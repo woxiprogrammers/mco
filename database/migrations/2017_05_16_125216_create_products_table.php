@@ -20,6 +20,9 @@ class CreateProductsTable extends Migration
             $table->unsignedInteger('category_id');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade')->onUpdate('cascade');
             $table->boolean('is_active');
+            $table->text('description');
+            $table->unsignedInteger('unit_id');
+            $table->foreign('unit_id')->references('id')->on('units')->onUpdate('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

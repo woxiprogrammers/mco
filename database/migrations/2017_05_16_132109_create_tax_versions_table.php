@@ -16,6 +16,7 @@ class CreateTaxVersionsTable extends Migration
         Schema::create('tax_versions', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('tax_id');
+            $table->unsignedInteger('quotation_version_id');
             $table->float('percentage');
             $table->foreign('tax_id')->references('id')->on('taxes')->onUpdate('cascade')->onUpdate('cascade');
             $table->timestamps();

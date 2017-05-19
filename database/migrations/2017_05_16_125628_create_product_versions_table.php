@@ -17,10 +17,7 @@ class CreateProductVersionsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('product_id');
             $table->foreign('product_id')->references('id')->on('products')->onUpdate('cascade')->onUpdate('cascade');
-            $table->text('description');
             $table->double('rate_per_unit');
-            $table->unsignedInteger('unit_id');
-            $table->foreign('unit_id')->references('id')->on('units')->onUpdate('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
