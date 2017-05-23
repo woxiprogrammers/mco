@@ -1,9 +1,8 @@
+.page-logo{
+  height: 100px;
+  width: 100px;
+}
 
-// Fonts
-@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);
-
-// Variables
-@import "variables";
-
-// Bootstrap
-@import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+.page-footer{
+  margin-top: 95%;
+}
