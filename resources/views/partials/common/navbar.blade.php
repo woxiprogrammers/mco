@@ -1,8 +1,4 @@
-<div class="page-wrapper">
-    <div class="page-wrapper-row">
-        <div class="page-wrapper-top">
-            <!-- BEGIN HEADER -->
-<div class="page-wrapper">
+<div class="page-header">
     <div class="page-header-top">
         <div class="container">
             <!-- BEGIN LOGO -->
@@ -117,3 +113,4 @@
         </div>
     </div>
     <!-- END HEADER MENU -->
+    </div>
