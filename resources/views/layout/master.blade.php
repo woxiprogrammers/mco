@@ -48,7 +48,8 @@ License: You must have a valid license purchased only from themeforest(the above
 
 <body class="page-container-bg-solid page-md">
         @yield('content')
-
+        <div class="page-wrapper-row">
+            <div class="page-wrapper-bottom">
                 <div class="page-footer">
                     <div class="container">
                         Copyright &copy; Manisha Constructions <?php echo date("Y");?>
@@ -57,6 +58,8 @@ License: You must have a valid license purchased only from themeforest(the above
                 <div class="scroll-to-top">
                     <i class="icon-arrow-up"></i>
                 </div>
+                </div>
+            </div>
                 <!-- END INNER FOOTER -->
                 <!-- END FOOTER -->
 
@@ -73,6 +76,7 @@ License: You must have a valid license purchased only from themeforest(the above
 <script src="/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/jquery.blockui.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
 <!-- END CORE PLUGINS -->
 <!-- BEGIN THEME GLOBAL SCRIPTS -->
 <script src="/assets/global/scripts/app.min.js" type="text/javascript"></script>
@@ -92,6 +96,7 @@ License: You must have a valid license purchased only from themeforest(the above
         });
     })
 </script>
+@yield('javascript')
 </body>
 
 </html>
