@@ -11,6 +11,14 @@
 |
 */
 
-Route::get('/', function () {
-    return view('admin.login');
+
+Route::group(['domain' => env('DOMAIN_NAME')], function(){
+    Route::get('/', function () {
+        return view('admin.login');
+    });
+
+    Route::group(['prefix' => 'category'],function(){
+        Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
+        Route::get('edit',array('uses' => 'Admin\CategoryController@getEditView'));
+    });
 });

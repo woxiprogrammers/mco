@@ -78,34 +78,10 @@
 
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown mega-menu-dropdown  ">
-                        <a href="javascript:;"> UI Features
+                        <a href="javascript:;"> Category
                             <span class="arrow"></span>
                         </a>
 
-                    </li>
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown active">
-                        <a href="javascript:;"> Layouts
-                            <span class="arrow"></span>
-                        </a>
-
-                    </li>
-                    <li aria-haspopup="true" class="menu-dropdown mega-menu-dropdown  mega-menu-full">
-                        <a href="javascript:;"> Components
-                            <span class="arrow"></span>
-                        </a>
-
-                    </li>
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown ">
-                        <a href="javascript:;"> More
-                            <span class="arrow"></span>
-                        </a>
-
-                    </li>
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown ">
-                        <a href="javascript:;">
-                            <i class="icon-briefcase"></i> Pages
-                            <span class="arrow"></span>
-                        </a>
                     </li>
                 </ul>
             </div>
