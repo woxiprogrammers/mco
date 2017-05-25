@@ -13,15 +13,19 @@
 
 
 Route::group(['domain' => env('DOMAIN_NAME')], function(){
-    Route::get('/', function () {
-        return view('admin.login');
-    });
+
+    Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
+    Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
+    Route::post('/logout',array('uses' => 'Auth\LoginController@logout'));
     Route::get('/dashboard',function(){
         return view('admin.dashboard');
     });
-      Route::post('/authenticate',array('uses' => 'Auth\LoginController@authenticate'));
+
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::get('edit',array('uses' => 'Admin\CategoryController@getEditView'));
     });
 });
+
+Auth::routes();
+

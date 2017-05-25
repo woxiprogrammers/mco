@@ -71,7 +71,7 @@ License: You must have a valid license purchased only from themeforest(the above
         <label class="control-label visible-ie8 visible-ie9">Username</label>
         <div class="input-icon">
             <i class="fa fa-user"></i>
-            <input class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" /> </div>
+            <input class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="Email" name="email" /> </div>
     </div>
     <div class="form-group">
         <label class="control-label visible-ie8 visible-ie9">Password</label>
@@ -79,6 +79,7 @@ License: You must have a valid license purchased only from themeforest(the above
             <i class="fa fa-lock"></i>
             <input class="form-control placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" /> </div>
     </div>
+
     <div class="form-actions">
 
         <button type="submit" class="btn green pull-right"> Login </button>
