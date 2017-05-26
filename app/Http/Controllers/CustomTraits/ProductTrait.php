@@ -11,5 +11,19 @@ trait ProductTrait{
 
         }
     }
+    public function getCreateView() {
+        try{
+            return view('admin.product.create');
+        }catch(\Exception $e){
+
+        }
+    }
+    public function getEditView() {
+        try{
+            return view('admin.product.edit');
+        }catch(\Exception $e){
+
+        }
+    }
 
 }

@@ -18,7 +18,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Manage</h1>
+                                <h1>Manage Material</h1>
                             </div>
                         </div>
                     </div>
@@ -47,9 +47,10 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <div class="btn-group">
-                                                            <button id="sample_editable_1_new" class="btn sbold green"> Add New
-                                                                <i class="fa fa-plus"></i>
-                                                            </button>
+                                                          <div id="sample_editable_1_new" class="btn sbold green"><a href="/material/create"> Add New
+                                                              <i class="fa fa-plus"></i>
+                                                          </a>
+                                                          </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
