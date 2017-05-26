@@ -13,8 +13,12 @@
 
 
 Route::group(['domain' => env('DOMAIN_NAME')], function(){
-    Route::get('/', function () {
-        return view('admin.login');
+
+    Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
+    Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
+    Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
+    Route::get('/dashboard',function(){
+        return view('admin.dashboard');
     });
 
     Route::group(['prefix' => 'category'],function(){
@@ -38,3 +42,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
     });
 });
+
+Auth::routes();
+
