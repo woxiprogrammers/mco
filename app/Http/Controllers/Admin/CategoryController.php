@@ -9,4 +9,9 @@ use App\Http\Controllers\Controller;
 class CategoryController extends Controller
 {
     use CategoryTrait;
+
+    public function __construct()
+    {
+        $this->middleware('custom.auth');
+    }
 }
