@@ -17,7 +17,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Manage</h1>
+                                <h1>Manage Summary</h1>
                             </div>
                         </div>
                     </div>

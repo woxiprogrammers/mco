@@ -25,5 +25,12 @@ trait UnitsTrait{
 
         }
     }
+    public function getCreateConversionView() {
+        try{
+            return view('admin.units.createConversion');
+        }catch(\Exception $e){
+
+        }
+    }
 
 }

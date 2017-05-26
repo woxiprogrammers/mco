@@ -3,7 +3,6 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
-
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -18,9 +17,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Create Category
-
-                                </h1>
+                                <h1>Create Summary</h1>
                             </div>
                         </div>
                     </div>
@@ -29,11 +26,10 @@
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
-
                                     <div class="portlet-body form">
-                                        <form role="form" id="create-category" class="form-horizontal">
+                                        <form role="form" id="create-summary" class="form-horizontal">
                                             <div class="form-body">
-                                                <div class="form-group row">
+                                                <div class="form-group">
                                                     <div class="col-md-3" style="text-align: right">
                                                         <label for="name" class="control-label">Name</label>
                                                         <span>*</span>
@@ -42,17 +38,24 @@
                                                         <input type="text" class="form-control" id="name" name="name">
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Amount</label>
+                                                        <span>*</span>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="text" class="form-control" id="amount" name="amount">
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn blue">Submit</button>
+                                                       <button type="submit" class="btn btn-success btn-md" style="width:25%">Submit</button>
                                                 </div>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -62,12 +65,11 @@
     </div>
 </div>
 @endsection
-
 @section('javascript')
-<script src="/assets/custom/admin/category.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/summary.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
-        CreateCategory.init();
+        SummaryCreate.init();
     });
 </script>
 @endsection

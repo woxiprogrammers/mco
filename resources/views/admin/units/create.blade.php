@@ -18,9 +18,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Create Category
-
-                                </h1>
+                                <h1>Create Unit</h1>
                             </div>
                         </div>
                     </div>
@@ -29,9 +27,8 @@
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
-
                                     <div class="portlet-body form">
-                                        <form role="form" id="create-category" class="form-horizontal">
+                                        <form role="form" id="create-unit" class="form-horizontal">
                                             <div class="form-body">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
@@ -45,14 +42,11 @@
                                             </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn blue">Submit</button>
-                                                </div>
+                                                        <button type="submit" class="btn btn-success btn-md" style="width:25%">Submit</button>                                                </div>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -64,10 +58,10 @@
 @endsection
 
 @section('javascript')
-<script src="/assets/custom/admin/category.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/units.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
-        CreateCategory.init();
+        UnitsCreate.init();
     });
 </script>
 @endsection

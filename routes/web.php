@@ -45,6 +45,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Admin\UnitsController@getManageView'));
         Route::get('create',array('uses' => 'Admin\UnitsController@getCreateView'));
         Route::get('edit',array('uses' => 'Admin\UnitsController@getEditView'));
+        Route::get('conversion',array('uses' => 'Admin\UnitsController@getCreateConversionView'));
     });
     Route::group(['prefix' => 'summary'],function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
@@ -54,4 +55,3 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 });
 
 Auth::routes();
-
