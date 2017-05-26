@@ -30,14 +30,12 @@
                                         <form role="form" id="create-material" class="form-horizontal">
                                             <div class="form-body">
                                                 <div class="form-group">
-                                                    <label class="col-md-3 control-label">material Name</label>
+                                                    <label class="col-md-3 control-label">Category Name</label>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="category_name" name="category_name">
-                                                            <option>Option 1</option>
-                                                            <option>Option 2</option>
-                                                            <option>Option 3</option>
-                                                            <option>Option 4</option>
-                                                            <option>Option 5</option>
+                                                        <select class="form-control" id="category_id" name="category_id">
+                                                            @foreach($categories as $category)
+                                                                <option value="{{$category['id']}}"> {{$category['name']}} </option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                 </div>
