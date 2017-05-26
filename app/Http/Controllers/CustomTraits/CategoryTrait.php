@@ -143,7 +143,8 @@ trait CategoryTrait{
 
     public function changeCategoryStatus(Request $request, $category){
         try{
-            $category->update(['is_active' => !($category->is_active)]);
+            $newStatus = (boolean)!$category->is_active;
+            $category->update(['is_active' => $newStatus]);
             $request->session()->flash('success', 'Category Status changed successfully.');
             return redirect('/category/manage');
         }catch(\Exception $e){
