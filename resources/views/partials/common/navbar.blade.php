@@ -45,7 +45,7 @@
                                     <i class="icon-lock"></i> Lock Screen </a>
                             </li>
                             <li>
-                                <a href="javascript:void(0)">
+                                <a href="/logout">
                                     <i class="icon-key"></i> Log Out </a>
                             </li>
                         </ul>

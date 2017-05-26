@@ -16,7 +16,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
-    Route::post('/logout',array('uses' => 'Auth\LoginController@logout'));
+    Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
     Route::get('/dashboard',function(){
         return view('admin.dashboard');
     });

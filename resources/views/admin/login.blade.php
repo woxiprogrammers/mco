@@ -66,6 +66,22 @@ License: You must have a valid license purchased only from themeforest(the above
         <button class="close" data-close="alert"></button>
         <span> Enter any username and password. </span>
     </div>
+    @if (count($errors) > 0)
+    <div class="alert alert-danger">
+        <button class="close" data-close="alert"></button>
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+    @if(Session::has('error'))
+    <div class="alert alert-danger">
+        <button class="close" data-close="alert"></button>
+        <span>{{ Session::get('error') }}</span>
+    </div>
+    @endif
     <div class="form-group">
         <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
         <label class="control-label visible-ie8 visible-ie9">Username</label>
@@ -84,6 +100,7 @@ License: You must have a valid license purchased only from themeforest(the above
 
         <button type="submit" class="btn green pull-right"> Login </button>
     </div>
+
 </form>
 
 
