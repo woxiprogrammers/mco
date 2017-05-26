@@ -18,20 +18,22 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Create Category
-
+                                <h1>
+                                    Create Category
                                 </h1>
                             </div>
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
                             <div class="col-md-11">
                             <!-- BEGIN VALIDATION STATES-->
                             <div class="portlet light ">
 
                                 <div class="portlet-body form">
-                                    <form role="form" id="create-category" class="form-horizontal">
+                                    <form role="form" id="create-category" class="form-horizontal" method="post" action="/category/create">
+                                        {!! csrf_field() !!}
                                         <div class="form-body">
                                             <div class="form-group row">
                                                 <div class="col-md-3" style="text-align: right">
@@ -64,7 +66,7 @@
 @endsection
 
 @section('javascript')
-<script src="/assets/custom/admin/category.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/category/category.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
         CreateCategory.init();

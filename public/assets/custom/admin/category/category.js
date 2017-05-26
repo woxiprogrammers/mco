@@ -42,6 +42,7 @@ var  CreateCategory = function () {
             submitHandler: function (form) {
                 success.show();
                 error.hide();
+                form.submit();
             }
         });
     }
@@ -99,6 +100,7 @@ var  EditCategory = function () {
             submitHandler: function (form) {
                 success.show();
                 error.hide();
+                form.submit();
             }
         });
     }

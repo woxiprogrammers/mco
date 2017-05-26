@@ -86,7 +86,8 @@ License: You must have a valid license purchased only from themeforest(the above
 <script src="/assets/layouts/layout3/scripts/demo.min.js" type="text/javascript"></script>
 <script src="/assets/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script>
 <script src="/assets/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script>
-<!-- END THEME LAYOUT SCRIPTS -->
+<script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+        <!-- END THEME LAYOUT SCRIPTS -->
 <script>
     $(document).ready(function()
     {
