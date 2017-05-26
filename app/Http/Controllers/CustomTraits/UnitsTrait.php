@@ -11,5 +11,26 @@ trait UnitsTrait{
 
         }
     }
+    public function getCreateView() {
+        try{
+            return view('admin.units.create');
+        }catch(\Exception $e){
+
+        }
+    }
+    public function getEditView() {
+        try{
+            return view('admin.units.edit');
+        }catch(\Exception $e){
+
+        }
+    }
+    public function getCreateConversionView() {
+        try{
+            return view('admin.units.createConversion');
+        }catch(\Exception $e){
+
+        }
+    }
 
 }
