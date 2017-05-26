@@ -59,18 +59,35 @@ License: You must have a valid license purchased only from themeforest(the above
 <!-- BEGIN LOGIN -->
 <div class="content">
 <!-- BEGIN LOGIN FORM -->
-<form class="login-form" action="index.html" method="post">
+<form class="login-form" action="/authenticate" method="post">
+  {!! csrf_field() !!}
     <h3 class="form-title">Login to your account</h3>
     <div class="alert alert-danger display-hide">
         <button class="close" data-close="alert"></button>
         <span> Enter any username and password. </span>
     </div>
+    @if (count($errors) > 0)
+    <div class="alert alert-danger">
+        <button class="close" data-close="alert"></button>
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+    @if(Session::has('error'))
+    <div class="alert alert-danger">
+        <button class="close" data-close="alert"></button>
+        <span>{{ Session::get('error') }}</span>
+    </div>
+    @endif
     <div class="form-group">
         <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
         <label class="control-label visible-ie8 visible-ie9">Username</label>
         <div class="input-icon">
             <i class="fa fa-user"></i>
-            <input class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" /> </div>
+            <input class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="Email" name="email" /> </div>
     </div>
     <div class="form-group">
         <label class="control-label visible-ie8 visible-ie9">Password</label>
@@ -78,10 +95,12 @@ License: You must have a valid license purchased only from themeforest(the above
             <i class="fa fa-lock"></i>
             <input class="form-control placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" /> </div>
     </div>
+
     <div class="form-actions">
 
         <button type="submit" class="btn green pull-right"> Login </button>
     </div>
+
 </form>
 
 
