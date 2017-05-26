@@ -3,15 +3,10 @@
  * Created by Ameya Joshi
  * Date: 23/5/17
  */
-
-
 namespace App\Http\Controllers\CustomTraits;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
 trait CategoryTrait{
-
     public function getCreateView(Request $request){
         try{
             return view('admin.category.create');
@@ -25,8 +20,6 @@ trait CategoryTrait{
             abort(500);
         }
     }
-
-
     public function getEditView(Request $request){
         try{
             return view('admin.category.edit');
@@ -38,6 +31,13 @@ trait CategoryTrait{
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+    public function getManageView(Request $request){
+        try{
+              return view('admin.category.manage');
+        }catch(\Exception $e){
+
         }
     }
 }
