@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Category')
+@section('title','Constro | Edit Category')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -18,20 +18,22 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Create Category
+                                <h1>Edit Category {{$category['name']}}
 
                                 </h1>
                             </div>
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
 
                                     <div class="portlet-body form">
-                                        <form role="form" id="edit-category" class="form-horizontal">
+                                        <form role="form" id="edit-category" class="form-horizontal" method="post" action="/category/edit/{{$category['id']}}">
+                                            {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
@@ -39,7 +41,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" id="name" name="name">
+                                                        <input type="text" class="form-control" id="name" name="name" value="{{$category['name']}}">
                                                     </div>
                                                 </div>
                                             </div>

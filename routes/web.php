@@ -23,8 +23,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
-        Route::get('edit',array('uses' => 'Admin\CategoryController@getEditView'));
+        Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
+        Route::get('edit/{category}',array('uses' => 'Admin\CategoryController@getEditView'));
+        Route::post('edit/{category}',array('uses' => 'Admin\CategoryController@editCategory'));
         Route::get('manage',array('uses' => 'Admin\CategoryController@getManageView'));
+        Route::post('listing',array('uses' => 'Admin\CategoryController@categoryListing'));
+        Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
     });
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
