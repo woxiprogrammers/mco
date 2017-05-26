@@ -11,5 +11,19 @@ trait ProfitMarginTrait{
 
         }
     }
+    public function getCreateView() {
+        try{
+            return view('admin.profitMargin.create');
+        }catch(\Exception $e){
+
+        }
+    }
+    public function getEditView() {
+        try{
+            return view('admin.profitMargin.edit');
+        }catch(\Exception $e){
+
+        }
+    }
 
 }

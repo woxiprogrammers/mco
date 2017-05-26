@@ -11,5 +11,19 @@ trait SummaryTrait{
 
         }
     }
+    public function getCreateView() {
+        try{
+            return view('admin.summary.create');
+        }catch(\Exception $e){
+
+        }
+    }
+    public function getEditView() {
+        try{
+            return view('admin.summary.edit');
+        }catch(\Exception $e){
+
+        }
+    }
 
 }

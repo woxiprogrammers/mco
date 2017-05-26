@@ -3,7 +3,6 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
-
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -18,9 +17,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Create Category
-
-                                </h1>
+                                <h1>Create Category</h1>
                             </div>
                         </div>
                     </div>
@@ -51,8 +48,6 @@
                                     </form>
                                 </div>
                             </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -62,7 +57,6 @@
     </div>
 </div>
 @endsection
-
 @section('javascript')
 <script src="/assets/custom/admin/category.js" type="application/javascript"></script>
 <script>

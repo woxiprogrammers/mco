@@ -3,7 +3,6 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
-
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -47,9 +46,10 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <div class="btn-group">
-                                                            <button id="sample_editable_1_new" class="btn sbold green"> Add New
+                                                            <div id="sample_editable_1_new" class="btn sbold green"><a href="/category/create"> Add New
                                                                 <i class="fa fa-plus"></i>
-                                                            </button>
+                                                            </a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
