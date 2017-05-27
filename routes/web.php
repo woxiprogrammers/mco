@@ -30,13 +30,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses' => 'Admin\CategoryController@categoryListing'));
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
     });
-
-    Route::group(['prefix' => 'tax'],function(){
-        Route::get('create',array('uses' => 'Admin\TaxController@getCreateView'));
-        Route::post('create',array('uses' => 'Admin\TaxController@createTax'));
-        Route::get('edit/{tax}',array('uses' => 'Admin\TaxController@getEditView'));
-        Route::post('edit/{tax}',array('uses' => 'Admin\TaxController@editTax'));
-    });
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
         Route::get('create',array('uses' => 'Admin\MaterialController@getCreateView'));
@@ -62,6 +55,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
         Route::get('create',array('uses' => 'Admin\SummaryController@getCreateView'));
         Route::get('edit',array('uses' => 'Admin\SummaryController@getEditView'));
+    });
+    Route::group(['prefix' => 'tax'],function(){
+        Route::get('create',array('uses' => 'Admin\TaxController@getCreateView'));
+        Route::post('create',array('uses' => 'Admin\TaxController@createTax'));
+        Route::get('edit/{tax}',array('uses' => 'Admin\TaxController@getEditView'));
+        Route::post('edit/{tax}',array('uses' => 'Admin\TaxController@editTax'));
+        Route::get('manage',array('uses' => 'Admin\TaxController@getManageView'));
+        Route::post('listing',array('uses' => 'Admin\TaxController@taxListing'));
+        Route::get('change-status/{tax}',array('uses' => 'Admin\TaxController@changeTaxStatus'));
     });
 
 });
