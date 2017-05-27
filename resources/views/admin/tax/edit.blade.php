@@ -18,7 +18,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Edit Tax {{ucwords($tax['name'])}}
+                                <h1>Edit Tax {{$tax['name']}}
 
                                 </h1>
                             </div>
@@ -41,7 +41,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" id="name" name="name" value="{{ucwords($tax['name'])}}">
+                                                        <input type="text" class="form-control" id="name" name="name" value="{{$tax['name']}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">

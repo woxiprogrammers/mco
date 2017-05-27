@@ -24,8 +24,9 @@
 
         public function createTax(Request $request){
             try{
-                $data = $request->all();
+                $data = $request->only('name','base_percentage');
                 $data['is_active'] = false;
+                $data['name'] = ucwords($data['name']);
                 $tax = Tax::create($data);
                 $request->session()->flash('success', 'Tax Created successfully.');
                 return redirect('/tax/create');
@@ -57,7 +58,7 @@
 
         public function editTax(Request $request,$tax){
             try{
-                $tax->update(['name' => $request->name, 'base_percentage' => $request->base_percentage]);
+                $tax->update(['name' => ucwords($request->name), 'base_percentage' => $request->base_percentage]);
                 $request->session()->flash('success', 'Tax Edited successfully.');
                 return redirect('/tax/edit/'.$tax->id);
             }catch(\Exception $e){
