@@ -23,12 +23,24 @@
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
+                            <ul class="page-breadcrumb breadcrumb">
+                                <li>
+                                    <a href="/units/manage">Manage Units</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Create Unit</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                            </ul>
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <form role="form" id="create-unit" class="form-horizontal">
+                                        <form role="form" id="create-unit" class="form-horizontal" method="post" action="/units/create">
+                                            {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
