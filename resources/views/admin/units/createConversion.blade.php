@@ -23,22 +23,22 @@
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <form role="form" id="create-conversion" class="form-horizontal">
+                                        <form role="form" id="create-conversion" class="form-horizontal" method="post" action="/units/conversion/create">
+                                            {!! csrf_field() !!}
                                             <div class="form-body">
                                               <div class="form-group">
                                                   <label class="col-md-3 control-label">From Unit</label>
                                                   <div class="col-md-6">
                                                       <select class="form-control" id="from_unit" name="from_unit">
-                                                          <option>Option 1</option>
-                                                          <option>Option 2</option>
-                                                          <option>Option 3</option>
-                                                          <option>Option 4</option>
-                                                          <option>Option 5</option>
+                                                          @foreach($units as $unit)
+                                                            <option value="{{$unit['id']}}"> {{$unit['name']}} </option>
+                                                          @endforeach
                                                       </select>
                                                   </div>
                                               </div>
@@ -55,11 +55,9 @@
                                                     <label class="col-md-3 control-label">To Unit</label>
                                                     <div class="col-md-6">
                                                         <select class="form-control" id="to_unit" name="to_unit">
-                                                            <option>Option 1</option>
-                                                            <option>Option 2</option>
-                                                            <option>Option 3</option>
-                                                            <option>Option 4</option>
-                                                            <option>Option 5</option>
+                                                            @for($i = 1; $i< count ($units);$i++)
+                                                                <option value="{{$units[$i]['id']}}"> {{$units[$i]['name']}} </option>
+                                                            @endfor
                                                         </select>
                                               </div>
                                               </div>
@@ -91,10 +89,9 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/units.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/units/units.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
-        UnitsCreate.init();
         UnitsConversionCreate.init();
     });
 </script>
