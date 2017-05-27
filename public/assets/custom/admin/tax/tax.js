@@ -1,6 +1,6 @@
-var  UnitsCreate = function () {
-  var handleCreate = function() {
-        var form = $('#create-unit');
+var  CreateTax = function () {
+    var handleCreate = function() {
+        var form = $('#create-tax');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -10,44 +10,59 @@ var  UnitsCreate = function () {
             rules: {
                 name: {
                     required: true
+                },
+                base_percentage: {
+                    required: true
                 }
             },
+
             messages: {
                 name: {
-                    required: "Name is required."
+                    required: "Tax name is required."
+                },
+                base_percentage: {
+                    required: "Percentage is required."
                 }
             },
+
             invalidHandler: function (event, validator) { //display error alert on form submit
                 success.hide();
                 error.show();
             },
+
             highlight: function (element) { // hightlight error inputs
                 $(element)
                     .closest('.form-group').addClass('has-error'); // set error class to the control group
             },
+
             unhighlight: function (element) { // revert the change done by hightlight
                 $(element)
                     .closest('.form-group').removeClass('has-error'); // set error class to the control group
             },
+
             success: function (label) {
                 label
                     .closest('.form-group').addClass('has-success');
             },
+
             submitHandler: function (form) {
                 success.show();
                 error.hide();
+                form.submit();
             }
         });
     }
+
     return {
         init: function () {
             handleCreate();
         }
     };
 }();
-var  UnitsConversionCreate = function () {
-  var handleCreate = function() {
-        var form = $('#create-conversion');
+
+var  EditTax = function () {
+    var handleEdit = function() {
+        var form = $('#edit-tax');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -55,58 +70,54 @@ var  UnitsConversionCreate = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                from_unit: {
+                name: {
                     required: true
                 },
-                to_unit: {
-                  required: true
-                },
-                from_value:{
-                  required: true
-                },
-                to_value: {
-                  required: true
+                base_percentage: {
+                    required: true
                 }
             },
+
             messages: {
-                from_unit: {
-                    required: "Unit is required."
+                name: {
+                    required: "Tax name is required."
                 },
-                to_unit: {
-                  required: "Unit is required."
-                },
-                from_value:{
-                  required: "Value is required."
-                },
-                to_value: {
-                  required: "Value is required."
+                base_percentage: {
+                    required: "Percentage is required."
                 }
             },
+
             invalidHandler: function (event, validator) { //display error alert on form submit
                 success.hide();
                 error.show();
             },
+
             highlight: function (element) { // hightlight error inputs
                 $(element)
                     .closest('.form-group').addClass('has-error'); // set error class to the control group
             },
+
             unhighlight: function (element) { // revert the change done by hightlight
                 $(element)
                     .closest('.form-group').removeClass('has-error'); // set error class to the control group
             },
+
             success: function (label) {
                 label
                     .closest('.form-group').addClass('has-success');
             },
+
             submitHandler: function (form) {
                 success.show();
                 error.hide();
+                form.submit();
             }
         });
     }
+
     return {
         init: function () {
-            handleCreate();
+            handleEdit();
         }
     };
 }();
