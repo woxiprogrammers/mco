@@ -30,6 +30,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses' => 'Admin\CategoryController@categoryListing'));
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
     });
+    Route::group(['prefix' => 'summary'],function(){
+        Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
+        Route::get('create',array('uses' => 'Admin\SummaryController@getCreateView'));
+        Route::get('edit/{summary}',array('uses' => 'Admin\SummaryController@getEditView'));
+        Route::post('create',array('uses' => 'Admin\SummaryController@createSummary'));
+        Route::post('edit/{summary}',array('uses' => 'Admin\SummaryController@editSummary'));
+    });
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
         Route::get('create',array('uses' => 'Admin\MaterialController@getCreateView'));
@@ -51,11 +58,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit',array('uses' => 'Admin\UnitsController@getEditView'));
         Route::get('conversion',array('uses' => 'Admin\UnitsController@getCreateConversionView'));
     });
-    Route::group(['prefix' => 'summary'],function(){
-        Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
-        Route::get('create',array('uses' => 'Admin\SummaryController@getCreateView'));
-        Route::get('edit',array('uses' => 'Admin\SummaryController@getEditView'));
-    });
+
 });
 
 Auth::routes();

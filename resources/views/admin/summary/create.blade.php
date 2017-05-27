@@ -22,12 +22,14 @@
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <form role="form" id="create-summary" class="form-horizontal">
+                                        <form role="form" id="create-summary" class="form-horizontal" method="post" action="/summary/create">
+                                            {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="form-group">
                                                     <div class="col-md-3" style="text-align: right">
@@ -36,15 +38,6 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <input type="text" class="form-control" id="name" name="name">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Amount</label>
-                                                        <span>*</span>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <input type="text" class="form-control" id="amount" name="amount">
                                                     </div>
                                                 </div>
                                             </div>
