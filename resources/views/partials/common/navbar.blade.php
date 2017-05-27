@@ -107,7 +107,7 @@
                               </a>
                           </li>
                             <li aria-haspopup="true" class="dropdown-submenu ">
-                                <a href="/summary/manage" class="nav-link nav-toggle ">
+                                <a href="/tax/manage" class="nav-link nav-toggle ">
                                     <i class="icon-wallet"></i> Tax
                                 </a>
                             </li>

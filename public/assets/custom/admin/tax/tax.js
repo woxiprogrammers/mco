@@ -11,7 +11,7 @@ var  CreateTax = function () {
                 name: {
                     required: true
                 },
-                percentage: {
+                base_percentage: {
                     required: true
                 }
             },
@@ -20,7 +20,7 @@ var  CreateTax = function () {
                 name: {
                     required: "Tax name is required."
                 },
-                parcentage: {
+                base_percentage: {
                     required: "Percentage is required."
                 }
             },
@@ -73,7 +73,7 @@ var  EditTax = function () {
                 name: {
                     required: true
                 },
-                percentage: {
+                base_percentage: {
                     required: true
                 }
             },
@@ -82,7 +82,7 @@ var  EditTax = function () {
                 name: {
                     required: "Tax name is required."
                 },
-                percentage: {
+                base_percentage: {
                     required: "Percentage is required."
                 }
             },

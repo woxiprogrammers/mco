@@ -32,7 +32,7 @@
                 return redirect('/tax/create');
             }catch(\Exception $e){
                 $data = [
-                    'action' => 'Create Category',
+                    'action' => 'Create Tax',
                     'params' => $request->all(),
                     'exception'=> $e->getMessage()
                 ];
@@ -47,7 +47,7 @@
                     return view('admin.tax.edit')->with(compact('tax'));
             }catch(\Exception $e){
                 $data = [
-                    'action' => 'Get Edit View',
+                    'action' => 'Get Tax Edit View',
                     'params' => $request->all(),
                     'exception' => $e->getMessage()
                 ];
@@ -129,7 +129,7 @@
             }catch(\Exception $e){
                 $records = array();
                 $data = [
-                    'action' => 'Create Tax',
+                    'action' => 'Get Tax Listing',
                     'params' => $request->all(),
                     'exception'=> $e->getMessage()
                 ];
@@ -156,11 +156,5 @@
                 abort(500);
             }
         }
-
-
-
-
-
-
 
     }
