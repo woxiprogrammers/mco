@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Category;
 use App\Unit;
+use App\Tax;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -31,6 +32,7 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::model('category',Category::class);
         Route::model('unit',Unit::class);
+        Route::model('tax',Tax::class);
     }
 
     /**
