@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Category;
+use App\ProfitMargin;
 use App\Summary;
 use App\Unit;
 use App\Tax;
@@ -35,6 +36,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('summary',Summary::class);
         Route::model('unit',Unit::class);
         Route::model('tax',Tax::class);
+        Route::model('profit_margin',ProfitMargin::class);
     }
 
     /**

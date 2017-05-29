@@ -40,10 +40,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'Admin\ProductController@getCreateView'));
         Route::get('edit',array('uses' => 'Admin\ProductController@getEditView'));
     });
-    Route::group(['prefix' => 'profitMargin'],function(){
+    Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
         Route::get('create',array('uses' => 'Admin\ProfitMarginController@getCreateView'));
-        Route::get('edit',array('uses' => 'Admin\ProfitMarginController@getEditView'));
+        Route::get('edit/{profit_margin}',array('uses' => 'Admin\ProfitMarginController@getEditView'));
+        Route::post('edit/{profit_margin}',array('uses' => 'Admin\ProfitMarginController@editProfitMargin'));
+        Route::post('create',array('uses' => 'Admin\ProfitMarginController@createProfitMargin'));
+        Route::post('listing',array('uses' => 'Admin\ProfitMarginController@profitMarginListing'));
+        Route::get('change-status/{profit_margin}',array('uses' => 'Admin\ProfitMarginController@changeProfitMarginStatus'));
     });
     Route::group(['prefix' => 'units'],function(){
         Route::get('manage',array('uses' => 'Admin\UnitsController@getManageView'));
@@ -80,5 +84,5 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses' => 'Admin\TaxController@taxListing'));
         Route::get('change-status/{tax}',array('uses' => 'Admin\TaxController@changeTaxStatus'));
     });
-
 });
+
