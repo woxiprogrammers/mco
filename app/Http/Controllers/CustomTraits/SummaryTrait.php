@@ -49,8 +49,9 @@ trait SummaryTrait{
 
     public function createSummary(Request $request){
         try{
-            $data = ucwords($request->name);
-            $summary = Summary::create(['name'=>$data]);
+            $data['name'] = ucwords($request->name);
+            $data['is_active'] = false;
+            $summary = Summary::create($data);
             $request->session()->flash('success', 'Summary Created successfully.');
             return redirect('/summary/create');
         }catch(\Exception $e){
@@ -73,6 +74,76 @@ trait SummaryTrait{
             $data = [
                 'action' => 'Edit existing Summary',
                 'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function summaryListing(Request $request){
+        try{
+            $summaryData = Summary::orderBy('id','asc')->get()->toArray();
+            $iTotalRecords = count($summaryData);
+            $records = array();
+            $iterator = 0;
+            foreach($summaryData as $summary){
+                if($summary['is_active'] == true){
+                    $summary_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                    $status = 'Disable';
+                }else{
+                    $summary_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                    $status = 'Enable';
+                }
+                $records['data'][$iterator] = [
+                    $summary['name'],
+                    $summary_status,
+                    date('d M Y',strtotime($summary['created_at'])),
+                    '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/summary/edit/'.$summary['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                            </li>
+                            <li>
+                                <a href="/summary/change-status/'.$summary['id'].'">
+                                    <i class="icon-tag"></i> '.$status.' </a>
+                            </li>
+                        </ul>
+                    </div>'
+                ];
+                $iterator++;
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Summary Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records,200);
+    }
+
+    public function changeSummaryStatus(Request $request, $summary){
+        try{
+            $newStatus = (boolean)!$summary->is_active;
+            $summary->update(['is_active' => $newStatus]);
+            $request->session()->flash('success', 'Summary Status changed successfully.');
+            return redirect('/summary/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Change summary status',
+                'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));

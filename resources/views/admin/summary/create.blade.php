@@ -59,7 +59,7 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/summary.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/summary/summary.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
         SummaryCreate.init();

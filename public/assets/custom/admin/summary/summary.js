@@ -1,5 +1,5 @@
 var  SummaryCreate = function () {
-  var handleCreate = function() {
+    var handleCreate = function() {
         var form = $('#create-summary');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
