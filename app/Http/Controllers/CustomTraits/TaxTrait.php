@@ -2,6 +2,7 @@
 
     namespace App\Http\Controllers\CustomTraits;
 
+    use App\Http\Requests\TaxRequest;
     use App\Tax;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Log;
@@ -22,7 +23,7 @@
             }
         }
 
-        public function createTax(Request $request){
+        public function createTax(TaxRequest $request){
             try{
                 $data = $request->only('name','base_percentage');
                 $data['is_active'] = false;
@@ -56,7 +57,7 @@
             }
         }
 
-        public function editTax(Request $request,$tax){
+        public function editTax(TaxRequest $request,$tax){
             try{
                 $tax->update(['name' => ucwords($request->name), 'base_percentage' => $request->base_percentage]);
                 $request->session()->flash('success', 'Tax Edited successfully.');
