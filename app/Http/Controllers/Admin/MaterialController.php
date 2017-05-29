@@ -11,6 +11,6 @@ class MaterialController extends Controller
 
     public function __construct()
     {
-        $this->middleware('custom.auth');
+        $this->middleware('custom.auth')->except('checkMaterialName');
     }
 }
