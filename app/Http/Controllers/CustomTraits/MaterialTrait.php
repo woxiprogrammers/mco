@@ -6,26 +6,37 @@ use App\MaterialVersion;
 use App\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 trait MaterialTrait{
 
-    public function getManageView() {
+    public function getManageView(Request $request) {
        try{
            return view('admin.material.manage');
        }catch(\Exception $e){
-
+           $data = [
+               'action' => 'Get material manage view',
+               'params' => $request->all(),
+               'exception' => $e->getMessage()
+           ];
+           Log::critical(json_encode($data));
+           abort(500);
        }
     }
 
-    public function getCreateView() {
+    public function getCreateView(Request $request) {
         try{
             $categories = Category::select('id','name')->orderBy('name','asc')->get()->toArray();
             $units = Unit::select('id','name')->orderBy('name','asc')->get()->toArray();
             return view('admin.material.create')->with(compact('categories','units'));
         }catch(\Exception $e){
-
+            $data = [
+                'action' => 'Get create material view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 
@@ -41,7 +52,13 @@ trait MaterialTrait{
             $materialData['unit'] = $materialVersion->unit_id;
             return view('admin.material.edit')->with(compact('categories','units','materialData'));
         }catch(\Exception $e){
-
+            $data = [
+                'action' => 'get Edit material view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 
