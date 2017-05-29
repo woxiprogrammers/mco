@@ -162,7 +162,7 @@ trait MaterialTrait{
         }catch(\Exception $e){
             $records = array();
             $data = [
-                'action' => 'Create Category',
+                'action' => 'Material Listing',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
@@ -181,7 +181,7 @@ trait MaterialTrait{
             return redirect('/material/manage');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Change category status',
+                'action' => 'Change Material status',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
