@@ -92,8 +92,8 @@
                               </a>
                           </li>
                           <li aria-haspopup="true" class="dropdown-submenu ">
-                              <a href="/profitMargin/manage" class="nav-link nav-toggle ">
-                                  <i class="icon-settings"></i> ProfitMargin
+                              <a href="/profit-margin/manage" class="nav-link nav-toggle ">
+                                  <i class="icon-settings"></i> Profit Margin
                               </a>
                           </li>
                           <li aria-haspopup="true" class="dropdown-submenu ">
