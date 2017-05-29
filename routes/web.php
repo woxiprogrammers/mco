@@ -45,10 +45,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'Admin\ProductController@getCreateView'));
         Route::get('edit',array('uses' => 'Admin\ProductController@getEditView'));
     });
-    Route::group(['prefix' => 'profitMargin'],function(){
+    Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
         Route::get('create',array('uses' => 'Admin\ProfitMarginController@getCreateView'));
-        Route::get('edit',array('uses' => 'Admin\ProfitMarginController@getEditView'));
+        Route::get('edit/{profit_margin}',array('uses' => 'Admin\ProfitMarginController@getEditView'));
+        Route::post('edit/{profit_margin}',array('uses' => 'Admin\ProfitMarginController@editProfitMargin'));
+        Route::post('create',array('uses' => 'Admin\ProfitMarginController@createProfitMargin'));
+        Route::post('listing',array('uses' => 'Admin\ProfitMarginController@profitMarginListing'));
+        Route::get('change-status/{profit_margin}',array('uses' => 'Admin\ProfitMarginController@changeProfitMarginStatus'));
     });
     Route::group(['prefix' => 'units'],function(){
         Route::get('manage',array('uses' => 'Admin\UnitsController@getManageView'));
@@ -69,7 +73,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'summary'],function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
         Route::get('create',array('uses' => 'Admin\SummaryController@getCreateView'));
-        Route::get('edit',array('uses' => 'Admin\SummaryController@getEditView'));
+        Route::get('edit/{summary}',array('uses' => 'Admin\SummaryController@getEditView'));
+        Route::post('create',array('uses' => 'Admin\SummaryController@createSummary'));
+        Route::post('edit/{summary}',array('uses' => 'Admin\SummaryController@editSummary'));
+        Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
+        Route::post('listing',array('uses' => 'Admin\SummaryController@summaryListing'));
+        Route::get('change-status/{summary}',array('uses' => 'Admin\SummaryController@changeSummaryStatus'));
     });
     Route::group(['prefix' => 'tax'],function(){
         Route::get('create',array('uses' => 'Admin\TaxController@getCreateView'));
@@ -80,5 +89,5 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses' => 'Admin\TaxController@taxListing'));
         Route::get('change-status/{tax}',array('uses' => 'Admin\TaxController@changeTaxStatus'));
     });
-
 });
+
