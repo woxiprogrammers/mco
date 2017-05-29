@@ -1,8 +1,9 @@
 @extends('layout.master')
-@section('title','Constro | Create Category')
+@section('title','Constro | Manage Units')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
+<link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -24,21 +25,14 @@
                     <div class="page-content">
                         <div class="container">
                             <div class="row">
+                                @include('partials.common.messages')
                                 <div class="col-md-12">
                                     <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                     <div class="portlet light ">
                                         <div class="portlet-title">
                                             <div class="caption font-dark">
                                                 <i class="icon-settings font-dark"></i>
-                                                <span class="caption-subject bold uppercase"> Managed Table</span>
-                                            </div>
-                                            <div class="actions">
-                                                <div class="btn-group btn-group-devided" data-toggle="buttons">
-                                                    <label class="btn btn-transparent dark btn-outline btn-circle btn-sm active">
-                                                        <input type="radio" name="options" class="toggle" id="option1">Actions</label>
-                                                    <label class="btn btn-transparent dark btn-outline btn-circle btn-sm">
-                                                        <input type="radio" name="options" class="toggle" id="option2">Settings</label>
-                                                </div>
+                                                <span class="caption-subject bold uppercase"> Manage Units</span>
                                             </div>
                                         </div>
                                         <div class="portlet-body">
@@ -52,107 +46,34 @@
                                                           </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <div class="btn-group pull-right">
-                                                            <button class="btn green  btn-outline dropdown-toggle" data-toggle="dropdown">Tools
-                                                                <i class="fa fa-angle-down"></i>
-                                                            </button>
-                                                            <ul class="dropdown-menu pull-right">
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="fa fa-print"></i> Print </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="fa fa-file-pdf-o"></i> Save as PDF </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="fa fa-file-excel-o"></i> Export to Excel </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
                                                 </div>
                                             </div>
+                                            {!! csrf_field() !!}
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="unitsTable">
                                                 <thead>
                                                 <tr>
-                                                    <th>
-                                                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
-                                                            <input type="checkbox" class="group-checkable" data-set="#sample_1 .checkboxes" />
-                                                            <span></span>
-                                                        </label>
-                                                    </th>
-                                                    <th> Username </th>
-                                                    <th> Email </th>
+                                                    <th> Name </th>
                                                     <th> Status </th>
-                                                    <th> Joined </th>
+                                                    <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                <tr class="odd gradeX">
-                                                    <td>
-                                                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
-                                                            <input type="checkbox" class="checkboxes" value="1" />
-                                                            <span></span>
-                                                        </label>
-                                                    </td>
-                                                    <td> shuxer </td>
-                                                    <td>
-                                                        <a href="mailto:shuxer@gmail.com"> shuxer@gmail.com </a>
-                                                    </td>
-                                                    <td>
-                                                        <span class="label label-sm label-success"> Approved </span>
-                                                    </td>
-                                                    <td class="center"> 12 Jan 2012 </td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false"> Actions
-                                                                <i class="fa fa-angle-down"></i>
-                                                            </button>
-                                                            <ul class="dropdown-menu pull-left" role="menu">
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="icon-docs"></i> New Post </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="icon-tag"></i> New Comment </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="icon-user"></i> New User </a>
-                                                                </li>
-                                                                <li class="divider"> </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="icon-flag"></i> Comments
-                                                                        <span class="badge badge-success">4</span>
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                     <div class="portlet light ">
                                         <div class="portlet-title">
                                             <div class="caption font-dark">
                                                 <i class="icon-settings font-dark"></i>
-                                                <span class="caption-subject bold uppercase"> Managed Table</span>
-                                            </div>
-                                            <div class="actions">
-                                                <div class="btn-group btn-group-devided" data-toggle="buttons">
-                                                    <label class="btn btn-transparent dark btn-outline btn-circle btn-sm active">
-                                                        <input type="radio" name="options" class="toggle" id="option1">Actions</label>
-                                                    <label class="btn btn-transparent dark btn-outline btn-circle btn-sm">
-                                                        <input type="radio" name="options" class="toggle" id="option2">Settings</label>
-                                                </div>
+                                                <span class="caption-subject bold uppercase"> Manage Unit Conversions </span>
                                             </div>
                                         </div>
                                         <div class="portlet-body">
@@ -160,96 +81,27 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <div class="btn-group">
-                                                          <div id="sample_editable_1_new" class="btn sbold green"><a href="/units/conversion"> Add New
-                                                              <i class="fa fa-plus"></i>
-                                                          </a>
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="btn-group pull-right">
-                                                            <button class="btn green  btn-outline dropdown-toggle" data-toggle="dropdown">Tools
-                                                                <i class="fa fa-angle-down"></i>
-                                                            </button>
-                                                            <ul class="dropdown-menu pull-right">
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="fa fa-print"></i> Print </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="fa fa-file-pdf-o"></i> Save as PDF </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="fa fa-file-excel-o"></i> Export to Excel </a>
-                                                                </li>
-                                                            </ul>
+                                                            <div id="sample_editable_1_new" class="btn sbold green"><a href="/units/conversion/create"> Add New
+                                                                    <i class="fa fa-plus"></i>
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="conversionsTable">
+                                            {!! csrf_field() !!}
+                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="unitConversionTable">
                                                 <thead>
                                                 <tr>
-                                                    <th>
-                                                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
-                                                            <input type="checkbox" class="group-checkable" data-set="#sample_1 .checkboxes" />
-                                                            <span></span>
-                                                        </label>
-                                                    </th>
-                                                    <th> Username </th>
-                                                    <th> Email </th>
-                                                    <th> Status </th>
-                                                    <th> Joined </th>
-                                                    <th> Actions </th>
+                                                    <th> Unit  </th>
+                                                    <th> Value </th>
+                                                    <th> Unit </th>
+                                                    <th> Value </th>
+                                                    <th> Action </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                <tr class="odd gradeX">
-                                                    <td>
-                                                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
-                                                            <input type="checkbox" class="checkboxes" value="1" />
-                                                            <span></span>
-                                                        </label>
-                                                    </td>
-                                                    <td> shuxer </td>
-                                                    <td>
-                                                        <a href="mailto:shuxer@gmail.com"> shuxer@gmail.com </a>
-                                                    </td>
-                                                    <td>
-                                                        <span class="label label-sm label-success"> Approved </span>
-                                                    </td>
-                                                    <td class="center"> 12 Jan 2012 </td>
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false"> Actions
-                                                                <i class="fa fa-angle-down"></i>
-                                                            </button>
-                                                            <ul class="dropdown-menu pull-left" role="menu">
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="icon-docs"></i> New Post </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="icon-tag"></i> New Comment </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="icon-user"></i> New User </a>
-                                                                </li>
-                                                                <li class="divider"> </li>
-                                                                <li>
-                                                                    <a href="javascript:;">
-                                                                        <i class="icon-flag"></i> Comments
-                                                                        <span class="badge badge-success">4</span>
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+
                                                 </tbody>
                                             </table>
                                         </div>
@@ -268,6 +120,11 @@
 <script src="/public/assets/global/plugins/jquery.min.js" type="text/javascript"></script>
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+<script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/custom/admin/units/manage-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
         $('#unitsTable').DataTable();

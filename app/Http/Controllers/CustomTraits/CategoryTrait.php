@@ -48,7 +48,7 @@ trait CategoryTrait{
                 'action' => 'Get Category manage view',
                 'exception'=> $e->getMessage()
             ];
-            Log::citical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
     }
@@ -66,7 +66,7 @@ trait CategoryTrait{
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
-            Log::citical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
     }
@@ -82,7 +82,7 @@ trait CategoryTrait{
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
-            Log::citical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
     }
@@ -134,7 +134,7 @@ trait CategoryTrait{
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
-            Log::citical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
 
