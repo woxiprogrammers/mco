@@ -68,7 +68,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'summary'],function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
         Route::get('create',array('uses' => 'Admin\SummaryController@getCreateView'));
-        Route::get('edit',array('uses' => 'Admin\SummaryController@getEditView'));
+        Route::get('edit/{summary}',array('uses' => 'Admin\SummaryController@getEditView'));
+        Route::post('create',array('uses' => 'Admin\SummaryController@createSummary'));
+        Route::post('edit/{summary}',array('uses' => 'Admin\SummaryController@editSummary'));
+        Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
+        Route::post('listing',array('uses' => 'Admin\SummaryController@summaryListing'));
+        Route::get('change-status/{summary}',array('uses' => 'Admin\SummaryController@changeSummaryStatus'));
     });
     Route::group(['prefix' => 'tax'],function(){
         Route::get('create',array('uses' => 'Admin\TaxController@getCreateView'));
@@ -80,3 +85,4 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{tax}',array('uses' => 'Admin\TaxController@changeTaxStatus'));
     });
 });
+

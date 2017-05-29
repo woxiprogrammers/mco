@@ -66,7 +66,7 @@
 @endsection
 
 @section('javascript')
-<script src="/assets/custom/admin/category.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/sumamry.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
         EditCategory.init();
