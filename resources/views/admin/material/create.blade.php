@@ -22,27 +22,27 @@
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <form role="form" id="create-material" class="form-horizontal">
+                                        <form role="form" id="create-material" class="form-horizontal" action="/material/create" method="post">
+                                            {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="form-group">
-                                                    <label class="col-md-3 control-label">material Name</label>
+                                                    <label class="col-md-3 control-label">Category Name</label>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="category_name" name="category_name">
-                                                            <option>Option 1</option>
-                                                            <option>Option 2</option>
-                                                            <option>Option 3</option>
-                                                            <option>Option 4</option>
-                                                            <option>Option 5</option>
+                                                        <select class="form-control" id="category_id" name="category_id">
+                                                            @foreach($categories as $category)
+                                                                <option value="{{$category['id']}}"> {{$category['name']}} </option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label class="col-md-3 control-label">Is material already created</label>
+                                                    <label class="col-md-3 control-label">Is Material already created</label>
                                                     <div class="col-md-6">
                                                         <div class="mt-checkbox-list">
                                                             <label class="mt-checkbox">
@@ -61,18 +61,16 @@
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">Rate</label>
                                                     <div class="col-md-6">
-                                                        <input type="number" id="rate" name="rate" class="form-control" placeholder="Enter Rate">
+                                                        <input type="number" id="rate_per_unit" name="rate_per_unit" class="form-control" placeholder="Enter Rate">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">Unit</label>
                                                     <div class="col-md-6">
                                                         <select class="form-control" id="unit" name="unit">
-                                                            <option>Option 1</option>
-                                                            <option>Option 2</option>
-                                                            <option>Option 3</option>
-                                                            <option>Option 4</option>
-                                                            <option>Option 5</option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{$unit['id']}}"> {{$unit['name']}} </option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                 </div>
@@ -95,10 +93,39 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/material.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/material/material.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
        CreateMaterial.init();
+        $("#name").rules('add',{
+            remote: {
+                url: "/material/check-name",
+                type: "POST",
+                data: {
+                    name: function() {
+                        return $( "#name" ).val();
+                    }
+                }
+            }
+        });
+
+        $('#is_present').on('click',function(){
+            if($(this).prop('checked') == true){
+                $('#name').rules('remove', 'remote');
+            }else{
+                $("#name").rules('add',{
+                    remote: {
+                        url: "/material/check-name",
+                        type: "POST",
+                        data: {
+                            name: function() {
+                                return $("#name" ).val();
+                            }
+                        }
+                    }
+                });
+            }
+        });
     });
 </script>
 @endsection

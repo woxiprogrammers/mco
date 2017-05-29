@@ -32,8 +32,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
+        Route::post('listing',array('uses' => 'Admin\MaterialController@materialListing'));
         Route::get('create',array('uses' => 'Admin\MaterialController@getCreateView'));
-        Route::get('edit',array('uses' => 'Admin\MaterialController@getEditView'));
+        Route::post('create',array('uses' => 'Admin\MaterialController@createMaterial'));
+        Route::get('edit/{material}',array('uses' => 'Admin\MaterialController@getEditView'));
+        Route::post('edit/{material}',array('uses' => 'Admin\MaterialController@editMaterial'));
+        Route::get('change-status/{material}',array('uses' => 'Admin\MaterialController@changeMaterialStatus'));
+        Route::post('check-name',array('uses' => 'Admin\MaterialController@checkMaterialName'));
     });
     Route::group(['prefix' => 'product'],function(){
         Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));

@@ -8,4 +8,9 @@ use App\Http\Controllers\Controller;
 class MaterialController extends Controller
 {
     use MaterialTrait;
+
+    public function __construct()
+    {
+        $this->middleware('custom.auth')->except('checkMaterialName');
+    }
 }
