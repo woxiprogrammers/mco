@@ -111,10 +111,5 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/material.js" type="application/javascript"></script>
-<script>
-    $(document).ready(function() {
-       CreateMaterial.init();
-    });
-</script>
+
 @endsection
