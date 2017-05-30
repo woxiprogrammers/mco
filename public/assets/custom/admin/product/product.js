@@ -1,9 +1,7 @@
 $(document).ready(function(){
-    $(".materials-table-div").hide();
-
     getMaterials($("#category_name").val());
     $("#next_btn").on('click',function(){
-        if($("#material_name option:selected").length > 0){
+        if($("#material_id option:selected").length > 0){
             getMaterialDetails();
             $(".materials-table-div").show();
         }
@@ -21,7 +19,7 @@ function getMaterials(category){
         async: false,
         success: function(data, textStatus, xhr){
             if(xhr.status == 200){
-                $("#material_name").html(data);
+                $("#material_id").html(data);
             }else{
 
             }
@@ -34,7 +32,7 @@ function getMaterials(category){
 
 function getMaterialDetails(){
     var material_ids = [];
-    $("#material_name option:selected").each(function(i){
+    $("#material_id option:selected").each(function(i){
         material_ids[i] = $(this).val();
     });
 
@@ -47,7 +45,7 @@ function getMaterialDetails(){
         },
         async: false,
         success: function(data,textStatus, xhr){
-            $("#productMaterialTable").html(data.data);
+            $("#productMaterialTable").html(data);
         },
         error: function(errorStatus, xhr){
 
@@ -55,12 +53,16 @@ function getMaterialDetails(){
     });
 }
 function changedQuantity(materialVersion){
-    var rate = $("input[name='material_rate["+materialVersion+"]']").val();
+    /*material_version[{{$data['material_version']['id']}}]['rate_per_unit']
+    *
+    * material_version_{{$data['material_version']['id']}}_amount*/
+    var rate = $("#material_version_"+materialVersion+"_rate").val();
     console.log("rate"+rate);
-    var quantity = $("input[name='material_quantity["+materialVersion+"]']").val();
+
+    var quantity = $("#material_version_"+materialVersion+"_quantity").val();
     console.log("quantity"+quantity);
     var amount = rate*quantity;
     console.log("amount"+amount);
 
-    $("input[name='material_amount["+materialVersion+"]']").val(amount);
+    $("#material_version_"+materialVersion+"_amount").val(amount);
 }

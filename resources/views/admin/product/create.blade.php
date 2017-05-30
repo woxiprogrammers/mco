@@ -23,6 +23,7 @@
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
@@ -75,7 +76,7 @@
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Material</label>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="material_name" name="material_id" multiple="true">
+                                                            <select class="form-control" id="material_id" multiple="true">
 
                                                             </select>
                                                         </div>
@@ -85,7 +86,7 @@
                                                             <a class="btn btn-success btn-md" id="next_btn">Next >></a>
                                                         </div>
                                                     </div>
-                                                    <div class="materials-table-div">
+                                                    <div class="materials-table-div" hidden>
                                                         <fieldset>
                                                             <legend> Materials</legend>
                                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productMaterialTable">
