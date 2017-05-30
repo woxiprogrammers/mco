@@ -44,6 +44,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));
         Route::get('create',array('uses' => 'Admin\ProductController@getCreateView'));
         Route::get('edit',array('uses' => 'Admin\ProductController@getEditView'));
+        Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));
+        Route::post('listing',array('uses' => 'Admin\ProductController@productListing'));
+        Route::get('change-status/{product}',array('uses' => 'Admin\ProductController@changeProductStatus'));
     });
     Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
