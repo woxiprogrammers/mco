@@ -43,10 +43,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'product'],function(){
         Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));
         Route::get('create',array('uses' => 'Admin\ProductController@getCreateView'));
-        Route::get('create/temp',function(){
-            return view('admin.product.temp-product');
-        });
+        Route::post('create',array('uses' => 'Admin\ProductController@createProduct'));
         Route::get('edit',array('uses' => 'Admin\ProductController@getEditView'));
+        Route::get('get-materials/{category}',array('uses' => 'Admin\ProductController@getMaterials'));
+        Route::post('material/listing',array('uses' => 'Admin\ProductController@getMaterialsDetails'));
     });
     Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
