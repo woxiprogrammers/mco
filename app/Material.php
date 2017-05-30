@@ -9,7 +9,7 @@ class Material extends Model
 {
     protected $table = 'materials';
 
-    protected $fillable = ['name','slug','category_id','is_active','created_at','updated_at'];
+    protected $fillable = ['name','slug','is_active','created_at','updated_at'];
 
     use Sluggable;
     public function sluggable()
