@@ -56,6 +56,7 @@ trait CategoryTrait{
     public function createCategory(Request $request){
         try{
             $data = $request->only('name');
+            $data['name'] = ucwords($data['name']);
             $data['is_active'] = false;
             $category = Category::create($data);
             $request->session()->flash('success', 'Category Created successfully.');
@@ -73,7 +74,7 @@ trait CategoryTrait{
 
     public function editCategory(Request $request, $category){
         try{
-            $category->update(['name' => $request->name]);
+            $category->update(['name' => ucwords($request->name)]);
             $request->session()->flash('success', 'Category Edited successfully.');
             return redirect('/category/edit/'.$category->id);
         }catch(\Exception $e){
