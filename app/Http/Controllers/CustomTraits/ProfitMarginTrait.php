@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
+use App\Http\Requests\ProfitMarginRequest;
 use App\ProfitMargin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -48,7 +49,7 @@ trait ProfitMarginTrait{
         }
     }
 
-    public function createProfitMargin(Request $request){
+    public function createProfitMargin(ProfitMarginRequest $request){
         try{
             $data = $request->only('name','base_percentage');
             $data['is_active'] = false;
@@ -67,7 +68,7 @@ trait ProfitMarginTrait{
         }
     }
 
-    public function editProfitMargin(Request $request,$profit_margin){
+    public function editProfitMargin(ProfitMarginRequest $request,$profit_margin){
         try{
             $profit_margin->update(['name' => ucwords($request->name), 'base_percentage' => $request->base_percentage]);
             $request->session()->flash('success', 'Profit Margin Edited successfully.');
