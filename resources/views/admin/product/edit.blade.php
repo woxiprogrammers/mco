@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Product')
+@section('title','Constro | Edit Product')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -18,7 +18,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Create Product</h1>
+                                <h1>Edit Product</h1>
                             </div>
                         </div>
                     </div>
@@ -37,7 +37,7 @@
                                                 <a href="#tab_profit_margin" data-toggle="tab" id="tab_price_a"> Profit Margins </a>
                                             </li>
                                         </ul>
-                                        <form role="form" id="create-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
+                                        <form role="form" id="edit-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
                                             {!! csrf_field() !!}
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="tab_general">
@@ -70,6 +70,7 @@
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Category</label>
                                                         <div class="col-md-6">
+                                                            <input type="hidden" name="category_id" value="{{$product['category_id']}}">
                                                             <input class="form-control" value="{{$product['category']}}" readonly>
                                                         </div>
                                                     </div>
@@ -78,7 +79,11 @@
                                                         <div class="col-md-6">
                                                             <select class="form-control" id="material_id" multiple="true">
                                                                 @foreach($materials as $material)
-                                                                    <option value="{{$material['id']}}"> {{$material['name']}}</option>
+                                                                    @if(in_array($material['id'],$productMaterialIds))
+                                                                        <option value="{{$material['id']}}" selected> {{$material['name']}}</option>
+                                                                    @else
+                                                                        <option value="{{$material['id']}}"> {{$material['name']}}</option>
+                                                                    @endif
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -88,6 +93,7 @@
                                                             <a class="btn btn-success btn-md" id="next_btn">Next >></a>
                                                         </div>
                                                     </div>
+                                                    <input type="hidden" name="material_version_ids" value="{{$materialVersionIds}}">
                                                     <div class="materials-table-div">
                                                         <fieldset>
                                                             <legend> Materials</legend>
@@ -99,6 +105,35 @@
                                                                     <th> Quantity </th>
                                                                     <th> Amount </th>
                                                                 </tr>
+                                                                @foreach($productMaterialVersions as $version)
+                                                                    <tr>
+                                                                        <td>
+                                                                            <label>
+                                                                                {{$version['name']}}
+                                                                            </label>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control" type="text" id="material_version_{{$version['id']}}_rate" name="material_version[{{$version['id']}}][rate_per_unit]" value="{{$version['rate_per_unit']}}" onkeyup="changedQuantity({{$version['id']}})">
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="form-control" name="material_version[{{$version['id']}}][unit_id]">
+                                                                                @foreach($units as $unit)
+                                                                                    @if($unit['id'] == $version['unit_id'])
+                                                                                        <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
+                                                                                    @else
+                                                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" class="form-control" id="material_version_{{$version['id']}}_quantity" name="material_quantity[{{$version['id']}}]" onkeyup="changedQuantity({{$version['id']}})" value="{{$version['quantity']}}" required>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="text" class="form-control" id="material_version_{{$version['id']}}_amount" name="material_amount[{{$version['id']}}]" value="{!! $version['quantity']*$version['rate_per_unit'] !!}" required>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
                                                             </table>
                                                             <div class="col-md-offset-7">
                                                                 <div class="col-md-3 col-md-offset-2">
@@ -121,7 +156,7 @@
                                                         <div class="form-group">
                                                             <label class="col-md-3 control-label">{{$profitMargin['name']}}</label>
                                                             <div class="col-md-6">
-                                                                <input type="text" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" required>
+                                                                <input type="text" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" required>
                                                             </div>
                                                         </div>
                                                         @endforeach

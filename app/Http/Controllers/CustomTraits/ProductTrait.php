@@ -52,15 +52,35 @@ trait ProductTrait{
             $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first()->toArray();
             $product['category'] = Category::where('id',$product['category_id'])->pluck('name')->first();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
+            $productProfitMarginsData = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
+                                    ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
+                                    ->select('profit_margins.id as id','profit_margin_versions.percentage as percentage')
+                                    ->get()->toArray();
+            $productProfitMargins = array();
+            foreach($productProfitMarginsData as $productProfitMargin){
+                $productProfitMargins[$productProfitMargin['id']] = $productProfitMargin['percentage'];
+            }
             $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             $materials = Material::join('category_material_relations','category_material_relations.material_id','=','materials.id')
                                     ->where('category_material_relations.category_id',$product['category_id'])
                                     ->where('materials.is_active', true)
+                                    ->select('materials.id as id','materials.name as name')
                                     ->get();
-            return view('admin.product.edit')->with(compact('product','profitMargins','units','materials'));
+            $productMaterialIds = Material::join('material_versions','materials.id','=','material_versions.material_id')
+                                        ->join('product_material_relation','product_material_relation.material_version_id','=','material_versions.id')
+                                        ->where('product_material_relation.product_version_id',$recentProductVersion['id'])
+                                        ->pluck('materials.id')
+                                        ->toArray();
+            $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
+                                        ->join('materials','materials.id','=','material_versions.material_id')
+                                        ->where('product_material_relation.product_version_id',$recentProductVersion['id'])
+                                        ->select('material_versions.id as id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity')
+                                        ->get()->toArray();
+            $materialVersionIds = implode(',',ProductMaterialRelation::where('product_version_id','=',$recentProductVersion['id'])->pluck('material_version_id')->toArray());
+            return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get Manage View',
+                'action' => 'Get Edit View',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -262,6 +282,78 @@ trait ProductTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Change product status',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editProduct(Request $request, $product){
+        try{
+            $data = $request->all();
+            $productData['name'] = ucwords($data['name']);
+            $productData['description'] = $data['description'];
+            $productData['category_id'] = $data['category_id'];
+            $productData['unit_id'] =  $data['unit_id'];
+            $product->update($productData);
+            $productMaterialProfitMarginData = array();
+            $iterator = 0;
+            $subTotal = 0;
+            foreach($data['material_version'] as $key => $materialVersion){
+                $recentVersion = MaterialVersion::where('id',$key)->select('rate_per_unit','unit_id')->first();
+                $subTotal += $materialVersion['rate_per_unit']*$data['material_quantity'][$key];
+                $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
+                if($materialVersion != $recentVersion){
+                    $materialVersion['material_id'] = MaterialVersion::where('id',$key)->pluck('material_id')->first();
+                    $newVersion = MaterialVersion::create($materialVersion);
+                    $productMaterialProfitMarginData[$iterator]['material_version_id'] = $newVersion->id;
+                }else{
+                    $productMaterialProfitMarginData[$iterator]['material_version_id'] = $key;
+                }
+                $iterator++;
+            }
+            $iterator = 0;
+            $taxAmount = 0;
+            foreach($data['profit_margin'] as $key => $profitMargin){
+                $taxAmount += $subTotal * ($profitMargin / 100);
+                $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$key)->orderBy('created_at','desc')->select('id','percentage')->first()->toArray();
+                if($profitMargin == $recentProfitMarginVersion['percentage']){
+                    $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
+                }else{
+                    $versionData = array();
+                    $versionData['profit_margin_id'] = $key;
+                    $versionData['percentage'] = $profitMargin;
+                    $newProfitMargin = ProfitMarginVersion::create($versionData);
+                    $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $newProfitMargin->id;
+                }
+                $iterator++;
+            }
+            $productVersionData = array();
+            $productVersionData['product_id'] = $product->id;
+            $productVersionData['rate_per_unit'] = $subTotal + $taxAmount;
+            $productVersion = ProductVersion::create($productVersionData);
+            foreach($productMaterialProfitMarginData as $versions){
+                if(array_key_exists('material_version_id',$versions) && array_key_exists('material_quantity',$versions)){
+                    $productMaterialRelation = ProductMaterialRelation::create([
+                        'product_version_id' => $productVersion->id,
+                        'material_version_id' => $versions['material_version_id'],
+                        'material_quantity' => $versions['material_quantity']
+                    ]);
+                }
+                if(array_key_exists('profit_margin_version_id',$versions)){
+                    $productProfitMarginRelation = ProductProfitMarginRelation::create([
+                        'product_version_id' => $productVersion->id,
+                        'profit_margin_version_id' => $versions['profit_margin_version_id']
+                    ]);
+                }
+            }
+            $request->session()->flash('success','Product Edited Successfully');
+            return redirect('/product/edit/'.$product->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
