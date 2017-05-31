@@ -43,8 +43,8 @@ trait MaterialTrait{
 
     public function getEditView(Request $request, $material) {
         try{
-            $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            $units = Unit::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             $materialData['id'] = $material->id;
             $materialData['name'] = $material->name;
             $materialData['category_id'] = $material->category_id;

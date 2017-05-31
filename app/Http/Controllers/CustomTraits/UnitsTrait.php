@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Http\Requests\UnitConversionRequest;
 use App\Http\Requests\UnitRequest;
+use App\MaterialVersion;
 use App\Unit;
 use App\UnitConversion;
 use Illuminate\Http\Request;
@@ -302,4 +303,40 @@ trait UnitsTrait{
         }
 
     }
+
+    public function convertUnits(Request $request){
+        try{
+            $data = $request->all();
+            $materialVersion = MaterialVersion::where('id',$data['material_version_id'])->first()->toArray();
+            $conversion = UnitConversion::where('unit_1_id',$materialVersion['unit_id'])->where('unit_2_id',$data['new_unit'])->first();
+            $response = array();
+            $status = 200;
+            if($conversion != null){
+                $materialRateFrom = $conversion->unit_1_value / $conversion->unit_2_value;
+                $materialRateTo = $materialVersion['rate_per_unit'] / $materialRateFrom;
+            }else{
+                $conversion = UnitConversion::where('unit_2_id',$materialVersion['unit_id'])->where('unit_1_id',$data['new_unit'])->first();
+                if($conversion != null){
+                    $materialRateFrom = $conversion->unit_2_value / $conversion->unit_1_value;
+                    $materialRateTo = $materialVersion['rate_per_unit'] / $materialRateFrom;
+                }else{
+                    $status = 203;
+                    $response['unit'] = $materialVersion['unit_id'];
+                    $materialRateTo = $materialVersion['rate_per_unit'];
+                }
+            }
+            $response['rate'] = $materialRateTo;
+        }catch(\Exception $e){
+            $status = 500;
+            $response = array();
+            $data = [
+                'action' => 'Convert Units',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
+    }
+
 }

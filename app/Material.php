@@ -23,6 +23,6 @@ class Material extends Model
 
     public function versions()
     {
-        return $this->hasMany('App\MaterialVersion');
+        return $this->hasMany('App\MaterialVersion','material_version');
     }
 }

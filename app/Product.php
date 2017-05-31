@@ -9,7 +9,8 @@ class Product extends Model
 {
     protected $table = 'products';
 
-    protected $fillable = ['name','slug','category_id','is_active','description','unit_id','created_at','updated_at'];
+    protected $fillable = ['name','slug','description','is_active','category_id','unit_id'];
+
 
     use Sluggable;
     public function sluggable()
@@ -25,5 +26,4 @@ class Product extends Model
     {
         return $this->hasMany('App\ProductVersion');
     }
-
 }
