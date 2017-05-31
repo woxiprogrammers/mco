@@ -33,15 +33,6 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-default">
                             <li>
-                                <a href="javascript:void(0)">
-                                    <i class="icon-user"></i> My Profile </a>
-                            </li>
-                            <li class="divider"> </li>
-                            <li>
-                                <a href="javascript:void(0)">
-                                    <i class="icon-lock"></i> Lock Screen </a>
-                            </li>
-                            <li>
                                 <a href="/logout">
                                     <i class="icon-key"></i> Log Out </a>
                             </li>
@@ -68,7 +59,7 @@
             <div class="hor-menu  ">
                 <ul class="nav navbar-nav">
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a href="javascript:;"> Dashboard
+                        <a href="/"> Dashboard
                             <span class="arrow"></span>
                         </a>
                     </li>
