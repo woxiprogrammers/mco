@@ -54,7 +54,7 @@ trait UnitsTrait{
 
     public function getCreateConversionView(Request $request) {
         try{
-            $units = Unit::select('id','name')->orderBy('name','asc')->get()->toArray();
+            $units = Unit::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             return view('admin.units.createConversion')->with(compact('units'));
         }catch(\Exception $e){
             $data = [
@@ -276,5 +276,30 @@ trait UnitsTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function checkUnitName(Request $request){
+        try{
+            $unitName = ucwords($request->name);
+            if($request->has('unit_id')){
+                $nameCount = Unit::where('name','=',$unitName)->where('id','!=',$request->$unit_id)->count();
+            }else{
+                $nameCount = Unit::where('name','=',$unitName)->count();
+            }
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Unit name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
     }
 }

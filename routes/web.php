@@ -29,6 +29,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Admin\CategoryController@getManageView'));
         Route::post('listing',array('uses' => 'Admin\CategoryController@categoryListing'));
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
+        Route::post('check-name',array('uses' => 'Admin\CategoryController@checkCategoryName'));
     });
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
@@ -64,6 +65,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('create',array('uses' => 'Admin\UnitsController@createUnit'));
         Route::get('edit/{unit}',array('uses' => 'Admin\UnitsController@getEditView'));
         Route::post('edit/{unit}',array('uses' => 'Admin\UnitsController@editUnit'));
+        Route::post('check-name',array('uses' => 'Admin\UnitsController@checkUnitName'));
         Route::group(['prefix' => 'conversion'],function(){
             Route::get('create',array('uses' => 'Admin\UnitsController@getCreateConversionView'));
             Route::post('create',array('uses' => 'Admin\UnitsController@createConversion'));
@@ -82,6 +84,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
         Route::post('listing',array('uses' => 'Admin\SummaryController@summaryListing'));
         Route::get('change-status/{summary}',array('uses' => 'Admin\SummaryController@changeSummaryStatus'));
+        Route::post('check-name',array('uses' => 'Admin\SummaryController@checkSummaryName'));
     });
     Route::group(['prefix' => 'tax'],function(){
         Route::get('create',array('uses' => 'Admin\TaxController@getCreateView'));

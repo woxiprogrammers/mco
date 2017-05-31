@@ -9,7 +9,19 @@ var  CreateCategory = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/category/check-name",
+                        type: "POST",
+                        data: {
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 }
             },
 
@@ -67,13 +79,29 @@ var  EditCategory = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/category/check-name",
+                        type: "POST",
+                        data: {
+                            category_id: function(){
+                                return $("#category_id").val();
+                            },
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 }
             },
 
             messages: {
                 name: {
-                    required: "Category name is required."
+                    required: "Category name is required.",
+                    remote: "Category already exists."
                 }
             },
 

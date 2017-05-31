@@ -9,12 +9,25 @@ var  SummaryCreate = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/summary/check-name",
+                        type: "POST",
+                        data: {
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 }
             },
             messages: {
                 name: {
-                    required: "Name is required."
+                    required: "Name is required.",
+                    remote: "Summary already exists."
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
@@ -58,13 +71,29 @@ var  EditSummary = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/summary/check-name",
+                        type: "POST",
+                        data: {
+                            summary_id: function(){
+                                return $("#summary_id").val();
+                            },
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 }
             },
 
             messages: {
                 name: {
-                    required: "Summary name is required."
+                    required: "Summary name is required.",
+                    remote: "Summary name already exists"
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit

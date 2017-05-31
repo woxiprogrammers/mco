@@ -26,7 +26,7 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/category/manage">Home</a>
+                                    <a href="/category/manage">Manage Category</a>
                                     <i class="fa fa-circle"></i>
                                </li>
                                 <li>

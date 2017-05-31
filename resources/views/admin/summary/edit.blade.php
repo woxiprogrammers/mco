@@ -27,11 +27,18 @@
                     <div class="page-content">
                         @include('partials.common.messages')
                         <div class="container">
+                            <ul class="page-breadcrumb breadcrumb">
+                                <li>
+                                    <a href="/summary/manage">Back</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                            </ul>
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
 
                                     <div class="portlet-body form">
+                                        <input type="hidden" id="summary_id" value="{{$summary['id']}}">
                                         <form role="form" id="edit-summary" class="form-horizontal" method="post" action="/summary/edit/{{$summary['id']}}">
                                             {!! csrf_field() !!}
                                             <div class="form-body">

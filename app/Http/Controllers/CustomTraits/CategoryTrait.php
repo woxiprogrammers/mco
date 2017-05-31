@@ -159,4 +159,29 @@ trait CategoryTrait{
         }
     }
 
+    public function checkCategoryName(Request $request){
+        try{
+            $categoryName = ucwords($request->name);
+            if($request->has('category_id')){
+                $nameCount = Category::where('name','=',$categoryName)->where('id','!=',$request->category_id)->count();
+            }else{
+                $nameCount = Category::where('name','=',$categoryName)->count();
+            }
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Category name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+    }
+
 }
