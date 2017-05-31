@@ -105,29 +105,52 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="col-md-4">
-                                                                    <label class="control-label">
+                                                                    <label class="control-label" style="font-weight: bold" id="subtotal">
 
                                                                     </label>
                                                                 </div>
                                                             </div>
                                                         </fieldset>
-                                                    </div>
-                                                </div>
-                                                <div class="tab-pane fade" id="tab_profit_margin">
-                                                    <div class="form-body">
-                                                        @foreach($profitMargins as $profitMargin)
-                                                            <div class="form-group">
-                                                                <label class="col-md-3 control-label">{{$profitMargin['name']}}</label>
-                                                                <div class="col-md-6">
-                                                                    <input type="text" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" required>
+                                                        <fieldset>
+                                                            <legend> Profit Margins </legend>
+                                                            <div class="form-body">
+                                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productMaterialTable">
+                                                                    <tr>
+                                                                        <th style="width: 33%"> Profit Margin Name </th>
+                                                                        <th style="width: 33%"> Percentage </th>
+                                                                        <th style="width: 33%"> Amount </th>
+                                                                    </tr>
+                                                                    @foreach($profitMargins as $profitMargin)
+                                                                    <tr>
+                                                                        <td>
+                                                                            {{$profitMargin['name']}}
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="profit-margin form-control" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                        </td>
+                                                                        <td class="profit-margin-amount">
+
+                                                                        </td>
+                                                                    </tr>
+                                                                    @endforeach
+                                                                </table>
+                                                                <div class="col-md-offset-6">
+                                                                    <div class="col-md-5 col-md-offset-2" style="align-items: ">
+                                                                        <label class="control-label" style="font-weight: bold; text-align: right">
+                                                                            Total:
+                                                                        </label>
+                                                                        <label class="control-label" style="font-weight: bold; margin-left: 1%" id="total">
+
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3 col-md-offset-4">
+                                                                        <button type="submit" class="btn btn-success"> Submit </button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        @endforeach
-                                                        <div class="form-group">
-                                                            <div class="col-md-3 col-md-offset-4">
-                                                                <button type="submit" class="btn btn-success"> Submit </button>
-                                                            </div>
-                                                        </div>
+                                                        </fieldset>
                                                     </div>
                                                 </div>
                                             </div>

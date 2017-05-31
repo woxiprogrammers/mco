@@ -13,10 +13,10 @@
             </label>
         </td>
         <td>
-            <input class="form-control" type="text" id="material_version_{{$data['material_version']['id']}}_rate" name="material_version[{{$data['material_version']['id']}}][rate_per_unit]" value="{{$data['material_version']['rate_per_unit']}}" onkeyup="changedQuantity({{$data['material_version']['id']}})">
+            <input class="form-control" type="number" id="material_version_{{$data['material_version']['id']}}_rate" name="material_version[{{$data['material_version']['id']}}][rate_per_unit]" value="{{$data['material_version']['rate_per_unit']}}" onkeyup="changedQuantity({{$data['material_version']['id']}})" onchange="changedQuantity({{$data['material_version']['id']}})">
         </td>
         <td>
-            <select class="form-control" name="material_version[{{$data['material_version']['id']}}][unit_id]">
+            <select class="form-control material_unit" id="material_version_{{$data['material_version']['id']}}_unit" name="material_version[{{$data['material_version']['id']}}][unit_id]" onchange="convertUnits({{$data['material_version']['id']}})">
                 @foreach($units as $unit)
                     @if($unit['id'] == $data['material_version']['unit_id'])
                         <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
@@ -27,10 +27,17 @@
             </select>
         </td>
         <td>
-            <input type="number" class="form-control" id="material_version_{{$data['material_version']['id']}}_quantity" name="material_quantity[{{$data['material_version']['id']}}]" onkeyup="changedQuantity({{$data['material_version']['id']}})" required>
+            <input type="number" class="form-control" id="material_version_{{$data['material_version']['id']}}_quantity" name="material_quantity[{{$data['material_version']['id']}}]" onkeyup="changedQuantity({{$data['material_version']['id']}})" onchange="changedQuantity({{$data['material_version']['id']}})" required>
         </td>
         <td>
-            <input type="text" class="form-control" id="material_version_{{$data['material_version']['id']}}_amount" name="material_amount[{{$data['material_version']['id']}}]" required>
+            <input type="text" class="form-control material_amount" id="material_version_{{$data['material_version']['id']}}_amount" name="material_amount[{{$data['material_version']['id']}}]" required>
         </td>
     </tr>
 @endforeach
+<script>
+/*$(document).ready(function(){
+    $(".material_unit").on('change', function(){
+
+    });
+});*/
+</script>

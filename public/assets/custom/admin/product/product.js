@@ -1,12 +1,12 @@
 $(document).ready(function(){
     getMaterials($("#category_name").val());
+    calculateSubTotal();
     $("#next_btn").on('click',function(){
         if($("#material_id option:selected").length > 0){
             getMaterialDetails();
             $(".materials-table-div").show();
         }
     });
-
     $("#category_name").on('change', function(){
         getMaterials($("#category_name").val());
     });
@@ -53,16 +53,58 @@ function getMaterialDetails(){
     });
 }
 function changedQuantity(materialVersion){
-    /*material_version[{{$data['material_version']['id']}}]['rate_per_unit']
-    *
-    * material_version_{{$data['material_version']['id']}}_amount*/
     var rate = $("#material_version_"+materialVersion+"_rate").val();
-    console.log("rate"+rate);
-
     var quantity = $("#material_version_"+materialVersion+"_quantity").val();
-    console.log("quantity"+quantity);
     var amount = rate*quantity;
-    console.log("amount"+amount);
-
     $("#material_version_"+materialVersion+"_amount").val(amount);
+    calculateSubTotal();
+}
+
+function calculateSubTotal(){
+    var amount = 0;
+    $(".material_amount").each(function(){
+        amount = amount+parseFloat($(this).val());
+    });
+    if(isNaN(amount)){
+        amount = 0;
+    }
+    $("#subtotal").text(amount);
+    calculateProfitMargin();
+}
+
+function calculateProfitMargin(){
+    var amount = parseFloat($("#subtotal").text());
+    var total = amount;
+    $(".profit-margin").each(function(){
+        var profitMarginAmount = amount * ($(this).val() / 100);
+        total = total + profitMarginAmount;
+        $(this).parent().next().text(profitMarginAmount);
+    });
+    $("#total").text(total);
+}
+
+function convertUnits(materialVersionId){
+    var newUnit = $("#material_version_"+materialVersionId+"_unit").val();
+    $.ajax({
+        url: '/units/convert',
+        type: 'POST',
+        async: false,
+        data: {
+            new_unit: newUnit,
+            material_version_id:materialVersionId,
+            _token: $("input[name='_token']").val()
+        },
+        success: function(data,textStatus,xhr){
+            if(xhr.status == 200){
+                $("#material_version_"+materialVersionId+"_rate").val(data.rate);
+            }else{
+                $("#material_version_"+materialVersionId+"_unit option[value='"+data.unit+"']").prop('selected', true);
+                $("#material_version_"+materialVersionId+"_rate").val(data.rate);
+            }
+            changedQuantity(materialVersionId);
+        },
+        error: function(data, textStatus, xhr){
+
+        }
+    });
 }

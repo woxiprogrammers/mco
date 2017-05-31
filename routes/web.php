@@ -75,6 +75,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses' => 'Admin\UnitsController@unitConversionsListing'));
         });
         Route::get('change-status/{unit}',array('uses' => 'Admin\UnitsController@changeUnitStatus'));
+        Route::post('convert',array('uses' => 'Admin\UnitsController@convertUnits'));
     });
     Route::group(['prefix' => 'summary'],function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
