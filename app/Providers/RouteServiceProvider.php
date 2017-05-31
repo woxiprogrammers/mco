@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Category;
 use App\Material;
+use App\Product;
 use App\ProfitMargin;
 use App\Summary;
 use App\Unit;
@@ -39,6 +40,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('tax',Tax::class);
         Route::model('material',Material::class);
         Route::model('profit_margin',ProfitMargin::class);
+        Route::model('product',Product::class);
     }
 
     /**

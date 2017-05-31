@@ -27,8 +27,8 @@ trait MaterialTrait{
 
     public function getCreateView(Request $request) {
         try{
-            $categories = Category::select('id','name')->orderBy('name','asc')->get()->toArray();
-            $units = Unit::select('id','name')->orderBy('name','asc')->get()->toArray();
+            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             return view('admin.material.create')->with(compact('categories','units'));
         }catch(\Exception $e){
             $data = [
@@ -43,8 +43,8 @@ trait MaterialTrait{
 
     public function getEditView(Request $request, $material) {
         try{
-            $categories = Category::select('id','name')->orderBy('name','asc')->get()->toArray();
-            $units = Unit::select('id','name')->orderBy('name','asc')->get()->toArray();
+            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             $materialData['id'] = $material->id;
             $materialData['name'] = $material->name;
             $materialData['category_id'] = $material->category_id;
