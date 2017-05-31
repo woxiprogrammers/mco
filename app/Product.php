@@ -5,11 +5,12 @@ namespace App;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 
-class Material extends Model
+class Product extends Model
 {
-    protected $table = 'materials';
+    protected $table = 'products';
 
-    protected $fillable = ['name','slug','is_active','created_at','updated_at'];
+    protected $fillable = ['name','slug','description','is_active','category_id','unit_id'];
+
 
     use Sluggable;
     public function sluggable()
@@ -23,6 +24,6 @@ class Material extends Model
 
     public function versions()
     {
-        return $this->hasMany('App\MaterialVersion','material_version');
+        return $this->hasMany('App\ProductVersion');
     }
 }

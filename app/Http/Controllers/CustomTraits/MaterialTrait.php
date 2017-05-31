@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
 use App\CategoryMaterialRelation;
+use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialVersion;
 use App\Unit;
@@ -27,8 +28,8 @@ trait MaterialTrait{
 
     public function getCreateView(Request $request) {
         try{
-            $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            $units = Unit::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             return view('admin.material.create')->with(compact('categories','units'));
         }catch(\Exception $e){
             $data = [
@@ -43,8 +44,8 @@ trait MaterialTrait{
 
     public function getEditView(Request $request, $material) {
         try{
-            $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            $units = Unit::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             $materialData['id'] = $material->id;
             $materialData['name'] = $material->name;
             $materialData['category_id'] = CategoryMaterialRelation::where('material_id',$material['id'])->pluck('category_id')->first();
@@ -63,7 +64,7 @@ trait MaterialTrait{
         }
     }
 
-    public function createMaterial(Request $request){
+    public function createMaterial(MaterialRequest $request){
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords($request->name);
@@ -92,7 +93,7 @@ trait MaterialTrait{
 
     }
 
-    public function editMaterial(Request $request, $material){
+    public function editMaterial(MaterialRequest $request, $material){
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords($request->name);

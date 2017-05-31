@@ -1,6 +1,6 @@
-var  SummaryCreate = function () {
+var  CreateProduct = function () {
     var handleCreate = function() {
-        var form = $('#create-summary');
+        var form = $('#create-product');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -10,11 +10,17 @@ var  SummaryCreate = function () {
             rules: {
                 name: {
                     required: true
+                },
+                description: {
+                    required: true
                 }
             },
             messages: {
                 name: {
-                    required: "Name is required."
+                    required: "Product name is required."
+                },
+                description: {
+                    required: "Description is required."
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
@@ -36,7 +42,6 @@ var  SummaryCreate = function () {
             submitHandler: function (form) {
                 success.show();
                 error.hide();
-                form.submit();
             }
         });
     }
@@ -47,9 +52,9 @@ var  SummaryCreate = function () {
     };
 }();
 
-var  EditSummary = function () {
+var  EditProduct = function () {
     var handleEdit = function() {
-        var form = $('#edit-summary');
+        var form = $('#create-product');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -59,42 +64,41 @@ var  EditSummary = function () {
             rules: {
                 name: {
                     required: true
+                },
+                description: {
+                    required: true
                 }
             },
-
             messages: {
                 name: {
-                    required: "Summary name is required."
+                    required: "Product name is required."
+                },
+                description: {
+                    required: "Description is required."
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
                 success.hide();
                 error.show();
             },
-
             highlight: function (element) { // hightlight error inputs
                 $(element)
                     .closest('.form-group').addClass('has-error'); // set error class to the control group
             },
-
             unhighlight: function (element) { // revert the change done by hightlight
                 $(element)
                     .closest('.form-group').removeClass('has-error'); // set error class to the control group
             },
-
             success: function (label) {
                 label
                     .closest('.form-group').addClass('has-success');
             },
-
             submitHandler: function (form) {
                 success.show();
                 error.hide();
-                form.submit();
             }
         });
     }
-
     return {
         init: function () {
             handleEdit();

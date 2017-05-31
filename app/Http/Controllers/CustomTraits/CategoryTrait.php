@@ -6,6 +6,7 @@
 
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
+use App\Http\Requests\CategoryRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -53,7 +54,7 @@ trait CategoryTrait{
         }
     }
 
-    public function createCategory(Request $request){
+    public function createCategory(CategoryRequest $request){
         try{
             $data = $request->only('name');
             $data['name'] = ucwords($data['name']);
@@ -72,7 +73,7 @@ trait CategoryTrait{
         }
     }
 
-    public function editCategory(Request $request, $category){
+    public function editCategory(CategoryRequest $request, $category){
         try{
             $category->update(['name' => ucwords($request->name)]);
             $request->session()->flash('success', 'Category Edited successfully.');

@@ -11,6 +11,6 @@ class MaterialVersion extends Model
     protected $fillable = ['material_id','rate_per_unit','unit_id'];
 
     public function material(){
-        $this->belongsTo('App\Material');
+        $this->belongsTo('App\Material','material_id');
     }
 }

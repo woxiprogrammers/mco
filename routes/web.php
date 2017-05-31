@@ -43,7 +43,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'product'],function(){
         Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));
         Route::get('create',array('uses' => 'Admin\ProductController@getCreateView'));
-        Route::get('edit',array('uses' => 'Admin\ProductController@getEditView'));
+        Route::post('create',array('uses' => 'Admin\ProductController@createProduct'));
+        Route::get('edit/{product}',array('uses' => 'Admin\ProductController@getEditView'));
+        Route::post('edit/{product}',array('uses' => 'Admin\ProductController@editProduct'));
+        Route::get('get-materials/{category}',array('uses' => 'Admin\ProductController@getMaterials'));
+        Route::post('material/listing',array('uses' => 'Admin\ProductController@getMaterialsDetails'));
+        Route::post('listing',array('uses' => 'Admin\ProductController@productListing'));
+        Route::get('change-status/{product}',array('uses' => 'Admin\ProductController@changeProductStatus'));
     });
     Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
@@ -69,6 +75,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses' => 'Admin\UnitsController@unitConversionsListing'));
         });
         Route::get('change-status/{unit}',array('uses' => 'Admin\UnitsController@changeUnitStatus'));
+        Route::post('convert',array('uses' => 'Admin\UnitsController@convertUnits'));
     });
     Route::group(['prefix' => 'summary'],function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));

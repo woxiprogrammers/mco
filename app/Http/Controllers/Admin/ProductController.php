@@ -8,4 +8,8 @@ use App\Http\Controllers\Controller;
 class ProductController extends Controller
 {
     use ProductTrait;
+    public function __construct()
+    {
+        $this->middleware('custom.auth');
+    }
 }
