@@ -34,10 +34,3 @@
         </td>
     </tr>
 @endforeach
-<script>
-/*$(document).ready(function(){
-    $(".material_unit").on('change', function(){
-
-    });
-});*/
-</script>
