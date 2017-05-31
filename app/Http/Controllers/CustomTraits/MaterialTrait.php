@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
+use App\CategoryMaterialRelation;
 use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialVersion;
@@ -47,7 +48,7 @@ trait MaterialTrait{
             $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             $materialData['id'] = $material->id;
             $materialData['name'] = $material->name;
-            $materialData['category_id'] = $material->category_id;
+            $materialData['category_id'] = CategoryMaterialRelation::where('material_id',$material['id'])->pluck('category_id')->first();
             $materialVersion = MaterialVersion::where('material_id',$material->id)->orderBy('created_at','desc')->first();
             $materialData['rate_per_unit'] = $materialVersion->rate_per_unit;
             $materialData['unit'] = $materialVersion->unit_id;
@@ -67,11 +68,13 @@ trait MaterialTrait{
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords($request->name);
-            $materialData['category_id'] = $request->category_id;
+            $categoryMaterialData['category_id'] = $request->category_id;
             $materialData['is_active'] = (boolean)0;
             $materialData['created_at'] = $now;
             $materialData['updated_at'] = $now;
             $material = Material::create($materialData);
+            $categoryMaterialData['material_id'] = $material['id'];
+            $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
             $materialVersionData['material_id'] = $material->id;
             $materialVersionData['rate_per_unit'] = $request->rate_per_unit;
             $materialVersionData['unit_id'] = $request->unit;
@@ -94,10 +97,10 @@ trait MaterialTrait{
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords($request->name);
-            $materialData['category_id'] = $request->category_id;
             $materialData['is_active'] = (boolean)0;
             $materialData['updated_at'] = $now;
             $material->update($materialData);
+            $categoryMaterial = CategoryMaterialRelation::where('material_id',$material['id'])->update(['category_id' => $request->category_id]);
             $materialVersionData['material_id'] = $material->id;
             $materialVersionData['rate_per_unit'] = $request->rate_per_unit;
             $materialVersionData['unit_id'] = (int)$request->unit;
