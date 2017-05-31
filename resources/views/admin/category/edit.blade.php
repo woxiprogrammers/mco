@@ -27,11 +27,18 @@
                     <div class="page-content">
                         @include('partials.common.messages')
                         <div class="container">
+                            <ul class="page-breadcrumb breadcrumb">
+                                <li>
+                                    <a href="/category/manage">Back</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                            </ul>
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
 
                                     <div class="portlet-body form">
+                                        <input type="hidden" id="category_id" value="{{$category['id']}}">
                                         <form role="form" id="edit-category" class="form-horizontal" method="post" action="/category/edit/{{$category['id']}}">
                                             {!! csrf_field() !!}
                                             <div class="form-body">
@@ -66,7 +73,7 @@
 @endsection
 
 @section('javascript')
-<script src="/assets/custom/admin/sumamry.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/category/category.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
         EditCategory.init();

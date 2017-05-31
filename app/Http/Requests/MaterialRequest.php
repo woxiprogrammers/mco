@@ -27,7 +27,7 @@ class MaterialRequest extends FormRequest
             case 'POST':
                 return [
                     'name' => 'required',
-                    'category_name' => 'required',
+                    'category_id' => 'required',
                     'rate_per_unit' => 'required',
                     'unit' => 'required',
                 ];
@@ -35,7 +35,7 @@ class MaterialRequest extends FormRequest
             case 'GET':
                 return[
                     'name' => 'required',
-                    'category_name' => 'required',
+                    'category_id' => 'required',
                     'rate_per_unit' => 'required',
                     'unit' => 'required',
                 ];

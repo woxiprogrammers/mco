@@ -26,7 +26,7 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/tax/manage">Home</a>
+                                    <a href="/tax/manage">Manage Tax</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                                 <li>

@@ -26,7 +26,7 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/profit-margin/manage">Home</a>
+                                    <a href="/profit-margin/manage">Manage Profit Margin</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                                 <li>

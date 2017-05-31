@@ -27,8 +27,8 @@ trait MaterialTrait{
 
     public function getCreateView(Request $request) {
         try{
-            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $units = Unit::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             return view('admin.material.create')->with(compact('categories','units'));
         }catch(\Exception $e){
             $data = [

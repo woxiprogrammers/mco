@@ -52,7 +52,7 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="unitsTable">
                                                 <thead>
                                                 <tr>
-                                                    <th> Name </th>
+                                                    <th style="width:30%"> Name </th>
                                                     <th> Status </th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>
@@ -93,9 +93,9 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="unitConversionTable">
                                                 <thead>
                                                 <tr>
-                                                    <th> Unit  </th>
+                                                    <th style="width:30%"> Unit  </th>
                                                     <th> Value </th>
-                                                    <th> Unit </th>
+                                                    <th style="width:30%"> Unit </th>
                                                     <th> Value </th>
                                                     <th> Action </th>
                                                 </tr>

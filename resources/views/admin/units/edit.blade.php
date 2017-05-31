@@ -39,11 +39,7 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/units/manage">Manage Units</a>
-                                    <i class="fa fa-circle"></i>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);">Edit Unit</a>
+                                    <a href="/units/manage">Back</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
@@ -51,6 +47,7 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
+                                        <input type="hidden" id="unit_id" value="{{$unit['id']}}">
                                         <form role="form" id="edit-unit" class="form-horizontal" method="post" action="/units/edit/{{$unit['id']}}">
                                             {!! csrf_field() !!}
                                             <div class="form-body">

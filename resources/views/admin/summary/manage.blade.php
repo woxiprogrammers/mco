@@ -27,12 +27,6 @@
                                 <div class="col-md-12">
                                     <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                     <div class="portlet light ">
-                                        <div class="portlet-title">
-                                            <div class="caption font-dark">
-                                                <i class="icon-settings font-dark"></i>
-                                                <span class="caption-subject bold uppercase"> Managed Table</span>
-                                            </div>
-                                        </div>
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
                                             <div class="table-toolbar">
@@ -50,7 +44,7 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="summaryTable">
                                                 <thead>
                                                 <tr>
-                                                    <th> Name </th>
+                                                    <th style="width:30%"> Name </th>
                                                     <th> Status </th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>

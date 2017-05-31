@@ -152,4 +152,29 @@ trait SummaryTrait{
         }
     }
 
+    public function checkSummaryName(Request $request){
+        try{
+            $summaryName = ucwords($request->name);
+            if($request->has('summary_id')){
+                $nameCount = Summary::where('name','=',$summaryName)->where('id','!=',$request->$summary_id)->count();
+            }else{
+                $nameCount = Summary::where('name','=',$summaryName)->count();
+            }
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Summary name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+    }
+
 }

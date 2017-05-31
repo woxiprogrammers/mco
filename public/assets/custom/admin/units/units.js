@@ -9,12 +9,25 @@ var  UnitsCreate = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/units/check-name",
+                        type: "POST",
+                        data: {
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 }
             },
             messages: {
                 name: {
-                    required: "Name is required."
+                    required: "Name is required.",
+                    remote: "Unit already exists."
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
@@ -58,12 +71,28 @@ var  UnitsEdit = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/units/check-name",
+                        type: "POST",
+                        data: {
+                            unit_id: function(){
+                                return $("#unit_id").val();
+                            },
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 }
             },
             messages: {
                 name: {
-                    required: "Name is required."
+                    required: "Name is required.",
+                    remote: "Unit already exists."
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
