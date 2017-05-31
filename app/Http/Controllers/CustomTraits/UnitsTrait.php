@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
+use App\Http\Requests\UnitConversionRequest;
+use App\Http\Requests\UnitRequest;
 use App\Unit;
 use App\UnitConversion;
 use Illuminate\Http\Request;
@@ -65,7 +67,7 @@ trait UnitsTrait{
         }
     }
 
-    public function createUnit(Request $request){
+    public function createUnit(UnitRequest $request){
         try{
             $data = $request->only('name');
             $data['name'] = ucwords($data['name']);
@@ -84,7 +86,7 @@ trait UnitsTrait{
         }
     }
 
-    public function editUnit(Request $request, $unit){
+    public function editUnit(UnitRequest $request, $unit){
         try{
             $unit->update(['name' => ucwords($request->name)]);
             $request->session()->flash('success','Unit Edited Successfully');
@@ -171,7 +173,7 @@ trait UnitsTrait{
         }
     }
 
-    public function createConversion(Request $request){
+    public function createConversion(UnitConversionRequest $request){
         try{
             $data['unit_1_id'] = $request->from_unit;
             $data['unit_2_id'] = $request->to_unit;
@@ -255,7 +257,7 @@ trait UnitsTrait{
         }
     }
 
-    public function editConversion(Request $request, $units){
+    public function editConversion(UnitConversionRequest $request, $units){
         try{
             $unitString = $units;
             $unitIds = explode('-',$units);

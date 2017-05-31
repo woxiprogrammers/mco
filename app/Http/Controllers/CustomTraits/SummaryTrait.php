@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
+use App\Http\Requests\SummaryRequest;
 use App\Summary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -47,7 +48,7 @@ trait SummaryTrait{
         }
     }
 
-    public function createSummary(Request $request){
+    public function createSummary(SummaryRequest $request){
         try{
             $data['name'] = ucwords($request->name);
             $data['is_active'] = false;
@@ -65,7 +66,7 @@ trait SummaryTrait{
         }
     }
 
-    public function editSummary(Request $request, $summary){
+    public function editSummary(SummaryRequest $request, $summary){
         try{
             $summary->update(['name' => ucwords($request->name)]);
             $request->session()->flash('success', 'Summary Edited successfully.');
