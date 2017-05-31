@@ -67,7 +67,6 @@ var  EditSummary = function () {
                     required: "Summary name is required."
                 }
             },
-
             invalidHandler: function (event, validator) { //display error alert on form submit
                 success.hide();
                 error.show();

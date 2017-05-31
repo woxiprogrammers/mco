@@ -9,4 +9,8 @@ class ProductVersion extends Model
     protected $table = 'product_versions';
 
     protected $fillable = ['product_id','rate_per_unit'];
+
+    public function product(){
+        $this->belongsTo('App\Product');
+    }
 }

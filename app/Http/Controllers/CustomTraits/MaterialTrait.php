@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
+use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialVersion;
 use App\Unit;
@@ -62,7 +63,7 @@ trait MaterialTrait{
         }
     }
 
-    public function createMaterial(Request $request){
+    public function createMaterial(MaterialRequest $request){
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords($request->name);
@@ -89,7 +90,7 @@ trait MaterialTrait{
 
     }
 
-    public function editMaterial(Request $request, $material){
+    public function editMaterial(MaterialRequest $request, $material){
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords($request->name);

@@ -11,8 +11,10 @@ class Product extends Model
 
     protected $fillable = ['name','slug','description','is_active','category_id','unit_id'];
 
+
     use Sluggable;
-    public function sluggable(){
+    public function sluggable()
+    {
         return [
             'slug' => [
                 'source' => 'name'
@@ -20,4 +22,8 @@ class Product extends Model
         ];
     }
 
+    public function versions()
+    {
+        return $this->hasMany('App\ProductVersion');
+    }
 }
