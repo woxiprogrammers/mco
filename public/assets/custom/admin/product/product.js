@@ -46,6 +46,7 @@ function getMaterialDetails(){
         async: false,
         success: function(data,textStatus, xhr){
             $("#productMaterialTable").html(data);
+            calculateSubTotal();
         },
         error: function(errorStatus, xhr){
 

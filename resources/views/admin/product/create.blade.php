@@ -170,6 +170,8 @@
 <script src="/assets/custom/admin/product/product.js"></script>
 <script src="/assets/custom/admin/product/validations.js"></script>
 <script>
-
+    $(document).ready(function(){
+        CreateProduct.init();
+    });
 </script>
 @endsection

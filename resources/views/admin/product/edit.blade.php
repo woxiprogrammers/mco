@@ -107,7 +107,7 @@
                                                                         </label>
                                                                     </td>
                                                                     <td>
-                                                                        <input class="form-control" type="number" id="material_version_{{$version['id']}}_rate" name="matrial_version[{{$version['id']}}][rate_per_unit]" value="{{$version['rate_per_unit']}}" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})">
+                                                                        <input class="form-control" type="number" id="material_version_{{$version['id']}}_rate" name="material_version[{{$version['id']}}][rate_per_unit]" value="{{$version['rate_per_unit']}}" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})">
                                                                     </td>
                                                                     <td>
                                                                         <select class="form-control" name="material_version[{{$version['id']}}][unit_id]"  id="material_version_{{$version['id']}}_unit" onchange="convertUnits({{$version['id']}})">
@@ -203,6 +203,9 @@
 <script src="/assets/custom/admin/product/product.js"></script>
 <script src="/assets/custom/admin/product/validations.js"></script>
 <script>
-
+    $(document).ready(function(){
+        EditProduct.init();
+    });
 </script>
 @endsection
+
