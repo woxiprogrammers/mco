@@ -42,6 +42,7 @@ var  CreateProduct = function () {
             submitHandler: function (form) {
                 success.show();
                 error.hide();
+                form.submit();
             }
         });
     }
@@ -96,6 +97,7 @@ var  EditProduct = function () {
             submitHandler: function (form) {
                 success.show();
                 error.hide();
+                form.submit();
             }
         });
     }
