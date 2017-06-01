@@ -235,7 +235,7 @@ trait ProductTrait{
                 $records['data'][$iterator] = [
                     $productData[$pagination]['name'],
                     Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                    $productVersion['rate_per_unit'],
+                    $productVersion->rate_per_unit,
                     Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                     $product_status,
                     '<div class="btn-group">
