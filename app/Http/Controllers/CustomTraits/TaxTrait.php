@@ -91,9 +91,8 @@
                 $taxData = Tax::orderBy('id','asc')->get()->toArray();
                 $iTotalRecords = count($taxData);
                 $records = array();
-                $iterator = 0;
-                foreach($taxData as $tax){
-                    if($tax['is_active'] == true){
+                for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($taxData) ; $iterator++ , $pagination++){
+                    if($taxData[$pagination]['is_active'] == true){
                         $tax_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                         $status = 'Disable';
                     }else{
@@ -101,10 +100,10 @@
                         $status = 'Enable';
                     }
                     $records['data'][$iterator] = [
-                        $tax['name'],
-                        $tax['base_percentage'],
+                        $taxData[$pagination]['name'],
+                        $taxData[$pagination]['base_percentage'],
                         $tax_status,
-                        date('d M Y',strtotime($tax['created_at'])),
+                        date('d M Y',strtotime($taxData[$pagination]['created_at'])),
                         '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -112,17 +111,16 @@
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
-                                    <a href="/tax/edit/'.$tax['id'].'">
+                                    <a href="/tax/edit/'.$taxData[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
-                                <a href="/tax/change-status/'.$tax['id'].'">
+                                <a href="/tax/change-status/'.$taxData[$pagination]['id'].'">
                                     <i class="icon-tag"></i> '.$status.' </a>
                             </li>
                         </ul>
                     </div>'
                     ];
-                    $iterator++;
                 }
                 $records["draw"] = intval($request->draw);
                 $records["recordsTotal"] = $iTotalRecords;

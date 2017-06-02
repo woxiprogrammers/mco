@@ -94,9 +94,8 @@ trait ProfitMarginTrait{
             $profitMarginData = ProfitMargin::orderBy('id','asc')->get()->toArray();
             $iTotalRecords = count($profitMarginData);
             $records = array();
-            $iterator = 0;
-            foreach($profitMarginData as $profitMargin){
-                if($profitMargin['is_active'] == true){
+            for($iterator = 0 , $pagiantion = $request->start ; $iterator < $request->length && $iterator < count($profitMarginData) ; $iterator++ , $pagiantion++){
+                if($profitMarginData[$pagiantion]['is_active'] == true){
                     $profitMargin_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
                 }else{
@@ -104,10 +103,10 @@ trait ProfitMarginTrait{
                     $status = 'Enable';
                 }
                 $records['data'][$iterator] = [
-                    $profitMargin['name'],
-                    $profitMargin['base_percentage'],
+                    $profitMarginData[$pagiantion]['name'],
+                    $profitMarginData[$pagiantion]['base_percentage'],
                     $profitMargin_status,
-                    date('d M Y',strtotime($profitMargin['created_at'])),
+                    date('d M Y',strtotime($profitMarginData[$pagiantion]['created_at'])),
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -115,17 +114,16 @@ trait ProfitMarginTrait{
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/profit-margin/edit/'.$profitMargin['id'].'">
+                                <a href="/profit-margin/edit/'.$profitMarginData[$pagiantion]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
-                                <a href="/profit-margin/change-status/'.$profitMargin['id'].'">
+                                <a href="/profit-margin/change-status/'.$profitMarginData[$pagiantion]['id'].'">
                                     <i class="icon-tag"></i> '.$status.' </a>
                             </li>
                         </ul>
                     </div>'
                 ];
-                $iterator++;
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
