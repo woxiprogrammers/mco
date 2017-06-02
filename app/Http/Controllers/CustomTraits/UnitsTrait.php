@@ -108,9 +108,8 @@ trait UnitsTrait{
             $unitData = Unit::orderBy('id','asc')->get()->toArray();
             $iTotalRecords = count($unitData);
             $records = array();
-            $iterator = 0;
-            foreach($unitData as $unit){
-                if($unit['is_active'] == true){
+            for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($unitData) ; $iterator++ , $pagination++){
+                if($unitData[$pagination]['is_active'] == true){
                     $unit_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
                 }else{
@@ -118,9 +117,9 @@ trait UnitsTrait{
                     $status = 'Enable';
                 }
                 $records['data'][$iterator] = [
-                    $unit['name'],
+                    $unitData[$pagination]['name'],
                     $unit_status,
-                    date('d M Y',strtotime($unit['created_at'])),
+                    date('d M Y',strtotime($unitData[$pagination]['created_at'])),
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -128,17 +127,16 @@ trait UnitsTrait{
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/units/edit/'.$unit['id'].'">
+                                <a href="/units/edit/'.$unitData[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
-                                <a href="/units/change-status/'.$unit['id'].'">
+                                <a href="/units/change-status/'.$unitData[$pagination]['id'].'">
                                     <i class="icon-tag"></i> '.$status.' </a>
                             </li>
                         </ul>
                     </div>'
                 ];
-                $iterator++;
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -199,15 +197,14 @@ trait UnitsTrait{
             $conversions = UnitConversion::orderBy('id','asc')->get();
             $iTotalRecords = count($conversions);
             $records = array();
-            $iterator = 0;
-            foreach($conversions as $unit){
-                $fromUnit = Unit::findOrFail($unit['unit_1_id']);
-                $toUnit = Unit::findOrFail($unit['unit_2_id']);
+            for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($conversions) ; $iterator++ , $pagination++){
+                $fromUnit = Unit::findOrFail($conversions[$pagination]['unit_1_id']);
+                $toUnit = Unit::findOrFail($conversions[$pagination]['unit_2_id']);
                 $records['data'][$iterator] = [
                     $fromUnit['name'],
-                    $unit['unit_1_value'],
+                    $conversions[$pagination]['unit_1_value'],
                     $toUnit['name'],
-                    $unit['unit_2_value'],
+                    $conversions[$pagination]['unit_2_value'],
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -221,7 +218,6 @@ trait UnitsTrait{
                         </ul>
                     </div>'
                 ];
-                $iterator++;
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;

@@ -87,9 +87,8 @@ trait SummaryTrait{
             $summaryData = Summary::orderBy('id','asc')->get()->toArray();
             $iTotalRecords = count($summaryData);
             $records = array();
-            $iterator = 0;
-            foreach($summaryData as $summary){
-                if($summary['is_active'] == true){
+            for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($summaryData) ; $iterator++ , $pagination++){
+                if($summaryData[$pagination]['is_active'] == true){
                     $summary_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
                 }else{
@@ -97,9 +96,9 @@ trait SummaryTrait{
                     $status = 'Enable';
                 }
                 $records['data'][$iterator] = [
-                    $summary['name'],
+                    $summaryData[$pagination]['name'],
                     $summary_status,
-                    date('d M Y',strtotime($summary['created_at'])),
+                    date('d M Y',strtotime($summaryData[$pagination]['created_at'])),
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -107,17 +106,16 @@ trait SummaryTrait{
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/summary/edit/'.$summary['id'].'">
+                                <a href="/summary/edit/'.$summaryData[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
-                                <a href="/summary/change-status/'.$summary['id'].'">
+                                <a href="/summary/change-status/'.$summaryData[$pagination]['id'].'">
                                     <i class="icon-tag"></i> '.$status.' </a>
                             </li>
                         </ul>
                     </div>'
                 ];
-                $iterator++;
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
