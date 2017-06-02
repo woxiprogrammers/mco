@@ -27,7 +27,8 @@ var  CreateCategory = function () {
 
             messages: {
                 name: {
-                    required: "Category name is required."
+                    required: "Category name is required.",
+                    remote: "Category already exists."
                 }
             },
 
