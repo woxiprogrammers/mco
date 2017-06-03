@@ -40,6 +40,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('edit/{material}',array('uses' => 'Admin\MaterialController@editMaterial'));
         Route::get('change-status/{material}',array('uses' => 'Admin\MaterialController@changeMaterialStatus'));
         Route::post('check-name',array('uses' => 'Admin\MaterialController@checkMaterialName'));
+        Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\MaterialController@autoSuggest'));
     });
     Route::group(['prefix' => 'product'],function(){
         Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));

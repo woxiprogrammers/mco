@@ -3,6 +3,8 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
+<link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -68,9 +70,7 @@
 @endsection
 
 @section('javascript')
-<script src="/public/assets/global/plugins/jquery.min.js" type="text/javascript"></script>
 <script src="/assets/custom/admin/category.js" type="application/javascript"></script>
-<link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
