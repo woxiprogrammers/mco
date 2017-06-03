@@ -219,4 +219,36 @@ trait MaterialTrait{
 
     }
 
+    public function autoSuggest(Request $request,$keyword){
+        try{
+            $materials = Material::where('name','ilike','%'.$keyword.'%')->get();
+            $response = array();
+            if($materials != null){
+                $iterator = 0;
+                $materials = $materials->toArray();
+                foreach($materials as $material){
+                    $response[$iterator] = MaterialVersion::join('units','units.id','=','material_versions.unit_id')
+                                    ->where('material_versions.material_id',$material['id'])
+                                    ->orderBy('material_versions.created_at','desc')
+                                    ->select('material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','units.name as unit','material_versions.id as material_version_id')
+                                    ->first()->toArray();
+                    $response[$iterator]['id'] = $material['id'];
+                    $response[$iterator]['name'] = $material['name'];
+                    $iterator++;
+                }
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $response = array();
+            $data = [
+                'action' => 'Material Auto-suggest',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
+        return response()->json($response,$status);
+    }
+
 }

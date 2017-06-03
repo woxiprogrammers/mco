@@ -3,6 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
+<link rel="stylesheet"  href="/assets/global/plugins/typeahead/tyepahead.css"/>
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -103,6 +104,8 @@
 </div>
 @endsection
 @section('javascript')
+<script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+<script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script src="/assets/custom/admin/material/material.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
@@ -122,7 +125,36 @@
         $('#is_present').on('click',function(){
             if($(this).prop('checked') == true){
                 $('#name').rules('remove', 'remote');
+                $('#name').addClass('typeahead');
+                citiList.initialize();
+                $('.typeahead').typeahead(null, {
+                    displayKey: 'name',
+                    engine: Handlebars,
+                    source: citiList.ttAdapter(),
+                    limit: 30,
+                    templates: {
+                        empty: [
+                            '<div class="empty-suggest">',
+                            'Unable to find any Result that match the current query',
+                            '</div>'
+                        ].join('\n'),
+                        suggestion: Handlebars.compile('<div><strong>@{{name}}</strong></div>')
+                    },
+            }).on('typeahead:selected', function (obj, datum) {
+                var POData = new Array();
+                POData = $.parseJSON(JSON.stringify(datum));
+                POData.name = POData.name.replace(/\&/g,'%26');
+                $("#rate_per_unit").val(POData.rate_per_unit);
+                $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
+                $("#name").val(POData.name);
+
+            })
+                .on('typeahead:open', function (obj, datum) {
+
+                });
             }else{
+                $('#name').removeClass('typeahead');
+                $('#name').typeahead('destroy');
                 $("#name").rules('add',{
                     remote: {
                         url: "/material/check-name",
@@ -136,6 +168,33 @@
                 });
             }
         });
+
+
+        var citiList = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                url: "/material/auto-suggest/%QUERY",
+                filter: function(x) {
+                    if($(window).width()<420){
+                        $("#header").addClass("fixed");
+                    }
+                    return $.map(x, function (data) {
+                        return {
+                            id:data.id,
+                            name:data.name,
+                            material_version_id:data.material_version_id,
+                            unit_id:data.unit_id,
+                            unit:data.unit,
+                            rate_per_unit:data.rate_per_unit
+                        };
+                    });
+                },
+                wildcard: "%QUERY"
+            }
+        });
+
     });
+
 </script>
 @endsection

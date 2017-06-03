@@ -40,6 +40,9 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <div class="col-md-3 col-md-offset-2" style="text-align: right;">
+                                                        <input type="text" class="form-control form-filter" placeholder="Search Keyword" style="width: 50%"><button class="btn btn-sm btn-primary filter-submit">Search</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                             {!! csrf_field() !!}
@@ -73,7 +76,6 @@
 @endsection
 
 @section('javascript')
-<script src="/assets/custom/admin/category.js" type="application/javascript"></script>
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
@@ -81,5 +83,4 @@
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/custom/admin/material/manage-datatable.js" type="text/javascript"></script>
-
 @endsection
