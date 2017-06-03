@@ -39,63 +39,58 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <ul class="nav nav-tabs">
-                                            <li class="active">
-                                                <a href="#tab_general" data-toggle="tab" id="tab_general_a"> General Information </a>
-                                            </li>
-                                            <li>
-                                                <a href="#tab_profit_margin" data-toggle="tab" id="tab_price_a"> Profit Margins </a>
-                                            </li>
-                                        </ul>
                                         <form role="form" id="create-product" class="form-horizontal" action="/product/create" method="post">
                                             {!! csrf_field() !!}
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="tab_general">
-                                                    <div class="form-group">
-                                                        <label class="col-md-3 control-label">Product Title</label>
-                                                        <div class="col-md-6">
-                                                            <input type="text" id="name" name="name" class="form-control" placeholder="Enter Product Name">
+                                                    <fieldset>
+                                                        <legend> General Information </legend>
+                                                        <div class="form-group">
+                                                            <label class="col-md-3 control-label">Product Title</label>
+                                                            <div class="col-md-6">
+                                                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter Product Name">
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-md-3 control-label">Description</label>
-                                                        <div class="col-md-6">
-                                                            <textarea class="form-control" rows="2" id="description" name="description"></textarea>
+                                                        <div class="form-group">
+                                                            <label class="col-md-3 control-label">Description</label>
+                                                            <div class="col-md-6">
+                                                                <textarea class="form-control" rows="2" id="description" name="description"></textarea>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-md-3 control-label">Unit</label>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="unit_id" name="unit_id">
-                                                                @foreach($units as $unit)
-                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                                @endforeach
-                                                            </select>
+                                                        <div class="form-group">
+                                                            <label class="col-md-3 control-label">Unit</label>
+                                                            <div class="col-md-6">
+                                                                <select class="form-control" id="unit_id" name="unit_id">
+                                                                    @foreach($units as $unit)
+                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-md-3 control-label">Category</label>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="category_name" name="category_id">
-                                                                @foreach($categories as $category)
+                                                        <div class="form-group">
+                                                            <label class="col-md-3 control-label">Category</label>
+                                                            <div class="col-md-6">
+                                                                <select class="form-control" id="category_name" name="category_id">
+                                                                    @foreach($categories as $category)
                                                                     <option value="{{$category['id']}}">{{$category['name']}}</option>
-                                                                @endforeach
-                                                            </select>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-md-3 control-label">Material</label>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="material_id" multiple="true">
+                                                        <div class="form-group">
+                                                            <label class="col-md-3 control-label">Material</label>
+                                                            <div class="col-md-6">
+                                                                <select class="form-control" id="material_id" multiple="true">
 
-                                                            </select>
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-offset-9">
-                                                            <a class="btn btn-success btn-md" id="next_btn">Next >></a>
+                                                        <div class="form-group">
+                                                            <div class="col-md-offset-9">
+                                                                <a class="btn btn-success btn-md" id="next_btn">Next >></a>
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    </fieldset>
                                                     <div class="materials-table-div" hidden>
                                                         <fieldset>
                                                             <legend> Materials</legend>
@@ -136,7 +131,7 @@
                                                                             {{$profitMargin['name']}}
                                                                         </td>
                                                                         <td>
-                                                                            <input class="profit-margin form-control" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                            <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
                                                                         </td>
                                                                         <td class="profit-margin-amount">
 

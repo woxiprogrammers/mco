@@ -25,6 +25,12 @@
                     <div class="page-content">
                         @include('partials.common.messages')
                         <div class="container">
+                            <ul class="page-breadcrumb breadcrumb">
+                                <li>
+                                    <a href="/product/manage">Back</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                            </ul>
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
@@ -107,7 +113,7 @@
                                                                         </label>
                                                                     </td>
                                                                     <td>
-                                                                        <input class="form-control" type="number" id="material_version_{{$version['id']}}_rate" name="material_version[{{$version['id']}}][rate_per_unit]" value="{{$version['rate_per_unit']}}" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})">
+                                                                        <input class="form-control" step="any" type="number" id="material_version_{{$version['id']}}_rate" name="material_version[{{$version['id']}}][rate_per_unit]" value="{{$version['rate_per_unit']}}" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})">
                                                                     </td>
                                                                     <td>
                                                                         <select class="form-control" name="material_version[{{$version['id']}}][unit_id]"  id="material_version_{{$version['id']}}_unit" onchange="convertUnits({{$version['id']}})">
@@ -121,7 +127,7 @@
                                                                         </select>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="number" class="form-control" id="material_version_{{$version['id']}}_quantity" name="material_quantity[{{$version['id']}}]" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})" value="{{$version['quantity']}}" required>
+                                                                        <input type="number" step="any" class="form-control" id="material_version_{{$version['id']}}_quantity" name="material_quantity[{{$version['id']}}]" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})" value="{{$version['quantity']}}" required>
                                                                     </td>
                                                                     <td>
                                                                         <input type="text" class="form-control material_amount" id="material_version_{{$version['id']}}_amount" name="material_amount[{{$version['id']}}]" value="{!! $version['quantity']*$version['rate_per_unit'] !!}" required>
@@ -157,7 +163,7 @@
                                                                         {{$profitMargin['name']}}
                                                                     </td>
                                                                     <td>
-                                                                        <input class="profit-margin form-control" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                        <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
                                                                     </td>
                                                                     <td class="profit-margin-amount">
 

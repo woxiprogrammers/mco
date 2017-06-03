@@ -95,8 +95,8 @@ trait CategoryTrait{
             $iTotalRecords = count($categoriesData);
             $records = array();
             $iterator = 0;
-            foreach($categoriesData as $category){
-                if($category['is_active'] == true){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($categoriesData); $iterator++,$pagination++ ){
+                if($categoriesData[$pagination]['is_active'] == true){
                     $category_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
                 }else{
@@ -104,9 +104,9 @@ trait CategoryTrait{
                     $status = 'Enable';
                 }
                 $records['data'][$iterator] = [
-                    $category['name'],
+                    $categoriesData[$pagination]['name'],
                     $category_status,
-                    date('d M Y',strtotime($category['created_at'])),
+                    date('d M Y',strtotime($categoriesData[$pagination]['created_at'])),
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -114,17 +114,16 @@ trait CategoryTrait{
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/category/edit/'.$category['id'].'">
+                                <a href="/category/edit/'.$categoriesData[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
-                                <a href="/category/change-status/'.$category['id'].'">
+                                <a href="/category/change-status/'.$categoriesData[$pagination]['id'].'">
                                     <i class="icon-tag"></i> '.$status.' </a>
                             </li>
                         </ul>
                     </div>'
                 ];
-                $iterator++;
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
