@@ -71,7 +71,7 @@ trait UnitsTrait{
     public function createUnit(UnitRequest $request){
         try{
             $data = $request->only('name');
-            $data['name'] = ucwords($data['name']);
+            $data['name'] = ucwords(trim($data['name']));
             $data['is_active'] = false;
             $unit = Unit::create($data);
             $request->session()->flash('success','Unit Created Successfully');
@@ -89,7 +89,7 @@ trait UnitsTrait{
 
     public function editUnit(UnitRequest $request, $unit){
         try{
-            $unit->update(['name' => ucwords($request->name)]);
+            $unit->update(['name' => ucwords(trim($request->name))]);
             $request->session()->flash('success','Unit Edited Successfully');
             return redirect('/units/edit/'.$unit->id);
         }catch(\Exception $e){
@@ -308,12 +308,12 @@ trait UnitsTrait{
             $response = array();
             $status = 200;
             if($conversion != null){
-                $materialRateFrom = $conversion->unit_1_value / $conversion->unit_2_value;
+                $materialRateFrom = $conversion->unit_2_value / $conversion->unit_1_value;
                 $materialRateTo = $materialVersion['rate_per_unit'] / $materialRateFrom;
             }else{
                 $conversion = UnitConversion::where('unit_2_id',$materialVersion['unit_id'])->where('unit_1_id',$data['new_unit'])->first();
                 if($conversion != null){
-                    $materialRateFrom = $conversion->unit_2_value / $conversion->unit_1_value;
+                    $materialRateFrom = $conversion->unit_1_value / $conversion->unit_2_value;
                     $materialRateTo = $materialVersion['rate_per_unit'] / $materialRateFrom;
                 }else{
                     $status = 203;

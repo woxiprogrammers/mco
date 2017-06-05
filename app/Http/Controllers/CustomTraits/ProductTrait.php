@@ -148,7 +148,8 @@ trait ProductTrait{
     public function createProduct(Request $request){
         try{
             $data = $request->all();
-            $productData['name'] = ucwords($data['name']);
+            dd($data);
+            $productData['name'] = ucwords(trim($data['name']));
             $productData['description'] = $data['description'];
             $productData['category_id'] = $data['category_id'];
             $productData['unit_id'] =  $data['unit_id'];
@@ -293,7 +294,8 @@ trait ProductTrait{
     public function editProduct(Request $request, $product){
         try{
             $data = $request->all();
-            $productData['name'] = ucwords($data['name']);
+            dd($data);
+            $productData['name'] = ucwords(trim($data['name']));
             $productData['description'] = $data['description'];
             $productData['category_id'] = $data['category_id'];
             $productData['unit_id'] =  $data['unit_id'];

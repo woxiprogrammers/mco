@@ -4,7 +4,7 @@
             <!-- BEGIN LOGO -->
             <div class="page-logo">
                 <a href="javascript:void(0)">
-                    <img src="/assets/global/img/logo.png" alt="logo" class="logo-default" width="106" height="40">
+                    <img src="/assets/global/img/logo.jpg" alt="logo" class="logo-default" width="156" height="40">
                 </a>
             </div>
             <!-- END LOGO -->

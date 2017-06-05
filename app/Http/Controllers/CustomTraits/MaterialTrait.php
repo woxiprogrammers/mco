@@ -67,18 +67,32 @@ trait MaterialTrait{
     public function createMaterial(MaterialRequest $request){
         try{
             $now = Carbon::now();
-            $materialData['name'] = ucwords($request->name);
+            $materialData['name'] = ucwords(trim($request->name));
             $categoryMaterialData['category_id'] = $request->category_id;
             $materialData['is_active'] = (boolean)0;
             $materialData['created_at'] = $now;
             $materialData['updated_at'] = $now;
-            $material = Material::create($materialData);
-            $categoryMaterialData['material_id'] = $material['id'];
-            $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
+            if($request->has('material_id')){
+                $material = Material::findOrFail($request->material_id);
+                $categoryId = CategoryMaterialRelation::where('material_id',$material->id)->pluck('category_id')->first();
+                if($categoryId != $request->category_id){
+                    $categoryMaterialData['material_id'] = $material['id'];
+                    $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
+                }
+                $recentMaterialVersion = MaterialVersion::where('material_id',$material->id)->select('material_id','rate_per_unit','unit_id')->first()->toArray();
+            }else{
+                $material = Material::create($materialData);
+                $recentMaterialVersion = null;
+                $categoryMaterialData['material_id'] = $material['id'];
+                $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
+            }
+
             $materialVersionData['material_id'] = $material->id;
             $materialVersionData['rate_per_unit'] = $request->rate_per_unit;
             $materialVersionData['unit_id'] = $request->unit;
-            $materialVersion = MaterialVersion::create($materialVersionData);
+            if(!(is_array($recentMaterialVersion) && $recentMaterialVersion == $materialVersionData)){
+                $materialVersion = MaterialVersion::create($materialVersionData);
+            }
             $request->session()->flash('success','Material created successfully.');
             return redirect('/material/create');
         }catch(\Exception $e){
@@ -96,7 +110,7 @@ trait MaterialTrait{
     public function editMaterial(MaterialRequest $request, $material){
         try{
             $now = Carbon::now();
-            $materialData['name'] = ucwords($request->name);
+            $materialData['name'] = ucwords(trim($request->name));
             $materialData['is_active'] = (boolean)0;
             $materialData['updated_at'] = $now;
             $material->update($materialData);
