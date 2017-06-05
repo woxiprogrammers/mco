@@ -80,7 +80,7 @@
                                                         <div class="form-group">
                                                             <label class="col-md-3 control-label">Material</label>
                                                             <div class="col-md-6">
-                                                                <select class="form-control" id="material_id" multiple="true">
+                                                                <select class="form-control" id="material_id" multiple="true" style="overflow: scroll">
 
                                                                 </select>
                                                             </div>
@@ -119,7 +119,7 @@
                                                         <fieldset>
                                                             <legend> Profit Margins </legend>
                                                             <div class="form-body">
-                                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productMaterialTable">
+                                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productProfitMarginTable">
                                                                     <tr>
                                                                         <th style="width: 33%"> Profit Margin Name </th>
                                                                         <th style="width: 33%"> Percentage </th>

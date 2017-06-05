@@ -54,7 +54,7 @@ trait ProfitMarginTrait{
         try{
             $data = $request->only('name','base_percentage');
             $data['is_active'] = false;
-            $data['name'] = ucwords($data['name']);
+            $data['name'] = ucwords(trim($data['name']));
             $profitMargin = ProfitMargin::create($data);
             $profitMarginVersionData['profit_margin_id'] = $profitMargin['id'];
             $profitMarginVersionData['percentage'] = $data['base_percentage'];
@@ -74,7 +74,7 @@ trait ProfitMarginTrait{
 
     public function editProfitMargin(ProfitMarginRequest $request,$profit_margin){
         try{
-            $profit_margin->update(['name' => ucwords($request->name), 'base_percentage' => $request->base_percentage]);
+            $profit_margin->update(['name' => ucwords(trim($request->name)), 'base_percentage' => $request->base_percentage]);
             $profitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$profit_margin['id'])->update(['percentage' => $request->base_percentage]);
             $request->session()->flash('success', 'Profit Margin Edited successfully.');
             return redirect('/profit-margin/edit/'.$profit_margin->id);

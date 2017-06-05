@@ -55,7 +55,7 @@ var  CreateProduct = function () {
 
 var  EditProduct = function () {
     var handleEdit = function() {
-        var form = $('#create-product');
+        var form = $('#edit-product');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({

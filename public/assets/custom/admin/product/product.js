@@ -8,6 +8,12 @@ $(document).ready(function(){
         }
     });
     $("#category_name").on('change', function(){
+        if(!($("#materials-table-div").is(':visible'))){
+            $("#productMaterialTable tr").each(function(){
+                $(this).remove();
+            });
+            $(".materials-table-div").hide();
+        }
         getMaterials($("#category_name").val());
     });
 });
@@ -20,6 +26,12 @@ function getMaterials(category){
         success: function(data, textStatus, xhr){
             if(xhr.status == 200){
                 $("#material_id").html(data);
+                $("#productMaterialTable input[type='number']").each(function(){
+                    $(this).rules('add',{
+                        required: true
+                    });
+                });
+
             }else{
 
             }

@@ -5,3 +5,13 @@
     width: 100%;
 }
 
+.material-table-input{
+        width: 80%;
+        margin-left: 10%
+}
+
+.logo-default{
+    margin: 10.5px 0 0 !important;
+    height: 60px !important;
+}
+

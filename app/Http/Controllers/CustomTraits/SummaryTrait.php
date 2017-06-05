@@ -50,7 +50,7 @@ trait SummaryTrait{
 
     public function createSummary(SummaryRequest $request){
         try{
-            $data['name'] = ucwords($request->name);
+            $data['name'] = ucwords(trim($request->name));
             $data['is_active'] = false;
             $summary = Summary::create($data);
             $request->session()->flash('success', 'Summary Created successfully.');
@@ -68,7 +68,7 @@ trait SummaryTrait{
 
     public function editSummary(SummaryRequest $request, $summary){
         try{
-            $summary->update(['name' => ucwords($request->name)]);
+            $summary->update(['name' => ucwords(trim($request->name))]);
             $request->session()->flash('success', 'Summary Edited successfully.');
             return redirect('/summary/edit/'.$summary->id);
         }catch(\Exception $e){

@@ -141,12 +141,16 @@
                         suggestion: Handlebars.compile('<div><strong>@{{name}}</strong></div>')
                     },
             }).on('typeahead:selected', function (obj, datum) {
-                var POData = new Array();
-                POData = $.parseJSON(JSON.stringify(datum));
+                var POData = $.parseJSON(JSON.stringify(datum));
                 POData.name = POData.name.replace(/\&/g,'%26');
                 $("#rate_per_unit").val(POData.rate_per_unit);
                 $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
                 $("#name").val(POData.name);
+                $("#create-material .form-body").append($("<input>", {'id': "material_id",
+                    'type': 'hidden',
+                    'value': POData.id,
+                    'name': "material_id"
+                }));
 
             })
                 .on('typeahead:open', function (obj, datum) {
@@ -154,6 +158,7 @@
                 });
             }else{
                 $('#name').removeClass('typeahead');
+                $("#create-material input[name='material_id']").remove();
                 $('#name').typeahead('destroy');
                 $("#name").rules('add',{
                     remote: {
