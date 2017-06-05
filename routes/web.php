@@ -21,6 +21,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         return view('admin.dashboard');
     });
 
+    Route::group(['prefix' => 'user'],function (){
+        Route::get('create',array('uses' => 'User\UserController@getUserView'));
+        Route::post('create',array('uses' => 'User\UserController@createUser'));
+    });
+
+    Route::group(['prefix' => 'client'],function (){
+        Route::get('create',array('uses' => 'User\UserController@getClientView'));
+        Route::post('create',array('uses' => 'User\UserController@createClient'));
+    });
+
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
