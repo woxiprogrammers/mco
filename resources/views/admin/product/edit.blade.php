@@ -76,7 +76,7 @@
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Material</label>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="material_id" multiple="true">
+                                                            <select class="form-control" id="material_id" multiple="true" style="overflow: scroll">
                                                                 @foreach($materials as $material)
                                                                 @if(in_array($material['id'],$productMaterialIds))
                                                                 <option value="{{$material['id']}}" selected> {{$material['name']}}</option>
