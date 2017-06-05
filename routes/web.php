@@ -24,6 +24,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'user'],function (){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
         Route::post('create',array('uses' => 'User\UserController@createUser'));
+        Route::get('manage',array('uses' => 'User\UserController@getManageView'));
+        Route::post('listing',array('uses' => 'User\UserController@userListing'));
+        Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
     });
 
     Route::group(['prefix' => 'client'],function (){
