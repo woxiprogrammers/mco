@@ -151,8 +151,6 @@
                     'value': POData.id,
                     'name': "material_id"
                 }));
-                   var arrayInput =  $("#create-material").serializeArray();
-                    console.log(arrayInput);
 
             })
                 .on('typeahead:open', function (obj, datum) {
@@ -161,8 +159,6 @@
             }else{
                 $('#name').removeClass('typeahead');
                 $("#create-material input[name='material_id']").remove();
-                var arrayInput =  $("#create-material").serializeArray();
-                console.log(arrayInput);
                 $('#name').typeahead('destroy');
                 $("#name").rules('add',{
                     remote: {
