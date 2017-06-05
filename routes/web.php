@@ -100,5 +100,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses' => 'Admin\TaxController@taxListing'));
         Route::get('change-status/{tax}',array('uses' => 'Admin\TaxController@changeTaxStatus'));
     });
+
+    Route::group(['prefix' => 'quotation'], function(){
+        Route::get('create',array('uses'=> 'Admin\QuotationController@getCreateView'));
+        Route::get('manage',array('uses'=> 'Admin\QuotationController@getManageView'));
+        Route::post('get-products',array('uses'=> 'Admin\QuotationController@getProducts'));
+    });
 });
 
