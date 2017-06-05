@@ -97,7 +97,7 @@
                                                             <tr>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <select class="form-control quotation-product-table quotation-category" name="category_id[]">
+                                                                        <select class="form-control quotation-product-table quotation-category" id="category_select_1" name="category_id[]">
                                                                             @foreach($categories as $category)
                                                                                 <option value="{{$category['id']}}"> {{$category['name']}} </option>
                                                                             @endforeach
@@ -106,31 +106,31 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <select class="form-control quotation-product-table" name="product_id[]" disabled>
+                                                                        <select class="form-control quotation-product-table" name="product_id[]" id="product_select_1" disabled>
 
                                                                         </select>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <textarea class="form-control quotation-product-table" readonly>
+                                                                        <textarea class="form-control quotation-product-table" id="product_description_1" readonly>
 
                                                                         </textarea>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <input name="product_rate[]" class="form-control quotation-product-table" type="text" readonly>
+                                                                        <input name="product_rate[]" class="form-control quotation-product-table" id="product_rate_1" type="text" readonly>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <input type="text" class="form-control quotation-product-table" name="product_quantity[]" readonly>
+                                                                        <input type="text" class="form-control quotation-product-table" name="product_quantity[]" id="product_quantity_1" readonly>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <input type="text" name="product_amount[]" class="form-control quotation-product-table" readonly>
+                                                                        <input type="text" name="product_amount[]" class="form-control quotation-product-table" id="product_amount_1" readonly>
                                                                     </div>
                                                                 </td>
                                                                 <td>
