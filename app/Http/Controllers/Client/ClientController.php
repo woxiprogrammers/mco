@@ -46,6 +46,37 @@ class ClientController extends Controller
         }
     }
 
+    public function getEditView(Request $request,$client){
+        try{
+            $client = $client->toArray();
+            return view('client.edit')->with(compact('client'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get client edit view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editClient(Request $request, $client){
+        try{
+            $client->update($request->all());
+            $request->session()->flash('success', 'Client Edited successfully.');
+            return redirect('/client/edit/'.$client->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Client',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function getManageView(Request $request){
         try{
             return view('client.manage');
@@ -65,7 +96,6 @@ class ClientController extends Controller
             $clientData = Client::orderBy('id','asc')->get()->toArray();
             $iTotalRecords = count($clientData);
             $records = array();
-            $iterator = 0;
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($clientData); $iterator++,$pagination++ ){
                 if($clientData[$pagination]['is_active'] == true){
                     $client_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';

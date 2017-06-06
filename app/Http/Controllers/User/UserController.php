@@ -53,6 +53,40 @@ class UserController extends Controller
         }
     }
 
+    public function getEditView(Request $request,$user){
+        try{
+            $roles = Role::get()->toArray();
+            $user = $user->toArray();
+            return view('user.edit')->with(compact('user','roles'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get user edit view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editUser(Request $request, $user){
+        try{
+            $user->update($request->all());
+            $request->session()->flash('success', 'User Edited successfully.');
+            return redirect('/user/edit/'.$user->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit User',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+
+
     public function getManageView(Request $request){
         try{
             return view('user.manage');
