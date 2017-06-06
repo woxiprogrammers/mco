@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Client;
+use App\Http\Requests\ClientRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +29,7 @@ class ClientController extends Controller
         }
     }
 
-    public function createClient(Request $request){
+    public function createClient(ClientRequest $request){
         try{
             $data = $request->all();
             $data['is_active'] = (boolean)false;
@@ -61,7 +62,7 @@ class ClientController extends Controller
         }
     }
 
-    public function editClient(Request $request, $client){
+    public function editClient(ClientRequest $request, $client){
         try{
             $client->update($request->all());
             $request->session()->flash('success', 'Client Edited successfully.');

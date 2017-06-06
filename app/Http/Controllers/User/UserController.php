@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Client;
 use App\ClientUser;
+use App\Http\Requests\UserRequest;
 use App\Role;
 use App\User;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class UserController extends Controller
         }
     }
 
-    public function createUser(Request $request){
+    public function createUser(UserRequest $request){
         try{
             $data = $request->all();
             $data['first_name'] = ucfirst($data['first_name']);
@@ -69,7 +70,7 @@ class UserController extends Controller
         }
     }
 
-    public function editUser(Request $request, $user){
+    public function editUser(UserRequest $request, $user){
         try{
             $user->update($request->all());
             $request->session()->flash('success', 'User Edited successfully.');
