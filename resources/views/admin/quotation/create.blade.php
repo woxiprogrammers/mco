@@ -84,13 +84,13 @@
                                                     </fieldset>
                                                     <fieldset>
                                                         <legend> Products <a class="btn btn-success btn-md col-md-offset-9" id="next_btn">Add Product</a></legend>
-                                                        <table class="table table-bordered">
+                                                        <table class="table table-bordered" id="productTable">
                                                             <tr>
                                                                 <th style="width: 18%"> Category </th>
                                                                 <th style="width: 18%"> Product </th>
-                                                                <th style="width: 18%"> Description </th>
                                                                 <th style="width: 12%"> Rate</th>
-                                                                <th style="width: 8%"> Quantity </th>
+                                                                <th style="width: 10%"> unit</th>
+                                                                <th style="width: 15%"> Quantity </th>
                                                                 <th  style="width: 12%"> Amount </th>
                                                                 <th> View </th>
                                                             </tr>
@@ -113,14 +113,12 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <textarea class="form-control quotation-product-table" id="product_description_1" readonly>
-
-                                                                        </textarea>
+                                                                        <input name="product_rate[]" class="form-control quotation-product-table" id="product_rate_1" type="text" readonly>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <input name="product_rate[]" class="form-control quotation-product-table" id="product_rate_1" type="text" readonly>
+                                                                        <input name="product_rate[]" class="form-control quotation-product-table" id="product_unit_1" type="text" readonly>
                                                                     </div>
                                                                 </td>
                                                                 <td>
@@ -157,4 +155,27 @@
 @endsection
 @section('javascript')
 <script src="/assets/custom/admin/quotation/quotation.js"></script>
+<script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#next_btn").on('click',function(){
+            var rowCount = $('#productTable tr').length;
+            $.ajax({
+                url: '/quotation/add-product-row',
+                type: 'POST',
+                async: true,
+                data: {
+                    _token: $("input[name='_token']").val(),
+                    row_count: rowCount
+                },
+                success: function(data,textStatus,xhr){
+                    $("#productTable").append(data);
+                },
+                error: function(errorStatus, xhr){
+
+                }
+            });
+        });
+    });
+</script>
 @endsection

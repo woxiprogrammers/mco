@@ -105,6 +105,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses'=> 'Admin\QuotationController@getCreateView'));
         Route::get('manage',array('uses'=> 'Admin\QuotationController@getManageView'));
         Route::post('get-products',array('uses'=> 'Admin\QuotationController@getProducts'));
+        Route::post('get-product-detail',array('uses'=> 'Admin\QuotationController@getProductDetail'));
+        Route::post('add-product-row',array('uses'=> 'Admin\QuotationController@addProductRow'));
     });
 });
 
