@@ -76,7 +76,7 @@
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Material</label>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="material_id" multiple="true">
+                                                            <select class="form-control" id="material_id" multiple="true" style="overflow: scroll">
                                                                 @foreach($materials as $material)
                                                                 @if(in_array($material['id'],$productMaterialIds))
                                                                 <option value="{{$material['id']}}" selected> {{$material['name']}}</option>
@@ -113,24 +113,32 @@
                                                                         </label>
                                                                     </td>
                                                                     <td>
-                                                                        <input class="form-control" step="any" type="number" id="material_version_{{$version['id']}}_rate" name="material_version[{{$version['id']}}][rate_per_unit]" value="{{$version['rate_per_unit']}}" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})">
+                                                                        <div class="form-group">
+                                                                            <input class="form-control material-table-input" step="any" type="number" id="material_version_{{$version['id']}}_rate" name="material_version[{{$version['id']}}][rate_per_unit]" value="{{$version['rate_per_unit']}}" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})">
+                                                                        </div>
                                                                     </td>
                                                                     <td>
-                                                                        <select class="form-control" name="material_version[{{$version['id']}}][unit_id]"  id="material_version_{{$version['id']}}_unit" onchange="convertUnits({{$version['id']}})">
-                                                                            @foreach($units as $unit)
-                                                                                @if($unit['id'] == $version['unit_id'])
-                                                                                    <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
-                                                                                @else
-                                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                                                @endif
-                                                                            @endforeach
-                                                                        </select>
+                                                                        <div class="form-group">
+                                                                            <select class="form-control material-table-input" name="material_version[{{$version['id']}}][unit_id]"  id="material_version_{{$version['id']}}_unit" onchange="convertUnits({{$version['id']}})">
+                                                                                @foreach($units as $unit)
+                                                                                    @if($unit['id'] == $version['unit_id'])
+                                                                                        <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
+                                                                                    @else
+                                                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="number" step="any" class="form-control" id="material_version_{{$version['id']}}_quantity" name="material_quantity[{{$version['id']}}]" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})" value="{{$version['quantity']}}" required>
+                                                                        <div class="form-group">
+                                                                            <input type="number" step="any" class="form-control material-table-input" id="material_version_{{$version['id']}}_quantity" name="material_quantity[{{$version['id']}}]" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})" value="{{$version['quantity']}}" required>
+                                                                        </div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control material_amount" id="material_version_{{$version['id']}}_amount" name="material_amount[{{$version['id']}}]" value="{!! $version['quantity']*$version['rate_per_unit'] !!}" required>
+                                                                        <div class="form-group">
+                                                                            <input type="text" class="form-control material_amount material-table-input" id="material_version_{{$version['id']}}_amount" name="material_amount[{{$version['id']}}]" value="{!! $version['quantity']*$version['rate_per_unit'] !!}">
+                                                                        </div>
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
