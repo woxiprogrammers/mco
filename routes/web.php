@@ -21,6 +21,26 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         return view('admin.dashboard');
     });
 
+    Route::group(['prefix' => 'user'],function (){
+        Route::get('create',array('uses' => 'User\UserController@getUserView'));
+        Route::post('create',array('uses' => 'User\UserController@createUser'));
+        Route::get('edit/{user}',array('uses' => 'User\UserController@getEditView'));
+        Route::post('edit/{user}',array('uses' => 'User\UserController@editUser'));
+        Route::get('manage',array('uses' => 'User\UserController@getManageView'));
+        Route::post('listing',array('uses' => 'User\UserController@userListing'));
+        Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
+    });
+
+    Route::group(['prefix' => 'client'],function (){
+        Route::get('create',array('uses' => 'Client\ClientController@getClientView'));
+        Route::post('create',array('uses' => 'Client\ClientController@createClient'));
+        Route::get('edit/{client}',array('uses' => 'Client\ClientController@getEditView'));
+        Route::post('edit/{client}',array('uses' => 'Client\ClientController@editClient'));
+        Route::get('manage',array('uses' => 'Client\ClientController@getManageView'));
+        Route::post('listing',array('uses' => 'Client\ClientController@clientListing'));
+        Route::get('change-status/{client}',array('uses' => 'Client\ClientController@changeClientStatus'));
+    });
+
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
