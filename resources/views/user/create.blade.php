@@ -151,13 +151,10 @@
 @endsection
 @section('javascript')
 <script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
-<script src="/assets/custom/admin/user/user.js" type="application/javascript"></script>
+<script src="/assets/custom/user/user.js" type="application/javascript"></script>
 <script>
     $(document).ready(function(){
         CreateUser.init();
     });
-    /*$(document).ready(function() {
-     CreateCategory.init();
-     });*/
 </script>
 @endsection

@@ -30,8 +30,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
 
     Route::group(['prefix' => 'client'],function (){
-        Route::get('create',array('uses' => 'User\UserController@getClientView'));
-        Route::post('create',array('uses' => 'User\UserController@createClient'));
+        Route::get('create',array('uses' => 'Client\ClientController@getClientView'));
+        Route::post('create',array('uses' => 'Client\ClientController@createClient'));
+        Route::get('manage',array('uses' => 'Client\ClientController@getManageView'));
+        Route::post('listing',array('uses' => 'Client\ClientController@clientListing'));
+        Route::get('change-status/{client}',array('uses' => 'Client\ClientController@changeClientStatus'));
     });
 
     Route::group(['prefix' => 'category'],function(){
