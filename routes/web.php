@@ -100,5 +100,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses' => 'Admin\TaxController@taxListing'));
         Route::get('change-status/{tax}',array('uses' => 'Admin\TaxController@changeTaxStatus'));
     });
+
+    Route::group(['prefix' => 'bill'],function(){
+        Route::get('create',array('uses' => 'Admin\BillController@getCreateView'));
+    });
 });
 
