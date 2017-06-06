@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Category;
+use App\Client;
 use App\Material;
 use App\Product;
 use App\ProfitMargin;
 use App\Summary;
 use App\Unit;
 use App\Tax;
+use App\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -41,6 +43,8 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('material',Material::class);
         Route::model('profit_margin',ProfitMargin::class);
         Route::model('product',Product::class);
+        Route::model('user',User::class);
+        Route::model('client',Client::class);
     }
 
     /**
