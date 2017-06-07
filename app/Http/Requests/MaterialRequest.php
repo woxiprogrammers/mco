@@ -26,18 +26,19 @@ class MaterialRequest extends FormRequest
         switch($this->method()){
             case 'POST':
                 return [
-                    'name' => 'required',
+                    //'name' => 'required',
                     'category_id' => 'required',
-                    'rate_per_unit' => 'required',
-                    'unit' => 'required',
+                    /*'rate_per_unit' => 'required',
+                    'unit' => 'required',*/
                 ];
                 break;
-            case 'GET':
-                return[
-                    'name' => 'required',
-                    'category_id' => 'required',
-                    'rate_per_unit' => 'required',
-                    'unit' => 'required',
+
+            case 'PUT':
+                return [
+                    //'name' => 'required',
+//                    'category_id' => 'required',
+                    /*'rate_per_unit' => 'required',
+                    'unit' => 'required',*/
                 ];
                 break;
         }

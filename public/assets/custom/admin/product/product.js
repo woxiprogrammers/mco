@@ -65,11 +65,11 @@ function getMaterialDetails(){
         }
     });
 }
-function changedQuantity(materialVersion){
-    var rate = $("#material_version_"+materialVersion+"_rate").val();
-    var quantity = $("#material_version_"+materialVersion+"_quantity").val();
+function changedQuantity(materialId){
+    var rate = $("#material_"+materialId+"_rate").val();
+    var quantity = $("#material_"+materialId+"_quantity").val();
     var amount = rate*quantity;
-    $("#material_version_"+materialVersion+"_amount").val(amount);
+    $("#material_"+materialId+"_amount").val(amount);
     calculateSubTotal();
 }
 
@@ -96,25 +96,25 @@ function calculateProfitMargin(){
     $("#total").text(total);
 }
 
-function convertUnits(materialVersionId){
-    var newUnit = $("#material_version_"+materialVersionId+"_unit").val();
+function convertUnits(materialId){
+    var newUnit = $("#material_"+materialId+"_unit").val();
     $.ajax({
         url: '/units/convert',
         type: 'POST',
         async: false,
         data: {
             new_unit: newUnit,
-            material_version_id:materialVersionId,
+            material_id:materialId,
             _token: $("input[name='_token']").val()
         },
         success: function(data,textStatus,xhr){
             if(xhr.status == 200){
-                $("#material_version_"+materialVersionId+"_rate").val(data.rate);
+                $("#material_"+materialId+"_rate").val(data.rate);
             }else{
-                $("#material_version_"+materialVersionId+"_unit option[value='"+data.unit+"']").prop('selected', true);
-                $("#material_version_"+materialVersionId+"_rate").val(data.rate);
+                $("#material_"+materialId+"_unit option[value='"+data.unit+"']").prop('selected', true);
+                $("#material_"+materialId+"_rate").val(data.rate);
             }
-            changedQuantity(materialVersionId);
+            changedQuantity(materialId);
         },
         error: function(data, textStatus, xhr){
 
