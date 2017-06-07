@@ -16,14 +16,12 @@ trait BillTrait{
 
     public function getCreateView(Request $request,$project_site){
         try{
-            //$quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
-            /*$quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->lists('product_id');
-            $categories = Product::whereIn('id',$quotationProducts)->get()->toArray();*/
-            /*$quotationProducts = [1,2,3,4,5,6];
-            $categories = [1,2,3];
+            $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
+            $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->pluck('product_id')->toArray();
+            $categories = Product::whereIn('id',$quotationProducts)->get()->toArray();
             foreach($categories as $category){
 
-           }*/
+           }
      //       dd($project_site);
             $clients = Client::where('is_active',true)->get()->toArray();
             $categories = Category::where('is_active',true)->get()->toArray();

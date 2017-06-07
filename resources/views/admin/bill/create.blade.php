@@ -37,30 +37,86 @@
                             <div class="col-md-11">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
-
                                     <div class="portlet-body form">
                                         <ul class="nav nav-tabs">
-                                                <li class="active">
-                                                    <a href="#tab_general_1" data-toggle="tab" id="tab_general_a">1st tab </a>
-                                                </li>
-                                            <li class="active">
-                                                <a href="#tab_general_2" data-toggle="tab" id="tab_general_a">2nd tab </a>
+                                            @foreach($categories as $category)
+                                            <li>
+                                                <a href="#tab_category_{{$category['id']}}" data-toggle="tab" id="tab_price_a"> {{$category['name']}} </a>
                                             </li>
-                                            <li class="active">
-                                                <a href="#tab_general_3" data-toggle="tab" id="tab_general_a">3rd tab </a>
+                                            @endforeach
+                                            <li>
+                                                <a href="#tab_tax" data-toggle="tab" id="tab_tax_a"> Taxes </a>
                                             </li>
                                         </ul>
-                                        <form role="form" id="create-bill" class="form-horizontal" method="post" action="/bill/create">
+                                        <form role="form" id="create-product" class="form-horizontal" action="/bill/create" method="post">
                                             {!! csrf_field() !!}
                                             <div class="tab-content">
-                                                <div class="tab-pane fade in active" id="tab_general_1">
-                                                    fnsjkfb
+                                                <div class="tab-pane fade in active" id="tab_category_{{$category['id']}}">
+                                                    <fieldset>
+                                                        <legend style="font-size: 20px;"><input type="checkbox" id="check_1">&nbsp;&nbsp;&nbsp;Product Nameee</legend>
+                                                        <div class="form-group">
+                                                            <label class="col-md-2 control-label">Product Description</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="description" name="description" class="form-control" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-md-2 control-label">Product Unit</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" value="KG" readonly>
+                                                            </div>
+                                                            <label class="col-md-2 control-label">Product Rate</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" value="123" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-md-2 control-label">BOQ Quantity</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" readonly>
+                                                            </div>
+                                                            <label class="col-md-2 control-label">W.O Amount</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" value="123" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-md-2 control-label">Previous Quantity</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" value="2" readonly>
+                                                            </div>
+                                                            <label class="col-md-2 control-label">Amount</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" value="123" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-md-2 control-label">Current Quantity</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control">
+                                                            </div>
+                                                            <label class="col-md-2 control-label">Amount</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" value="123" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-md-2 control-label">Cumulative Quantity</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" readonly>
+                                                            </div>
+                                                            <label class="col-md-2 control-label">Cumulative Amount</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" id="unit" name="unit" class="form-control" value="123" readonly>
+                                                            </div>
+                                                        </div>
+
+                                                    </fieldset>
                                                 </div>
-                                                <div class="tab-pane fade in active" id="tab_general_2">
-                                                    fnsjkfb jsfhnj
-                                                </div>
-                                                <div class="tab-pane fade in active" id="tab_general_3">
-                                                    fnsjkfb
+                                                <div class="tab-pane fade in active" id="tab_tax">
+                                                    <fieldset>
+
+                                                    </fieldset>
                                                 </div>
                                             </div>
                                         </form>
