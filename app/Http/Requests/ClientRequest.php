@@ -28,7 +28,7 @@ class ClientRequest extends FormRequest
                 return [
                     'company' => 'required',
                     'address' => 'required',
-                    'email' => 'required|chk_email',
+                    'email' => 'required|email',
                     'mobile' => 'required',
                 ];
             break;
@@ -37,7 +37,7 @@ class ClientRequest extends FormRequest
                 return [
                     'company' => 'required',
                     'address' => 'required',
-                    'email' => 'required|chk_email',
+                    'email' => 'required|email',
                     'mobile' => 'required',
                 ];
             break;

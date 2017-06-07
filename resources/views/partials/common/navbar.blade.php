@@ -105,7 +105,7 @@
                         </ul>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a href="/bill/create"> Bill
+                        <a href="/bill/manage"> Bill
                             <span class="arrow"></span>
                         </a>
                     </li>

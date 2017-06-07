@@ -39,51 +39,28 @@
                                 <div class="portlet light ">
 
                                     <div class="portlet-body form">
+                                        <ul class="nav nav-tabs">
+                                                <li class="active">
+                                                    <a href="#tab_general_1" data-toggle="tab" id="tab_general_a">1st tab </a>
+                                                </li>
+                                            <li class="active">
+                                                <a href="#tab_general_2" data-toggle="tab" id="tab_general_a">2nd tab </a>
+                                            </li>
+                                            <li class="active">
+                                                <a href="#tab_general_3" data-toggle="tab" id="tab_general_a">3rd tab </a>
+                                            </li>
+                                        </ul>
                                         <form role="form" id="create-bill" class="form-horizontal" method="post" action="/bill/create">
                                             {!! csrf_field() !!}
-                                            <div class="form-body">
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Company Name</label>
-                                                        <span>*</span>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <select class="form-control" id="company" name="company">
-                                                            @foreach($clients as $client)
-                                                            <option value="{{$client['id']}}">{{$client['name']}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
+                                            <div class="tab-content">
+                                                <div class="tab-pane fade in active" id="tab_general_1">
+                                                    fnsjkfb
                                                 </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Project</label>
-                                                        <span>*</span>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <select class="form-control" id="company" name="company">
-                                                            @foreach($clients as $client)
-                                                                <option value="{{$client['id']}}">{{$client['name']}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div><div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Company Name</label>
-                                                        <span>*</span>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <select class="form-control" id="company" name="company">
-                                                            @foreach($clients as $client)
-                                                            <option value="{{$client['id']}}">{{$client['name']}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
+                                                <div class="tab-pane fade in active" id="tab_general_2">
+                                                    fnsjkfb jsfhnj
                                                 </div>
-                                            </div>
-                                            <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn blue">Submit</button>
+                                                <div class="tab-pane fade in active" id="tab_general_3">
+                                                    fnsjkfb
                                                 </div>
                                             </div>
                                         </form>
@@ -102,14 +79,25 @@
 <script src="/assets/custom/admin/category/category.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
-        getProjects($('#company').val());
+        console.log('here');
+        console.log($('#company').val());
+        //getProjects($('#company').val());
 
-    function getProjects(company){
+    function getProjects(client_id){
         $.ajax({
-            url: '/bill/get-projects/'+company,
+            url: '/bill/get-projects/'+client_id,
             type: 'GET',
             async : false,
-            success: funct
+            success: function(data,textStatus,xhr){
+                if(xhr.status == 200){
+                    console.log(data);
+                }else{
+
+                }
+            },
+            error: function(errorStatus,xhr){
+
+            }
         });
     }
     });
