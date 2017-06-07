@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Category')
+@section('title','Constro | Create Material')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->

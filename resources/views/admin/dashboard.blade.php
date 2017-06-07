@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro 360')
+@section('title','Constro')
 @include('partials.common.navbar')
 @section('content')
 <div class="page-wrapper">
