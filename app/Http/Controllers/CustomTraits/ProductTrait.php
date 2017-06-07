@@ -129,7 +129,6 @@ trait ProductTrait{
             $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             foreach($materials as $material){
                 $materialData[$iterator]['material'] = $material;
-//                $materialData[$iterator]['material_version'] = MaterialVersion::where('material_id',$material['id'])->orderBy('created_at','desc')->first()->toArray();
                 $materialData[$iterator]['unit'] = Unit::where('id',$materialData[$iterator]['material']['unit_id'])->select('id','name')->first()->toArray();
                 $iterator++;
             }

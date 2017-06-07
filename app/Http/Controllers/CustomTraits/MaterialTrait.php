@@ -76,7 +76,6 @@ trait MaterialTrait{
 
     public function createMaterial(MaterialRequest $request){
         try{
-//            dd($request->all());
             $now = Carbon::now();
             if($request->has('material_id')){
                 $categoryId = CategoryMaterialRelation::where('material_id',$request->material_id)->pluck('category_id')->first();
@@ -93,7 +92,6 @@ trait MaterialTrait{
                 $materialData['is_active'] = (boolean)0;
                 $materialData['created_at'] = $now;
                 $materialData['updated_at'] = $now;
-//                dd($materialData);
                 $material = Material::create($materialData);
                 $categoryMaterialData['material_id'] = $material['id'];
                 $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
