@@ -84,7 +84,11 @@ trait SummaryTrait{
 
     public function summaryListing(Request $request){
         try{
-            $summaryData = Summary::orderBy('id','asc')->get()->toArray();
+            if($request->has('search_name')){
+                $summaryData = Summary::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+            }else{
+                $summaryData = Summary::orderBy('id','asc')->get()->toArray();
+            }
             $iTotalRecords = count($summaryData);
             $records = array();
             for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($summaryData) ; $iterator++ , $pagination++){

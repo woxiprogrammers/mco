@@ -209,7 +209,7 @@
                     '<div class="empty-suggest">',
                     '</div>'
                 ].join('\n'),
-                suggestion: Handlebars.compile('<div><strong>@{{name}}</strong></div>')
+                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
             },
         }).on('typeahead:selected', function (obj, datum) {
 

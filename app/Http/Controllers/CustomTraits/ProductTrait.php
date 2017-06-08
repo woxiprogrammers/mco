@@ -229,7 +229,11 @@ trait ProductTrait{
 
     public function productListing(Request $request){
         try{
-            $productData = Product::orderBy('id','asc')->get()->toArray();
+            if($request->has('search_product_name')){
+                $productData = Product::where('name','ilike','%'.$request->search_product_name.'%')->orderBy('id','asc')->get()->toArray();
+            }else{
+                $productData = Product::orderBy('id','asc')->get()->toArray();
+            }
             $iTotalRecords = count($productData);
             $records = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($productData); $iterator++,$pagination++ ){
