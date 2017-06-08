@@ -1,17 +1,6 @@
-/* here you can put your own css to customize and override the theme */
 
-.empty-suggest{
-    background-color: floralwhite;
-    width: 100%;
-}
 
 .material-table-input, .quotation-product-table{
         width: 80%;
         margin-left: 10%
 }
-
-.logo-default{
-    margin: 10.5px 0 0 !important;
-    height: 60px !important;
-}
-

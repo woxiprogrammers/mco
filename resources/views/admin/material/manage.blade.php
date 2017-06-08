@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Category')
+@section('title','Constro | Manage Materials')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -40,9 +40,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-3 col-md-offset-2" style="text-align: right;">
-                                                        <input type="text" class="form-control form-filter" placeholder="Search Keyword" style="width: 50%"><button class="btn btn-sm btn-primary filter-submit">Search</button>
-                                                    </div>
                                                 </div>
                                             </div>
                                             {!! csrf_field() !!}
@@ -55,6 +52,17 @@
                                                     <th> Status </th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="width: 25%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_rate" readonly> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_unit" readonly> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                    <th>
+                                                        <button class="btn-primary filter-submit"> Search </button>
+                                                        <button class="btn-default filter-cancel"> Reset </button>
+                                                    </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>

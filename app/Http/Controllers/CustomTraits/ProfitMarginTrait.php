@@ -91,7 +91,11 @@ trait ProfitMarginTrait{
 
     public function profitMarginListing(Request $request){
         try{
-            $profitMarginData = ProfitMargin::orderBy('id','asc')->get()->toArray();
+            if($request->has('search_name')){
+                $profitMarginData = ProfitMargin::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+            }else{
+                $profitMarginData = ProfitMargin::orderBy('id','asc')->get()->toArray();
+            }
             $iTotalRecords = count($profitMarginData);
             $records = array();
             for($iterator = 0 , $pagiantion = $request->start ; $iterator < $request->length && $iterator < count($profitMarginData) ; $iterator++ , $pagiantion++){
@@ -157,6 +161,31 @@ trait ProfitMarginTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function checkProfitMarginName(Request $request){
+        try{
+            $profitMarginName = $request->name;
+            if($request->has('profit_margin_id')){
+                $nameCount = ProfitMargin::where('name','ilike',$profitMarginName)->where('id','!=',$request->profit_margin_id)->count();
+            }else{
+                $nameCount = ProfitMargin::where('name','ilike',$profitMarginName)->count();
+            }
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Material name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
     }
 
 }

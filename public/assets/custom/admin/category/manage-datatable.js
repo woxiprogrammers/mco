@@ -25,9 +25,6 @@ var CategoryListing = function () {
                 "pageLength": 10, // default record count per page
                 "ajax": {
                     "url": "/category/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
                 },
                 "order": [
                     [1, "asc"]

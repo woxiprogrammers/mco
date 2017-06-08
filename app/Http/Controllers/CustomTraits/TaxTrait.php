@@ -88,7 +88,11 @@
 
         public function taxListing(Request $request){
             try{
-                $taxData = Tax::orderBy('id','asc')->get()->toArray();
+                if($request->has('search_name')){
+                    $taxData = Tax::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+                }else{
+                    $taxData = Tax::orderBy('id','asc')->get()->toArray();
+                }
                 $iTotalRecords = count($taxData);
                 $records = array();
                 for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($taxData) ; $iterator++ , $pagination++){
@@ -154,6 +158,32 @@
                 Log::critical(json_encode($data));
                 abort(500);
             }
+        }
+
+        public function checkTaxName(Request $request){
+            try{
+                $taxName = $request->name;
+                if($request->has('tax_id')){
+                    $nameCount = Tax::where('name','ilike',$taxName)->where('id','!=',$request->tax_id)->count();
+                }else{
+                    $nameCount = Tax::where('name','ilike',$taxName)->count();
+                }
+                Log::info($nameCount);
+                if($nameCount > 0){
+                    return 'false';
+                }else{
+                    return 'true';
+                }
+            }catch(\Exception $e){
+                $data = [
+                    'action' => 'Check Material name',
+                    'param' => $request->all(),
+                    'exception' => $e->getMessage()
+                ];
+                Log::critical(json_encode($data));
+                abort(500);
+            }
+
         }
 
     }

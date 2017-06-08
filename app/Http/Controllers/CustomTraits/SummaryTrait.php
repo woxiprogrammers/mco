@@ -84,7 +84,11 @@ trait SummaryTrait{
 
     public function summaryListing(Request $request){
         try{
-            $summaryData = Summary::orderBy('id','asc')->get()->toArray();
+            if($request->has('search_name')){
+                $summaryData = Summary::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+            }else{
+                $summaryData = Summary::orderBy('id','asc')->get()->toArray();
+            }
             $iTotalRecords = count($summaryData);
             $records = array();
             for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($summaryData) ; $iterator++ , $pagination++){
@@ -152,11 +156,11 @@ trait SummaryTrait{
 
     public function checkSummaryName(Request $request){
         try{
-            $summaryName = ucwords($request->name);
+            $summaryName = $request->name;
             if($request->has('summary_id')){
-                $nameCount = Summary::where('name','=',$summaryName)->where('id','!=',$request->$summary_id)->count();
+                $nameCount = Summary::where('name','ilike',$summaryName)->where('id','!=',$request->$summary_id)->count();
             }else{
-                $nameCount = Summary::where('name','=',$summaryName)->count();
+                $nameCount = Summary::where('name','ilike',$summaryName)->count();
             }
             if($nameCount > 0){
                 return 'false';

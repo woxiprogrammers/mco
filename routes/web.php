@@ -21,6 +21,26 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         return view('admin.dashboard');
     });
 
+    Route::group(['prefix' => 'user'],function (){
+        Route::get('create',array('uses' => 'User\UserController@getUserView'));
+        Route::post('create',array('uses' => 'User\UserController@createUser'));
+        Route::get('edit/{user}',array('uses' => 'User\UserController@getEditView'));
+        Route::post('edit/{user}',array('uses' => 'User\UserController@editUser'));
+        Route::get('manage',array('uses' => 'User\UserController@getManageView'));
+        Route::post('listing',array('uses' => 'User\UserController@userListing'));
+        Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
+    });
+
+    Route::group(['prefix' => 'client'],function (){
+        Route::get('create',array('uses' => 'Client\ClientController@getClientView'));
+        Route::post('create',array('uses' => 'Client\ClientController@createClient'));
+        Route::get('edit/{client}',array('uses' => 'Client\ClientController@getEditView'));
+        Route::post('edit/{client}',array('uses' => 'Client\ClientController@editClient'));
+        Route::get('manage',array('uses' => 'Client\ClientController@getManageView'));
+        Route::post('listing',array('uses' => 'Client\ClientController@clientListing'));
+        Route::get('change-status/{client}',array('uses' => 'Client\ClientController@changeClientStatus'));
+    });
+
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
@@ -37,7 +57,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'Admin\MaterialController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\MaterialController@createMaterial'));
         Route::get('edit/{material}',array('uses' => 'Admin\MaterialController@getEditView'));
-        Route::post('edit/{material}',array('uses' => 'Admin\MaterialController@editMaterial'));
+        Route::put('edit/{material}',array('uses' => 'Admin\MaterialController@editMaterial'));
         Route::get('change-status/{material}',array('uses' => 'Admin\MaterialController@changeMaterialStatus'));
         Route::post('check-name',array('uses' => 'Admin\MaterialController@checkMaterialName'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\MaterialController@autoSuggest'));
@@ -52,6 +72,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('material/listing',array('uses' => 'Admin\ProductController@getMaterialsDetails'));
         Route::post('listing',array('uses' => 'Admin\ProductController@productListing'));
         Route::get('change-status/{product}',array('uses' => 'Admin\ProductController@changeProductStatus'));
+        Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\ProductController@autoSuggest'));
+        Route::post('check-name',array('uses' => 'Admin\ProductController@checkProductName'));
     });
     Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
@@ -61,6 +83,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('create',array('uses' => 'Admin\ProfitMarginController@createProfitMargin'));
         Route::post('listing',array('uses' => 'Admin\ProfitMarginController@profitMarginListing'));
         Route::get('change-status/{profit_margin}',array('uses' => 'Admin\ProfitMarginController@changeProfitMarginStatus'));
+        Route::post('check-name',array('uses' => 'Admin\ProfitMarginController@checkProfitMarginName'));
     });
     Route::group(['prefix' => 'units'],function(){
         Route::get('manage',array('uses' => 'Admin\UnitsController@getManageView'));
@@ -99,6 +122,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Admin\TaxController@getManageView'));
         Route::post('listing',array('uses' => 'Admin\TaxController@taxListing'));
         Route::get('change-status/{tax}',array('uses' => 'Admin\TaxController@changeTaxStatus'));
+        Route::post('check-name',array('uses' => 'Admin\TaxController@checkTaxName'));
     });
 
     Route::group(['prefix' => 'quotation'], function(){

@@ -9,7 +9,19 @@ var  CreateProduct = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote:{
+                        url: "/product/check-name",
+                        type: "POST",
+                        data: {
+                            product_name: function() {
+                                return $("#name" ).val();
+                            },
+                            _token: function() {
+                                return $("input[name='_token']").val();
+                            }
+                        }
+                    }
                 },
                 description: {
                     required: true
@@ -17,7 +29,8 @@ var  CreateProduct = function () {
             },
             messages: {
                 name: {
-                    required: "Product name is required."
+                    required: "Product name is required.",
+                    remote: "Product name Already exists."
                 },
                 description: {
                     required: "Description is required."
@@ -64,7 +77,24 @@ var  EditProduct = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote:{
+                        url: "/product/check-name",
+                        type: "POST",
+                        data: {
+                            product_name: function() {
+                                return $("#name" ).val();
+                            },
+                            product_id: function() {
+                                return $("#productId").val();
+                            },
+                            _token: function() {
+                                return $("input[name='_token']").val();
+                            }
+
+
+                        }
+                    }
                 },
                 description: {
                     required: true
@@ -72,7 +102,8 @@ var  EditProduct = function () {
             },
             messages: {
                 name: {
-                    required: "Product name is required."
+                    required: "Product name is required.",
+                    remote: "Product name Already exists."
                 },
                 description: {
                     required: "Description is required."
