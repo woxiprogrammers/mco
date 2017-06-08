@@ -361,4 +361,48 @@ trait ProductTrait{
             abort(500);
         }
     }
+
+    public function autoSuggest(Request $request, $keyword){
+        try{
+            $products = Product::where('name','ilike','%'.$keyword.'%')->select('id','name')->get();
+            if($products == null){
+                $response = array();
+            }else{
+                $response = $products->toArray();
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Product auto suggest',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = array();
+        }
+        return response()->json($response,$status);
+    }
+
+    public function checkProductName(Request $request){
+        try{
+            if($request->has('product_id')){
+                $productCount = Product::where('name','ilike',$request->product_name)->where('id','!=',$request->product_id)->count();
+            }else{
+                $productCount = Product::where('name','ilike',$request->product_name)->count();
+            }
+            if($productCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Product Name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
 }

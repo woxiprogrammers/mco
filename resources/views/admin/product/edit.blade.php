@@ -35,6 +35,7 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
+                                        <input type="hidden" id="productId" value="{{$product['id']}}">
                                         <form role="form" id="edit-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
                                             {!! csrf_field() !!}
                                             <div>
