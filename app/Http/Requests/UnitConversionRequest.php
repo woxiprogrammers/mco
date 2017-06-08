@@ -32,13 +32,6 @@ class UnitConversionRequest extends FormRequest
                     'to_value' => 'required',
                 ];
                 break;
-            case 'GET':
-                return[
-                    'from_unit' => 'required',
-                    'from_value' => 'required',
-                    'to_value' => 'required',
-                ];
-                break;
         }
     }
 }
