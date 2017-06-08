@@ -165,11 +165,11 @@ trait CategoryTrait{
 
     public function checkCategoryName(Request $request){
         try{
-            $categoryName = ucwords($request->name);
+            $categoryName = $request->name;
             if($request->has('category_id')){
-                $nameCount = Category::where('name','=',$categoryName)->where('id','!=',$request->category_id)->count();
+                $nameCount = Category::where('name','ilike',$categoryName)->where('id','!=',$request->category_id)->count();
             }else{
-                $nameCount = Category::where('name','=',$categoryName)->count();
+                $nameCount = Category::where('name','ilike',$categoryName)->count();
             }
             if($nameCount > 0){
                 return 'false';
@@ -185,7 +185,6 @@ trait CategoryTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
-
     }
 
 }

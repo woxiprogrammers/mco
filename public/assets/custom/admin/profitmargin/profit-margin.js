@@ -9,7 +9,19 @@ var  CreateProfitMargin = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/profit-margin/check-name",
+                        type: "POST",
+                        data: {
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 },
                 base_percentage: {
                     required: true
@@ -18,7 +30,8 @@ var  CreateProfitMargin = function () {
 
             messages: {
                 name: {
-                    required: "Name is required."
+                    required: "Name is required.",
+                    remote: "Profit margin already exists."
                 },
                 base_percentage: {
                     required: "Percentage is required."
@@ -71,7 +84,22 @@ var  EditProfitMargin = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/profit-margin/check-name",
+                        type: "POST",
+                        data: {
+                            profit_margin_id: function(){
+                                return $("#profitMarginId").val();
+                            },
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 },
                 base_percentage: {
                     required: true
@@ -80,7 +108,8 @@ var  EditProfitMargin = function () {
 
             messages: {
                 name: {
-                    required: "Name is required."
+                    required: "Name is required.",
+                    remote: "Profit margin already Exists."
                 },
                 base_percentage: {
                     required: "Percentage is required."

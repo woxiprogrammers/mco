@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Http\Requests\UnitConversionRequest;
 use App\Http\Requests\UnitRequest;
+use App\Material;
 use App\MaterialVersion;
 use App\Unit;
 use App\UnitConversion;
@@ -293,11 +294,11 @@ trait UnitsTrait{
 
     public function checkUnitName(Request $request){
         try{
-            $unitName = ucwords($request->name);
+            $unitName = $request->name;
             if($request->has('unit_id')){
-                $nameCount = Unit::where('name','=',$unitName)->where('id','!=',$request->$unit_id)->count();
+                $nameCount = Unit::where('name','ilike',$unitName)->where('id','!=',$request->$unit_id)->count();
             }else{
-                $nameCount = Unit::where('name','=',$unitName)->count();
+                $nameCount = Unit::where('name','ilike',$unitName)->count();
             }
             if($nameCount > 0){
                 return 'false';
@@ -319,25 +320,18 @@ trait UnitsTrait{
     public function convertUnits(Request $request){
         try{
             $data = $request->all();
-            $materialVersion = MaterialVersion::where('id',$data['material_version_id'])->first()->toArray();
-            $conversion = UnitConversion::where('unit_1_id',$materialVersion['unit_id'])->where('unit_2_id',$data['new_unit'])->first();
+            $material = Material::where('id',$data['material_id'])->first()->toArray();
+            $fromUnit = $material['unit_id'];
+            $toUnit = $data['new_unit'];
             $response = array();
-            $status = 200;
-            if($conversion != null){
-                $materialRateFrom = $conversion->unit_2_value / $conversion->unit_1_value;
-                $materialRateTo = $materialVersion['rate_per_unit'] / $materialRateFrom;
+            $conversion = $this->unitConversion($fromUnit,$toUnit,$material['rate_per_unit']);
+            if(is_array($conversion)){
+                $status = 203;
+                $response = $conversion;
             }else{
-                $conversion = UnitConversion::where('unit_2_id',$materialVersion['unit_id'])->where('unit_1_id',$data['new_unit'])->first();
-                if($conversion != null){
-                    $materialRateFrom = $conversion->unit_1_value / $conversion->unit_2_value;
-                    $materialRateTo = $materialVersion['rate_per_unit'] / $materialRateFrom;
-                }else{
-                    $status = 203;
-                    $response['unit'] = $materialVersion['unit_id'];
-                    $materialRateTo = $materialVersion['rate_per_unit'];
-                }
+                $status = 200;
+                $response['rate'] = $conversion;
             }
-            $response['rate'] = $materialRateTo;
         }catch(\Exception $e){
             $status = 500;
             $response = array();
@@ -349,6 +343,24 @@ trait UnitsTrait{
             Log::critical(json_encode($data));
         }
         return response()->json($response,$status);
+    }
+
+    public function unitConversion($fromUnit,$toUnit, $rate){
+        $conversion = UnitConversion::where('unit_1_id',$fromUnit)->where('unit_2_id',$toUnit)->first();
+        if($conversion != null){
+            $materialRateFrom = $conversion->unit_1_value / $conversion->unit_2_value;
+            $materialRateTo = $rate * $materialRateFrom;
+        }else{
+            $conversion = UnitConversion::where('unit_2_id',$fromUnit)->where('unit_1_id',$toUnit)->first();
+            if($conversion != null){
+                $materialRateFrom = $conversion->unit_2_value / $conversion->unit_1_value;
+                $materialRateTo = $rate * $materialRateFrom;
+            }else{
+                $materialRateTo['unit'] = $fromUnit;
+                $materialRateTo['rate'] = $rate;
+            }
+        }
+        return $materialRateTo;
     }
 
 }

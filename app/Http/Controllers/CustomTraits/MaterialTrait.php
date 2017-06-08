@@ -44,15 +44,25 @@ trait MaterialTrait{
 
     public function getEditView(Request $request, $material) {
         try{
-            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $unit = Unit::where('id',$material->unit_id)->select('id','name')->first();
             $materialData['id'] = $material->id;
             $materialData['name'] = $material->name;
-            $materialData['category_id'] = CategoryMaterialRelation::where('material_id',$material['id'])->pluck('category_id')->first();
+            $materialData['categories'] =  CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
+                                            ->where('category_material_relations.material_id', $material->id)
+                                            ->select('category_material_relations.category_id as id','categories.name as name')
+                                            ->get()
+                                            ->toArray();
+            $categoryIds = CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
+                ->where('category_material_relations.material_id', $material->id)
+                ->select('category_material_relations.category_id as id','categories.name as name')
+                ->pluck('id')
+                ->toArray();
+            $materialData['category_id'] = implode(',',$categoryIds);
+            $categories = Category::whereNotIn('id',$categoryIds)->where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             $materialVersion = MaterialVersion::where('material_id',$material->id)->orderBy('created_at','desc')->first();
             $materialData['rate_per_unit'] = $materialVersion->rate_per_unit;
             $materialData['unit'] = $materialVersion->unit_id;
-            return view('admin.material.edit')->with(compact('categories','units','materialData'));
+            return view('admin.material.edit')->with(compact('categories','unit','materialData'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'get Edit material view',
@@ -67,30 +77,27 @@ trait MaterialTrait{
     public function createMaterial(MaterialRequest $request){
         try{
             $now = Carbon::now();
-            $materialData['name'] = ucwords(trim($request->name));
-            $categoryMaterialData['category_id'] = $request->category_id;
-            $materialData['is_active'] = (boolean)0;
-            $materialData['created_at'] = $now;
-            $materialData['updated_at'] = $now;
             if($request->has('material_id')){
-                $material = Material::findOrFail($request->material_id);
-                $categoryId = CategoryMaterialRelation::where('material_id',$material->id)->pluck('category_id')->first();
+                $categoryId = CategoryMaterialRelation::where('material_id',$request->material_id)->pluck('category_id')->first();
                 if($categoryId != $request->category_id){
-                    $categoryMaterialData['material_id'] = $material['id'];
+                    $categoryMaterialData['material_id'] = $request->material_id;
+                    $categoryMaterialData['category_id'] = $request->category_id;
                     $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
                 }
-                $recentMaterialVersion = MaterialVersion::where('material_id',$material->id)->select('material_id','rate_per_unit','unit_id')->first()->toArray();
             }else{
+                $materialData['name'] = ucwords(trim($request->name));
+                $categoryMaterialData['category_id'] = $request->category_id;
+                $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialData['unit_id'] = $request->unit;
+                $materialData['is_active'] = (boolean)0;
+                $materialData['created_at'] = $now;
+                $materialData['updated_at'] = $now;
                 $material = Material::create($materialData);
-                $recentMaterialVersion = null;
                 $categoryMaterialData['material_id'] = $material['id'];
                 $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
-            }
-
-            $materialVersionData['material_id'] = $material->id;
-            $materialVersionData['rate_per_unit'] = $request->rate_per_unit;
-            $materialVersionData['unit_id'] = $request->unit;
-            if(!(is_array($recentMaterialVersion) && $recentMaterialVersion == $materialVersionData)){
+                $materialVersionData['material_id'] = $material->id;
+                $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialVersionData['unit_id'] = $request->unit;
                 $materialVersion = MaterialVersion::create($materialVersionData);
             }
             $request->session()->flash('success','Material created successfully.');
@@ -111,13 +118,15 @@ trait MaterialTrait{
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords(trim($request->name));
-            $materialData['is_active'] = (boolean)0;
+            $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
             $materialData['updated_at'] = $now;
             $material->update($materialData);
-            $categoryMaterial = CategoryMaterialRelation::where('material_id',$material['id'])->update(['category_id' => $request->category_id]);
+            if($request->category_id != null){
+                $categoryMaterial = CategoryMaterialRelation::create(['category_id' => $request->category_id,'material_id'=>$material->id]);
+            }
             $materialVersionData['material_id'] = $material->id;
-            $materialVersionData['rate_per_unit'] = $request->rate_per_unit;
-            $materialVersionData['unit_id'] = (int)$request->unit;
+            $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
+            $materialVersionData['unit_id'] = Unit::where('id',$material->unit_id)->pluck('id')->first();
             $recentMaterialVersion = MaterialVersion::where('material_id',$material->id)->select('material_id','rate_per_unit','unit_id')->orderBy('created_at','desc')->first()->toArray();
             if($recentMaterialVersion != $materialVersionData){
                 $materialVersion = MaterialVersion::create($materialVersionData);
@@ -144,9 +153,7 @@ trait MaterialTrait{
             }
             $iTotalRecords = count($materialData);
             $records = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialData); $iterator++,$pagination++ ){
-                $materialVersion = MaterialVersion::where('material_id',$materialData[$pagination]['id'])->select('rate_per_unit','unit_id')->orderBy('created_at','desc')->first();
-
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($materialData); $iterator++,$pagination++ ){
                 if($materialData[$pagination]['is_active'] == true){
                     $material_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
@@ -156,8 +163,8 @@ trait MaterialTrait{
                 }
                 $records['data'][$iterator] = [
                     $materialData[$pagination]['name'],
-                    $materialVersion->rate_per_unit,
-                    Unit::where('id',$materialVersion->unit_id)->pluck('name')->first(),
+                    round($materialData[$pagination]['rate_per_unit'],3),
+                    Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                     $material_status,
                     date('d M Y',strtotime($materialData[$pagination]['created_at'])),
                     '<div class="btn-group">
@@ -214,11 +221,11 @@ trait MaterialTrait{
 
     public function checkMaterialName(Request $request){
         try{
-            $materialName = ucwords($request->name);
+            $materialName = $request->name;
             if($request->has('material_id')){
-                $nameCount = Material::where('name','=',$materialName)->where('id','!=',$request->material_id)->count();
+                $nameCount = Material::where('name','ilike',$materialName)->where('id','!=',$request->material_id)->count();
             }else{
-                $nameCount = Material::where('name','=',$materialName)->count();
+                $nameCount = Material::where('name','ilike',$materialName)->count();
             }
             if($nameCount > 0){
                 return 'false';
@@ -245,11 +252,8 @@ trait MaterialTrait{
                 $iterator = 0;
                 $materials = $materials->toArray();
                 foreach($materials as $material){
-                    $response[$iterator] = MaterialVersion::join('units','units.id','=','material_versions.unit_id')
-                                    ->where('material_versions.material_id',$material['id'])
-                                    ->orderBy('material_versions.created_at','desc')
-                                    ->select('material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','units.name as unit','material_versions.id as material_version_id')
-                                    ->first()->toArray();
+                    $response[$iterator] = Unit::where('id',$material['unit_id'])->select('id as unit_id','name as unit')->first()->toArray();
+                    $response[$iterator]['rate_per_unit'] = round($material['rate_per_unit'],3);
                     $response[$iterator]['id'] = $material['id'];
                     $response[$iterator]['name'] = $material['name'];
                     $iterator++;
