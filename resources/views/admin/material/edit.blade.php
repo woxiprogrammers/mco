@@ -26,7 +26,11 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/material/manage">Back</a>
+                                    <a href="/material/manage">Manage Material</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Edit Material</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
@@ -34,20 +38,28 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <input type="hidden" id="categoryId" value="{{$materialData['category_id']}}">
-                                        <input type="hidden" id="unitId" value="{{$materialData['unit']}}">
                                         <input type="hidden" id="materialId" value="{{$materialData['id']}}">
                                         <form role="form" id="edit-material" class="form-horizontal" action="/material/edit/{{$materialData['id']}}" method="post">
                                             {!! csrf_field() !!}
+                                            <input name="_method" value="put" type="hidden">
                                             <div class="form-body">
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">Category Name</label>
                                                     <div class="col-md-6 category">
                                                         <select class="form-control" id="category_id" name="category_id">
+                                                            <option value=""> -- Select Category -- </option>
                                                             @foreach($categories as $category)
                                                             <option value="{{$category['id']}}"> {{$category['name']}} </option>
                                                             @endforeach
                                                         </select>
+                                                        <div>
+                                                            @if(isset($materialData['categories']))
+                                                                <label class="col-md-6 control-label">Already Assigned Categories</label>
+                                                                @foreach($materialData['categories'] as $category)
+                                                                    <label class="control-label" style="font-style: italic">{{$category['name']}} ,</label>
+                                                                @endforeach
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
@@ -76,11 +88,7 @@
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">Unit</label>
                                                     <div class="col-md-6 units">
-                                                        <select class="form-control" id="unit" name="unit">
-                                                            @foreach($units as $unit)
-                                                            <option value="{{$unit['id']}}"> {{$unit['name']}} </option>
-                                                            @endforeach
-                                                        </select>
+                                                        <input type="text" class="form-control" name="unit" value="{{$unit['name']}}" readonly>
                                                     </div>
                                                 </div>
                                             </div>
@@ -106,10 +114,6 @@
 <script>
     $(document).ready(function() {
         EditMaterial.init();
-        var category = $('#categoryId').val();
-        var unit = $('#unitId').val();
-        $(".category option[value='"+ category +"']").prop('selected', true);
-        $(".units option[value='"+ unit +"']").prop('selected', true);
         $("#name").rules('add',{
             remote: {
                 url: "/material/check-name",
