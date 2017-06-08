@@ -24,20 +24,11 @@ class ClientRequest extends FormRequest
     public function rules()
     {
         switch($this->method()){
-            case 'GET':
-                return [
-                    'company' => 'required',
-                    'address' => 'required',
-                    'email' => 'required|chk_email',
-                    'mobile' => 'required',
-                ];
-            break;
-
             case 'POST' :
                 return [
                     'company' => 'required',
                     'address' => 'required',
-                    'email' => 'required|chk_email',
+                    'email' => 'required|email',
                     'mobile' => 'required',
                 ];
             break;
