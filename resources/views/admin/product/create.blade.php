@@ -48,7 +48,7 @@
                                                         <div class="form-group">
                                                             <label class="col-md-3 control-label">Product Title</label>
                                                             <div class="col-md-6">
-                                                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter Product Name">
+                                                                <input type="text" id="name" name="name" class="form-control typeahead" placeholder="Enter Product Name">
                                                             </div>
                                                         </div>
                                                         <div class="form-group">
@@ -62,7 +62,7 @@
                                                             <div class="col-md-6">
                                                                 <select class="form-control" id="unit_id" name="unit_id">
                                                                     @foreach($units as $unit)
-                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -72,7 +72,7 @@
                                                             <div class="col-md-6">
                                                                 <select class="form-control" id="category_name" name="category_id">
                                                                     @foreach($categories as $category)
-                                                                    <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                                                        <option value="{{$category['id']}}">{{$category['name']}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -174,9 +174,48 @@
 @section('javascript')
 <script src="/assets/custom/admin/product/product.js"></script>
 <script src="/assets/custom/admin/product/validations.js"></script>
+<script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+<script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
     $(document).ready(function(){
         CreateProduct.init();
+        var citiList = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                url: "/product/auto-suggest/%QUERY",
+                filter: function(x) {
+                    if($(window).width()<420){
+                        $("#header").addClass("fixed");
+                    }
+                    return $.map(x, function (data) {
+                        return {
+                            id:data.id,
+                            name:data.name,
+                        };
+                    });
+                },
+                wildcard: "%QUERY"
+            }
+        });
+        citiList.initialize();
+        $('.typeahead').typeahead(null, {
+            displayKey: 'name',
+            engine: Handlebars,
+            source: citiList.ttAdapter(),
+            limit: 30,
+            templates: {
+                empty: [
+                    '<div class="empty-suggest">',
+                    '</div>'
+                ].join('\n'),
+                suggestion: Handlebars.compile('<div><strong>@{{name}}</strong></div>')
+            },
+        }).on('typeahead:selected', function (obj, datum) {
+
+            }).on('typeahead:open', function (obj, datum) {
+
+                });
     });
 </script>
 @endsection

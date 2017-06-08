@@ -217,11 +217,11 @@ trait MaterialTrait{
 
     public function checkMaterialName(Request $request){
         try{
-            $materialName = ucwords($request->name);
+            $materialName = $request->name;
             if($request->has('material_id')){
-                $nameCount = Material::where('name','=',$materialName)->where('id','!=',$request->material_id)->count();
+                $nameCount = Material::where('name','ilike',$materialName)->where('id','!=',$request->material_id)->count();
             }else{
-                $nameCount = Material::where('name','=',$materialName)->count();
+                $nameCount = Material::where('name','ilike',$materialName)->count();
             }
             if($nameCount > 0){
                 return 'false';

@@ -32,6 +32,7 @@
                                 <div class="portlet light ">
 
                                     <div class="portlet-body form">
+                                        <input type="hidden" value="{{$tax['id']}}" id="taxId">
                                         <form role="form" id="edit-tax" class="form-horizontal" method="post" action="/tax/edit/{{$tax['id']}}">
                                             {!! csrf_field() !!}
                                             <div class="form-body">

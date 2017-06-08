@@ -278,11 +278,11 @@ trait UnitsTrait{
 
     public function checkUnitName(Request $request){
         try{
-            $unitName = ucwords($request->name);
+            $unitName = $request->name;
             if($request->has('unit_id')){
-                $nameCount = Unit::where('name','=',$unitName)->where('id','!=',$request->$unit_id)->count();
+                $nameCount = Unit::where('name','ilike',$unitName)->where('id','!=',$request->$unit_id)->count();
             }else{
-                $nameCount = Unit::where('name','=',$unitName)->count();
+                $nameCount = Unit::where('name','ilike',$unitName)->count();
             }
             if($nameCount > 0){
                 return 'false';

@@ -156,4 +156,30 @@
             }
         }
 
+        public function checkTaxName(Request $request){
+            try{
+                $taxName = $request->name;
+                if($request->has('tax_id')){
+                    $nameCount = Tax::where('name','ilike',$taxName)->where('id','!=',$request->tax_id)->count();
+                }else{
+                    $nameCount = Tax::where('name','ilike',$taxName)->count();
+                }
+                Log::info($nameCount);
+                if($nameCount > 0){
+                    return 'false';
+                }else{
+                    return 'true';
+                }
+            }catch(\Exception $e){
+                $data = [
+                    'action' => 'Check Material name',
+                    'param' => $request->all(),
+                    'exception' => $e->getMessage()
+                ];
+                Log::critical(json_encode($data));
+                abort(500);
+            }
+
+        }
+
     }

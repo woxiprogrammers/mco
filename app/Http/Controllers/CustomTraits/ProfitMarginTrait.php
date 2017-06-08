@@ -159,4 +159,29 @@ trait ProfitMarginTrait{
         }
     }
 
+    public function checkProfitMarginName(Request $request){
+        try{
+            $profitMarginName = $request->name;
+            if($request->has('profit_margin_id')){
+                $nameCount = ProfitMargin::where('name','ilike',$profitMarginName)->where('id','!=',$request->profit_margin_id)->count();
+            }else{
+                $nameCount = ProfitMargin::where('name','ilike',$profitMarginName)->count();
+            }
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Material name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+    }
+
 }
