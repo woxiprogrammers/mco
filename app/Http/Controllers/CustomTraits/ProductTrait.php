@@ -123,14 +123,13 @@ trait ProductTrait{
     public function getMaterialsDetails(Request $request){
         try{
             $materialIds = $request->material_ids;
-            $materials = Material::whereIn('id',$materialIds)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $materials = Material::whereIn('id',$materialIds)->select('id','name','rate_per_unit','unit_id')->orderBy('name','asc')->get()->toArray();
             $materialData = array();
             $iterator = 0;
             $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             foreach($materials as $material){
                 $materialData[$iterator]['material'] = $material;
-                $materialData[$iterator]['material_version'] = MaterialVersion::where('material_id',$material['id'])->orderBy('created_at','desc')->first()->toArray();
-                $materialData[$iterator]['unit'] = Unit::where('id',$materialData[$iterator]['material_version']['unit_id'])->select('id','name')->first()->toArray();
+                $materialData[$iterator]['unit'] = Unit::where('id',$materialData[$iterator]['material']['unit_id'])->select('id','name')->first()->toArray();
                 $iterator++;
             }
             return view('partials.product.material-listing')->with(compact('materialData','units'));
@@ -145,6 +144,7 @@ trait ProductTrait{
         }
     }
 
+    use UnitsTrait;
     public function createProduct(Request $request){
         try{
             $data = $request->all();
@@ -157,8 +157,17 @@ trait ProductTrait{
             $productMaterialProfitMarginData = array();
             $iterator = 0;
             $subTotal = 0;
-            foreach($data['material_version'] as $key => $materialVersion){
-                $recentVersion = MaterialVersion::where('id',$key)->select('rate_per_unit','unit_id')->first();
+            foreach($data['material'] as $key => $materialVersion){
+                $material = Material::findOrFail($key);
+                $fromUnit = $materialVersion['unit_id'];
+                $toUnit = $material->unit_id;
+                if($fromUnit != $toUnit){
+                    $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
+                    Material::where('id',$key)->update(['rate_per_unit' => $conversionRate]);
+                }else{
+                    Material::where('id',$key)->update(['rate_per_unit' => $materialVersion['rate_per_unit']]);
+                }
+                $recentVersion = MaterialVersion::where('material_id',$key)->orderBy('created_at','desc')->select('rate_per_unit','unit_id')->first();
                 $subTotal += $materialVersion['rate_per_unit']*$data['material_quantity'][$key];
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
@@ -188,7 +197,7 @@ trait ProductTrait{
             }
             $productVersionData = array();
             $productVersionData['product_id'] = $product->id;
-            $productVersionData['rate_per_unit'] = $subTotal + $taxAmount;
+            $productVersionData['rate_per_unit'] = round(($subTotal + $taxAmount),3);
             $productVersion = ProductVersion::create($productVersionData);
             foreach($productMaterialProfitMarginData as $versions){
                 if(array_key_exists('material_version_id',$versions) && array_key_exists('material_quantity',$versions)){
@@ -290,6 +299,7 @@ trait ProductTrait{
         }
     }
 
+    use UnitsTrait;
     public function editProduct(Request $request, $product){
         try{
             $data = $request->all();
@@ -313,6 +323,15 @@ trait ProductTrait{
                     $productMaterialProfitMarginData[$iterator]['material_version_id'] = $key;
                 }
                 $iterator++;
+                $material = Material::findOrFail(MaterialVersion::where('id',$key)->pluck('material_id')->first());
+                $fromUnit = $materialVersion['unit_id'];
+                $toUnit = $material->unit_id;
+                if($fromUnit != $toUnit){
+                    $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
+                    Material::where('id',$key)->update(['rate_per_unit' => $conversionRate]);
+                }else{
+                    Material::where('id',$key)->update(['rate_per_unit' => $materialVersion['rate_per_unit']]);
+                }
             }
             $iterator = 0;
             $taxAmount = 0;
@@ -332,7 +351,7 @@ trait ProductTrait{
             }
             $productVersionData = array();
             $productVersionData['product_id'] = $product->id;
-            $productVersionData['rate_per_unit'] = $subTotal + $taxAmount;
+            $productVersionData['rate_per_unit'] = round(($subTotal + $taxAmount),3);
             $productVersion = ProductVersion::create($productVersionData);
             foreach($productMaterialProfitMarginData as $versions){
                 if(array_key_exists('material_version_id',$versions) && array_key_exists('material_quantity',$versions)){

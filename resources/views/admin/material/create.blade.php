@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Category')
+@section('title','Constro | Create Material')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -138,14 +138,17 @@
                             'Unable to find any Result that match the current query',
                             '</div>'
                         ].join('\n'),
-                        suggestion: Handlebars.compile('<div><strong>@{{name}}</strong></div>')
+                        suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
                     },
             }).on('typeahead:selected', function (obj, datum) {
                 var POData = $.parseJSON(JSON.stringify(datum));
                 POData.name = POData.name.replace(/\&/g,'%26');
                 $("#rate_per_unit").val(POData.rate_per_unit);
+                $("#rate_per_unit").prop('disabled', true);
                 $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
+                $("#unit").prop('disabled', true);
                 $("#name").val(POData.name);
+                $("#name").prop('disabled', true);
                 $("#create-material .form-body").append($("<input>", {'id': "material_id",
                     'type': 'hidden',
                     'value': POData.id,
@@ -160,6 +163,9 @@
                 $('#name').removeClass('typeahead');
                 $("#create-material input[name='material_id']").remove();
                 $('#name').typeahead('destroy');
+                $("#rate_per_unit").prop('disabled', false);
+                $("#name").prop('disabled', false);
+                $("#unit").prop('disabled', false);
                 $("#name").rules('add',{
                     remote: {
                         url: "/material/check-name",
