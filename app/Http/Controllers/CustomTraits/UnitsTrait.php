@@ -105,7 +105,11 @@ trait UnitsTrait{
 
     public function unitsListing(Request $request){
         try{
-            $unitData = Unit::orderBy('id','asc')->get()->toArray();
+            if($request->has('search_name')){
+                $unitData = Unit::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+            }else{
+                $unitData = Unit::orderBy('id','asc')->get()->toArray();
+            }
             $iTotalRecords = count($unitData);
             $records = array();
             for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($unitData) ; $iterator++ , $pagination++){
@@ -194,7 +198,19 @@ trait UnitsTrait{
 
     public function unitConversionsListing(Request $request){
         try{
-            $conversions = UnitConversion::orderBy('id','asc')->get();
+            if($request->has('search_unit_1_name') && $request->search_unit_1_name != '' && $request->has('search_unit_2_name') && $request->search_unit_2_name != ''){
+                $unit1 = Unit::where('name','ilike','%'.$request->search_unit_1_name.'%')->pluck('id');
+                $unit2 = Unit::where('name','ilike','%'.$request->search_unit_2_name.'%')->pluck('id');
+                $conversions = UnitConversion::whereIn('unit_1_id',$unit1)->whereIn('unit_2_id',$unit2)->orderBy('id','asc')->get();
+            }elseif($request->has('search_unit_1_name') && $request->search_unit_1_name != ''){
+                $unit1 = Unit::where('name','ilike','%'.$request->search_unit_1_name.'%')->pluck('id');
+                $conversions = UnitConversion::whereIn('unit_1_id',$unit1)->orderBy('id','asc')->get();
+            }elseif($request->has('search_unit_2_name') && $request->search_unit_2_name != ''){
+                $unit2 = Unit::where('name','ilike','%'.$request->search_unit_2_name.'%')->pluck('id');
+                $conversions = UnitConversion::whereIn('unit_2_id',$unit2)->orderBy('id','asc')->get();
+            }else{
+                $conversions = UnitConversion::orderBy('id','asc')->get();
+            }
             $iTotalRecords = count($conversions);
             $records = array();
             for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($conversions) ; $iterator++ , $pagination++){

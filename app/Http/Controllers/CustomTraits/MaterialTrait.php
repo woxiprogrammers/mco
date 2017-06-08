@@ -137,7 +137,11 @@ trait MaterialTrait{
 
     public function materialListing(Request $request){
         try{
-            $materialData = Material::orderBy('id','asc')->get()->toArray();
+            if($request->has('search_name')){
+                $materialData = Material::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+            }else{
+                $materialData = Material::orderBy('id','asc')->get()->toArray();
+            }
             $iTotalRecords = count($materialData);
             $records = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialData); $iterator++,$pagination++ ){

@@ -50,6 +50,16 @@
                                                     <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
+                                                <tr>
+                                                    <th style="width:30%"> <input class="form-control form-filter" name="search_name" type="text"> </th>
+                                                    <th> <input class="form-control form-filter" name="search_percentage" type="text" readonly> </th>
+                                                    <th> <input class="form-control form-filter" name="search_status" type="text" readonly> </th>
+                                                    <th> <input class="form-control form-filter" name="search_created" type="text" readonly> </th>
+                                                    <th>
+                                                        <button class="btn-primary filter-submit"> Search  </button> <br>
+                                                        <button class="btn-defualt filter-cancel"> Reset  </button>
+                                                    </th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
 

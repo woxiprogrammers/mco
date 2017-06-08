@@ -51,6 +51,15 @@
                                                     <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
+                                                <tr class="filter">
+                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                    <th>
+                                                        <button class="btn-primary filter-submit"> Search </button>
+                                                        <button class="btn-default filter-cancel"> Reset </button>
+                                                    </th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
 

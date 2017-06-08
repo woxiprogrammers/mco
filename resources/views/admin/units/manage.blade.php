@@ -57,6 +57,15 @@
                                                     <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
+                                                <tr>
+                                                    <th style="width:30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on"> </th>
+                                                    <th>
+                                                        <button class="btn-primary filter-submit"> Search  </button> <br>
+                                                        <button class="btn-defualt filter-cancel"> Reset  </button>
+                                                    </th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
 
@@ -98,6 +107,16 @@
                                                     <th style="width:30%"> Unit </th>
                                                     <th> Value </th>
                                                     <th> Action </th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="width:30%"> <input type="text" class="form-control form-filter" name="search_unit_1_name"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_unit_1_value" readonly> </th>
+                                                    <th style="width:30%"> <input type="text" class="form-control form-filter" name="search_unit_2_name"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_unit_2_value" readonly> </th>
+                                                    <th>
+                                                        <button class="btn-primary filter-submit"> Search  </button> <br>
+                                                        <button class="btn-defualt filter-cancel"> Reset  </button>
+                                                    </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
