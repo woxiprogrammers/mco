@@ -9,7 +9,19 @@ var  CreateTax = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/tax/check-name",
+                        type: "POST",
+                        data: {
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 },
                 base_percentage: {
                     required: true
@@ -18,7 +30,8 @@ var  CreateTax = function () {
 
             messages: {
                 name: {
-                    required: "Tax name is required."
+                    required: "Tax name is required.",
+                    remote: "Tax already exists."
                 },
                 base_percentage: {
                     required: "Percentage is required."
@@ -71,7 +84,22 @@ var  EditTax = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    remote: {
+                        url: "/tax/check-name",
+                        type: "POST",
+                        data: {
+                            tax_id: function(){
+                                return $("#taxId").val();
+                            },
+                            _token: function(){
+                                return $("input[name='_token']").val();
+                            },
+                            name: function() {
+                                return $( "#name" ).val();
+                            }
+                        }
+                    }
                 },
                 base_percentage: {
                     required: true
@@ -80,7 +108,8 @@ var  EditTax = function () {
 
             messages: {
                 name: {
-                    required: "Tax name is required."
+                    required: "Tax name is required.",
+                    remote: "Tax already exists."
                 },
                 base_percentage: {
                     required: "Percentage is required."
