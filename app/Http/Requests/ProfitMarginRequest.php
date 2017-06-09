@@ -30,12 +30,7 @@ class ProfitMarginRequest extends FormRequest
                     'base_percentage' => 'required',
                 ];
                 break;
-            case 'GET':
-                return[
-                    'name' => 'required',
-                    'base_percentage' => 'required',
-                ];
-                break;
+
         }
     }
 }
