@@ -95,7 +95,7 @@ trait QuotationTrait{
 
     public function addProductRow(Request $request){
         try{
-            $rowIndex = $request->row_count;
+            $rowIndex = $request->row_count + 1;
             $categories = Category::where('is_active', true)->select('id','name')->get()->toArray();
             return view('partials.quotation.product-table-listing')->with(compact('categories','rowIndex'));
         }catch (\Exception $e){
