@@ -8,7 +8,10 @@
 namespace App\Http\Controllers\CustomTraits;
 
 use App\Category;
+use App\Material;
 use App\Product;
+use App\ProductMaterialRelation;
+use App\ProductVersion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -106,6 +109,43 @@ trait QuotationTrait{
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getMaterials(Request $request){
+        try{
+            dd($request->params);
+            $productIds = $request->product_ids;
+            $materialIds = array();
+            $materials = array();
+            $data = array();
+            foreach($productIds as $id){
+                $recentVersionId = ProductVersion::where('product_id',$id)->pluck('id')->first();
+                $materialId = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
+                                ->join('materials','materials.id','=','material_versions.material_id')
+                                ->where('product_material_relation.product_version_id',$recentVersionId)
+                                ->pluck('material_versions.material_id')
+                                ->toArray();
+                if(!(in_array($materialId,$materialIds))){
+                    $materialIds[] = $materialId;
+                    $materials = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
+                        ->join('materials','materials.id','=','material_versions.material_id')
+                        ->join('units','units.id','=','material_versions.unit_id')
+                        ->where('product_material_relation.product_version_id',$recentVersionId)
+                        ->select('material_versions.id as material_version_id','materials.id as material_id','materials.name as material_name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','units.name as unit')
+                        ->get()
+                        ->toArray();
+                }
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add Product Row',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = array();
         }
     }
 }

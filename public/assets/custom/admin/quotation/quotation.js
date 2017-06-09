@@ -31,10 +31,35 @@ $(document).ready(function(){
         $("#MaterialsTab").addClass('active');
         var productIds = [];
         $(".quotation-product").each(function(){
-            productIds.push($(this.val()));
+            productIds.push($(this).val());
         });
+        var formFields = $('#QuotationGeneralForm').serializeArray();
+        console.log(formFields);
+        $.ajax({
+            url: '/quotation/get-materials',
+            async: false,
+            type: "POST",
+            data:{
+                //_token: $("input[name='_token']").val(),
+                params: formFields
+            },
+            success: function(data, textStatus, xhr){
 
+            },
+            error: function(errorStatus, data){
 
+            }
+        });
+    });
+
+    $("#back1").on('click', function(e){
+        e.stopPropagation();
+        $("#MaterialsTab").removeClass('active');
+        $("#GeneralTab").addClass('active');
+        /*var productIds = [];
+        $(".quotation-product").each(function(){
+            productIds.push($(this.val()));
+        });*/
     });
 
 });

@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 class QuotationController extends Controller
 {
     public function __construct(){
-        $this->middleware('custom.auth');
+        $this->middleware('custom.auth')->except('getMaterials');
     }
 
     use QuotationTrait;

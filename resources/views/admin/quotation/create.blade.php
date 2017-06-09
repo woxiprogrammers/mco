@@ -47,10 +47,10 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
                                         <input type="hidden" id="productRowCount" value="1">
-                                        <form role="form" id="create-product" class="form-horizontal">
-                                            {!! csrf_field() !!}
-                                            <div class="tab-content">
-                                                <div class="tab-pane fade in active" id="GeneralTab">
+                                        {!! csrf_field() !!}
+                                        <div class="tab-content">
+                                            <div class="tab-pane fade in" id="GeneralTab">
+                                                <form role="form" id="QuotationGeneralForm" class="form-horizontal">
                                                     <fieldset>
                                                         <legend>Project</legend>
                                                         <div class="form-group">
@@ -164,12 +164,33 @@
                                                             </a>
                                                         </div>
                                                     </fieldset>
-                                                </div>
-                                                <div class="tab-pane fade in" id="MaterialsTab">
-                                                    Something Something meri jaan . !!!!!
-                                                </div>
+                                                </form>
                                             </div>
-                                        </form>
+                                            <div class="tab-pane fade in active" id="MaterialsTab">
+                                                <fieldset>
+                                                    <legend> Materials </legend>
+                                                    <table class="table table-bordered" id="quotationMaterialTable">
+                                                        <tr>
+                                                            <th>
+                                                                Material Name
+                                                            </th>
+                                                            <th>
+                                                                Rate per Unit
+                                                            </th>
+                                                            <th>
+                                                                Unit
+                                                            </th>
+                                                        </tr>
+                                                    </table>
+                                                    <div class="col-md-2 col-md-offset-2">
+                                                        <a class="btn btn-primary" id="back1">
+                                                            Back
+                                                        </a>
+                                                    </div>
+                                                </fieldset>
+
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
