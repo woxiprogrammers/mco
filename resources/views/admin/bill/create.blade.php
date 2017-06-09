@@ -39,7 +39,7 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
                                         <ul class="nav nav-tabs">
-                                            @foreach($categories as $category)
+                                            @foreach($category_products as $key => $category)
                                             <li>
                                                 <a href="#tab_category_{{$category['id']}}" data-toggle="tab" id="tab_price_a"> {{$category['name']}} </a>
                                             </li>
@@ -134,15 +134,14 @@
 @section('javascript')
 <script src="/assets/custom/admin/category/category.js" type="application/javascript"></script>
 <script>
-    $(document).ready(function() {
+    /*$(document).ready(function() {
         console.log('here');
-        console.log($('#company').val());
         //getProjects($('#company').val());
 
     function getProjects(client_id){
         $.ajax({
-            url: '/bill/get-projects/'+client_id,
-            type: 'GET',
+            url: ,
+            type: ,
             async : false,
             success: function(data,textStatus,xhr){
                 if(xhr.status == 200){
@@ -156,6 +155,6 @@
             }
         });
     }
-    });
+    });*/
 </script>
 @endsection
