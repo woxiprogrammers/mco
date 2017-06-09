@@ -25,9 +25,6 @@ var ProfitMarginListing = function () {
                 "pageLength": 10, // default record count per page
                 "ajax": {
                     "url": "/profit-margin/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
                 },
                 "order": [
                     [1, "asc"]

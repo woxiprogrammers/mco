@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Product')
+@section('title','Constro | Manage Product')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -52,6 +52,17 @@
                                                     <th> Unit </th>
                                                     <th> Status </th>
                                                     <th> Actions </th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="width: 25%"> <input class="form-control form-filter" name="search_product_name"></th>
+                                                    <th style="width: 25%"> <input class="form-control form-filter" name="search_category_name" readonly> </th>
+                                                    <th> <input class="form-control form-filter" name="search_total" readonly> </th>
+                                                    <th> <input class="form-control form-filter" name="search_unit" readonly> </th>
+                                                    <th> <input class="form-control form-filter" name="search_status" readonly> </th>
+                                                    <th>
+                                                        <button class="btn-primary btn-sm filter-submit"> Search </button> <br>
+                                                        <button class="btn-default filter-cancel"> Reset </button>
+                                                    </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>

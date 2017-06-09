@@ -20,9 +20,6 @@ var MaterialListing = function () {
                 "pageLength": 10,
                 "ajax": {
                     "url": "/material/listing",
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
                 },
                 "order": [
                     [1, "asc"]

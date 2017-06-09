@@ -29,11 +29,6 @@ class CategoryRequest extends FormRequest
                     'name' => 'required',
                 ];
                 break;
-            case 'GET':
-                return[
-                    'name' => 'required',
-                ];
-                break;
         }
     }
 }

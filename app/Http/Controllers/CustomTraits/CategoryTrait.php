@@ -91,7 +91,11 @@ trait CategoryTrait{
 
     public function categoryListing(Request $request){
         try{
-            $categoriesData = Category::orderBy('id','asc')->get()->toArray();
+            if($request->has('search_name')){
+                $categoriesData = Category::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+            }else{
+                $categoriesData = Category::orderBy('id','asc')->get()->toArray();
+            }
             $iTotalRecords = count($categoriesData);
             $records = array();
             $iterator = 0;
@@ -161,11 +165,11 @@ trait CategoryTrait{
 
     public function checkCategoryName(Request $request){
         try{
-            $categoryName = ucwords($request->name);
+            $categoryName = $request->name;
             if($request->has('category_id')){
-                $nameCount = Category::where('name','=',$categoryName)->where('id','!=',$request->category_id)->count();
+                $nameCount = Category::where('name','ilike',$categoryName)->where('id','!=',$request->category_id)->count();
             }else{
-                $nameCount = Category::where('name','=',$categoryName)->count();
+                $nameCount = Category::where('name','ilike',$categoryName)->count();
             }
             if($nameCount > 0){
                 return 'false';
@@ -181,7 +185,6 @@ trait CategoryTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
-
     }
 
 }

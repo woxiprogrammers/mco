@@ -25,9 +25,6 @@ var TaxListing = function () {
                 "pageLength": 10, // default record count per page
                 "ajax": {
                     "url": "/tax/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
                 },
                 "order": [
                     [1, "asc"]

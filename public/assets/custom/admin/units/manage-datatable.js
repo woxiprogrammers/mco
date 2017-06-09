@@ -25,9 +25,6 @@ var UnitsListing = function () {
                 "pageLength": 10, // default record count per page
                 "ajax": {
                     "url": "/units/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
                 },
                 "order": [
                     [1, "asc"]
@@ -104,9 +101,6 @@ var UnitConversionListing = function () {
                 "pageLength": 10, // default record count per page
                 "ajax": {
                     "url": "/units/conversion/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
                 },
                 "order": [
                     [1, "asc"]
