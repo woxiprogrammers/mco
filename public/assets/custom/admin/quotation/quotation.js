@@ -27,24 +27,22 @@ $(document).ready(function(){
 
     $("#next1").on('click', function(e){
         e.stopPropagation();
-        $("#GeneralTab").removeClass('active');
-        $("#MaterialsTab").addClass('active');
         var productIds = [];
         $(".quotation-product").each(function(){
             productIds.push($(this).val());
         });
-        var formFields = $('#QuotationGeneralForm').serializeArray();
-        console.log(formFields);
         $.ajax({
             url: '/quotation/get-materials',
             async: false,
             type: "POST",
             data:{
                 //_token: $("input[name='_token']").val(),
-                params: formFields
+                product_ids: productIds
             },
             success: function(data, textStatus, xhr){
-
+                $("#GeneralTab").removeClass('active');
+                $("#MaterialsTab").addClass('active');
+                $("#MaterialsTab").html(data);
             },
             error: function(errorStatus, data){
 
@@ -56,10 +54,6 @@ $(document).ready(function(){
         e.stopPropagation();
         $("#MaterialsTab").removeClass('active');
         $("#GeneralTab").addClass('active');
-        /*var productIds = [];
-        $(".quotation-product").each(function(){
-            productIds.push($(this.val()));
-        });*/
     });
 
 });
@@ -124,10 +118,7 @@ function calculateAmount(row){
 }
 
 function replaceEditor(row){
-    var editor = $("#ckeditor"+row);
-    var temp = CKEDITOR.instances["ckeditor"+row];
     if(CKEDITOR.instances["ckeditor"+row]){
-        console.log('in if');
         var description = CKEDITOR.instances["ckeditor"+row].getData();
         $("#productDescription"+row).val(description);
         CKEDITOR.instances["ckeditor"+row].destroy();
@@ -138,15 +129,31 @@ function replaceEditor(row){
         CKEDITOR.replace('ckeditor'+row,{
             extraPlugins:"imageuploader"
         });
-        console.log('in else')
     }
-/*    if (typeof editor  !== "undefined"){
+}
 
-    }else{
-        var description = $("#productDescription"+row).val();
-        $( "<tr><td colspan='8'><textarea id='ckeditor"+row+"'>"+description+"</textarea></td></tr>" ).insertAfter("#Row"+row);
-        CKEDITOR.replace('ckeditor'+row);
-    }*/
+function showProfitMargins(){
+    var productIds = [];
+    $(".quotation-product").each(function(){
+        productIds.push($(this).val());
+    });
+    $.ajax({
+        url: '/quotation/get-profit-margins',
+        async: false,
+        type: "POST",
+        data:{
+            //_token: $("input[name='_token']").val(),
+            product_ids: productIds
+        },
+        success: function(data, textStatus, xhr){
+            $("#GeneralTab").removeClass('active');
+            $("#MaterialsTab").removeClass('active');
+            $("#ProfitMarginsTab").addClass('active');
+            $("#ProfitMarginsTab").html(data);
+        },
+        error: function(errorStatus, data){
 
+        }
+    });
 }
 
