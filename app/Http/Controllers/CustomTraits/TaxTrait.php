@@ -168,7 +168,6 @@
                 }else{
                     $nameCount = Tax::where('name','ilike',$taxName)->count();
                 }
-                Log::info($nameCount);
                 if($nameCount > 0){
                     return 'false';
                 }else{

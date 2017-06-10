@@ -1,15 +1,16 @@
 <?php
 
 namespace App\Http\Controllers\CustomTraits;
+use App\Bill;
 use App\Category;
 use App\Client;
-use App\Http\Requests\CategoryRequest;
 use App\Product;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
 use App\QuotationProduct;
 use App\Tax;
+use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -17,10 +18,19 @@ trait BillTrait{
 
     public function getCreateView(Request $request,$project_site){
         try{
-            return view('admin.bill.create1')->with(compact('project_site'));
+            $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
+            $bills = Bill::where('quotation_id',$quotation['id'])->get()->toArray();
+            $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
+            for($i=0 ; $i < count($quotationProducts) ; $i++){
+                $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
+                $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
+                $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
+            }
+            $taxes = Tax::where('is_active',true)->get()->toArray();
+            return view('admin.bill.create')->with(compact('bills','project_site','quotationProducts','taxes'));
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get bill create view',
+                'action' => 'Get existing bill create view',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -29,38 +39,62 @@ trait BillTrait{
         }
     }
 
-    public function billProductListing(Request $request){
+    public function getCreateNewBillView(Request $request){
         try{
-            Log::info('inside listing');
-            $records = array();
-            $category_products = array();
-            $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
-            $quotationProductIds = QuotationProduct::where('quotation_id',$quotation['id'])->pluck('product_id')->toArray();
-            $productData = Product::whereIn('id',$quotationProductIds)->get()->toArray();
-            $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
-            for($i = 0; $i < count($productData); $i++){
-                $k = 0;
-                for($j = 0 ; $j < count($quotationProducts); $j++){
-                    if($productData[$i]['id'] == $quotationProducts[$j]['product_id']){
-                        $category_products[$i] = Category::where('id',$productData[$i]['category_id'])->first()->toArray();
-                        $category_products[$i]['product'] = $quotationProducts[$j];
-                        $k++;
-                    }
-                }
-            }
-            $taxes = Tax::where('is_active',true)->get()->toArray();
+            $clients = Client::where('is_active',true)->orderBy('id','asc')->get()->toArray();
+            return view('admin.bill.create-new')->with(compact('clients'));
         }catch (\Exception $e){
-            $records = array();
             $data = [
-                'action' => 'Bill Product listing',
+                'action' => 'Get new bill create view',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
-        return response()->json($records,200);
+    }
 
+    public function getProjects(Request $request,$client){
+        try{
+            $status = 200;
+            $projects = Project::where('client_id',$client['id'])->get()->toArray();
+            $projectOptions = array();
+            for($i = 0 ; $i < count($projects); $i++){
+                $projectOptions[] = '<option value="'.$projects[$i]['id'].'"> '.$projects[$i]['name'].' </option>';
+            }
+        }catch (\Exception $e){
+            $projectOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Create New Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectOptions,$status);
+    }
+    public function getProjectSites(Request $request,$project){
+        try{
+            $status = 200;
+            $projectSites = ProjectSite::where('project_id',$project['id'])->get()->toArray();
+            $projectSitesOptions = array();
+            for($i = 0 ; $i < count($projectSites); $i++){
+                $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';
+            }
+        }catch (\Exception $e){
+            $projectSitesOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Create New Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectSitesOptions,$status);
     }
 
     public function getManageView(Request $request){
@@ -131,7 +165,6 @@ trait BillTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
-
         return response()->json($records,200);
     }
 
