@@ -40,13 +40,15 @@
                                 <div class="portlet light ">
                                         <div class="portlet-body flip-scroll">
                                             @if($bills != NULL)
-                                                <div class="col-md-offset-9 table-actions-wrapper">
-                                                    <label class="control-label col-md-5">Select Bill</label>
+                                                <div class="col-md-offset-7 table-actions-wrapper" style="margin-bottom: 20px">
+                                                    <label class="control-label">Select Bill</label>
                                                     <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                         @for($i = 0 ; $i < count($bills); $i++)
                                                             <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                         @endfor
                                                     </select>
+                                                    <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
+
                                                 </div>
                                             @endif
                                            <input type="hidden" id="project_id" name="project_id" value="{{$project_site['id']}}">
@@ -72,7 +74,7 @@
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                     <tr>
                                                         <td>
-                                                            <input type="checkbox" name="id_{{$quotationProducts[$iterator]['id']}}" value="{{$quotationProducts[$iterator]['id']}}" onclick="selectedProducts({{$quotationProducts[$iterator]['id']}})">
+                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="id_{{$quotationProducts[$iterator]['id']}}" value="{{$quotationProducts[$iterator]['id']}}" onclick="selectedProducts({{$quotationProducts[$iterator]['id']}})">
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['id']}}</span>
@@ -173,7 +175,7 @@
 
                                             </table>
                                             <div class="form-group">
-                                                <div class="col-md-3 col-md-offset-4">
+                                                <div class="col-md-offset-11">
                                                     <button type="submit" class="btn btn-success"> Submit </button>
                                                 </div>
                                             </div>
@@ -229,8 +231,8 @@
         var total_previous_bill_amount = 0;
         var total_current_bill_amount = 0;
         var total_cumulative_bill_amount = 0;
-        var product_length = $('input:checked').length;
-        if(product_length > 0){
+        var selected_product_length = $('input:checked').length;
+        if(selected_product_length > 0){
             $('input:checked').each(function(){
                 var id = $(this).val();
 
@@ -248,6 +250,16 @@
             });
         }
     }
+
+    $(document).ready(function (){
+        $('input[type="checkbox"]').click(function(){
+            if($(this).prop("checked") == false){
+                var id = $(this).val();
+                $('#current_quantity_'+id).prop('disabled',true);
+                getcal(0,id);
+            }
+        });
+    });
 
 </script>
 @endsection
