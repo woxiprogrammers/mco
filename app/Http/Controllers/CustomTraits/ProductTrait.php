@@ -10,6 +10,7 @@ use App\ProductVersion;
 use App\ProfitMargin;
 use App\ProfitMarginVersion;
 use App\Unit;
+use App\UnitConversion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -74,7 +75,7 @@ trait ProductTrait{
             $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                                         ->join('materials','materials.id','=','material_versions.material_id')
                                         ->where('product_material_relation.product_version_id',$recentProductVersion['id'])
-                                        ->select('material_versions.id as id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity')
+                                        ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity')
                                         ->get()->toArray();
             $materialVersionIds = implode(',',ProductMaterialRelation::where('product_version_id','=',$recentProductVersion['id'])->pluck('material_version_id')->toArray());
             return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
@@ -331,7 +332,9 @@ trait ProductTrait{
                 $toUnit = $material->unit_id;
                 if($fromUnit != $toUnit){
                     $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
-                    Material::where('id',$key)->update(['rate_per_unit' => $conversionRate]);
+                    if(!(is_array($conversionRate))){
+                        Material::where('id',$key)->update(['rate_per_unit' => $conversionRate]);
+                    }
                 }else{
                     Material::where('id',$key)->update(['rate_per_unit' => $materialVersion['rate_per_unit']]);
                 }
