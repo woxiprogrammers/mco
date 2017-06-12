@@ -105,6 +105,11 @@
                         </ul>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a href="/bill/manage"> Bill
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/quotation/manage"> Quotations
                             <span class="arrow"></span>
                         </a>
