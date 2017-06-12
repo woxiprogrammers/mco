@@ -110,6 +110,11 @@
                         </a>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a href="/quotation/manage"> Quotations
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="/client/manage">Client
                             <span class="arrow"></span>
                         </a>

@@ -98,7 +98,7 @@ trait CategoryTrait{
             }
             $iTotalRecords = count($categoriesData);
             $records = array();
-            $iterator = 0;
+            $records['data'] = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($categoriesData); $iterator++,$pagination++ ){
                 if($categoriesData[$pagination]['is_active'] == true){
                     $category_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
@@ -119,31 +119,31 @@ trait CategoryTrait{
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
                                 <a href="/category/edit/'.$categoriesData[$pagination]['id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/category/change-status/'.$categoriesData[$pagination]['id'].'">
-                                    <i class="icon-tag"></i> '.$status.' </a>
-                            </li>
-                        </ul>
-                    </div>'
+                                <i class="icon-docs"></i> Edit </a>
+                        </li>
+                        <li>
+                            <a href="/category/change-status/'.$categoriesData[$pagination]['id'].'">
+                                <i class="icon-tag"></i> '.$status.' </a>
+                        </li>
+                    </ul>
+                </div>'
                 ];
             }
+
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
             $records["recordsFiltered"] = $iTotalRecords;
         }catch(\Exception $e){
             $records = array();
             $data = [
-                'action' => 'Create Category',
+                'action' => 'Get Category Listing',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
-
-        return response()->json($records,200);
+        return response()->json($records);
     }
 
     public function changeCategoryStatus(Request $request, $category){

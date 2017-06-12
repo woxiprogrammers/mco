@@ -95,6 +95,7 @@
                 }
                 $iTotalRecords = count($taxData);
                 $records = array();
+                $records['data'] = array();
                 for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($taxData) ; $iterator++ , $pagination++){
                     if($taxData[$pagination]['is_active'] == true){
                         $tax_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
