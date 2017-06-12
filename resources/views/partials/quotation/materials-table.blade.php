@@ -9,7 +9,7 @@
 
 
 <fieldset>
-    <legend> Materials </legend>
+    <legend> Edit Materials </legend>
     <table class="table table-bordered" id="quotationMaterialTable">
         <tr>
             <th>
@@ -47,7 +47,7 @@
     </table>
     <div>
         <div class="col-md-2 col-md-offset-2">
-            <a class="btn btn-primary" id="back1">
+            <a class="btn btn-primary" onclick="backToGeneral()" href="javascript:void(0);">
                 Back
             </a>
         </div>

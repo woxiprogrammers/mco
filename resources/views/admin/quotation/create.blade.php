@@ -70,7 +70,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
-                                                                <label class="col-md-3 control-label">Client Name</label>
+                                                                <label class="col-md-3 control-label">Project Site Name</label>
                                                                 <div class="col-md-6">
                                                                     <select class="form-control" id="client_id" name="client_id" disabled>
 

@@ -177,4 +177,25 @@ trait QuotationTrait{
             Log::critical(json_encode($data));
         }
     }
+
+    public function quotationListing(Request $request){
+        try{
+            $records = array();
+            $records['data'] = array();
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = 0;
+            $records["recordsFiltered"] = 0;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Quotation Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+        return response()->json($records);
+    }
 }

@@ -113,6 +113,7 @@ trait UnitsTrait{
             }
             $iTotalRecords = count($unitData);
             $records = array();
+            $records['data'] = array();
             for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($unitData) ; $iterator++ , $pagination++){
                 if($unitData[$pagination]['is_active'] == true){
                     $unit_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
@@ -214,6 +215,7 @@ trait UnitsTrait{
             }
             $iTotalRecords = count($conversions);
             $records = array();
+            $records['data'] = array();
             for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($conversions) ; $iterator++ , $pagination++){
                 $fromUnit = Unit::findOrFail($conversions[$pagination]['unit_1_id']);
                 $toUnit = Unit::findOrFail($conversions[$pagination]['unit_2_id']);
@@ -296,7 +298,7 @@ trait UnitsTrait{
         try{
             $unitName = $request->name;
             if($request->has('unit_id')){
-                $nameCount = Unit::where('name','ilike',$unitName)->where('id','!=',$request->$unit_id)->count();
+                $nameCount = Unit::where('name','ilike',$unitName)->where('id','!=',$request->unit_id)->count();
             }else{
                 $nameCount = Unit::where('name','ilike',$unitName)->count();
             }
@@ -314,7 +316,6 @@ trait UnitsTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
-
     }
 
     public function convertUnits(Request $request){

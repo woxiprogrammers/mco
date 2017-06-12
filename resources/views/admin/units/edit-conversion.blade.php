@@ -58,7 +58,7 @@
                                                     <label class="col-md-3 control-label">To Unit</label>
                                                     <div class="col-md-6">
                                                         <input type="text" class="form-control" name="from_unit_text" value="{{$units[$conversion['unit_2_id']]}}"  readonly>
-                                                        <input type="hidden" class="form-control" id="from_unit" name="from_unit" value="{{$conversion['unit_2_id']}}">
+                                                        <input type="hidden" class="form-control" id="from_unit" name="to_unit" value="{{$conversion['unit_2_id']}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">

@@ -236,6 +236,7 @@ trait ProductTrait{
             }
             $iTotalRecords = count($productData);
             $records = array();
+            $records['data'] = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($productData); $iterator++,$pagination++ ){
                 $productVersion = ProductVersion::where('product_id',$productData[$pagination]['id'])->select('rate_per_unit')->orderBy('created_at','desc')->first();
                 if($productData[$pagination]['is_active'] == true){
@@ -248,7 +249,7 @@ trait ProductTrait{
                 $records['data'][$iterator] = [
                     $productData[$pagination]['name'],
                     Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                    $productVersion->rate_per_unit,
+                    $productVersion['rate_per_unit'],
                     Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                     $product_status,
                     '<div class="btn-group">
