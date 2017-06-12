@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    getMaterials($("#category_name").val());
+
     calculateSubTotal();
     $("#next_btn").on('click',function(){
         if($("#material_id option:selected").length > 0){
