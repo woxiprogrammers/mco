@@ -98,6 +98,7 @@ trait ProfitMarginTrait{
             }
             $iTotalRecords = count($profitMarginData);
             $records = array();
+            $records['data'] = array();
             for($iterator = 0 , $pagiantion = $request->start ; $iterator < $request->length && $iterator < count($profitMarginData) ; $iterator++ , $pagiantion++){
                 if($profitMarginData[$pagiantion]['is_active'] == true){
                     $profitMargin_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';

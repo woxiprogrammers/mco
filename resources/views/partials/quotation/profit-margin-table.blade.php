@@ -6,7 +6,7 @@
  */
 ?>
 <fieldset>
-    <legend> Profit Margins </legend>
+    <legend> Edit Profit Margins </legend>
     <div class="table-scrollable">
         <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -31,7 +31,7 @@
     </div>
     <div>
         <div class="col-md-2 col-md-offset-2">
-            <a class="btn btn-primary" id="back1">
+            <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
                 Back
             </a>
         </div>

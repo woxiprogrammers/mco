@@ -52,7 +52,7 @@
                                             </div>
                                         </div>
                                         {!! csrf_field() !!}
-                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productTable">
+                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="quotationTable">
                                             <thead>
                                             <tr>
                                                 <th style="width: 25%"> Project Site </th>
@@ -81,13 +81,11 @@
 @endsection
 
 @section('javascript')
-    <script src="/assets/custom/product/product.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/quotation/manage-datatable.js"></script>
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-<script src="/assets/custom/admin/product/manage-datatable.js" type="text/javascript"></script>
-
 @endsection

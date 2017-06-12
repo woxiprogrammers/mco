@@ -49,15 +49,19 @@ $(document).ready(function(){
             }
         });
     });
-
-    $("#back1").on('click', function(e){
-        e.stopPropagation();
-        $("#MaterialsTab").removeClass('active');
-        $("#GeneralTab").addClass('active');
-    });
-
 });
 
+function backToGeneral(){
+    $("#MaterialsTab").removeClass('active');
+    $("#ProfitMarginsTab").removeClass('active');
+    $("#GeneralTab").addClass('active');
+}
+
+function backToMaterials(){
+    $("#ProfitMarginsTab").removeClass('active');
+    $("#GeneralTab").removeClass('active');
+    $("#MaterialsTab").addClass('active');
+}
 
 function getProducts(category_id,rowNumber){
     $.ajax({
