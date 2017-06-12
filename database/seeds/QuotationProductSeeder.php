@@ -18,7 +18,8 @@ class QuotationProductSeeder extends Seeder
             [
                 'quotation_id' => 1,
                 'description' => 'This quotation contains 2 products, this product contains 2 materials',
-                'product_version_id' => 14,
+                'product_id' => 3,
+                'product_version_id' => 1,
                 'rate_per_unit' => 49.28,
                 'quantity' => 10,
                 'created_at' => $now,
@@ -27,7 +28,8 @@ class QuotationProductSeeder extends Seeder
             [
                 'quotation_id' => 1,
                 'description' => 'This quotation contains 2 products, this product contains 1 material',
-                'product_version_id' => 15,
+                'product_id' => 4,
+                'product_version_id' => 2,
                 'rate_per_unit' => 22.4,
                 'quantity' => 15,
                 'created_at' => $now,

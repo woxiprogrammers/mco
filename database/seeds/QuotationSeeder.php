@@ -15,7 +15,7 @@ class QuotationSeeder extends Seeder
     {
         $now = Carbon::now();
         DB::table('quotations')->insert([
-            'project_site_id' => 4,
+            'project_site_id' => 1,
             'quotation_status_id' => 2,
             'remark' => 'This is quotation seeder',
             'created_at' => $now,
