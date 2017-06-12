@@ -95,7 +95,7 @@
                                                             <span>{{$quotationProducts[$iterator]['rate_per_unit'] * $quotationProducts[$iterator]['quantity']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">45</span>
+                                                            <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">0</span>
                                                         </td>
                                                         <td>
                                                             <input class="form-control" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity" disabled>
@@ -256,7 +256,12 @@
             if($(this).prop("checked") == false){
                 var id = $(this).val();
                 $('#current_quantity_'+id).prop('disabled',true);
-                getcal(0,id);
+                $('#current_quantity_'+id).val('');
+                $('#cumulative_quantity_'+id).text("");
+                $('#previous_bill_amount_'+id).text("");
+                $('#current_bill_amount_'+id).text("");
+                $('#cumulative_bill_amount_'+id).text("");
+                getTotal();
             }
         });
     });
