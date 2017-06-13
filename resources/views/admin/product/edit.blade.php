@@ -27,7 +27,11 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/product/manage">Back</a>
+                                    <a href="/product/manage">Manage Products</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Edit Product</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
@@ -172,7 +176,11 @@
                                                                         {{$profitMargin['name']}}
                                                                     </td>
                                                                     <td>
-                                                                        <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                        @if(isset($productProfitMargins[$profitMargin['id']]))
+                                                                            <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                        @else
+                                                                            <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                        @endif
                                                                     </td>
                                                                     <td class="profit-margin-amount">
 

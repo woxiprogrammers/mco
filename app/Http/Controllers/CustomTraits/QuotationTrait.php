@@ -8,12 +8,14 @@
 namespace App\Http\Controllers\CustomTraits;
 
 use App\Category;
+use App\Client;
 use App\Material;
 use App\Product;
 use App\ProductMaterialRelation;
 use App\ProductProfitMarginRelation;
 use App\ProductVersion;
 use App\ProfitMargin;
+use App\ProjectSite;
 use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,8 +24,9 @@ trait QuotationTrait{
 
     public function getCreateView(Request $request){
         try{
+            $clients = Client::where('is_active', true)->select('id','company')->get()->toArray();
             $categories = Category::where('is_active', true)->select('id','name')->get()->toArray();
-            return view('admin.quotation.create')->with(compact('categories'));
+            return view('admin.quotation.create')->with(compact('categories','clients'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Create Quotation View',
@@ -119,7 +122,6 @@ trait QuotationTrait{
         try{
             $productIds = $request->product_ids;
             $materialIds = array();
-            $materials = array();
             $units = Unit::where('is_active', true)->orderBy('name','asc')->get()->toArray();
             foreach($productIds as $id){
                 $recentVersionId = ProductVersion::where('product_id',$id)->pluck('id')->first();
@@ -128,17 +130,14 @@ trait QuotationTrait{
                                 ->where('product_material_relation.product_version_id',$recentVersionId)
                                 ->pluck('material_versions.material_id')
                                 ->toArray();
-                if(!(in_array($materialId,$materialIds))){
-                    $materialIds[] = $materialId;
-                    $materials[] = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
-                        ->join('materials','materials.id','=','material_versions.material_id')
-                        ->join('units','units.id','=','material_versions.unit_id')
-                        ->where('product_material_relation.product_version_id',$recentVersionId)
-                        ->select('materials.id as id','materials.name as name','materials.rate_per_unit as rate_per_unit','materials.unit_id as unit_id','units.name as unit')
-                        ->first()
-                        ->toArray();
-                }
+                $materialIds = array_unique(array_merge($materialIds,$materialId));
             }
+            $materials = Material::join('units','materials.unit_id','=','units.id')
+                        ->whereIn('materials.id',$materialIds)
+                        ->orderBy('name','asc')
+                        ->select('materials.id as id','materials.name as name','materials.rate_per_unit as rate_per_unit','materials.unit_id as unit_id','units.name as unit')
+                        ->get()
+                        ->toArray();
             return view('partials.quotation.materials-table')->with(compact('materials','units'));
         }catch(\Exception $e){
             $data = [
@@ -197,5 +196,29 @@ trait QuotationTrait{
         }
 
         return response()->json($records);
+    }
+
+    public function checkProjectSiteName(Request $request){
+        try{
+            $projectSiteName = $request->name;
+            if($request->has('project_site_id')){
+                $nameCount = ProjectSite::where('name','ilike',$projectSiteName)->where('id','!=',$request->project_site_id)->count();
+            }else{
+                $nameCount = ProjectSite::where('name','ilike',$projectSiteName)->count();
+            }
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Project Site name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }

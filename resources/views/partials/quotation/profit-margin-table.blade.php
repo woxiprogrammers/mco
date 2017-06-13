@@ -10,22 +10,22 @@
     <div class="table-scrollable">
         <table class="table table-striped table-bordered table-hover">
             <thead>
-            <tr>
-                <th scope="col" style="width:450px !important"> <u> Profit Margins<i class="fa fa-arrow-right"></i> </u> <br> Products <i class="fa fa-arrow-down"></i></th>
-                @foreach($profitMargins as $profitMargin)
-                <th scope="col"> {{$profitMargin['name']}} </th>
-                @endforeach
-            </tr>
+                <tr>
+                    <th scope="col" style="width:450px !important"> <u> Profit Margins<i class="fa fa-arrow-right"></i> </u> <br> Products <i class="fa fa-arrow-down"></i></th>
+                    @foreach($profitMargins as $profitMargin)
+                    <th scope="col"> {{$profitMargin['name']}} </th>
+                    @endforeach
+                </tr>
             </thead>
             <tbody>
-            <tr>
                 @foreach($productProfitMargins as $id => $data)
-                <td> {{$data['products']}} </td>
-                @foreach($data['profit_margin'] as $profitMargin)
-                <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="{{$profitMargin['percentage']}}"></td>
+                    <tr>
+                        <td> {{$data['products']}} </td>
+                        @foreach($data['profit_margin'] as $profitMargin)
+                        <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="{{$profitMargin['percentage']}}"></td>
+                        @endforeach
+                    </tr>
                 @endforeach
-                @endforeach
-            </tr>
             </tbody>
         </table>
     </div>

@@ -29,18 +29,22 @@
                     {{$material['name']}}
                 </td>
                 <td>
-                    <input type="number" class="form-control material-table-input" name="material_rate[{{$material['id']}}]" value="{{$material['rate_per_unit']}}" step="any">
+                    <div class="form-group">
+                        <input type="number" class="form-control material-table-input quotation-material-rate" name="material_rate[{{$material['id']}}]" value="{{$material['rate_per_unit']}}" step="any">
+                    </div>
                 </td>
                 <td>
-                    <select name="material_unit[{{$material['id']}}]" class="form-control material-table-input">
-                        @foreach($units as $unit)
-                            @if($unit['id'] == $material['unit_id'])
-                                <option value="{{$unit['id']}}" selected> {{$unit['name']}}</option>
-                            @else
-                                <option value="{{$unit['id']}}"> {{$unit['name']}} </option>
-                            @endif
-                        @endforeach
-                    </select>
+                    <div class="form-group">
+                        <select name="material_unit[{{$material['id']}}]" class="form-control material-table-input">
+                            @foreach($units as $unit)
+                                @if($unit['id'] == $material['unit_id'])
+                                    <option value="{{$unit['id']}}" selected> {{$unit['name']}}</option>
+                                @else
+                                    <option value="{{$unit['id']}}"> {{$unit['name']}} </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
                 </td>
             </tr>
         @endforeach
