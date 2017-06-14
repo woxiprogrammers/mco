@@ -15,6 +15,7 @@ use App\ProductMaterialRelation;
 use App\ProductProfitMarginRelation;
 use App\ProductVersion;
 use App\ProfitMargin;
+use App\Project;
 use App\ProjectSite;
 use App\Unit;
 use Illuminate\Http\Request;
@@ -155,16 +156,18 @@ trait QuotationTrait{
             $profitMargins = ProfitMargin::where('is_active', true)->orderBy('name','asc')->get()->toArray();
             $productProfitMargins = array();
             foreach($productIds as $id){
-                $recentVersion = ProductVersion::where('product_id',$id)->orderBy('created_at')->pluck('id')->first();
+                $recentVersion = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
                 $productProfitMargins[$id]['products'] = Product::where('id',$id)->pluck('name')->first();
-                $productProfitMargins[$id]['profit_margin'] = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
-                                                            ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
-                                                            ->where('products_profit_margins_relation.product_version_id',$recentVersion)
-                                                            ->orderBy('profit_margins.name','asc')
-                                                            ->select('profit_margins.name as name','profit_margins.id as id','profit_margin_versions.percentage as percentage')
-                                                            ->get()
-                                                            ->toArray();
-
+                $productProfitMarginRelation = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
+                                            ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
+                                            ->where('products_profit_margins_relation.product_version_id',$recentVersion)
+                                            ->orderBy('profit_margins.name','asc')
+                                            ->select('profit_margins.name as name','profit_margins.id as id','profit_margin_versions.percentage as percentage')
+                                            ->get()
+                                            ->toArray();
+                foreach($productProfitMarginRelation as $profitMargin){
+                    $productProfitMargins[$id]['profit_margin'][$profitMargin['id']] = $profitMargin;
+                }
             }
             return view('partials.quotation.profit-margin-table')->with(compact('productProfitMargins','profitMargins'));
         }catch(\Exception $e){
@@ -214,6 +217,47 @@ trait QuotationTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Check Project Site name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function checkProjectNames(Request $request){
+        try{
+            $project = $request->name;
+            $nameCount = Project::where('name','ilike',$project)->count();
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $response = array();
+            $status = 500;
+            $data = [
+                'action' => 'Get Project names',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function createQuotation(Request $request){
+        try{
+            $data = $request->all();
+            dd($data);
+            $projectData = array();
+            $projectData['name'] = ucwords($data['project']);
+            $quotationData = array();
+//            $quotationData['']
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Quotation',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];

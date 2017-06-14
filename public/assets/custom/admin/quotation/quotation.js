@@ -129,12 +129,12 @@ function getProductDetails(product_id,rowNumber){
             $("#productDescription"+rowNumber).attr('name','product_description['+data.id+']');
             $("#productRate"+rowNumber).val(data.rate_per_unit);
             $("#productRate"+rowNumber).attr('name','product_rate['+data.id+']');
-            $("#productRate"+rowNumber).prop('readonly', false);
             $("#productQuantity"+rowNumber).prop('readonly', false);
             $("#productUnit"+rowNumber).val(data.unit);
             $("#productUnit"+rowNumber).attr('name','product_unit['+data.id+']');
             $("#productQuantity"+rowNumber).attr('name','product_quantity['+data.id+']');
             $("#productAmount"+rowNumber).attr('name','product_amount['+data.id+']');
+            calculateAmount(rowNumber);
         },
         error: function(errorStatus, xhr){
 

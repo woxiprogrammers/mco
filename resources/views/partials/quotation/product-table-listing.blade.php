@@ -32,7 +32,7 @@
     </td>
     <td>
         <div class="form-group">
-            <input name="product_rate[]" class="form-control quotation-product-table quotation-product-rate" id="productRate{{$rowIndex}}" type="number" step="any" onchange="calculateAmount({{$rowIndex}})" onkeyup="calculateAmount({{$rowIndex}})" readonly>
+            <input name="product_rate[]" class="form-control quotation-product-table" id="productRate{{$rowIndex}}" type="text" readonly>
         </div>
     </td>
     <td>

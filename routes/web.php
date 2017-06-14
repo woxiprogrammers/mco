@@ -137,6 +137,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix' => 'quotation'], function(){
         Route::get('create',array('uses'=> 'Admin\QuotationController@getCreateView'));
+        Route::post('create',array('uses'=> 'Admin\QuotationController@createQuotation'));
         Route::get('manage',array('uses'=> 'Admin\QuotationController@getManageView'));
         Route::post('listing',array('uses'=> 'Admin\QuotationController@quotationListing'));
         Route::post('get-products',array('uses'=> 'Admin\QuotationController@getProducts'));
@@ -144,6 +145,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-profit-margins', array('uses' => 'Admin\QuotationController@getProfitMargins'));
         Route::post('get-product-detail',array('uses'=> 'Admin\QuotationController@getProductDetail'));
         Route::post('add-product-row',array('uses'=> 'Admin\QuotationController@addProductRow'));
+        Route::post('check-project-site-name',array('uses'=> 'Admin\QuotationController@checkProjectSiteName'));
+        Route::post('check-project-name',array('uses'=> 'Admin\QuotationController@checkProjectNames'));
     });
 });
 

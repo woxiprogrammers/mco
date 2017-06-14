@@ -5,13 +5,13 @@
  * Time: 12:47 PM
  */
 ?>
-
-
-
 <fieldset>
     <legend> Edit Materials </legend>
     <table class="table table-bordered" id="quotationMaterialTable">
         <tr>
+            <th style="width: 13%">
+                Is Client supplied?
+            </th>
             <th>
                 Material Name
             </th>
@@ -25,6 +25,9 @@
         @foreach($materials as $material)
             <tr>
                 <input type="hidden" name="material_id[]" value="{{$material['id']}}">
+                <td>
+                    <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}">
+                </td>
                 <td>
                     {{$material['name']}}
                 </td>

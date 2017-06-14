@@ -47,7 +47,7 @@
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
                                             <input type="hidden" id="productRowCount" value="1">
-                                            <form role="form" id="QuotationCreateForm" class="form-horizontal">
+                                            <form role="form" id="QuotationCreateForm" class="form-horizontal" action="/quotation/create" method="post">
                                                 {!! csrf_field() !!}
                                                 <div class="tab-content">
                                                     <div class="tab-pane fade in active" id="GeneralTab">
@@ -120,7 +120,7 @@
                                                                         </td>
                                                                         <td>
                                                                             <div class="form-group">
-                                                                                <input name="product_rate[]" type="number" step="any" class="form-control quotation-product-table" id="productRate1" type="text" onchange="calculateAmount(1)" onkeyup="calculateAmount(1)" readonly>
+                                                                                <input name="product_rate[]" class="form-control quotation-product-table" id="productRate1" type="text" readonly>
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -190,8 +190,6 @@
 @endsection
 @section('javascript')
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
-<script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
-<script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script src="/assets/custom/admin/quotation/quotation.js"></script>
 <script src="/assets/custom/admin/quotation/validations.js"></script>
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
@@ -199,51 +197,6 @@
 <script>
     $(document).ready(function(){
         CreateQuotation.init();
-
-        /*var citiList = new Bloodhound({
-            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
-            queryTokenizer: Bloodhound.tokenizers.whitespace,
-            remote: {
-                url: "/material/auto-suggest/%QUERY",
-                filter: function(x) {
-                    if($(window).width()<420){
-                        $("#header").addClass("fixed");
-                    }
-                    return $.map(x, function (data) {
-                        return {
-                            id:data.id,
-                            name:data.name,
-                        };
-                    });
-                },
-                wildcard: "%QUERY"
-            }
-        });
-        citiList.initialize();
-        $('.typeahead').typeahead(null, {
-            displayKey: 'name',
-            engine: Handlebars,
-            source: citiList.ttAdapter(),
-            limit: 30,
-            templates: {
-                empty: [
-
-                ].join('\n'),
-                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
-            },
-        }).on('typeahead:selected', function (obj, datum) {
-            var POData = $.parseJSON(JSON.stringify(datum));
-            POData.name = POData.name.replace(/\&/g,'%26');
-            $("#name").val(POData.name);
-            $("#QuotationCreateForm").append($("<input>", {'id': "project_id",
-                'type': 'hidden',
-                'value': POData.id,
-                'name': "project_id"
-            }));
-        })
-            .on('typeahead:open', function (obj, datum) {
-
-            });*/
     });
 </script>
 @endsection
