@@ -8,5 +8,5 @@ class Project extends Model
 {
     protected $table = 'projects';
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name','client_id','is_active'];
 }

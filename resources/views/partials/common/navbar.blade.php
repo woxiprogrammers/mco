@@ -115,16 +115,30 @@
                             <span class="arrow"></span>
                         </a>
                     </li>
-                    <li>
-                        <a href="/client/manage">Client
+                    <li aria-haspopup="true" class="menu-dropdown mega-menu-dropdown">
+                        <a href="javascript:void(0);">Client
                             <span class="arrow"></span>
                         </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/client/manage"> Client
+                                    <span class="arrow"></span>
+                                </a>
+                            </li>
+                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/project/manage">Project
+                                    <span class="arrow"></span>
+                                </a>
+                            </li>
+                        </ul>
+
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/user/manage">User
                             <span class="arrow"></span>
                         </a>
                     </li>
+
                 </ul>
             </div>
             <!-- END MEGA MENU -->

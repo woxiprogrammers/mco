@@ -148,5 +148,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-project-site-name',array('uses'=> 'Admin\QuotationController@checkProjectSiteName'));
         Route::post('check-project-name',array('uses'=> 'Admin\QuotationController@checkProjectNames'));
     });
+
+    Route::group(['prefix' => 'project'], function(){
+        Route::get('create',array('uses'=> 'Admin\ProjectController@getCreateView'));
+        Route::post('create',array('uses'=> 'Admin\ProjectController@createProject'));
+        Route::get('manage',array('uses'=> 'Admin\ProjectController@getManageView'));
+        Route::post('listing',array('uses'=> 'Admin\ProjectController@projectListing'));
+        Route::post('check-name',array('uses'=> 'Admin\ProjectController@checkProjectName'));
+
+    });
 });
 

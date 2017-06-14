@@ -8,5 +8,5 @@ class ProjectSite extends Model
 {
     protected $table = 'project_sites';
 
-    protected $fillable = ['name','project_id'];
+    protected $fillable = ['name','project_id','address'];
 }
