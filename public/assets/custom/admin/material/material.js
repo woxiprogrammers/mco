@@ -52,6 +52,7 @@ var  CreateMaterial = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -119,6 +120,7 @@ var  EditMaterial = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();

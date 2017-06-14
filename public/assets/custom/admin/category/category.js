@@ -53,6 +53,7 @@ var  CreateCategory = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -127,6 +128,7 @@ var  EditCategory = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();

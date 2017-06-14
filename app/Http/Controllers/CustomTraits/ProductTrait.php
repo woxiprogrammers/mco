@@ -163,12 +163,12 @@ trait ProductTrait{
                 $toUnit = $material->unit_id;
                 if($fromUnit != $toUnit){
                     $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
-                    Material::where('id',$key)->update(['rate_per_unit' => $conversionRate]);
+                    Material::where('id',$key)->update(['rate_per_unit' => round($conversionRate,3)]);
                 }else{
-                    Material::where('id',$key)->update(['rate_per_unit' => $materialVersion['rate_per_unit']]);
+                    Material::where('id',$key)->update(['rate_per_unit' => round($materialVersion['rate_per_unit'],3)]);
                 }
                 $recentVersion = MaterialVersion::where('material_id',$key)->orderBy('created_at','desc')->select('rate_per_unit','unit_id')->first();
-                $subTotal += $materialVersion['rate_per_unit']*$data['material_quantity'][$key];
+                $subTotal += round($materialVersion['rate_per_unit']*$data['material_quantity'][$key],3);
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
                     $materialVersion['material_id'] = MaterialVersion::where('id',$key)->pluck('material_id')->first();
@@ -182,7 +182,7 @@ trait ProductTrait{
             $iterator = 0;
             $taxAmount = 0;
             foreach($data['profit_margin'] as $key => $profitMargin){
-                $taxAmount += $subTotal * ($profitMargin / 100);
+                $taxAmount += round($subTotal * ($profitMargin / 100),3);
                 $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$key)->orderBy('created_at','desc')->select('id','percentage')->first()->toArray();
                 if($profitMargin == $recentProfitMarginVersion['percentage']){
                     $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
@@ -317,7 +317,7 @@ trait ProductTrait{
             $subTotal = 0;
             foreach($data['material_version'] as $key => $materialVersion){
                 $recentVersion = MaterialVersion::where('id',$key)->select('rate_per_unit','unit_id')->first();
-                $subTotal += $materialVersion['rate_per_unit']*$data['material_quantity'][$key];
+                $subTotal += round($materialVersion['rate_per_unit']*$data['material_quantity'][$key],3);
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
                     $materialVersion['material_id'] = MaterialVersion::where('id',$key)->pluck('material_id')->first();
@@ -333,16 +333,16 @@ trait ProductTrait{
                 if($fromUnit != $toUnit){
                     $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
                     if(!(is_array($conversionRate))){
-                        Material::where('id',$key)->update(['rate_per_unit' => $conversionRate]);
+                        Material::where('id',$key)->update(['rate_per_unit' => round($conversionRate,3)]);
                     }
                 }else{
-                    Material::where('id',$key)->update(['rate_per_unit' => $materialVersion['rate_per_unit']]);
+                    Material::where('id',$key)->update(['rate_per_unit' => round($materialVersion['rate_per_unit'],3)]);
                 }
             }
             $iterator = 0;
             $taxAmount = 0;
             foreach($data['profit_margin'] as $key => $profitMargin){
-                $taxAmount += $subTotal * ($profitMargin / 100);
+                $taxAmount += round($subTotal * ($profitMargin / 100),3);
                 $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$key)->orderBy('created_at','desc')->select('id','percentage')->first()->toArray();
                 if($profitMargin == $recentProfitMarginVersion['percentage']){
                     $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
