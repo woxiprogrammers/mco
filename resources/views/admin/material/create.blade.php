@@ -35,7 +35,7 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <div class="col-md-11">
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
@@ -109,6 +109,8 @@
 <script src="/assets/custom/admin/material/material.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
+        var num = 1.12305;
+        console.log();
        CreateMaterial.init();
         $("#name").rules('add',{
             remote: {

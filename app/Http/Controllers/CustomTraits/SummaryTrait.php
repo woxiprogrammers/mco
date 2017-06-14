@@ -159,7 +159,7 @@ trait SummaryTrait{
         try{
             $summaryName = $request->name;
             if($request->has('summary_id')){
-                $nameCount = Summary::where('name','ilike',$summaryName)->where('id','!=',$request->$summary_id)->count();
+                $nameCount = Summary::where('name','ilike',$summaryName)->where('id','!=',$request->summary_id)->count();
             }else{
                 $nameCount = Summary::where('name','ilike',$summaryName)->count();
             }

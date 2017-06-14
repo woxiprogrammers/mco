@@ -27,7 +27,17 @@
                     <div class="page-content">
                         @include('partials.common.messages')
                         <div class="container">
-                            <div class="col-md-11">
+                            <ul class="page-breadcrumb breadcrumb">
+                                <li>
+                                    <a href="/tax/manage">Manage Tax</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Edit Tax</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                            </ul>
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
 
