@@ -39,11 +39,15 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/units/manage">Back</a>
+                                    <a href="/units/manage">Manage Units</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Edit Unit</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <div class="col-md-11">
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">

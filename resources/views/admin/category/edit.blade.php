@@ -29,11 +29,15 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/category/manage">Back</a>
+                                    <a href="/category/manage">Manage Category</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Edit Category</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <div class="col-md-11">
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
 

@@ -69,7 +69,7 @@ function changedQuantity(materialId){
     var rate = $("#material_"+materialId+"_rate").val();
     var quantity = $("#material_"+materialId+"_quantity").val();
     var amount = rate*quantity;
-    $("#material_"+materialId+"_amount").val(amount);
+    $("#material_"+materialId+"_amount").val(Math.round(amount * 1000) / 1000);
     calculateSubTotal();
 }
 
@@ -81,7 +81,8 @@ function calculateSubTotal(){
     if(isNaN(amount)){
         amount = 0;
     }
-    $("#subtotal").text(amount);
+
+    $("#subtotal").text(Math.round(amount * 1000) / 1000);
     calculateProfitMargin();
 }
 
@@ -91,9 +92,9 @@ function calculateProfitMargin(){
     $(".profit-margin").each(function(){
         var profitMarginAmount = amount * ($(this).val() / 100);
         total = total + profitMarginAmount;
-        $(this).parent().next().text(profitMarginAmount);
+        $(this).parent().next().text(Math.round(profitMarginAmount * 1000) / 1000);
     });
-    $("#total").text(total);
+    $("#total").text(Math.round(total * 1000) / 1000);
 }
 
 function convertUnits(materialId){
@@ -109,10 +110,10 @@ function convertUnits(materialId){
         },
         success: function(data,textStatus,xhr){
             if(xhr.status == 200){
-                $("#material_"+materialId+"_rate").val(data.rate);
+                $("#material_"+materialId+"_rate").val(Math.round(data.rate * 1000) / 1000);
             }else{
                 $("#material_"+materialId+"_unit option[value='"+data.unit+"']").prop('selected', true);
-                $("#material_"+materialId+"_rate").val(data.rate);
+                $("#material_"+materialId+"_rate").val(Math.round(data.rate * 1000) / 1000);
             }
             changedQuantity(materialId);
         },

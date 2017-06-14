@@ -47,6 +47,7 @@ var  SummaryCreate = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -117,6 +118,7 @@ var  EditSummary = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
