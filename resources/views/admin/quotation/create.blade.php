@@ -42,7 +42,7 @@
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
-                                <div class="col-md-11">
+                                <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
@@ -84,79 +84,82 @@
                                                         </fieldset>
                                                         <fieldset>
                                                             <legend> Products <a class="btn btn-success btn-md col-md-offset-9" id="addProduct">Add Product</a></legend>
-                                                            <table class="table table-bordered" id="productTable" style="overflow: scroll">
-                                                                <tr>
-                                                                    <th style="width: 18%"> Category </th>
-                                                                    <th style="width: 18%"> Product </th>
-                                                                    <th style="width: 25%"> Description</th>
-                                                                    <th style="width: 10%"> Rate</th>
-                                                                    <th style="width: 8%"> unit</th>
-                                                                    <th style="width: 10%"> Quantity </th>
-                                                                    <th  style="width: 10%"> Amount </th>
-                                                                    <th> Action </th>
-                                                                </tr>
-                                                                <tr id="Row1">
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <select class="form-control quotation-product-table quotation-category" id="categorySelect1" name="category_id[]">
-                                                                                @foreach($categories as $category)
+                                                            <div class="table-scrollable">
+                                                                <table class="table table-bordered" id="productTable" style="overflow: scroll;overflow-x: auto; overflow-y: auto">
+                                                                    <tr>
+                                                                        <th style="width: 18%"> Category </th>
+                                                                        <th style="width: 18%"> Product </th>
+                                                                        <th style="width: 25%"> Description</th>
+                                                                        <th style="width: 10%"> Rate</th>
+                                                                        <th style="width: 8%"> Unit</th>
+                                                                        <th style="width: 10%"> Quantity </th>
+                                                                        <th  style="width: 10%"> Amount </th>
+                                                                        <th> Action </th>
+                                                                    </tr>
+                                                                    <tr id="Row1">
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <select class="form-control quotation-product-table quotation-category" id="categorySelect1" name="category_id[]">
+                                                                                    @foreach($categories as $category)
                                                                                     <option value="{{$category['id']}}"> {{$category['name']}} </option>
-                                                                                @endforeach
-                                                                            </select>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <select class="form-control quotation-product-table quotation-product" name="product_id[]" id="productSelect1" disabled>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <select class="form-control quotation-product-table quotation-product" name="product_id[]" id="productSelect1" disabled>
 
-                                                                            </select>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input name="product_description[]" class="form-control quotation-product-table" onclick="replaceEditor(1)" id="productDescription1" type="text" readonly>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input name="product_rate[]" type="number" step="any" class="form-control quotation-product-table" id="productRate1" type="text" onchange="calculateAmount(1)" onkeyup="calculateAmount(1)" readonly>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input name="product_rate[]" class="form-control quotation-product-table" id="productUnit1" type="text" readonly>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input type="number" step="any" class="form-control quotation-product-table" name="product_quantity[]" id="productQuantity1" onchange="calculateAmount(1)" onkeyup="calculateAmount(1)" readonly>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input type="text" name="product_amount[]" class="form-control quotation-product-table" id="productAmount1" readonly>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <table>
-                                                                            <tr style="border-bottom: 1px solid black">
-                                                                                <td>
-                                                                                    <a href="javascript:void(0);">
-                                                                                        View
-                                                                                    </a>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>
-                                                                                    <a href="javascript:void(0);" onclick="removeRow(1)">
-                                                                                        Remove
-                                                                                    </a>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </table>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <input name="product_description[]" class="form-control quotation-product-table" onclick="replaceEditor(1)" id="productDescription1" type="text" readonly>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <input name="product_rate[]" type="number" step="any" class="form-control quotation-product-table" id="productRate1" type="text" onchange="calculateAmount(1)" onkeyup="calculateAmount(1)" readonly>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <input name="product_rate[]" class="form-control quotation-product-table" id="productUnit1" type="text" readonly>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <input type="number" step="any" class="form-control quotation-product-table" name="product_quantity[]" id="productQuantity1" onchange="calculateAmount(1)" onkeyup="calculateAmount(1)" readonly>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <input type="text" name="product_amount[]" class="form-control quotation-product-table" id="productAmount1" readonly>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <table>
+                                                                                <tr style="border-bottom: 1px solid black">
+                                                                                    <td>
+                                                                                        <a href="javascript:void(0);">
+                                                                                            View
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <a href="javascript:void(0);" onclick="removeRow(1)">
+                                                                                            Remove
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+
                                                             <div class="col-md-3 col-md-offset-5">
                                                                 <a class="btn btn-wide btn-primary" id="next1">
                                                                     Edit Material Cost
