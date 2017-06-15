@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Bill;
 use App\BillQuotationProducts;
+use App\BillStatus;
+use App\BillTax;
 use App\Category;
 use App\Client;
 use App\Product;
@@ -46,7 +48,7 @@ trait BillTrait{
                 }
             }
             $taxes = Tax::where('is_active',true)->get()->toArray();
-            return view('admin.bill.create')->with(compact('bills','project_site','quotationProducts','taxes'));
+            return view('admin.bill.create')->with(compact('quotation','bills','project_site','quotationProducts','taxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get existing bill create view',
@@ -189,12 +191,34 @@ trait BillTrait{
 
     public function createBill(Request $request){
         try{
-            dd($request->all());
-            if($request['change_bill'] == 'default'){
+            $bill_quotation_product = array();
+            //dd($request->all());
+            /*if(){
 
-            }else{
+            }else{*/
+                 $bill['quotaion_id'] = $request['quotation_id'];
+                 $bill['bill_status_id'] = BillStatus::where('slug','unpaid')->pluck('id')->first();
+                 Bill::create($bill);
+                 foreach($request['quotation_product_id'] as $key=>$value){
+                     foreach($request['current_quantity'] as $quantities=>$quantity){
+                         if($key == $quantities){
+                             $bill_quotation_product['bill_id'] = $request->bill_id;
+                             $bill_quotation_product['quotation_product_id'] = $value;
+                             $bill_quotation_product['quantity'] = $quantity;
+                             QuotationProduct::create($bill_quotation_product);
+                         }
 
-            }
+                     }
+
+                 }
+                 foreach($request['tax_percentage'] as $key=>$value){
+                     $bill_taxes['tax_id'] = $key;
+                     $bill_taxes['percentage'] = $value;
+                     BillTax::create($bill_taxes);
+                 }
+
+
+            //}
             dd(123);
             $request->session()->flash('success','Bill Created Successfully');
             return redirect('/bill/create');
