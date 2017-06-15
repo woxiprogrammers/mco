@@ -24,7 +24,7 @@
                     </div>
                     <div class="page-content">
                         @include('partials.common.messages')
-                        <div class="container">
+                        <div class="container" style="width: 100%">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
                                     <a href="/bill/manage">Manage Bill</a>
@@ -95,7 +95,7 @@
                                                             <span>{{$quotationProducts[$iterator]['rate_per_unit'] * $quotationProducts[$iterator]['quantity']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">0</span>
+                                                            <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
                                                         </td>
                                                         <td>
                                                             <input class="form-control" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity" disabled>
@@ -193,7 +193,7 @@
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-<script src="/assets/custom/bill/bill-manage-datatable.js" type="text/javascript"></script>
+<!--<script src="/assets/custom/bill/bill-manage-datatable.js" type="text/javascript"></script>-->
 <script>
     function selectedProducts(id){
         $('input[name="id_'+id+'"]:checked').each(function(){
@@ -228,9 +228,9 @@
     }
 
     function getTotal(){
-        var total_previous_bill_amount = 0;
-        var total_current_bill_amount = 0;
-        var total_cumulative_bill_amount = 0;
+        var total_previous_bill_amount = 0.0;
+        var total_current_bill_amount = 0.000000;
+        var total_cumulative_bill_amount = 0.0;
         var selected_product_length = $('input:checked').length;
         if(selected_product_length > 0){
             $('input:checked').each(function(){
@@ -239,29 +239,38 @@
                 var previous_bill_amount = parseFloat($('#previous_bill_amount_'+id).text());
                 total_previous_bill_amount = total_previous_bill_amount + previous_bill_amount;
                 $('#total_previous_bill_amount').text(total_previous_bill_amount);
+                $('#rounded_off_previous_bill_amount').text(total_previous_bill_amount.toFixed(3));
 
                 var current_bill_amount = parseFloat($('#current_bill_amount_'+id).text());
                 total_current_bill_amount = total_current_bill_amount + current_bill_amount;
                 $('#total_current_bill_amount').text(total_current_bill_amount);
+                $('#rounded_off_current_bill_amount').text(total_current_bill_amount.toFixed(3));
 
                 var cumulative_bill_amount = parseFloat($('#cumulative_bill_amount_'+id).text());
                 total_cumulative_bill_amount = total_cumulative_bill_amount + cumulative_bill_amount;
                 $('#total_cumulative_bill_amount').text(total_cumulative_bill_amount);
+                $('#rounded_off_cumulative_bill_amount').text(total_cumulative_bill_amount.toFixed(3));
             });
         }
     }
 
     $(document).ready(function (){
         $('input[type="checkbox"]').click(function(){
+            var length = $('input[type="checkbox"]:checked').length;
+            if($('input[type="checkbox"]:checked').length <= 0){
+                $('#total_cumulative_bill_amount').text("");
+                $('#total_current_bill_amount').text("");
+                $('#total_previous_bill_amount').text("");
+            }
             if($(this).prop("checked") == false){
-                var id = $(this).val();
-                $('#current_quantity_'+id).prop('disabled',true);
-                $('#current_quantity_'+id).val('');
-                $('#cumulative_quantity_'+id).text("");
-                $('#previous_bill_amount_'+id).text("");
-                $('#current_bill_amount_'+id).text("");
-                $('#cumulative_bill_amount_'+id).text("");
-                getTotal();
+                    var id = $(this).val();
+                    $('#current_quantity_'+id).prop('disabled',true);
+                    $('#current_quantity_'+id).val('');
+                    $('#cumulative_quantity_'+id).text("");
+                    $('#previous_bill_amount_'+id).text("");
+                    $('#current_bill_amount_'+id).text("");
+                    $('#cumulative_bill_amount_'+id).text("");
+                    getTotal();
             }
         });
     });

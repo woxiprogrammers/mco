@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\CustomTraits;
 use App\Bill;
+use App\BillQuotationProducts;
 use App\Category;
 use App\Client;
 use App\Product;
@@ -21,10 +22,28 @@ trait BillTrait{
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
             $bills = Bill::where('quotation_id',$quotation['id'])->get()->toArray();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
-            for($i=0 ; $i < count($quotationProducts) ; $i++){
-                $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
-                $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
-                $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
+            if($bills != null){
+                for($i=0 ; $i < count($quotationProducts) ; $i++){
+                    $quotationProducts[$i]['previous_quantity'] = 0;
+                    for($j = 0; $j < count($bills) ; $j++ ){
+                        $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
+                        $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
+                        $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
+                        $bill_produc = BillQuotationProducts::where('bill_id',$bills[$j]['id'])->where('quotation_product_id',$quotationProducts[$i]['id'])->get()->toArray();
+                        for($k =0 ; $k < count($bill_produc); $k++ ){
+                            if($bill_produc[$k]['quotation_product_id'] == $quotationProducts[$i]['id']){
+                                $quotationProducts[$i]['previous_quantity'] = $quotationProducts[$i]['previous_quantity'] + $bill_produc[$k]['quantity'];
+                            }
+                        }
+                    }
+                }
+            }else{
+                for($i=0 ; $i < count($quotationProducts) ; $i++){
+                    $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
+                    $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
+                    $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
+                    $quotationProducts[$i]['previous_quantity'] = 0;
+                }
             }
             $taxes = Tax::where('is_active',true)->get()->toArray();
             return view('admin.bill.create')->with(compact('bills','project_site','quotationProducts','taxes'));
