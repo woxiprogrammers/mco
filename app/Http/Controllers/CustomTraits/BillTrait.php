@@ -187,6 +187,28 @@ trait BillTrait{
         return response()->json($records,200);
     }
 
+    public function createBill(Request $request){
+        try{
+            dd($request->all());
+            if($request['change_bill'] == 'default'){
+
+            }else{
+
+            }
+            dd(123);
+            $request->session()->flash('success','Bill Created Successfully');
+            return redirect('/bill/create');
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Create New bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
 }
 
 

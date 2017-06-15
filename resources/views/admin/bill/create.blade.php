@@ -39,10 +39,12 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                         <div class="portlet-body flip-scroll">
+                                           <form role="form" id="new_bill" class="form-horizontal" action="/bill/create" method="post">
                                             @if($bills != NULL)
                                                 <div class="col-md-offset-7 table-actions-wrapper" style="margin-bottom: 20px">
                                                     <label class="control-label">Select Bill</label>
                                                     <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
+                                                            <option value="default">Select Bill Array</option>
                                                         @for($i = 0 ; $i < count($bills); $i++)
                                                             <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                         @endfor
@@ -74,7 +76,7 @@
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                     <tr>
                                                         <td>
-                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="id_{{$quotationProducts[$iterator]['id']}}" value="{{$quotationProducts[$iterator]['id']}}" onclick="selectedProducts({{$quotationProducts[$iterator]['id']}})">
+                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" onclick="selectedProducts({{$quotationProducts[$iterator]['id']}})">
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['id']}}</span>
@@ -98,7 +100,7 @@
                                                             <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
                                                         </td>
                                                         <td>
-                                                            <input class="form-control" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity" disabled>
+                                                            <input class="form-control" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity[{{$quotationProducts[$iterator]['id']}}]" disabled>
                                                         </td>
                                                         <td>
                                                             <span id="cumulative_quantity_{{$quotationProducts[$iterator]['id']}}"></span>
@@ -146,7 +148,7 @@
                                                 @for($j = 0 ; $j < count($taxes); $j++)
                                                      <tr>
                                                          <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
-                                                         <td colspan="4" style="text-align: right"><input class="form-control" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage_{{$taxes[$j]['id']}}" value="{{$taxes[$j]['base_percentage']}}"></td>
+                                                         <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
                                                          <td>
                                                              <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}"></span>
                                                          </td>
@@ -179,6 +181,7 @@
                                                     <button type="submit" class="btn btn-success"> Submit </button>
                                                 </div>
                                             </div>
+                                               </form>
                                         </div>
                                 </div>
                             </div>
@@ -196,7 +199,7 @@
 <!--<script src="/assets/custom/bill/bill-manage-datatable.js" type="text/javascript"></script>-->
 <script>
     function selectedProducts(id){
-        $('input[name="id_'+id+'"]:checked').each(function(){
+        $('input[name="id['+id+']"]:checked').each(function(){
             $('#current_quantity_'+id).prop('disabled',false);
             var typingTimer;
             var doneTypingInterval = 500;
@@ -209,27 +212,27 @@
                 clearTimeout(typingTimer);
             });
             function doneTyping () {
-                getcal(input.val(),id);
+                calculateQuantityAmount(input.val(),id);
         }
         });
     }
 
-    function getcal(current_quantity,id){
+    function calculateQuantityAmount(current_quantity,id){
         var total = 0;
         var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
         var prev_bill_amount = parseFloat($('#previous_quantity_'+id).text()) * parseFloat($('#rate_per_unit_'+id).text());
         var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
         var cumulative_bill_amount = prev_bill_amount + current_bill_amount;
-        $('#cumulative_quantity_'+id).text(cumulative_quantity);
-        $('#previous_bill_amount_'+id).text(prev_bill_amount);
-        $('#current_bill_amount_'+id).text(current_bill_amount);
-        $('#cumulative_bill_amount_'+id).text(cumulative_bill_amount);
-        getTotal();
+        $('#cumulative_quantity_'+id).text(cumulative_quantity.toFixed(3));
+        $('#previous_bill_amount_'+id).text(prev_bill_amount.toFixed(3));
+        $('#current_bill_amount_'+id).text(current_bill_amount.toFixed(3));
+        $('#cumulative_bill_amount_'+id).text(cumulative_bill_amount.toFixed(3));
+        getTotals();
     }
 
-    function getTotal(){
+    function getTotals(){
         var total_previous_bill_amount = 0.0;
-        var total_current_bill_amount = 0.000000;
+        var total_current_bill_amount = 0.0;
         var total_cumulative_bill_amount = 0.0;
         var selected_product_length = $('input:checked').length;
         if(selected_product_length > 0){
@@ -238,29 +241,62 @@
 
                 var previous_bill_amount = parseFloat($('#previous_bill_amount_'+id).text());
                 total_previous_bill_amount = total_previous_bill_amount + previous_bill_amount;
-                $('#total_previous_bill_amount').text(total_previous_bill_amount);
-                $('#rounded_off_previous_bill_amount').text(total_previous_bill_amount.toFixed(3));
+                $('#total_previous_bill_amount').text(total_previous_bill_amount.toFixed(3));
+                $('#rounded_off_previous_bill_amount').text(Math.round(total_previous_bill_amount));
 
                 var current_bill_amount = parseFloat($('#current_bill_amount_'+id).text());
                 total_current_bill_amount = total_current_bill_amount + current_bill_amount;
-                $('#total_current_bill_amount').text(total_current_bill_amount);
-                $('#rounded_off_current_bill_amount').text(total_current_bill_amount.toFixed(3));
+                $('#total_current_bill_amount').text(total_current_bill_amount.toFixed(3));
+                $('#rounded_off_current_bill_amount').text(Math.round(total_current_bill_amount));
 
                 var cumulative_bill_amount = parseFloat($('#cumulative_bill_amount_'+id).text());
                 total_cumulative_bill_amount = total_cumulative_bill_amount + cumulative_bill_amount;
-                $('#total_cumulative_bill_amount').text(total_cumulative_bill_amount);
-                $('#rounded_off_cumulative_bill_amount').text(total_cumulative_bill_amount.toFixed(3));
+                $('#total_cumulative_bill_amount').text(total_cumulative_bill_amount.toFixed(3));
+                $('#rounded_off_cumulative_bill_amount').text(Math.round(total_cumulative_bill_amount));
             });
+            calculateTax();
         }
+    }
+
+    function calculateTax(){
+        var total_rounded_previous_bill = parseFloat($("#rounded_off_previous_bill_amount").text());
+        var final_total_previous_bill = total_rounded_previous_bill;
+
+        var total_rounded_current_bill = parseFloat($("#rounded_off_current_bill_amount").text());
+        var final_total_current_bill = total_rounded_current_bill;
+
+        var total_rounded_cumulative_bill = parseFloat($("#rounded_off_cumulative_bill_amount").text());
+        var final_total_cumulative_bill = total_rounded_cumulative_bill;
+
+        $(".tax").each(function(){
+            var tax_amount_previous_bill = total_rounded_previous_bill * ($(this).val() / 100);
+            final_total_previous_bill = final_total_previous_bill + tax_amount_previous_bill;
+            $(this).parent().next().text(tax_amount_previous_bill.toFixed(3));
+
+            var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
+            final_total_current_bill = final_total_current_bill + tax_amount_current_bill;
+            $(this).parent().next().next().text(tax_amount_current_bill.toFixed(3));
+
+            var tax_amount_cumulative_bill = total_rounded_cumulative_bill * ($(this).val() / 100);
+            final_total_cumulative_bill = final_total_cumulative_bill + tax_amount_cumulative_bill;
+            $(this).parent().next().next().next().text(tax_amount_cumulative_bill.toFixed(3));
+        });
+
+        $("#final_previous_bill_total").text(Math.round(final_total_previous_bill));
+        $("#final_current_bill_total").text(Math.round(final_total_current_bill));
+        $("#final_cumulative_bill_total").text(Math.round(final_total_cumulative_bill));
     }
 
     $(document).ready(function (){
         $('input[type="checkbox"]').click(function(){
             var length = $('input[type="checkbox"]:checked').length;
             if($('input[type="checkbox"]:checked').length <= 0){
+                $('#total_previous_bill_amount').text("");
                 $('#total_cumulative_bill_amount').text("");
                 $('#total_current_bill_amount').text("");
-                $('#total_previous_bill_amount').text("");
+                $('#rounded_off_previous_bill_amount').text("");
+                $('#rounded_off_cumulative_bill_amount').text("");
+                $('#rounded_off_current_bill_amount').text("");
             }
             if($(this).prop("checked") == false){
                     var id = $(this).val();
@@ -270,7 +306,7 @@
                     $('#previous_bill_amount_'+id).text("");
                     $('#current_bill_amount_'+id).text("");
                     $('#cumulative_bill_amount_'+id).text("");
-                    getTotal();
+                    getTotals();
             }
         });
     });
