@@ -51,13 +51,14 @@ trait ProjectTrait{
             $k = 0;
             $clientData = Client::where('is_active',true)->orderBy('id','asc')->get()->toArray();
             for($i = 0 ; $i < count($clientData) ; $i++){
-                $project = Project::where('client_id',$clientData[$i]['id'])->get()->toArray();
+                $project = Project::where('client_id',$clientData[$i]['id'])->orderBy('id','asc')->get()->toArray();
                 for($j = 0 ; $j < count($project) ; $j++){
-                    $project_site = ProjectSite::where('project_id',$project[$j]['id'])->get()->toArray();
+                    $project_site = ProjectSite::where('project_id',$project[$j]['id'])->orderBy('id','asc')->get()->toArray();
                     for($l = 0 ; $l < count($project_site) ; $l++){
                         $listingData[$k]['company'] = $clientData[$i]['company'];
                         $listingData[$k]['project_name'] = $project[$j]['name'];
                         $listingData[$k]['project_id'] = $project[$j]['id'];
+                        $listingData[$k]['project_is_active'] = $project[$j]['is_active'];
                         $listingData[$k]['project_site_id'] = $project_site[$l]['id'];
                         $listingData[$k]['project_site_name'] = $project_site[$l]['name'];
                         $k++;
@@ -69,10 +70,18 @@ trait ProjectTrait{
             $records = array();
             $records['data'] = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($listingData); $iterator++,$pagination++ ){
+                if( $listingData[$pagination]['project_is_active'] == true){
+                    $projectStatus = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                    $status = 'Disable';
+                }else{
+                    $projectStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                    $status = 'Enable';
+                }
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['company'],
                     $listingData[$pagination]['project_name'],
                     $listingData[$pagination]['project_site_name'],
+                    $projectStatus,
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -84,8 +93,8 @@ trait ProjectTrait{
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
-                                <a href="javascript:void(0);">
-                                    <i class="icon-docs"></i> Enable </a>
+                                <a href="/project/change-status/'.$listingData[$pagination]['project_id'].'">
+                                    <i class="icon-docs"></i> '.$status.' </a>
                             </li>
                         </ul>
                     </div>'
@@ -148,6 +157,63 @@ trait ProjectTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Project',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function changeProjectStatus(Request $request, $project){
+        try{
+            $newStatus = (boolean)!$project->is_active;
+            $project->update(['is_active' => $newStatus]);
+            $request->session()->flash('success', 'Project Status changed successfully.');
+            return redirect('/project/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'change Project status',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getEditView(Request $request, $project){
+        try{
+            $projectData['client'] = $project->client->company;
+            $projectData['id'] = $project->id;
+            $projectData['project'] = $project->name;
+            $project->project_site = $project->project_site->toArray();
+            $projectData['project_site'] = $project->project_site[0]['name'];
+            $projectData['project_site_address'] = $project->project_site[0]['address'];
+            return view('admin.project.edit')->with(compact('projectData'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'change Project status',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editProject(Request $request, $project){
+        try{
+            $project->update(['name'=>$request->project_name]);
+            ProjectSite::where('project_id',$project->id)->update([
+                'name' => $request->project_site_name,
+                'address' => $request->address
+            ]);
+            $request->session()->flash('success', 'Project edited successfully.');
+            return redirect('/project/edit/'.$project->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'change Project status',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];

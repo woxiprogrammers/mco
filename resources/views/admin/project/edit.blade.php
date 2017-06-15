@@ -1,13 +1,12 @@
 <?php
 /**
  * Created by Ameya Joshi.
- * Date: 14/6/17
- * Time: 5:52 PM
+ * Date: 15/6/17
+ * Time: 12:46 PM
  */
 ?>
-
 @extends('layout.master')
-@section('title','Constro | Create Project')
+@section('title','Constro | Edit Project')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -38,16 +37,17 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                                 <li>
-                                    <a href="javascript:void(0);">Create Project</a>
+                                    <a href="javascript:void(0);">Edit Project</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
                             <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
-
                                     <div class="portlet-body form">
-                                        <form role="form" id="createProject" class="form-horizontal" method="post" action="/project/create">
+                                        <form role="form" id="createProject" class="form-horizontal" method="post" action="/project/edit/{{$projectData['id']}}">
+                                            <input type="hidden" name="project_id" id="projectId" value="{{$projectData['id']}}">
+                                            <input type="hidden" name="_method" value="put">
                                             {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="form-group row">
@@ -56,12 +56,8 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select name="client_id" class="form-control">
-                                                            @foreach($clients as $client)
-                                                                <option value="{{$client->id}}"> {{$client->company}} </option>
-                                                            @endforeach
-                                                        </select>
-                                                        </div>
+                                                        <input name="client" class="form-control" id="client" value="{{$projectData['client']}}" readonly>
+                                                    </div>
                                                 </div>
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
@@ -69,7 +65,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" name="project_name" class="form-control" id="projectName">
+                                                        <input type="text" name="project_name" class="form-control" id="projectName" value="{{$projectData['project']}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
@@ -78,7 +74,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" id="projectSiteName" name="project_site_name" class="form-control">
+                                                        <input type="text" id="projectSiteName" name="project_site_name" class="form-control" value="{{$projectData['project_site']}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
@@ -87,7 +83,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <textarea id="siteAddress" name="address" class="form-control"></textarea>
+                                                        <textarea id="siteAddress" name="address" class="form-control">{{$projectData['project_site_address']}}</textarea>
                                                     </div>
                                                 </div>
                                                 <div class="form-actions noborder row">
@@ -112,7 +108,7 @@
 <script src="/assets/custom/admin/project/project.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
-        CreateProject.init();
+        EditProject.init();
     });
 </script>
 @endsection

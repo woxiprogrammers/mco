@@ -31,6 +31,7 @@
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
                             <div class="row">
                                 <div class="col-md-12">
@@ -56,6 +57,7 @@
                                                     <th> Company Name </th>
                                                     <th style="width: 30%"> Project Name </th>
                                                     <th> Site Name </th>
+                                                    <th> Status </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 </thead>

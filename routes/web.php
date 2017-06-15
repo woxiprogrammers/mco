@@ -155,7 +155,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses'=> 'Admin\ProjectController@getManageView'));
         Route::post('listing',array('uses'=> 'Admin\ProjectController@projectListing'));
         Route::post('check-name',array('uses'=> 'Admin\ProjectController@checkProjectName'));
-
+        Route::get('change-status/{project}',array('uses' => 'Admin\ProjectController@changeProjectStatus'));
+        Route::get('edit/{project}',array('uses' => 'Admin\ProjectController@getEditView'));
+        Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
     });
 });
 
