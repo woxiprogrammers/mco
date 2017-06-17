@@ -59,6 +59,7 @@ var  CreateProfitMargin = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -137,6 +138,7 @@ var  EditProfitMargin = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
