@@ -196,7 +196,7 @@ trait BillTrait{
             /*if(){
 
             }else{*/
-                 $bill['quotaion_id'] = $request['quotation_id'];
+                 $bill['quotation_id'] = $request['quotation_id'];
                  $bill['bill_status_id'] = BillStatus::where('slug','unpaid')->pluck('id')->first();
                  Bill::create($bill);
                  foreach($request['quotation_product_id'] as $key=>$value){
@@ -205,21 +205,17 @@ trait BillTrait{
                              $bill_quotation_product['bill_id'] = $request->bill_id;
                              $bill_quotation_product['quotation_product_id'] = $value;
                              $bill_quotation_product['quantity'] = $quantity;
-                             QuotationProduct::create($bill_quotation_product);
+                             BillQuotationProducts::create($bill_quotation_product);
                          }
-
                      }
-
                  }
                  foreach($request['tax_percentage'] as $key=>$value){
                      $bill_taxes['tax_id'] = $key;
                      $bill_taxes['percentage'] = $value;
                      BillTax::create($bill_taxes);
                  }
-
-
             //}
-            dd(123);
+            //dd(123);
             $request->session()->flash('success','Bill Created Successfully');
             return redirect('/bill/create');
         }catch (\Exception $e){

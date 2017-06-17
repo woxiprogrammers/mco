@@ -51,9 +51,7 @@
                                                     <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
 
                                                 </div>
-                                               <input type="hidden" id="bill_id" name="bill_id" value="{{count($bills)+1}}">
-                                            @else
-                                               <input type="hidden" id="bill_id" name="bill_id" value="1">
+
                                             @endif
                                            <input type="hidden" id="project_id" name="project_id" value="{{$project_site['id']}}">
                                            <input type="hidden" id="quotation_id" name="quotation_id" value="{{$quotation['id']}}">
