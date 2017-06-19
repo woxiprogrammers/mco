@@ -54,7 +54,6 @@ $(document).ready(function(){
         var formFields = $('#QuotationCreateForm').serializeArray();
         var validForm = true;
        $.each(formFields, function(i){
-            console.log(formFields[i]);
            if(($.trim(formFields[i].value)) == ""){
                 $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
                validForm = false;
