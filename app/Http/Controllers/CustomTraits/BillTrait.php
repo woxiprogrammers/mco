@@ -189,35 +189,81 @@ trait BillTrait{
         return response()->json($records,200);
     }
 
+    public function editBill(Request $request,$bill){
+        try{
+            $selectedBillId = $bill['id'];
+            $bills = Bill::where('quotation_id',$bill['quotation_id'])->get()->toArray();
+            $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
+            $total['previous_bill_amount'] = $total['current_bill_amount'] = $total['cumulative_bill_amount'] = 0;
+            for($iterator = 0 ; $iterator < count($billQuotationProducts) ; $iterator++){
+                $billQuotationProducts[$iterator]['previous_quantity'] = 0;
+                $billQuotationProducts[$iterator]['quotationProducts'] = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->where('quotation_id',$bill['quotation_id'])->first();
+                $billQuotationProducts[$iterator]['productDetail'] = Product::where('id',$billQuotationProducts[$iterator]['quotationProducts']['product_id'])->first();
+                $billQuotationProducts[$iterator]['unit'] = Unit::where('id',$billQuotationProducts[$iterator]['productDetail']['unit_id'])->pluck('name')->first();
+                $billQuotationProducts[$iterator]['current_bill_amount'] = $billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'];
+                $previousBills = BillQuotationProducts::where('bill_id','<',$bill['id'])->get()->toArray();
+                foreach($previousBills as $key=>$previousBill){
+                    if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
+                        $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
+                    }
+                }
+                $billQuotationProducts[$iterator]['previous_bill_amount'] = $billQuotationProducts[$iterator]['previous_quantity'] * $billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'];
+                $billQuotationProducts[$iterator]['cumulative_quantity'] = $billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity'];
+                $billQuotationProducts[$iterator]['cumulative_bill_amount'] = $billQuotationProducts[$iterator]['cumulative_quantity'] * $billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'];
+                $total['previous_bill_amount'] = $total['previous_bill_amount'] + $billQuotationProducts[$iterator]['previous_bill_amount'];
+                $total['current_bill_amount'] = $total['current_bill_amount'] + $billQuotationProducts[$iterator]['current_bill_amount'];
+                $total['cumulative_bill_amount'] = $total['cumulative_bill_amount'] + $billQuotationProducts[$iterator]['cumulative_bill_amount'];
+            }
+            $final['previous_bill_amount'] = $total_rounded['previous_bill_amount'] = round($total['previous_bill_amount']);
+            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = round($total['current_bill_amount']);
+            $final['cumulative_bill_amount'] = $total_rounded['cumulative_bill_amount'] = round($total['cumulative_bill_amount']);
+            $taxes = BillTax::where('bill_id',$bill['id'])->get()->toArray();
+            for($j = 0 ; $j < count($taxes) ; $j++){
+                $taxes[$j]['name'] = Tax::where('id',$taxes[$j]['tax_id'])->pluck('name')->first();
+                $taxes[$j]['previous_bill_amount'] = round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                $taxes[$j]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                $taxes[$j]['cumulative_bill_amount'] = round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                $final['previous_bill_amount'] = round($final['previous_bill_amount'] + $taxes[$j]['previous_bill_amount']);
+                $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$j]['current_bill_amount']);
+                $final['cumulative_bill_amount'] = round($final['cumulative_bill_amount'] + $taxes[$j]['cumulative_bill_amount']);
+            }
+            return view('admin.bill.view')->with(compact('selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes'));
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'get view of bills',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function createBill(Request $request){
         try{
+            $projectSiteId = $request['project_site_id'];
             $bill_quotation_product = array();
-            //dd($request->all());
-            /*if(){
-
-            }else{*/
-                 $bill['quotation_id'] = $request['quotation_id'];
-                 $bill['bill_status_id'] = BillStatus::where('slug','unpaid')->pluck('id')->first();
-                 Bill::create($bill);
-                 foreach($request['quotation_product_id'] as $key=>$value){
-                     foreach($request['current_quantity'] as $quantities=>$quantity){
-                         if($key == $quantities){
-                             $bill_quotation_product['bill_id'] = $request->bill_id;
-                             $bill_quotation_product['quotation_product_id'] = $value;
-                             $bill_quotation_product['quantity'] = $quantity;
-                             BillQuotationProducts::create($bill_quotation_product);
-                         }
-                     }
-                 }
-                 foreach($request['tax_percentage'] as $key=>$value){
-                     $bill_taxes['tax_id'] = $key;
-                     $bill_taxes['percentage'] = $value;
-                     BillTax::create($bill_taxes);
-                 }
-            //}
-            //dd(123);
+            $bill['quotation_id'] = $request['quotation_id'];
+            $bill['bill_status_id'] = BillStatus::where('slug','unpaid')->pluck('id')->first();
+            $bill_created = Bill::create($bill);
+            foreach($request['quotation_product_id'] as $key=>$value){
+                foreach($request['current_quantity'] as $quantities=>$quantity){
+                    if($key == $quantities){
+                        $bill_quotation_product['bill_id'] = $bill_created['id'];
+                        $bill_quotation_product['quotation_product_id'] = $value;
+                        $bill_quotation_product['quantity'] = $quantity;
+                        BillQuotationProducts::create($bill_quotation_product);
+                    }
+                }
+            }
+            foreach($request['tax_percentage'] as $key=>$value){
+                $bill_taxes['tax_id'] = $key;
+                $bill_taxes['bill_id'] = $bill_created['id'];
+                $bill_taxes['percentage'] = $value;
+                BillTax::create($bill_taxes);
+            }
             $request->session()->flash('success','Bill Created Successfully');
-            return redirect('/bill/create');
+            return redirect('/bill/create/'.$projectSiteId);
         }catch (\Exception $e){
             $data = [
                 'action' => 'Create New bill',

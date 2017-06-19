@@ -127,6 +127,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix' => 'bill'],function(){
         Route::get('create/{project_site}',array('uses' => 'Admin\BillController@getCreateView'));
+        Route::get('view/{bill}',array('uses' => 'Admin\BillController@editBill'));
         Route::get('create',array('uses' => 'Admin\BillController@getCreateNewBillView'));
         Route::post('create',array('uses' => 'Admin\BillController@createBill'));
         Route::get('projects/{client}',array('uses' => 'Admin\BillController@getProjects'));

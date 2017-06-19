@@ -44,16 +44,15 @@
                                                 <div class="col-md-offset-7 table-actions-wrapper" style="margin-bottom: 20px">
                                                     <label class="control-label">Select Bill</label>
                                                     <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
+                                                        <option value="default">Select Array</option>
                                                         @for($i = 0 ; $i < count($bills); $i++)
                                                             <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                         @endfor
                                                     </select>
                                                     <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
-
                                                 </div>
-
                                             @endif
-                                           <input type="hidden" id="project_id" name="project_id" value="{{$project_site['id']}}">
+                                           <input type="hidden" id="project_site_id" name="project_site_id" value="{{$project_site['id']}}">
                                            <input type="hidden" id="quotation_id" name="quotation_id" value="{{$quotation['id']}}">
 
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
@@ -76,7 +75,7 @@
 
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
-                                                    <tr>
+                                                    <tr id="id_{{$quotationProducts[$iterator]['id']}}">
                                                         <td>
                                                             <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" onclick="selectedProducts({{$quotationProducts[$iterator]['id']}})">
                                                         </td>
@@ -198,11 +197,11 @@
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-<!--<script src="/assets/custom/bill/bill-manage-datatable.js" type="text/javascript"></script>-->
 <script>
     function selectedProducts(id){
         $('input[name="quotation_product_id['+id+']"]:checked').each(function(){
             $('#current_quantity_'+id).prop('disabled',false);
+            $("#id_"+id).css('background-color',"#e1e1e1");
             var typingTimer;
             var doneTypingInterval = 500;
             var input = $('#current_quantity_'+id);
@@ -290,6 +289,11 @@
     }
 
     $(document).ready(function (){
+        $("#change_bill").on('change', function(){
+            var bill_id = $(this).val();
+            window.location.href = "/bill/view/"+bill_id;
+        });
+
         $('input[type="checkbox"]').click(function(){
             var length = $('input[type="checkbox"]:checked').length;
             if($('input[type="checkbox"]:checked').length <= 0){
@@ -302,6 +306,7 @@
             }
             if($(this).prop("checked") == false){
                     var id = $(this).val();
+                    $("#id_"+id).css('background-color',"");
                     $('#current_quantity_'+id).prop('disabled',true);
                     $('#current_quantity_'+id).val('');
                     $('#cumulative_quantity_'+id).text("");
