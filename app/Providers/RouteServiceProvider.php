@@ -7,6 +7,7 @@ use App\Client;
 use App\Material;
 use App\Product;
 use App\ProfitMargin;
+use App\Project;
 use App\ProjectSite;
 use App\Summary;
 use App\Unit;
@@ -47,6 +48,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('user',User::class);
         Route::model('client',Client::class);
         Route::model('project_site',ProjectSite::class);
+        Route::model('project',Project::class);
     }
 
     /**
