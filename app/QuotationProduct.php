@@ -8,5 +8,5 @@ class QuotationProduct extends Model
 {
     protected $table = 'quotation_products';
 
-    protected $fillable = ['project_site_id'];
+    protected $fillable = ['quotation_id','description','product_id','product_version_id','rate_per_unit','quantity','summary_id'];
 }

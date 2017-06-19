@@ -10,22 +10,26 @@
     <div class="table-scrollable">
         <table class="table table-striped table-bordered table-hover">
             <thead>
-            <tr>
-                <th scope="col" style="width:450px !important"> <u> Profit Margins<i class="fa fa-arrow-right"></i> </u> <br> Products <i class="fa fa-arrow-down"></i></th>
-                @foreach($profitMargins as $profitMargin)
-                <th scope="col"> {{$profitMargin['name']}} </th>
-                @endforeach
-            </tr>
+                <tr>
+                    <th scope="col" style="width:450px !important"> <u> Profit Margins<i class="fa fa-arrow-right"></i> </u> <br> Products <i class="fa fa-arrow-down"></i></th>
+                    @foreach($profitMargins as $profitMargin)
+                        <th scope="col"> {{$profitMargin['name']}} </th>
+                    @endforeach
+                </tr>
             </thead>
             <tbody>
-            <tr>
                 @foreach($productProfitMargins as $id => $data)
-                <td> {{$data['products']}} </td>
-                @foreach($data['profit_margin'] as $profitMargin)
-                <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="{{$profitMargin['percentage']}}"></td>
+                    <tr>
+                        <td> {{$data['products']}} </td>
+                        @foreach($profitMargins as $profitMargin)
+                            @if(array_key_exists($profitMargin['id'],$data['profit_margin']))
+                                <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="{{$data['profit_margin'][$profitMargin['id']]['percentage']}}"></td>
+                            @else
+                                <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="0"></td>
+                            @endif
+                        @endforeach
+                    </tr>
                 @endforeach
-                @endforeach
-            </tr>
             </tbody>
         </table>
     </div>
@@ -36,9 +40,9 @@
             </a>
         </div>
         <div class="col-md-3 col-md-offset-4">
-            <a class="btn btn-success" id="next2" href="javascript:void(0);">
+            <button type="submit" class="btn btn-success" id="next2">
                 Submit
-            </a>
+            </button>
         </div>
     </div>
 
