@@ -265,4 +265,49 @@ trait QuotationTrait{
             abort(500);
         }
     }
+
+    public function getProjects(Request $request){
+        try{
+            $clientId = $request->client_id;
+            $projects = Project::where('client_id', $clientId)->where('is_active', true)->get();
+            $response = array();
+            foreach($projects as $project){
+                $response[] = '<option value="'.$project->id.'">'.$project->name.'</option> ';
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Projects',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
+    }
+
+
+    public function getProjectSites(Request $request){
+        try{
+            $projectId = $request->project_id;
+            $projectSites = Project::where('client_id', $projectId)->get();
+            $response = array();
+            foreach($projectSites as $projectSite){
+                $response[] = '<option value="'.$projectSite->id.'">'.$projectSite->name.'</option> ';
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Projects',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
+    }
 }

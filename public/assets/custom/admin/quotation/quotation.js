@@ -83,6 +83,44 @@ $(document).ready(function(){
             });
         }
     });
+
+    $("#clientId").on('change', function(){
+        var clientId = $(this).val();
+        $.ajax({
+            url: '/quotation/get-projects',
+            type: 'POST',
+            async: true,
+            data: {
+                _token: $("input[name='_token']").val(),
+                client_id: clientId
+            },
+            success: function(data,textStatus,xhr){
+                $('#projectId').html(data);
+            },
+            error: function(){
+
+            }
+        });
+    });
+
+    $("#projectId").on('change', function(){
+        var projectId = $(this).val();
+        $.ajax({
+            url: '/quotation/get-project-sites',
+            type: 'POST',
+            async: true,
+            data: {
+                _token: $("input[name='_token']").val(),
+                project_id: projectId
+            },
+            success: function(data,textStatus,xhr){
+                $('#projectSiteId').html(data);
+            },
+            error: function(){
+
+            }
+        });
+    });
 });
 
 function backToGeneral(){

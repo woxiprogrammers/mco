@@ -56,7 +56,7 @@
                                                             <div class="form-group">
                                                                 <label class="col-md-3 control-label">Client Name</label>
                                                                 <div class="col-md-6">
-                                                                    <select class="form-control" id="client_id" name="client_id">
+                                                                    <select class="form-control" id="clientId" name="client_id">
                                                                         <option value=""> -- Select Client -- </option>
                                                                         @foreach($clients as $client)
                                                                             <option value="{{$client['id']}}"> {{$client['company']}} </option>
@@ -67,13 +67,17 @@
                                                             <div class="form-group">
                                                                 <label class="col-md-3 control-label">Project Name</label>
                                                                 <div class="col-md-6">
-                                                                    <input class="form-control" id="project" name="project">
+                                                                    <select name="project_id" id="projectId" class="form-control" disabled>
+
+                                                                    </select>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label class="col-md-3 control-label">Project Site Name</label>
                                                                 <div class="col-md-6">
-                                                                    <input class="form-control" id="project_site" name="project_site">
+                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" disabled>
+
+                                                                    </select>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">

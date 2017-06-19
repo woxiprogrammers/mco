@@ -146,7 +146,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-product-detail',array('uses'=> 'Admin\QuotationController@getProductDetail'));
         Route::post('add-product-row',array('uses'=> 'Admin\QuotationController@addProductRow'));
         Route::post('check-project-site-name',array('uses'=> 'Admin\QuotationController@checkProjectSiteName'));
+        Route::post('get-project-sites',array('uses'=> 'Admin\QuotationController@getProjectSites'));
         Route::post('check-project-name',array('uses'=> 'Admin\QuotationController@checkProjectNames'));
+        Route::post('get-projects',array('uses'=> 'Admin\QuotationController@checkProjectNames'));
     });
 });
 
