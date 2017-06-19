@@ -50,13 +50,13 @@ trait ProductTrait{
     public function getEditView(Request $request, $product) {
         try{
             $product = $product->toArray();
-            $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first()->toArray();
+            $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first();
             $product['category'] = Category::where('id',$product['category_id'])->pluck('name')->first();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
             $productProfitMarginsData = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
                                     ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
                                     ->select('profit_margins.id as id','profit_margin_versions.percentage as percentage')
-                                    ->get()->toArray();
+                                    ->get();
             $productProfitMargins = array();
             foreach($productProfitMarginsData as $productProfitMargin){
                 $productProfitMargins[$productProfitMargin['id']] = $productProfitMargin['percentage'];
@@ -181,19 +181,21 @@ trait ProductTrait{
             }
             $iterator = 0;
             $taxAmount = 0;
-            foreach($data['profit_margin'] as $key => $profitMargin){
-                $taxAmount += round($subTotal * ($profitMargin / 100),3);
-                $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$key)->orderBy('created_at','desc')->select('id','percentage')->first()->toArray();
-                if($profitMargin == $recentProfitMarginVersion['percentage']){
-                    $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
-                }else{
-                    $versionData = array();
-                    $versionData['profit_margin_id'] = $key;
-                    $versionData['percentage'] = $profitMargin;
-                    $newProfitMargin = ProfitMarginVersion::create($versionData);
-                    $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $newProfitMargin->id;
+            if(array_key_exists('profit_margin',$data)){
+                foreach($data['profit_margin'] as $key => $profitMargin){
+                    $taxAmount += $subTotal * ($profitMargin / 100);
+                    $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$key)->orderBy('created_at','desc')->select('id','percentage')->first()->toArray();
+                    if($profitMargin == $recentProfitMarginVersion['percentage']){
+                        $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
+                    }else{
+                        $versionData = array();
+                        $versionData['profit_margin_id'] = $key;
+                        $versionData['percentage'] = $profitMargin;
+                        $newProfitMargin = ProfitMarginVersion::create($versionData);
+                        $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $newProfitMargin->id;
+                    }
+                    $iterator++;
                 }
-                $iterator++;
             }
             $productVersionData = array();
             $productVersionData['product_id'] = $product->id;
