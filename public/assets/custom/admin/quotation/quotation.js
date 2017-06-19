@@ -86,40 +86,37 @@ $(document).ready(function(){
 
     $("#clientId").on('change', function(){
         var clientId = $(this).val();
-        $.ajax({
-            url: '/quotation/get-projects',
-            type: 'POST',
-            async: true,
-            data: {
-                _token: $("input[name='_token']").val(),
-                client_id: clientId
-            },
-            success: function(data,textStatus,xhr){
-                $('#projectId').html(data);
-            },
-            error: function(){
+        if(clientId == ""){
+            $('#projectId').prop('disabled', true);
+            $('#projectId').html('');
+            $('#projectSiteId').prop('disabled', true);
+            $('#projectSiteId').html('');
+        }else{
+            $.ajax({
+                url: '/quotation/get-projects',
+                type: 'POST',
+                async: true,
+                data: {
+                    _token: $("input[name='_token']").val(),
+                    client_id: clientId
+                },
+                success: function(data,textStatus,xhr){
+                    $('#projectId').html(data);
+                    $('#projectId').prop('disabled', false);
+                    var projectId = $("#projectId").val();
+                    getProjectSites(projectId);
+                },
+                error: function(){
 
-            }
-        });
+                }
+            });
+        }
+
     });
 
     $("#projectId").on('change', function(){
         var projectId = $(this).val();
-        $.ajax({
-            url: '/quotation/get-project-sites',
-            type: 'POST',
-            async: true,
-            data: {
-                _token: $("input[name='_token']").val(),
-                project_id: projectId
-            },
-            success: function(data,textStatus,xhr){
-                $('#projectSiteId').html(data);
-            },
-            error: function(){
-
-            }
-        });
+        getProjectSites(projectId);
     });
 });
 
@@ -149,6 +146,27 @@ function getProducts(category_id,rowNumber){
             $("#productSelect"+rowNumber).prop('disabled', false);
         },
         error: function(errorStatus, xhr){
+
+        }
+    });
+}
+
+function getProjectSites(projectId){
+    $.ajax({
+        url: '/quotation/get-project-sites',
+        type: 'POST',
+        async: true,
+        data: {
+            _token: $("input[name='_token']").val(),
+            project_id: projectId
+        },
+        success: function(data,textStatus,xhr){
+            if(data.length > 0){
+                $('#projectSiteId').html(data);
+                $('#projectSiteId').prop('disabled', false);
+            }
+        },
+        error: function(){
 
         }
     });
