@@ -50,6 +50,11 @@ trait BillTrait{
                     $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
                     $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
                     $quotationProducts[$i]['previous_quantity'] = 0;
+                    if($quotation['discount'] != 0){
+                        $quotationProducts[$i]['rate'] = $quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100));
+                    }else{
+                        $quotationProducts[$i]['rate'] = $quotationProducts[$i]['rate_per_unit'];
+                    }
                 }
             }
             $taxes = Tax::where('is_active',true)->get()->toArray();
@@ -104,7 +109,7 @@ trait BillTrait{
     public function getProjectSites(Request $request,$project){
         try{
             $status = 200;
-            $projectSites = ProjectSite::where('project_id',$project)->get()->toArray();
+            $projectSites = ProjectSite::where('project_id',$project['id'])->get()->toArray();
             $projectSitesOptions = array();
             for($i = 0 ; $i < count($projectSites); $i++){
                 $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';
@@ -153,7 +158,7 @@ trait BillTrait{
                         $listingData[$iterator]['project_name'] = $projectData[$j]['name'];
                         $listingData[$iterator]['project_site_id'] = $projectSiteData[$i]['id'];
                         $listingData[$iterator]['project_site_name'] = $projectSiteData[$i]['name'];
-                        $k++;
+                        $iterator++;
                     }
                 }
             }
@@ -251,8 +256,8 @@ trait BillTrait{
             $bill['quotation_id'] = $request['quotation_id'];
             $bill['bill_status_id'] = BillStatus::where('slug','unpaid')->pluck('id')->first();
             $bill_created = Bill::create($bill);
-            foreach($request['quotation_product_id'] as $key=>$value){
-                foreach($request['current_quantity'] as $quantities=>$quantity){
+            foreach($request['quotation_product_id'] as $key => $value){
+                foreach($request['current_quantity'] as $quantities => $quantity){
                     if($key == $quantities){
                         $bill_quotation_product['bill_id'] = $bill_created['id'];
                         $bill_quotation_product['quotation_product_id'] = $value;
@@ -261,7 +266,7 @@ trait BillTrait{
                     }
                 }
             }
-            foreach($request['tax_percentage'] as $key=>$value){
+            foreach($request['tax_percentage'] as $key => $value){
                 $bill_taxes['tax_id'] = $key;
                 $bill_taxes['bill_id'] = $bill_created['id'];
                 $bill_taxes['percentage'] = $value;
