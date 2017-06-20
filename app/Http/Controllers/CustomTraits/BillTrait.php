@@ -104,7 +104,7 @@ trait BillTrait{
     public function getProjectSites(Request $request,$project){
         try{
             $status = 200;
-            $projectSites = ProjectSite::where('project_id',$project['id'])->get()->toArray();
+            $projectSites = ProjectSite::where('project_id',$project)->get()->toArray();
             $projectSitesOptions = array();
             for($i = 0 ; $i < count($projectSites); $i++){
                 $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';

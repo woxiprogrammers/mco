@@ -8,12 +8,21 @@
 namespace App\Http\Controllers\CustomTraits;
 
 use App\Category;
+use App\Client;
+use App\Helper\UnitHelper;
 use App\Material;
 use App\Product;
 use App\ProductMaterialRelation;
 use App\ProductProfitMarginRelation;
 use App\ProductVersion;
 use App\ProfitMargin;
+use App\Project;
+use App\ProjectSite;
+use App\Quotation;
+use App\QuotationMaterial;
+use App\QuotationProduct;
+use App\QuotationProfitMarginVersion;
+use App\QuotationStatus;
 use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,8 +31,9 @@ trait QuotationTrait{
 
     public function getCreateView(Request $request){
         try{
+            $clients = Client::where('is_active', true)->select('id','company')->get()->toArray();
             $categories = Category::where('is_active', true)->select('id','name')->get()->toArray();
-            return view('admin.quotation.create')->with(compact('categories'));
+            return view('admin.quotation.create')->with(compact('categories','clients'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Create Quotation View',
@@ -119,26 +129,22 @@ trait QuotationTrait{
         try{
             $productIds = $request->product_ids;
             $materialIds = array();
-            $materials = array();
             $units = Unit::where('is_active', true)->orderBy('name','asc')->get()->toArray();
             foreach($productIds as $id){
-                $recentVersionId = ProductVersion::where('product_id',$id)->pluck('id')->first();
+                $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
                 $materialId = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
                                 ->join('materials','materials.id','=','material_versions.material_id')
                                 ->where('product_material_relation.product_version_id',$recentVersionId)
-                                ->pluck('material_versions.material_id')
+                                ->pluck('materials.id')
                                 ->toArray();
-                if(!(in_array($materialId,$materialIds))){
-                    $materialIds[] = $materialId;
-                    $materials[] = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
-                        ->join('materials','materials.id','=','material_versions.material_id')
-                        ->join('units','units.id','=','material_versions.unit_id')
-                        ->where('product_material_relation.product_version_id',$recentVersionId)
-                        ->select('materials.id as id','materials.name as name','materials.rate_per_unit as rate_per_unit','materials.unit_id as unit_id','units.name as unit')
-                        ->first()
-                        ->toArray();
-                }
+                $materialIds = array_unique(array_merge($materialIds,$materialId));
             }
+            $materials = Material::join('units','materials.unit_id','=','units.id')
+                        ->whereIn('materials.id',$materialIds)
+                        ->orderBy('name','asc')
+                        ->select('materials.id as id','materials.name as name','materials.rate_per_unit as rate_per_unit','materials.unit_id as unit_id','units.name as unit')
+                        ->get()
+                        ->toArray();
             return view('partials.quotation.materials-table')->with(compact('materials','units'));
         }catch(\Exception $e){
             $data = [
@@ -156,16 +162,18 @@ trait QuotationTrait{
             $profitMargins = ProfitMargin::where('is_active', true)->orderBy('name','asc')->get()->toArray();
             $productProfitMargins = array();
             foreach($productIds as $id){
-                $recentVersion = ProductVersion::where('product_id',$id)->orderBy('created_at')->pluck('id')->first();
+                $recentVersion = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
                 $productProfitMargins[$id]['products'] = Product::where('id',$id)->pluck('name')->first();
-                $productProfitMargins[$id]['profit_margin'] = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
-                                                            ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
-                                                            ->where('products_profit_margins_relation.product_version_id',$recentVersion)
-                                                            ->orderBy('profit_margins.name','asc')
-                                                            ->select('profit_margins.name as name','profit_margins.id as id','profit_margin_versions.percentage as percentage')
-                                                            ->get()
-                                                            ->toArray();
-
+                $productProfitMarginRelation = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
+                                            ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
+                                            ->where('products_profit_margins_relation.product_version_id',$recentVersion)
+                                            ->orderBy('profit_margins.name','asc')
+                                            ->select('profit_margins.name as name','profit_margins.id as id','profit_margin_versions.percentage as percentage')
+                                            ->get()
+                                            ->toArray();
+                foreach($productProfitMarginRelation as $profitMargin){
+                    $productProfitMargins[$id]['profit_margin'][$profitMargin['id']] = $profitMargin;
+                }
             }
             return view('partials.quotation.profit-margin-table')->with(compact('productProfitMargins','profitMargins'));
         }catch(\Exception $e){
@@ -197,5 +205,167 @@ trait QuotationTrait{
         }
 
         return response()->json($records);
+    }
+
+    public function checkProjectSiteName(Request $request){
+        try{
+            $projectSiteId = $request->projectSiteId;
+            $nameCount = ProjectSite::where('id',$projectSiteId)->count();
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Project Site name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function checkProjectNames(Request $request){
+        try{
+            $project = $request->name;
+            $nameCount = Project::where('name','ilike',$project)->count();
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $response = array();
+            $status = 500;
+            $data = [
+                'action' => 'Get Project names',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function createQuotation(Request $request){
+        try{
+            $data = $request->all();
+            $quotationData = array();
+            $draftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
+            $quotationData['project_site_id'] = $data['project_site_id'];
+            $quotationData['quotation_status_id'] = $draftStatusId;
+            $quotation = Quotation::create($quotationData);
+            $quotation = $quotation->toArray();
+            foreach($data['product_id'] as $productId){
+                $quotationProductData = array();
+                $quotationProductData['product_id'] = $productId;
+                $quotationProductData['quotation_id'] = $quotation['id'];
+                $quotationProductData['description'] = $data['product_description'][$productId];
+                $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                $productMaterials = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
+                                                ->join('materials','materials.id','=','material_versions.material_id')
+                                                ->where('product_material_relation.product_version_id', $recentVersion)
+                                                ->select('materials.id as id','product_material_relation.material_quantity as material_quantity','material_versions.unit_id')
+                                                ->get()
+                                                ->toArray();
+                $productAmount = 0;
+                foreach($productMaterials as $material){
+                    if($data['material_unit'][$material['id']] == $material['unit_id']){
+                        $rateConversion = $data['material_rate'][$material['id']];
+                    }else{
+                        $rateConversion = UnitHelper::unitConversion($material['unit_id'],$data['material_unit'][$material['id']],$data['material_rate'][$material['id']]);
+                        if(is_array($rateConversion)){
+                            $request->session()->flash('error','Unit Conversion is invalid');
+                            return redirect('/quotation/create');
+                        }
+                    }
+                    $productAmount = $productAmount + ($rateConversion * $material['material_quantity']);
+                }
+                $quotationProductData['rate_per_unit'] = $productAmount;
+                $quotationProductData['quantity'] = $data['product_quantity'][$productId];
+                $quotationProduct = QuotationProduct::create($quotationProductData);
+                foreach($data['profit_margins'][$productId] as $id => $percentage){
+                    $quotationProfitMarginData = array();
+                    $quotationProfitMarginData['profit_margin_id'] = $id;
+                    $quotationProfitMarginData['percentage'] = $percentage;
+                    $quotationProfitMarginData['quotation_product_id'] = $quotationProduct->id;
+                    QuotationProfitMarginVersion::create($quotationProfitMarginData);
+                    $productAmount = $productAmount + ($productAmount * ($percentage / 100));
+                }
+                QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
+            }
+            foreach($data['material_id'] as $materialId){
+                $quotationMaterialData = array();
+                $quotationMaterialData['material_id'] = $materialId;
+                $quotationMaterialData['rate_per_unit'] = $data['material_rate'][$materialId];
+                $quotationMaterialData['unit_id'] = $data['material_unit'][$materialId];
+                if(is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
+                    $quotationMaterialData['is_client_supplied'] = true;
+                }else{
+                    $quotationMaterialData['is_client_supplied'] = false;
+                }
+                $quotationMaterialData['quotation_id'] = $quotation['id'];
+                QuotationMaterial::create($quotationMaterialData);
+            }
+            $request->session()->flash('success','Quotation created successfully.');
+            return redirect('/quotation/create');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Quotation',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getProjects(Request $request){
+        try{
+            $clientId = $request->client_id;
+            $projects = Project::where('client_id', $clientId)->where('is_active', true)->get();
+            $response = array();
+            foreach($projects as $project){
+                $response[] = '<option value="'.$project->id.'">'.$project->name.'</option> ';
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Projects',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
+    }
+
+
+    public function getProjectSites(Request $request){
+        try{
+            $projectId = $request->project_id;
+            $projectSites = ProjectSite::join('quotations','quotations.project_site_id','!=','project_sites.id')
+                                ->where('project_id', $projectId)
+                                ->get();
+            $response = array();
+            foreach($projectSites as $projectSite){
+                $response[] = '<option value="'.$projectSite->id.'">'.$projectSite->name.'</option> ';
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Projects',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
     }
 }

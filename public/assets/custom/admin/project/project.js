@@ -1,6 +1,9 @@
-var  CreateCategory = function () {
+/**
+ * Created by Ameya Joshi on 14/6/17.
+ */
+var  CreateProject = function () {
     var handleCreate = function() {
-        var form = $('#create-category');
+        var form = $('#createProject');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -8,27 +11,45 @@ var  CreateCategory = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                name: {
+                project_name: {
                     required: true,
                     remote: {
-                        url: "/category/check-name",
+                        url: "/project/check-name",
                         type: "POST",
                         data: {
                             _token: function(){
                                 return $("input[name='_token']").val();
                             },
                             name: function() {
-                                return $( "#name" ).val();
+                                return $( "#projectName" ).val();
                             }
                         }
                     }
+                },
+                project_site_name: {
+                    required: true
+                },
+                client_id: {
+                    required: true
+                },
+                address: {
+                    required: true
                 }
             },
 
             messages: {
-                name: {
-                    required: "Category name is required.",
-                    remote: "Category already exists."
+                project_name: {
+                    required: "Project is required.",
+                    remote: "Project already exists."
+                },
+                project_site_name:{
+                    required: "Project site is required."
+                },
+                client_id:{
+                    required: "Client is required."
+                },
+                address:{
+                    required: "Address is required."
                 }
             },
 
@@ -68,11 +89,9 @@ var  CreateCategory = function () {
     };
 }();
 
-
-
-var  EditCategory = function () {
+var  EditProject = function () {
     var handleEdit = function() {
-        var form = $('#edit-category');
+        var form = $('#createProject');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -80,30 +99,48 @@ var  EditCategory = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                name: {
+                project_name: {
                     required: true,
                     remote: {
-                        url: "/category/check-name",
+                        url: "/project/check-name",
                         type: "POST",
                         data: {
-                            category_id: function(){
-                                return $("#category_id").val();
-                            },
                             _token: function(){
                                 return $("input[name='_token']").val();
                             },
+                            project_id: function(){
+                                return $("#projectId").val();
+                            },
                             name: function() {
-                                return $( "#name" ).val();
+                                return $( "#projectName" ).val();
                             }
                         }
                     }
+                },
+                project_site_name: {
+                    required: true
+                },
+                client_id: {
+                    required: true
+                },
+                address: {
+                    required: true
                 }
             },
 
             messages: {
-                name: {
-                    required: "Category name is required.",
-                    remote: "Category already exists."
+                project_name: {
+                    required: "Project is required.",
+                    remote: "Project already exists."
+                },
+                project_site_name:{
+                    required: "Project site is required."
+                },
+                client_id:{
+                    required: "Client is required."
+                },
+                address:{
+                    required: "Address is required."
                 }
             },
 
@@ -142,6 +179,3 @@ var  EditCategory = function () {
         }
     };
 }();
-
-
-

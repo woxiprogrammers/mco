@@ -29,7 +29,7 @@
                     <li class="dropdown dropdown-user dropdown-dark">
                         <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
                             <img alt="" class="img-circle" src="/assets/layouts/layout3/img/no-user.jpg">
-                            <span class="username username-hide-mobile">Nick</span>
+                            <span class="username username-hide-mobile">{{ Auth::user()->first_name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-default">
                             <li>
@@ -104,6 +104,7 @@
                             </li>
                         </ul>
                     </li>
+
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/bill/manage"> Bill
                             <span class="arrow"></span>
@@ -114,16 +115,30 @@
                             <span class="arrow"></span>
                         </a>
                     </li>
-                    <li>
-                        <a href="/client/manage">Client
+                    <li aria-haspopup="true" class="menu-dropdown mega-menu-dropdown">
+                        <a href="javascript:void(0);">Client
                             <span class="arrow"></span>
                         </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/client/manage"> Client
+                                    <span class="arrow"></span>
+                                </a>
+                            </li>
+                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/project/manage">Project
+                                    <span class="arrow"></span>
+                                </a>
+                            </li>
+                        </ul>
+
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/user/manage">User
                             <span class="arrow"></span>
                         </a>
                     </li>
+
                 </ul>
             </div>
             <!-- END MEGA MENU -->

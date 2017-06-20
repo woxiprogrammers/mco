@@ -27,11 +27,15 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/product/manage">Back</a>
+                                    <a href="/product/manage">Manage Product</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Edit Product</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <div class="col-md-11">
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
@@ -115,12 +119,12 @@
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input class="form-control material-table-input" step="any" type="number" id="material_version_{{$version['id']}}_rate" name="material_version[{{$version['id']}}][rate_per_unit]" value="{{$version['rate_per_unit']}}" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})">
+                                                                            <input class="form-control material-table-input" step="any" type="number" id="material_{{$version['material_id']}}_rate" name="material_version[{{$version['id']}}][rate_per_unit]" value="{{round($version['rate_per_unit'],3)}}" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})">
                                                                         </div>
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <select class="form-control material-table-input" name="material_version[{{$version['id']}}][unit_id]"  id="material_version_{{$version['id']}}_unit" onchange="convertUnits({{$version['id']}})">
+                                                                            <select class="form-control material-table-input" name="material_version[{{$version['id']}}][unit_id]"  id="material_{{$version['material_id']}}_unit" onchange="convertUnits({{$version['material_id']}})">
                                                                                 @foreach($units as $unit)
                                                                                     @if($unit['id'] == $version['unit_id'])
                                                                                         <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
@@ -133,12 +137,12 @@
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input type="number" step="any" class="form-control material-table-input" id="material_version_{{$version['id']}}_quantity" name="material_quantity[{{$version['id']}}]" onkeyup="changedQuantity({{$version['id']}})" onchange="changedQuantity({{$version['id']}})" value="{{$version['quantity']}}" required>
+                                                                            <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material_quantity[{{$version['id']}}]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],3)}}" required>
                                                                         </div>
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input type="text" class="form-control material_amount material-table-input" id="material_version_{{$version['id']}}_amount" name="material_amount[{{$version['id']}}]" value="{!! $version['quantity']*$version['rate_per_unit'] !!}">
+                                                                            <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material_amount[{{$version['id']}}]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}">
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -167,17 +171,21 @@
                                                                     <th style="width: 33%"> Amount </th>
                                                                 </tr>
                                                                 @foreach($profitMargins as $profitMargin)
-                                                                <tr>
-                                                                    <td>
-                                                                        {{$profitMargin['name']}}
-                                                                    </td>
-                                                                    <td>
-                                                                        <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
-                                                                    </td>
-                                                                    <td class="profit-margin-amount">
+                                                                    <tr>
+                                                                        <td>
+                                                                            {{$profitMargin['name']}}
+                                                                        </td>
+                                                                        <td>
+                                                                            @if(isset($productProfitMargins[$profitMargin['id']]))
+                                                                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                            @else
+                                                                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                            @endif
+                                                                        </td>
+                                                                        <td class="profit-margin-amount">
 
-                                                                    </td>
-                                                                </tr>
+                                                                        </td>
+                                                                    </tr>
                                                                 @endforeach
                                                             </table>
                                                             <div class="col-md-offset-7">

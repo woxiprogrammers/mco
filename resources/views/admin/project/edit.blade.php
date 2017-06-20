@@ -1,9 +1,15 @@
+<?php
+/**
+ * Created by Ameya Joshi.
+ * Date: 15/6/17
+ * Time: 12:46 PM
+ */
+?>
 @extends('layout.master')
-@section('title','Constro | Edit Conversion')
+@section('title','Constro | Edit Project')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
-
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -18,7 +24,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Edit Conversion</h1>
+                                <h1>Create Category</h1>
                             </div>
                         </div>
                     </div>
@@ -27,11 +33,11 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/units/manage">Manage Units Conversions</a>
+                                    <a href="/project/manage">Manage Projects</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                                 <li>
-                                    <a href="javascript:void(0);">Edit Unit Conversion</a>
+                                    <a href="javascript:void(0);">Edit Project</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
@@ -39,45 +45,51 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <form role="form" id="edit-conversion" class="form-horizontal" method="post" action="/units/conversion/edit/{{$conversion['unit_1_id']}}-{{$conversion['unit_2_id']}}">
+                                        <form role="form" id="createProject" class="form-horizontal" method="post" action="/project/edit/{{$projectData['id']}}">
+                                            <input type="hidden" name="project_id" id="projectId" value="{{$projectData['id']}}">
+                                            <input type="hidden" name="_method" value="put">
                                             {!! csrf_field() !!}
                                             <div class="form-body">
-                                                <div class="form-group">
-                                                    <label class="col-md-3 control-label">From Unit</label>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Client</label>
+                                                        <span>*</span>
+                                                    </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" name="from_unit_text" value="{{$units[$conversion['unit_1_id']]}}" readonly>
-                                                        <input type="hidden" class="form-control" id="from_unit" name="from_unit" value="{{$conversion['unit_1_id']}}">
+                                                        <input name="client" class="form-control" id="client" value="{{$projectData['client']}}" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Value</label>
+                                                        <label for="name" class="control-label">Project Name</label>
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="number" class="form-control" id="from_value" name="from_value" value="{{$conversion['unit_1_value']}}">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="col-md-3 control-label">To Unit</label>
-                                                    <div class="col-md-6">
-                                                        <input type="text" class="form-control" name="from_unit_text" value="{{$units[$conversion['unit_2_id']]}}"  readonly>
-                                                        <input type="hidden" class="form-control" id="from_unit" name="to_unit" value="{{$conversion['unit_2_id']}}">
+                                                        <input type="text" name="project_name" class="form-control" id="projectName" value="{{$projectData['project']}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Value</label>
+                                                        <label for="name" class="control-label">Project Site Name</label>
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="number" class="form-control" id="to_value" name="to_value" value="{{$conversion['unit_2_value']}}">
+                                                        <input type="text" id="projectSiteName" name="project_site_name" class="form-control" value="{{$projectData['project_site']}}">
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn btn-success btn-md" style="width:25%">Submit</button>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Project Site address</label>
+                                                        <span>*</span>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <textarea id="siteAddress" name="address" class="form-control">{{$projectData['project_site_address']}}</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3">
+                                                        <button type="submit" class="btn blue">Submit</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </form>
@@ -93,10 +105,10 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/units/units.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/project/project.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
-        UnitsConversionEdit.init();
+        EditProject.init();
     });
 </script>
 @endsection

@@ -35,7 +35,7 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <div class="col-md-11">
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
@@ -109,6 +109,8 @@
 <script src="/assets/custom/admin/material/material.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
+        var num = 1.12305;
+        console.log();
        CreateMaterial.init();
         $("#name").rules('add',{
             remote: {
@@ -140,22 +142,21 @@
                         ].join('\n'),
                         suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
                     },
-            }).on('typeahead:selected', function (obj, datum) {
-                var POData = $.parseJSON(JSON.stringify(datum));
-                POData.name = POData.name.replace(/\&/g,'%26');
-                $("#rate_per_unit").val(POData.rate_per_unit);
-                $("#rate_per_unit").prop('disabled', true);
-                $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
-                $("#unit").prop('disabled', true);
-                $("#name").val(POData.name);
-                $("#name").prop('disabled', true);
-                $("#create-material .form-body").append($("<input>", {'id': "material_id",
-                    'type': 'hidden',
-                    'value': POData.id,
-                    'name': "material_id"
-                }));
-
-            })
+                }).on('typeahead:selected', function (obj, datum) {
+                    var POData = $.parseJSON(JSON.stringify(datum));
+                    POData.name = POData.name.replace(/\&/g,'%26');
+                    $("#rate_per_unit").val(POData.rate_per_unit);
+                    $("#rate_per_unit").prop('disabled', true);
+                    $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
+                    $("#unit").prop('disabled', true);
+                    $("#name").val(POData.name);
+                    $("#name").prop('disabled', true);
+                    $("#create-material .form-body").append($("<input>", {'id': "material_id",
+                        'type': 'hidden',
+                        'value': POData.id,
+                        'name': "material_id"
+                    }));
+                })
                 .on('typeahead:open', function (obj, datum) {
 
                 });
