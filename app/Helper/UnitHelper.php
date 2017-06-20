@@ -6,6 +6,7 @@
  */
 
 namespace App\Helper;
+
 use App\UnitConversion;
 
 class UnitHelper{

@@ -13,6 +13,7 @@ use App\ProjectSite;
 use App\Summary;
 use App\Unit;
 use App\Tax;
+use App\UnitConversion;
 use App\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -50,6 +51,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('client',Client::class);
         Route::model('project_site',ProjectSite::class);
         Route::model('bill',Bill::class);
+        Route::model('unit_conversion',UnitConversion::class);
         Route::model('project',Project::class);
     }
 

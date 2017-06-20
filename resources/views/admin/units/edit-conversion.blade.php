@@ -39,14 +39,22 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <form role="form" id="edit-conversion" class="form-horizontal" method="post" action="/units/conversion/edit/{{$conversion['unit_1_id']}}-{{$conversion['unit_2_id']}}">
+                                        <form role="form" id="edit-conversion" class="form-horizontal" method="post" action="/units/conversion/edit/{{$conversion['id']}}">
                                             {!! csrf_field() !!}
+                                            <input type="hidden" name="_method" value="put">
                                             <div class="form-body">
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">From Unit</label>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" name="from_unit_text" value="{{$units[$conversion['unit_1_id']]}}" readonly>
-                                                        <input type="hidden" class="form-control" id="from_unit" name="from_unit" value="{{$conversion['unit_1_id']}}">
+                                                        <select class="form-control" id="from_unit" name="from_unit">
+                                                            @foreach($units as $unit)
+                                                                @if($unit['id'] == $conversion['unit_1_id'])
+                                                                    <option value="{{$unit['id']}}" selected> {{$unit['name']}}</option>
+                                                                @else
+                                                                    <option value="{{$unit['id']}}"> {{$unit['name']}}</option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
@@ -61,8 +69,15 @@
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">To Unit</label>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" name="from_unit_text" value="{{$units[$conversion['unit_2_id']]}}"  readonly>
-                                                        <input type="hidden" class="form-control" id="from_unit" name="to_unit" value="{{$conversion['unit_2_id']}}">
+                                                        <select class="form-control" id="to_unit" name="to_unit">
+                                                            @foreach($units as $unit)
+                                                                @if($unit['id'] == $conversion['unit_2_id'])
+                                                                    <option value="{{$unit['id']}}" selected> {{$unit['name']}}</option>
+                                                                @else
+                                                                    <option value="{{$unit['id']}}"> {{$unit['name']}}</option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">

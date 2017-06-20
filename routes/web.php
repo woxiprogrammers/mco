@@ -91,13 +91,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'Admin\UnitsController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\UnitsController@createUnit'));
         Route::get('edit/{unit}',array('uses' => 'Admin\UnitsController@getEditView'));
-        Route::post('edit/{unit}',array('uses' => 'Admin\UnitsController@editUnit'));
+        Route::put('edit/{unit}',array('uses' => 'Admin\UnitsController@editUnit'));
         Route::post('check-name',array('uses' => 'Admin\UnitsController@checkUnitName'));
         Route::group(['prefix' => 'conversion'],function(){
             Route::get('create',array('uses' => 'Admin\UnitsController@getCreateConversionView'));
             Route::post('create',array('uses' => 'Admin\UnitsController@createConversion'));
-            Route::get('edit/{units}',array('uses' => 'Admin\UnitsController@getEditConversionView'));
-            Route::post('edit/{units}',array('uses' => 'Admin\UnitsController@editConversion'));
+            Route::get('edit/{unit_conversion}',array('uses' => 'Admin\UnitsController@getEditConversionView'));
+            Route::put('edit/{unit_conversion}',array('uses' => 'Admin\UnitsController@editConversion'));
             Route::post('listing',array('uses' => 'Admin\UnitsController@unitConversionsListing'));
         });
         Route::get('change-status/{unit}',array('uses' => 'Admin\UnitsController@changeUnitStatus'));

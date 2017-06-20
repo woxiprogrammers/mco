@@ -14,11 +14,6 @@
         </td>
         <td>
             <div class="form-group">
-                <input class="form-control material-table-input" step="any" type="number" id="material_{{$data['material']['id']}}_rate" name="material[{{$data['material']['id']}}][rate_per_unit]" value="{{$data['material']['rate_per_unit']}}" onkeyup="changedQuantity({{$data['material']['id']}})" onchange="changedQuantity({{$data['material']['id']}})">
-            </div>
-        </td>
-        <td>
-            <div class="form-group">
                 <select class="form-control material_unit material-table-input" id="material_{{$data['material']['id']}}_unit" name="material[{{$data['material']['id']}}][unit_id]" onchange="convertUnits({{$data['material']['id']}})">
                     @foreach($units as $unit)
                         @if($unit['id'] == $data['material']['unit_id'])
@@ -28,6 +23,11 @@
                         @endif
                     @endforeach
                 </select>
+            </div>
+        </td>
+        <td>
+            <div class="form-group">
+                <input class="form-control material-table-input" step="any" type="number" id="material_{{$data['material']['id']}}_rate" name="material[{{$data['material']['id']}}][rate_per_unit]" value="{{$data['material']['rate_per_unit']}}" onkeyup="changedQuantity({{$data['material']['id']}})" onchange="changedQuantity({{$data['material']['id']}})">
             </div>
         </td>
         <td>
