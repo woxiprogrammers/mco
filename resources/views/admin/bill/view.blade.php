@@ -31,7 +31,7 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                                 <li>
-                                    <a href="javascript:void(0);">Create Bill</a>
+                                    <a href="javascript:void(0);">View Bill</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
@@ -40,7 +40,7 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body flip-scroll">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-7 table-actions-wrapper" style="margin-bottom: 20px">
+                                            <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
                                                 <label class="control-label">Select Bill</label>
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)

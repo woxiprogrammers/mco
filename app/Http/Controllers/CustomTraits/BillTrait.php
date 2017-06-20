@@ -25,7 +25,7 @@ trait BillTrait{
             $bills = Bill::where('quotation_id',$quotation['id'])->get()->toArray();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
             if($bills != null){
-                for($i=0 ; $i < count($quotationProducts) ; $i++){
+                for($i = 0 ; $i < count($quotationProducts) ; $i++){
                     $quotationProducts[$i]['previous_quantity'] = 0;
                     for($j = 0; $j < count($bills) ; $j++ ){
                         $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
@@ -139,21 +139,22 @@ trait BillTrait{
 
     public function billListing(Request $request){
         try{
+            $iterator = 0;
             $listingData = array();
-            $k = 0;
-            $clientData = Client::where('is_active',true)->orderBy('id','asc')->get()->toArray();
-            for($i = 0 ; $i < count($clientData) ; $i++){
-                $project = Project::where('client_id',$clientData[$i]['id'])->get()->toArray();
-                for($j = 0 ; $j < count($project) ; $j++){
-                    $project_site = ProjectSite::where('project_id',$project[$j]['id'])->get()->toArray();
-                    for($l = 0 ; $l < count($project_site) ; $l++){
-                        $listingData[$k]['company'] = $clientData[$i]['company'];
-                        $listingData[$k]['project_name'] = $project[$j]['name'];
-                        $listingData[$k]['project_site_id'] = $project_site[$l]['id'];
-                        $listingData[$k]['project_site_name'] = $project_site[$l]['name'];
+            $quotationIds = Bill::groupBy('quotation_id')->pluck('quotation_id')->toArray();
+            $projectSiteIds = Quotation::whereIn('id',$quotationIds)->pluck('project_site_id')->toArray();
+            $projectSiteData = ProjectSite::whereIn('id',$projectSiteIds)->get()->toArray();
+            for($i = 0 ; $i < count($projectSiteData) ; $i++){
+                $projectData = Project::where('id',$projectSiteData[$i]['project_id'])->get()->toArray();
+                for($j = 0 ; $j < count($projectData) ; $j++){
+                    $clientData = Client::where('id',$projectData[$j]['client_id'])->get()->toArray();
+                    for($k = 0 ; $k < count($clientData); $k++){
+                        $listingData[$iterator]['company'] = $clientData[$j]['company'];
+                        $listingData[$iterator]['project_name'] = $projectData[$j]['name'];
+                        $listingData[$iterator]['project_site_id'] = $projectSiteData[$i]['id'];
+                        $listingData[$iterator]['project_site_name'] = $projectSiteData[$i]['name'];
                         $k++;
                     }
-
                 }
             }
             $iTotalRecords = count($listingData);
