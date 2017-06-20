@@ -25,29 +25,97 @@ $(document).ready(function(){
         getProductDetails(productId,rowNumber);
     });
 
+    $("#addProduct").on('click',function(){
+        var rowCount = $('#productRowCount').val();
+        $.ajax({
+            url: '/quotation/add-product-row',
+            type: 'POST',
+            async: true,
+            data: {
+                _token: $("input[name='_token']").val(),
+                row_count: rowCount
+            },
+            success: function(data,textStatus,xhr){
+                $("#productTable").append(data);
+                $('#productRowCount').val(parseInt(rowCount)+1);
+            },
+            error: function(errorStatus, xhr){
+
+            }
+        });
+    });
+
     $("#next1").on('click', function(e){
         e.stopPropagation();
         var productIds = [];
         $(".quotation-product").each(function(){
             productIds.push($(this).val());
         });
-        $.ajax({
-            url: '/quotation/get-materials',
-            async: false,
-            type: "POST",
-            data:{
-                //_token: $("input[name='_token']").val(),
-                product_ids: productIds
-            },
-            success: function(data, textStatus, xhr){
-                $("#GeneralTab").removeClass('active');
-                $("#MaterialsTab").addClass('active');
-                $("#MaterialsTab").html(data);
-            },
-            error: function(errorStatus, data){
-
-            }
+        var formFields = $('#QuotationCreateForm').serializeArray();
+        var validForm = true;
+       $.each(formFields, function(i){
+           if(($.trim(formFields[i].value)) == ""){
+                $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
+               validForm = false;
+           }else{
+               $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
+           }
         });
+        if(validForm == true){
+            $.ajax({
+                url: '/quotation/get-materials',
+                async: false,
+                type: "POST",
+                data:{
+                    //_token: $("input[name='_token']").val(),
+                    product_ids: productIds
+                },
+                success: function(data, textStatus, xhr){
+                    $("#GeneralTab").removeClass('active');
+                    $("#ProfitMarginsTab").removeClass('active');
+                    $("#MaterialsTab").addClass('active');
+                    $("#MaterialsTab").html(data);
+                },
+                error: function(errorStatus, data){
+
+                }
+            });
+        }
+    });
+
+    $("#clientId").on('change', function(){
+        var clientId = $(this).val();
+        if(clientId == ""){
+            $('#projectId').prop('disabled', true);
+            $('#projectId').html('');
+            $('#projectSiteId').prop('disabled', true);
+            $('#projectSiteId').html('');
+        }else{
+            $.ajax({
+                url: '/quotation/get-projects',
+                type: 'POST',
+                async: true,
+                data: {
+                    _token: $("input[name='_token']").val(),
+                    client_id: clientId
+                },
+                success: function(data,textStatus,xhr){
+                    $('#projectId').html(data);
+                    $('#projectId').prop('disabled', false);
+                    var projectId = $("#projectId").val();
+                    getProjectSites(projectId);
+                },
+                error: function(){
+
+                }
+            });
+        }
+
+    });
+
+    $("#projectId").on('change', function(){
+        var projectId = $(this).val();
+        getProjectSites(projectId);
     });
 });
 
@@ -82,6 +150,27 @@ function getProducts(category_id,rowNumber){
     });
 }
 
+function getProjectSites(projectId){
+    $.ajax({
+        url: '/quotation/get-project-sites',
+        type: 'POST',
+        async: true,
+        data: {
+            _token: $("input[name='_token']").val(),
+            project_id: projectId
+        },
+        success: function(data,textStatus,xhr){
+            if(data.length > 0){
+                $('#projectSiteId').html(data);
+                $('#projectSiteId').prop('disabled', false);
+            }
+        },
+        error: function(){
+
+        }
+    });
+}
+
 function getProductDetails(product_id,rowNumber){
     $.ajax({
         url:'/quotation/get-product-detail',
@@ -95,10 +184,12 @@ function getProductDetails(product_id,rowNumber){
             $("#productDescription"+rowNumber).attr('name','product_description['+data.id+']');
             $("#productRate"+rowNumber).val(data.rate_per_unit);
             $("#productRate"+rowNumber).attr('name','product_rate['+data.id+']');
-            $("#productRate"+rowNumber).prop('readonly', false);
             $("#productQuantity"+rowNumber).prop('readonly', false);
             $("#productUnit"+rowNumber).val(data.unit);
             $("#productUnit"+rowNumber).attr('name','product_unit['+data.id+']');
+            $("#productQuantity"+rowNumber).attr('name','product_quantity['+data.id+']');
+            $("#productAmount"+rowNumber).attr('name','product_amount['+data.id+']');
+            calculateAmount(rowNumber);
         },
         error: function(errorStatus, xhr){
 
@@ -137,27 +228,39 @@ function replaceEditor(row){
 }
 
 function showProfitMargins(){
-    var productIds = [];
-    $(".quotation-product").each(function(){
-        productIds.push($(this).val());
-    });
-    $.ajax({
-        url: '/quotation/get-profit-margins',
-        async: false,
-        type: "POST",
-        data:{
-            //_token: $("input[name='_token']").val(),
-            product_ids: productIds
-        },
-        success: function(data, textStatus, xhr){
-            $("#GeneralTab").removeClass('active');
-            $("#MaterialsTab").removeClass('active');
-            $("#ProfitMarginsTab").addClass('active');
-            $("#ProfitMarginsTab").html(data);
-        },
-        error: function(errorStatus, data){
-
+    var validForm = true;
+    $(".quotation-material-rate").each(function(){
+        if(($.trim($(this).val())) == ''){
+            $(this).closest('.form-group').addClass('has-error');
+            validForm = false;
+        }else{
+            $(this).closest('.form-group').removeClass('has-error');
         }
     });
-}
 
+    if(validForm == true){
+        var productIds = [];
+        $(".quotation-product").each(function(){
+            productIds.push($(this).val());
+        });
+        $.ajax({
+            url: '/quotation/get-profit-margins',
+            async: false,
+            type: "POST",
+            data:{
+                //_token: $("input[name='_token']").val(),
+                product_ids: productIds
+            },
+            success: function(data, textStatus, xhr){
+                $("#GeneralTab").removeClass('active');
+                $("#MaterialsTab").removeClass('active');
+                $("#ProfitMarginsTab").addClass('active');
+                $("#ProfitMarginsTab").html(data);
+            },
+            error: function(errorStatus, data){
+
+            }
+        });
+    }
+
+}

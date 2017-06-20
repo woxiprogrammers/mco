@@ -142,22 +142,21 @@
                         ].join('\n'),
                         suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
                     },
-            }).on('typeahead:selected', function (obj, datum) {
-                var POData = $.parseJSON(JSON.stringify(datum));
-                POData.name = POData.name.replace(/\&/g,'%26');
-                $("#rate_per_unit").val(POData.rate_per_unit);
-                $("#rate_per_unit").prop('disabled', true);
-                $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
-                $("#unit").prop('disabled', true);
-                $("#name").val(POData.name);
-                $("#name").prop('disabled', true);
-                $("#create-material .form-body").append($("<input>", {'id': "material_id",
-                    'type': 'hidden',
-                    'value': POData.id,
-                    'name': "material_id"
-                }));
-
-            })
+                }).on('typeahead:selected', function (obj, datum) {
+                    var POData = $.parseJSON(JSON.stringify(datum));
+                    POData.name = POData.name.replace(/\&/g,'%26');
+                    $("#rate_per_unit").val(POData.rate_per_unit);
+                    $("#rate_per_unit").prop('disabled', true);
+                    $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
+                    $("#unit").prop('disabled', true);
+                    $("#name").val(POData.name);
+                    $("#name").prop('disabled', true);
+                    $("#create-material .form-body").append($("<input>", {'id': "material_id",
+                        'type': 'hidden',
+                        'value': POData.id,
+                        'name': "material_id"
+                    }));
+                })
                 .on('typeahead:open', function (obj, datum) {
 
                 });
