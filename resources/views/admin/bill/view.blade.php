@@ -136,7 +136,7 @@
                                                 </tr>
                                                 @for($j = 0 ; $j < count($taxes); $j++)
                                                 <tr>
-                                                    <td colspan="5" style="text-align: center">{{$taxes[$j]['name']}}</td>
+                                                    <td colspan="5" style="text-align: center">{{$taxes[$j]['taxes']['name']}}</td>
                                                     <td colspan="4" style="text-align: right"><span id="percentage">{{$taxes[$j]['percentage']}}</td>
                                                     <td>
                                                         <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['previous_bill_amount']}}</span>

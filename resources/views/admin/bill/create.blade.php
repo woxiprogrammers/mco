@@ -148,6 +148,7 @@
                                                 </tr>
                                                 @for($j = 0 ; $j < count($taxes); $j++)
                                                      <tr>
+                                                         <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">
                                                          <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
                                                          <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
                                                          <td>
@@ -270,15 +271,23 @@
         var final_total_cumulative_bill = total_rounded_cumulative_bill;
 
         $(".tax").each(function(){
-            var tax_amount_previous_bill = total_rounded_previous_bill * ($(this).val() / 100);
+            var elementId = $(this).attr('id');
+            var elementIdArray = elementId.split('_');
+            var id = elementIdArray[2];
+            var tax_slug = $("#tax_slug_"+id).val();
+            if(tax_slug == 'tds' || tax_slug == 'retention'){
+                var tax_amount_previous_bill = -(total_rounded_previous_bill * ($(this).val() / 100));
+                var tax_amount_current_bill = -(total_rounded_current_bill * ($(this).val() / 100));
+                var tax_amount_cumulative_bill = -(total_rounded_cumulative_bill * ($(this).val() / 100));
+            }else{
+                var tax_amount_previous_bill = total_rounded_previous_bill * ($(this).val() / 100);
+                var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
+                var tax_amount_cumulative_bill = total_rounded_cumulative_bill * ($(this).val() / 100);
+            }
             final_total_previous_bill = final_total_previous_bill + tax_amount_previous_bill;
             $(this).parent().next().text(tax_amount_previous_bill.toFixed(3));
-
-            var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
             final_total_current_bill = final_total_current_bill + tax_amount_current_bill;
             $(this).parent().next().next().text(tax_amount_current_bill.toFixed(3));
-
-            var tax_amount_cumulative_bill = total_rounded_cumulative_bill * ($(this).val() / 100);
             final_total_cumulative_bill = final_total_cumulative_bill + tax_amount_cumulative_bill;
             $(this).parent().next().next().next().text(tax_amount_cumulative_bill.toFixed(3));
         });

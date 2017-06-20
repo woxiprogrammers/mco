@@ -202,7 +202,7 @@ trait BillTrait{
                 $billQuotationProducts[$iterator]['unit'] = Unit::where('id',$billQuotationProducts[$iterator]['productDetail']['unit_id'])->pluck('name')->first();
                 $billQuotationProducts[$iterator]['current_bill_amount'] = $billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'];
                 $previousBills = BillQuotationProducts::where('bill_id','<',$bill['id'])->get()->toArray();
-                foreach($previousBills as $key=>$previousBill){
+                foreach($previousBills as $key => $previousBill){
                     if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
                     }
@@ -217,12 +217,17 @@ trait BillTrait{
             $final['previous_bill_amount'] = $total_rounded['previous_bill_amount'] = round($total['previous_bill_amount']);
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = round($total['current_bill_amount']);
             $final['cumulative_bill_amount'] = $total_rounded['cumulative_bill_amount'] = round($total['cumulative_bill_amount']);
-            $taxes = BillTax::where('bill_id',$bill['id'])->get()->toArray();
+            $taxes = BillTax::where('bill_id',$bill['id'])->with('taxes')->get()->toArray();
             for($j = 0 ; $j < count($taxes) ; $j++){
-                $taxes[$j]['name'] = Tax::where('id',$taxes[$j]['tax_id'])->pluck('name')->first();
-                $taxes[$j]['previous_bill_amount'] = round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                $taxes[$j]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                $taxes[$j]['cumulative_bill_amount'] = round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                if($taxes[$j]['taxes']['slug'] == 'tds' || $taxes[$j]['taxes']['slug'] == 'retention'){
+                    $taxes[$j]['previous_bill_amount'] = -(round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3));
+                    $taxes[$j]['current_bill_amount'] = -(round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3));
+                    $taxes[$j]['cumulative_bill_amount'] = -(round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3));
+                }else{
+                    $taxes[$j]['previous_bill_amount'] = round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                    $taxes[$j]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                    $taxes[$j]['cumulative_bill_amount'] = round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                }
                 $final['previous_bill_amount'] = round($final['previous_bill_amount'] + $taxes[$j]['previous_bill_amount']);
                 $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$j]['current_bill_amount']);
                 $final['cumulative_bill_amount'] = round($final['cumulative_bill_amount'] + $taxes[$j]['cumulative_bill_amount']);
