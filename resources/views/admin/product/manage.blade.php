@@ -48,16 +48,16 @@
                                                 <tr>
                                                     <th style="width: 25%"> Product Name </th>
                                                     <th style="width: 25%"> Category Name </th>
-                                                    <th> Total </th>
                                                     <th> Unit </th>
+                                                    <th> Rate </th>
                                                     <th> Status </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 <tr>
                                                     <th style="width: 25%"> <input class="form-control form-filter" name="search_product_name"></th>
                                                     <th style="width: 25%"> <input class="form-control form-filter" name="search_category_name" readonly> </th>
-                                                    <th> <input class="form-control form-filter" name="search_total" readonly> </th>
                                                     <th> <input class="form-control form-filter" name="search_unit" readonly> </th>
+                                                    <th> <input class="form-control form-filter" name="search_rate" readonly> </th>
                                                     <th> <input class="form-control form-filter" name="search_status" readonly> </th>
                                                     <th>
                                                         <button class="btn-primary btn-sm filter-submit"> Search </button> <br>
