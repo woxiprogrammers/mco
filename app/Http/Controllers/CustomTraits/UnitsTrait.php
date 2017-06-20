@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
+use App\Helper\UnitHelper;
 use App\Http\Requests\UnitConversionRequest;
 use App\Http\Requests\UnitRequest;
 use App\Material;
@@ -231,7 +232,7 @@ trait UnitsTrait{
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/units/conversion/edit/'.$fromUnit['id'].'-'.$toUnit['id'].'">
+                                <a href="/units/conversion/edit/'.$conversions[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                         </ul>
@@ -254,13 +255,10 @@ trait UnitsTrait{
         return response()->json($records,200);
     }
 
-    public function getEditConversionView(Request $request, $units){
+    public function getEditConversionView(Request $request, $conversion){
         try{
-            $unitIds = explode('-',$units);
-            $conversion = UnitConversion::where('unit_1_id',$unitIds[0])->where('unit_2_id',$unitIds[1])->first();
-            $units = array();
-            $units[$unitIds[0]] = Unit::where('id',$unitIds[0])->pluck('name')->first();
-            $units[$unitIds[1]] = Unit::where('id',$unitIds[1])->pluck('name')->first();
+            $units = Unit::where('is_active', true)->get()->toArray();
+            $conversion = $conversion->toArray();
             return view('admin.units.edit-conversion')->with(compact('units','conversion'));
         }catch(\Exception $e){
             $data = [
@@ -273,16 +271,16 @@ trait UnitsTrait{
         }
     }
 
-    public function editConversion(UnitConversionRequest $request, $units){
+    public function editConversion(UnitConversionRequest $request, $conversion){
         try{
-            $unitString = $units;
-            $unitIds = explode('-',$units);
             $units = array();
             $units['unit_1_value'] = $request->from_value;
+            $units['unit_1_id'] = $request->from_unit;
+            $units['unit_2_id'] = $request->to_unit;
             $units['unit_2_value'] = $request->to_value;
-            $conversion = UnitConversion::where('unit_1_id',$unitIds[0])->where('unit_2_id',$unitIds[1])->update($units);
+            $conversion->update($units);
             $request->session()->flash('success','Conversion Edited Successfully');
-            return redirect('/units/conversion/edit/'.$unitString);
+            return redirect('/units/conversion/edit/'.$conversion->id);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Conversion',
@@ -321,11 +319,18 @@ trait UnitsTrait{
     public function convertUnits(Request $request){
         try{
             $data = $request->all();
-            $material = Material::where('id',$data['material_id'])->first()->toArray();
-            $fromUnit = $material['unit_id'];
-            $toUnit = $data['new_unit'];
+            if($request->has('current_unit') && $request->has('rate')){
+                $rate = $request->rate;
+                $fromUnit = $data['current_unit'];
+                $toUnit = $data['new_unit'];
+            }else{
+                $material = Material::where('id',$data['material_id'])->first()->toArray();
+                $rate = $material['rate_per_unit'];
+                $fromUnit = $material['unit_id'];
+                $toUnit = $data['new_unit'];
+            }
             $response = array();
-            $conversion = $this->unitConversion($fromUnit,$toUnit,$material['rate_per_unit']);
+            $conversion = UnitHelper::unitConversion($fromUnit,$toUnit,$rate);
             if(is_array($conversion)){
                 $status = 203;
                 $response = $conversion;

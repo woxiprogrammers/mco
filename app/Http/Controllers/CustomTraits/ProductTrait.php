@@ -251,8 +251,8 @@ trait ProductTrait{
                 $records['data'][$iterator] = [
                     $productData[$pagination]['name'],
                     Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                    $productVersion['rate_per_unit'],
                     Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                    $productVersion['rate_per_unit'],
                     $product_status,
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">

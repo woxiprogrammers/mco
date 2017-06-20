@@ -54,6 +54,7 @@
                                         <input type="hidden" id="unit_id" value="{{$unit['id']}}">
                                         <form role="form" id="edit-unit" class="form-horizontal" method="post" action="/units/edit/{{$unit['id']}}">
                                             {!! csrf_field() !!}
+                                            <input type="hidden" name="_method" value="put">
                                             <div class="form-body">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">

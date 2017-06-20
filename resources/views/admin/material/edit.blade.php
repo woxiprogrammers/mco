@@ -88,7 +88,15 @@
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">Unit</label>
                                                     <div class="col-md-6 units">
-                                                        <input type="text" class="form-control" name="unit" value="{{$unit['name']}}" readonly>
+                                                        <select class="form-control" name="unit">
+                                                            @foreach($units as $unit)
+                                                                @if($unit['id'] == $materialData['unit'])
+                                                                    <option value="{{$unit['id']}}" selected> {{$unit['name']}} </option>
+                                                                @else
+                                                                    <option value="{{$unit['id']}}"> {{$unit['name']}} </option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
