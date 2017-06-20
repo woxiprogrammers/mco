@@ -106,7 +106,7 @@
                                                 </tr>
                                                 @endfor
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">Total</td>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Total</b></td>
                                                     <td>
                                                         <span id="total_previous_bill_amount">{{$total['previous_bill_amount']}}</span>
                                                     </td>
@@ -118,7 +118,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">Total Round</td>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
                                                     <td>
                                                         <span id="rounded_off_previous_bill_amount">{{$total_rounded['previous_bill_amount']}}</span>
                                                     </td>
@@ -130,14 +130,14 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="5" >Tax Name</td>
-                                                    <td colspan="4">Tax Rate</td>
+                                                    <td colspan="5"><b>Tax Name</b></td>
+                                                    <td colspan="4"><b>Tax Rate</b></td>
                                                     <td colspan="3"></td>
                                                 </tr>
                                                 @for($j = 0 ; $j < count($taxes); $j++)
                                                 <tr>
                                                     <td colspan="5" style="text-align: center">{{$taxes[$j]['taxes']['name']}}</td>
-                                                    <td colspan="4" style="text-align: right"><span id="percentage">{{$taxes[$j]['percentage']}}</td>
+                                                    <td colspan="4" style="text-align: center"><span id="percentage">{{$taxes[$j]['percentage']}}</td>
                                                     <td>
                                                         <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['previous_bill_amount']}}</span>
                                                     </td>
@@ -151,7 +151,7 @@
                                                 </tr>
                                                 @endfor
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">Final Total</td>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
                                                     <td>
                                                         <span id="final_previous_bill_total">{{$final['previous_bill_amount']}}</span>
                                                     </td>
@@ -161,7 +161,6 @@
                                                     <td>
                                                         <span id="final_cumulative_bill_total">{{$final['cumulative_bill_amount']}}</span>
                                                     </td>
-
                                                 </tr>
 
                                             </table>

@@ -60,19 +60,18 @@
                                                     <th width="1%">
                                                         <input type="checkbox" class="group-checkable" disabled="disabled" >
                                                     </th>
-                                                    <th width="10%"> Item no </th>
-                                                    <th width="90%" style="text-align: center"> Item Description </th>
-                                                    <th width="40%" class="numeric"> UOM </th>
-                                                    <th width="30%" class="numeric"> Rate </th>
-                                                    <th width="30%" class="numeric"> BOQ Quantity </th>
-                                                    <th width="30%" class="numeric"> W.O Amount </th>
-                                                    <th width="30%" class="numeric"> Previous Quantity </th>
-                                                    <th width="30%" class="numeric"> Current Quantity </th>
-                                                    <th width="40%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="40%" class="numeric"> Previous. Bill Amount </th>
-                                                    <th width="40%" class="numeric"> Current Bill Amount </th>
-                                                    <th width="40%" class="numeric"> Cumulative Bill Amount </th>
-
+                                                    <th width="5%"> Item no </th>
+                                                    <th width="15%"> Item Description </th>
+                                                    <th width="8%" class="numeric"> UOM </th>
+                                                    <th width="8%" class="numeric"> Rate </th>
+                                                    <th width="9%" class="numeric"> BOQ Quantity </th>
+                                                    <th width="10%" class="numeric"> W.O Amount </th>
+                                                    <th width="8%" class="numeric"> Previous Quantity </th>
+                                                    <th width="8%" class="numeric"> Current Quantity </th>
+                                                    <th width="8%" class="numeric"> Cumulative Quantity </th>
+                                                    <th width="7%" class="numeric"> Previous. Bill Amount </th>
+                                                    <th width="7%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="7%" class="numeric"> Cumulative Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                     <tr id="id_{{$quotationProducts[$iterator]['id']}}">
@@ -89,7 +88,7 @@
                                                             <span>{{$quotationProducts[$iterator]['unit']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate_per_unit']}}</span>
+                                                            <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate']}}</span>
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['quantity']}}</span>
@@ -118,7 +117,7 @@
                                                     </tr>
                                                 @endfor
                                                     <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;">Total</td>
+                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total</b></td>
                                                         <td>
                                                             <span id="total_previous_bill_amount"></span>
                                                         </td>
@@ -130,7 +129,7 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;">Total Round</td>
+                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
                                                         <td>
                                                             <span id="rounded_off_previous_bill_amount"></span>
                                                         </td>
@@ -142,8 +141,8 @@
                                                         </td>
                                                     </tr>
                                                 <tr>
-                                                    <td colspan="6" >Tax Name</td>
-                                                    <td colspan="4">Tax Rate</td>
+                                                    <td colspan="6"><b>Tax Name</b></td>
+                                                    <td colspan="4"><b>Tax Rate</b></td>
                                                     <td colspan="3"></td>
                                                 </tr>
                                                 @for($j = 0 ; $j < count($taxes); $j++)
@@ -164,7 +163,7 @@
                                                      </tr>
                                                 @endfor
                                                 <tr>
-                                                    <td colspan="10" style="text-align: right; padding-right: 30px;">Final Total</td>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
                                                     <td>
                                                         <span id="final_previous_bill_total"></span>
                                                     </td>
@@ -198,137 +197,5 @@
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-<script>
-    function selectedProducts(id){
-        $('input[name="quotation_product_id['+id+']"]:checked').each(function(){
-            $('#current_quantity_'+id).prop('disabled',false);
-            $("#id_"+id).css('background-color',"#e1e1e1");
-            var typingTimer;
-            var doneTypingInterval = 500;
-            var input = $('#current_quantity_'+id);
-            input.on('keyup', function () {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(doneTyping, doneTypingInterval);
-            });
-            input.on('keydown', function () {
-                clearTimeout(typingTimer);
-            });
-            function doneTyping () {
-                calculateQuantityAmount(input.val(),id);
-        }
-        });
-    }
-
-    function calculateQuantityAmount(current_quantity,id){
-        var total = 0;
-        var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
-        var prev_bill_amount = parseFloat($('#previous_quantity_'+id).text()) * parseFloat($('#rate_per_unit_'+id).text());
-        var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
-        var cumulative_bill_amount = prev_bill_amount + current_bill_amount;
-        $('#cumulative_quantity_'+id).text(cumulative_quantity.toFixed(3));
-        $('#previous_bill_amount_'+id).text(prev_bill_amount.toFixed(3));
-        $('#current_bill_amount_'+id).text(current_bill_amount.toFixed(3));
-        $('#cumulative_bill_amount_'+id).text(cumulative_bill_amount.toFixed(3));
-        getTotals();
-    }
-
-    function getTotals(){
-        var total_previous_bill_amount = 0.0;
-        var total_current_bill_amount = 0.0;
-        var total_cumulative_bill_amount = 0.0;
-        var selected_product_length = $('input:checked').length;
-        if(selected_product_length > 0){
-            $('input:checked').each(function(){
-                var id = $(this).val();
-
-                var previous_bill_amount = parseFloat($('#previous_bill_amount_'+id).text());
-                total_previous_bill_amount = total_previous_bill_amount + previous_bill_amount;
-                $('#total_previous_bill_amount').text(total_previous_bill_amount.toFixed(3));
-                $('#rounded_off_previous_bill_amount').text(Math.round(total_previous_bill_amount));
-
-                var current_bill_amount = parseFloat($('#current_bill_amount_'+id).text());
-                total_current_bill_amount = total_current_bill_amount + current_bill_amount;
-                $('#total_current_bill_amount').text(total_current_bill_amount.toFixed(3));
-                $('#rounded_off_current_bill_amount').text(Math.round(total_current_bill_amount));
-
-                var cumulative_bill_amount = parseFloat($('#cumulative_bill_amount_'+id).text());
-                total_cumulative_bill_amount = total_cumulative_bill_amount + cumulative_bill_amount;
-                $('#total_cumulative_bill_amount').text(total_cumulative_bill_amount.toFixed(3));
-                $('#rounded_off_cumulative_bill_amount').text(Math.round(total_cumulative_bill_amount));
-            });
-            calculateTax();
-        }
-    }
-
-    function calculateTax(){
-        var total_rounded_previous_bill = parseFloat($("#rounded_off_previous_bill_amount").text());
-        var final_total_previous_bill = total_rounded_previous_bill;
-
-        var total_rounded_current_bill = parseFloat($("#rounded_off_current_bill_amount").text());
-        var final_total_current_bill = total_rounded_current_bill;
-
-        var total_rounded_cumulative_bill = parseFloat($("#rounded_off_cumulative_bill_amount").text());
-        var final_total_cumulative_bill = total_rounded_cumulative_bill;
-
-        $(".tax").each(function(){
-            var elementId = $(this).attr('id');
-            var elementIdArray = elementId.split('_');
-            var id = elementIdArray[2];
-            var tax_slug = $("#tax_slug_"+id).val();
-            if(tax_slug == 'tds' || tax_slug == 'retention'){
-                var tax_amount_previous_bill = -(total_rounded_previous_bill * ($(this).val() / 100));
-                var tax_amount_current_bill = -(total_rounded_current_bill * ($(this).val() / 100));
-                var tax_amount_cumulative_bill = -(total_rounded_cumulative_bill * ($(this).val() / 100));
-            }else{
-                var tax_amount_previous_bill = total_rounded_previous_bill * ($(this).val() / 100);
-                var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
-                var tax_amount_cumulative_bill = total_rounded_cumulative_bill * ($(this).val() / 100);
-            }
-            final_total_previous_bill = final_total_previous_bill + tax_amount_previous_bill;
-            $(this).parent().next().text(tax_amount_previous_bill.toFixed(3));
-            final_total_current_bill = final_total_current_bill + tax_amount_current_bill;
-            $(this).parent().next().next().text(tax_amount_current_bill.toFixed(3));
-            final_total_cumulative_bill = final_total_cumulative_bill + tax_amount_cumulative_bill;
-            $(this).parent().next().next().next().text(tax_amount_cumulative_bill.toFixed(3));
-        });
-
-        $("#final_previous_bill_total").text(Math.round(final_total_previous_bill));
-        $("#final_current_bill_total").text(Math.round(final_total_current_bill));
-        $("#final_cumulative_bill_total").text(Math.round(final_total_cumulative_bill));
-    }
-
-    $(document).ready(function (){
-        $("#change_bill").on('change', function(){
-            var bill_id = $(this).val();
-            window.location.href = "/bill/view/"+bill_id;
-        });
-
-        $('input[type="checkbox"]').click(function(){
-            var length = $('input[type="checkbox"]:checked').length;
-            if($('input[type="checkbox"]:checked').length <= 0){
-                $('#total_previous_bill_amount').text("");
-                $('#total_cumulative_bill_amount').text("");
-                $('#total_current_bill_amount').text("");
-                $('#rounded_off_previous_bill_amount').text("");
-                $('#rounded_off_cumulative_bill_amount').text("");
-                $('#rounded_off_current_bill_amount').text("");
-            }
-            if($(this).prop("checked") == false){
-                    var id = $(this).val();
-                    $("#id_"+id).css('background-color',"");
-                    $('#current_quantity_'+id).prop('disabled',true);
-                    $('#current_quantity_'+id).val('');
-                    $('#cumulative_quantity_'+id).text("");
-                    $('#previous_bill_amount_'+id).text("");
-                    $('#current_bill_amount_'+id).text("");
-                    $('#cumulative_bill_amount_'+id).text("");
-                    getTotals();
-            }
-        });
-    });
-
-</script>
+<script src="/assets/custom/bill/bill.js" type="text/javascript"></script>
 @endsection
-
-
-

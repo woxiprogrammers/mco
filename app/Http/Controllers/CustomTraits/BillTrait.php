@@ -31,10 +31,15 @@ trait BillTrait{
                         $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
                         $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
                         $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
-                        $bill_produc = BillQuotationProducts::where('bill_id',$bills[$j]['id'])->where('quotation_product_id',$quotationProducts[$i]['id'])->get()->toArray();
-                        for($k =0 ; $k < count($bill_produc); $k++ ){
-                            if($bill_produc[$k]['quotation_product_id'] == $quotationProducts[$i]['id']){
-                                $quotationProducts[$i]['previous_quantity'] = $quotationProducts[$i]['previous_quantity'] + $bill_produc[$k]['quantity'];
+                        if($quotation['discount'] != 0){
+                            $quotationProducts[$i]['rate'] = $quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100));
+                        }else{
+                            $quotationProducts[$i]['rate'] = $quotationProducts[$i]['rate_per_unit'];
+                        }
+                        $bill_products = BillQuotationProducts::where('bill_id',$bills[$j]['id'])->where('quotation_product_id',$quotationProducts[$i]['id'])->get()->toArray();
+                        for($k = 0 ; $k < count($bill_products) ; $k++ ){
+                            if($bill_products[$k]['quotation_product_id'] == $quotationProducts[$i]['id']){
+                                $quotationProducts[$i]['previous_quantity'] = $quotationProducts[$i]['previous_quantity'] + $bill_products[$k]['quantity'];
                             }
                         }
                     }
@@ -219,15 +224,9 @@ trait BillTrait{
             $final['cumulative_bill_amount'] = $total_rounded['cumulative_bill_amount'] = round($total['cumulative_bill_amount']);
             $taxes = BillTax::where('bill_id',$bill['id'])->with('taxes')->get()->toArray();
             for($j = 0 ; $j < count($taxes) ; $j++){
-                if($taxes[$j]['taxes']['slug'] == 'tds' || $taxes[$j]['taxes']['slug'] == 'retention'){
-                    $taxes[$j]['previous_bill_amount'] = -(round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3));
-                    $taxes[$j]['current_bill_amount'] = -(round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3));
-                    $taxes[$j]['cumulative_bill_amount'] = -(round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3));
-                }else{
-                    $taxes[$j]['previous_bill_amount'] = round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                    $taxes[$j]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                    $taxes[$j]['cumulative_bill_amount'] = round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                }
+                $taxes[$j]['previous_bill_amount'] = round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                $taxes[$j]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
+                $taxes[$j]['cumulative_bill_amount'] = round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
                 $final['previous_bill_amount'] = round($final['previous_bill_amount'] + $taxes[$j]['previous_bill_amount']);
                 $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$j]['current_bill_amount']);
                 $final['cumulative_bill_amount'] = round($final['cumulative_bill_amount'] + $taxes[$j]['cumulative_bill_amount']);
