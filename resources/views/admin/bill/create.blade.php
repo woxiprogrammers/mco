@@ -24,7 +24,7 @@
                     </div>
                     <div class="page-content">
                         @include('partials.common.messages')
-                        <div class="container">
+                        <div class="container" style="width: 100%">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
                                     <a href="/bill/manage">Manage Bill</a>
@@ -39,42 +39,44 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                         <div class="portlet-body flip-scroll">
+                                           <form role="form" id="new_bill" class="form-horizontal" action="/bill/create" method="post">
                                             @if($bills != NULL)
-                                                <div class="col-md-offset-7 table-actions-wrapper" style="margin-bottom: 20px">
+                                                <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
                                                     <label class="control-label">Select Bill</label>
                                                     <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
+                                                        <option value="default">Select Array</option>
                                                         @for($i = 0 ; $i < count($bills); $i++)
                                                             <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                         @endfor
                                                     </select>
                                                     <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
-
                                                 </div>
                                             @endif
-                                           <input type="hidden" id="project_id" name="project_id" value="{{$project_site['id']}}">
+                                           <input type="hidden" id="project_site_id" name="project_site_id" value="{{$project_site['id']}}">
+                                           <input type="hidden" id="quotation_id" name="quotation_id" value="{{$quotation['id']}}">
+
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                 <tr>
                                                     <th width="1%">
                                                         <input type="checkbox" class="group-checkable" disabled="disabled" >
                                                     </th>
-                                                    <th width="10%"> Item no </th>
-                                                    <th width="90%" style="text-align: center"> Item Description </th>
-                                                    <th width="40%" class="numeric"> UOM </th>
-                                                    <th width="30%" class="numeric"> Rate </th>
-                                                    <th width="30%" class="numeric"> BOQ Quantity </th>
-                                                    <th width="30%" class="numeric"> W.O Amount </th>
-                                                    <th width="30%" class="numeric"> Previous Quantity </th>
-                                                    <th width="30%" class="numeric"> Current Quantity </th>
-                                                    <th width="40%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="40%" class="numeric"> Previous. Bill Amount </th>
-                                                    <th width="40%" class="numeric"> Current Bill Amount </th>
-                                                    <th width="40%" class="numeric"> Cumulative Bill Amount </th>
-
+                                                    <th width="5%"> Item no </th>
+                                                    <th width="15%"> Item Description </th>
+                                                    <th width="8%" class="numeric"> UOM </th>
+                                                    <th width="8%" class="numeric"> Rate </th>
+                                                    <th width="9%" class="numeric"> BOQ Quantity </th>
+                                                    <th width="10%" class="numeric"> W.O Amount </th>
+                                                    <th width="8%" class="numeric"> Previous Quantity </th>
+                                                    <th width="8%" class="numeric"> Current Quantity </th>
+                                                    <th width="8%" class="numeric"> Cumulative Quantity </th>
+                                                    <th width="7%" class="numeric"> Previous. Bill Amount </th>
+                                                    <th width="7%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="7%" class="numeric"> Cumulative Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
-                                                    <tr>
+                                                    <tr id="id_{{$quotationProducts[$iterator]['id']}}">
                                                         <td>
-                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="id_{{$quotationProducts[$iterator]['id']}}" value="{{$quotationProducts[$iterator]['id']}}" onclick="selectedProducts({{$quotationProducts[$iterator]['id']}})">
+                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}">
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['id']}}</span>
@@ -86,7 +88,7 @@
                                                             <span>{{$quotationProducts[$iterator]['unit']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate_per_unit']}}</span>
+                                                            <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate']}}</span>
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['quantity']}}</span>
@@ -95,10 +97,10 @@
                                                             <span>{{$quotationProducts[$iterator]['rate_per_unit'] * $quotationProducts[$iterator]['quantity']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">0</span>
+                                                            <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
                                                         </td>
                                                         <td>
-                                                            <input class="form-control" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity" disabled>
+                                                            <input class="form-control" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity[{{$quotationProducts[$iterator]['id']}}]" disabled>
                                                         </td>
                                                         <td>
                                                             <span id="cumulative_quantity_{{$quotationProducts[$iterator]['id']}}"></span>
@@ -115,7 +117,7 @@
                                                     </tr>
                                                 @endfor
                                                     <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;">Total</td>
+                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total</b></td>
                                                         <td>
                                                             <span id="total_previous_bill_amount"></span>
                                                         </td>
@@ -127,7 +129,7 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;">Total Round</td>
+                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
                                                         <td>
                                                             <span id="rounded_off_previous_bill_amount"></span>
                                                         </td>
@@ -139,14 +141,15 @@
                                                         </td>
                                                     </tr>
                                                 <tr>
-                                                    <td colspan="6" >Tax Name</td>
-                                                    <td colspan="4">Tax Rate</td>
+                                                    <td colspan="6"><b>Tax Name</b></td>
+                                                    <td colspan="4"><b>Tax Rate</b></td>
                                                     <td colspan="3"></td>
                                                 </tr>
                                                 @for($j = 0 ; $j < count($taxes); $j++)
                                                      <tr>
+                                                         <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">
                                                          <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
-                                                         <td colspan="4" style="text-align: right"><input class="form-control" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage_{{$taxes[$j]['id']}}" value="{{$taxes[$j]['base_percentage']}}"></td>
+                                                         <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
                                                          <td>
                                                              <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}"></span>
                                                          </td>
@@ -160,7 +163,7 @@
                                                      </tr>
                                                 @endfor
                                                 <tr>
-                                                    <td colspan="10" style="text-align: right; padding-right: 30px;">Final Total</td>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
                                                     <td>
                                                         <span id="final_previous_bill_total"></span>
                                                     </td>
@@ -179,6 +182,7 @@
                                                     <button type="submit" class="btn btn-success"> Submit </button>
                                                 </div>
                                             </div>
+                                               </form>
                                         </div>
                                 </div>
                             </div>
@@ -193,81 +197,5 @@
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-<script src="/assets/custom/bill/bill-manage-datatable.js" type="text/javascript"></script>
-<script>
-    function selectedProducts(id){
-        $('input[name="id_'+id+'"]:checked').each(function(){
-            $('#current_quantity_'+id).prop('disabled',false);
-            var typingTimer;
-            var doneTypingInterval = 500;
-            var input = $('#current_quantity_'+id);
-            input.on('keyup', function () {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(doneTyping, doneTypingInterval);
-            });
-            input.on('keydown', function () {
-                clearTimeout(typingTimer);
-            });
-            function doneTyping () {
-                getcal(input.val(),id);
-        }
-        });
-    }
-
-    function getcal(current_quantity,id){
-        var total = 0;
-        var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
-        var prev_bill_amount = parseFloat($('#previous_quantity_'+id).text()) * parseFloat($('#rate_per_unit_'+id).text());
-        var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
-        var cumulative_bill_amount = prev_bill_amount + current_bill_amount;
-        $('#cumulative_quantity_'+id).text(cumulative_quantity);
-        $('#previous_bill_amount_'+id).text(prev_bill_amount);
-        $('#current_bill_amount_'+id).text(current_bill_amount);
-        $('#cumulative_bill_amount_'+id).text(cumulative_bill_amount);
-        getTotal();
-    }
-
-    function getTotal(){
-        var total_previous_bill_amount = 0;
-        var total_current_bill_amount = 0;
-        var total_cumulative_bill_amount = 0;
-        var selected_product_length = $('input:checked').length;
-        if(selected_product_length > 0){
-            $('input:checked').each(function(){
-                var id = $(this).val();
-
-                var previous_bill_amount = parseFloat($('#previous_bill_amount_'+id).text());
-                total_previous_bill_amount = total_previous_bill_amount + previous_bill_amount;
-                $('#total_previous_bill_amount').text(total_previous_bill_amount);
-
-                var current_bill_amount = parseFloat($('#current_bill_amount_'+id).text());
-                total_current_bill_amount = total_current_bill_amount + current_bill_amount;
-                $('#total_current_bill_amount').text(total_current_bill_amount);
-
-                var cumulative_bill_amount = parseFloat($('#cumulative_bill_amount_'+id).text());
-                total_cumulative_bill_amount = total_cumulative_bill_amount + cumulative_bill_amount;
-                $('#total_cumulative_bill_amount').text(total_cumulative_bill_amount);
-            });
-        }
-    }
-
-    $(document).ready(function (){
-        $('input[type="checkbox"]').click(function(){
-            if($(this).prop("checked") == false){
-                var id = $(this).val();
-                $('#current_quantity_'+id).prop('disabled',true);
-                $('#current_quantity_'+id).val('');
-                $('#cumulative_quantity_'+id).text("");
-                $('#previous_bill_amount_'+id).text("");
-                $('#current_bill_amount_'+id).text("");
-                $('#cumulative_bill_amount_'+id).text("");
-                getTotal();
-            }
-        });
-    });
-
-</script>
+<script src="/assets/custom/bill/bill.js" type="text/javascript"></script>
 @endsection
-
-
-
