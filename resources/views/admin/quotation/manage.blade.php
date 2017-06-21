@@ -55,10 +55,11 @@
                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="quotationTable">
                                             <thead>
                                             <tr>
-                                                <th style="width: 25%"> Project Site </th>
-                                                <th style="width: 25%"> Project Name </th>
                                                 <th style="width: 25%"> Client Name </th>
+                                                <th style="width: 25%"> Project Name </th>
+                                                <th style="width: 25%"> Project Site </th>
                                                 <th> Status </th>
+                                                <th> Created At </th>
                                                 <th> Actions </th>
                                             </tr>
                                             </thead>
