@@ -49,7 +49,6 @@ trait ProductTrait{
 
     public function getEditView(Request $request, $product) {
         try{
-            $product = $product->toArray();
             $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first();
             $product['category'] = Category::where('id',$product['category_id'])->pluck('name')->first();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();

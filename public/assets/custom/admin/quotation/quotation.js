@@ -272,10 +272,29 @@ function viewProduct(row){
         async: false,
         success: function(data, textStatus, xhr){
             $("#productView .modal-body").html(data);
+            calculateProductSubtotal();
             $("#productView").modal('show');
         },
         error: function(){
 
         }
     });
+}
+
+function calculateProductSubtotal(){
+    var subtotal = 0;
+    $(".material-amount").each(function(){
+        subtotal = subtotal + parseInt($(this).text());
+    });
+    $("#subtotal").text(subtotal);
+
+    var total = subtotal;
+    $(".profit-margin-percentage").each(function(){
+        var percentage = parseFloat($(this).text());
+        var amount = subtotal * (percentage/100);
+        $(this).next().text(amount);
+        total = total + amount;
+    });
+    $("#total").text(total);
+
 }

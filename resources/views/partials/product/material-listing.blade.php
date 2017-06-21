@@ -1,7 +1,7 @@
 <tr>
     <th style="width: 25%"> Name </th>
-    <th> Rate </th>
     <th> Unit </th>
+    <th> Rate </th>
     <th> Quantity </th>
     <th> Amount </th>
 </tr>
