@@ -47,6 +47,7 @@
                                                         <label class="col-md-3 control-label">Client</label>
                                                         <div class="col-md-6">
                                                             <select class="form-control" id="company" name="client_id">
+                                                                    <option value="">Select Client</option>
                                                                 @foreach($clients as $client)
                                                                     <option value="{{$client['id']}}">{{$client['company']}}</option>
                                                                 @endforeach
@@ -58,7 +59,7 @@
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Projects</label>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="project" name="project_id">
+                                                            <select class="form-control" id="project" name="project_id" disabled>
 
                                                             </select>
                                                         </div>
@@ -68,7 +69,7 @@
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Project Sites</label>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="project_sites" name="project_site_id">
+                                                            <select class="form-control" id="project_sites" name="project_site_id" disabled>
 
                                                             </select>
                                                         </div>
@@ -95,20 +96,13 @@
 @section('javascript')
 <script>
     $(document).ready(function() {
-        getProjects($('#company').val());
-        getProjectSites($('#project').val());
         $("#company").on('change', function(){
             getProjects($('#company').val());
-            getProjectSites($('#project').val());
         });
-        $("#project").on('change', function(){
-            getProjectSites($('#project').val());
-        });
-
         $('#submit').on('click',function(){
             var project_site= $('#project_sites').val();
             window.location.href = "/bill/create/"+project_site;
-        })
+        });
     });
 
     function getProjects(client_id){
@@ -119,8 +113,8 @@
             success: function(data,textStatus,xhr){
                 if(xhr.status == 200){
                     $('#project').html(data);
-                }else{
-
+                    $('#project').prop('disabled',false);
+                    getProjectSites($('#project').val());
                 }
             },
             error: function(errorStatus,xhr){
@@ -137,8 +131,7 @@
             success: function(data,textStatus,xhr){
                 if(xhr.status == 200){
                     $('#project_sites').html(data);
-                }else{
-
+                    $('#project_sites').prop('disabled',false);
                 }
             },
             error: function(errorStatus,xhr){
