@@ -190,9 +190,38 @@ trait QuotationTrait{
         try{
             $records = array();
             $records['data'] = array();
+            $quotations = Quotation::get();
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($quotations); $iterator++,$pagination++ ){
+                if($quotations[$pagination]->quotation_status->slug == 'draft'){
+                    $quotationStatus = '<td><span class="label label-sm label-warning"> Draft </span></td>';
+                }elseif($quotations[$pagination]->quotation_status->slug == 'approved'){
+                    $quotationStatus = '<td><span class="label label-sm label-success"> Approved </span></td>';
+                }else{
+                    $quotationStatus = '<td><span class="label label-sm label-danger"> Disapproved </span></td>';
+                }
+                $records['data'][] = [
+                    $quotations[$pagination]->project_site->project->client->company,
+                    $quotations[$pagination]->project_site->project->name,
+                    $quotations[$pagination]->project_site->name,
+                    $quotationStatus,
+                    date('d M Y',strtotime($quotations[$pagination]->created_at)),
+                    '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="javascript:void(0);">
+                                <i class="icon-docs"></i> Edit </a>
+                            </li>
+                        </ul>
+                    </div>'
+                ];
+            }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = 0;
-            $records["recordsFiltered"] = 0;
+            $records["recordsTotal"] = count($quotations);
+            $records["recordsFiltered"] = count($quotations);
         }catch(\Exception $e){
             $records = array();
             $data = [
