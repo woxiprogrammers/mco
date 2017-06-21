@@ -72,7 +72,10 @@ trait BillTrait{
 
     public function getCreateNewBillView(Request $request){
         try{
-            $clients = Client::where('is_active',true)->orderBy('id','asc')->get()->toArray();
+            $projectSiteIds = Quotation::pluck('project_site_id')->toArray();
+            $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+            $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
+            $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
             return view('admin.bill.create-new')->with(compact('clients'));
         }catch (\Exception $e){
             $data = [
@@ -88,7 +91,9 @@ trait BillTrait{
     public function getProjects(Request $request,$client){
         try{
             $status = 200;
-            $projects = Project::where('client_id',$client['id'])->get()->toArray();
+            $projectSiteIds = Quotation::pluck('project_site_id')->toArray();
+            $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+            $projects = Project::where('client_id',$client['id'])->whereIn('id',$projectIds)->get()->toArray();
             $projectOptions = array();
             for($i = 0 ; $i < count($projects); $i++){
                 $projectOptions[] = '<option value="'.$projects[$i]['id'].'"> '.$projects[$i]['name'].' </option>';
