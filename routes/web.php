@@ -91,13 +91,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'Admin\UnitsController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\UnitsController@createUnit'));
         Route::get('edit/{unit}',array('uses' => 'Admin\UnitsController@getEditView'));
-        Route::post('edit/{unit}',array('uses' => 'Admin\UnitsController@editUnit'));
+        Route::put('edit/{unit}',array('uses' => 'Admin\UnitsController@editUnit'));
         Route::post('check-name',array('uses' => 'Admin\UnitsController@checkUnitName'));
         Route::group(['prefix' => 'conversion'],function(){
             Route::get('create',array('uses' => 'Admin\UnitsController@getCreateConversionView'));
             Route::post('create',array('uses' => 'Admin\UnitsController@createConversion'));
-            Route::get('edit/{units}',array('uses' => 'Admin\UnitsController@getEditConversionView'));
-            Route::post('edit/{units}',array('uses' => 'Admin\UnitsController@editConversion'));
+            Route::get('edit/{unit_conversion}',array('uses' => 'Admin\UnitsController@getEditConversionView'));
+            Route::put('edit/{unit_conversion}',array('uses' => 'Admin\UnitsController@editConversion'));
             Route::post('listing',array('uses' => 'Admin\UnitsController@unitConversionsListing'));
         });
         Route::get('change-status/{unit}',array('uses' => 'Admin\UnitsController@changeUnitStatus'));
@@ -137,6 +137,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix' => 'quotation'], function(){
         Route::get('create',array('uses'=> 'Admin\QuotationController@getCreateView'));
+        Route::post('create',array('uses'=> 'Admin\QuotationController@createQuotation'));
         Route::get('manage',array('uses'=> 'Admin\QuotationController@getManageView'));
         Route::post('listing',array('uses'=> 'Admin\QuotationController@quotationListing'));
         Route::post('get-products',array('uses'=> 'Admin\QuotationController@getProducts'));
@@ -144,6 +145,21 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-profit-margins', array('uses' => 'Admin\QuotationController@getProfitMargins'));
         Route::post('get-product-detail',array('uses'=> 'Admin\QuotationController@getProductDetail'));
         Route::post('add-product-row',array('uses'=> 'Admin\QuotationController@addProductRow'));
+        Route::post('check-project-site-name',array('uses'=> 'Admin\QuotationController@checkProjectSiteName'));
+        Route::post('get-project-sites',array('uses'=> 'Admin\QuotationController@getProjectSites'));
+        Route::post('check-project-name',array('uses'=> 'Admin\QuotationController@checkProjectNames'));
+        Route::post('get-projects',array('uses'=> 'Admin\QuotationController@getProjects'));
+    });
+
+    Route::group(['prefix' => 'project'], function(){
+        Route::get('create',array('uses'=> 'Admin\ProjectController@getCreateView'));
+        Route::post('create',array('uses'=> 'Admin\ProjectController@createProject'));
+        Route::get('manage',array('uses'=> 'Admin\ProjectController@getManageView'));
+        Route::post('listing',array('uses'=> 'Admin\ProjectController@projectListing'));
+        Route::post('check-name',array('uses'=> 'Admin\ProjectController@checkProjectName'));
+        Route::get('change-status/{project}',array('uses' => 'Admin\ProjectController@changeProjectStatus'));
+        Route::get('edit/{project}',array('uses' => 'Admin\ProjectController@getEditView'));
+        Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
     });
 });
 

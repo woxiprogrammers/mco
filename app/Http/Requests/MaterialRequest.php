@@ -35,10 +35,9 @@ class MaterialRequest extends FormRequest
 
             case 'PUT':
                 return [
-                    /*'name' => 'required',
-                    'category_id' => 'required',
+                    'name' => 'required',
                     'unit' => 'required',
-                    'rate_per_unit' => 'required',*/
+                    'rate_per_unit' => 'required',
                 ];
                 break;
         }

@@ -44,9 +44,11 @@ trait MaterialTrait{
 
     public function getEditView(Request $request, $material) {
         try{
-            $unit = Unit::where('id',$material->unit_id)->select('id','name')->first();
+            $units = Unit::where('is_active', true)->orderBy('name','asc')->get()->toArray();
             $materialData['id'] = $material->id;
             $materialData['name'] = $material->name;
+            $materialData['rate_per_unit'] = $material->rate_per_unit;
+            $materialData['unit'] = $material->unit_id;
             $materialData['categories'] =  CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
                                             ->where('category_material_relations.material_id', $material->id)
                                             ->select('category_material_relations.category_id as id','categories.name as name')
@@ -59,10 +61,7 @@ trait MaterialTrait{
                 ->toArray();
             $materialData['category_id'] = implode(',',$categoryIds);
             $categories = Category::whereNotIn('id',$categoryIds)->where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            $materialVersion = MaterialVersion::where('material_id',$material->id)->orderBy('created_at','desc')->first();
-            $materialData['rate_per_unit'] = $materialVersion->rate_per_unit;
-            $materialData['unit'] = $materialVersion->unit_id;
-            return view('admin.material.edit')->with(compact('categories','unit','materialData'));
+            return view('admin.material.edit')->with(compact('categories','units','materialData'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'get Edit material view',
@@ -119,6 +118,7 @@ trait MaterialTrait{
             $now = Carbon::now();
             $materialData['name'] = ucwords(trim($request->name));
             $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
+            $materialData['unit_id'] = $request->unit;
             $materialData['updated_at'] = $now;
             $material->update($materialData);
             if($request->category_id != null){
@@ -164,8 +164,8 @@ trait MaterialTrait{
                 }
                 $records['data'][$iterator] = [
                     $materialData[$pagination]['name'],
-                    round($materialData[$pagination]['rate_per_unit'],3),
                     Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
+                    round($materialData[$pagination]['rate_per_unit'],3),
                     $material_status,
                     date('d M Y',strtotime($materialData[$pagination]['created_at'])),
                     '<div class="btn-group">

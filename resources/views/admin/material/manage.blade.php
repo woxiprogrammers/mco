@@ -47,16 +47,16 @@
                                                 <thead>
                                                 <tr>
                                                     <th style="width: 25%"> Name </th>
-                                                    <th> Rate </th>
                                                     <th> Unit </th>
+                                                    <th> Rate </th>
                                                     <th> Status </th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 <tr>
                                                     <th style="width: 25%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_rate" readonly> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_unit" readonly> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_rate" readonly> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                     <th>

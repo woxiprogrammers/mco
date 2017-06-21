@@ -99,15 +99,29 @@ function calculateProfitMargin(){
 
 function convertUnits(materialId){
     var newUnit = $("#material_"+materialId+"_unit").val();
+    var url = window.location.href;
+    if(url.indexOf("edit") > 0){
+        var materialVersionUnitId = $("input[name='unit_"+materialId+"']").val();
+        var materialVersionRate = $("input[name='rate_"+materialId+"']").val();
+        var data = {
+                current_unit: materialVersionUnitId,
+                rate: materialVersionRate,
+                new_unit: newUnit,
+                material_id:materialId,
+                _token: $("input[name='_token']").val()
+            };
+    }else{
+        var data = {
+                new_unit: newUnit,
+                material_id:materialId,
+                _token: $("input[name='_token']").val()
+            };
+    }
     $.ajax({
         url: '/units/convert',
         type: 'POST',
         async: false,
-        data: {
-            new_unit: newUnit,
-            material_id:materialId,
-            _token: $("input[name='_token']").val()
-        },
+        data: data,
         success: function(data,textStatus,xhr){
             if(xhr.status == 200){
                 $("#material_"+materialId+"_rate").val(Math.round(data.rate * 1000) / 1000);

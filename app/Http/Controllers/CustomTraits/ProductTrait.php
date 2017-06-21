@@ -171,7 +171,7 @@ trait ProductTrait{
                 $subTotal += round($materialVersion['rate_per_unit']*$data['material_quantity'][$key],3);
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
-                    $materialVersion['material_id'] = MaterialVersion::where('id',$key)->pluck('material_id')->first();
+                    $materialVersion['material_id'] = $key;
                     $newVersion = MaterialVersion::create($materialVersion);
                     $productMaterialProfitMarginData[$iterator]['material_version_id'] = $newVersion->id;
                 }else{
@@ -251,8 +251,8 @@ trait ProductTrait{
                 $records['data'][$iterator] = [
                     $productData[$pagination]['name'],
                     Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                    $productVersion['rate_per_unit'],
                     Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                    $productVersion['rate_per_unit'],
                     $product_status,
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">

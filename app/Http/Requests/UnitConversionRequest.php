@@ -24,6 +24,15 @@ class UnitConversionRequest extends FormRequest
     public function rules()
     {
         switch($this->method()){
+            case 'PUT':
+                return [
+                    'from_unit' => 'required',
+                    'from_value' => 'required',
+                    'to_unit' => 'required',
+                    'to_value' => 'required',
+                ];
+                break;
+
             case 'POST':
                 return [
                     'from_unit' => 'required',
