@@ -78,7 +78,11 @@ trait ProductTrait{
                                         ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity')
                                         ->get()->toArray();
             $materialVersionIds = implode(',',ProductMaterialRelation::where('product_version_id','=',$recentProductVersion['id'])->pluck('material_version_id')->toArray());
-            return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            if($request->ajax()){
+                return view('partials.quotation.product-view')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            }else{
+                return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Edit View',

@@ -11,13 +11,13 @@
     <div class="form-group">
         <label class="col-md-3 control-label">Product Title</label>
         <div class="col-md-6">
-            <input type="text" id="name" name="name" class="form-control" value="{{$product['name']}}">
+            <label class="col-md-3 control-label">{{$product['name']}}</label>
         </div>
     </div>
     <div class="form-group">
         <label class="col-md-3 control-label">Description</label>
         <div class="col-md-6">
-            <textarea class="form-control" rows="2" id="description" name="description">{{$product['description']}}</textarea>
+            <span>{!!$product['description']!!}</span>
         </div>
     </div>
     <div class="form-group">
@@ -163,11 +163,6 @@
                     <label class="control-label" style="font-weight: bold; margin-left: 1%" id="total">
 
                     </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-3 col-md-offset-4">
-                    <button type="submit" class="btn btn-success"> Submit </button>
                 </div>
             </div>
         </div>

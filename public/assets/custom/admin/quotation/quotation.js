@@ -262,5 +262,20 @@ function showProfitMargins(){
             }
         });
     }
+}
 
+function viewProduct(row){
+    var productId = $('#productSelect'+row).val();
+    $.ajax({
+        url:'/product/edit/'+productId,
+        type: "GET",
+        async: false,
+        success: function(data, textStatus, xhr){
+            $("#productView .modal-body").html(data);
+            $("#productView").modal('show');
+        },
+        error: function(){
+
+        }
+    });
 }
