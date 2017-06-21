@@ -146,7 +146,7 @@
                                                                             <table>
                                                                                 <tr style="border-bottom: 1px solid black">
                                                                                     <td>
-                                                                                        <a href="javascript:void(0);">
+                                                                                        <a href="javascript:void(0);" onclick="viewProduct(1)">
                                                                                             View
                                                                                         </a>
                                                                                     </td>
@@ -180,6 +180,25 @@
                                                     </div>
                                                 </div>
                                             </form>
+                                        </div>
+                                    </div>
+                                    <div id="productView" class="modal fade" role="dialog">
+                                        <div class="modal-dialog">
+
+                                            <!-- Modal content-->
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                    <h4 class="modal-title">Product Analysis.</h4>
+                                                </div>
+                                                <div class="modal-body">
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>

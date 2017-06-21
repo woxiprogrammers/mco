@@ -49,7 +49,6 @@ trait ProductTrait{
 
     public function getEditView(Request $request, $product) {
         try{
-            $product = $product->toArray();
             $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first();
             $product['category'] = Category::where('id',$product['category_id'])->pluck('name')->first();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
@@ -78,7 +77,11 @@ trait ProductTrait{
                                         ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity')
                                         ->get()->toArray();
             $materialVersionIds = implode(',',ProductMaterialRelation::where('product_version_id','=',$recentProductVersion['id'])->pluck('material_version_id')->toArray());
-            return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            if($request->ajax()){
+                return view('partials.quotation.product-view')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            }else{
+                return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Edit View',
@@ -251,8 +254,8 @@ trait ProductTrait{
                 $records['data'][$iterator] = [
                     $productData[$pagination]['name'],
                     Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                    $productVersion['rate_per_unit'],
                     Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                    $productVersion['rate_per_unit'],
                     $product_status,
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">

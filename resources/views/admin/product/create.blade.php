@@ -95,13 +95,7 @@
                                                         <fieldset>
                                                             <legend> Materials</legend>
                                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productMaterialTable">
-                                                                <tr>
-                                                                    <th style="width: 25%"> Name </th>
-                                                                    <th> Rate </th>
-                                                                    <th> Unit </th>
-                                                                    <th> Quantity </th>
-                                                                    <th> Amount </th>
-                                                                </tr>
+
                                                             </table>
                                                             <div class="col-md-offset-7">
                                                                 <div class="col-md-3 col-md-offset-2">

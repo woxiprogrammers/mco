@@ -54,7 +54,7 @@
         <table>
             <tr style="border-bottom: 1px solid black">
                 <td>
-                    <a href="javascript:void(0);">
+                    <a href="javascript:void(0);" onclick="viewProduct({{$rowIndex}})">
                         View
                     </a>
                 </td>

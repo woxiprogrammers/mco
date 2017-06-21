@@ -26,4 +26,8 @@ class Product extends Model
     {
         return $this->hasMany('App\ProductVersion');
     }
+
+    public function unit(){
+        return $this->belongsTo('App\Unit','unit_id');
+    }
 }
