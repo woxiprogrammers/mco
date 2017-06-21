@@ -14,8 +14,10 @@ use App\Quotation;
 use App\QuotationProduct;
 use App\Tax;
 use App\Unit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
 trait BillTrait{
 
@@ -287,6 +289,49 @@ trait BillTrait{
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function approveBill(Request $request){
+        try{
+            //dd($request->all());
+            $data = $request->all();
+            Log::info($data['bill_id']);
+            $ds = DIRECTORY_SEPARATOR;
+            foreach($data['images'] as $key => $image){
+                $imagename = basename($image);
+                /*$productImageArray = array(
+                    'name' => $imagename,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                );
+                Bill::create($productImageArray);*/
+                $billUploadPath = public_path().env('BILL_FILE_UPLOAD');
+                Log::info('$billUploadPath');
+                Log::info($billUploadPath);
+                $billTempImageUploadPath = public_path().$data['bill_id'];
+                Log::info('$billTempImageUploadPath');
+                Log::info($billTempImageUploadPath);
+                Log::info("image");
+                $billOwnDirecory = $billUploadPath.sha1($data['bill_id']);
+                Log::info('$billOwnDirecory');
+                Log::info($billOwnDirecory);
+                $billImageUploadPath = $billOwnDirecory.$ds.'bill_images';
+                /* Create Upload Directory If Not Exists */
+                if (!file_exists($billImageUploadPath)) {
+                    File::makeDirectory($billImageUploadPath, $mode = 0777, true, true);
+                }
+                if(File::exists($billTempImageUploadPath)){
+                    Log::info('inside file exists');
+                    $billImageUploadNewPath = $billImageUploadPath.$ds.$imagename;
+                    Log::info('$billImageUploadNewPath');
+                    Log::info($billImageUploadNewPath);
+                    $demo = File::move($billTempImageUploadPath,$billImageUploadNewPath);
+                    Log::info($demo);
+                }
+            }
+        }catch (\Exception $e){
+
         }
     }
 

@@ -47,7 +47,8 @@
                                                         <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                     @endfor
                                                 </select>
-                                                <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
+                                                <button class="btn btn-info btn-icon" style="margin-left: 10px">Download</button>
+                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#approve" class="btn btn-info btn-icon" style="margin-left: 10px">Approve</a>
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
@@ -174,6 +175,45 @@
         </div>
     </div>
 </div>
+
+<div id="approve" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Enter Remark and Upload Images</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" action="/bill/approve" method="POST">
+                    <input type="hidden" id="bill_id" name="bill_id" value="{{$selectedBillId}}">
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label for="remark" class="control-label">Remark : </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="remark" name="remark">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label for="upload_images" class="control-label">Upload Images : </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="file" name="images[]" id="images" multiple>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary pull-right">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
@@ -185,6 +225,11 @@
             window.location.href = "/bill/view/"+bill_id;
         });
         $('select[name="change_bill"]').find('option[value={{$selectedBillId}}]').attr("selected",true);
+
+        $('#approve').on('click', function(){
+
+            console.log('inside on click event');
+        });
     });
 </script>
 @endsection
