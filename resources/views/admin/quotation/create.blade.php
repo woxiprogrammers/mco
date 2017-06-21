@@ -220,6 +220,10 @@
 <script>
     $(document).ready(function(){
         CreateQuotation.init();
+        var category_id = $("#categorySelect1").val();
+        getProducts(category_id,1);
+        var selectedProduct = $("#productSelect1").val();
+        getProductDetails(selectedProduct, 1);
     });
 </script>
 @endsection

@@ -23,6 +23,7 @@ use App\QuotationMaterial;
 use App\QuotationProduct;
 use App\QuotationProfitMarginVersion;
 use App\QuotationStatus;
+use App\Summary;
 use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -212,7 +213,7 @@ trait QuotationTrait{
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="javascript:void(0);">
+                                <a href="/quotation/edit/'.$quotations[$pagination]->id.'">
                                 <i class="icon-docs"></i> Edit </a>
                             </li>
                         </ul>
@@ -396,5 +397,20 @@ trait QuotationTrait{
             Log::critical(json_encode($data));
         }
         return response()->json($response,$status);
+    }
+
+    public function getEditView(Request $request, $quotation){
+        try{
+            $summaries = Summary::where('is_active', true)->select('id','name')->get();
+            return view('admin.quotation.edit')->with(compact('quotation','summaries'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Projects',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }

@@ -32,14 +32,15 @@
     </td>
     <td>
         <div class="form-group">
-            <input name="product_rate[]" class="form-control quotation-product-table" id="productRate{{$rowIndex}}" type="text" readonly>
+            <input class="form-control quotation-product-table" id="productUnit{{$rowIndex}}" type="text" readonly>
         </div>
     </td>
     <td>
         <div class="form-group">
-            <input class="form-control quotation-product-table" id="productUnit{{$rowIndex}}" type="text" readonly>
+            <input name="product_rate[]" class="form-control quotation-product-table" id="productRate{{$rowIndex}}" type="text" readonly>
         </div>
     </td>
+
     <td>
         <div class="form-group">
             <input type="number" step="any" class="form-control quotation-product-table quotation-product-quantity" name="product_quantity[]" id="productQuantity{{$rowIndex}}" onchange="calculateAmount({{$rowIndex}})" onkeyup="calculateAmount({{$rowIndex}})" readonly>
@@ -47,7 +48,7 @@
     </td>
     <td>
         <div class="form-group">
-            <input type="text" name="product_amount[]" class="form-control quotation-product-table" id="productAmount{{$rowIndex}}" readonly>
+            <input type="text" name="product_amount[]" class="form-control quotation-product-table product-amount" id="productAmount{{$rowIndex}}" readonly>
         </div>
     </td>
     <td>

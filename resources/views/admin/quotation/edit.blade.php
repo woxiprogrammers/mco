@@ -48,129 +48,217 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
                                         <input type="hidden" id="productRowCount" value="1">
-                                        <form role="form" id="QuotationCreateForm" class="form-horizontal" action="/quotation/create" method="post">
+                                        <form role="form" id="QuotationEditForm" class="form-horizontal" action="/quotation/edit/{{$quotation->id}}" method="post">
                                             {!! csrf_field() !!}
+
+                                            <input type="hidden" name="_method" value="put">
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="GeneralTab">
-                                                    <fieldset>
-                                                        <legend>Project</legend>
-                                                        <div class="form-group">
-                                                            <label class="col-md-3 control-label">Client Name</label>
-                                                            <div class="col-md-6">
-                                                                <select class="form-control" id="clientId" name="client_id">
-                                                                    <option value=""> -- Select Client -- </option>
-                                                                    @foreach($clients as $client)
-                                                                    <option value="{{$client['id']}}"> {{$client['company']}} </option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label class="col-md-3 control-label">Project Name</label>
-                                                            <div class="col-md-6">
-                                                                <select name="project_id" id="projectId" class="form-control" disabled>
-
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label class="col-md-3 control-label">Project Site Name</label>
-                                                            <div class="col-md-6">
-                                                                <select name="project_site_id" id="projectSiteId" class="form-control" disabled>
-
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <div class="col-md-1 col-md-offset-1">
-
-                                                            </div>
-                                                        </div>
+                                                    <fieldset class="row">
+                                                        <a class="col-md-offset-1 btn green-meadow" id="next1">
+                                                            Approve
+                                                        </a>
+                                                        <a class="col-md-offset-1 btn btn-danger" id="next1">
+                                                            Disaaprove
+                                                        </a>
+                                                        <a class="col-md-offset-1 btn btn-primary" id="next1">
+                                                            Change Material Cost
+                                                        </a>
+                                                        <a class="col-md-offset-1 btn btn-wide btn-primary" id="next1">
+                                                            Change Profit Margins
+                                                        </a>
                                                     </fieldset>
-                                                    <fieldset>
-                                                        <legend> Products <a class="btn btn-success btn-md col-md-offset-9" id="addProduct">Add Product</a></legend>
-                                                        <div class="table-scrollable">
-                                                            <table class="table table-bordered" id="productTable" style="overflow: scroll;overflow-x: auto; overflow-y: auto">
-                                                                <tr>
-                                                                    <th style="width: 18%"> Category </th>
-                                                                    <th style="width: 18%"> Product </th>
-                                                                    <th style="width: 25%"> Description</th>
-                                                                    <th style="width: 10%"> Rate</th>
-                                                                    <th style="width: 8%"> Unit</th>
-                                                                    <th style="width: 10%"> Quantity </th>
-                                                                    <th  style="width: 10%"> Amount </th>
-                                                                    <th> Action </th>
-                                                                </tr>
-                                                                <tr id="Row1">
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <select class="form-control quotation-product-table quotation-category" id="categorySelect1" name="category_id[]">
-                                                                                @foreach($categories as $category)
-                                                                                <option value="{{$category['id']}}"> {{$category['name']}} </option>
-                                                                                @endforeach
-                                                                            </select>
+                                                    <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
+                                                        <div class="panel panel-default">
+                                                            <div class="panel-heading">
+                                                                <h4 class="panel-title">
+                                                                    <a class="accordion-toggle accordion-toggle-styled" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_1" style="font-size: 16px"><b> Project Details </b></a>
+                                                                </h4>
+                                                            </div>
+                                                            <div id="collapse_3_1" class="panel-collapse in">
+                                                                <div class="panel-body" style="font-size: 15px">
+                                                                    <div class="row" style="margin-left: 2%">
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-label"><b>Client Name:</b></label>
+                                                                            <label class="control-label"> {{$quotation->project_site->project->client->company}} </label>
                                                                         </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <select class="form-control quotation-product-table quotation-product" name="product_id[]" id="productSelect1" disabled>
-
-                                                                            </select>
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-label"><b>Project Name:</b></label>
+                                                                            <label class="control-label">{{$quotation->project_site->project->name}}</label>
                                                                         </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input name="product_description[]" class="form-control quotation-product-table" onclick="replaceEditor(1)" id="productDescription1" type="text" readonly>
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-label"><b>Project Site Name:</b></label>
+                                                                            <label class="control-label">{{$quotation->project_site->name}}</label>
                                                                         </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input name="product_rate[]" class="form-control quotation-product-table" id="productRate1" type="text" readonly>
+                                                                    </div>
+                                                                    <div class="row" style="margin-left: 3%">
+                                                                        <div>
+                                                                            <label class="control-label"><b>Project Site Address:</b></label>
+                                                                            <label class="control-label">{{$quotation->project_site->address}}</label>
                                                                         </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input name="product_rate[]" class="form-control quotation-product-table" id="productUnit1" type="text" readonly>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input type="number" step="any" class="form-control quotation-product-table" name="product_quantity[]" id="productQuantity1" onchange="calculateAmount(1)" onkeyup="calculateAmount(1)" readonly>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="form-group">
-                                                                            <input type="text" name="product_amount[]" class="form-control quotation-product-table" id="productAmount1" readonly>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <table>
-                                                                            <tr style="border-bottom: 1px solid black">
-                                                                                <td>
-                                                                                    <a href="javascript:void(0);" onclick="viewProduct(1)">
-                                                                                        View
-                                                                                    </a>
-                                                                                </td>
-                                                                            </tr>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="panel panel-default">
+                                                            <div class="panel-heading">
+                                                                <h4 class="panel-title">
+                                                                    <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_2" style="font-size: 16px"><b> Product Details </b></a>
+                                                                </h4>
+                                                            </div>
+                                                            <div id="collapse_3_2" class="panel-collapse collapse">
+                                                                <div class="panel-body" style="height:400px; overflow-y:auto;">
+                                                                    <a class="btn btn-success btn-md col-md-offset-11" id="addProduct">Add Product</a>
+                                                                    <div class="table-scrollable">
+                                                                        <table class="table table-bordered" id="productTable" style="overflow: scroll;overflow-x: auto; overflow-y: auto">
                                                                             <tr>
-                                                                                <td>
-                                                                                    <a href="javascript:void(0);" onclick="removeRow(1)">
-                                                                                        Remove
-                                                                                    </a>
-                                                                                </td>
+                                                                                <th style="width: 10%"> Category </th>
+                                                                                <th style="width: 10%"> Product </th>
+                                                                                <th style="width: 18%"> Description</th>
+                                                                                <th style="width: 8%"> Unit</th>
+                                                                                <th style="width: 8%"> Rate</th>
+                                                                                <th style="width: 5%"> Quantity </th>
+                                                                                <th  style="width: 8%"> Amount </th>
+                                                                                <th  style="width: 8%"> Discounted Amount </th>
+                                                                                <th  style="width: 15%"> Summary </th>
+                                                                                <th> Action </th>
                                                                             </tr>
-                                                                        </table>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </div>
+                                                                            @for($iterator=0; $iterator < count($quotation->quotation_products); $iterator++)
+                                                                                <tr id="Row{{$iterator}}">
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            {{$quotation->quotation_products[$iterator]->product->category->name}}
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            {{$quotation->quotation_products[$iterator]->product->name}}
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            <input name="product_description[{{$quotation->quotation_products[$iterator]->product->id}}]" class="form-control quotation-product-table" onclick="replaceEditor({{$iterator}})" id="productDescription{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->description}}" readonly>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            <input name="product_unit[]" class="form-control quotation-product-table" id="productUnit{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->product->unit->name}}" readonly>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            <input name="product_rate[]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->rate_per_unit}}" readonly>
+                                                                                        </div>
+                                                                                    </td>
 
-                                                        <div class="col-md-3 col-md-offset-5">
-                                                            <a class="btn btn-wide btn-primary" id="next1">
-                                                                Edit Material Cost
-                                                            </a>
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            <input type="number" step="any" class="form-control quotation-product-table" name="product_quantity[]" id="productQuantity{{$iterator}}" onchange="calculateAmount({{$iterator}})" onkeyup="calculateAmount({{$iterator}})"  value="{{$quotation->quotation_products[$iterator]->quantity}}" readonly>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            <input type="text" name="product_amount[]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="{!!$quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity!!}" readonly>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            <input type="text" name="product_discount_amount[]" class="form-control quotation-product-table product-discount-amount" id="productAmount{{$iterator}}" value="{!!$quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity!!}" readonly>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group">
+                                                                                            <select class="form-control" name="product_summary[]" style="width: 80%; margin-left: 10%; font-size: 13px">
+                                                                                                <option value="">Select Summary</option>
+                                                                                                @foreach($summaries as $summary)
+                                                                                                    <option value="{{$summary['id']}}">{{$summary['name']}}</option>
+                                                                                                @endforeach
+                                                                                            </select>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <table>
+                                                                                            <tr style="border-bottom: 1px solid black">
+                                                                                                <td>
+                                                                                                    <a href="javascript:void(0);" onclick="viewProduct({{$iterator}})">
+                                                                                                        View
+                                                                                                    </a>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td>
+                                                                                                    <a href="javascript:void(0);" onclick="removeRow({{$iterator}})">
+                                                                                                        Remove
+                                                                                                    </a>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endfor
+                                                                        </table>
+
+                                                                        <input type="hidden" id="productRowCount" value="{{$iterator}}">
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-3 col-md-offset-9">
+                                                                            <label class="control-label" style="font-weight: bold; margin-left: 15%; font-size: 15px">
+                                                                                Subtotal:
+                                                                            </label>
+                                                                            <label class="control-label" style="font-weight: bold; margin-left: 15%; font-size: 14px" id="subtotal">
+
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-2 col-md-offset-7">
+                                                                            <label class="control-label" style="font-weight: bold;float: right; margin-left: 15%; font-size: 15px">
+                                                                                Discount:
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <input class="form-control" id="discount" name="discount" type="number" value="0" min="0">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </fieldset>
+                                                        <div class="panel panel-default">
+                                                            <div class="panel-heading">
+                                                                <h4 class="panel-title">
+                                                                    <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_3" style="font-size: 16px"><b> Discount </b></a>
+                                                                </h4>
+                                                            </div>
+                                                            <div id="collapse_3_3" class="panel-collapse collapse">
+                                                                <div class="panel-body">
+                                                                    <div class="form-group">
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-label">
+                                                                                Discount
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-label">
+                                                                                <input type="number" step="any" name="discount" min="0" class="form-control">
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="panel panel-default">
+                                                            <div class="panel-heading">
+                                                                <h4 class="panel-title">
+                                                                    <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_4" style="font-size: 16px"><b> Tax </b></a>
+                                                                </h4>
+                                                            </div>
+                                                            <div id="collapse_3_4" class="panel-collapse collapse">
+                                                                <div class="panel-body">
+                                                                    // Tax Data
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="tab-pane fade in" id="MaterialsTab">
 
@@ -220,7 +308,9 @@
 
 <script>
     $(document).ready(function(){
-        CreateQuotation.init();
+        //CreateQuotation.init();
+        calculateSubtotal();
     });
+
 </script>
 @endsection

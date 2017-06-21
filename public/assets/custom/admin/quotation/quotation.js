@@ -4,10 +4,7 @@
 
 
 $(document).ready(function(){
-    var category_id = $("#categorySelect1").val();
-    getProducts(category_id,1);
-    var selectedProduct = $("#productSelect1").val();
-    getProductDetails(selectedProduct, 1);
+
 
     $(".quotation-category").change(function(){
         var category_id = $(this).val();
@@ -26,15 +23,25 @@ $(document).ready(function(){
     });
 
     $("#addProduct").on('click',function(){
+        var url = window.location.href;
         var rowCount = $('#productRowCount').val();
+        if(url.indexOf("edit") > 0){
+            var data = {
+                _token: $("input[name='_token']").val(),
+                row_count: rowCount,
+                is_edit: true
+            }
+        }else{
+            var data = {
+                    _token: $("input[name='_token']").val(),
+                    row_count: rowCount
+                }
+        }
         $.ajax({
             url: '/quotation/add-product-row',
             type: 'POST',
             async: true,
-            data: {
-                _token: $("input[name='_token']").val(),
-                row_count: rowCount
-            },
+            data: data,
             success: function(data,textStatus,xhr){
                 $("#productTable").append(data);
                 $('#productRowCount').val(parseInt(rowCount)+1);
@@ -210,6 +217,7 @@ function calculateAmount(row){
     }else{
         $("#productAmount"+row).val(amount);
     }
+    calculateSubtotal();
 }
 
 function replaceEditor(row){
@@ -296,5 +304,12 @@ function calculateProductSubtotal(){
         total = total + amount;
     });
     $("#total").text(total);
+}
 
+function calculateSubtotal(){
+    var subtotal = 0;
+    $(".product-amount").each(function(){
+        subtotal = subtotal+parseFloat($(this).val());
+    });
+    $("#subtotal").text(subtotal);
 }

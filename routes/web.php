@@ -151,6 +151,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-project-sites',array('uses'=> 'Admin\QuotationController@getProjectSites'));
         Route::post('check-project-name',array('uses'=> 'Admin\QuotationController@checkProjectNames'));
         Route::post('get-projects',array('uses'=> 'Admin\QuotationController@getProjects'));
+        Route::get('edit/{quotation}',array('uses'=> 'Admin\QuotationController@getEditView'));
     });
 
     Route::group(['prefix' => 'project'], function(){

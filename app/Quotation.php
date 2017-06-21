@@ -17,4 +17,8 @@ class Quotation extends Model
     public function quotation_status(){
         return $this->belongsTo('App\QuotationStatus','quotation_status_id','id');
     }
+
+    public function quotation_products(){
+        return $this->hasMany('App\QuotationProduct','quotation_id');
+    }
 }
