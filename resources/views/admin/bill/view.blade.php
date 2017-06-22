@@ -47,7 +47,7 @@
                                                         <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                     @endfor
                                                 </select>
-                                                <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
+                                                <a href="/bill/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Current Bill</a>
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">

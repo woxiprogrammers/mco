@@ -290,6 +290,10 @@ trait BillTrait{
         }
     }
 
+    public function generateCurrentBill(){
+        dd(123);
+    }
+
 }
 
 
