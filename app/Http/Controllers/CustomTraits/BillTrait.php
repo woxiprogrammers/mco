@@ -16,6 +16,7 @@ use App\Tax;
 use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Mockery\CountValidator\Exception;
 
 trait BillTrait{
 
@@ -290,8 +291,58 @@ trait BillTrait{
         }
     }
 
-    public function generateCurrentBill(){
-        dd(123);
+    public function generateCurrentBill(Request $request,$bill){
+        try{
+            $invoiceData = $taxData = array();
+            $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
+            $i = $j = $subTotal = $grossTotal = 0;
+            foreach($billQuotationProducts as $key => $billQuotationProduct){
+                    $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
+                    $invoiceData[$i]['quantity'] = $billQuotationProduct->quantity;
+                    $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
+                    if($billQuotationProduct->quotation_products->discount != 0){
+                        $invoiceData[$i]['rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->discount / 100))),3);
+                    }else{
+                        $invoiceData[$i]['rate'] = $billQuotationProduct->quotation_products->rate_per_unit;
+                    }
+                    $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
+                    $subTotal = $subTotal + $invoiceData[$i]['amount'];
+                $i++;
+            }
+            $taxes = BillTax::where('bill_id',$bill['id'])->get();
+            foreach($taxes as $key => $tax){
+                $taxData[$j]['name'] = $tax->taxes->name;
+                $taxData[$j]['percentage'] = $tax->percentage;
+                $taxData[$j]['tax_amount'] = round($subTotal * ($taxData[$j]['percentage'] / 100) , 3);
+                $grossTotal = $grossTotal + $taxData[$j]['tax_amount'];
+                $j++;
+            }
+            $grossTotal = round($grossTotal + $subTotal);
+            return view('admin.bill.pdf.invoice')->with(compact('invoiceData','taxData','subTotal','grossTotal'));
+        }catch(\Exception $e){
+            $data = [
+                'actions' => 'Generate current Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500,$e->getMessage());
+        }
+
+    }
+
+    public function generateCumulativeInvoice(Request $request,$bill){
+        try{
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
+            $listingProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->get()->toArray();
+            dd($listingProducts);
+        }catch(Exception $e){
+            $data = [
+                'actions' => 'Generate Cumulative Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+        }
     }
 
 }
