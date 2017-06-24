@@ -14,7 +14,9 @@ use App\Quotation;
 use App\QuotationProduct;
 use App\Tax;
 use App\Unit;
+use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Mockery\CountValidator\Exception;
 
@@ -293,9 +295,20 @@ trait BillTrait{
 
     public function generateCurrentBill(Request $request,$bill){
         try{
+            $data = array();
             $invoiceData = $taxData = array();
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
+            $data['currentBillID'] = 1;
+            foreach($allBillIds as $key => $billId){
+                 if($billId == $bill['id']){
+                     $data['currentBillID'] = $key+1;
+                 }
+             }
+            $data['billDate'] =$bill->created_at->formatLocalized('%d/%m/%Y');
+            $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
+            $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
-            $i = $j = $subTotal = $grossTotal = 0;
+            $i = $j = $data['subTotal'] = $data['grossTotal'] = 0;
             foreach($billQuotationProducts as $key => $billQuotationProduct){
                     $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
                     $invoiceData[$i]['quantity'] = $billQuotationProduct->quantity;
@@ -306,19 +319,26 @@ trait BillTrait{
                         $invoiceData[$i]['rate'] = $billQuotationProduct->quotation_products->rate_per_unit;
                     }
                     $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
-                    $subTotal = $subTotal + $invoiceData[$i]['amount'];
+                    $data['subTotal'] = $data['subTotal'] + $invoiceData[$i]['amount'];
                 $i++;
             }
+            $data['invoiceData'] = $invoiceData;
             $taxes = BillTax::where('bill_id',$bill['id'])->get();
             foreach($taxes as $key => $tax){
                 $taxData[$j]['name'] = $tax->taxes->name;
                 $taxData[$j]['percentage'] = $tax->percentage;
-                $taxData[$j]['tax_amount'] = round($subTotal * ($taxData[$j]['percentage'] / 100) , 3);
-                $grossTotal = $grossTotal + $taxData[$j]['tax_amount'];
+                $taxData[$j]['tax_amount'] = round($data['subTotal'] * ($taxData[$j]['percentage'] / 100) , 3);
+                $data['grossTotal'] = $data['grossTotal'] + $taxData[$j]['tax_amount'];
                 $j++;
             }
-            $grossTotal = round($grossTotal + $subTotal);
-            return view('admin.bill.pdf.invoice')->with(compact('invoiceData','taxData','subTotal','grossTotal'));
+            $data['taxData'] = $taxData;
+            $grossTotal = round($data['grossTotal'] + $data['subTotal']);
+            $data['amountInWords'] = ucwords($this->getIndianCurrency($grossTotal));
+            $pdf = PDF::loadView('admin.bill.pdf.invoice',$data);
+            return $pdf->download('invoice.pdf');
+            /*$pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.bill.pdf.invoice')->with(compact('billDate','amountInWords','clientCompany','currentBillID','projectSiteName','invoiceData','taxData','subTotal','grossTotal')));
+            return $pdf->stream();*/
         }catch(\Exception $e){
             $data = [
                 'actions' => 'Generate current Bill',
@@ -331,11 +351,45 @@ trait BillTrait{
 
     }
 
+    public function getIndianCurrency($number)
+    {
+        $number = floor($number);
+        $decimal = round($number - ($no = floor($number)), 2) * 100;
+        $hundred = null;
+        $digits_length = strlen($no);
+        $i = 0;
+        $str = array();
+        $words = array(0 => '', 1 => 'one', 2 => 'two',
+            3 => 'three', 4 => 'four', 5 => 'five', 6 => 'six',
+            7 => 'seven', 8 => 'eight', 9 => 'nine',
+            10 => 'ten', 11 => 'eleven', 12 => 'twelve',
+            13 => 'thirteen', 14 => 'fourteen', 15 => 'fifteen',
+            16 => 'sixteen', 17 => 'seventeen', 18 => 'eighteen',
+            19 => 'nineteen', 20 => 'twenty', 30 => 'thirty',
+            40 => 'forty', 50 => 'fifty', 60 => 'sixty',
+            70 => 'seventy', 80 => 'eighty', 90 => 'ninety');
+        $digits = array('', 'hundred','thousand','lakh', 'crore');
+        while( $i < $digits_length ) {
+            $divider = ($i == 2) ? 10 : 100;
+            $number = floor($no % $divider);
+            $no = floor($no / $divider);
+            $i += $divider == 10 ? 1 : 2;
+            if ($number) {
+                $plural = (($counter = count($str)) && $number > 9) ? 's' : null;
+                $hundred = ($counter == 1 && $str[0]) ? 'and ' : null;
+                $str [] = ($number < 21) ? $words[$number].' '. $digits[$counter]. $plural.' '.$hundred:$words[floor($number / 10) * 10].' '.$words[$number % 10]. ' '.$digits[$counter].$plural.' '.$hundred;
+            } else $str[] = null;
+        }
+        $Rupees = implode('', array_reverse($str));
+        $paise = ($decimal) ? "." . ($words[$decimal / 10] . " " . $words[$decimal % 10]) . ' Paise' : '';
+        return ($Rupees ? $Rupees . 'only' : '') . $paise ;
+    }
+
     public function generateCumulativeInvoice(Request $request,$bill){
         try{
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
             $listingProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->get()->toArray();
-            dd($listingProducts);
+            return redirect('/bill/view/'.$bill['id']);
         }catch(Exception $e){
             $data = [
                 'actions' => 'Generate Cumulative Bill',
