@@ -27,7 +27,7 @@
         <table>
             <tr>
                 <td><b>To : {!! $clientCompany !!} </b></td>
-                <td style="padding-left: 400px; font-size: 15px"> <i>DATE : {!! $billDate !!}</i> </td>
+                <td style="padding-left: 360px; font-size: 15px"> <i>DATE : {!! $billDate !!}</i> </td>
             </tr>
             <tr>
                 <td><b>Site Name : {!! $projectSiteName !!}</b></td>
