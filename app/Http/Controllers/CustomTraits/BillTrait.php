@@ -335,10 +335,7 @@ trait BillTrait{
             $grossTotal = round($data['grossTotal'] + $data['subTotal']);
             $data['amountInWords'] = ucwords($this->getIndianCurrency($grossTotal));
             $pdf = PDF::loadView('admin.bill.pdf.invoice',$data);
-            return $pdf->download('invoice.pdf');
-            /*$pdf = App::make('dompdf.wrapper');
-            $pdf->loadHTML(view('admin.bill.pdf.invoice')->with(compact('billDate','amountInWords','clientCompany','currentBillID','projectSiteName','invoiceData','taxData','subTotal','grossTotal')));
-            return $pdf->stream();*/
+            return $pdf->download('Invoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
         }catch(\Exception $e){
             $data = [
                 'actions' => 'Generate current Bill',
