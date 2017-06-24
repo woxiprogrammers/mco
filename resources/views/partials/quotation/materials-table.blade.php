@@ -24,7 +24,7 @@
         </tr>
         @foreach($materials as $material)
             <tr>
-                <input type="hidden" name="material_id[]" value="{{$material['id']}}">
+                <input type="hidden" class="material-id" name="material_id[]" value="{{$material['id']}}">
                 <td>
                     <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}">
                 </td>

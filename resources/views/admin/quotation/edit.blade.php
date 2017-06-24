@@ -48,6 +48,7 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
                                         <input type="hidden" id="productRowCount" value="1">
+                                        <input type="hidden" id="quotationId" value="{{$quotation->id}}">
                                         <form role="form" id="QuotationEditForm" class="form-horizontal" action="/quotation/edit/{{$quotation->id}}" method="post">
                                             {!! csrf_field() !!}
 
@@ -55,16 +56,16 @@
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="GeneralTab">
                                                     <fieldset class="row">
-                                                        <a class="col-md-offset-1 btn green-meadow" id="next1">
+                                                        <a class="col-md-offset-1 btn green-meadow" id="approve">
                                                             Approve
                                                         </a>
-                                                        <a class="col-md-offset-1 btn btn-danger" id="next1">
+                                                        <a class="col-md-offset-1 btn btn-danger" id="disapprove">
                                                             Disaaprove
                                                         </a>
-                                                        <a class="col-md-offset-1 btn btn-primary" id="next1">
+                                                        <a class="col-md-offset-1 btn btn-primary" id="materialCosts">
                                                             Change Material Cost
                                                         </a>
-                                                        <a class="col-md-offset-1 btn btn-wide btn-primary" id="next1">
+                                                        <a class="col-md-offset-1 btn btn-wide btn-primary" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             Change Profit Margins
                                                         </a>
                                                     </fieldset>
@@ -132,38 +133,39 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
+                                                                                            <input type="hidden" class="quotation-product" value="{{$quotation->quotation_products[$iterator]->product_id}}" id="productSelect{{$iterator}}">
                                                                                             {{$quotation->quotation_products[$iterator]->product->name}}
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input name="product_description[{{$quotation->quotation_products[$iterator]->product->id}}]" class="form-control quotation-product-table" onclick="replaceEditor({{$iterator}})" id="productDescription{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->description}}" readonly>
+                                                                                            <input name="product_description[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" onclick="replaceEditor({{$iterator}})" id="productDescription{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->description}}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input name="product_unit[]" class="form-control quotation-product-table" id="productUnit{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->product->unit->name}}" readonly>
+                                                                                            <input name="product_unit[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" id="productUnit{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->product->unit->name}}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input name="product_rate[]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->rate_per_unit}}" readonly>
+                                                                                            <input name="product_rate[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->rate_per_unit}}" readonly>
                                                                                         </div>
                                                                                     </td>
 
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="number" step="any" class="form-control quotation-product-table" name="product_quantity[]" id="productQuantity{{$iterator}}" onchange="calculateAmount({{$iterator}})" onkeyup="calculateAmount({{$iterator}})"  value="{{$quotation->quotation_products[$iterator]->quantity}}" readonly>
+                                                                                            <input type="number" step="any" class="form-control quotation-product-table" name="product_quantity[{{$quotation->quotation_products[$iterator]->product_id}}]" id="productQuantity{{$iterator}}" onchange="calculateAmount({{$iterator}})" onkeyup="calculateAmount({{$iterator}})"  value="{{$quotation->quotation_products[$iterator]->quantity}}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="text" name="product_amount[]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="{!!$quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity!!}" readonly>
+                                                                                            <input type="text" name="product_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="{!!$quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity!!}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="text" name="product_discount_amount[]" class="form-control quotation-product-table product-discount-amount" id="productAmount{{$iterator}}" value="{!!$quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity!!}" readonly>
+                                                                                            <input type="text" name="product_discount_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-discount-amount" id="productDiscountAmount{{$iterator}}" value="{!!($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity)-($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity*($quotation->discount/100))!!}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
@@ -217,30 +219,7 @@
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-2">
-                                                                            <input class="form-control" id="discount" name="discount" type="number" value="0" min="0">
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="panel panel-default">
-                                                            <div class="panel-heading">
-                                                                <h4 class="panel-title">
-                                                                    <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_3" style="font-size: 16px"><b> Discount </b></a>
-                                                                </h4>
-                                                            </div>
-                                                            <div id="collapse_3_3" class="panel-collapse collapse">
-                                                                <div class="panel-body">
-                                                                    <div class="form-group">
-                                                                        <div class="col-md-3">
-                                                                            <label class="control-label">
-                                                                                Discount
-                                                                            </label>
-                                                                        </div>
-                                                                        <div class="col-md-3">
-                                                                            <label class="control-label">
-                                                                                <input type="number" step="any" name="discount" min="0" class="form-control">
-                                                                            </label>
+                                                                            <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" min="0">
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -254,7 +233,16 @@
                                                             </div>
                                                             <div id="collapse_3_4" class="panel-collapse collapse">
                                                                 <div class="panel-body">
-                                                                    // Tax Data
+                                                                    @foreach($taxes as $tax)
+                                                                        <div class="row">
+                                                                            <div class="col-md-3">
+                                                                                <label class="control-label" style="float: right;"> {{$tax['name']}}: </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input type="number" step="any" class="form-control" name="tax[{{$tax['id']}}]" id="Tax{{$tax['id']}}" value="{{$tax['base_percentage']}}">
+                                                                            </div>
+                                                                        </div>
+                                                                    @endforeach
                                                                 </div>
                                                             </div>
                                                         </div>

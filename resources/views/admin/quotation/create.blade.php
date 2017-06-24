@@ -165,7 +165,7 @@
                                                             </div>
 
                                                             <div class="col-md-3 col-md-offset-5">
-                                                                <a class="btn btn-wide btn-primary" id="next1">
+                                                                <a class="btn btn-wide btn-primary" id="materialCosts">
                                                                     Edit Material Cost
                                                                 </a>
                                                             </div>

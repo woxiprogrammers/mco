@@ -51,6 +51,23 @@
             <input type="text" name="product_amount[]" class="form-control quotation-product-table product-amount" id="productAmount{{$rowIndex}}" readonly>
         </div>
     </td>
+    @if($isEdit == true)
+        <td>
+            <div class="form-group">
+                <input type="text" name="product_discount_amount[]" class="form-control quotation-product-table product-discount-amount" id="productDiscountAmount{{$rowIndex}}" readonly>
+            </div>
+        </td>
+        <td>
+            <div class="form-group">
+                <select class="form-control" name="product_summary[]" style="width: 80%; margin-left: 10%; font-size: 13px">
+                    <option value="">Select Summary</option>
+                    @foreach($summaries as $summary)
+                        <option value="{{$summary['id']}}">{{$summary['name']}}</option>
+                    @endforeach
+                </select>
+            </div>
+        </td>
+    @endif
     <td>
         <table>
             <tr style="border-bottom: 1px solid black">
