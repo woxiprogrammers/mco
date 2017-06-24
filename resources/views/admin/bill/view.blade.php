@@ -40,14 +40,15 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body flip-scroll">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
+                                            <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px">
                                                 <label class="control-label">Select Bill</label>
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                     @endfor
                                                 </select>
-                                                <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
+                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Current Bill</a>
+                                                <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Cumulative Bill</a>
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
