@@ -59,7 +59,7 @@
         </td>
         <td>
             <div class="form-group">
-                <select class="form-control" name="product_summary[]" style="width: 80%; margin-left: 10%; font-size: 13px">
+                <select class="form-control" name="product_summary[]" id="productSummary{{$rowIndex}}" style="width: 80%; margin-left: 10%; font-size: 13px">
                     <option value="">Select Summary</option>
                     @foreach($summaries as $summary)
                         <option value="{{$summary['id']}}">{{$summary['name']}}</option>

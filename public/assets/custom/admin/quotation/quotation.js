@@ -264,6 +264,10 @@ function getProductDetails(product_id,rowNumber){
             $("#productUnit"+rowNumber).attr('name','product_unit['+data.id+']');
             $("#productQuantity"+rowNumber).attr('name','product_quantity['+data.id+']');
             $("#productAmount"+rowNumber).attr('name','product_amount['+data.id+']');
+            var url = window.location.href;
+            if(url.indexOf('edit') > 0){
+                $("#productSummary"+rowNumber).attr('name','product_summary['+data.id+']');
+            }
             calculateAmount(rowNumber);
         },
         error: function(errorStatus, xhr){

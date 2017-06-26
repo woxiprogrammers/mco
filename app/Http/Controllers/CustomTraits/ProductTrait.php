@@ -54,6 +54,7 @@ trait ProductTrait{
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
             $productProfitMarginsData = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
                                     ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
+                                    ->where('products_profit_margins_relation.product_version_id',$recentProductVersion['id'])
                                     ->select('profit_margins.id as id','profit_margin_versions.percentage as percentage')
                                     ->get();
             $productProfitMargins = array();

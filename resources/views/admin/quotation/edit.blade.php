@@ -132,7 +132,7 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="hidden" class="quotation-product" value="{{$quotation->quotation_products[$iterator]->product_id}}" id="productSelect{{$iterator}}">
+                                                                                            <input type="hidden" class="quotation-product" value="{{$quotation->quotation_products[$iterator]->product_id}}" id="productSelect{{$iterator}}" name="product_id[]">
                                                                                             {{$quotation->quotation_products[$iterator]->product->name}}
                                                                                         </div>
                                                                                     </td>
@@ -169,11 +169,22 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <select class="form-control" name="product_summary[]" style="width: 80%; margin-left: 10%; font-size: 13px">
-                                                                                                <option value="">Select Summary</option>
-                                                                                                @foreach($summaries as $summary)
-                                                                                                    <option value="{{$summary['id']}}">{{$summary['name']}}</option>
-                                                                                                @endforeach
+                                                                                            <select class="form-control" name="product_summary[{{$quotation->quotation_products[$iterator]->product_id}}]" style="width: 80%; margin-left: 10%; font-size: 13px">
+                                                                                                @if($quotation->quotation_products[$iterator]->summary_id == null)
+                                                                                                    <option value="" selected>Select Summary</option>
+                                                                                                    @foreach($summaries as $summary)
+                                                                                                        <option value="{{$summary['id']}}">{{$summary['name']}}</option>
+                                                                                                    @endforeach
+                                                                                                @else
+                                                                                                    <option value="">Select Summary</option>
+                                                                                                    @foreach($summaries as $summary)
+                                                                                                        @if($quotation->quotation_products[$iterator]->summary_id == $summary['id'])
+                                                                                                            <option value="{{$summary['id']}}" selected>{{$summary['name']}}</option>
+                                                                                                        @else
+                                                                                                            <option value="{{$summary['id']}}">{{$summary['name']}}</option>
+                                                                                                        @endif
+                                                                                                    @endforeach
+                                                                                                @endif
                                                                                             </select>
                                                                                         </div>
                                                                                     </td>

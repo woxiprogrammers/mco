@@ -24,6 +24,7 @@ use App\QuotationMaterial;
 use App\QuotationProduct;
 use App\QuotationProfitMarginVersion;
 use App\QuotationStatus;
+use App\QuotationTaxVersion;
 use App\Summary;
 use App\Tax;
 use App\Unit;
@@ -422,7 +423,7 @@ trait QuotationTrait{
                 $productMaterials = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                                                 ->join('materials','materials.id','=','material_versions.material_id')
                                                 ->where('product_material_relation.product_version_id', $recentVersion)
-                                                ->select('materials.id as id','product_material_relation.material_quantity as material_quantity','material_versions.unit_id')
+                                                ->select('materials.id as id','product_material_relation.material_quantity as material_quantity','material_versions.unit_id as unit_id')
                                                 ->get()
                                                 ->toArray();
                 $productAmount = 0;
@@ -456,7 +457,7 @@ trait QuotationTrait{
                 $quotationMaterialData['material_id'] = $materialId;
                 $quotationMaterialData['rate_per_unit'] = $data['material_rate'][$materialId];
                 $quotationMaterialData['unit_id'] = $data['material_unit'][$materialId];
-                if(is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
+                if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
                     $quotationMaterialData['is_client_supplied'] = true;
                 }else{
                     $quotationMaterialData['is_client_supplied'] = false;
@@ -504,6 +505,7 @@ trait QuotationTrait{
             $projectId = $request->project_id;
             $projectSites = ProjectSite::join('quotations','quotations.project_site_id','!=','project_sites.id')
                                 ->where('project_id', $projectId)
+                                ->select('project_sites.id as id','project_sites.name as name')
                                 ->get();
             $response = array();
             foreach($projectSites as $projectSite){
@@ -657,5 +659,99 @@ trait QuotationTrait{
             $response = array();
         }
         return response()->json($response,$status);
+    }
+
+    public function editQuotation(Request $request, $quotation){
+        try{
+            $data = $request->all();
+            $quotationData = array();
+            $quotationData['discount'] = $data['discount'];
+            $quotationData['is_tax_applied'] = true;
+            if(in_array(!null,$data['product_summary'])){
+                $quotationData['is_summary_applied'] = true;
+            }
+            $quotation->update($quotationData);
+            $taxData = array();
+            $taxData['quotation_id'] = $quotation['id'];
+            foreach($data['tax'] as $taxId => $taxPercentage){
+                $taxData['tax_id'] = $taxId;
+                $taxData['percentage'] = $taxPercentage;
+                QuotationTaxVersion::create($taxData);
+            }
+            foreach($quotation->quotation_products as $quotationProduct){
+                foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
+                    $quotationProfitMargin->delete();
+                }
+                $quotationProduct->delete();
+            }
+            foreach($quotation->quotation_materials as $quotationMaterial){
+                $quotationMaterial->delete();
+            }
+            foreach($data['product_id'] as $productId){
+                $quotationProductData = array();
+                $quotationProductData['product_id'] = $productId;
+                $quotationProductData['quotation_id'] = $quotation['id'];
+                $quotationProductData['description'] = $data['product_description'][$productId];
+                $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                $productMaterials = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
+                    ->join('materials','materials.id','=','material_versions.material_id')
+                    ->where('product_material_relation.product_version_id', $recentVersion)
+                    ->select('materials.id as id','product_material_relation.material_quantity as material_quantity','material_versions.unit_id as unit_id')
+                    ->get()
+                    ->toArray();
+                $productAmount = 0;
+                foreach($productMaterials as $material){
+                    if($data['material_unit'][$material['id']] == $material['unit_id']){
+                        $rateConversion = $data['material_rate'][$material['id']];
+                    }else{
+                        $rateConversion = UnitHelper::unitConversion($material['unit_id'],$data['material_unit'][$material['id']],$data['material_rate'][$material['id']]);
+                        if(is_array($rateConversion)){
+                            $request->session()->flash('error','Unit Conversion is invalid');
+                            return redirect('/quotation/create');
+                        }
+                    }
+                    $productAmount = $productAmount + ($rateConversion * $material['material_quantity']);
+                }
+                $quotationProductData['rate_per_unit'] = $productAmount;
+                $quotationProductData['quantity'] = $data['product_quantity'][$productId];
+                if(isset($quotationData['is_summary_applied']) && $quotationData['is_summary_applied'] == true){
+                    if(array_key_exists($productId,$data['product_summary'])){
+                        $quotationProductData['summary_id'] = $data['product_summary'][$productId];
+                    }
+                }
+                $quotationProduct = QuotationProduct::create($quotationProductData);
+                foreach($data['profit_margins'][$productId] as $id => $percentage){
+                    $quotationProfitMarginData = array();
+                    $quotationProfitMarginData['profit_margin_id'] = $id;
+                    $quotationProfitMarginData['percentage'] = $percentage;
+                    $quotationProfitMarginData['quotation_product_id'] = $quotationProduct->id;
+                    QuotationProfitMarginVersion::create($quotationProfitMarginData);
+                    $productAmount = $productAmount + ($productAmount * ($percentage / 100));
+                }
+                QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
+            }
+            foreach($data['material_id'] as $materialId){
+                $quotationMaterialData = array();
+                $quotationMaterialData['material_id'] = $materialId;
+                $quotationMaterialData['rate_per_unit'] = $data['material_rate'][$materialId];
+                $quotationMaterialData['unit_id'] = $data['material_unit'][$materialId];
+                if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
+                    $quotationMaterialData['is_client_supplied'] = true;
+                }else{
+                    $quotationMaterialData['is_client_supplied'] = false;
+                }
+                $quotationMaterialData['quotation_id'] = $quotation['id'];
+                QuotationMaterial::create($quotationMaterialData);
+            }
+            $request->session()->flash('success','Quotation Edited Successfully');
+            return redirect('/quotation/edit/'.$quotation->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Quotation',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 }
