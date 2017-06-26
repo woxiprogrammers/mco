@@ -139,6 +139,11 @@ trait QuotationTrait{
             $productIds = $request->productIds;
             $materialIds = array();
             $units = Unit::where('is_active', true)->orderBy('name','asc')->get()->toArray();
+            if($request->clientSuppliedMaterial == null){
+                $clientSuppliedMaterial = array();
+            }else{
+                $clientSuppliedMaterial = $request->clientSuppliedMaterial;
+            }
             foreach($productIds as $id){
                 $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
                 $materialId = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
@@ -212,7 +217,7 @@ trait QuotationTrait{
                         ->toArray();
                 }
             }
-            return view('partials.quotation.materials-table')->with(compact('materials','units'));
+            return view('partials.quotation.materials-table')->with(compact('materials','units','clientSuppliedMaterial'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add Product Row',
@@ -542,6 +547,11 @@ trait QuotationTrait{
             $productIds = $data['product_ids'];
             foreach($productIds as $productId){
                 $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                $productMaterialIds = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
+                    ->join('materials','materials.id','=','material_versions.material_id')
+                    ->where('product_material_relation.product_version_id',$recentVersion)
+                    ->pluck('material_versions.material_id')
+                    ->toArray();
                 $materials = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                                                 ->join('materials','materials.id','=','material_versions.material_id')
                                                 ->where('product_material_relation.product_version_id',$recentVersion)
@@ -629,7 +639,9 @@ trait QuotationTrait{
                 }
                 if($request->has('clientSuppliedMaterial')){
                     foreach($data['clientSuppliedMaterial'] as $materialId){
-                        $productAmount = $productAmount - $data['material_rate'][$materialId];
+                        if(in_array($materialId,$productMaterialIds)){
+                            $productAmount = $productAmount - $data['material_rate'][$materialId];
+                        }
                     }
                 }
                 $response['amount'][$productId] = $productAmount;

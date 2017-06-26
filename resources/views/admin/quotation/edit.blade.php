@@ -51,7 +51,6 @@
                                         <input type="hidden" id="quotationId" value="{{$quotation->id}}">
                                         <form role="form" id="QuotationEditForm" class="form-horizontal" action="/quotation/edit/{{$quotation->id}}" method="post">
                                             {!! csrf_field() !!}
-
                                             <input type="hidden" name="_method" value="put">
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="GeneralTab">
