@@ -12,6 +12,7 @@ use App\Project;
 use App\ProjectSite;
 use App\Quotation;
 use App\QuotationProduct;
+use App\QuotationStatus;
 use App\Tax;
 use App\Unit;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ trait BillTrait{
 
     public function getCreateView(Request $request,$project_site){
         try{
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
             $bills = Bill::where('quotation_id',$quotation['id'])->get()->toArray();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
@@ -72,7 +74,8 @@ trait BillTrait{
 
     public function getCreateNewBillView(Request $request){
         try{
-            $projectSiteIds = Quotation::pluck('project_site_id')->toArray();
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
             $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
             $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
             $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
@@ -91,7 +94,8 @@ trait BillTrait{
     public function getProjects(Request $request,$client){
         try{
             $status = 200;
-            $projectSiteIds = Quotation::pluck('project_site_id')->toArray();
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
             $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
             $projects = Project::where('client_id',$client['id'])->whereIn('id',$projectIds)->get()->toArray();
             $projectOptions = array();

@@ -49,7 +49,6 @@
                                                             <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                         @endfor
                                                     </select>
-                                                    <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
                                                 </div>
                                             @endif
                                            <input type="hidden" id="project_site_id" name="project_site_id" value="{{$project_site['id']}}">
