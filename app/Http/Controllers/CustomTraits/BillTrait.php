@@ -332,8 +332,8 @@ trait BillTrait{
                 $j++;
             }
             $data['taxData'] = $taxData;
-            $grossTotal = round($data['grossTotal'] + $data['subTotal']);
-            $data['amountInWords'] = ucwords($this->getIndianCurrency($grossTotal));
+            $data['grossTotal'] = round($data['grossTotal'] + $data['subTotal']);
+            $data['amountInWords'] = ucwords($this->getIndianCurrency($data['grossTotal']));
             $pdf = PDF::loadView('admin.bill.pdf.invoice',$data);
             return $pdf->download('Invoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
         }catch(\Exception $e){
