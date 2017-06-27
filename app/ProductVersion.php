@@ -11,6 +11,6 @@ class ProductVersion extends Model
     protected $fillable = ['product_id','rate_per_unit'];
 
     public function product(){
-        $this->belongsTo('App\Product');
+        return $this->belongsTo('App\Product','product_id');
     }
 }

@@ -65,7 +65,7 @@
                 </label>
             </div>
             <div class="col-md-2">
-                <label class="control-label" style="font-weight: bold" id="subtotal">
+                <label class="control-label" style="font-weight: bold" id="productViewSubtotal">
 
                 </label>
             </div>
