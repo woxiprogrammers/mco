@@ -99,6 +99,9 @@
         $("#company").on('change', function(){
             getProjects($('#company').val());
         });
+        $("#project").on('change', function(){
+            getProjectSites($('#project').val());
+        });
         $('#submit').on('click',function(){
             var project_site= $('#project_sites').val();
             window.location.href = "/bill/create/"+project_site;

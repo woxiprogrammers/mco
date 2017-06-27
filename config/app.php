@@ -179,7 +179,7 @@ return [
 
         App\Providers\NavBarProvider::class,
         Cviebrock\EloquentSluggable\ServiceProvider::class,
-
+        Barryvdh\DomPDF\ServiceProvider::class,
     ],
 
     /*
@@ -228,7 +228,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        'UnitHelper' => \App\Helper\UnitHelper::class
+        'UnitHelper' => \App\Helper\UnitHelper::class,
+        'PDF' => Barryvdh\DomPDF\Facade::class,
 
     ],
 

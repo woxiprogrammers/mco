@@ -7,20 +7,26 @@ use App\BillStatus;
 use App\BillTax;
 use App\Category;
 use App\Client;
+use App\Helper\NumberHelper;
 use App\Product;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
 use App\QuotationProduct;
+use App\QuotationStatus;
 use App\Tax;
 use App\Unit;
+use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Mockery\CountValidator\Exception;
 
 trait BillTrait{
 
     public function getCreateView(Request $request,$project_site){
         try{
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
             $bills = Bill::where('quotation_id',$quotation['id'])->get()->toArray();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
@@ -72,7 +78,8 @@ trait BillTrait{
 
     public function getCreateNewBillView(Request $request){
         try{
-            $projectSiteIds = Quotation::pluck('project_site_id')->toArray();
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
             $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
             $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
             $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
@@ -91,7 +98,8 @@ trait BillTrait{
     public function getProjects(Request $request,$client){
         try{
             $status = 200;
-            $projectSiteIds = Quotation::pluck('project_site_id')->toArray();
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
             $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
             $projects = Project::where('client_id',$client['id'])->whereIn('id',$projectIds)->get()->toArray();
             $projectOptions = array();
@@ -287,6 +295,75 @@ trait BillTrait{
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function generateCurrentBill(Request $request,$bill){
+        try{
+            $data = array();
+            $invoiceData = $taxData = array();
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
+            $data['currentBillID'] = 1;
+            foreach($allBillIds as $key => $billId){
+                 if($billId == $bill['id']){
+                     $data['currentBillID'] = $key+1;
+                 }
+             }
+            $data['billDate'] =$bill->created_at->formatLocalized('%d/%m/%Y');
+            $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
+            $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
+            $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
+            $i = $j = $data['subTotal'] = $data['grossTotal'] = 0;
+            foreach($billQuotationProducts as $key => $billQuotationProduct){
+                    $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
+                    $invoiceData[$i]['quantity'] = $billQuotationProduct->quantity;
+                    $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
+                    if($billQuotationProduct->quotation_products->discount != 0){
+                        $invoiceData[$i]['rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->discount / 100))),3);
+                    }else{
+                        $invoiceData[$i]['rate'] = $billQuotationProduct->quotation_products->rate_per_unit;
+                    }
+                    $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
+                    $data['subTotal'] = $data['subTotal'] + $invoiceData[$i]['amount'];
+                $i++;
+            }
+            $data['invoiceData'] = $invoiceData;
+            $taxes = BillTax::where('bill_id',$bill['id'])->get();
+            foreach($taxes as $key => $tax){
+                $taxData[$j]['name'] = $tax->taxes->name;
+                $taxData[$j]['percentage'] = abs($tax->percentage);
+                $taxData[$j]['tax_amount'] = round($data['subTotal'] * ($tax->percentage / 100) , 3);
+                $data['grossTotal'] = $data['grossTotal'] + $taxData[$j]['tax_amount'];
+                $j++;
+            }
+            $data['taxData'] = $taxData;
+            $data['grossTotal'] = round($data['grossTotal'] + $data['subTotal']);
+            $data['amountInWords'] = ucwords(NumberHelper::getIndianCurrency($data['grossTotal']));
+            $pdf = PDF::loadView('admin.bill.pdf.invoice',$data);
+            return $pdf->download('Invoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
+        }catch(\Exception $e){
+            $data = [
+                'actions' => 'Generate current Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500,$e->getMessage());
+        }
+
+    }
+
+    public function generateCumulativeInvoice(Request $request,$bill){
+        try{
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
+            $listingProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->get()->toArray();
+            return redirect('/bill/view/'.$bill['id']);
+        }catch(Exception $e){
+            $data = [
+                'actions' => 'Generate Cumulative Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
         }
     }
 

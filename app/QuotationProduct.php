@@ -20,5 +20,6 @@ class QuotationProduct extends Model
 
     public function quotation_profit_margins(){
         return $this->hasMany('App\QuotationProfitMarginVersion','quotation_product_id');
+
     }
 }

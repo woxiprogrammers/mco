@@ -42,14 +42,12 @@
                                            <form role="form" id="new_bill" class="form-horizontal" action="/bill/create" method="post">
                                             @if($bills != NULL)
                                                 <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
-                                                    <label class="control-label">Select Bill</label>
                                                     <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
-                                                        <option value="default">Select Array</option>
+                                                        <option value="default">Select Bill</option>
                                                         @for($i = 0 ; $i < count($bills); $i++)
                                                             <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                         @endfor
                                                     </select>
-                                                    <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
                                                 </div>
                                             @endif
                                            <input type="hidden" id="project_site_id" name="project_site_id" value="{{$project_site['id']}}">
