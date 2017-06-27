@@ -340,6 +340,7 @@ trait BillTrait{
             $data['grossTotal'] = round($data['grossTotal'] + $data['subTotal']);
             $data['amountInWords'] = ucwords(NumberHelper::getIndianCurrency($data['grossTotal']));
             $pdf = PDF::loadView('admin.bill.pdf.invoice',$data);
+
             return $pdf->download('Invoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
         }catch(\Exception $e){
             $data = [
@@ -355,9 +356,52 @@ trait BillTrait{
 
     public function generateCumulativeInvoice(Request $request,$bill){
         try{
-            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
-            $listingProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->get()->toArray();
-            return redirect('/bill/view/'.$bill['id']);
+
+            $data = array();
+            $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
+            $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
+            $previousBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<',$bill['id'])->pluck('id');
+            $billProducts = BillQuotationProducts::whereIn('bill_id',$previousBillIds)->get()->toArray();
+            $currentBillProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<=',$bill['id'])->pluck('id');
+            $distinctProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->distinct('quotation_product_id')->orderBy('quotation_product_id')->select('quotation_product_id')->get();
+            $invoiceData =array();
+            $i = 0;
+            foreach($distinctProducts as $key => $distinctProduct){
+                $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
+                $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
+                if($distinctProduct->quotation_products->discount != 0){
+                    $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($distinctProduct->quotation_products->discount / 100))),3);
+                }else{
+                    $invoiceData[$i]['rate'] = $distinctProduct->quotation_products->rate_per_unit;
+                }
+                $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
+                $invoiceData[$i]['previous_quantity'] = 0;
+                foreach($billProducts as $k => $billProduct){
+                    if($distinctProduct['quotation_product_id'] == $billProduct['quotation_product_id']){
+                        $invoiceData[$i]['previous_quantity'] = $invoiceData[$i]['previous_quantity'] + $billProduct['quantity'];
+                        $invoiceData[$i]['current_quantity'] = 0;
+                    }
+                }
+                foreach($currentBillProducts as $j => $currentBillProduct){
+                    if($distinctProduct['quotation_product_id'] == $currentBillProduct['quotation_product_id']){
+                        $invoiceData[$i]['current_quantity'] = $currentBillProduct['quantity'];
+                    }
+                }
+                $invoiceData[$i]['cumulative_quantity'] = $invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity'];
+                $invoiceData[$i]['previous_bill_amount'] = $invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate'];
+                $invoiceData[$i]['current_bill_amount'] = $invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate'];
+                $invoiceData[$i]['cumulative_bill_amount'] = $invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate'];
+
+                $i++;
+            }
+            $data['invoiceData'] = $invoiceData;
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.bill.pdf.cumulative',$data));
+            $pdf->setPaper('A4', 'landscape');
+            return $pdf->stream();
+           // return redirect('/bill/view/'.$bill['id']);
+
         }catch(Exception $e){
             $data = [
                 'actions' => 'Generate Cumulative Bill',
@@ -366,6 +410,8 @@ trait BillTrait{
             ];
         }
     }
+
+
 
 }
 
