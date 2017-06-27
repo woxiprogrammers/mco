@@ -186,7 +186,6 @@ function backToGeneral(){
         data: formData,
         success: function(data,textStatus,xhr){
             $.each(data.amount, function(id,value){
-                console.log("input[name='product_rate["+id+"]']");
                 $("input[name='product_rate["+id+"]']").val(value);
                 var row = $("input[name='product_rate["+id+"]']").closest("tr").attr('id');
                 var rowNumber = row.match(/\d+/)[0];

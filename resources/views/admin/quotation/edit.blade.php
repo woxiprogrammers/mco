@@ -8,7 +8,7 @@
 
 
 @extends('layout.master')
-@section('title','Constro | Create Quotation')
+@section('title','Constro | Edit Quotation')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
