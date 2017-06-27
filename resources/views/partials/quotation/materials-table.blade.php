@@ -26,11 +26,20 @@
             <tr>
                 <input type="hidden" class="material-id" name="material_id[]" value="{{$material['id']}}">
                 <td>
-                    @if(in_array($material['id'],$clientSuppliedMaterial))
-                        <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}" checked>
+                    @if(array_key_exists('is_client_supplied',$material))
+                        @if($material['is_client_supplied'] == true)
+                            <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}" checked>
+                        @else
+                            <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}">
+                        @endif
                     @else
-                        <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}">
+                        @if(in_array($material['id'],$clientSuppliedMaterial))
+                            <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}" checked>
+                        @else
+                            <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}">
+                        @endif
                     @endif
+
                 </td>
                 <td>
                     {{$material['name']}}

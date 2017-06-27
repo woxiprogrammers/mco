@@ -232,6 +232,26 @@
                                                                             <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" min="0">
                                                                         </div>
                                                                     </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-label  pull-right">
+                                                                                Carpet Area:
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <input class="form-control" type="number" name="carpet_area" value="{{$quotation->carpet_area}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-label  pull-right">
+                                                                                Built up area:
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>

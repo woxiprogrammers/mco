@@ -172,7 +172,7 @@ trait QuotationTrait{
                         ->join('units','units.id','=','quotation_materials.unit_id')
                         ->where('quotation_id',$request->quotation_id)
                         ->whereIn('quotation_materials.material_id',$materialIds)
-                        ->select('materials.id as id','materials.name as name','quotation_materials.rate_per_unit as rate_per_unit','quotation_materials.unit_id as unit_id','units.name as unit')
+                        ->select('materials.id as id','materials.name as name','quotation_materials.rate_per_unit as rate_per_unit','quotation_materials.unit_id as unit_id','units.name as unit','quotation_materials.is_client_supplied as is_client_supplied')
                         ->get()
                         ->toArray();
                 }
@@ -521,10 +521,8 @@ trait QuotationTrait{
     public function getProjectSites(Request $request){
         try{
             $projectId = $request->project_id;
-            $projectSites = ProjectSite::join('quotations','quotations.project_site_id','!=','project_sites.id')
-                                ->where('project_id', $projectId)
-                                ->select('project_sites.id as id','project_sites.name as name')
-                                ->get();
+            $quotationProjectSiteIds = Quotation::pluck('project_site_id')->toArray();
+            $projectSites = ProjectSite::where('project_id',$projectId)->whereNotIn('id',$quotationProjectSiteIds)->select('id','name')->get();
             $response = array();
             foreach($projectSites as $projectSite){
                 $response[] = '<option value="'.$projectSite->id.'">'.$projectSite->name.'</option> ';
@@ -691,6 +689,8 @@ trait QuotationTrait{
             $quotationData = array();
             $quotationData['discount'] = $data['discount'];
             $quotationData['is_tax_applied'] = true;
+            $quotationData['carpet_area'] = $data['carpet_area'];
+            $quotationData['built_up_area'] = $data['built_up_area'];
             if(in_array(!null,$data['product_summary'])){
                 $quotationData['is_summary_applied'] = true;
             }
