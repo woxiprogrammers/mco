@@ -356,7 +356,6 @@ trait BillTrait{
 
     public function generateCumulativeInvoice(Request $request,$bill){
         try{
-
             $data = array();
             $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
@@ -392,7 +391,6 @@ trait BillTrait{
                 $invoiceData[$i]['previous_bill_amount'] = $invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate'];
                 $invoiceData[$i]['current_bill_amount'] = $invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate'];
                 $invoiceData[$i]['cumulative_bill_amount'] = $invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate'];
-
                 $i++;
             }
             $data['invoiceData'] = $invoiceData;
@@ -400,8 +398,6 @@ trait BillTrait{
             $pdf->loadHTML(view('admin.bill.pdf.cumulative',$data));
             $pdf->setPaper('A4', 'landscape');
             return $pdf->stream();
-           // return redirect('/bill/view/'.$bill['id']);
-
         }catch(Exception $e){
             $data = [
                 'actions' => 'Generate Cumulative Bill',
