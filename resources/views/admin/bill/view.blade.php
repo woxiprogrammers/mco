@@ -78,7 +78,7 @@
                                                         <span>{{$billQuotationProducts[$iterator]['unit']}}</span>
                                                     </td>
                                                     <td>
-                                                        <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit']}}</span>
+                                                        <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate']}}</span>
                                                     </td>
                                                     <td>
                                                         <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
