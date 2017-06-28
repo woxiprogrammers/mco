@@ -364,8 +364,8 @@ trait BillTrait{
             $currentBillProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<=',$bill['id'])->pluck('id');
             $distinctProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->distinct('quotation_product_id')->orderBy('quotation_product_id')->select('quotation_product_id')->get();
-            $invoiceData =array();
-            $i = 0;
+            $invoiceData = $total = array();
+            $i = $total['previous_quantity'] = $total['current_quantity'] = $total['cumulative_quantity'] = $total['rate'] = $total['previous_bill_amount'] = $total['current_bill_amount'] = $total['cumulative_bill_amount'] = 0;
             foreach($distinctProducts as $key => $distinctProduct){
                 $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
                 $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
@@ -391,8 +391,16 @@ trait BillTrait{
                 $invoiceData[$i]['previous_bill_amount'] = $invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate'];
                 $invoiceData[$i]['current_bill_amount'] = $invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate'];
                 $invoiceData[$i]['cumulative_bill_amount'] = $invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate'];
+                $total['previous_quantity'] = $total['previous_quantity'] + $invoiceData[$i]['previous_quantity'];
+                $total['current_quantity'] = $total['current_quantity'] + $invoiceData[$i]['current_quantity'];
+                $total['cumulative_quantity'] = $total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity'];
+                $total['rate'] = $total['rate'] + $invoiceData[$i]['rate'];
+                $total['previous_bill_amount'] = $total['previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount'];
+                $total['current_bill_amount'] = $total['current_bill_amount'] + $invoiceData[$i]['current_bill_amount'];
+                $total['cumulative_bill_amount'] = $total['cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount'];
                 $i++;
             }
+            $data['total'] = $total;
             $data['invoiceData'] = $invoiceData;
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('admin.bill.pdf.cumulative',$data));
