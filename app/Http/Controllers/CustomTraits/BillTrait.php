@@ -377,7 +377,7 @@ trait BillTrait{
                 if($distinctProduct->quotation_products->discount != 0){
                     $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($distinctProduct->quotation_products->discount / 100))),3);
                 }else{
-                    $invoiceData[$i]['rate'] = $distinctProduct->quotation_products->rate_per_unit;
+                    $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit),3);
                 }
                 $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
                 $invoiceData[$i]['previous_quantity'] = 0;
@@ -393,16 +393,16 @@ trait BillTrait{
                     }
                 }
                 $invoiceData[$i]['cumulative_quantity'] = $invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity'];
-                $invoiceData[$i]['previous_bill_amount'] = $invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate'];
-                $invoiceData[$i]['current_bill_amount'] = $invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate'];
-                $invoiceData[$i]['cumulative_bill_amount'] = $invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate'];
+                $invoiceData[$i]['previous_bill_amount'] = round(($invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate']),3);
+                $invoiceData[$i]['current_bill_amount'] = round(($invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate']),3);
+                $invoiceData[$i]['cumulative_bill_amount'] = round(($invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate']),3);
                 $total['previous_quantity'] = $total['previous_quantity'] + $invoiceData[$i]['previous_quantity'];
                 $total['current_quantity'] = $total['current_quantity'] + $invoiceData[$i]['current_quantity'];
                 $total['cumulative_quantity'] = $total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity'];
-                $total['rate'] = $total['rate'] + $invoiceData[$i]['rate'];
-                $total['previous_bill_amount'] = $total['previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount'];
-                $total['current_bill_amount'] = $total['current_bill_amount'] + $invoiceData[$i]['current_bill_amount'];
-                $total['cumulative_bill_amount'] = $total['cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount'];
+                $total['rate'] = round(($total['rate'] + $invoiceData[$i]['rate']),3);
+                $total['previous_bill_amount'] = round(($total['previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
+                $total['current_bill_amount'] = round(($total['current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
+                $total['cumulative_bill_amount'] = round(($total['cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
                 $i++;
             }
             $data['total'] = $total;
