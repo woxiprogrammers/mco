@@ -340,7 +340,7 @@ trait BillTrait{
             $data['grossTotal'] = round($data['grossTotal'] + $data['subTotal']);
             $data['amountInWords'] = ucwords(NumberHelper::getIndianCurrency($data['grossTotal']));
             $pdf = PDF::loadView('admin.bill.pdf.invoice',$data);
-            return $pdf->download('Invoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
+            return $pdf->download('CurrentInvoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
         }catch(\Exception $e){
             $data = [
                 'actions' => 'Generate current Bill',
@@ -350,23 +350,76 @@ trait BillTrait{
             Log::critical(json_encode($data));
             abort(500,$e->getMessage());
         }
-
     }
 
     public function generateCumulativeInvoice(Request $request,$bill){
         try{
-            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
-            $listingProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->get()->toArray();
-            return redirect('/bill/view/'.$bill['id']);
+            $data = array();
+            $data['currentBillID'] = 1;
+            $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
+            $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
+            $previousBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<',$bill['id'])->pluck('id');
+            $billProducts = BillQuotationProducts::whereIn('bill_id',$previousBillIds)->get()->toArray();
+            $currentBillProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<=',$bill['id'])->pluck('id');
+            foreach($allBillIds as $key => $billId){
+                if($billId == $bill['id']){
+                    $data['currentBillID'] = $key;
+                    break;
+                }
+            }
+            $distinctProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->distinct('quotation_product_id')->orderBy('quotation_product_id')->select('quotation_product_id')->get();
+            $invoiceData = $total = array();
+            $i = $total['previous_quantity'] = $total['current_quantity'] = $total['cumulative_quantity'] = $total['rate'] = $total['previous_bill_amount'] = $total['current_bill_amount'] = $total['cumulative_bill_amount'] = 0;
+            foreach($distinctProducts as $key => $distinctProduct){
+                $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
+                $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
+                if($distinctProduct->quotation_products->discount != 0){
+                    $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($distinctProduct->quotation_products->discount / 100))),3);
+                }else{
+                    $invoiceData[$i]['rate'] = $distinctProduct->quotation_products->rate_per_unit;
+                }
+                $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
+                $invoiceData[$i]['previous_quantity'] = 0;
+                foreach($billProducts as $k => $billProduct){
+                    if($distinctProduct['quotation_product_id'] == $billProduct['quotation_product_id']){
+                        $invoiceData[$i]['previous_quantity'] = $invoiceData[$i]['previous_quantity'] + $billProduct['quantity'];
+                        $invoiceData[$i]['current_quantity'] = 0;
+                    }
+                }
+                foreach($currentBillProducts as $j => $currentBillProduct){
+                    if($distinctProduct['quotation_product_id'] == $currentBillProduct['quotation_product_id']){
+                        $invoiceData[$i]['current_quantity'] = $currentBillProduct['quantity'];
+                    }
+                }
+                $invoiceData[$i]['cumulative_quantity'] = $invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity'];
+                $invoiceData[$i]['previous_bill_amount'] = $invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate'];
+                $invoiceData[$i]['current_bill_amount'] = $invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate'];
+                $invoiceData[$i]['cumulative_bill_amount'] = $invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate'];
+                $total['previous_quantity'] = $total['previous_quantity'] + $invoiceData[$i]['previous_quantity'];
+                $total['current_quantity'] = $total['current_quantity'] + $invoiceData[$i]['current_quantity'];
+                $total['cumulative_quantity'] = $total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity'];
+                $total['rate'] = $total['rate'] + $invoiceData[$i]['rate'];
+                $total['previous_bill_amount'] = $total['previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount'];
+                $total['current_bill_amount'] = $total['current_bill_amount'] + $invoiceData[$i]['current_bill_amount'];
+                $total['cumulative_bill_amount'] = $total['cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount'];
+                $i++;
+            }
+            $data['total'] = $total;
+            $data['invoiceData'] = $invoiceData;
+            $pdf = PDF::loadView('admin.bill.pdf.cumulative',$data);
+            $pdf->setPaper('A4', 'landscape');
+            return $pdf->download('CumulativeInvoice_'.$data['currentBillID'].'_'.date('d-m-Y').'.pdf');
         }catch(Exception $e){
             $data = [
                 'actions' => 'Generate Cumulative Bill',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
+            Log::critical(json_encode($data));
+            abort(500,$e->getMessage());
         }
     }
-
 }
 
 
