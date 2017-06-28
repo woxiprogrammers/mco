@@ -155,6 +155,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{quotation}',array('uses'=> 'Admin\QuotationController@getEditView'));
         Route::put('edit/{quotation}',array('uses'=> 'Admin\QuotationController@editQuotation'));
         Route::post('get-product-calculations',array('uses'=> 'Admin\QuotationController@calculateProductsAmount'));
+        Route::post('image-upload/{quotationId}',array('uses'=>'Admin\QuotationController@uploadWorkOrderImages'));
+        Route::post('display-images/{quotationId}',array('uses'=>'Admin\QuotationController@displayWorkOrderImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\QuotationController@removeTempImage'));
+        Route::group(['prefix'=>'work-order'],function(){
+
+        });
     });
 
     Route::group(['prefix' => 'project'], function(){

@@ -30,6 +30,7 @@ use App\Tax;
 use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
 trait QuotationTrait{
 
@@ -824,6 +825,59 @@ trait QuotationTrait{
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+        }
+    }
+
+    public function uploadWorkOrderImages(Request $request,$quotationId){
+        try{
+            $quotationDirectoryName = sha1($quotationId);
+            $sellerUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
+            $sellerImageUploadPath = $sellerUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
+            /* Create Upload Directory If Not Exists */
+            if (!file_exists($sellerImageUploadPath)) {
+                File::makeDirectory($sellerImageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($sellerImageUploadPath,$filename);
+            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $response = [
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => 101,
+                    'message' => 'Failed to open input stream.',
+                ],
+                'id' => 'id'
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function displayWorkOrderImages(Request $request){
+        try{
+            $path = $request->path;
+            $count = $request->count;
+            $random = mt_rand(1,10000000000);
+        }catch (\Exception $e){
+            $path = null;
+            $count = null;
+        }
+        return view('partials.quotation.work-order-images')->with(compact('path','count','random'));
+    }
+
+    public function removeTempImage(Request $request){
+        try{
+            $sellerUploadPath = public_path().$request->path;
+            File::delete($sellerUploadPath);
+            return response(200);
+        }catch(\Exception $e){
+            return response(500);
         }
     }
 }

@@ -12,11 +12,6 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
-<link href="/assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" type="text/css" xmlns="http://www.w3.org/1999/html"/>
-<link href="/assets/global/plugins/fancybox/source/jquery.fancybox.css" rel="stylesheet" type="text/css" />
-<link href="/assets/global/plugins/jquery-file-upload/blueimp-gallery/blueimp-gallery.min.css" rel="stylesheet" type="text/css" />
-<link href="/assets/global/plugins/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" type="text/css" />
-<link href="/assets/global/plugins/jquery-file-upload/css/jquery.fileupload-ui.css" rel="stylesheet" type="text/css" />
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -292,10 +287,12 @@
                                                 </div>
                                         </form>
                                                 <div class="tab-pane fade in active">
-                                                    <form id="WorkOrderCreateForm" method="post">
+                                                    <form id="WorkOrderCreateForm" method="post" action="/quotation/work-order/create" method="post">
                                                         {!! csrf_field() !!}
                                                         <input type="hidden" name="_method" value="put">
+                                                        <input type="hidden" name="quotation_id" value="{{$quotation['id']}}">
                                                         <div class="col-md-offset-2">
+
                                                             <div class="form-group">
                                                                 <div class="col-md-3">
                                                                     <label for="work_order_number" class="control-form pull-right">
@@ -337,38 +334,32 @@
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
-                                                                <div class="row fileupload-buttonbar col-md-offset-2">
-                                                                    <div class="col-lg-7">
-                                                                        <!-- The fileinput-button span is used to style the file input field as button -->
-                                                                        <span class="btn base-color fileinput-button">
-                                                                            <i class="fa fa-plus"></i>
-                                                                            <span> Add files... </span>
-                                                                            <input type="file" name="images" multiple="">
-                                                                        </span>
-                                                                        <button type="submit" class="btn blue start">
-                                                                            <i class="fa fa-upload"></i>
-                                                                            <span> Start upload </span>
-                                                                        </button>
-                                                                        <button type="reset" class="btn warning cancel">
-                                                                            <i class="fa fa-ban-circle"></i>
-                                                                            <span> Cancel upload </span>
-                                                                        </button>
-                                                                        <span class="fileupload-process"> </span>
-                                                                    </div>
-                                                                    <!-- The global progress information -->
-                                                                    <div class="col-lg-5 fileupload-progress fade">
-                                                                        <!-- The global progress bar -->
-                                                                        <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                                                                            <div class="progress-bar progress-bar-success" style="width:0%;"> </div>
-                                                                        </div>
-                                                                        <!-- The extended global progress information -->
-                                                                        <div class="progress-extended"> &nbsp; </div>
-                                                                    </div>
+                                                                <div class="row">
+                                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
                                                                 </div>
-                                                                <!-- The table listing the files available for upload/download -->
-                                                                <table role="presentation" class="table table-striped clearfix">
-                                                                    <tbody class="files"> </tbody>
+                                                                <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                        Browse</a>
+                                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                        <i class="fa fa-share"></i> Upload Files </a>
+                                                                </div>
+                                                                <table class="table table-bordered table-hover" style="width: 700px">
+                                                                    <thead>
+                                                                    <tr role="row" class="heading">
+                                                                        <th> Image </th>
+                                                                        <th> Action </th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody id="show-product-images">
+
+                                                                    </tbody>
                                                                 </table>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="col-md-2 col-md-offset-4">
+                                                                <a class="btn btn-success">
+                                                                    Submit
+                                                                </a>
                                                             </div>
                                                         </div>
 
@@ -399,6 +390,8 @@
                                 </div>
                             </div>
                         </div>
+                    <input type="hidden" id="path" name="path" value="">
+                    <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                     </div>
                 </div>
             </div>
@@ -408,23 +401,19 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/vendor/jquery.ui.widget.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/vendor/tmpl.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/vendor/load-image.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/vendor/canvas-to-blob.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/blueimp-gallery/jquery.blueimp-gallery.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/jquery.iframe-transport.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/jquery.fileupload.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/jquery.fileupload-process.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/jquery.fileupload-image.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jquery-file-upload/js/jquery.fileupload-ui.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js" type="text/javascript"></script>
-<script src="/assets/pages/scripts/form-fileupload.js" type="text/javascript"></script>
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
 <script src="/assets/custom/admin/quotation/quotation.js"></script>
 <script src="/assets/custom/admin/quotation/validations.js"></script>
-<script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
+<script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+<script src="/assets/custom/admin/quotation/image-datatable.js"></script>
+<script src="/assets/custom/admin/quotation/image-upload.js"></script>
 <script>
     $(document).ready(function(){
         //CreateQuotation.init();
