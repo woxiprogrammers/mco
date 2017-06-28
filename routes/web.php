@@ -158,8 +158,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('image-upload/{quotationId}',array('uses'=>'Admin\QuotationController@uploadWorkOrderImages'));
         Route::post('display-images/{quotationId}',array('uses'=>'Admin\QuotationController@displayWorkOrderImages'));
         Route::post('delete-temp-product-image',array('uses'=>'Admin\QuotationController@removeTempImage'));
-        Route::group(['prefix'=>'work-order'],function(){
-
+        Route::post('get-work-order-form', array('uses'=> 'Admin\QuotationController@getWorkOrderForm'));
+        Route::group(['prefix' => 'work-order'],function(){
+            Route::post('create',array('uses'=>'Admin\QuotationController@createWorkOrder'));
         });
     });
 

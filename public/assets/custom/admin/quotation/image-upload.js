@@ -4,12 +4,8 @@
 
 /* Function To Display Uploaded image */
 var $hello= $('#path');
-$hello.on("change", function(event, path,count){ //bind() for older jquery version
+$hello.on("change", function(event, path,count){
     if (typeof path !== "undefined") {
-        /*console.log('In HTML');
-         console.log("Length:"+$('#length').val());
-         console.log("max_file:"+$('#max_files').val());
-         console.log("max_file_id:"+$('#max_files_count').val());*/
         var quotationId = $("#quotationId").val();
         $.ajax({
             url: "/quotation/display-images/"+quotationId,
@@ -26,13 +22,8 @@ $hello.on("change", function(event, path,count){ //bind() for older jquery versi
     }
 
 }).triggerHandler('change');
-/* Function To Remove Product Images */
 
 function removeProductImages(imageId,path,originalId){
-    /*console.log('In Remove');
-     console.log("Length:"+$('#length').val());
-     console.log("max_file:"+$('#max_files').val());
-     console.log("max_file:"+$('#max_files').val());*/
     var maxCount = parseInt($('#max_files_count').val());
     maxCount = maxCount +  1;
     $('#max_files_count').val(maxCount);

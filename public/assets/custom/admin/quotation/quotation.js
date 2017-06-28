@@ -149,6 +149,25 @@ $(document).ready(function(){
         });
         calculateProductSubtotal();
     });
+
+    $("#approve").on('click',function(){
+        var quotationId = $("#quotationId").val();
+        $.ajax({
+            url: '/quotation/get-work-order-form',
+            type: ' POST',
+            async: false,
+            data : {
+                _token: $("input[name='_token']").val(),
+                quotation_id: quotationId
+            },
+            success: function(data,textStatus,xhr){
+                $("#workOrderTab").html(data);
+            },
+            error: function(){
+                alert('Something went wrong.');
+            }
+        });
+    });
 });
 
 function backToGeneral(){
