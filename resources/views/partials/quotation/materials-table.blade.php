@@ -24,9 +24,22 @@
         </tr>
         @foreach($materials as $material)
             <tr>
-                <input type="hidden" name="material_id[]" value="{{$material['id']}}">
+                <input type="hidden" class="material-id" name="material_id[]" value="{{$material['id']}}">
                 <td>
-                    <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}">
+                    @if(array_key_exists('is_client_supplied',$material))
+                        @if($material['is_client_supplied'] == true)
+                            <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}" checked>
+                        @else
+                            <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}">
+                        @endif
+                    @else
+                        @if(in_array($material['id'],$clientSuppliedMaterial))
+                            <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}" checked>
+                        @else
+                            <input type="checkbox" name="clientSuppliedMaterial[]" value="{{$material['id']}}">
+                        @endif
+                    @endif
+
                 </td>
                 <td>
                     {{$material['name']}}

@@ -165,7 +165,7 @@
                                                             </div>
 
                                                             <div class="col-md-3 col-md-offset-5">
-                                                                <a class="btn btn-wide btn-primary" id="next1">
+                                                                <a class="btn btn-wide btn-primary" id="materialCosts">
                                                                     Edit Material Cost
                                                                 </a>
                                                             </div>
@@ -220,6 +220,10 @@
 <script>
     $(document).ready(function(){
         CreateQuotation.init();
+        var category_id = $("#categorySelect1").val();
+        getProducts(category_id,1);
+        var selectedProduct = $("#productSelect1").val();
+        getProductDetails(selectedProduct, 1);
     });
 </script>
 @endsection

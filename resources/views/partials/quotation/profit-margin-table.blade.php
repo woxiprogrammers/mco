@@ -7,7 +7,7 @@
 ?>
 <fieldset>
     <legend> Edit Profit Margins </legend>
-    <div class="table-scrollable">
+    <div class="table-scrollable profit-margin-table">
         <table class="table table-striped table-bordered table-hover">
             <thead>
                 <tr>
@@ -23,7 +23,7 @@
                         <td> {{$data['products']}} </td>
                         @foreach($profitMargins as $profitMargin)
                             @if(array_key_exists($profitMargin['id'],$data['profit_margin']))
-                                <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="{{$data['profit_margin'][$profitMargin['id']]['percentage']}}"></td>
+                                <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="{{$data['profit_margin'][$profitMargin['id']]}}"></td>
                             @else
                                 <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="0"></td>
                             @endif

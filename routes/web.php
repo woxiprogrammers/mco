@@ -138,7 +138,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('cumulative/invoice/{bill}', array('uses' => 'Admin\BillController@generateCumulativeInvoice'));
     });
 
-
     Route::group(['prefix' => 'quotation'], function(){
         Route::get('create',array('uses'=> 'Admin\QuotationController@getCreateView'));
         Route::post('create',array('uses'=> 'Admin\QuotationController@createQuotation'));
@@ -153,6 +152,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-project-sites',array('uses'=> 'Admin\QuotationController@getProjectSites'));
         Route::post('check-project-name',array('uses'=> 'Admin\QuotationController@checkProjectNames'));
         Route::post('get-projects',array('uses'=> 'Admin\QuotationController@getProjects'));
+        Route::get('edit/{quotation}',array('uses'=> 'Admin\QuotationController@getEditView'));
+        Route::put('edit/{quotation}',array('uses'=> 'Admin\QuotationController@editQuotation'));
+        Route::post('get-product-calculations',array('uses'=> 'Admin\QuotationController@calculateProductsAmount'));
     });
 
     Route::group(['prefix' => 'project'], function(){
