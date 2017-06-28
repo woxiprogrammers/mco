@@ -14,4 +14,8 @@ class Bill extends Model
     {
         return $this->belongsTo('App\Quotation','quotation_id');
     }
+    public function bill_quotation_product()
+    {
+        return $this->hasMany('App\BillQuotationProducts','bill_id');
+    }
 }
