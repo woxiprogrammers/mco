@@ -270,14 +270,11 @@ trait BillTrait{
             $bill['bill_status_id'] = BillStatus::where('slug','unpaid')->pluck('id')->first();
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
-                foreach($request['current_quantity'] as $quantities => $quantity){
-                    if($key == $quantities){
-                        $bill_quotation_product['bill_id'] = $bill_created['id'];
-                        $bill_quotation_product['quotation_product_id'] = $value;
-                        $bill_quotation_product['quantity'] = $quantity;
-                        BillQuotationProducts::create($bill_quotation_product);
-                    }
-                }
+                $bill_quotation_product['bill_id'] = $bill_created['id'];
+                $bill_quotation_product['quotation_product_id'] = $key;
+                $bill_quotation_product['quantity'] = $value['current_quantity'];
+                $bill_quotation_product['description'] = ucfirst($value['product_description']);
+                BillQuotationProducts::create($bill_quotation_product);
             }
             foreach($request['tax_percentage'] as $key => $value){
                 $bill_taxes['tax_id'] = $key;
@@ -316,6 +313,7 @@ trait BillTrait{
             $i = $j = $data['subTotal'] = $data['grossTotal'] = 0;
             foreach($billQuotationProducts as $key => $billQuotationProduct){
                     $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
+                    $invoiceData[$i]['description'] = $billQuotationProduct->description;
                     $invoiceData[$i]['quantity'] = $billQuotationProduct->quantity;
                     $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
                     if($billQuotationProduct->quotation_products->discount != 0){
