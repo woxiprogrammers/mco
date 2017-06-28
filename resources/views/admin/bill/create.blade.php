@@ -89,7 +89,7 @@
                                                             <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span>{{$quotationProducts[$iterator]['quantity']}}</span>
+                                                            <span id="boq_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['quantity']}}</span>
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['rate_per_unit'] * $quotationProducts[$iterator]['quantity']}}</span>
@@ -97,8 +97,8 @@
                                                         <td>
                                                             <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
                                                         </td>
-                                                        <td>
-                                                            <input class="form-control" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity[{{$quotationProducts[$iterator]['id']}}]" disabled>
+                                                        <td class="form-group">
+                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity[{{$quotationProducts[$iterator]['id']}}]" disabled>
                                                         </td>
                                                         <td>
                                                             <span id="cumulative_quantity_{{$quotationProducts[$iterator]['id']}}"></span>
@@ -177,7 +177,7 @@
                                             </table>
                                             <div class="form-group">
                                                 <div class="col-md-offset-11">
-                                                    <button type="submit" class="btn btn-success"> Submit </button>
+                                                    <button type="submit" class="btn btn-success" id="submit"> Submit </button>
                                                 </div>
                                             </div>
                                                </form>
@@ -196,4 +196,5 @@
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/bill.js" type="text/javascript"></script>
+<script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
 @endsection
