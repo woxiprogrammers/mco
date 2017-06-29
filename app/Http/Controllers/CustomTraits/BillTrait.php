@@ -38,9 +38,9 @@ trait BillTrait{
                         $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
                         $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
                         if($quotation['discount'] != 0){
-                            $quotationProducts[$i]['rate'] = $quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100));
+                            $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
                         }else{
-                            $quotationProducts[$i]['rate'] = $quotationProducts[$i]['rate_per_unit'];
+                            $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit']),3);
                         }
                         $bill_products = BillQuotationProducts::where('bill_id',$bills[$j]['id'])->where('quotation_product_id',$quotationProducts[$i]['id'])->get()->toArray();
                         for($k = 0 ; $k < count($bill_products) ; $k++ ){
@@ -57,9 +57,9 @@ trait BillTrait{
                     $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
                     $quotationProducts[$i]['previous_quantity'] = 0;
                     if($quotation['discount'] != 0){
-                        $quotationProducts[$i]['rate'] = $quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100));
+                        $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
                     }else{
-                        $quotationProducts[$i]['rate'] = $quotationProducts[$i]['rate_per_unit'];
+                        $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit']),3);
                     }
                 }
             }
@@ -224,19 +224,23 @@ trait BillTrait{
                 $billQuotationProducts[$iterator]['quotationProducts'] = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->where('quotation_id',$bill['quotation_id'])->first();
                 $billQuotationProducts[$iterator]['productDetail'] = Product::where('id',$billQuotationProducts[$iterator]['quotationProducts']['product_id'])->first();
                 $billQuotationProducts[$iterator]['unit'] = Unit::where('id',$billQuotationProducts[$iterator]['productDetail']['unit_id'])->pluck('name')->first();
-                $billQuotationProducts[$iterator]['current_bill_amount'] = $billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'];
+                $quotation_id = Bill::where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
+                $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
+                $rate_per_unit = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
+                $billQuotationProducts[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                $billQuotationProducts[$iterator]['current_bill_amount'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
                 $previousBills = BillQuotationProducts::where('bill_id','<',$bill['id'])->get()->toArray();
                 foreach($previousBills as $key => $previousBill){
                     if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
                     }
                 }
-                $billQuotationProducts[$iterator]['previous_bill_amount'] = $billQuotationProducts[$iterator]['previous_quantity'] * $billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'];
-                $billQuotationProducts[$iterator]['cumulative_quantity'] = $billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity'];
-                $billQuotationProducts[$iterator]['cumulative_bill_amount'] = $billQuotationProducts[$iterator]['cumulative_quantity'] * $billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'];
-                $total['previous_bill_amount'] = $total['previous_bill_amount'] + $billQuotationProducts[$iterator]['previous_bill_amount'];
-                $total['current_bill_amount'] = $total['current_bill_amount'] + $billQuotationProducts[$iterator]['current_bill_amount'];
-                $total['cumulative_bill_amount'] = $total['cumulative_bill_amount'] + $billQuotationProducts[$iterator]['cumulative_bill_amount'];
+                $billQuotationProducts[$iterator]['previous_bill_amount'] = round(($billQuotationProducts[$iterator]['previous_quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
+                $billQuotationProducts[$iterator]['cumulative_bill_amount'] = round(($billQuotationProducts[$iterator]['cumulative_quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                $total['previous_bill_amount'] = round(($total['previous_bill_amount'] + $billQuotationProducts[$iterator]['previous_bill_amount']),3);
+                $total['current_bill_amount'] = round(($total['current_bill_amount'] + $billQuotationProducts[$iterator]['current_bill_amount']),3);
+                $total['cumulative_bill_amount'] = round(($total['cumulative_bill_amount'] + $billQuotationProducts[$iterator]['cumulative_bill_amount']),3);
             }
             $final['previous_bill_amount'] = $total_rounded['previous_bill_amount'] = round($total['previous_bill_amount']);
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = round($total['current_bill_amount']);
@@ -270,14 +274,11 @@ trait BillTrait{
             $bill['bill_status_id'] = BillStatus::where('slug','unpaid')->pluck('id')->first();
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
-                foreach($request['current_quantity'] as $quantities => $quantity){
-                    if($key == $quantities){
-                        $bill_quotation_product['bill_id'] = $bill_created['id'];
-                        $bill_quotation_product['quotation_product_id'] = $value;
-                        $bill_quotation_product['quantity'] = $quantity;
-                        BillQuotationProducts::create($bill_quotation_product);
-                    }
-                }
+                $bill_quotation_product['bill_id'] = $bill_created['id'];
+                $bill_quotation_product['quotation_product_id'] = $key;
+                $bill_quotation_product['quantity'] = $value['current_quantity'];
+                $bill_quotation_product['description'] = ucfirst($value['product_description']);
+                BillQuotationProducts::create($bill_quotation_product);
             }
             foreach($request['tax_percentage'] as $key => $value){
                 $bill_taxes['tax_id'] = $key;
@@ -316,15 +317,12 @@ trait BillTrait{
             $i = $j = $data['subTotal'] = $data['grossTotal'] = 0;
             foreach($billQuotationProducts as $key => $billQuotationProduct){
                     $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
-                    $invoiceData[$i]['quantity'] = $billQuotationProduct->quantity;
+                    $invoiceData[$i]['description'] = $billQuotationProduct->description;
+                    $invoiceData[$i]['quantity'] = round(($billQuotationProduct->quantity),3);
                     $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
-                    if($billQuotationProduct->quotation_products->discount != 0){
-                        $invoiceData[$i]['rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->discount / 100))),3);
-                    }else{
-                        $invoiceData[$i]['rate'] = $billQuotationProduct->quotation_products->rate_per_unit;
-                    }
+                    $invoiceData[$i]['rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
                     $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
-                    $data['subTotal'] = $data['subTotal'] + $invoiceData[$i]['amount'];
+                    $data['subTotal'] = round(($data['subTotal'] + $invoiceData[$i]['amount']),3);
                 $i++;
             }
             $data['invoiceData'] = $invoiceData;
@@ -340,7 +338,7 @@ trait BillTrait{
             $data['grossTotal'] = round($data['grossTotal'] + $data['subTotal']);
             $data['amountInWords'] = ucwords(NumberHelper::getIndianCurrency($data['grossTotal']));
             $pdf = PDF::loadView('admin.bill.pdf.invoice',$data);
-            return $pdf->download('Invoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
+            return $pdf->download('CurrentInvoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
         }catch(\Exception $e){
             $data = [
                 'actions' => 'Generate current Bill',
@@ -350,23 +348,72 @@ trait BillTrait{
             Log::critical(json_encode($data));
             abort(500,$e->getMessage());
         }
-
     }
 
     public function generateCumulativeInvoice(Request $request,$bill){
         try{
-            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
-            $listingProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->get()->toArray();
-            return redirect('/bill/view/'.$bill['id']);
+            $data = array();
+            $data['currentBillID'] = 1;
+            $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
+            $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
+            $previousBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<',$bill['id'])->pluck('id');
+            $billProducts = BillQuotationProducts::whereIn('bill_id',$previousBillIds)->get()->toArray();
+            $currentBillProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<=',$bill['id'])->pluck('id');
+            foreach($allBillIds as $key => $billId){
+                if($billId == $bill['id']){
+                    $data['currentBillID'] = $key;
+                    break;
+                }
+            }
+            $distinctProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->distinct('quotation_product_id')->orderBy('quotation_product_id')->select('quotation_product_id')->get();
+            $invoiceData = $total = array();
+            $i = $total['previous_quantity'] = $total['current_quantity'] = $total['cumulative_quantity'] = $total['rate'] = $total['previous_bill_amount'] = $total['current_bill_amount'] = $total['cumulative_bill_amount'] = 0;
+            foreach($distinctProducts as $key => $distinctProduct){
+                $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
+                $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
+                $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($distinctProduct->quotation_products->discount / 100))),3);
+                $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
+                $invoiceData[$i]['previous_quantity'] = 0;
+                foreach($billProducts as $k => $billProduct){
+                    if($distinctProduct['quotation_product_id'] == $billProduct['quotation_product_id']){
+                        $invoiceData[$i]['previous_quantity'] = round(($invoiceData[$i]['previous_quantity'] + $billProduct['quantity']),3);
+                        $invoiceData[$i]['current_quantity'] = 0;
+                    }
+                }
+                foreach($currentBillProducts as $j => $currentBillProduct){
+                    if($distinctProduct['quotation_product_id'] == $currentBillProduct['quotation_product_id']){
+                        $invoiceData[$i]['current_quantity'] = round(($currentBillProduct['quantity']),3);
+                    }
+                }
+                $invoiceData[$i]['cumulative_quantity'] = round(($invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity']),3);
+                $invoiceData[$i]['previous_bill_amount'] = round(($invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate']),3);
+                $invoiceData[$i]['current_bill_amount'] = round(($invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate']),3);
+                $invoiceData[$i]['cumulative_bill_amount'] = round(($invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate']),3);
+                $total['previous_quantity'] = round(($total['previous_quantity'] + $invoiceData[$i]['previous_quantity']),3);
+                $total['current_quantity'] = round(($total['current_quantity'] + $invoiceData[$i]['current_quantity']),3);
+                $total['cumulative_quantity'] = round(($total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity']),3);
+                $total['rate'] = round(($total['rate'] + $invoiceData[$i]['rate']),3);
+                $total['previous_bill_amount'] = round(($total['previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
+                $total['current_bill_amount'] = round(($total['current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
+                $total['cumulative_bill_amount'] = round(($total['cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
+                $i++;
+            }
+            $data['total'] = $total;
+            $data['invoiceData'] = $invoiceData;
+            $pdf = PDF::loadView('admin.bill.pdf.cumulative',$data);
+            $pdf->setPaper('A4', 'landscape');
+            return $pdf->download('CumulativeInvoice_'.$data['currentBillID'].'_'.date('d-m-Y').'.pdf');
         }catch(Exception $e){
             $data = [
                 'actions' => 'Generate Cumulative Bill',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
+            Log::critical(json_encode($data));
+            abort(500,$e->getMessage());
         }
     }
-
 }
 
 
