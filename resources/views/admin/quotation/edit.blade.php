@@ -67,6 +67,12 @@
                                                         <a class="col-md-offset-1 btn btn-wide btn-primary" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             Change Profit Margins
                                                         </a>
+                                                        <a href="/quotation/invoice/{{$quotation->id}}" class="col-md-offset-1 btn btn-wide btn-primary">
+                                                            Download Quotation
+                                                        </a>
+                                                        <a href="/quotation/summary/{{$quotation->id}}" class="col-md-offset-1 btn btn-wide btn-primary">
+                                                            Download Summary
+                                                        </a>
                                                     </fieldset>
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
                                                         <div class="panel panel-default">

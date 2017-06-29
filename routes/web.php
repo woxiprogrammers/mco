@@ -155,6 +155,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{quotation}',array('uses'=> 'Admin\QuotationController@getEditView'));
         Route::put('edit/{quotation}',array('uses'=> 'Admin\QuotationController@editQuotation'));
         Route::post('get-product-calculations',array('uses'=> 'Admin\QuotationController@calculateProductsAmount'));
+        Route::get('invoice/{quotation}' ,array('uses' => 'Admin\QuotationController@generateQuotationPdf'));
+        Route::get('summary/{quotation}' ,array('uses' => 'Admin\QuotationController@generateSummaryPdf'));
     });
 
     Route::group(['prefix' => 'project'], function(){

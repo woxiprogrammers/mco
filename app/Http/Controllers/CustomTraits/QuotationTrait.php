@@ -29,6 +29,7 @@ use App\Summary;
 use App\Tax;
 use App\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 
 trait QuotationTrait{
@@ -820,6 +821,51 @@ trait QuotationTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Quotation',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function generateQuotationPdf(Request $request,$quotation){
+        try{
+            $data = array();
+            //$quotationProductIds = QuotationProduct::where('quotation_id',$quotation['id'])->with(->toArray();
+            //dd($quotationProductIds);
+            //$category_id = Product::whereIn('id',$quotationProductIds)->groupBy('category_id')->get()->toArray();
+           // dd(1234);
+
+
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
+            return $pdf->stream();
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Generate Quotation PDF',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function generateSummaryPdf(Request $request,$quotation){
+        try{
+            $data = array();
+            $data['project_site'] = $quotation->project_site;
+            $summaryData = array();
+            //$demo = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
+            $summaryData = QuotationProduct::where('quotation_id',$quotation['id'])->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get()->toArray();
+            foreach($summaryData as $key => $summary){
+                
+            }
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.quotation.pdf.summary',$data));
+            return $pdf->stream();
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Generate Summary PDF',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
