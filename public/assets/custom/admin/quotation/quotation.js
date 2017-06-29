@@ -154,7 +154,7 @@ $(document).ready(function(){
         var quotationId = $("#quotationId").val();
         $.ajax({
             url: '/quotation/get-work-order-form',
-            type: ' POST',
+            type: 'POST',
             async: false,
             data : {
                 _token: $("input[name='_token']").val(),
@@ -162,6 +162,8 @@ $(document).ready(function(){
             },
             success: function(data,textStatus,xhr){
                 $("#workOrderTab").html(data);
+                $("#GeneralTab").removeClass('active');
+                $("#workOrderTab").addClass('active');
             },
             error: function(){
                 alert('Something went wrong.');
@@ -275,7 +277,7 @@ function getProductDetails(product_id,rowNumber){
         success: function(data,textStatus,xhr){
             $("#productDescription"+rowNumber).val(data.description);
             $("#productDescription"+rowNumber).attr('name','product_description['+data.id+']');
-            $("#productRate"+rowNumber).val(data.rate_per_unit);
+            $("#productRate"+rowNumber).val(Math.round(data.rate_per_unit * 1000) / 1000);
             $("#productRate"+rowNumber).attr('name','product_rate['+data.id+']');
             $("#productQuantity"+rowNumber).prop('readonly', false);
             $("#productUnit"+rowNumber).val(data.unit);
@@ -309,7 +311,7 @@ function calculateAmount(row){
     if(isNaN(amount)){
         $("#productAmount"+row).val(0);
     }else{
-        $("#productAmount"+row).val(amount);
+        $("#productAmount"+row).val(Math.round(amount * 1000) / 1000);
     }
     calculateSubtotal();
 }
@@ -421,7 +423,7 @@ function calculateSubtotal(){
         $(".product-amount").each(function(){
             subtotal = subtotal+parseFloat($(this).val());
         });
-        $("#subtotal").text(subtotal);
+        $("#subtotal").text(Math.round(subtotal * 1000) / 1000);
     }
 }
 
@@ -440,4 +442,34 @@ function calucalateProductViewTotal(){
         total = total + amount;
     });
     $("#total").text(Math.round(total * 1000) / 1000);
+}
+
+function convertUnit(materialId,fromUnit){
+    var newUnit = $("#materialUnit"+materialId).val();
+    var rate = $("#materialRate"+materialId).val();
+    var data = {
+        current_unit: fromUnit,
+        rate: rate,
+        new_unit: newUnit,
+        material_id:materialId,
+        _token: $("input[name='_token']").val()
+    };
+    $.ajax({
+        url: '/units/convert',
+        type: 'POST',
+        async: false,
+        data: data,
+        success: function(data,textStatus,xhr){
+            if(xhr.status == 200){
+                $("#materialRate"+materialId).val(Math.round(data.rate * 1000) / 1000);
+            }else{
+                $("#materialUnit"+materialId+" option[value='"+data.unit+"']").prop('selected', true);
+                $("#materialRate"+materialId).val(Math.round(data.rate * 1000) / 1000);
+            }
+        },
+        error: function(data, textStatus, xhr){
+            alert("Something went wrong");
+        }
+    });
+
 }

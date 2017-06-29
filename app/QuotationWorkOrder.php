@@ -13,4 +13,8 @@ class QuotationWorkOrder extends Model
     public function images(){
         return $this->hasMany('App\WorkOrderImage','quotation_work_order_id');
     }
+
+    public function quotation(){
+        return $this->belongsTo('App\Quotation','quotation_id');
+    }
 }

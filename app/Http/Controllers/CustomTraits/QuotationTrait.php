@@ -238,6 +238,7 @@ trait QuotationTrait{
             $profitMargins = ProfitMargin::where('is_active', true)->orderBy('name','asc')->get()->toArray();
             $productProfitMargins = array();
             if($request->has('quotation_id')){
+                $isEdit = true;
                 $quotationProductIds = QuotationProduct::where('quotation_id',$request->quotation_id)->pluck('product_id')->toArray();
                 $newProductIds = array_diff($productIds,$quotationProductIds);
                 if($request->has('profit_margins')){
@@ -281,6 +282,7 @@ trait QuotationTrait{
                     }
                 }
             }else{
+                $isEdit = false;
                 if($request->has('profit_margins')){
                     foreach($request['profit_margins'] as $productId => $profitMargin){
                         $productProfitMargins[$productId]['products'] = Product::where('id',$productId)->pluck('name')->first();
@@ -305,7 +307,7 @@ trait QuotationTrait{
                     }
                 }
             }
-            return view('partials.quotation.profit-margin-table')->with(compact('productProfitMargins','profitMargins'));
+            return view('partials.quotation.profit-margin-table')->with(compact('productProfitMargins','profitMargins','isEdit'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add Product Row',
@@ -442,6 +444,7 @@ trait QuotationTrait{
                         $rateConversion = UnitHelper::unitConversion($material['unit_id'],$data['material_unit'][$material['id']],$data['material_rate'][$material['id']]);
                         if(is_array($rateConversion)){
                             $request->session()->flash('error','Unit Conversion is invalid');
+                            Quotation::where('id',$quotation['id'])->delete();
                             return redirect('/quotation/create');
                         }
                     }
@@ -552,7 +555,15 @@ trait QuotationTrait{
                 }
             }
             $summaries = Summary::where('is_active', true)->select('id','name')->get();
-            $taxes = Tax::where('is_active', true)->select('id','name','base_percentage')->get();
+            if($quotation->is_tax_applied == true){
+                $taxes = QuotationTaxVersion::join('taxes','taxes.id','=','quotation_tax_versions.tax_id')
+                                        ->where('quotation_id',$quotation->id)
+                                        ->select('taxes.id as id','taxes.name as name','quotation_tax_versions.percentage as base_percentage')
+                                        ->get();
+            }else{
+                $taxes = Tax::where('is_active', true)->select('id','name','base_percentage')->get();
+
+            }
             return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes'));
         }catch(\Exception $e){
             $data = [
@@ -676,7 +687,7 @@ trait QuotationTrait{
                         }
                     }
                 }
-                $response['amount'][$productId] = $productAmount;
+                $response['amount'][$productId] = round($productAmount,3);
             }
         }catch(\Exception $e){
             $data = [
@@ -705,6 +716,7 @@ trait QuotationTrait{
             $quotation->update($quotationData);
             $taxData = array();
             $taxData['quotation_id'] = $quotation['id'];
+            QuotationTaxVersion::where('quotation_id',$quotation->id)->delete();
             foreach($data['tax'] as $taxId => $taxPercentage){
                 $taxData['tax_id'] = $taxId;
                 $taxData['percentage'] = $taxPercentage;
@@ -835,18 +847,18 @@ trait QuotationTrait{
         }
     }
 
-    public function uploadWorkOrderImages(Request $request,$quotationId){
+    public function uploadTempWorkOrderImages(Request $request,$quotationId){
         try{
             $quotationDirectoryName = sha1($quotationId);
-            $sellerUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
-            $sellerImageUploadPath = $sellerUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
+            $tempUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
             /* Create Upload Directory If Not Exists */
-            if (!file_exists($sellerImageUploadPath)) {
-                File::makeDirectory($sellerImageUploadPath, $mode = 0777, true, true);
+            if (!file_exists($tempImageUploadPath)) {
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
             }
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-            $request->file('file')->move($sellerImageUploadPath,$filename);
+            $request->file('file')->move($tempImageUploadPath,$filename);
             $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
@@ -888,7 +900,7 @@ trait QuotationTrait{
         }
     }
 
-    public function createWorkOrder(Request $request){
+    public function approve(Request $request){
         try{
             $quotationApprovedStatusId = QuotationStatus::where('slug','approved')->pluck('id')->first();
             $quotationData = array();
@@ -897,27 +909,7 @@ trait QuotationTrait{
             Quotation::where('id',$request->quotation_id)->update($quotationData);
             $workOrderData = $request->except('_token','product_images','remark');
             $workOrder = QuotationWorkOrder::create($workOrderData);
-            $quotationDirectoryName = sha1($workOrderData['quotation_id']);
-            $tempImageUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName;
-            $imageUploadPath = public_path().env('QUOTATION_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.'work_order_images';
-            $workOrderImagesData = array();
-            $workOrderImagesData['quotation_work_order_id'] = $workOrder['id'];
-            foreach($request->product_images as $image){
-                $imageName = basename($image['image_name']);
-                $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
-                $workOrderImagesData['image'] = $imageName;
-                WorkOrderImage::create($workOrderImagesData);
-                if (!file_exists($imageUploadPath)) {
-                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
-                }
-                if(File::exists($newTempImageUploadPath)){
-                    $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
-                    File::move($newTempImageUploadPath,$imageUploadNewPath);
-                }
-            }
-            if(count(scandir($tempImageUploadPath)) <= 2){
-                rmdir($tempImageUploadPath);
-            }
+            $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
             $request->session()->flash('success','Quotation Approved Successfully');
             return redirect('/quotation/edit/'.$request->quotation_id);
         }catch (\Exception $e){
@@ -950,7 +942,64 @@ trait QuotationTrait{
         $iterator = 0;
         foreach($workOrderImages as $image){
             $workOrderImages[$iterator]['path'] = $imageUploadPath.DIRECTORY_SEPARATOR.$image->image;
+            $iterator++;
         }
         return $workOrderImages;
+    }
+
+    public function uploadWorkOrderImages($images,$quotationId,$workOrderId){
+        try{
+            $quotationDirectoryName = sha1($quotationId);
+            $tempImageUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName;
+            $imageUploadPath = public_path().env('QUOTATION_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.'work_order_images';
+            $workOrderImagesData = array();
+            $workOrderImagesData['quotation_work_order_id'] = $workOrderId;
+            foreach($images as $image){
+                $imageName = basename($image['image_name']);
+                $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
+                $workOrderImagesData['image'] = $imageName;
+                WorkOrderImage::create($workOrderImagesData);
+                if (!file_exists($imageUploadPath)) {
+                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                }
+                if(File::exists($newTempImageUploadPath)){
+
+                    $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
+                    File::move($newTempImageUploadPath,$imageUploadNewPath);
+                }
+            }
+            if(count(scandir($tempImageUploadPath)) <= 2){
+                rmdir($tempImageUploadPath);
+            }
+            return true;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Upload Work Order Images',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return false;
+        }
+    }
+
+    public function editWorkOrder(Request $request, $workOrder){
+        try{
+            $workOrder->quotation->update(['remark' => $request->remark]);
+            $workOrderData = $request->except('_token','work_order_images');
+            $workOrder->update($workOrderData);
+            foreach($workOrder->images as $image){
+                $image->delete();
+            }
+            $isImagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$workOrder->quotation_id,$workOrder['id']);
+            $request->session()->flash('success','Work Order Updated Successfully');
+            return redirect('/quotation/edit/'.$request->quotation_id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Work Order',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 }

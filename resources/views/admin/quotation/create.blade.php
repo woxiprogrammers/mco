@@ -94,8 +94,8 @@
                                                                         <th style="width: 18%"> Category </th>
                                                                         <th style="width: 18%"> Product </th>
                                                                         <th style="width: 25%"> Description</th>
-                                                                        <th style="width: 10%"> Rate</th>
                                                                         <th style="width: 8%"> Unit</th>
+                                                                        <th style="width: 10%"> Rate</th>
                                                                         <th style="width: 10%"> Quantity </th>
                                                                         <th  style="width: 10%"> Amount </th>
                                                                         <th> Action </th>
@@ -124,12 +124,12 @@
                                                                         </td>
                                                                         <td>
                                                                             <div class="form-group">
-                                                                                <input name="product_rate[]" class="form-control quotation-product-table" id="productRate1" type="text" readonly>
+                                                                                <input name="product_unit[]" class="form-control quotation-product-table" id="productUnit1" type="text" readonly>
                                                                             </div>
                                                                         </td>
                                                                         <td>
                                                                             <div class="form-group">
-                                                                                <input name="product_rate[]" class="form-control quotation-product-table" id="productUnit1" type="text" readonly>
+                                                                                <input name="product_rate[]" class="form-control quotation-product-table" id="productRate1" type="text" readonly>
                                                                             </div>
                                                                         </td>
                                                                         <td>
