@@ -81,6 +81,7 @@
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
+                                                            <input class="form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['unit']}}</span>
@@ -92,13 +93,13 @@
                                                             <span id="boq_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['quantity']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span>{{$quotationProducts[$iterator]['rate_per_unit'] * $quotationProducts[$iterator]['quantity']}}</span>
+                                                            <span>{{$quotationProducts[$iterator]['rate'] * $quotationProducts[$iterator]['quantity']}}</span>
                                                         </td>
                                                         <td>
                                                             <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
                                                         </td>
                                                         <td class="form-group">
-                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity[{{$quotationProducts[$iterator]['id']}}]" disabled>
+                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" disabled>
                                                         </td>
                                                         <td>
                                                             <span id="cumulative_quantity_{{$quotationProducts[$iterator]['id']}}"></span>

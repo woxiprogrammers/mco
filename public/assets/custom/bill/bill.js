@@ -14,7 +14,8 @@ $(document).ready(function (){
         if($(this).prop("checked") == false){
             $("#id_"+id).css('background-color',"");
             $('#current_quantity_'+id).prop('disabled',true);
-            //$('#current_quantity_'+id).rules('remove');
+            $('#product_description_'+id).prop('disabled',true);
+            $('#current_quantity_'+id).rules('remove');
             $('#current_quantity_'+id).closest('form-group').removeClass('has-error');
             $('#current_quantity_'+id).val('');
             $('#cumulative_quantity_'+id).text("");
@@ -23,6 +24,7 @@ $(document).ready(function (){
             $('#cumulative_bill_amount_'+id).text("");
             getTotals();
         }else{
+            $('#product_description_'+id).prop('disabled',false);
             $('#current_quantity_'+id).prop('disabled',false);
             $('#current_quantity_'+id).val(0);
             $("#id_"+id).css('background-color',"#e1e1e1");

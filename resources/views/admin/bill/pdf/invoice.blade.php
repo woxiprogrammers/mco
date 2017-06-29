@@ -56,7 +56,7 @@
                 @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
                     <tr>
                         <td style="text-align: center;">{!! $iterator+1 !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['product_name'] !!}</td>
+                        <td style="text-align: center;">{!! $invoiceData[$iterator]['product_name'] !!} - {!! $invoiceData[$iterator]['description'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['quantity'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['unit'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['rate'] !!}</td>
