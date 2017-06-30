@@ -24,7 +24,7 @@
             <hr>
             <table width="100%" style="text-align: center" border="1">
                 <tr>
-                    <td style="background-color: #808080">BILL OF QUANTITIES</td>
+                    <td style="background-color: #c2c2c2">BILL OF QUANTITIES</td>
                 </tr>
             </table>
             <br>
@@ -42,7 +42,7 @@
                     @for($iterator = 0 ; $iterator < count($quotationProductData) ; $iterator++)
                         @if($iterator == 0)
                             <tr>
-                                <td colspan="2" style="text-align: center;background-color: #aaa7a7;"><b>{{$quotationProductData[$iterator]['category_name']}}</b></td>
+                                <td colspan="2" style="text-align: center;background-color: #c2c2c2;"><b>{{$quotationProductData[$iterator]['category_name']}}</b></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -58,7 +58,7 @@
                             </tr>
                         @elseif($quotationProductData[$iterator]['category_id'] != $quotationProductData[$iterator-1]['category_id'])
                             <tr>
-                                <td colspan="2" style="text-align: center;background-color: #aaa7a7;"><b>{{$quotationProductData[$iterator]['category_name']}}</b></td>
+                                <td colspan="2" style="text-align: center;background-color: #c2c2c2;"><b>{{$quotationProductData[$iterator]['category_name']}}</b></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -85,23 +85,29 @@
                     @endif
                     @endfor
                     <tr>
-                        <td colspan="5" style="text-align: right; padding-right:10px;background-color: #808080 ">Total </td>
-                        <td style="text-align: right; padding-right:10px;background-color: #808080 ">{!! $total !!}</td>
+                        <td colspan="5" style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">Total </td>
+                        <td style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">{!! $total !!}</td>
+                    </tr>
+                    @for($iterator = 0; $iterator < count($taxData) ; $iterator++)
+                        <tr>
+                            <td colspan="5" style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
+                        </tr>
+                    @endfor
+                    <tr>
+                        <td colspan="5" style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">Final Total</td>
+                        <td style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">{!! $rounded_total !!}</td>
                     </tr>
                     <tr>
-                        <td colspan="5" style="text-align: right; padding-right:10px;background-color: #808080 ">Final Total</td>
-                        <td style="text-align: right; padding-right:10px;background-color: #808080 ">{!! $rounded_total !!}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="6" style="background-color: #808080"><b>Rs. {!! $amount_in_words !!}.</b></td>
+                        <td colspan="6" style="background-color: #c2c2c2"><b>Rs. {!! $amount_in_words !!}.</b></td>
                     </tr>
                 </table>
             </div>
             <br>
             <table style="font-size:15px" width="100%" border="1">
                 <tr>
-                    <th width="65%" colspan="2" style="background-color: #aaa7a7; padding-left: 10px"><b>For Company PVT. LTD.</b></th>
-                    <th width="35%" style="background-color: #aaa7a7; text-align: right; padding-right: 10px"><b>For Manisha Construction</b></th>
+                    <th width="65%" colspan="2" style="background-color: #c2c2c2; padding-left: 10px"><b>For Company PVT. LTD.</b></th>
+                    <th width="35%" style="background-color: #c2c2c2; text-align: right; padding-right: 10px"><b>For Manisha Construction</b></th>
                 </tr>
                 <tr >
                     <td width="32.5%" style="padding-top: 80px"><b>Head-Engineering</b></td>
