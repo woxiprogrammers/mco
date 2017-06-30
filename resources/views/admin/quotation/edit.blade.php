@@ -55,24 +55,28 @@
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="GeneralTab">
                                                     <fieldset class="row">
-                                                        <a class="col-md-offset-1 btn green-meadow" id="approve">
-                                                            Approve
-                                                        </a>
-                                                        <a class="col-md-offset-1 btn btn-danger" id="disapprove">
-                                                            Disaaprove
-                                                        </a>
+                                                        @if($quotation->quotation_status->slug == 'draft')
+                                                            <a class="col-md-offset-1 btn green-meadow" id="approve">
+                                                                Approve
+                                                            </a>
+                                                            <a class="col-md-offset-1 btn btn-danger" id="disapprove">
+                                                                Disaaprove
+                                                            </a>
+                                                        @endif
                                                         <a class="col-md-offset-1 btn btn-primary" id="materialCosts">
                                                             Change Material Cost
                                                         </a>
                                                         <a class="col-md-offset-1 btn btn-wide btn-primary" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             Change Profit Margins
                                                         </a>
-                                                        <a href="/quotation/invoice/{{$quotation->id}}" class="col-md-offset-1 btn btn-wide btn-primary">
-                                                            Download Quotation
-                                                        </a>
-                                                        <a href="/quotation/summary/{{$quotation->id}}" class="col-md-offset-1 btn btn-wide btn-primary">
-                                                            Download Summary
-                                                        </a>
+                                                        @if($quotation->quotation_status->slug == 'approved')
+                                                            <a href="/quotation/invoice/{{$quotation->id}}" class="col-md-offset-1 btn btn-wide btn-primary">
+                                                                Download Quotation
+                                                            </a>
+                                                            <a href="/quotation/summary/{{$quotation->id}}" class="col-md-offset-1 btn btn-wide btn-primary">
+                                                                Download Summary
+                                                            </a>
+                                                        @endif
                                                     </fieldset>
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
                                                         <div class="panel panel-default">
