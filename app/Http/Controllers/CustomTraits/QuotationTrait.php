@@ -854,12 +854,35 @@ trait QuotationTrait{
         try{
             $data = array();
             $data['project_site'] = $quotation->project_site;
-            $summaryData = array();
-            //$demo = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
-            $summaryData = QuotationProduct::where('quotation_id',$quotation['id'])->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get()->toArray();
+            $summaryData = QuotationProduct::where('quotation_id',$quotation['id'])->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get();
+            $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get();
+            $i = $total['rate_per_sft'] = $total['rate_per_carpet'] = 0;
             foreach($summaryData as $key => $summary){
-                
+                $summary_amount = 0;
+                foreach($quotationProducts as $j => $quotationProduct){
+                    if($quotationProduct->summary_id == $summary['summary_id']){
+                         $discounted_price_per_product = round(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))),3);
+                         $discounted_price = $quotationProduct->quantity * $discounted_price_per_product;
+                         $summary_amount = $summary_amount + $discounted_price;
+                    }
+                }
+                $summaryData[$i]['description'] = $summary->summary->name;
+                if(!empty($quotation['built_up_area'])){
+                    $summaryData[$i]['rate_per_sft'] = round(($summary_amount / $quotation['built_up_area']),3);
+                }else{
+                    $summaryData[$i]['rate_per_sft'] = 0.00;
+                }
+                if(!empty($quotation['carpet_area'])){
+                    $summaryData[$i]['rate_per_carpet'] = round(($summary_amount / $quotation['carpet_area']),3);
+                }else{
+                    $summaryData[$i]['rate_per_carpet'] = 0.00;
+                }
+                $total['rate_per_sft'] = $total['rate_per_sft'] + $summaryData[$i]['rate_per_sft'];
+                $total['rate_per_carpet'] = $total['rate_per_carpet'] + $summaryData[$i]['rate_per_carpet'];
+                $i++;
             }
+            $data['summaryData'] = $summaryData;
+            $data['total'] = $total;
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('admin.quotation.pdf.summary',$data));
             return $pdf->stream();

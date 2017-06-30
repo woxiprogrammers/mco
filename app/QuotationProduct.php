@@ -22,4 +22,7 @@ class QuotationProduct extends Model
         return $this->hasMany('App\QuotationProfitMarginVersion','quotation_product_id');
 
     }
+    public function summary(){
+        return $this->belongsTo('App\Summary','summary_id');
+    }
 }
