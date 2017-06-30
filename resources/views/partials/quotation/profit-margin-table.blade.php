@@ -39,11 +39,13 @@
                 Back
             </a>
         </div>
-        <div class="col-md-3 col-md-offset-4">
-            <button type="submit" class="btn btn-success" id="next2">
-                Submit
-            </button>
-        </div>
+        @if($hideSubmit == false)
+            <div class="col-md-3 col-md-offset-4">
+                <button type="submit" class="btn btn-success" id="next2">
+                    Submit
+                </button>
+            </div>
+        @endif
     </div>
 
 </fieldset>

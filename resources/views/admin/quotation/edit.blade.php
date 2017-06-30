@@ -56,7 +56,7 @@
                                                 <div class="tab-pane fade in active" id="GeneralTab">
                                                     <fieldset class="row">
                                                         @if($quotation->quotation_status->slug == 'draft')
-                                                            <a class="col-md-offset-1 btn green-meadow" id="approve">
+                                                            <a class="col-md-offset-1 btn green-meadow" id="approve" data-toggle="tab" href="#workOrderTab">
                                                                 Approve
                                                             </a>
                                                             <a class="col-md-offset-1 btn btn-danger" id="disapprove">
@@ -396,7 +396,7 @@
 
                                                         </form>
                                                     @elseif($quotation->quotation_status->slug == 'draft')
-                                                        <form id="WorkOrderCreateForm" action="/quotation/approve" method="post">
+                                                        <form id="WorkOrderCreateForm" action="/quotation/approve/{{$quotation->id}}" method="post">
                                                             {!! csrf_field() !!}
                                                             <input type="hidden" name="quotation_id" value="{{$quotation->id}}">
                                                             <div class="col-md-offset-2">

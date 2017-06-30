@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
 use App\CategoryMaterialRelation;
+use App\Helper\MaterialProductHelper;
 use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialVersion;
@@ -117,21 +118,23 @@ trait MaterialTrait{
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords(trim($request->name));
-            $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
-            $materialData['unit_id'] = $request->unit;
+            /*$materialData['rate_per_unit'] = round($request->rate_per_unit,3);
+            $materialData['unit_id'] = $request->unit;*/
             $materialData['updated_at'] = $now;
             $material->update($materialData);
             if($request->category_id != null){
                 $categoryMaterial = CategoryMaterialRelation::create(['category_id' => $request->category_id,'material_id'=>$material->id]);
             }
-            $materialVersionData['material_id'] = $material->id;
-            $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
-            $materialVersionData['unit_id'] = Unit::where('id',$material->unit_id)->pluck('id')->first();
-            $recentMaterialVersion = MaterialVersion::where('material_id',$material->id)->select('material_id','rate_per_unit','unit_id')->orderBy('created_at','desc')->first()->toArray();
-            if($recentMaterialVersion != $materialVersionData){
-                $materialVersion = MaterialVersion::create($materialVersionData);
+            $updateMaterial = array();
+            $updateMaterial[0]['id'] = $material->id;
+            $updateMaterial[0]['rate_per_unit'] = $request->rate_per_unit;
+            $updateMaterial[0]['unit_id'] = $request->unit;
+            $response = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($updateMaterial);
+            if($response['slug'] == 'error'){
+                $request->session()->flash('error',$response['message']);
+            }else{
+                $request->session()->flash('success','Material Edited successfully.');
             }
-            $request->session()->flash('success','Material Edited successfully.');
             return redirect('/material/edit/'.$material->id);
         }catch(\Exception $e){
             $data = [

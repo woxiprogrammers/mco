@@ -9,6 +9,7 @@ namespace App\Http\Controllers\CustomTraits;
 
 use App\Category;
 use App\Client;
+use App\Helper\MaterialProductHelper;
 use App\Helper\UnitHelper;
 use App\Material;
 use App\Product;
@@ -239,6 +240,13 @@ trait QuotationTrait{
             $productProfitMargins = array();
             if($request->has('quotation_id')){
                 $isEdit = true;
+                $quotationDraftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
+                $quotationStatusId = Quotation::where('id',$request->quotation_id)->pluck('quotation_status_id')->first();
+                if($quotationDraftStatusId != $quotationStatusId){
+                    $hideSubmit = true;
+                }else{
+                    $hideSubmit = false;
+                }
                 $quotationProductIds = QuotationProduct::where('quotation_id',$request->quotation_id)->pluck('product_id')->toArray();
                 $newProductIds = array_diff($productIds,$quotationProductIds);
                 if($request->has('profit_margins')){
@@ -283,6 +291,7 @@ trait QuotationTrait{
                 }
             }else{
                 $isEdit = false;
+                $hideSubmit = false;
                 if($request->has('profit_margins')){
                     foreach($request['profit_margins'] as $productId => $profitMargin){
                         $productProfitMargins[$productId]['products'] = Product::where('id',$productId)->pluck('name')->first();
@@ -307,7 +316,7 @@ trait QuotationTrait{
                     }
                 }
             }
-            return view('partials.quotation.profit-margin-table')->with(compact('productProfitMargins','profitMargins','isEdit'));
+            return view('partials.quotation.profit-margin-table')->with(compact('productProfitMargins','profitMargins','isEdit','hideSubmit'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add Product Row',
@@ -900,7 +909,7 @@ trait QuotationTrait{
         }
     }
 
-    public function approve(Request $request){
+    public function approve(Request $request,$quotation){
         try{
             $quotationApprovedStatusId = QuotationStatus::where('slug','approved')->pluck('id')->first();
             $quotationData = array();
@@ -910,7 +919,36 @@ trait QuotationTrait{
             $workOrderData = $request->except('_token','product_images','remark');
             $workOrder = QuotationWorkOrder::create($workOrderData);
             $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
-            $request->session()->flash('success','Quotation Approved Successfully');
+            $materials = array();
+            $iterator = 0;
+            foreach($quotation->quotation_materials as $quotationMaterial){
+                if($quotationMaterial->rate_per_unit != $quotationMaterial->material->rate_per_unit || $quotationMaterial->unit_id != $quotationMaterial->material->unit_id){
+                    $materials[$iterator]['id'] = $quotationMaterial->material_id;
+                    $materials[$iterator]['rate_per_unit'] = $quotationMaterial->rate_per_unit;
+                    $materials[$iterator]['unit_id'] = $quotationMaterial->unit_id;
+                    $iterator++;
+                }
+
+            }
+            $profitMargins = array();
+            foreach($quotation->quotation_products as $quotationProduct){
+                $profitMargins[$quotationProduct->id] = array();
+                foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
+                    $profitMargins[$quotationProduct->id]['profit_margin_id'] = $quotationProfitMargin->profit_margin_id;
+                    $profitMargins[$quotationProduct->id]['percentage'] = $quotationProfitMargin->percentage;
+
+                }
+            }
+            if(count($materials) > 0){
+                $updateMaterial = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($materials,$profitMargins);
+                if($updateMaterial['slug'] == 'error'){
+                    $request->session()->flash('error', $updateMaterial['message']);
+                }else{
+                    $request->session()->flash('success','Quotation Approved Successfully');
+                }
+            }else{
+                $request->session()->flash('success','Quotation Approved Successfully');
+            }
             return redirect('/quotation/edit/'.$request->quotation_id);
         }catch (\Exception $e){
             $data = [
@@ -996,6 +1034,25 @@ trait QuotationTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Work Order',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function disapprove(Request $request,$quotation){
+        try{
+            $quotationData = array();
+            $quotationData['remark'] = $request->remark;
+            $quotationDisapproveStatusId = QuotationStatus::where('slug','disapproved')->pluck('id')->first();
+            $quotationData['quotation_status_id'] = $quotationDisapproveStatusId;
+            $quotation->update($quotationData);
+            $request->session()->flash('success','Quotation disapproved.');
+            return redirect('/quotation/edit/'.$quotation->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Disapprove functionality',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];

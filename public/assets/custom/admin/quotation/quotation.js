@@ -150,8 +150,8 @@ $(document).ready(function(){
         calculateProductSubtotal();
     });
 
-    $("#approve").on('click',function(){
-        var quotationId = $("#quotationId").val();
+    /*$("#approve").on('click',function(){
+        *//*var quotationId = $("#quotationId").val();
         $.ajax({
             url: '/quotation/get-work-order-form',
             type: 'POST',
@@ -168,8 +168,8 @@ $(document).ready(function(){
             error: function(){
                 alert('Something went wrong.');
             }
-        });
-    });
+        });*//*
+    });*/
 });
 
 function backToGeneral(){
