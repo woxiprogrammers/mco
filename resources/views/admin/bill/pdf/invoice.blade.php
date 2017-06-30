@@ -7,21 +7,23 @@
     </style>
 </head>
 <body>
-<table border="1" style="padding-top: 20px; padding-bottom:20px " width="100%">
-    <tr><td>
-        <table width="100%" style="text-align: center; ">
-            <tr>
-                <td style="font-size: 30px"><i>Manisha Construction</i></td>
-            </tr>
-            <tr>
-                <td style="font-size: 20px"><i>CIVIL CONTRACTOR</i></td>
-            </tr>
-            <tr>
-                <td style="font-size: 15px"><i>SIDDHI TOWER ABOVE RUPEE BANK, KONDHWA,PUNE - 411048</i></td>
-            </tr>
-            <tr>
-                <td style="font-size: 15px">Ph 26831325 /26</td>
-            </tr>
+        <table border="1" style="padding-top: 20px; padding-bottom:20px " width="100%">
+            <tr><td>
+                    <table width="100%" style="text-align: center; ">
+                        <tr>
+                            <td style="font-size: 30px"><i>{!! env('COMPANY_NAME') !!}</i></td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 20px"><i>{!! env('DESIGNATION') !!}</i></td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 15px"><i>{!! env('ADDRESS') !!}</i></td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
+                        </tr>
+                    </table>
+                </td></tr>
         </table>
         <hr>
         <table>
@@ -91,8 +93,5 @@
                 <td style="padding-top: 30px">Authorised Signatory</td>
             </tr>
         </table>
-
-    </td></tr>
-</table>
 </body>
 </html>
