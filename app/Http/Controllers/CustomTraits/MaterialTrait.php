@@ -9,12 +9,18 @@ use App\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
+use Barryvdh\DomPDF\Facade as PDF;
 
 trait MaterialTrait{
 
     public function getManageView(Request $request) {
        try{
-           return view('admin.material.manage');
+           $categories = null;
+           $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+           $data['categories'] = $categories;
+           return view('admin.material.manage', $data);
        }catch(\Exception $e){
            $data = [
                'action' => 'Get material manage view',
@@ -274,4 +280,59 @@ trait MaterialTrait{
         return response()->json($response,$status);
     }
 
+    public function generateBasicRateMaterialPdf(Request $request){
+        try{
+            $materialData = null;
+            if ($request->has('material_category_ids')) {
+                if  (in_array('all', $request->material_category_ids)) {
+                    $materialData = DB::table('materials')
+                        ->join('units','materials.unit_id','=','units.id')
+                        ->join('category_material_relations','materials.id','=', 'category_material_relations.material_id')
+                        ->join('categories','category_material_relations.category_id','=','categories.id')
+                        ->where('materials.is_active',true)
+                        ->orderBy('categories.id')
+                        ->select('categories.name as category_name','materials.name as material_name','units.name as unit_name','materials.rate_per_unit as rate')
+                        ->get()->toArray();
+                }  else {
+                    $materialData = DB::table('materials')
+                        ->join('units','materials.unit_id','=','units.id')
+                        ->join('category_material_relations','materials.id','=', 'category_material_relations.material_id')
+                        ->join('categories','category_material_relations.category_id','=','categories.id')
+                        ->whereIn('categories.id', $request->material_category_ids)
+                        ->where('materials.is_active',true)
+                        ->orderBy('categories.id')
+                        ->select('categories.name as category_name','materials.name as material_name','units.name as unit_name','materials.rate_per_unit as rate')
+                        ->get()->toArray();
+                }
+            }
+            $data = array();
+            $materialDataFinal = array();
+            foreach ($materialData as $material) {
+                if (!in_array($material->category_name, $materialDataFinal)) {
+                    $materialDataFinal[$material->category_name][] = array (
+                        'material_name' => $material->material_name,
+                        'unit_name' =>  $material->unit_name,
+                        'rate' =>  $material->rate,
+                    );
+                } else {
+                    $materialDataFinal[$material->category_name][] = array (
+                        'material_name' => $material->material_name,
+                        'unit_name' =>  $material->unit_name,
+                        'rate' =>  $material->rate,
+                    );
+                }
+            }
+            $data['materialData'] = $materialDataFinal;
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.material.pdf.materialbasicrates',$data));
+            return $pdf->stream();
+        } catch(\Exception $e) {
+            $data = [
+                'action' => 'Generate Summary PDF',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
 }
