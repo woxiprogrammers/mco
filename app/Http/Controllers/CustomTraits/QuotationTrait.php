@@ -9,6 +9,7 @@ namespace App\Http\Controllers\CustomTraits;
 
 use App\Category;
 use App\Client;
+use App\Helper\NumberHelper;
 use App\Helper\UnitHelper;
 use App\Material;
 use App\Product;
@@ -831,12 +832,26 @@ trait QuotationTrait{
     public function generateQuotationPdf(Request $request,$quotation){
         try{
             $data = array();
-            //$quotationProductIds = QuotationProduct::where('quotation_id',$quotation['id'])->with(->toArray();
-            //dd($quotationProductIds);
-            //$category_id = Product::whereIn('id',$quotationProductIds)->groupBy('category_id')->get()->toArray();
-           // dd(1234);
-
-
+            $quotationProductData = array();
+            $iterator = $total = 0;
+            foreach($quotation->quotation_products as $quotationProducts){
+                $quotationProductData[$iterator]['product_name'] = $quotationProducts->product->name;
+                $quotationProductData[$iterator]['category_id'] = $quotationProducts->product->category_id;
+                $quotationProductData[$iterator]['category_name'] = $quotationProducts->product->category->name;
+                $quotationProductData[$iterator]['quantity'] = $quotationProducts->quantity;
+                $quotationProductData[$iterator]['unit'] = $quotationProducts->product->unit->name;
+                $quotationProductData[$iterator]['rate'] = round(($quotationProducts->rate_per_unit - ($quotationProducts->rate_per_unit * ($quotationProducts->quotation->discount / 100))),3);
+                $quotationProductData[$iterator]['amount'] = round(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']),3);
+                $total = $total + $quotationProductData[$iterator]['amount'];
+                $iterator++;
+            }
+            usort($quotationProductData, function($a, $b) {
+                return $a['category_id'] > $b['category_id'];
+            });
+            $data['total'] = $total;
+            $data['rounded_total'] = round($total);
+            $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($data['rounded_total']));
+            $data['quotationProductData'] = $quotationProductData;
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
             return $pdf->stream();
