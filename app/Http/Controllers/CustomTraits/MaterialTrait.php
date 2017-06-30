@@ -328,7 +328,7 @@ trait MaterialTrait{
             return $pdf->stream();
         } catch(\Exception $e) {
             $data = [
-                'action' => 'Generate Summary PDF',
+                'action' => 'Generate Basic Rate PDF',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];

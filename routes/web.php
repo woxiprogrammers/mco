@@ -76,6 +76,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{product}',array('uses' => 'Admin\ProductController@changeProductStatus'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\ProductController@autoSuggest'));
         Route::post('check-name',array('uses' => 'Admin\ProductController@checkProductName'));
+        Route::get('product-analysis-pdf/{product}', array('uses' => 'Admin\ProductController@generateProductAnalysisPdf'));
     });
     Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
