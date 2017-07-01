@@ -69,7 +69,7 @@
                                                 @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
                                                 <tr>
                                                     <td>
-                                                        <span id="quotation_product_id">{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}</span>
+                                                        <span id="quotation_product_id">{{$iterator + 1}}</span>
                                                     </td>
                                                     <td>
                                                         <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}}</span>
