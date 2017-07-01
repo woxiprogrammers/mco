@@ -51,10 +51,7 @@ class MaterialProductHelper{
                                             ->get()
                                             ->toArray();
                 foreach($products as $product){
-                    Log::info($product);
                     $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->select('id','product_id','rate_per_unit')->first()->toArray();
-                    Log::info('recent version Id');
-                    Log::info($recentProductVersion);
                     $productAmount = 0;
                     if($product['product_version_id'] == $recentProductVersion['id']){
                         Log::info('in if');
@@ -65,25 +62,16 @@ class MaterialProductHelper{
                                 ->select('product_versions.id as product_version_id','product_versions.product_id as id','product_material_relation.material_quantity as material_quantity','material_versions.id as material_version_id','material_versions.material_id as material_id','material_versions.unit_id as unit_id','material_versions.rate_per_unit as rate_per_unit')
                                 ->get()
                                 ->toArray();
-                        Log::info('product version materials');
-                        Log::info($productVersionMaterials);
                         $productVersionData = array();
                         $productVersionData['rate_per_unit'] = $recentProductVersion['rate_per_unit'];
                         $productVersionData['product_id'] = $recentProductVersion['product_id'];
-                        Log::info('before product version create');
                         $newProductVersion = ProductVersion::create($productVersionData);
-                        Log::info($newProductVersion);
                         $productMaterialRelationData = array();
                         foreach($productVersionMaterials as $materialInfo){
-                            Log::info('in product materials loop');
-                            Log::info($materialInfo);
                             $productMaterialRelationData['product_version_id'] = $newProductVersion['id'];
                             $productMaterialRelationData['material_quantity'] = $materialInfo['material_quantity'];
                             if(in_array($materialInfo['material_id'],$changedMaterialIds)){
-                                Log::info('in changed material if');
                                 $materialRecentVersion = MaterialVersion::where('id',$materialRecentVersions[$materialInfo['material_id']])->select('id','unit_id','rate_per_unit','material_id')->first();
-                                Log::info('fouind material version');
-                                Log::info($materialRecentVersion);
                                 $productMaterialRelationData['material_quantity'] = $materialInfo['material_quantity'];
                                 if($materialInfo['unit_id'] == $materialRecentVersion['unit_id']){
                                     $rateConversion = $materialRecentVersion['rate_per_unit'];
@@ -114,17 +102,10 @@ class MaterialProductHelper{
                                     $productMaterialRelationData['material_version_id'] = $newMaterialVersion['id'];
 
                                 }
-                                Log::info('product amount');
-                                Log::info($productAmount);
                             }else{
-                                Log::info('in chanegd material else');
                                 $productMaterialRelationData['material_version_id'] = $materialInfo['material_version_id'];
                                 $productAmount = $productAmount + ($materialInfo['rate_per_unit'] * $materialInfo['material_quantity']);
-                                Log::info('product amount');
-                                Log::info($productAmount);
                             }
-                            Log::info('product material raletion data');
-                            Log::info($productMaterialRelationData);
                             ProductMaterialRelation::create($productMaterialRelationData);
                         }
                         $productProfitMarginRelationData =array();
