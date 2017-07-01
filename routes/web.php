@@ -140,6 +140,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('approve', array('uses' => 'Admin\BillController@approveBill'));
         Route::get('current/invoice/{bill}', array('uses' => 'Admin\BillController@generateCurrentBill'));
         Route::get('cumulative/invoice/{bill}', array('uses' => 'Admin\BillController@generateCumulativeInvoice'));
+        Route::post('image-upload/{billId}',array('uses'=>'Admin\BillController@uploadTempBillImages'));
+        Route::post('display-images/{billId}',array('uses'=>'Admin\BillController@displayBillImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\BillController@removeTempImage'));
     });
 
     Route::group(['prefix' => 'quotation'], function(){
