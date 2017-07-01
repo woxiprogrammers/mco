@@ -59,8 +59,8 @@
                                                             <a class="col-md-offset-1 btn green-meadow" id="approve" data-toggle="tab" href="#workOrderTab">
                                                                 Approve
                                                             </a>
-                                                            <a class="col-md-offset-1 btn btn-danger" id="disapprove">
-                                                                Disaaprove
+                                                            <a class="col-md-offset-1 btn btn-danger" id="disapprove" onclick="openDisapproveModal()">
+                                                                Disapprove
                                                             </a>
                                                         @elseif($quotation->quotation_status->slug == 'approved')
                                                             <a class="col-md-offset-1 btn btn-primary" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
@@ -518,6 +518,42 @@
 
                                     </div>
                                 </div>
+                                @if($quotation->quotation_status->slug == 'draft')
+                                    <div id="disapproveModal" class="modal fade" role="dialog">
+                                        <div class="modal-dialog">
+                                            <!-- Modal content-->
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                    <h4 class="modal-title">Disapprove Quotation</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="disapproveForm" method="post" action="/quotation/disapprove/{{$quotation->id}}">
+                                                        {!! csrf_field() !!}
+                                                        <div class="form-group">
+                                                            <div class="col-md-3">
+                                                                <lable for="remark" class="control-label pull-right">
+                                                                    Remark
+                                                                </lable>
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                <textarea name="remark" id="disapproveRemark" class="form-control">
+
+                                                                </textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <button type="submit" class="btn btn-success" style="margin-left: 40%; margin-top:3%">
+                                                                Submit
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     <input type="hidden" id="path" name="path" value="">

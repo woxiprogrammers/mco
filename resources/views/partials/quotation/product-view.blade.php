@@ -44,7 +44,7 @@
                     </label>
                 </td>
                 <td>
-                    <label class="control-label"> {{$product->unit->name}} </label>
+                    <label class="control-label"> {{$version['unit']}} </label>
                 </td>
                 <td>
                     <label class="control-label"> {{round($version['rate_per_unit'],3)}} </label>
