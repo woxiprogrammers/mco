@@ -96,7 +96,7 @@
                                                         <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
                                                     </td>
                                                     <td>
-                                                        <span>{!! round($billQuotationProducts[$iterator]['quotationProducts']['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']) !!}</span>
+                                                        <span>{!! round($billQuotationProducts[$iterator]['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']) !!}</span>
                                                     </td>
                                                     <td>
                                                         <span id="previous_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['previous_quantity']}}</span>
