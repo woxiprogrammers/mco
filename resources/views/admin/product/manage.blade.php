@@ -51,7 +51,7 @@
                                                     <th> Unit </th>
                                                     <th> Rate </th>
                                                     <th> Status </th>
-                                                    <th> Actions </th>
+                                                    <th style="width: 15%"> Actions </th>
                                                 </tr>
                                                 <tr>
                                                     <th style="width: 25%"> <input class="form-control form-filter" name="search_product_name"></th>
@@ -60,8 +60,8 @@
                                                     <th> <input class="form-control form-filter" name="search_rate" readonly> </th>
                                                     <th> <input class="form-control form-filter" name="search_status" readonly> </th>
                                                     <th>
-                                                        <button class="btn-primary btn-sm filter-submit"> Search </button> <br>
-                                                        <button class="btn-default filter-cancel"> Reset </button>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                     </th>
                                                 </tr>
                                                 </thead>
