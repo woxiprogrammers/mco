@@ -35,7 +35,6 @@ function removeProductImages(imageId,path,originalId){
             alert('something went wrong');
         },
         success: function(data, textStatus, xhr) {
-            console.log(xhr.status);
             if(xhr.status==200){
                 $(imageId).remove();
             }else{
