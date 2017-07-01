@@ -28,4 +28,8 @@ class Quotation extends Model
     public function tax_version(){
         return $this->hasMany('App\QuotationTaxVersion','quotation_id');
     }
+
+    public function work_order(){
+        return $this->hasOne('App\QuotationWorkOrder','quotation_id');
+    }
 }

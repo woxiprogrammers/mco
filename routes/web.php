@@ -158,6 +158,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{quotation}',array('uses'=> 'Admin\QuotationController@getEditView'));
         Route::put('edit/{quotation}',array('uses'=> 'Admin\QuotationController@editQuotation'));
         Route::post('get-product-calculations',array('uses'=> 'Admin\QuotationController@calculateProductsAmount'));
+        Route::post('image-upload/{quotationId}',array('uses'=>'Admin\QuotationController@uploadTempWorkOrderImages'));
+        Route::post('display-images/{quotationId}',array('uses'=>'Admin\QuotationController@displayWorkOrderImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\QuotationController@removeTempImage'));
+        Route::post('get-work-order-form', array('uses'=> 'Admin\QuotationController@getWorkOrderForm'));
+        Route::post('approve/{quotation}', array('uses'=> 'Admin\QuotationController@approve'));
+        Route::group(['prefix' => 'work-order'],function(){
+            Route::post('edit/{work_order}',array('uses'=>'Admin\QuotationController@editWorkOrder'));
+        });
     });
 
     Route::group(['prefix' => 'project'], function(){
