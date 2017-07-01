@@ -237,6 +237,9 @@ function getProjectSites(projectId){
             if(data.length > 0){
                 $('#projectSiteId').html(data);
                 $('#projectSiteId').prop('disabled', false);
+            }else{
+                $('#projectSiteId').html("");
+                $('#projectSiteId').prop('disabled', true);
             }
         },
         error: function(){
@@ -451,4 +454,8 @@ function convertUnit(materialId,fromUnit){
         }
     });
 
+}
+
+function openDisapproveModal(){
+    $("#disapproveModal").modal('show');
 }

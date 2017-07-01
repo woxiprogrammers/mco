@@ -5,6 +5,14 @@
  * Time: 12:47 PM
  */
 ?>
+<fieldset class="row" style="text-align: right">
+        <a class="btn btn-info" onclick="backToGeneral()" href="javascript:void(0);">
+            Back
+        </a>
+        <a class="btn btn-info" id="next2" href="javascript:void(0);" onclick="showProfitMargins()">
+            Update Profit Margins
+        </a>
+</fieldset>
 <fieldset>
     <legend> Edit Materials </legend>
     <table class="table table-bordered" id="quotationMaterialTable">
@@ -66,15 +74,6 @@
         @endforeach
     </table>
     <div>
-        <div class="col-md-2 col-md-offset-2">
-            <a class="btn btn-primary" onclick="backToGeneral()" href="javascript:void(0);">
-                Back
-            </a>
-        </div>
-        <div class="col-md-3 col-md-offset-4">
-            <a class="btn btn-primary" id="next2" href="javascript:void(0);" onclick="showProfitMargins()">
-                Update Profit Margins
-            </a>
-        </div>
+
     </div>
 </fieldset>

@@ -9,6 +9,7 @@ namespace App\Http\Controllers\CustomTraits;
 
 use App\Category;
 use App\Client;
+use App\Helper\NumberHelper;
 use App\Helper\MaterialProductHelper;
 use App\Helper\UnitHelper;
 use App\Material;
@@ -32,6 +33,7 @@ use App\Tax;
 use App\Unit;
 use App\WorkOrderImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 
@@ -452,7 +454,7 @@ trait QuotationTrait{
                     }else{
                         $rateConversion = UnitHelper::unitConversion($material['unit_id'],$data['material_unit'][$material['id']],$data['material_rate'][$material['id']]);
                         if(is_array($rateConversion)){
-                            $request->session()->flash('error','Unit Conversion is invalid');
+                            $request->session()->flash('error',$rateConversion['message']);
                             Quotation::where('id',$quotation['id'])->delete();
                             return redirect('/quotation/create');
                         }
@@ -571,7 +573,6 @@ trait QuotationTrait{
                                         ->get();
             }else{
                 $taxes = Tax::where('is_active', true)->select('id','name','base_percentage')->get();
-
             }
             return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes'));
         }catch(\Exception $e){
@@ -716,21 +717,24 @@ trait QuotationTrait{
             $data = $request->all();
             $quotationData = array();
             $quotationData['discount'] = $data['discount'];
-            $quotationData['is_tax_applied'] = true;
+            if($request->has('tax')){
+                $taxData = array();
+                $quotationData['is_tax_applied'] = true;
+                $taxData['quotation_id'] = $quotation['id'];
+                QuotationTaxVersion::where('quotation_id',$quotation->id)->delete();
+                foreach($data['tax'] as $taxId => $taxPercentage){
+                    $taxData['tax_id'] = $taxId;
+                    $taxData['percentage'] = $taxPercentage;
+                    QuotationTaxVersion::create($taxData);
+                }
+            }
             $quotationData['carpet_area'] = $data['carpet_area'];
             $quotationData['built_up_area'] = $data['built_up_area'];
             if(in_array(!null,$data['product_summary'])){
                 $quotationData['is_summary_applied'] = true;
             }
             $quotation->update($quotationData);
-            $taxData = array();
-            $taxData['quotation_id'] = $quotation['id'];
-            QuotationTaxVersion::where('quotation_id',$quotation->id)->delete();
-            foreach($data['tax'] as $taxId => $taxPercentage){
-                $taxData['tax_id'] = $taxId;
-                $taxData['percentage'] = $taxPercentage;
-                QuotationTaxVersion::create($taxData);
-            }
+
             foreach($quotation->quotation_products as $quotationProduct){
                 foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
                     $quotationProfitMargin->delete();
@@ -763,7 +767,7 @@ trait QuotationTrait{
                         }else{
                             $rateConversion = UnitHelper::unitConversion($data['material_unit'][$material['id']],$material['unit_id'],$data['material_rate'][$material['id']]);
                             if(is_array($rateConversion)){
-                                $request->session()->flash('error','Unit Conversion is invalid');
+                                $request->session()->flash('error',$rateConversion['message']);
                                 return redirect('/quotation/edit/'.$quotation['id']);
                             }
                         }
@@ -849,6 +853,57 @@ trait QuotationTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Quotation',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function generateQuotationPdf(Request $request,$quotation,$slug){
+        try{
+            $data = array();
+            $data['slug'] = $slug;
+            $quotationProductData = array();
+            $iterator = $total = 0;
+            foreach($quotation->quotation_products as $quotationProducts){
+                $quotationProductData[$iterator]['product_name'] = $quotationProducts->product->name;
+                $quotationProductData[$iterator]['category_id'] = $quotationProducts->product->category_id;
+                $quotationProductData[$iterator]['category_name'] = $quotationProducts->product->category->name;
+                $quotationProductData[$iterator]['quantity'] = $quotationProducts->quantity;
+                $quotationProductData[$iterator]['unit'] = $quotationProducts->product->unit->name;
+                $quotationProductData[$iterator]['rate'] = round(($quotationProducts->rate_per_unit - ($quotationProducts->rate_per_unit * ($quotationProducts->quotation->discount / 100))),3);
+                $quotationProductData[$iterator]['amount'] = round(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']),3);
+                $total = $total + $quotationProductData[$iterator]['amount'];
+                $iterator++;
+            }
+            usort($quotationProductData, function($a, $b) {
+                return $a['category_id'] > $b['category_id'];
+            });
+            $rounded_amount = $total;
+            if($data['slug'] == 'with-tax'){
+                $taxData = array();
+                $i = 0;
+                foreach($quotation->tax_version as $key => $tax){
+                    $taxData[$i]['id'] = $tax->id;
+                    $taxData[$i]['name'] = $tax->tax->name;
+                    $taxData[$i]['percentage'] = abs($tax->percentage);
+                    $taxData[$i]['tax_amount'] = round($total * ($tax->percentage / 100) , 3);
+                    $rounded_amount = $rounded_amount + $taxData[$i]['tax_amount'];
+                    $i++;
+                }
+                $data['taxData'] = $taxData;
+            }
+            $data['total'] = $total;
+            $data['rounded_total'] = round($rounded_amount);
+            $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($data['rounded_total']));
+            $data['quotationProductData'] = $quotationProductData;
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
+            return $pdf->stream();
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Generate Quotation PDF',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -953,6 +1008,54 @@ trait QuotationTrait{
             Log::critical(json_encode($data));
         }
     }
+
+    public function generateSummaryPdf(Request $request,$quotation){
+        try{
+            $data = array();
+            $data['project_site'] = $quotation->project_site;
+            $summaryData = QuotationProduct::where('quotation_id',$quotation['id'])->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get();
+            $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get();
+            $i = $total['rate_per_sft'] = $total['rate_per_carpet'] = 0;
+            foreach($summaryData as $key => $summary){
+                $summary_amount = 0;
+                foreach($quotationProducts as $j => $quotationProduct){
+                    if($quotationProduct->summary_id == $summary['summary_id']){
+                         $discounted_price_per_product = round(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))),3);
+                         $discounted_price = $quotationProduct->quantity * $discounted_price_per_product;
+                         $summary_amount = $summary_amount + $discounted_price;
+                    }
+                }
+                $summaryData[$i]['description'] = $summary->summary->name;
+                if(!empty($quotation['built_up_area'])){
+                    $summaryData[$i]['rate_per_sft'] = round(($summary_amount / $quotation['built_up_area']),3);
+                }else{
+                    $summaryData[$i]['rate_per_sft'] = 0.00;
+                }
+                if(!empty($quotation['carpet_area'])){
+                    $summaryData[$i]['rate_per_carpet'] = round(($summary_amount / $quotation['carpet_area']),3);
+                }else{
+                    $summaryData[$i]['rate_per_carpet'] = 0.00;
+                }
+                $total['rate_per_sft'] = $total['rate_per_sft'] + $summaryData[$i]['rate_per_sft'];
+                $total['rate_per_carpet'] = $total['rate_per_carpet'] + $summaryData[$i]['rate_per_carpet'];
+                $i++;
+            }
+            $data['summaryData'] = $summaryData;
+            $data['total'] = $total;
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.quotation.pdf.summary',$data));
+            return $pdf->stream();
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Generate Summary PDF',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+
 
     public function getWorkOrderForm(Request $request){
         try{

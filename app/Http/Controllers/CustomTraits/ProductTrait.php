@@ -74,9 +74,10 @@ trait ProductTrait{
                                         ->pluck('materials.id')
                                         ->toArray();
             $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
+                                        ->join('units','units.id','=','material_versions.unit_id')
                                         ->join('materials','materials.id','=','material_versions.material_id')
                                         ->where('product_material_relation.product_version_id',$recentProductVersion['id'])
-                                        ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity')
+                                        ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity','units.name as unit')
                                         ->get()->toArray();
             $materialVersionIds = implode(',',ProductMaterialRelation::where('product_version_id','=',$recentProductVersion['id'])->pluck('material_version_id')->toArray());
             if($request->ajax()){
