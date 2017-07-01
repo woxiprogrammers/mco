@@ -455,7 +455,6 @@ trait QuotationTrait{
                         $rateConversion = UnitHelper::unitConversion($material['unit_id'],$data['material_unit'][$material['id']],$data['material_rate'][$material['id']]);
                         if(is_array($rateConversion)){
                             $request->session()->flash('error',$rateConversion['message']);
-                            Log::info('in invalid conversion if');
                             Quotation::where('id',$quotation['id'])->delete();
                             return redirect('/quotation/create');
                         }
