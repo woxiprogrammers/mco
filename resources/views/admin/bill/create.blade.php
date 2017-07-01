@@ -77,7 +77,7 @@
                                                             <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}">
                                                         </td>
                                                         <td>
-                                                            <span>{{$quotationProducts[$iterator]['id']}}</span>
+                                                            <span>{{$iterator + 1}}</span>
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
