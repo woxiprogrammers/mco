@@ -54,7 +54,6 @@ class MaterialProductHelper{
                     $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->select('id','product_id','rate_per_unit')->first()->toArray();
                     $productAmount = 0;
                     if($product['product_version_id'] == $recentProductVersion['id']){
-                        Log::info('in if');
                         $productVersionMaterials = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                                 ->join('materials','materials.id','=','material_versions.material_id')
                                 ->join('product_versions','product_versions.id','=','product_material_relation.product_version_id')

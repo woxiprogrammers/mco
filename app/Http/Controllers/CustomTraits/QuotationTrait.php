@@ -915,20 +915,17 @@ trait QuotationTrait{
             $quotationData = array();
             $quotationData['quotation_status_id'] = $quotationApprovedStatusId;
             $quotationData['remark'] = $request->remark;
-            Quotation::where('id',$request->quotation_id)->update($quotationData);
+
             $workOrderData = $request->except('_token','product_images','remark');
             $workOrder = QuotationWorkOrder::create($workOrderData);
             $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
             $materials = array();
             $iterator = 0;
             foreach($quotation->quotation_materials as $quotationMaterial){
-                if($quotationMaterial->rate_per_unit != $quotationMaterial->material->rate_per_unit || $quotationMaterial->unit_id != $quotationMaterial->material->unit_id){
-                    $materials[$iterator]['id'] = $quotationMaterial->material_id;
-                    $materials[$iterator]['rate_per_unit'] = $quotationMaterial->rate_per_unit;
-                    $materials[$iterator]['unit_id'] = $quotationMaterial->unit_id;
-                    $iterator++;
-                }
-
+                $materials[$iterator]['id'] = $quotationMaterial->material_id;
+                $materials[$iterator]['rate_per_unit'] = $quotationMaterial->rate_per_unit;
+                $materials[$iterator]['unit_id'] = $quotationMaterial->unit_id;
+                $iterator++;
             }
             $profitMargins = array();
             foreach($quotation->quotation_products as $quotationProduct){
@@ -939,16 +936,13 @@ trait QuotationTrait{
 
                 }
             }
-            if(count($materials) > 0){
-                $updateMaterial = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($materials,$profitMargins);
-                if($updateMaterial['slug'] == 'error'){
-                    $request->session()->flash('error', $updateMaterial['message']);
-                }else{
-                    $request->session()->flash('success','Quotation Approved Successfully');
-                }
+            $updateMaterial = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($materials,$profitMargins);
+            if($updateMaterial['slug'] == 'error'){
+                $request->session()->flash('error', $updateMaterial['message']);
             }else{
                 $request->session()->flash('success','Quotation Approved Successfully');
             }
+            Quotation::where('id',$request->quotation_id)->update($quotationData);
             return redirect('/quotation/edit/'.$request->quotation_id);
         }catch (\Exception $e){
             $data = [

@@ -118,8 +118,6 @@ trait MaterialTrait{
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords(trim($request->name));
-            /*$materialData['rate_per_unit'] = round($request->rate_per_unit,3);
-            $materialData['unit_id'] = $request->unit;*/
             $materialData['updated_at'] = $now;
             $material->update($materialData);
             if($request->category_id != null){
