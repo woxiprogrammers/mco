@@ -10,6 +10,8 @@ use App\Product;
 use App\ProfitMargin;
 use App\Project;
 use App\ProjectSite;
+use App\Quotation;
+use App\QuotationWorkOrder;
 use App\Summary;
 use App\Unit;
 use App\Tax;
@@ -53,6 +55,8 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('bill',Bill::class);
         Route::model('unit_conversion',UnitConversion::class);
         Route::model('project',Project::class);
+        Route::model('quotation',Quotation::class);
+        Route::model('work_order',QuotationWorkOrder::class);
     }
 
     /**

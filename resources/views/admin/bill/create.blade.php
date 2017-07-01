@@ -42,14 +42,12 @@
                                            <form role="form" id="new_bill" class="form-horizontal" action="/bill/create" method="post">
                                             @if($bills != NULL)
                                                 <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
-                                                    <label class="control-label">Select Bill</label>
                                                     <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
-                                                        <option value="default">Select Array</option>
+                                                        <option value="default">Select Bill</option>
                                                         @for($i = 0 ; $i < count($bills); $i++)
                                                             <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                         @endfor
                                                     </select>
-                                                    <button class="btn btn-info btn-icon" style="margin-left: 50px">Download</button>
                                                 </div>
                                             @endif
                                            <input type="hidden" id="project_site_id" name="project_site_id" value="{{$project_site['id']}}">
@@ -79,10 +77,11 @@
                                                             <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}">
                                                         </td>
                                                         <td>
-                                                            <span>{{$quotationProducts[$iterator]['id']}}</span>
+                                                            <span>{{$iterator + 1}}</span>
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
+                                                            <input class="form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['unit']}}</span>
@@ -91,16 +90,16 @@
                                                             <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span>{{$quotationProducts[$iterator]['quantity']}}</span>
+                                                            <span id="boq_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['quantity']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span>{{$quotationProducts[$iterator]['rate_per_unit'] * $quotationProducts[$iterator]['quantity']}}</span>
+                                                            <span>{{$quotationProducts[$iterator]['rate'] * $quotationProducts[$iterator]['quantity']}}</span>
                                                         </td>
                                                         <td>
                                                             <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
                                                         </td>
-                                                        <td>
-                                                            <input class="form-control" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="current_quantity[{{$quotationProducts[$iterator]['id']}}]" disabled>
+                                                        <td class="form-group">
+                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" disabled>
                                                         </td>
                                                         <td>
                                                             <span id="cumulative_quantity_{{$quotationProducts[$iterator]['id']}}"></span>
@@ -179,7 +178,7 @@
                                             </table>
                                             <div class="form-group">
                                                 <div class="col-md-offset-11">
-                                                    <button type="submit" class="btn btn-success"> Submit </button>
+                                                    <button type="submit" class="btn btn-success" id="submit"> Submit </button>
                                                 </div>
                                             </div>
                                                </form>
@@ -198,4 +197,5 @@
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/bill.js" type="text/javascript"></script>
+<script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
 @endsection

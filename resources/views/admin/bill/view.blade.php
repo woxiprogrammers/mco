@@ -40,15 +40,16 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body flip-scroll">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
+                                            <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px">
                                                 <label class="control-label">Select Bill</label>
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
                                                     @endfor
                                                 </select>
-                                                <button class="btn btn-info btn-icon" style="margin-left: 10px">Download</button>
                                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#approve" class="btn btn-info btn-icon" style="margin-left: 10px">Approve</a>
+                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Current Bill</a>
+                                                <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Cumulative Bill</a>
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
@@ -69,7 +70,7 @@
                                                 @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
                                                 <tr>
                                                     <td>
-                                                        <span id="quotation_product_id">{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}</span>
+                                                        <span id="quotation_product_id">{{$iterator + 1}}</span>
                                                     </td>
                                                     <td>
                                                         <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}}</span>
@@ -78,7 +79,7 @@
                                                         <span>{{$billQuotationProducts[$iterator]['unit']}}</span>
                                                     </td>
                                                     <td>
-                                                        <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit']}}</span>
+                                                        <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate']}}</span>
                                                     </td>
                                                     <td>
                                                         <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
@@ -138,7 +139,7 @@
                                                 @for($j = 0 ; $j < count($taxes); $j++)
                                                 <tr>
                                                     <td colspan="5" style="text-align: center">{{$taxes[$j]['taxes']['name']}}</td>
-                                                    <td colspan="4" style="text-align: center"><span id="percentage">{{$taxes[$j]['percentage']}}</td>
+                                                    <td colspan="4" style="text-align: center"><span id="percentage">{{abs($taxes[$j]['percentage'])}}</td>
                                                     <td>
                                                         <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['previous_bill_amount']}}</span>
                                                     </td>

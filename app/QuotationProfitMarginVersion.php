@@ -10,7 +10,7 @@ class QuotationProfitMarginVersion extends Model
 
     protected $fillable = ['profit_margin_id','percentage','quotation_product_id'];
 
-    public function quotation(){
-        return $this->belongsTo('App\Quotation','quotation_id');
+    public function quotation_product(){
+        return $this->belongsTo('App\QuotationProduct','quotation_product_id');
     }
 }
