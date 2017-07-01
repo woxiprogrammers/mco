@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\CustomTraits;
 use App\Bill;
+use App\BillImage;
 use App\BillQuotationProducts;
 use App\BillStatus;
 use App\BillTax;
@@ -16,11 +17,12 @@ use App\QuotationProduct;
 use App\QuotationStatus;
 use App\Tax;
 use App\Unit;
+use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
-use Mockery\CountValidator\Exception;
+use Illuminate\Support\Facades\File;
 
 trait BillTrait{
 
@@ -254,7 +256,7 @@ trait BillTrait{
                 $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$j]['current_bill_amount']);
                 $final['cumulative_bill_amount'] = round($final['cumulative_bill_amount'] + $taxes[$j]['cumulative_bill_amount']);
             }
-            return view('admin.bill.view')->with(compact('selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes'));
+            return view('admin.bill.view')->with(compact('bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -296,6 +298,115 @@ trait BillTrait{
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function approveBill(Request $request){
+        try{
+            $paidStatusId = BillStatus::where('slug','paid')->pluck('id')->first();
+            Bill::where('id',$request->bill_id)->update(['remark' => $request->remark , 'bill_status_id' => $paidStatusId]);
+            $imagesUploaded = $this->uploadPaidBillImages($request->bill_images,$request->bill_id);
+            if($imagesUploaded == true){
+                $request->session()->flash('success','Bill approved Successfully');
+            }else{
+                $request->session()->flash('error','Something went wrong');
+            }
+            return redirect('/bill/view/'.$request->bill_id);
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Change bill status to PAID',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function uploadTempBillImages(Request $request,$billId){
+        try{
+            $billDirectoryName = sha1($billId);
+            $tempUploadPath = public_path().env('BILL_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$billDirectoryName;
+            /* Create Upload Directory If Not Exists */
+            if (!file_exists($tempImageUploadPath)) {
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            $path = env('BILL_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$billDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $response = [
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => 101,
+                    'message' => 'Failed to open input stream.',
+                ],
+                'id' => 'id'
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function removeTempImage(Request $request){
+        try{
+            $sellerUploadPath = public_path().$request->path;
+            File::delete($sellerUploadPath);
+            return response(200);
+        }catch(\Exception $e){
+            return response(500);
+        }
+    }
+
+    public function displayBillImages(Request $request){
+        try{
+            $path = $request->path;
+            $count = $request->count;
+            $random = mt_rand(1,10000000000);
+        }catch (\Exception $e){
+            $path = null;
+            $count = null;
+        }
+        return view('partials.bill.bill-images')->with(compact('path','count','random'));
+    }
+
+    public function uploadPaidBillImages($images,$billId){
+        try{
+            $billDirectoryName = sha1($billId);
+            $tempImageUploadPath = public_path().env('BILL_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$billDirectoryName;
+            $imageUploadPath = public_path().env('BILL_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$billDirectoryName;
+            $billImagesData = array();
+            $billImagesData['bill_id'] = $billId;
+            foreach($images as $image){
+                $imageName = basename($image['image_name']);
+                $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
+                $billImagesData['image'] = $imageName;
+                BillImage::create($billImagesData);
+                if (!file_exists($imageUploadPath)) {
+                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                }
+                if(File::exists($newTempImageUploadPath)){
+                    $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
+                    File::move($newTempImageUploadPath,$imageUploadNewPath);
+                }
+            }
+            if(count(scandir($tempImageUploadPath)) <= 2){
+                rmdir($tempImageUploadPath);
+            }
+            return true;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Upload Work Order Images',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return false;
         }
     }
 
@@ -406,7 +517,7 @@ trait BillTrait{
             $pdf->loadHTML(view('admin.bill.pdf.cumulative',$data));
             $pdf->setPaper('A4', 'landscape');
             return $pdf->stream();
-        }catch(Exception $e){
+        }catch(\Exception $e){
             $data = [
                 'actions' => 'Generate Cumulative Bill',
                 'params' => $request->all(),

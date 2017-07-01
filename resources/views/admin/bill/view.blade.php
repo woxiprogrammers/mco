@@ -38,33 +38,45 @@
                             <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
-                                    <div class="portlet-body flip-scroll">
+                                    <div class="portlet-body">
+                                        <input type="hidden" id="billId" value="{{$selectedBillId}}">
+                                      <div class="tab-content">
+                                        <div class="tab-pane fade in active">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px">
-                                                <label class="control-label">Select Bill</label>
+                                            <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
-                                                        <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
+                                                        <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
                                                     @endfor
                                                 </select>
-                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Current Bill</a>
-                                                <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Cumulative Bill</a>
+                                                @if($bill->bill_status->slug != 'paid')
+                                                    <a class="btn green-meadow" id="approve" data-toggle="tab" href="#billApproveTab" style="margin-left: 10px">
+                                                        Approve
+                                                    </a>
+                                                @endif
+                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i>
+                                                    Current Bill
+                                                </a>
+                                                <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i> Cumulative Bill
+                                                </a>
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                 <tr style="text-align: center">
-                                                    <th width="5%"> Item no </th>
+                                                    <th width="3%"> Item no </th>
                                                     <th width="15%"> Item Description </th>
-                                                    <th width="8%" class="numeric"> UOM </th>
-                                                    <th width="8%" class="numeric"> Rate </th>
-                                                    <th width="9%" class="numeric"> BOQ Quantity </th>
+                                                    <th width="6%" class="numeric"> UOM </th>
+                                                    <th width="6%" class="numeric"> Rate </th>
+                                                    <th width="7%" class="numeric"> BOQ Quantity </th>
                                                     <th width="10%" class="numeric"> W.O Amount </th>
-                                                    <th width="8%" class="numeric"> Previous Quantity </th>
-                                                    <th width="8%" class="numeric"> Current Quantity </th>
-                                                    <th width="8%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="7%" class="numeric"> Previous. Bill Amount </th>
-                                                    <th width="7%" class="numeric"> Current Bill Amount </th>
-                                                    <th width="7%" class="numeric"> Cumulative Bill Amount </th>
+                                                    <th width="7%" class="numeric"> Previous Quantity </th>
+                                                    <th width="7%" class="numeric"> Current Quantity </th>
+                                                    <th width="10%" class="numeric"> Cumulative Quantity </th>
+                                                    <th width="10%" class="numeric"> Previous. Bill Amount </th>
+                                                    <th width="10%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="10%" class="numeric"> Cumulative Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
                                                 <tr>
@@ -84,7 +96,7 @@
                                                         <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
                                                     </td>
                                                     <td>
-                                                        <span>{{$billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
+                                                        <span>{!! round($billQuotationProducts[$iterator]['quotationProducts']['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']) !!}</span>
                                                     </td>
                                                     <td>
                                                         <span id="previous_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['previous_quantity']}}</span>
@@ -165,6 +177,55 @@
                                                 </tr>
 
                                             </table>
+                                        </div>
+                                        <div class="tab-pane fade in" id="billApproveTab">
+                                            <form id="approve" action="/bill/approve" method="post">
+                                                {!! csrf_field() !!}
+                                                <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                                                <div class="col-md-offset-2">
+                                                    <div class="form-group">
+                                                        <div class="col-md-3">
+                                                            <label for="remark" class="control-form pull-right">
+                                                                Remark:
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <textarea class="form-control" name="remark" id="remark"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="row">
+                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                        </div>
+                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                Browse</a>
+                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                <i class="fa fa-share"></i> Upload Files </a>
+                                                        </div>
+                                                        <table class="table table-bordered table-hover" style="width: 700px">
+                                                            <thead>
+                                                            <tr role="row" class="heading">
+                                                                <th> Image </th>
+                                                                <th> Action </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="show-product-images">
+
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-2 col-md-offset-4">
+                                                            <button type="submit" class="btn btn-success">
+                                                                Submit
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                      </div>
                                     </div>
                                 </div>
                             </div>
@@ -172,13 +233,25 @@
                     </div>
                 </div>
             </div>
+                <input type="hidden" id="path" name="path" value="">
+                <input type="hidden" id="max_files_count" name="max_files_count" value="20">
         </div>
     </div>
 </div>
+</div>
+
 @endsection
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+<script src="/assets/custom/bill/image-datatable.js"></script>
+<script src="/assets/custom/bill/image-upload.js"></script>
 <script>
     $(document).ready(function (){
         $("#change_bill").on('change', function(){
