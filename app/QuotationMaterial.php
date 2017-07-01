@@ -13,4 +13,8 @@ class QuotationMaterial extends Model
     public function quotation(){
         return $this->belongsTo('App\Quotation','quotation_id');
     }
+
+    public function material(){
+        return $this->belongsTo('App\Material','material_id');
+    }
 }

@@ -61,6 +61,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{material}',array('uses' => 'Admin\MaterialController@changeMaterialStatus'));
         Route::post('check-name',array('uses' => 'Admin\MaterialController@checkMaterialName'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\MaterialController@autoSuggest'));
+        Route::post('basicrate_material', array('uses' => 'Admin\MaterialController@generateBasicRateMaterialPdf'));
+
     });
     Route::group(['prefix' => 'product'],function(){
         Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));
@@ -74,6 +76,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{product}',array('uses' => 'Admin\ProductController@changeProductStatus'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\ProductController@autoSuggest'));
         Route::post('check-name',array('uses' => 'Admin\ProductController@checkProductName'));
+        Route::get('product-analysis-pdf/{product}', array('uses' => 'Admin\ProductController@generateProductAnalysisPdf'));
     });
     Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
@@ -157,6 +160,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-product-calculations',array('uses'=> 'Admin\QuotationController@calculateProductsAmount'));
         Route::get('invoice/{quotation}/{slug}' ,array('uses' => 'Admin\QuotationController@generateQuotationPdf'));
         Route::get('summary/{quotation}' ,array('uses' => 'Admin\QuotationController@generateSummaryPdf'));
+        Route::post('image-upload/{quotationId}',array('uses'=>'Admin\QuotationController@uploadTempWorkOrderImages'));
+        Route::post('display-images/{quotationId}',array('uses'=>'Admin\QuotationController@displayWorkOrderImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\QuotationController@removeTempImage'));
+        Route::post('get-work-order-form', array('uses'=> 'Admin\QuotationController@getWorkOrderForm'));
+        Route::post('approve/{quotation}', array('uses'=> 'Admin\QuotationController@approve'));
+        Route::group(['prefix' => 'work-order'],function(){
+            Route::post('edit/{work_order}',array('uses'=>'Admin\QuotationController@editWorkOrder'));
+        });
     });
 
     Route::group(['prefix' => 'project'], function(){

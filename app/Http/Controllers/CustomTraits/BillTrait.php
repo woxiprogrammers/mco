@@ -337,8 +337,9 @@ trait BillTrait{
             $data['taxData'] = $taxData;
             $data['grossTotal'] = round($data['grossTotal'] + $data['subTotal']);
             $data['amountInWords'] = ucwords(NumberHelper::getIndianCurrency($data['grossTotal']));
-            $pdf = PDF::loadView('admin.bill.pdf.invoice',$data);
-            return $pdf->download('CurrentInvoice_'.$data['currentBillID'].'_'.date('Y-m-d').'.pdf');
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.bill.pdf.invoice',$data));
+            return $pdf->stream();
         }catch(\Exception $e){
             $data = [
                 'actions' => 'Generate current Bill',
@@ -401,9 +402,10 @@ trait BillTrait{
             }
             $data['total'] = $total;
             $data['invoiceData'] = $invoiceData;
-            $pdf = PDF::loadView('admin.bill.pdf.cumulative',$data);
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.bill.pdf.cumulative',$data));
             $pdf->setPaper('A4', 'landscape');
-            return $pdf->download('CumulativeInvoice_'.$data['currentBillID'].'_'.date('d-m-Y').'.pdf');
+            return $pdf->stream();
         }catch(Exception $e){
             $data = [
                 'actions' => 'Generate Cumulative Bill',
