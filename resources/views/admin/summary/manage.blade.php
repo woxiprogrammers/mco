@@ -30,10 +30,10 @@
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
                                             <div class="table-toolbar">
-                                                <div class="row">
-                                                    <div class="col-md-6">
+                                                <div class="row" style="text-align: right">
+                                                    <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn sbold green"><a href="/summary/create"> Add New Summary
+                                                            <div id="sample_editable_1_new" class="btn yellow"><a href="/summary/create" style="color: white"> Summary
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>
                                                             </div>
@@ -47,15 +47,15 @@
                                                     <th style="width:30%"> Name </th>
                                                     <th> Status </th>
                                                     <th> Created On </th>
-                                                    <th> Actions </th>
+                                                    <th style="width: 15%"> Actions </th>
                                                 </tr>
                                                 <tr>
                                                     <th style="width:30%"> <input class="form-control form-filter" name="search_name" type="text"> </th>
                                                     <th> <input class="form-control form-filter" name="search_status" type="text" readonly> </th>
                                                     <th> <input class="form-control form-filter" name="search_created_on" type="text" readonly> </th>
                                                     <th>
-                                                        <button class="btn-primary filter-submit"> Search  </button> <br>
-                                                        <button class="btn-defualt filter-cancel"> Reset  </button>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                     </th>
                                                 </tr>
                                                 </thead>
