@@ -47,7 +47,6 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <input type="hidden" id="productRowCount" value="1">
                                         <input type="hidden" id="quotationId" value="{{$quotation->id}}">
                                         <form role="form" id="QuotationEditForm" class="form-horizontal" action="/quotation/edit/{{$quotation->id}}" method="post">
                                             {!! csrf_field() !!}
@@ -165,7 +164,7 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input name="product_rate[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="{{$quotation->quotation_products[$iterator]->rate_per_unit}}" readonly>
+                                                                                            <input name="product_rate[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="{{round($quotation->quotation_products[$iterator]->rate_per_unit,3)}}" readonly>
                                                                                         </div>
                                                                                     </td>
 
@@ -176,12 +175,12 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="text" name="product_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="{!!$quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity!!}" readonly>
+                                                                                            <input type="text" name="product_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="{!!round(($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity),3)!!}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="text" name="product_discount_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-discount-amount" id="productDiscountAmount{{$iterator}}" value="{!!($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity)-($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity*($quotation->discount/100))!!}" readonly>
+                                                                                            <input type="text" name="product_discount_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-discount-amount" id="productDiscountAmount{{$iterator}}" value="{!!round(($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity)-($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity*($quotation->discount/100)),3)!!}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
@@ -227,7 +226,7 @@
                                                                             @endfor
                                                                         </table>
 
-                                                                        <input type="hidden" id="productRowCount" value="{{$iterator}}">
+                                                                        <input type="hidden" id="productRowCount" value="{{count($quotation->quotation_products)}}">
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="col-md-3 col-md-offset-9">
