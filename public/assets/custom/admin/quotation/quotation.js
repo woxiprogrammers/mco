@@ -459,3 +459,9 @@ function convertUnit(materialId,fromUnit){
 function openDisapproveModal(){
     $("#disapproveModal").modal('show');
 }
+
+/*
+function backToGeneralFromWorkOrder(){
+    $("#workOrderTab").removeClass('active');
+    $("#GeneralTab").addClass('active');
+}*/

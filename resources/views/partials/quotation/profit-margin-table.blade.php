@@ -5,6 +5,16 @@
  * Time: 6:08 PM
  */
 ?>
+<fieldset class="row" style="text-align: right">
+    <a class="btn btn-info" onclick="backToMaterials()" href="javascript:void(0);">
+        Back
+    </a>
+    @if($hideSubmit == false)
+        <button type="submit" class="btn btn-success" id="next2">
+            Submit
+        </button>
+    @endif
+</fieldset>
 <fieldset>
     <legend> Edit Profit Margins </legend>
     <div class="table-scrollable profit-margin-table">

@@ -454,7 +454,8 @@ trait QuotationTrait{
                     }else{
                         $rateConversion = UnitHelper::unitConversion($material['unit_id'],$data['material_unit'][$material['id']],$data['material_rate'][$material['id']]);
                         if(is_array($rateConversion)){
-                            $request->session()->flash('error','Unit Conversion is invalid');
+                            $request->session()->flash('error',$rateConversion['message']);
+                            Log::info('in invalid conversion if');
                             Quotation::where('id',$quotation['id'])->delete();
                             return redirect('/quotation/create');
                         }
@@ -573,7 +574,6 @@ trait QuotationTrait{
                                         ->get();
             }else{
                 $taxes = Tax::where('is_active', true)->select('id','name','base_percentage')->get();
-
             }
             return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes'));
         }catch(\Exception $e){
@@ -718,21 +718,24 @@ trait QuotationTrait{
             $data = $request->all();
             $quotationData = array();
             $quotationData['discount'] = $data['discount'];
-            $quotationData['is_tax_applied'] = true;
+            if($request->has('tax')){
+                $taxData = array();
+                $quotationData['is_tax_applied'] = true;
+                $taxData['quotation_id'] = $quotation['id'];
+                QuotationTaxVersion::where('quotation_id',$quotation->id)->delete();
+                foreach($data['tax'] as $taxId => $taxPercentage){
+                    $taxData['tax_id'] = $taxId;
+                    $taxData['percentage'] = $taxPercentage;
+                    QuotationTaxVersion::create($taxData);
+                }
+            }
             $quotationData['carpet_area'] = $data['carpet_area'];
             $quotationData['built_up_area'] = $data['built_up_area'];
             if(in_array(!null,$data['product_summary'])){
                 $quotationData['is_summary_applied'] = true;
             }
             $quotation->update($quotationData);
-            $taxData = array();
-            $taxData['quotation_id'] = $quotation['id'];
-            QuotationTaxVersion::where('quotation_id',$quotation->id)->delete();
-            foreach($data['tax'] as $taxId => $taxPercentage){
-                $taxData['tax_id'] = $taxId;
-                $taxData['percentage'] = $taxPercentage;
-                QuotationTaxVersion::create($taxData);
-            }
+
             foreach($quotation->quotation_products as $quotationProduct){
                 foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
                     $quotationProfitMargin->delete();
@@ -765,7 +768,7 @@ trait QuotationTrait{
                         }else{
                             $rateConversion = UnitHelper::unitConversion($data['material_unit'][$material['id']],$material['unit_id'],$data['material_rate'][$material['id']]);
                             if(is_array($rateConversion)){
-                                $request->session()->flash('error','Unit Conversion is invalid');
+                                $request->session()->flash('error',$rateConversion['message']);
                                 return redirect('/quotation/edit/'.$quotation['id']);
                             }
                         }
