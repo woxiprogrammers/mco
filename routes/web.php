@@ -163,6 +163,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('delete-temp-product-image',array('uses'=>'Admin\QuotationController@removeTempImage'));
         Route::post('get-work-order-form', array('uses'=> 'Admin\QuotationController@getWorkOrderForm'));
         Route::post('approve/{quotation}', array('uses'=> 'Admin\QuotationController@approve'));
+        Route::post('disapprove/{quotation}', array('uses'=> 'Admin\QuotationController@disapprove'));
         Route::group(['prefix' => 'work-order'],function(){
             Route::post('edit/{work_order}',array('uses'=>'Admin\QuotationController@editWorkOrder'));
         });
