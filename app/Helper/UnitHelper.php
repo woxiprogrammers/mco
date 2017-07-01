@@ -7,6 +7,7 @@
 
 namespace App\Helper;
 
+use App\Unit;
 use App\UnitConversion;
 
 class UnitHelper{
@@ -24,6 +25,9 @@ class UnitHelper{
             }else{
                 $materialRateTo['unit'] = $fromUnit;
                 $materialRateTo['rate'] = $rate;
+                $unit1 = Unit::where('id',$fromUnit)->pluck('name')->first();
+                $unit2 = Unit::where('id',$toUnit)->pluck('name')->first();
+                $materialRateTo['message'] = "$unit1-$unit2 conversion is not present.";
             }
         }
         return $materialRateTo;

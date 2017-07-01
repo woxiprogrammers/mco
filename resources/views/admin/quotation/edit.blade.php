@@ -54,34 +54,34 @@
                                             <input type="hidden" name="_method" value="put">
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="GeneralTab">
-                                                    <fieldset class="row">
+                                                    <fieldset class="row" style="text-align: right">
                                                         @if($quotation->quotation_status->slug == 'draft')
-                                                            <a class="col-md-offset-1 btn green-meadow" id="approve" data-toggle="tab" href="#workOrderTab">
+                                                            <a class="btn green-meadow" id="approve" data-toggle="tab" href="#workOrderTab">
                                                                 Approve
                                                             </a>
-                                                            <a class="col-md-offset-1 btn btn-danger" id="disapprove" onclick="openDisapproveModal()">
+                                                            <a class="btn btn-danger" id="disapprove" onclick="openDisapproveModal()">
                                                                 Disapprove
                                                             </a>
                                                         @elseif($quotation->quotation_status->slug == 'approved')
-                                                            <a class="col-md-offset-1 btn btn-primary" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
+                                                            <a class="btn btn-info" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
                                                                 Work Order Details
                                                             </a>
                                                         @endif
-                                                        <a class="col-md-offset-1 btn btn-primary" id="materialCosts">
+                                                        <a class="btn btn-info" id="materialCosts">
                                                             Change Material Cost
                                                         </a>
-                                                        <a class="col-md-offset btn btn-wide btn-primary" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
+                                                        <a class="btn btn-info" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             Change Profit Margins
                                                         </a>
                                                         @if($quotation->quotation_status->slug == 'approved')
-                                                            <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="col-md-offset-1 btn btn-wide btn-primary">
-                                                                Download Quotation With Tax
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
+                                                                <i class="fa fa-download"></i>Quotation With Tax
                                                             </a>
-                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="col-md-offset btn btn-wide btn-primary">
-                                                                Download Quotation Without Tax
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
+                                                                <i class="fa fa-download"></i>Quotation Without Tax
                                                             </a>
-                                                            <a href="/quotation/summary/{{$quotation->id}}" class="col-md-offset-1 btn btn-wide btn-primary">
-                                                                Download Summary
+                                                            <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info">
+                                                                <i class="fa fa-download"></i>Summary
                                                             </a>
                                                         @endif
                                                     </fieldset>
@@ -304,6 +304,11 @@
                                                 </div>
                                         </form>
                                                 <div class="tab-pane fade in" id="workOrderTab">
+                                                    <fieldset class="row" style="text-align: right">
+                                                        <a class="btn btn-info" href="#GeneralTab" data-toggle="tab">
+                                                            Back
+                                                        </a>
+                                                    </fieldset>
                                                     @if($quotation->quotation_status->slug == 'approved')
                                                         <form id="WorkOrderEditForm" action="/quotation/work-order/edit/{{$quotation->work_order->id}}" method="post">
                                                             {!! csrf_field() !!}
@@ -439,7 +444,6 @@
                                                                     </div>
                                                                     <div class="col-md-3">
                                                                         <textarea class="form-control" name="description" id="workOrderDescription">
-
                                                                         </textarea>
                                                                     </div>
                                                                 </div>
