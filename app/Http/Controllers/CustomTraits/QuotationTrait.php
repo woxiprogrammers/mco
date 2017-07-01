@@ -829,9 +829,10 @@ trait QuotationTrait{
         }
     }
 
-    public function generateQuotationPdf(Request $request,$quotation){
+    public function generateQuotationPdf(Request $request,$quotation,$slug){
         try{
             $data = array();
+            $data['slug'] = $slug;
             $quotationProductData = array();
             $iterator = $total = 0;
             foreach($quotation->quotation_products as $quotationProducts){
@@ -848,18 +849,20 @@ trait QuotationTrait{
             usort($quotationProductData, function($a, $b) {
                 return $a['category_id'] > $b['category_id'];
             });
-            $taxData = array();
-            $i = 0;
             $rounded_amount = $total;
-            foreach($quotation->tax_version as $key => $tax){
-                $taxData[$i]['id'] = $tax->id;
-                $taxData[$i]['name'] = $tax->tax->name;
-                $taxData[$i]['percentage'] = abs($tax->percentage);
-                $taxData[$i]['tax_amount'] = round($total * ($tax->percentage / 100) , 3);
-                $rounded_amount = $rounded_amount + $taxData[$i]['tax_amount'];
-                $i++;
+            if($data['slug'] == 'with-tax'){
+                $taxData = array();
+                $i = 0;
+                foreach($quotation->tax_version as $key => $tax){
+                    $taxData[$i]['id'] = $tax->id;
+                    $taxData[$i]['name'] = $tax->tax->name;
+                    $taxData[$i]['percentage'] = abs($tax->percentage);
+                    $taxData[$i]['tax_amount'] = round($total * ($tax->percentage / 100) , 3);
+                    $rounded_amount = $rounded_amount + $taxData[$i]['tax_amount'];
+                    $i++;
+                }
+                $data['taxData'] = $taxData;
             }
-            $data['taxData'] = $taxData;
             $data['total'] = $total;
             $data['rounded_total'] = round($rounded_amount);
             $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($data['rounded_total']));

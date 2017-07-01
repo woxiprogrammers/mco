@@ -88,12 +88,14 @@
                         <td colspan="5" style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">Total </td>
                         <td style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">{!! $total !!}</td>
                     </tr>
-                    @for($iterator = 0; $iterator < count($taxData) ; $iterator++)
-                        <tr>
-                            <td colspan="5" style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
-                            <td style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
-                        </tr>
-                    @endfor
+                    @if($slug == 'with-tax')
+                        @for($iterator = 0; $iterator < count($taxData) ; $iterator++)
+                            <tr>
+                                <td colspan="5" style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
+                                <td style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
+                            </tr>
+                        @endfor
+                    @endif
                     <tr>
                         <td colspan="5" style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">Final Total</td>
                         <td style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">{!! $rounded_total !!}</td>
