@@ -40,32 +40,38 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body flip-scroll">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px">
-                                                <label class="control-label">Select Bill</label>
+                                            <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
-                                                        <option value="{{$bills[$i]['id']}}">Bill Array {{$i+1}}</option>
+                                                        <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
                                                     @endfor
                                                 </select>
-                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#approve" class="btn btn-info btn-icon" style="margin-left: 10px">Approve</a>
-                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Current Bill</a>
-                                                <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">Download Cumulative Bill</a>
+                                                <a class="btn green-meadow" id="approve" data-toggle="tab" href="#approve" style="margin-left: 10px">
+                                                    Approve
+                                                </a>
+                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i>
+                                                    Current Bill
+                                                </a>
+                                                <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i> Cumulative Bill
+                                                </a>
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                 <tr style="text-align: center">
-                                                    <th width="5%"> Item no </th>
+                                                    <th width="3%"> Item no </th>
                                                     <th width="15%"> Item Description </th>
-                                                    <th width="8%" class="numeric"> UOM </th>
-                                                    <th width="8%" class="numeric"> Rate </th>
-                                                    <th width="9%" class="numeric"> BOQ Quantity </th>
+                                                    <th width="6%" class="numeric"> UOM </th>
+                                                    <th width="6%" class="numeric"> Rate </th>
+                                                    <th width="7%" class="numeric"> BOQ Quantity </th>
                                                     <th width="10%" class="numeric"> W.O Amount </th>
-                                                    <th width="8%" class="numeric"> Previous Quantity </th>
-                                                    <th width="8%" class="numeric"> Current Quantity </th>
-                                                    <th width="8%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="7%" class="numeric"> Previous. Bill Amount </th>
-                                                    <th width="7%" class="numeric"> Current Bill Amount </th>
-                                                    <th width="7%" class="numeric"> Cumulative Bill Amount </th>
+                                                    <th width="7%" class="numeric"> Previous Quantity </th>
+                                                    <th width="7%" class="numeric"> Current Quantity </th>
+                                                    <th width="10%" class="numeric"> Cumulative Quantity </th>
+                                                    <th width="10%" class="numeric"> Previous. Bill Amount </th>
+                                                    <th width="10%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="10%" class="numeric"> Cumulative Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
                                                 <tr>
