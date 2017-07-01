@@ -37,10 +37,10 @@
                                         </div>
                                         <div class="portlet-body">
                                             <div class="table-toolbar">
-                                                <div class="row">
-                                                    <div class="col-md-6">
+                                                <div class="row" style="text-align: right">
+                                                    <div class="col-md-12">
                                                         <div class="btn-group">
-                                                          <div id="sample_editable_1_new" class="btn sbold green"><a href="/units/create"> Add New
+                                                          <div id="sample_editable_1_new" class="btn yellow"><a href="/units/create" style="color: white"> Unit
                                                               <i class="fa fa-plus"></i>
                                                           </a>
                                                           </div>
@@ -87,10 +87,10 @@
                                         </div>
                                         <div class="portlet-body">
                                             <div class="table-toolbar">
-                                                <div class="row">
-                                                    <div class="col-md-6">
+                                                <div class="row" style="text-align: right">
+                                                    <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn sbold green"><a href="/units/conversion/create"> Add New
+                                                            <div id="sample_editable_1_new" class="btn yellow"><a href="/units/conversion/create" style="color: white"> New
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>
                                                             </div>
