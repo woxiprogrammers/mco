@@ -41,7 +41,7 @@
                                     <div class="portlet-body">
                                         <input type="hidden" id="billId" value="{{$selectedBillId}}">
                                       <div class="tab-content">
-                                        <div class="tab-pane fade in">
+                                        <div class="tab-pane fade in active">
                                             @if($bills != NULL)
                                             <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
@@ -96,7 +96,7 @@
                                                         <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
                                                     </td>
                                                     <td>
-                                                        <span>{{$billQuotationProducts[$iterator]['quotationProducts']['rate_per_unit'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
+                                                        <span>{!! round($billQuotationProducts[$iterator]['quotationProducts']['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']) !!}</span>
                                                     </td>
                                                     <td>
                                                         <span id="previous_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['previous_quantity']}}</span>
@@ -178,7 +178,7 @@
 
                                             </table>
                                         </div>
-                                        <div class="tab-pane fade in active" id="billApproveTab">
+                                        <div class="tab-pane fade in" id="billApproveTab">
                                             <form id="approve" action="/bill/approve" method="post">
                                                 {!! csrf_field() !!}
                                                 <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
