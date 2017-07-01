@@ -32,26 +32,13 @@ var QuotationImageUpload = function() {
                     },
                     FilesAdded: function(up, files) {
                         plupload.each(files, function(e) {
-                            /*console.log('In JS');*/
-                            /*$('#length').val(up.files.length)
-                             $('#max_files').val(up.settings.max_files)
-                             console.log("Length:"+up.files.length);
-                             console.log("max_file:"+up.settings.max_files);
-                             console.log("max_file_id:"+$('#max_files_count').val());*/
                             if (up.files.length > up.settings.max_files) {
-                                // display alert message
-                                //alert('Cannot send more than ' + up.settings.max_files + ' file(s).');
-                                alert('Only 4 files are allowed');
+                                alert('Only 20 files are allowed');
                                 var index = up.settings.max_files;
                                 up.removeFile(up.files[index]);
-                                //e.removeFile(up.files[up.files.length]);
-                                // here you can also hide the "Select Files" button with the following code
-                                //$(up.settings.browse_button).hide();
-                                // cancel adding files. break each.
                                 return false;
                             }else{
                                 $("#tab_images_uploader_filelist").append('<div class="alert alert-warning added-files" id="uploaded_file_' + e.id + '">' + e.name + "(" + plupload.formatSize(e.size) + ') <span class="status label label-info"></span>&nbsp;</div>')
-                                //original: $("#tab_images_uploader_filelist").append('<div class="alert alert-warning added-files" id="uploaded_file_' + e.id + '">' + e.name + "(" + plupload.formatSize(e.size) + ') <span class="status label label-info"></span>&nbsp;<a href="javascript:;" style="margin-top:-5px" class="remove pull-right btn btn-sm red"><i class="fa fa-times"></i> remove</a></div>')
                             }
                         })
                     },
@@ -61,10 +48,6 @@ var QuotationImageUpload = function() {
                     FileUploaded: function(e, a, t) {
                         var t = $.parseJSON(t.response);
                         if (t.result && "OK" == t.result) {
-                            /*console.log("Original"+e.settings.max_files);
-                             var finalCount = e.settings.max_files - 1;
-                             console.log("Modified"+finalCount);
-                             $('#max_files_count').val(finalCount)*/
                             $('#path').val(t.path,e.files.length);
                             $("#path").triggerHandler("change", [t.path,e.files.length]);
                             $("#uploaded_file_" + a.id + " > .status").removeClass("label-info").addClass("label-success").html('<i class="fa fa-check"></i> Done')
