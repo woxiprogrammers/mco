@@ -38,10 +38,10 @@
                             <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
-                                    <div class="portlet-body flip-scroll">
+                                    <div class="portlet-body">
                                         <input type="hidden" id="billId" value="{{$selectedBillId}}">
-                                        <div class="tab-content">
-                                        <div class="tab-pane fade in active">
+                                      <div class="tab-content">
+                                        <div class="tab-pane fade in">
                                             @if($bills != NULL)
                                             <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
@@ -178,64 +178,66 @@
 
                                             </table>
                                         </div>
-                                            <div class="tab-pane fade in" id="billApproveTab">
-                                                <form id="approve" action="/bill/approve" method="post">
-                                                    {!! csrf_field() !!}
-                                                    <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
-                                                    <div class="col-md-offset-2">
-                                                        <div class="form-group">
-                                                            <div class="col-md-3">
-                                                                <label for="work_order_number" class="control-form pull-right">
-                                                                    Remark:
-                                                                </label>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <textarea class="form-control" name="remark" id="remark"></textarea>
-                                                            </div>
+                                        <div class="tab-pane fade in active" id="billApproveTab">
+                                            <form id="approve" action="/bill/approve" method="post">
+                                                {!! csrf_field() !!}
+                                                <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                                                <div class="col-md-offset-2">
+                                                    <div class="form-group">
+                                                        <div class="col-md-3">
+                                                            <label for="remark" class="control-form pull-right">
+                                                                Remark:
+                                                            </label>
                                                         </div>
-                                                        <div class="form-group">
-                                                            <div class="row">
-                                                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                            </div>
-                                                            <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                                    Browse</a>
-                                                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                    <i class="fa fa-share"></i> Upload Files </a>
-                                                            </div>
-                                                            <table class="table table-bordered table-hover" style="width: 700px">
-                                                                <thead>
-                                                                <tr role="row" class="heading">
-                                                                    <th> Image </th>
-                                                                    <th> Action </th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody id="show-product-images">
+                                                        <div class="col-md-3">
+                                                            <textarea class="form-control" name="remark" id="remark"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="row">
+                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                        </div>
+                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                Browse</a>
+                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                <i class="fa fa-share"></i> Upload Files </a>
+                                                        </div>
+                                                        <table class="table table-bordered table-hover" style="width: 700px">
+                                                            <thead>
+                                                            <tr role="row" class="heading">
+                                                                <th> Image </th>
+                                                                <th> Action </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="show-product-images">
 
-                                                                </tbody>
-                                                            </table>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-2 col-md-offset-4">
+                                                            <button type="submit" class="btn btn-success">
+                                                                Submit
+                                                            </button>
                                                         </div>
-                                                        <div class="form-group">
-                                                            <div class="col-md-2 col-md-offset-4">
-                                                                <button type="submit" class="btn btn-success">
-                                                                    Submit
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                </form>
-                                            </div>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
+                                      </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
                 <input type="hidden" id="path" name="path" value="">
                 <input type="hidden" id="max_files_count" name="max_files_count" value="20">
-            </div>
         </div>
     </div>
+</div>
 </div>
 
 @endsection
