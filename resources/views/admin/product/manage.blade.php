@@ -31,10 +31,10 @@
                                     <div class="portlet light ">
                                         <div class="portlet-body">
                                             <div class="table-toolbar">
-                                                <div class="row">
-                                                    <div class="col-md-6">
+                                                <div class="row" style="text-align: right">
+                                                    <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn sbold green"><a href="/product/create"> Add New Product
+                                                            <div id="sample_editable_1_new" class="btn yellow"><a href="/product/create" style="color: white"> Product
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>
                                                             </div>
@@ -51,7 +51,7 @@
                                                     <th> Unit </th>
                                                     <th> Rate </th>
                                                     <th> Status </th>
-                                                    <th> Actions </th>
+                                                    <th style="width: 15%"> Actions </th>
                                                 </tr>
                                                 <tr>
                                                     <th style="width: 25%"> <input class="form-control form-filter" name="search_product_name"></th>
@@ -60,8 +60,8 @@
                                                     <th> <input class="form-control form-filter" name="search_rate" readonly> </th>
                                                     <th> <input class="form-control form-filter" name="search_status" readonly> </th>
                                                     <th>
-                                                        <button class="btn-primary btn-sm filter-submit"> Search </button> <br>
-                                                        <button class="btn-default filter-cancel"> Reset </button>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                     </th>
                                                 </tr>
                                                 </thead>
