@@ -63,16 +63,27 @@
                                                                 Disapprove
                                                             </a>
                                                         @elseif($quotation->quotation_status->slug == 'approved')
-                                                        <a class="col-md-offset-1 btn btn-primary" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
-                                                            Work Order Details
-                                                        </a>
+                                                            <a class="col-md-offset-1 btn btn-primary" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
+                                                                Work Order Details
+                                                            </a>
                                                         @endif
                                                         <a class="col-md-offset-1 btn btn-primary" id="materialCosts">
                                                             Change Material Cost
                                                         </a>
-                                                        <a class="col-md-offset-1 btn btn-wide btn-primary" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
+                                                        <a class="col-md-offset btn btn-wide btn-primary" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             Change Profit Margins
                                                         </a>
+                                                        @if($quotation->quotation_status->slug == 'approved')
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="col-md-offset-1 btn btn-wide btn-primary">
+                                                                Download Quotation With Tax
+                                                            </a>
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="col-md-offset btn btn-wide btn-primary">
+                                                                Download Quotation Without Tax
+                                                            </a>
+                                                            <a href="/quotation/summary/{{$quotation->id}}" class="col-md-offset-1 btn btn-wide btn-primary">
+                                                                Download Summary
+                                                            </a>
+                                                        @endif
                                                     </fieldset>
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
                                                         <div class="panel panel-default">
@@ -573,7 +584,6 @@
 @endif
 <script>
     $(document).ready(function(){
-        //CreateQuotation.init();
         calculateSubtotal();
     });
 
