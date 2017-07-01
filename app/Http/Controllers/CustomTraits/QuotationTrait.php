@@ -576,7 +576,6 @@ trait QuotationTrait{
                 $taxes = Tax::where('is_active', true)->select('id','name','base_percentage')->get();
             }
             return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes'));
-            round(($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity)-($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity*($quotation->discount/100)),3);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
@@ -816,7 +815,6 @@ trait QuotationTrait{
                     $productAmount = round($productAmount + ($productAmount * ($percentage / 100)),3);
                 }
                 if($request->has('material_rate') && $request->has('material_unit')){
-                    dd('in if');
                     foreach($quotation->quotation_materials as $quotationMaterial){
                         $quotationMaterial->delete();
                     }
