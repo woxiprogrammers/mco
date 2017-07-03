@@ -56,29 +56,29 @@
                                                     <fieldset class="row" style="text-align: right">
                                                         @if($quotation->quotation_status->slug == 'draft')
                                                             <a class="btn green-meadow" id="approve" data-toggle="tab" href="#workOrderTab">
-                                                                Approve
+                                                                <i class="fa fa-check-square-o"></i> Approve
                                                             </a>
                                                             <a class="btn btn-danger" id="disapprove" onclick="openDisapproveModal()">
-                                                                Disapprove
+                                                                <i class="fa fa-remove"></i> Disapprove
                                                             </a>
                                                         @elseif($quotation->quotation_status->slug == 'approved')
                                                             <a class="btn btn-info" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
-                                                                Work Order Details
+                                                                <i class="fa fa-server"></i> Work Order Details
                                                             </a>
                                                         @endif
                                                         <a class="btn btn-info" id="materialCosts">
-                                                            Change Material Cost
+                                                            <i class="fa fa-edit"></i> Material Cost
                                                         </a>
                                                         <a class="btn btn-info" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
-                                                            Change Profit Margins
+                                                            <i class="fa fa-edit"></i> Profit Margins
                                                         </a>
-                                                        @if($quotation->quotation_status->slug == 'approved')
-                                                            <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
-                                                                <i class="fa fa-download"></i>Quotation With Tax
-                                                            </a>
-                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
+                                                        <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
+                                                             <i class="fa fa-download"></i>Quotation With Tax
+                                                        </a>
+                                                        <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
                                                                 <i class="fa fa-download"></i>Quotation Without Tax
-                                                            </a>
+                                                        </a>
+                                                        @if($quotation->is_summary_applied == true)
                                                             <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info">
                                                                 <i class="fa fa-download"></i>Summary
                                                             </a>

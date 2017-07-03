@@ -879,6 +879,7 @@ trait QuotationTrait{
             $data['slug'] = $slug;
             $quotationProductData = array();
             $iterator = $total = 0;
+            $data['company_name'] = $quotation->project_site->project->client->company;
             foreach($quotation->quotation_products as $quotationProducts){
                 $quotationProductData[$iterator]['product_name'] = $quotationProducts->product->name;
                 $quotationProductData[$iterator]['category_id'] = $quotationProducts->product->category_id;
@@ -1033,9 +1034,9 @@ trait QuotationTrait{
                 $summary_amount = 0;
                 foreach($quotationProducts as $j => $quotationProduct){
                     if($quotationProduct->summary_id == $summary['summary_id']){
-                         $discounted_price_per_product = round(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))),3);
-                         $discounted_price = $quotationProduct->quantity * $discounted_price_per_product;
-                         $summary_amount = $summary_amount + $discounted_price;
+                        $discounted_price_per_product = round(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))),3);
+                        $discounted_price = $quotationProduct->quantity * $discounted_price_per_product;
+                        $summary_amount = $summary_amount + $discounted_price;
                     }
                 }
                 $summaryData[$i]['description'] = $summary->summary->name;
@@ -1053,6 +1054,7 @@ trait QuotationTrait{
                 $total['rate_per_carpet'] = $total['rate_per_carpet'] + $summaryData[$i]['rate_per_carpet'];
                 $i++;
             }
+
             $data['summaryData'] = $summaryData;
             $data['total'] = $total;
             $pdf = App::make('dompdf.wrapper');
