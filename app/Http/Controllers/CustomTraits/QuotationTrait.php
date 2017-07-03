@@ -465,21 +465,13 @@ trait QuotationTrait{
                 $quotationProductData['quantity'] = $data['product_quantity'][$productId];
                 $quotationProduct = QuotationProduct::create($quotationProductData);
                 $profitMarginAmount = 0;
-                Log::info('before pm. product amount');
-                Log::info($productAmount);
                 foreach($data['profit_margins'][$productId] as $id => $percentage){
-                    Log::info('p m id');
-                    Log::info($id);
-                    Log::info('percentage');
-                    Log::info($percentage);
                     $quotationProfitMarginData = array();
                     $quotationProfitMarginData['profit_margin_id'] = $id;
                     $quotationProfitMarginData['percentage'] = $percentage;
                     $quotationProfitMarginData['quotation_product_id'] = $quotationProduct->id;
                     QuotationProfitMarginVersion::create($quotationProfitMarginData);
                     $profitMarginAmount = round($profitMarginAmount + ($productAmount * ($percentage / 100)),3);
-                    Log::info('profit margin amount');
-                    Log::info($profitMarginAmount);
                 }
                 if($request->has('clientSuppliedMaterial')){
                     foreach($data['clientSuppliedMaterial'] as $materialId){
@@ -494,10 +486,6 @@ trait QuotationTrait{
                         }
                     }
                 }
-                Log::info('product amount after profit margins');
-                Log::info($productAmount);
-                Log::info('profit margin amount');
-                Log::info($profitMarginAmount);
                 $productAmount = round(($productAmount + $profitMarginAmount),3);
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
             }
@@ -606,7 +594,6 @@ trait QuotationTrait{
             $response = array();
             $data = $request->all();
             $productIds = $data['product_ids'];
-            Log::info($request->all());
             foreach($productIds as $productId){
                 $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
                 $productMaterialIds = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
