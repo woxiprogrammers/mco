@@ -185,6 +185,9 @@ function backToGeneral(){
         async: false,
         data: formData,
         success: function(data,textStatus,xhr){
+            if(xhr.status == 201){
+                alert(data.message);
+            }
             $.each(data.amount, function(id,value){
                 $("input[name='product_rate["+id+"]']").val(value);
                 var row = $("input[name='product_rate["+id+"]']").closest("tr").attr('id');
