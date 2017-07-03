@@ -228,44 +228,48 @@
 
                                                                         <input type="hidden" id="productRowCount" value="{{count($quotation->quotation_products)}}">
                                                                     </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-3 col-md-offset-9">
-                                                                            <label class="control-label" style="font-weight: bold; margin-left: 15%; font-size: 15px">
-                                                                                Subtotal:
-                                                                            </label>
-                                                                            <label class="control-label" style="font-weight: bold; margin-left: 15%; font-size: 14px" id="subtotal">
+                                                                    <div class="col-md-12">
+                                                                        <div class="row">
+                                                                            <div class="col-md-10" style="text-align: right">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
+                                                                                    Subtotal:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 14px" id="subtotal">
 
-                                                                            </label>
+                                                                                </label>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 col-md-offset-7">
-                                                                            <label class="control-label" style="font-weight: bold;float: right; margin-left: 15%; font-size: 15px">
-                                                                                Discount:
-                                                                            </label>
+                                                                        <div class="row">
+                                                                            <div class="col-md-10" style="text-align: right">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
+                                                                                    Discount:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" min="0">
+                                                                            </div>
                                                                         </div>
-                                                                        <div class="col-md-2">
-                                                                            <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" min="0">
+                                                                        <div class="row">
+                                                                            <div class="col-md-10" style="text-align: right">
+                                                                                <label class="control-label  pull-right" style="font-weight: bold; font-size: 15px">
+                                                                                    Carpet Area:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <input class="form-control" type="number" name="carpet_area" value="{{$quotation->carpet_area}}">
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-3">
-                                                                            <label class="control-label  pull-right">
-                                                                                Carpet Area:
-                                                                            </label>
-                                                                        </div>
-                                                                        <div class="col-md-3">
-                                                                            <input class="form-control" type="number" name="carpet_area" value="{{$quotation->carpet_area}}">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-3">
-                                                                            <label class="control-label  pull-right">
-                                                                                Built up area:
-                                                                            </label>
-                                                                        </div>
-                                                                        <div class="col-md-3">
-                                                                            <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
+                                                                        <div class="row">
+                                                                            <div class="col-md-10" style="text-align: right">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
+                                                                                    Built up area:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -281,10 +285,10 @@
                                                                 <div class="panel-body">
                                                                     @foreach($taxes as $tax)
                                                                         <div class="row">
-                                                                            <div class="col-md-3">
-                                                                                <label class="control-label" style="float: right;"> {{$tax['name']}}: </label>
+                                                                            <div class="col-md-11">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px; float: right"> {{$tax['name']}}: </label>
                                                                             </div>
-                                                                            <div class="col-md-3">
+                                                                            <div class="col-md-1">
                                                                                 <input type="number" step="any" class="form-control" name="tax[{{$tax['id']}}]" id="Tax{{$tax['id']}}" value="{{$tax['base_percentage']}}">
                                                                             </div>
                                                                         </div>
