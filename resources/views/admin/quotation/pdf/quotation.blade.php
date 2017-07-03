@@ -105,14 +105,14 @@
                         <td style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">{!! $rounded_total !!}</td>
                     </tr>
                     <tr>
-                        <td colspan="6" style="background-color: #c2c2c2"><b>Rs. {!! $amount_in_words !!}.</b></td>
+                        <td colspan="6" style="background-color: #c2c2c2"><b><i>Rs. {!! $amount_in_words !!}.</i></b></td>
                     </tr>
                 </table>
             </div>
             <br>
             <table style="font-size:15px" width="100%" border="1">
                 <tr>
-                    <th width="65%" colspan="2" style="background-color: #c2c2c2; padding-left: 10px"><b>For Company PVT. LTD.</b></th>
+                    <th width="65%" colspan="2" style="background-color: #c2c2c2; padding-left: 10px"><b>For {!! ucwords($company_name) !!}</b></th>
                     <th width="35%" style="background-color: #c2c2c2; text-align: right; padding-right: 10px"><b>For Manisha Construction</b></th>
                 </tr>
                 <tr >
