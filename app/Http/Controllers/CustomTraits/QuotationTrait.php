@@ -338,7 +338,7 @@ trait QuotationTrait{
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
                     $quotationStatus = '<td><span class="label label-sm label-warning"> Draft </span></td>';
                 }elseif($quotations[$pagination]->quotation_status->slug == 'approved'){
-                    $quotationStatus = '<td><span class="label label-sm label-success"> Approved </span></td>';
+                    $quotationStatus = '<td><span class="label label-sm label-primary"> Approved </span></td>';
                 }else{
                     $quotationStatus = '<td><span class="label label-sm label-danger"> Disapproved </span></td>';
                 }
