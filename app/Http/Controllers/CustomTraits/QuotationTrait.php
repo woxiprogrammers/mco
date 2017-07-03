@@ -336,11 +336,11 @@ trait QuotationTrait{
             $quotations = Quotation::get();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($quotations); $iterator++,$pagination++ ){
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
-                    $quotationStatus = '<td><span class="label label-sm label-warning"> Draft </span></td>';
+                    $quotationStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
                 }elseif($quotations[$pagination]->quotation_status->slug == 'approved'){
-                    $quotationStatus = '<td><span class="label label-sm label-primary"> Approved </span></td>';
+                    $quotationStatus = '<td><span class="btn btn-xs green-meadow"> Approved </span></td>';
                 }else{
-                    $quotationStatus = '<td><span class="label label-sm label-danger"> Disapproved </span></td>';
+                    $quotationStatus = '<td><span class="btn btn-xs btn-danger"> Disapproved </span></td>';
                 }
                 $records['data'][] = [
                     $quotations[$pagination]->project_site->project->client->company,
