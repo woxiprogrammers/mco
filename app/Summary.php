@@ -20,4 +20,5 @@ class Summary extends Model
             ]
         ];
     }
+
 }

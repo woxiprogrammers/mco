@@ -57,7 +57,7 @@
                                             <tr>
                                                 <th style="width: 25%"> Client Name </th>
                                                 <th style="width: 25%"> Project Name </th>
-                                                <th style="width: 25%"> Project Site </th>
+                                                <th style="width: 25%"> Site Name </th>
                                                 <th> Status </th>
                                                 <th> Created At </th>
                                                 <th> Actions </th>

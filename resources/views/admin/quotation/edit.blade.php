@@ -56,29 +56,29 @@
                                                     <fieldset class="row" style="text-align: right">
                                                         @if($quotation->quotation_status->slug == 'draft')
                                                             <a class="btn green-meadow" id="approve" data-toggle="tab" href="#workOrderTab">
-                                                                Approve
+                                                                <i class="fa fa-check-square-o"></i> Approve
                                                             </a>
                                                             <a class="btn btn-danger" id="disapprove" onclick="openDisapproveModal()">
-                                                                Disapprove
+                                                                <i class="fa fa-remove"></i> Disapprove
                                                             </a>
                                                         @elseif($quotation->quotation_status->slug == 'approved')
                                                             <a class="btn btn-info" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
-                                                                Work Order Details
+                                                                <i class="fa fa-server"></i> Work Order Details
                                                             </a>
                                                         @endif
                                                         <a class="btn btn-info" id="materialCosts">
-                                                            Change Material Cost
+                                                            <i class="fa fa-edit"></i> Material Cost
                                                         </a>
                                                         <a class="btn btn-info" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
-                                                            Change Profit Margins
+                                                            <i class="fa fa-edit"></i> Profit Margins
                                                         </a>
-                                                        @if($quotation->quotation_status->slug == 'approved')
-                                                            <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
-                                                                <i class="fa fa-download"></i>Quotation With Tax
-                                                            </a>
-                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
+                                                        <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
+                                                             <i class="fa fa-download"></i>Quotation With Tax
+                                                        </a>
+                                                        <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
                                                                 <i class="fa fa-download"></i>Quotation Without Tax
-                                                            </a>
+                                                        </a>
+                                                        @if($quotation->is_summary_applied == true)
                                                             <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info">
                                                                 <i class="fa fa-download"></i>Summary
                                                             </a>
@@ -228,44 +228,48 @@
 
                                                                         <input type="hidden" id="productRowCount" value="{{count($quotation->quotation_products)}}">
                                                                     </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-3 col-md-offset-9">
-                                                                            <label class="control-label" style="font-weight: bold; margin-left: 15%; font-size: 15px">
-                                                                                Subtotal:
-                                                                            </label>
-                                                                            <label class="control-label" style="font-weight: bold; margin-left: 15%; font-size: 14px" id="subtotal">
+                                                                    <div class="col-md-12">
+                                                                        <div class="row">
+                                                                            <div class="col-md-10" style="text-align: right">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
+                                                                                    Subtotal:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 14px" id="subtotal">
 
-                                                                            </label>
+                                                                                </label>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 col-md-offset-7">
-                                                                            <label class="control-label" style="font-weight: bold;float: right; margin-left: 15%; font-size: 15px">
-                                                                                Discount:
-                                                                            </label>
+                                                                        <div class="row">
+                                                                            <div class="col-md-10" style="text-align: right">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
+                                                                                    Discount:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" min="0">
+                                                                            </div>
                                                                         </div>
-                                                                        <div class="col-md-2">
-                                                                            <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" min="0">
+                                                                        <div class="row">
+                                                                            <div class="col-md-10" style="text-align: right">
+                                                                                <label class="control-label  pull-right" style="font-weight: bold; font-size: 15px">
+                                                                                    Carpet Area:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <input class="form-control" type="number" name="carpet_area" value="{{$quotation->carpet_area}}">
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-3">
-                                                                            <label class="control-label  pull-right">
-                                                                                Carpet Area:
-                                                                            </label>
-                                                                        </div>
-                                                                        <div class="col-md-3">
-                                                                            <input class="form-control" type="number" name="carpet_area" value="{{$quotation->carpet_area}}">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-3">
-                                                                            <label class="control-label  pull-right">
-                                                                                Built up area:
-                                                                            </label>
-                                                                        </div>
-                                                                        <div class="col-md-3">
-                                                                            <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
+                                                                        <div class="row">
+                                                                            <div class="col-md-10" style="text-align: right">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
+                                                                                    Built up area:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -281,10 +285,10 @@
                                                                 <div class="panel-body">
                                                                     @foreach($taxes as $tax)
                                                                         <div class="row">
-                                                                            <div class="col-md-3">
-                                                                                <label class="control-label" style="float: right;"> {{$tax['name']}}: </label>
+                                                                            <div class="col-md-11">
+                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px; float: right"> {{$tax['name']}}: </label>
                                                                             </div>
-                                                                            <div class="col-md-3">
+                                                                            <div class="col-md-1">
                                                                                 <input type="number" step="any" class="form-control" name="tax[{{$tax['id']}}]" id="Tax{{$tax['id']}}" value="{{$tax['base_percentage']}}">
                                                                             </div>
                                                                         </div>
