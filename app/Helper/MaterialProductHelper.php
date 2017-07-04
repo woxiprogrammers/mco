@@ -54,7 +54,7 @@ class MaterialProductHelper{
                 foreach($products as $product){
                     $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->select('id','product_id','rate_per_unit')->first()->toArray();
                     $productAmount = 0;
-                    if($product['product_version_id'] <= $recentProductVersion['id']){
+                    if($product['product_version_id'] == $recentProductVersion['id']){
                         $productVersionMaterials = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                                 ->join('materials','materials.id','=','material_versions.material_id')
                                 ->join('product_versions','product_versions.id','=','product_material_relation.product_version_id')
@@ -73,6 +73,7 @@ class MaterialProductHelper{
                             if(in_array($materialInfo['material_id'],$changedMaterialIds)){
                                 $materialRecentVersion = MaterialVersion::join('materials','materials.id','=','material_versions.material_id')
                                                                         ->where('material_versions.material_id',$materialInfo['material_id'])
+                                                                        ->orderBy('material_versions.created_at','desc')
                                                                         ->select('material_versions.id as id','material_versions.unit_id as unit_id','material_versions.rate_per_unit as rate_per_unit','material_versions.material_id as material_id','materials.unit_id as material_unit_id')
                                                                         ->first();
                                 $productMaterialRelationData['material_quantity'] = $materialInfo['material_quantity'];
@@ -84,12 +85,15 @@ class MaterialProductHelper{
                                 if(!is_array($rateConversion)){
                                     $productAmount = round($productAmount + ($rateConversion * $materialInfo['material_quantity']),3);
                                 }else{
+                                    Log::info('in unit cionversion else');
+                                    Log::info($rateConversion);
                                     ProductMaterialRelation::where('product_version_id',$newProductVersion->id)->delete();
                                     ProductProfitMarginRelation::where('product_version_id',$newProductVersion->id)->delete();
                                     $newProductVersion->delete();
                                     foreach($materialRecentVersions as $newMaterialVersionId){
                                         $updateMaterialId = MaterialVersion::where('id',$newMaterialVersionId)->pluck('material_id')->first();
                                         Material::where('id',$updateMaterialId)->update($oldMaterialData[$updateMaterialId]);
+                                        ProductMaterialRelation::where('material_version_id',$newMaterialVersionId)->delete();
                                         MaterialVersion::where('id',$newMaterialVersionId)->delete();
                                     }
                                     $response['slug'] = 'error';
@@ -116,23 +120,41 @@ class MaterialProductHelper{
                         $productProfitMarginRelationData =array();
                         $productProfitMarginRelationData['product_version_id'] = $newProductVersion['id'];
                         $profitMarginAmount = 0;
+                        Log::info('product id');
+                        Log::info($product['id']);
                         if($profitMargins != null){
-                            foreach($profitMargins[$product['id']] as $profitMargin){
-                                $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$profitMargin['profit_margin_id'])->orderBy('created_at','desc')->select('id','percentage')->first();
-                                if($profitMargin['percentage'] == $recentProfitMarginVersion['percentage']){
-                                    $productProfitMarginRelationData['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
-                                    $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
-                                }else{
-                                    $profitMarginVersionData = array();
-                                    $profitMarginVersionData['profit_margin_id'] = $profitMargin['profit_margin_id'];
-                                    $profitMarginVersionData['percentage'] = $profitMargin['percentage'];
-                                    $newProfitMarginVersion = ProfitMarginVersion::create($profitMarginVersionData);
-                                    $productProfitMarginRelationData['profit_margin_version_id'] = $newProfitMarginVersion['id'];
-                                    $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                            Log::info(' in profit margin if');
+                            Log::info($profitMargins);
+                            if(array_key_exists($product['id'],$profitMargins)){
+                                Log::info('in array key exists if');
+                                foreach($profitMargins[$product['id']] as $profitMargin){
+                                    $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$profitMargin['profit_margin_id'])->orderBy('created_at','desc')->select('id','percentage')->first();
+                                    if($profitMargin['percentage'] == $recentProfitMarginVersion['percentage']){
+                                        $productProfitMarginRelationData['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
+                                        $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                                    }else{
+                                        $profitMarginVersionData = array();
+                                        $profitMarginVersionData['profit_margin_id'] = $profitMargin['profit_margin_id'];
+                                        $profitMarginVersionData['percentage'] = $profitMargin['percentage'];
+                                        $newProfitMarginVersion = ProfitMarginVersion::create($profitMarginVersionData);
+                                        $productProfitMarginRelationData['profit_margin_version_id'] = $newProfitMarginVersion['id'];
+                                        $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                                    }
+                                    Log::info($productProfitMarginRelationData);
+                                    ProductProfitMarginRelation::create($productProfitMarginRelationData);
                                 }
-                                ProductProfitMarginRelation::create($productProfitMarginRelationData);
+                            }else{
+                                Log::info('in array key exists else');
+
+                                $lastRecentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->skip(1)->first();
+                                foreach($lastRecentProductVersion->profit_margin_relations as $profitMarginRelation){
+                                    $productProfitMarginRelationData['profit_margin_version_id'] = $profitMarginRelation->profit_margin_version_id;
+                                    Log::info($productProfitMarginRelationData);
+                                    ProductProfitMarginRelation::create($productProfitMarginRelationData);
+                                }
                             }
                         }else{
+                            Log::info(' in profit margin else');
                             $productProfitMargins = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
                                 ->where('product_version_id',$recentProductVersion['id'])
                                 ->select('products_profit_margins_relation.profit_margin_version_id as profit_margin_version_id','profit_margin_versions.percentage as percentage')

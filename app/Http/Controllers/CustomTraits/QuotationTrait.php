@@ -816,14 +816,16 @@ trait QuotationTrait{
                     }
                 }
                 $quotationProduct = QuotationProduct::create($quotationProductData);
+                $profitMarginAmount = 0;
                 foreach($data['profit_margins'][$productId] as $id => $percentage){
                     $quotationProfitMarginData = array();
                     $quotationProfitMarginData['profit_margin_id'] = $id;
                     $quotationProfitMarginData['percentage'] = $percentage;
                     $quotationProfitMarginData['quotation_product_id'] = $quotationProduct->id;
                     QuotationProfitMarginVersion::create($quotationProfitMarginData);
-                    $productAmount = round($productAmount + ($productAmount * ($percentage / 100)),3);
+                    $profitMarginAmount = round($profitMarginAmount + ($productAmount * ($percentage / 100)),3);
                 }
+                $productAmount = round(($productAmount + $profitMarginAmount),3);
                 if($request->has('material_rate') && $request->has('material_unit')){
                     foreach($quotation->quotation_materials as $quotationMaterial){
                         $quotationMaterial->delete();
@@ -1007,10 +1009,11 @@ trait QuotationTrait{
             }
             $profitMargins = array();
             foreach($quotation->quotation_products as $quotationProduct){
-                $profitMargins[$quotationProduct->id] = array();
+                $profitMargins[$quotationProduct->product_id] = array();
+                $iterator = 0;
                 foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
-                    $profitMargins[$quotationProduct->id]['profit_margin_id'] = $quotationProfitMargin->profit_margin_id;
-                    $profitMargins[$quotationProduct->id]['percentage'] = $quotationProfitMargin->percentage;
+                    $profitMargins[$quotationProduct->product_id][$iterator]['profit_margin_id'] = $quotationProfitMargin->profit_margin_id;
+                    $profitMargins[$quotationProduct->product_id][$iterator]['percentage'] = $quotationProfitMargin->percentage;
                 }
             }
             $updateMaterial = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($materials,$profitMargins);
