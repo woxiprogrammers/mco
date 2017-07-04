@@ -1048,19 +1048,14 @@ trait QuotationTrait{
                         $summary_amount = $summary_amount + $discounted_price;
                     }
                 }
+                $data['quotation'] = $quotation;
                 $summaryData[$i]['description'] = $summary->summary->name;
                 if(!empty($quotation['built_up_area'])){
                     $summaryData[$i]['rate_per_sft'] = round(($summary_amount / $quotation['built_up_area']),3);
                 }else{
                     $summaryData[$i]['rate_per_sft'] = 0.00;
                 }
-                if(!empty($quotation['carpet_area'])){
-                    $summaryData[$i]['rate_per_carpet'] = round(($summary_amount / $quotation['carpet_area']),3);
-                }else{
-                    $summaryData[$i]['rate_per_carpet'] = 0.00;
-                }
                 $total['rate_per_sft'] = $total['rate_per_sft'] + $summaryData[$i]['rate_per_sft'];
-                $total['rate_per_carpet'] = $total['rate_per_carpet'] + $summaryData[$i]['rate_per_carpet'];
                 $i++;
             }
 
