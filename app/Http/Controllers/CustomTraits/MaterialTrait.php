@@ -154,9 +154,9 @@ trait MaterialTrait{
     public function materialListing(Request $request){
         try{
             if($request->has('search_name')){
-                $materialData = Material::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+                $materialData = Material::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $materialData = Material::orderBy('id','asc')->get()->toArray();
+                $materialData = Material::orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($materialData);
             $records = array();

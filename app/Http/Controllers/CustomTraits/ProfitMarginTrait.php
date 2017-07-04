@@ -92,9 +92,9 @@ trait ProfitMarginTrait{
     public function profitMarginListing(Request $request){
         try{
             if($request->has('search_name')){
-                $profitMarginData = ProfitMargin::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+                $profitMarginData = ProfitMargin::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $profitMarginData = ProfitMargin::orderBy('id','asc')->get()->toArray();
+                $profitMarginData = ProfitMargin::orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($profitMarginData);
             $records = array();

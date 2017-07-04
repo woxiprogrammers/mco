@@ -42,7 +42,7 @@ trait QuotationTrait{
     public function getCreateView(Request $request){
         try{
             $clients = Client::where('is_active', true)->select('id','company')->get()->toArray();
-            $categories = Category::where('is_active', true)->select('id','name')->get()->toArray();
+            $categories = Category::orderBy('name','asc')->where('is_active', true)->select('id','name')->get()->toArray();
             return view('admin.quotation.create')->with(compact('categories','clients'));
         }catch(\Exception $e){
             $data = [
@@ -123,7 +123,7 @@ trait QuotationTrait{
         try{
             $rowIndex = $request->row_count + 1;
             $isEdit = false;
-            $categories = Category::where('is_active', true)->select('id','name')->get()->toArray();
+            $categories = Category::orderBy('name','asc')->where('is_active', true)->select('id','name')->get()->toArray();
             if($request->has('is_edit')){
                 $isEdit = true;
                 $summaries = Summary::where('is_active', true)->select('id','name')->orderBy('name','asc')->get();
@@ -333,7 +333,7 @@ trait QuotationTrait{
         try{
             $records = array();
             $records['data'] = array();
-            $quotations = Quotation::get();
+            $quotations = Quotation::orderBy('updated_at','desc')->get();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($quotations); $iterator++,$pagination++ ){
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
                     $quotationStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';

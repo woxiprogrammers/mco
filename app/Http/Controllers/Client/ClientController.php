@@ -94,7 +94,7 @@ class ClientController extends Controller
 
     public function clientListing(Request $request){
         try{
-            $clientData = Client::orderBy('id','asc')->get()->toArray();
+            $clientData = Client::orderBy('id','desc')->get()->toArray();
             $iTotalRecords = count($clientData);
             $records = array();
             $records['data'] = array();
