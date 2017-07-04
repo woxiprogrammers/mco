@@ -2,7 +2,7 @@ var ProfitMarginListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
-
+        var quotation_status = $('#quotation_status').val();
         grid.init({
             src: $("#quotationTable"),
             onSuccess: function (grid) {
@@ -24,7 +24,7 @@ var ProfitMarginListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/quotation/listing", // ajax source
+                    "url": "/quotation/listing/" + quotation_status // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -64,16 +64,36 @@ var ProfitMarginListing = function () {
     }
 
     return {
-
         //main function to initiate the module
         init: function () {
             handleOrders();
         }
-
     };
 
 }();
 
 jQuery(document).ready(function() {
-    ProfitMarginListing.init();
+        var hash = window.location.hash;
+        var s = $('<select />',{id:"quotation_status",class:"form-control", name:"quotation_status"});
+        if (hash == "#1") { //DRAFT Status
+            $('<option />', {value:1,text:'Draft'}).appendTo(s);
+            $('<option />', {value:2,text:'Approved'}).appendTo(s);
+            $('<option />', {value:3,text:'Disapproved'}).appendTo(s);
+        } else if (hash == "#3") { // DISAPPROVED STATUS
+            $('<option />', {value:3,text:'Disapproved'}).appendTo(s);
+            $('<option />', {value:2,text:'Approved'}).appendTo(s);
+            $('<option />', {value:1,text:'Draft'}).appendTo(s);
+        } else {
+            $('<option />', {value:2,text:'Approved'}).appendTo(s);
+            $('<option />', {value:1,text:'Draft'}).appendTo(s);
+            $('<option />', {value:3,text:'Disapproved'}).appendTo(s);
+        }
+        s.appendTo('#dropdownQuotation');
+
+        ProfitMarginListing.init();
+
+        $('#quotation_status').on('change',function(e) {
+            window.location.href = "#" + $('#quotation_status').val();
+            location.reload();
+        });
 });

@@ -329,11 +329,11 @@ trait QuotationTrait{
         }
     }
 
-    public function quotationListing(Request $request){
+    public function quotationListing(Request $request, $status){
         try{
             $records = array();
             $records['data'] = array();
-            $quotations = Quotation::orderBy('updated_at','desc')->get();
+            $quotations = Quotation::where('quotation_status_id','=', $status)->orderBy('updated_at','desc')->get();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($quotations); $iterator++,$pagination++ ){
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
                     $quotationStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
