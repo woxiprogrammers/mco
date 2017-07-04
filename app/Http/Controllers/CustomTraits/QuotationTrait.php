@@ -891,6 +891,8 @@ trait QuotationTrait{
             $iterator = $total = 0;
             $data['company_name'] = $quotation->project_site->project->client->company;
             foreach($quotation->quotation_products as $quotationProducts){
+                $quotationProductData[$iterator]['summary_id'] = $quotationProducts->summary_id;
+                $quotationProductData[$iterator]['summary_name'] = $quotationProducts->summary->name;
                 $quotationProductData[$iterator]['product_name'] = $quotationProducts->product->name;
                 $quotationProductData[$iterator]['category_id'] = $quotationProducts->product->category_id;
                 $quotationProductData[$iterator]['category_name'] = $quotationProducts->product->category->name;
@@ -901,9 +903,13 @@ trait QuotationTrait{
                 $total = $total + $quotationProductData[$iterator]['amount'];
                 $iterator++;
             }
+           usort($quotationProductData, function($a, $b) {
+                return $a['summary_id'] > $b['summary_id'];
+            });
             usort($quotationProductData, function($a, $b) {
                 return $a['category_id'] > $b['category_id'];
             });
+            dd($quotationProductData);
             $rounded_amount = $total;
             if($data['slug'] == 'with-tax'){
                 $taxData = array();
