@@ -17,9 +17,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
-    Route::get('/dashboard',function(){
-        return view('admin.dashboard');
-    });
+
+    Route::get('/dashboard',array('uses' => 'Admin\DashboardController@index'));
+
 
     Route::group(['prefix' => 'user'],function (){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));

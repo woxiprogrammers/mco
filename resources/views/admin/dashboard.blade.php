@@ -2,6 +2,9 @@
 @section('title','Constro')
 @include('partials.common.navbar')
 @section('content')
+
+{!! Charts::assets() !!}
+
 <div class="page-wrapper">
     <div class="page-wrapper-row full-height">
 <!-- BEGIN CONTAINER -->
@@ -27,6 +30,32 @@
                 <!-- END PAGE BREADCRUMBS -->
                 <!-- BEGIN PAGE CONTENT INNER -->
                 <div class="page-content-inner">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {!! $quotationStatus->render() !!}
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    &nbsp;
+                                </div>
+                                <div class="col-md-3" style="background: #8fdf82;font-weight: bold;text-align: center;color: #ffffff">
+                                    <span>Total Category : {{$totalCategory}}</span>
+                                </div>
+                                <div class="col-md-3" style="background: #00b3ee;font-weight: bold;text-align: center;color: #ffffff">
+                                    <span>Total Materials : {{$totalMaterials}}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    &nbsp;
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    {!! $categorywiseMaterialCount->render() !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>

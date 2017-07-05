@@ -35,7 +35,7 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/quotation/manage">Manage Quotations</a>
+                                    <a href="/quotation/manage/state#2">Manage Quotations</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                                 <li>
