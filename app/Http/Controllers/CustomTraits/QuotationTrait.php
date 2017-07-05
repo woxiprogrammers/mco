@@ -885,14 +885,16 @@ trait QuotationTrait{
 
     public function generateQuotationPdf(Request $request,$quotation,$slug){
         try{
-            $data = array();
+            $data = $array = array();
             $data['slug'] = $slug;
             $quotationProductData = array();
-            $iterator = $total = 0;
+            $iterator = $total = $i = 0;
             $data['company_name'] = $quotation->project_site->project->client->company;
+            $distinct_summaryIds = QuotationProduct::where('quotation_id',$quotation->id)->distinct('summary_id')->select('summary_id')->get();
+            //dd($distinct_summaryId);
+
             foreach($quotation->quotation_products as $quotationProducts){
                 $quotationProductData[$iterator]['summary_id'] = $quotationProducts->summary_id;
-                $quotationProductData[$iterator]['summary_name'] = $quotationProducts->summary->name;
                 $quotationProductData[$iterator]['product_name'] = $quotationProducts->product->name;
                 $quotationProductData[$iterator]['category_id'] = $quotationProducts->product->category_id;
                 $quotationProductData[$iterator]['category_name'] = $quotationProducts->product->category->name;
@@ -903,13 +905,20 @@ trait QuotationTrait{
                 $total = $total + $quotationProductData[$iterator]['amount'];
                 $iterator++;
             }
-           usort($quotationProductData, function($a, $b) {
-                return $a['summary_id'] > $b['summary_id'];
-            });
+            foreach($distinct_summaryIds as $key => $distinct_summary_id){
+                $i = 0;
+                $array[$distinct_summary_id['summary_id']]['summary_name'] = Summary::where('id',$distinct_summary_id['summary_id'])->pluck('name')->first();
+                foreach($quotationProductData as $k => $productData){
+                    if($distinct_summary_id['summary_id'] == $productData['summary_id']){
+                        $array[$distinct_summary_id['summary_id']][$i] = $productData;
+                            $i++;
+                    }
+                }
+            }
+            dd($array);
             usort($quotationProductData, function($a, $b) {
                 return $a['category_id'] > $b['category_id'];
             });
-            dd($quotationProductData);
             $rounded_amount = $total;
             if($data['slug'] == 'with-tax'){
                 $taxData = array();
