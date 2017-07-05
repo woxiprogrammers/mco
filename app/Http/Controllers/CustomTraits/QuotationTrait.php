@@ -885,14 +885,12 @@ trait QuotationTrait{
 
     public function generateQuotationPdf(Request $request,$quotation,$slug){
         try{
-            $data = $array = array();
+            $data = $summary_data = array();
             $data['slug'] = $slug;
             $quotationProductData = array();
-            $iterator = $total = $i = 0;
+            $iterator = $total = $j =0;
             $data['company_name'] = $quotation->project_site->project->client->company;
             $distinct_summaryIds = QuotationProduct::where('quotation_id',$quotation->id)->distinct('summary_id')->select('summary_id')->get();
-            //dd($distinct_summaryId);
-
             foreach($quotation->quotation_products as $quotationProducts){
                 $quotationProductData[$iterator]['summary_id'] = $quotationProducts->summary_id;
                 $quotationProductData[$iterator]['product_name'] = $quotationProducts->product->name;
@@ -905,20 +903,24 @@ trait QuotationTrait{
                 $total = $total + $quotationProductData[$iterator]['amount'];
                 $iterator++;
             }
-            foreach($distinct_summaryIds as $key => $distinct_summary_id){
-                $i = 0;
-                $array[$distinct_summary_id['summary_id']]['summary_name'] = Summary::where('id',$distinct_summary_id['summary_id'])->pluck('name')->first();
-                foreach($quotationProductData as $k => $productData){
-                    if($distinct_summary_id['summary_id'] == $productData['summary_id']){
-                        $array[$distinct_summary_id['summary_id']][$i] = $productData;
-                            $i++;
-                    }
-                }
-            }
-            dd($array);
             usort($quotationProductData, function($a, $b) {
                 return $a['category_id'] > $b['category_id'];
             });
+            foreach($distinct_summaryIds as $key => $distinct_summary_id){
+                $summary_data[$j]['summary_amount'] = $amount = $i = 0;
+                $summary_data[$j]['summary_id'] = $distinct_summary_id['summary_id'];
+                $summary_data[$j]['summary_name'] = Summary::where('id',$distinct_summary_id['summary_id'])->pluck('name')->first();
+                foreach($quotationProductData as $k => $productData){
+                    if($distinct_summary_id['summary_id'] == $productData['summary_id']){
+                        $summary_data[$j]['products'][$i] = $productData;
+                        $amount = $amount +  $productData['amount'];
+                        $i++;
+                    }
+                }
+                $summary_data[$j]['summary_amount'] = $summary_data[$j]['summary_amount'] + $amount;
+                    $j++;
+            }
+            $data['summary_data'] = $summary_data;
             $rounded_amount = $total;
             if($data['slug'] == 'with-tax'){
                 $taxData = array();

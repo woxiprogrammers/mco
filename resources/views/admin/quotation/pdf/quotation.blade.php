@@ -37,16 +37,38 @@
                     <tr style="text-align: center">
                         <th style="width: 5%; "><b>Sr.no</b></th>
                         <th style="width: 25%"><b>Description</b></th>
-                        <th style="width: 20%"><b>Qty</b></th>
+                        <th style="width: 15%"><b>Qty</b></th>
                         <th style="width: 10%"><b>Unit</b></th>
                         <th style="width: 15%"><b>Rate</b></th>
-                        <th style="width: 15%"><b>Amt</b></th>
+                        <th style="width: 20%"><b>Amt</b></th>
                     </tr>
                     <?php $i = 1 ?>
-                    @for($iterator = 0 ; $iterator < count($quotationProductData) ; $iterator++)
-                        @if($iterator == 0)
+                    @for($j = 0 ; $j < count($summary_data) ; $j++)
+                        <tr>
+                            <td colspan="5" style="text-align: center;background-color: #c2c2c2;"><b>{{$summary_data[$j]['summary_name']}}</b></td>
+                            <td style="text-align: center;background-color: #c2c2c2;"><b>{{$summary_data[$j]['summary_amount']}}</b></td>
+                        </tr>
+                        @for($iterator = 0 ; $iterator < count($summary_data[$j]['products']) ; $iterator++)
+                            @if($iterator == 0)
                             <tr>
-                                <td colspan="2" style="text-align: center;background-color: #c2c2c2;"><b>{{$quotationProductData[$iterator]['category_name']}}</b></td>
+                                <td colspan="2" style="text-align: center;background-color: #c2c2c2;"><b>{{$summary_data[$j]['products'][$iterator]['category_name']}}</b></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center">1</td>
+                                <td style="text-align: left;">{{$summary_data[$j]['products'][$iterator]['product_name']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['quantity']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['unit']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['rate']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['amount']}}</td>
+                            </tr>
+                            @elseif($summary_data[$j]['products'][$iterator]['category_id'] != $summary_data[$j]['products'][$iterator-1]['category_id'])
+                            <?php $i = 1 ?>
+                            <tr>
+                                <td colspan="2" style="text-align: center;background-color: #c2c2c2;"><b>{{$summary_data[$j]['products'][$iterator]['category_name']}}</b></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -54,55 +76,40 @@
                             </tr>
                             <tr>
                                 <td style="text-align: center">{!! $i !!}</td>
-                                <td style="text-align: left; padding-left: 10px">{{$quotationProductData[$iterator]['product_name']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['quantity']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['unit']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['rate']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['amount']}}</td>
+                                <td style="text-align: left;">{{$summary_data[$j]['products'][$iterator]['product_name']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['quantity']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['unit']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['rate']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['amount']}}</td>
                             </tr>
-                        @elseif($quotationProductData[$iterator]['category_id'] != $quotationProductData[$iterator-1]['category_id'])
-                            <tr>
-                                <td colspan="2" style="text-align: center;background-color: #c2c2c2;"><b>{{$quotationProductData[$iterator]['category_name']}}</b></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
+                            @else
+                            <?php $i++; ?>
                             <tr>
                                 <td style="text-align: center">{!! $i !!}</td>
-                                <td style="text-align: left; padding-left: 10px">{{$quotationProductData[$iterator]['product_name']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['quantity']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['unit']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['rate']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['amount']}}</td>
+                                <td style="text-align: left;">{{$summary_data[$j]['products'][$iterator]['product_name']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['quantity']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['unit']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['rate']}}</td>
+                                <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['amount']}}</td>
                             </tr>
-                        @else
-                    <?php $i++; ?>
-                            <tr>
-                                <td style="text-align: center">{!! $i !!}</td>
-                                <td style="text-align: left; padding-left: 10px">{{$quotationProductData[$iterator]['product_name']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['quantity']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['unit']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['rate']}}</td>
-                                <td style="text-align: right; padding-right: 10px">{{$quotationProductData[$iterator]['amount']}}</td>
-                            </tr>
-                    @endif
+                            @endif
+                        @endfor
                     @endfor
                     <tr>
-                        <td colspan="5" style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">Total </td>
-                        <td style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">{!! $total !!}</td>
+                        <td colspan="5" style="text-align: right;background-color: #c2c2c2 ">Total </td>
+                        <td style="text-align: right;background-color: #c2c2c2 ">{!! $total !!}</td>
                     </tr>
                     @if($slug == 'with-tax')
                         @for($iterator = 0; $iterator < count($taxData) ; $iterator++)
                             <tr>
-                                <td colspan="5" style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
-                                <td style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
+                                <td colspan="5" style="text-align: right;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
+                                <td style="text-align: right;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
                             </tr>
                         @endfor
                     @endif
                     <tr>
-                        <td colspan="5" style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">Final Total</td>
-                        <td style="text-align: right; padding-right:10px;background-color: #c2c2c2 ">{!! $rounded_total !!}</td>
+                        <td colspan="5" style="text-align: right;background-color: #c2c2c2 ">Final Total</td>
+                        <td style="text-align: right;background-color: #c2c2c2 ">{!! $rounded_total !!}</td>
                     </tr>
                     <tr>
                         <td colspan="6" style="background-color: #c2c2c2"><b><i>Rs. {!! $amount_in_words !!}.</i></b></td>
@@ -112,13 +119,12 @@
             <br>
             <table style="font-size:15px" width="100%" border="1">
                 <tr>
-                    <th width="65%" colspan="2" style="background-color: #c2c2c2; padding-left: 10px"><b>For {!! ucwords($company_name) !!}</b></th>
-                    <th width="35%" style="background-color: #c2c2c2; text-align: right; padding-right: 10px"><b>For Manisha Construction</b></th>
+                    <th width="50%" style="background-color: #c2c2c2;"><b>For {!! ucwords($company_name) !!}</b></th>
+                    <th width="50%" style="background-color: #c2c2c2; text-align: right;"><b>For Manisha Construction</b></th>
                 </tr>
                 <tr >
-                    <td width="32.5%" style="padding-top: 80px"><b>Head-Engineering</b></td>
-                    <td width="32.5%" style="padding-top: 80px; text-align: center"><b>Authorised signatory</b></td>
-                    <td width="32.5%" style="padding-top: 80px; text-align: right; padding-right:10px "><b>Suresh Vaghela</b></td>
+                    <td width="50%" style="padding-top: 80px; text-align: center"><b>Authorised signatory</b></td>
+                    <td width="50%" style="padding-top: 80px; text-align: right;"><b>Suresh Vaghela</b></td>
                 </tr>
             </table>
             <table>
