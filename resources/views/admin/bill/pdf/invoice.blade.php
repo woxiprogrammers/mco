@@ -49,7 +49,7 @@
         </table>
         <hr>
         <div>
-            <table border="1" width="100%">
+            <table border="1" width="100%" style="font-size: 14px;">
                 <tr>
                     <th style="width: 12%; text-align: center"><b>Sr no.</b></th>
                     <th style="width: 40%; text-align: center"><b>Description of item</b></th>
@@ -68,7 +68,7 @@
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
                     </tr>
                 @endfor
-                @for($i = 0 ; $i < (15 - count($invoiceData)) ; $i++)
+                @for($i = 0 ; $i < (12 - count($invoiceData)) ; $i++)
                     <tr>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
@@ -79,7 +79,7 @@
                     </tr>
                 @endfor
                 <tr>
-                    <td colspan="5" style="text-align: center; width: 650px"><b>Total</b></td>
+                    <td colspan="5" style="text-align: right; width: 650px"><b>Total</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
                 </tr>
                 @for($iterator = 0 ; $iterator < count($taxData) ; $iterator++)
@@ -89,7 +89,7 @@
                     </tr>
                 @endfor
                 <tr>
-                    <td colspan="5" style="text-align: center; padding-right: 10px;"><b>Gross Total</b></td>
+                    <td colspan="5" style="text-align: right; padding-right: 10px;"><b>Gross Total</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $grossTotal !!}</td>
                 </tr>
                 <tr>
@@ -98,12 +98,15 @@
             </table>
         </div>
         <br>
-        <table style="font-size:15px ; padding-left:500px">
+        <table style="font-size:15px" width="100%" border="1">
             <tr>
-                <td>For Manisha Construction</td>
+                <th width="65%" colspan="2" style="background-color: #c2c2c2;"><b>For {!! ucwords($company_name) !!}</b></th>
+                <th width="35%" style="background-color: #c2c2c2; text-align: right;"><b>For Manisha Construction</b></th>
             </tr>
-            <tr>
-                <td style="padding-top: 30px">Authorised Signatory</td>
+            <tr >
+                <td width="32.5%" style="padding-top: 60px; text-align: right"><b>Head-Engineering</b></td>
+                <td width="32.5%" style="padding-top: 60px; text-align: right"><b>Authorised Signatory</b></td>
+                <td width="32.5%" style="padding-top: 60px; text-align: right;"><b>Authorised Signatory</b></td>
             </tr>
         </table>
 </body>

@@ -415,6 +415,7 @@ trait BillTrait{
             $data = array();
             $invoiceData = $taxData = array();
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
+            $data['company_name'] = $bill->quotation->project_site->project->client->company;
             $data['billData'] = $bill;
             $data['currentBillID'] = 1;
             foreach($allBillIds as $key => $billId){
