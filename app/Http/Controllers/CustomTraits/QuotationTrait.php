@@ -145,6 +145,7 @@ trait QuotationTrait{
         try{
             $productIds = $request->productIds;
             $materialIds = array();
+            Log::info($request->all());
             $units = Unit::where('is_active', true)->orderBy('name','asc')->get()->toArray();
             if($request->clientSuppliedMaterial == null){
                 $clientSuppliedMaterial = array();
@@ -160,18 +161,26 @@ trait QuotationTrait{
                                 ->toArray();
                 $materialIds = array_unique(array_merge($materialIds,$materialId));
             }
+            Log::info($materialIds);
             if($request->has('quotation_id')){
-                $quotationMaterialIds = QuotationMaterial::where('quotation_id',$request->quotation_id)->pluck('material_id')->toArray();
+                $quotationMaterialIds = QuotationMaterial::where('quotation_id',$request->quotation_id)->whereIn('material_id',$materialIds)->pluck('material_id')->toArray();
+                Log::info($quotationMaterialIds);
                 if($request->has('material_rate')){
                     $iterator = 0;
                     $materials = array();
                     foreach($request->material_rate as $materialId => $materialRate){
-                        $materials[$iterator]['id'] = $materialId;
-                        $materials[$iterator]['name'] = Material::where('id',$materialId)->pluck('name')->first();
-                        $materials[$iterator]['rate_per_unit'] = $materialRate;
-                        $materials[$iterator]['unit_id'] = $request->material_unit[$materialId];
-                        $materials[$iterator]['unit'] = Unit::where('id',$request->material_unit[$materialId]);
-                        $iterator++;
+                        if(in_array($materialId,$quotationMaterialIds)){
+                            $materials[$iterator]['id'] = $materialId;
+                            $materials[$iterator]['name'] = Material::where('id',$materialId)->pluck('name')->first();
+                            $materials[$iterator]['rate_per_unit'] = $materialRate;
+                            $materials[$iterator]['unit_id'] = $request->material_unit[$materialId];
+                            $materials[$iterator]['unit'] = Unit::where('id',$request->material_unit[$materialId]);
+                            $iterator++;
+                        }
+                    }
+                    if(count(array_diff($quotationMaterialIds,array_keys($request->material_rate))) > 0){
+                        $newMaterials = array_diff($quotationMaterialIds,array_keys($request->material_rate));
+
                     }
                 }else{
                     $materials = QuotationMaterial::join('materials','materials.id','=','quotation_materials.material_id')
@@ -181,6 +190,7 @@ trait QuotationTrait{
                         ->select('materials.id as id','materials.name as name','quotation_materials.rate_per_unit as rate_per_unit','quotation_materials.unit_id as unit_id','units.name as unit','quotation_materials.is_client_supplied as is_client_supplied')
                         ->get()
                         ->toArray();
+                    Log::info($materials);
                 }
                 $newMaterialIds = array_diff($materialIds,$quotationMaterialIds);
                 if(count($newMaterialIds) > 0){
@@ -794,7 +804,7 @@ trait QuotationTrait{
                             $quotationMaterialData['material_id'] = $material['id'];
                             $quotationMaterialData['rate_per_unit'] = $material['material_rate_per_unit'];
                             $quotationMaterialData['unit_id'] = $material['material_unit_id'];
-                            if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
+                            if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($material['id'],$data['clientSuppliedMaterial'])){
                                 $quotationMaterialData['is_client_supplied'] = true;
                             }else{
                                 $quotationMaterialData['is_client_supplied'] = false;
