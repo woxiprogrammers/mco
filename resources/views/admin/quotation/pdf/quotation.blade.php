@@ -30,6 +30,7 @@
                 <tr>
                     <td style="background-color: #c2c2c2">BILL OF QUANTITIES</td>
                 </tr>
+                <tr><td>(SLAB AREA CONSIDERED = <b>{!! $quotation['built_up_area'] !!} SQFT</b>)</td></tr>
             </table>
             <br>
             <div>
@@ -41,17 +42,19 @@
                         <th style="width: 10%"><b>Unit</b></th>
                         <th style="width: 15%"><b>Rate</b></th>
                         <th style="width: 20%"><b>Amt</b></th>
+                        <th style="width: 20%"><b>Rate/SFT</b></th>
                     </tr>
                     <?php $i = 1 ?>
                     @for($j = 0 ; $j < count($summary_data) ; $j++)
                         <tr>
-                            <td colspan="5" style="text-align: center;background-color: #c2c2c2;"><b>{{$summary_data[$j]['summary_name']}}</b></td>
-                            <td style="text-align: center;background-color: #c2c2c2;"><b>{{$summary_data[$j]['summary_amount']}}</b></td>
+                            <td colspan="7" style="text-align: left;background-color: #e2e2e2;"><b>{{$summary_data[$j]['summary_name']}}</b></td>
+
                         </tr>
                         @for($iterator = 0 ; $iterator < count($summary_data[$j]['products']) ; $iterator++)
                             @if($iterator == 0)
                             <tr>
-                                <td colspan="2" style="text-align: center;background-color: #c2c2c2;"><b>{{$summary_data[$j]['products'][$iterator]['category_name']}}</b></td>
+                                <td colspan="2" style="text-align: center;"><b>{{$summary_data[$j]['products'][$iterator]['category_name']}}</b></td>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -64,11 +67,13 @@
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['unit']}}</td>
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['rate']}}</td>
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['amount']}}</td>
+                                <td></td>
                             </tr>
                             @elseif($summary_data[$j]['products'][$iterator]['category_id'] != $summary_data[$j]['products'][$iterator-1]['category_id'])
                             <?php $i = 1 ?>
                             <tr>
-                                <td colspan="2" style="text-align: center;background-color: #c2c2c2;"><b>{{$summary_data[$j]['products'][$iterator]['category_name']}}</b></td>
+                                <td colspan="2" style="text-align: center;"><b>{{$summary_data[$j]['products'][$iterator]['category_name']}}</b></td>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -81,6 +86,7 @@
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['unit']}}</td>
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['rate']}}</td>
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['amount']}}</td>
+                                <td></td>
                             </tr>
                             @else
                             <?php $i++; ?>
@@ -91,28 +97,34 @@
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['unit']}}</td>
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['rate']}}</td>
                                 <td style="text-align: right;">{{$summary_data[$j]['products'][$iterator]['amount']}}</td>
+                                <td></td>
                             </tr>
                             @endif
                         @endfor
+                    <tr>
+                        <td colspan="5" style="text-align: right;"><b>Total Amount</b></td>
+                        <td style="text-align: right;"><b>{{$summary_data[$j]['summary_amount']}}</b></td>
+                        <td style="text-align: right;"><b>{!! round(($summary_data[$j]['summary_amount']/$quotation['built_up_area']),3) !!}</b></td>
+                    </tr>
                     @endfor
                     <tr>
-                        <td colspan="5" style="text-align: right;background-color: #c2c2c2 ">Total </td>
-                        <td style="text-align: right;background-color: #c2c2c2 ">{!! $total !!}</td>
+                        <td colspan="6" style="text-align: right;background-color: #d2d2d2 "><b>Sub Total </b></td>
+                        <td style="text-align: right;background-color: #d2d2d2 "><b>{!! $total !!}</b></td>
                     </tr>
                     @if($slug == 'with-tax')
                         @for($iterator = 0; $iterator < count($taxData) ; $iterator++)
                             <tr>
-                                <td colspan="5" style="text-align: right;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
+                                <td colspan="6" style="text-align: right;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
                                 <td style="text-align: right;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
                             </tr>
                         @endfor
                     @endif
                     <tr>
-                        <td colspan="5" style="text-align: right;background-color: #c2c2c2 ">Final Total</td>
-                        <td style="text-align: right;background-color: #c2c2c2 ">{!! $rounded_total !!}</td>
+                        <td colspan="6" style="text-align: right;background-color: #d2d2d2 "><b>Final Total</b></td>
+                        <td style="text-align: right;background-color: #d2d2d2 "><b>{!! $rounded_total !!}</b></td>
                     </tr>
                     <tr>
-                        <td colspan="6" style="background-color: #c2c2c2"><b><i>Rs. {!! $amount_in_words !!}.</i></b></td>
+                        <td colspan="7" style="background-color: #e2e2e2;font-size: 13px"><b><i>Rs. {!! $amount_in_words !!}.</i></b></td>
                     </tr>
                 </table>
             </div>
@@ -123,8 +135,8 @@
                     <th width="50%" style="background-color: #c2c2c2; text-align: right;"><b>For Manisha Construction</b></th>
                 </tr>
                 <tr >
-                    <td width="50%" style="padding-top: 80px; text-align: center"><b>Authorised signatory</b></td>
-                    <td width="50%" style="padding-top: 80px; text-align: right;"><b>Suresh Vaghela</b></td>
+                    <td width="50%" style="padding-top: 80px; text-align: right"><b>Authorised Signatory</b></td>
+                    <td width="50%" style="padding-top: 80px; text-align: right;"><b>Authorised Signatory</b></td>
                 </tr>
             </table>
             <table>

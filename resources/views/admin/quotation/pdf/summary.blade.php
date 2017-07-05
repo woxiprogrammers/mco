@@ -43,7 +43,7 @@
             <td colspan="3"><b>SUMMARY</b></td>
         </tr>
         <tr style="text-align: center">
-            <td colspan="3"><b>(SLAB AREA CONSIDERED FOR RCC = {!! $quotation['built_up_area'] !!} SQFT)</b></td>
+            <td colspan="3"><b>(SLAB AREA CONSIDERED = {!! $quotation['built_up_area'] !!} SQFT)</b></td>
         </tr>
         <tr style="text-align: center">
             <td style="width: 10%; "><b>Sr.no</b></td>
@@ -57,17 +57,24 @@
             <td style="text-align: center">{!! $summaryData[$iterator]['rate_per_sft'] !!}</td>
         </tr>
         @endfor
+        @for($iterator = 0 ; $iterator < (18 - count($summaryData)) ; $iterator++)
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+        @endfor
         <tr>
             <td></td>
-            <td style="text-align: center"><b>TOTAL RATE PER Sft. BUILTUP AREA</b></td>
-            <td style="text-align: center">{!! $total['rate_per_sft'] !!} </td>
+            <td style="text-align: center"><b>TOTAL RATE PER Sqft. BUILTUP AREA</b></td>
+            <td style="text-align: center"><b>{!! $total['rate_per_sft'] !!}</b> </td>
         </tr>
     </table>
 </div>
 <br>
 <br>
 
-<div style="font-size: 12px;">
+<div style="font-size: 14px;">
     <p><u>Note :-</u></p>
     <ul>
         <li>We have assumed 3.7kg of steel per B/UP area and concrete 0.035cu.m per B/UP area</li>

@@ -68,6 +68,20 @@
                         <td style="text-align: center;">{!! $invoiceData[$iterator]['cumulative_bill_amount'] !!}</td>
                     </tr>
                     @endfor
+                    @for($iterator = 0 ; $iterator < (14 - count($invoiceData)) ; $iterator++)
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    @endfor
                     <tr>
                         <td colspan="2" style="text-align: center;"><b>Total</b></td>
                         <td style="text-align: center;">{!! $total['previous_quantity'] !!}</td>

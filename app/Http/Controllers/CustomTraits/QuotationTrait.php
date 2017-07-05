@@ -886,6 +886,7 @@ trait QuotationTrait{
     public function generateQuotationPdf(Request $request,$quotation,$slug){
         try{
             $data = $summary_data = array();
+            $data['quotation'] = $quotation;
             $data['slug'] = $slug;
             $quotationProductData = array();
             $iterator = $total = $j =0;
