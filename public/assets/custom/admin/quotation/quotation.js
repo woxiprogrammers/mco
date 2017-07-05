@@ -186,7 +186,7 @@ function backToGeneral(){
         data: formData,
         success: function(data,textStatus,xhr){
             if(xhr.status == 201){
-                alert(data.message);
+                location.reload();
             }
             $.each(data.amount, function(id,value){
                 $("input[name='product_rate["+id+"]']").val(value);
@@ -272,6 +272,7 @@ function getProductDetails(product_id,rowNumber){
             var url = window.location.href;
             if(url.indexOf('edit') > 0){
                 $("#productSummary"+rowNumber).attr('name','product_summary['+data.id+']');
+                $("#productDiscountAmount"+rowNumber).attr('name','product_discount_amount['+data.id+']');
             }
             calculateAmount(rowNumber);
         },

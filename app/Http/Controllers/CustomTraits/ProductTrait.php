@@ -327,29 +327,27 @@ trait ProductTrait{
             $productMaterialProfitMarginData = array();
             $iterator = 0;
             $subTotal = 0;
-            foreach($data['material_version'] as $key => $materialVersion){
-                $recentVersion = MaterialVersion::where('id',$key)->select('rate_per_unit','unit_id')->first();
-                $subTotal += round($materialVersion['rate_per_unit']*$data['material_quantity'][$key],3);
-                $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
+            foreach($data['material'] as $key => $materialVersion){
+                $material = Material::findOrFail($key);
+                $toUnit = $materialVersion['unit_id'];
+                $fromUnit = $material->unit_id;
+                if($fromUnit != $toUnit){
+                    $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
+                    Material::where('id',$key)->update(['rate_per_unit' => round($conversionRate,3)]);
+                }else{
+                    Material::where('id',$key)->update(['rate_per_unit' => round($materialVersion['rate_per_unit'],3)]);
+                }
+                $recentVersion = MaterialVersion::where('id',$materialVersion['material_version_id'])->select('rate_per_unit','unit_id')->first();
+                $subTotal += round($materialVersion['rate_per_unit'] * $materialVersion['quantity'],3);
+                $productMaterialProfitMarginData[$iterator]['material_quantity'] = $materialVersion['quantity'];
                 if($materialVersion != $recentVersion){
-                    $materialVersion['material_id'] = MaterialVersion::where('id',$key)->pluck('material_id')->first();
+                    $materialVersion['material_id'] = $key;
                     $newVersion = MaterialVersion::create($materialVersion);
                     $productMaterialProfitMarginData[$iterator]['material_version_id'] = $newVersion->id;
                 }else{
                     $productMaterialProfitMarginData[$iterator]['material_version_id'] = $key;
                 }
                 $iterator++;
-                $material = Material::findOrFail(MaterialVersion::where('id',$key)->pluck('material_id')->first());
-                $fromUnit = $materialVersion['unit_id'];
-                $toUnit = $material->unit_id;
-                if($fromUnit != $toUnit){
-                    $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
-                    if(!(is_array($conversionRate))){
-                        Material::where('id',$key)->update(['rate_per_unit' => round($conversionRate,3)]);
-                    }
-                }else{
-                    Material::where('id',$key)->update(['rate_per_unit' => round($materialVersion['rate_per_unit'],3)]);
-                }
             }
             $iterator = 0;
             $taxAmount = 0;
