@@ -415,6 +415,7 @@ trait BillTrait{
             $data = array();
             $invoiceData = $taxData = array();
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
+            $data['billData'] = $bill;
             $data['currentBillID'] = 1;
             foreach($allBillIds as $key => $billId){
                  if($billId == $bill['id']){
@@ -474,7 +475,7 @@ trait BillTrait{
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<=',$bill['id'])->pluck('id');
             foreach($allBillIds as $key => $billId){
                 if($billId == $bill['id']){
-                    $data['currentBillID'] = $key;
+                    $data['currentBillID'] = $key+1;
                     break;
                 }
             }

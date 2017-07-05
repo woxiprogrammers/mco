@@ -37,6 +37,9 @@
             <tr>
                 <td><b>Bill No : RA BILL NO - {!! $currentBillID !!}</b></td>
             </tr>
+            <tr>
+                <td><b>Quotation No : {!! $billData['quotation_id'] !!}</b></td>
+            </tr>
         </table>
         <hr>
         <table width="100%">
@@ -58,7 +61,7 @@
                 @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
                     <tr>
                         <td style="text-align: center;">{!! $iterator+1 !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['product_name'] !!} - {!! $invoiceData[$iterator]['description'] !!}</td>
+                        <td style="text-align: center;">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!} @endif</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['quantity'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['unit'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['rate'] !!}</td>
@@ -67,12 +70,12 @@
                 @endfor
                 @for($i = 0 ; $i < (15 - count($invoiceData)) ; $i++)
                     <tr>
-                        <td style="height: 2.7%"></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
                     </tr>
                 @endfor
                 <tr>
