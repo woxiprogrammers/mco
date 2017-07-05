@@ -138,7 +138,7 @@
                     </li>
 
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a href="/quotation/manage"> Quotations
+                        <a href="/quotation/manage/status#2"> Quotations
                             <span class="arrow"></span>
                         </a>
                     </li>

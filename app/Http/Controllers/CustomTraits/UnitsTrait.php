@@ -108,9 +108,9 @@ trait UnitsTrait{
     public function unitsListing(Request $request){
         try{
             if($request->has('search_name')){
-                $unitData = Unit::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+                $unitData = Unit::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $unitData = Unit::orderBy('id','asc')->get()->toArray();
+                $unitData = Unit::orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($unitData);
             $records = array();
