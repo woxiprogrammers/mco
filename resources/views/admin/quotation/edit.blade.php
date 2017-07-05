@@ -264,7 +264,7 @@
                                                                         <div class="row">
                                                                             <div class="col-md-10" style="text-align: right">
                                                                                 <label class="control-label" style="font-weight: bold; font-size: 15px">
-                                                                                    Built up area:
+                                                                                    Slab area:
                                                                                 </label>
                                                                             </div>
                                                                             <div class="col-md-2">
