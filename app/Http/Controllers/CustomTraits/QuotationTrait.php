@@ -899,12 +899,15 @@ trait QuotationTrait{
 
     public function generateQuotationPdf(Request $request,$quotation,$slug){
         try{
-            $data = array();
+            $data = $summary_data = array();
+            $data['quotation'] = $quotation;
             $data['slug'] = $slug;
             $quotationProductData = array();
-            $iterator = $total = 0;
+            $iterator = $total = $j =0;
             $data['company_name'] = $quotation->project_site->project->client->company;
+            $distinct_summaryIds = QuotationProduct::where('quotation_id',$quotation->id)->distinct('summary_id')->select('summary_id')->get();
             foreach($quotation->quotation_products as $quotationProducts){
+                $quotationProductData[$iterator]['summary_id'] = $quotationProducts->summary_id;
                 $quotationProductData[$iterator]['product_name'] = $quotationProducts->product->name;
                 $quotationProductData[$iterator]['category_id'] = $quotationProducts->product->category_id;
                 $quotationProductData[$iterator]['category_name'] = $quotationProducts->product->category->name;
@@ -918,6 +921,21 @@ trait QuotationTrait{
             usort($quotationProductData, function($a, $b) {
                 return $a['category_id'] > $b['category_id'];
             });
+            foreach($distinct_summaryIds as $key => $distinct_summary_id){
+                $summary_data[$j]['summary_amount'] = $amount = $i = 0;
+                $summary_data[$j]['summary_id'] = $distinct_summary_id['summary_id'];
+                $summary_data[$j]['summary_name'] = Summary::where('id',$distinct_summary_id['summary_id'])->pluck('name')->first();
+                foreach($quotationProductData as $k => $productData){
+                    if($distinct_summary_id['summary_id'] == $productData['summary_id']){
+                        $summary_data[$j]['products'][$i] = $productData;
+                        $amount = $amount +  $productData['amount'];
+                        $i++;
+                    }
+                }
+                $summary_data[$j]['summary_amount'] = $summary_data[$j]['summary_amount'] + $amount;
+                    $j++;
+            }
+            $data['summary_data'] = $summary_data;
             $rounded_amount = $total;
             if($data['slug'] == 'with-tax'){
                 $taxData = array();
@@ -1064,19 +1082,14 @@ trait QuotationTrait{
                         $summary_amount = $summary_amount + $discounted_price;
                     }
                 }
+                $data['quotation'] = $quotation;
                 $summaryData[$i]['description'] = $summary->summary->name;
                 if(!empty($quotation['built_up_area'])){
                     $summaryData[$i]['rate_per_sft'] = round(($summary_amount / $quotation['built_up_area']),3);
                 }else{
                     $summaryData[$i]['rate_per_sft'] = 0.00;
                 }
-                if(!empty($quotation['carpet_area'])){
-                    $summaryData[$i]['rate_per_carpet'] = round(($summary_amount / $quotation['carpet_area']),3);
-                }else{
-                    $summaryData[$i]['rate_per_carpet'] = 0.00;
-                }
                 $total['rate_per_sft'] = $total['rate_per_sft'] + $summaryData[$i]['rate_per_sft'];
-                $total['rate_per_carpet'] = $total['rate_per_carpet'] + $summaryData[$i]['rate_per_carpet'];
                 $i++;
             }
 

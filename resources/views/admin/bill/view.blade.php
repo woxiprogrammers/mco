@@ -34,6 +34,10 @@
                                     <a href="javascript:void(0);">View Bill</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
+                                <li>
+                                    <a href="/bill/create/{{$bill->quotation->project_site_id}}">Create Bill</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
                             </ul>
                             <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
