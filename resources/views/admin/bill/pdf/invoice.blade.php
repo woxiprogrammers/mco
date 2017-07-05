@@ -28,8 +28,8 @@
         <hr>
         <table>
             <tr>
-                <td><b>To : {!! $clientCompany !!} </b></td>
-                <td style="padding-left: 360px; font-size: 15px"> <i>DATE : {!! $billDate !!}</i> </td>
+                <td style="width: 600px"><b>To : {!! $clientCompany !!} </b></td>
+                <td style=" font-size: 15px"> <i>DATE : {!! $billDate !!}</i> </td>
             </tr>
             <tr>
                 <td><b>Site Name : {!! $projectSiteName !!}</b></td>
@@ -65,8 +65,18 @@
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
                     </tr>
                 @endfor
+                @for($i = 0 ; $i < (15 - count($invoiceData)) ; $i++)
+                    <tr>
+                        <td style="height: 2.7%"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                @endfor
                 <tr>
-                    <td colspan="5" style="text-align: center; padding-right: 10px;"><b>Total</b></td>
+                    <td colspan="5" style="text-align: center; width: 650px"><b>Total</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
                 </tr>
                 @for($iterator = 0 ; $iterator < count($taxData) ; $iterator++)

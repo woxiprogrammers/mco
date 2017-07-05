@@ -70,11 +70,11 @@
                     @endfor
                     <tr>
                         <td colspan="2" style="text-align: center;"><b>Total</b></td>
-                        <td style="text-align: center;">{!! $total['previous_quantity'] !!}</td>
-                        <td style="text-align: center;">{!! $total['current_quantity'] !!}</td>
-                        <td style="text-align: center;">{!! $total['cumulative_quantity'] !!}</td>
                         <td style="text-align: center;"></td>
-                        <td style="text-align: center;">{!! $total['rate'] !!}</td>
+                        <td style="text-align: center;"></td>
+                        <td style="text-align: center;"></td>
+                        <td style="text-align: center;"></td>
+                        <td style="text-align: center;"></td>
                         <td style="text-align: center;">{!! $total['previous_bill_amount'] !!}</td>
                         <td style="text-align: center;">{!! $total['current_bill_amount'] !!}</td>
                         <td style="text-align: center;">{!! $total['cumulative_bill_amount'] !!}</td>
