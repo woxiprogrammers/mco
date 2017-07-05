@@ -4,42 +4,9 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c6962183665ce03f77cf6f98df0e6930",
-    "content-hash": "0af2d4f54b875efb7feb03d2c3209882",
+    "hash": "a613a409c0d990fc9356a496d5d79417",
+    "content-hash": "99dcf9a93d2d7af78a3c90f92cf1ec19",
     "packages": [
-        {
-            "name": "aizhar777/numbers-to-words",
-            "version": "v1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/aizhar777/numbers-to-words.git",
-                "reference": "939ec6e63f53f9fc5b315db8c529925dcfa7f251"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/aizhar777/numbers-to-words/zipball/939ec6e63f53f9fc5b315db8c529925dcfa7f251",
-                "reference": "939ec6e63f53f9fc5b315db8c529925dcfa7f251",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Aizhar777\\NumToWord\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Aizhar777",
-                    "email": "aizharolexin@gmail.com"
-                }
-            ],
-            "description": "Laravel package for the translation of numbers to words",
-            "time": "2016-10-31 19:43:01"
-        },
         {
             "name": "barryvdh/laravel-dompdf",
             "version": "v0.8.0",
@@ -151,6 +118,55 @@
                 "slugify"
             ],
             "time": "2017-03-23 21:52:55"
+        },
+        {
+            "name": "consoletvs/charts",
+            "version": "4.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ConsoleTVs/Charts.git",
+                "reference": "5f31e72cf292c0042ff3eec68ad7a7fa36bdffc2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ConsoleTVs/Charts/zipball/5f31e72cf292c0042ff3eec68ad7a7fa36bdffc2",
+                "reference": "5f31e72cf292c0042ff3eec68ad7a7fa36bdffc2",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "5.*",
+                "jenssegers/date": "v3.*",
+                "jlawrence/eos": "3.*",
+                "php": ">=5.6.4"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ConsoleTVs\\Charts\\ChartsServiceProvider"
+                    ],
+                    "aliases": {
+                        "Charts": "ConsoleTVs\\Charts\\Facades\\Charts"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ConsoleTVs\\Charts\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Erik Campobadal",
+                    "email": "soc@erik.cat"
+                }
+            ],
+            "description": "Create charts for laravel using diferent charts libraries",
+            "time": "2017-06-07 20:23:50"
         },
         {
             "name": "cviebrock/eloquent-sluggable",
@@ -494,6 +510,114 @@
                 }
             ],
             "time": "2015-04-20 18:58:01"
+        },
+        {
+            "name": "jenssegers/date",
+            "version": "v3.2.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jenssegers/date.git",
+                "reference": "1db4d580d1d45085a48fd4a332697619b9a3851c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jenssegers/date/zipball/1db4d580d1d45085a48fd4a332697619b9a3851c",
+                "reference": "1db4d580d1d45085a48fd4a332697619b9a3851c",
+                "shasum": ""
+            },
+            "require": {
+                "nesbot/carbon": "^1.0",
+                "php": ">=5.4",
+                "symfony/translation": "^2.7|^3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.0|^5.0|^6.0",
+                "satooshi/php-coveralls": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.1-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Jenssegers\\Date\\DateServiceProvider"
+                    ],
+                    "aliases": {
+                        "Date": "Jenssegers\\Date\\Date"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Jenssegers\\Date\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jens Segers",
+                    "homepage": "https://jenssegers.com"
+                }
+            ],
+            "description": "A date library to help you work with dates in different languages",
+            "homepage": "https://github.com/jenssegers/date",
+            "keywords": [
+                "carbon",
+                "date",
+                "datetime",
+                "i18n",
+                "laravel",
+                "time",
+                "translation"
+            ],
+            "time": "2017-06-30 11:51:03"
+        },
+        {
+            "name": "jlawrence/eos",
+            "version": "v3.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jlawrence11/eos.git",
+                "reference": "25e3d0f2316cb4636000f452a8e7dcc83725a32a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jlawrence11/eos/zipball/25e3d0f2316cb4636000f452a8e7dcc83725a32a",
+                "reference": "25e3d0f2316cb4636000f452a8e7dcc83725a32a",
+                "shasum": ""
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "dev-master",
+                "phpunit/phpunit": "4.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "jlawrence\\eos\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.1+"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Lawrence",
+                    "email": "jon@jon-lawrence.com"
+                }
+            ],
+            "description": "Parse and solve math equations without using 'eval()'.",
+            "keywords": [
+                "eos",
+                "equations",
+                "math",
+                "solve"
+            ],
+            "time": "2016-03-02 22:35:41"
         },
         {
             "name": "laravel/framework",
@@ -1319,52 +1443,6 @@
                 "uuid"
             ],
             "time": "2017-03-26 20:37:53"
-        },
-        {
-            "name": "riskihajar/terbilang",
-            "version": "1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/riskihajar/terbilang.git",
-                "reference": "175a26159b412801673fd780e6e92447b4b9cb6a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/riskihajar/terbilang/zipball/175a26159b412801673fd780e6e92447b4b9cb6a",
-                "reference": "175a26159b412801673fd780e6e92447b4b9cb6a",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/support": "~4.2||~5",
-                "php": ">=5.4.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Riskihajar\\Terbilang\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "riskihajar",
-                    "email": "riskihajar@gmail.com",
-                    "homepage": "http://riskihajar.com"
-                }
-            ],
-            "description": "Convert number & date to words in any language for Laravel 4 | 5",
-            "homepage": "https://github.com/riskihajar/terbilang",
-            "keywords": [
-                "date to words",
-                "laravel",
-                "number to roman",
-                "number to words",
-                "terbilang"
-            ],
-            "time": "2017-05-30 05:57:51"
         },
         {
             "name": "sabberworm/php-css-parser",
@@ -2309,6 +2387,39 @@
     ],
     "packages-dev": [
         {
+            "name": "aizhar777/numbers-to-words",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aizhar777/numbers-to-words.git",
+                "reference": "939ec6e63f53f9fc5b315db8c529925dcfa7f251"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aizhar777/numbers-to-words/zipball/939ec6e63f53f9fc5b315db8c529925dcfa7f251",
+                "reference": "939ec6e63f53f9fc5b315db8c529925dcfa7f251",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Aizhar777\\NumToWord\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aizhar777",
+                    "email": "aizharolexin@gmail.com"
+                }
+            ],
+            "description": "Laravel package for the translation of numbers to words",
+            "time": "2016-10-31 19:43:01"
+        },
+        {
             "name": "doctrine/instantiator",
             "version": "1.0.5",
             "source": {
@@ -3160,6 +3271,52 @@
                 "xunit"
             ],
             "time": "2016-12-08 20:27:08"
+        },
+        {
+            "name": "riskihajar/terbilang",
+            "version": "1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/riskihajar/terbilang.git",
+                "reference": "175a26159b412801673fd780e6e92447b4b9cb6a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/riskihajar/terbilang/zipball/175a26159b412801673fd780e6e92447b4b9cb6a",
+                "reference": "175a26159b412801673fd780e6e92447b4b9cb6a",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "~4.2||~5",
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Riskihajar\\Terbilang\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "riskihajar",
+                    "email": "riskihajar@gmail.com",
+                    "homepage": "http://riskihajar.com"
+                }
+            ],
+            "description": "Convert number & date to words in any language for Laravel 4 | 5",
+            "homepage": "https://github.com/riskihajar/terbilang",
+            "keywords": [
+                "date to words",
+                "laravel",
+                "number to roman",
+                "number to words",
+                "terbilang"
+            ],
+            "time": "2017-05-30 05:57:51"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",

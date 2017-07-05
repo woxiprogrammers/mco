@@ -180,6 +180,11 @@ return [
         App\Providers\NavBarProvider::class,
         Cviebrock\EloquentSluggable\ServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
+
+        /*
+         * Charts Service Providers
+         */
+        ConsoleTVs\Charts\ChartsServiceProvider::class,
     ],
 
     /*
@@ -230,7 +235,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'UnitHelper' => \App\Helper\UnitHelper::class,
         'PDF' => Barryvdh\DomPDF\Facade::class,
-
+        'Charts' => ConsoleTVs\Charts\Facades\Charts::class,
     ],
 
 ];
