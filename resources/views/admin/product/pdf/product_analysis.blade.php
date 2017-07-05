@@ -45,16 +45,16 @@
         <tr>
             <th>Material Name</th>
             <th>Unit</th>
-            <th>Rate</th>
             <th>Quantity</th>
+            <th>Rate</th>
             <th>Amount</th>
         </tr>
         @foreach ($productMaterialVersions as $material)
         <tr>
             <td>{{$material['name']}}</td>
             <td>{{$material['unit']}}</td>
-            <td>{{round($material['rate_per_unit'],3)}}</td>
             <td>{{round($material['quantity'],3)}}</td>
+            <td>{{round($material['rate_per_unit'],3)}}</td>
             <td>{!! round(($material['quantity']*$material['rate_per_unit']),3) !!}</td>
         </tr>
         @endforeach

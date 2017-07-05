@@ -163,7 +163,7 @@ trait BillTrait{
             $listingData = array();
             $quotationIds = Bill::groupBy('quotation_id')->pluck('quotation_id')->toArray();
             $projectSiteIds = Quotation::whereIn('id',$quotationIds)->pluck('project_site_id')->toArray();
-            $projectSiteData = ProjectSite::whereIn('id',$projectSiteIds)->get()->toArray();
+            $projectSiteData = ProjectSite::orderBy('updated_at','desc')->whereIn('id',$projectSiteIds)->get()->toArray();
             for($i = 0 ; $i < count($projectSiteData) ; $i++){
                 $projectData = Project::where('id',$projectSiteData[$i]['project_id'])->get()->toArray();
                 for($j = 0 ; $j < count($projectData) ; $j++){

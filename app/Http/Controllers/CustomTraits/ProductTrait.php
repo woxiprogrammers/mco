@@ -238,9 +238,9 @@ trait ProductTrait{
     public function productListing(Request $request){
         try{
             if($request->has('search_product_name')){
-                $productData = Product::where('name','ilike','%'.$request->search_product_name.'%')->orderBy('id','asc')->get()->toArray();
+                $productData = Product::where('name','ilike','%'.$request->search_product_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $productData = Product::orderBy('id','asc')->get()->toArray();
+                $productData = Product::orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($productData);
             $records = array();
