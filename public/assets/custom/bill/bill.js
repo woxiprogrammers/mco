@@ -32,7 +32,7 @@ $(document).ready(function (){
             var doneTypingInterval = 500;
             $('#current_quantity_'+id).rules('add',{
                 required: true,
-                min: 1,
+                min: 0.1,
                 max: diff
             });
             input.on('keyup', function () {

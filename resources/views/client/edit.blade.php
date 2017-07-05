@@ -29,7 +29,11 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/client/manage">Back</a>
+                                    <a href="/client/manage">Manage Clients</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Edit Client</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
