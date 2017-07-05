@@ -615,7 +615,10 @@ trait QuotationTrait{
                             if(!(is_array($conversion))){
                                 $productAmount = $productAmount + ($conversion * $material['quantity']);
                             }else{
-                                $productAmount = $productAmount + ($conversion['rate'] * $material['quantity']);
+                                $status = 201;
+                                $request->session()->flash('error',$conversion['message']);
+                                $response['message'] = $conversion['message'];
+                                return response()->json($response,$status);
                             }
                         }
                     }else{
