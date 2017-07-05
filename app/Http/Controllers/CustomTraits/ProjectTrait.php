@@ -49,11 +49,11 @@ trait ProjectTrait{
         try{
             $listingData = array();
             $k = 0;
-            $clientData = Client::where('is_active',true)->orderBy('id','asc')->get()->toArray();
+            $clientData = Client::where('is_active',true)->orderBy('updated_at','desc')->get()->toArray();
             for($i = 0 ; $i < count($clientData) ; $i++){
-                $project = Project::where('client_id',$clientData[$i]['id'])->orderBy('id','asc')->get()->toArray();
+                $project = Project::where('client_id',$clientData[$i]['id'])->orderBy('updated_at','desc')->get()->toArray();
                 for($j = 0 ; $j < count($project) ; $j++){
-                    $project_site = ProjectSite::where('project_id',$project[$j]['id'])->orderBy('id','asc')->get()->toArray();
+                    $project_site = ProjectSite::where('project_id',$project[$j]['id'])->orderBy('updated_at','desc')->get()->toArray();
                     for($l = 0 ; $l < count($project_site) ; $l++){
                         $listingData[$k]['company'] = $clientData[$i]['company'];
                         $listingData[$k]['project_name'] = $project[$j]['name'];

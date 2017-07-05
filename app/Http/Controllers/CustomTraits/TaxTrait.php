@@ -89,9 +89,9 @@
         public function taxListing(Request $request){
             try{
                 if($request->has('search_name')){
-                    $taxData = Tax::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+                    $taxData = Tax::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
                 }else{
-                    $taxData = Tax::orderBy('id','asc')->get()->toArray();
+                    $taxData = Tax::orderBy('name','asc')->get()->toArray();
                 }
                 $iTotalRecords = count($taxData);
                 $records = array();
