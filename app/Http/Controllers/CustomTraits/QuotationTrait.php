@@ -562,6 +562,7 @@ trait QuotationTrait{
 
     public function getEditView(Request $request, $quotation){
         try{
+            $orderValue = QuotationProduct::where('quotation_id',$quotation->id)->sum('rate_per_unit');
             if($quotation->quotation_status->slug == 'approved'){
                 if($quotation->work_order != null){
                     $quotation->work_order->images = $this->getWorkOrderImagePath($quotation->id,$quotation->work_order->images);
@@ -576,7 +577,12 @@ trait QuotationTrait{
             }else{
                 $taxes = Tax::where('is_active', true)->select('id','name','base_percentage')->get();
             }
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes'));
+            $taxAmount = 0;
+            foreach($taxes as $tax){
+                $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
+            }
+            $orderValue = $orderValue + $taxAmount;
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
