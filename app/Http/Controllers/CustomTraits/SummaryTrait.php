@@ -85,9 +85,9 @@ trait SummaryTrait{
     public function summaryListing(Request $request){
         try{
             if($request->has('search_name')){
-                $summaryData = Summary::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+                $summaryData = Summary::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $summaryData = Summary::orderBy('id','asc')->get()->toArray();
+                $summaryData = Summary::orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($summaryData);
             $records = array();

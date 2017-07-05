@@ -92,9 +92,9 @@ trait CategoryTrait{
     public function categoryListing(Request $request){
         try{
             if($request->has('search_name')){
-                $categoriesData = Category::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+                $categoriesData = Category::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $categoriesData = Category::orderBy('id','asc')->get()->toArray();
+                $categoriesData = Category::orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($categoriesData);
             $records = array();

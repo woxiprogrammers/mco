@@ -1,6 +1,5 @@
 var MaterialListing = function () {
     var handleMaterials = function () {
-
         var grid = new Datatable();
 
         grid.init({
