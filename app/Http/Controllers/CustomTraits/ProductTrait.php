@@ -318,9 +318,13 @@ trait ProductTrait{
             $iterator = 0;
             $subTotal = 0;
             foreach($data['material'] as $key => $materialVersion){
-                $recentVersion = MaterialVersion::where('id',$materialVersion['material_version_id'])->select('rate_per_unit','unit_id')->first();
-                $subTotal += round($materialVersion['rate_per_unit'] * $materialVersion['quantity'],3);
-                $productMaterialProfitMarginData[$iterator]['material_quantity'] = $materialVersion['quantity'];
+                if(array_key_exists('material_version_id',$materialVersion)){
+                    $recentVersion = MaterialVersion::where('id',$materialVersion['material_version_id'])->select('rate_per_unit','unit_id')->first();
+                }else{
+                    $recentVersion = MaterialVersion::where('material_id',$key)->orderBy('created_at','desc')->select('rate_per_unit','unit_id')->first();
+                }
+                $subTotal += round($materialVersion['rate_per_unit'] * $data['material_quantity'][$key],3);
+                $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
                     $materialVersion['material_id'] = $key;
                     $newVersion = MaterialVersion::create($materialVersion);
