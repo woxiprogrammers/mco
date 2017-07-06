@@ -393,48 +393,6 @@ trait QuotationTrait{
         return response()->json($records);
     }
 
-    public function checkProjectSiteName(Request $request){
-        try{
-            $projectSiteId = $request->projectSiteId;
-            $nameCount = ProjectSite::where('id',$projectSiteId)->count();
-            if($nameCount > 0){
-                return 'false';
-            }else{
-                return 'true';
-            }
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Check Project Site name',
-                'param' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-    }
-
-    public function checkProjectNames(Request $request){
-        try{
-            $project = $request->name;
-            $nameCount = Project::where('name','ilike',$project)->count();
-            if($nameCount > 0){
-                return 'false';
-            }else{
-                return 'true';
-            }
-        }catch(\Exception $e){
-            $response = array();
-            $status = 500;
-            $data = [
-                'action' => 'Get Project names',
-                'param' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-    }
-
     public function createQuotation(Request $request){
         try{
             $data = $request->all();
@@ -1123,8 +1081,6 @@ trait QuotationTrait{
         }
     }
 
-
-
     public function getWorkOrderForm(Request $request){
         try{
             $quotationId = $request->quotation_id;
@@ -1224,4 +1180,5 @@ trait QuotationTrait{
             Log::critical(json_encode($data));
         }
     }
+
 }
