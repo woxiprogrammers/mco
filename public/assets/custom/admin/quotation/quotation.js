@@ -43,7 +43,7 @@ $(document).ready(function(){
             async: true,
             data: data,
             success: function(data,textStatus,xhr){
-                $("#productTable").append(data);
+                $("#productTable tr:first").after(data);
                 $('#productRowCount').val(parseInt(rowCount)+1);
             },
             error: function(errorStatus, xhr){
@@ -387,7 +387,7 @@ function calculateProductSubtotal(){
     $(".product-discount-amount").each(function(){
         subtotal = subtotal + parseFloat($(this).val());
     });
-    $("#subtotal").text(Math.round(subtotal * 1000) / 1000);
+    $("#subtotal").val(Math.round(subtotal * 1000) / 1000);
 
     var total = subtotal;
     $(".profit-margin-percentage").each(function(){
@@ -409,7 +409,7 @@ function calculateSubtotal(){
         $(".product-amount").each(function(){
             subtotal = subtotal+parseFloat($(this).val());
         });
-        $("#subtotal").text(Math.round(subtotal * 1000) / 1000);
+        $("#subtotal").val(Math.round(subtotal * 1000) / 1000);
     }
 }
 

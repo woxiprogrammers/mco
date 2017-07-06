@@ -87,7 +87,16 @@
                                                             </div>
                                                         </fieldset>
                                                         <fieldset>
-                                                            <legend> Products <a class="btn btn-success btn-md col-md-offset-9" id="addProduct">Add Product</a></legend>
+                                                            <legend> Products
+                                                                <a class="btn btn-wide btn-primary  col-md-offset-9" id="materialCosts">
+                                                                    <i class="fa fa-pencil-square-o"></i>
+                                                                    Material Cost
+                                                                </a>
+                                                                <a class="btn btn-success btn-md" id="addProduct">
+                                                                    <i class="fa fa-plus"></i>
+                                                                    Product
+                                                                </a>
+                                                            </legend>
                                                             <div class="table-scrollable">
                                                                 <table class="table table-bordered" id="productTable" style="overflow: scroll;overflow-x: auto; overflow-y: auto">
                                                                     <tr>
@@ -162,12 +171,6 @@
                                                                         </td>
                                                                     </tr>
                                                                 </table>
-                                                            </div>
-
-                                                            <div class="col-md-3 col-md-offset-5">
-                                                                <a class="btn btn-wide btn-primary" id="materialCosts">
-                                                                    Edit Material Cost
-                                                                </a>
                                                             </div>
                                                         </fieldset>
                                                     </div>
