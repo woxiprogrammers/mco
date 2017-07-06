@@ -153,25 +153,37 @@ trait QuotationTrait{
             }
             foreach($productIds as $id){
                 $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
-                $materialId = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
+                $productMaterialIds = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
                                 ->join('materials','materials.id','=','material_versions.material_id')
                                 ->where('product_material_relation.product_version_id',$recentVersionId)
                                 ->pluck('materials.id')
                                 ->toArray();
-                $materialIds = array_unique(array_merge($materialIds,$materialId));
+                $materialIds = array_unique(array_merge($materialIds,$productMaterialIds));
             }
             if($request->has('quotation_id')){
-                $quotationMaterialIds = QuotationMaterial::where('quotation_id',$request->quotation_id)->pluck('material_id')->toArray();
+                $quotationMaterialIds = QuotationMaterial::where('quotation_id',$request->quotation_id)->whereIn('material_id',$materialIds)->pluck('material_id')->toArray();
                 if($request->has('material_rate')){
                     $iterator = 0;
                     $materials = array();
                     foreach($request->material_rate as $materialId => $materialRate){
-                        $materials[$iterator]['id'] = $materialId;
-                        $materials[$iterator]['name'] = Material::where('id',$materialId)->pluck('name')->first();
-                        $materials[$iterator]['rate_per_unit'] = $materialRate;
-                        $materials[$iterator]['unit_id'] = $request->material_unit[$materialId];
-                        $materials[$iterator]['unit'] = Unit::where('id',$request->material_unit[$materialId]);
-                        $iterator++;
+                        if(in_array($materialId,$materialIds)){
+                            $materials[$iterator]['id'] = $materialId;
+                            $materials[$iterator]['name'] = Material::where('id',$materialId)->pluck('name')->first();
+                            $materials[$iterator]['rate_per_unit'] = $materialRate;
+                            $materials[$iterator]['unit_id'] = $request->material_unit[$materialId];
+                            $iterator++;
+                        }
+                    }
+                    if(count(array_diff($materialIds,array_keys($request->material_rate))) > 0){
+                        $newMaterials = array_diff($materialIds,array_keys($request->material_rate));
+                        foreach($newMaterials as $newMaterialId){
+                            $materialInfo = Material::findOrFail($newMaterialId);
+                            $materials[$iterator]['id'] = $newMaterialId;
+                            $materials[$iterator]['name'] = $materialInfo->name;
+                            $materials[$iterator]['rate_per_unit'] = $materialInfo->rate_per_unit;
+                            $materials[$iterator]['unit_id'] = $materialInfo->unit_id;
+                            $iterator++;
+                        }
                     }
                 }else{
                     $materials = QuotationMaterial::join('materials','materials.id','=','quotation_materials.material_id')
@@ -199,12 +211,14 @@ trait QuotationTrait{
                     $materials = array();
                     $iterator = 0;
                     foreach($request->material_rate as $materialId => $materialRate){
-                        $materials[$iterator]['id'] = $materialId;
-                        $materials[$iterator]['name'] = Material::where('id',$materialId)->pluck('name')->first();
-                        $materials[$iterator]['rate_per_unit'] = $materialRate;
-                        $materials[$iterator]['unit_id'] = $request->material_unit[$materialId];
-                        $materials[$iterator]['unit'] = Unit::where('id',$request->material_unit[$materialId]);
-                        $iterator++;
+                        if(in_array($materialId,$materialIds)){
+                            $materials[$iterator]['id'] = $materialId;
+                            $materials[$iterator]['name'] = Material::where('id',$materialId)->pluck('name')->first();
+                            $materials[$iterator]['rate_per_unit'] = $materialRate;
+                            $materials[$iterator]['unit_id'] = $request->material_unit[$materialId];
+                            $materials[$iterator]['unit'] = Unit::where('id',$request->material_unit[$materialId]);
+                            $iterator++;
+                        }
                     }
                     if(count($newMaterialIds) > 0){
                         $newMaterials = Material::join('units','materials.unit_id','=','units.id')
@@ -800,7 +814,7 @@ trait QuotationTrait{
                             $quotationMaterialData['material_id'] = $material['id'];
                             $quotationMaterialData['rate_per_unit'] = $material['material_rate_per_unit'];
                             $quotationMaterialData['unit_id'] = $material['material_unit_id'];
-                            if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
+                            if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($material['id'],$data['clientSuppliedMaterial'])){
                                 $quotationMaterialData['is_client_supplied'] = true;
                             }else{
                                 $quotationMaterialData['is_client_supplied'] = false;
