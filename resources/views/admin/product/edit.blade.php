@@ -120,7 +120,6 @@
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input type="hidden" name="unit_{{$version['material_id']}}" value="{{$version['unit_id']}}">
                                                                             <select class="form-control material-table-input" name="material[{{$version['material_id']}}][unit_id]"  id="material_{{$version['material_id']}}_unit" onchange="convertUnits({{$version['material_id']}})">
                                                                                 @foreach($units as $unit)
                                                                                     @if($unit['id'] == $version['unit_id'])
@@ -134,13 +133,12 @@
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input name="rate_{{$version['material_id']}}" value="{{round($version['rate_per_unit'],3)}}" type="hidden">
                                                                             <input class="form-control material-table-input" step="any" type="number" id="material_{{$version['material_id']}}_rate" name="material[{{$version['material_id']}}][rate_per_unit]" value="{{round($version['rate_per_unit'],3)}}" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})">
                                                                         </div>
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material[{{$version['material_id']}}][quantity]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],3)}}" required>
+                                                                            <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material_quantity[{{$version['material_id']}}]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],3)}}" required>
                                                                         </div>
                                                                     </td>
                                                                     <td>

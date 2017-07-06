@@ -55,17 +55,31 @@
                         <th style="width: 10%; text-align: center"><b>Cumulative Amnt (Rs)</b></th>
                     </tr>
                     @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
+                        <tr>
+                            <td style="text-align: center;">{!! $iterator+1 !!}</td>
+                            <td style="text-align: center;"><b>{!! $invoiceData[$iterator]['product_name'] !!}<b></td>
+                            <td style="text-align: center;">{!! $invoiceData[$iterator]['previous_quantity'] !!}</td>
+                            <td style="text-align: center;">{!! $invoiceData[$iterator]['current_quantity'] !!}</td>
+                            <td style="text-align: center;">{!! $invoiceData[$iterator]['cumulative_quantity'] !!}</td>
+                            <td style="text-align: center;">{!! $invoiceData[$iterator]['unit'] !!}</td>
+                            <td style="text-align: center;">{!! $invoiceData[$iterator]['rate'] !!}</td>
+                            <td style="text-align: center;">{!! $invoiceData[$iterator]['previous_bill_amount'] !!}</td>
+                            <td style="text-align: center;">{!! $invoiceData[$iterator]['current_bill_amount'] !!}</td>
+                            <td style="text-align: center;">{!! $invoiceData[$iterator]['cumulative_bill_amount'] !!}</td>
+                        </tr>
+                    @endfor
+                    @for($iterator = 0 ; $iterator < (14 - count($invoiceData)) ; $iterator++ )
                     <tr>
-                        <td style="text-align: center;">{!! $iterator+1 !!}</td>
-                        <td style="text-align: center;"><b>{!! $invoiceData[$iterator]['product_name'] !!}<b></td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['previous_quantity'] !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['current_quantity'] !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['cumulative_quantity'] !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['unit'] !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['rate'] !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['previous_bill_amount'] !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['current_bill_amount'] !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['cumulative_bill_amount'] !!}</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
                     </tr>
                     @endfor
                     <tr>
@@ -75,10 +89,9 @@
                         <td style="text-align: center;"></td>
                         <td style="text-align: center;"></td>
                         <td style="text-align: center;"></td>
-                        <td style="text-align: center;">{!! $total['previous_bill_amount'] !!}</td>
-                        <td style="text-align: center;">{!! $total['current_bill_amount'] !!}</td>
-                        <td style="text-align: center;">{!! $total['cumulative_bill_amount'] !!}</td>
-
+                        <td style="text-align: center; font-weight: bold;">{!! $total['previous_bill_amount'] !!}</td>
+                        <td style="text-align: center; font-weight: bold;">{!! $total['current_bill_amount'] !!}</td>
+                        <td style="text-align: center; font-weight: bold;">{!! $total['cumulative_bill_amount'] !!}</td>
                     </tr>
                 </table>
             </div>

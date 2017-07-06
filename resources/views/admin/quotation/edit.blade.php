@@ -264,7 +264,7 @@
                                                                         <div class="row">
                                                                             <div class="col-md-10" style="text-align: right">
                                                                                 <label class="control-label" style="font-weight: bold; font-size: 15px">
-                                                                                    Built up area:
+                                                                                    Slab area:
                                                                                 </label>
                                                                             </div>
                                                                             <div class="col-md-2">
@@ -368,7 +368,7 @@
                                                                         </label>
                                                                     </div>
                                                                     <div class="col-md-3">
-                                                                        <input class="form-control"  value="{{$quotation->work_order->order_value}}" name="order_value" id="orderValue" type="number" step="any">
+                                                                        <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
@@ -467,7 +467,7 @@
                                                                         </label>
                                                                     </div>
                                                                     <div class="col-md-3">
-                                                                        <input class="form-control" name="order_value" id="orderValue" type="number" step="any">
+                                                                        <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
