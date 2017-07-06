@@ -6,11 +6,11 @@
  */
 ?>
 <fieldset class="row" style="text-align: right">
-        <a class="btn btn-info" onclick="backToGeneral()" href="javascript:void(0);">
+        <a class="btn btn-primary" onclick="backToGeneral()" href="javascript:void(0);">
             Back
         </a>
-        <a class="btn btn-info" id="next2" href="javascript:void(0);" onclick="showProfitMargins()">
-            Update Profit Margins
+        <a class="btn btn-primary" id="next2" href="javascript:void(0);" onclick="showProfitMargins()">
+            <i class="fa fa-pencil-square-o"></i> Profit Margins
         </a>
 </fieldset>
 <fieldset>
