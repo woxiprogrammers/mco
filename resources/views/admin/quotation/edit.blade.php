@@ -72,16 +72,20 @@
                                                         <a class="btn btn-info" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             <i class="fa fa-edit"></i> Profit Margins
                                                         </a>
-                                                        <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
-                                                             <i class="fa fa-download"></i>Quotation With Tax
-                                                        </a>
-                                                        <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
+                                                        @if($quotation->built_up_area != null)
+                                                            @if($quotation->is_tax_applied == true)
+                                                                <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
+                                                                    <i class="fa fa-download"></i>Quotation With Tax
+                                                                </a>
+                                                            @endif
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
                                                                 <i class="fa fa-download"></i>Quotation Without Tax
-                                                        </a>
-                                                        @if($quotation->is_summary_applied == true)
-                                                            <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info">
-                                                                <i class="fa fa-download"></i>Summary
                                                             </a>
+                                                            @if($quotation->is_summary_applied == true)
+                                                                <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info">
+                                                                    <i class="fa fa-download"></i>Summary
+                                                                </a>
+                                                            @endif
                                                         @endif
                                                     </fieldset>
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
@@ -249,16 +253,6 @@
                                                                             </div>
                                                                             <div class="col-md-2">
                                                                                 <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" min="0">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="row">
-                                                                            <div class="col-md-10" style="text-align: right">
-                                                                                <label class="control-label  pull-right" style="font-weight: bold; font-size: 15px">
-                                                                                    Carpet Area:
-                                                                                </label>
-                                                                            </div>
-                                                                            <div class="col-md-2">
-                                                                                <input class="form-control" type="number" name="carpet_area" value="{{$quotation->carpet_area}}">
                                                                             </div>
                                                                         </div>
                                                                         <div class="row">
@@ -591,8 +585,8 @@
 @endif
 <script>
     $(document).ready(function(){
+        EditQuotation.init();
         calculateSubtotal();
     });
-
 </script>
 @endsection
