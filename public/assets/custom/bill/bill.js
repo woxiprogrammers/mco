@@ -1,18 +1,6 @@
 $(document).ready(function (){
     CreateBill.init();
-    /*$('#submit').submit(function() {
-        console.log($('.require-one').length);
-        var error = false;
-        if ($('.require-one').length >= 1){
-            error = true;
-            alert("Please Tick the Agree to Terms of Use");
-        }
-            if(error == true){
-                $("#submit").prop('disabled', true);
-            }else{
-                $("#submit").prop('disabled', false);
-            }
-    });*/
+    $('#submit').prop('disabled',true);
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
         window.location.href = "/bill/view/"+bill_id;
@@ -25,6 +13,11 @@ $(document).ready(function (){
         var previous_quantity = $('#previous_quantity_'+id).text();
         var diff = parseFloat(boq - previous_quantity);
         if($(this).prop("checked") == false){
+            if($('input:checked').length > 0){
+                $('#submit').prop('disabled',false);
+            }else{
+                $('#submit').prop('disabled',true);
+            }
             $("#id_"+id).css('background-color',"");
             $('#current_quantity_'+id).prop('disabled',true);
             $('#product_description_'+id).prop('disabled',true);
@@ -64,6 +57,11 @@ $(document).ready(function (){
                     calculateQuantityAmount(input.val(),id);
                 }
                 calculateQuantityAmount(input.val(),id);
+            }
+            if($('input:checked').length > 0){
+                $('#submit').prop('disabled',false);
+            }else{
+                $('#submit').prop('disabled',true);
             }
         }
     });
