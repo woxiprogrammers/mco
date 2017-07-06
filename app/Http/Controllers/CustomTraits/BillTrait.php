@@ -179,6 +179,7 @@ trait BillTrait{
             }
             $iTotalRecords = count($listingData);
             $records = array();
+            $records['data'] = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($listingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['company'],

@@ -68,16 +68,18 @@
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
                     </tr>
                 @endfor
-                @for($i = 0 ; $i < (12 - count($invoiceData)) ; $i++)
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                    </tr>
-                @endfor
+                @if(count($invoiceData) > 12)
+                    @for($i = 0 ; $i < (12 - count($invoiceData)) ; $i++)
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    @endfor
+                @endif
                 <tr>
                     <td colspan="5" style="text-align: right; width: 650px"><b>Total</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
