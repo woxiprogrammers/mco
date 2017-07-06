@@ -74,7 +74,7 @@
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                     <tr id="id_{{$quotationProducts[$iterator]['id']}}">
                                                         <td>
-                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}">
+                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" class="require-one">
                                                         </td>
                                                         <td>
                                                             <span>{{$iterator + 1}}</span>

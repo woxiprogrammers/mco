@@ -1,5 +1,18 @@
 $(document).ready(function (){
     CreateBill.init();
+    /*$('#submit').submit(function() {
+        console.log($('.require-one').length);
+        var error = false;
+        if ($('.require-one').length >= 1){
+            error = true;
+            alert("Please Tick the Agree to Terms of Use");
+        }
+            if(error == true){
+                $("#submit").prop('disabled', true);
+            }else{
+                $("#submit").prop('disabled', false);
+            }
+    });*/
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
         window.location.href = "/bill/view/"+bill_id;
@@ -27,8 +40,7 @@ $(document).ready(function (){
             if(diff == 0){
                 $(this).attr('checked',false);
                 $('#boq_quantity_'+id).css('background-color',"ff8884");
-                $('#previous_quantity_'+id).css('color',"ce0e08");
-
+                $('#previous_quantity_'+id).css('background-color',"ff8884");
             }else{
                 $('#product_description_'+id).prop('disabled',false);
                 $('#current_quantity_'+id).prop('disabled',false);
