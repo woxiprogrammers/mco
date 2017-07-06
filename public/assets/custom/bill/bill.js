@@ -1,5 +1,6 @@
 $(document).ready(function (){
     CreateBill.init();
+    $('#submit').prop('disabled',true);
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
         window.location.href = "/bill/view/"+bill_id;
@@ -12,6 +13,11 @@ $(document).ready(function (){
         var previous_quantity = $('#previous_quantity_'+id).text();
         var diff = parseFloat(boq - previous_quantity);
         if($(this).prop("checked") == false){
+            if($('input:checked').length > 0){
+                $('#submit').prop('disabled',false);
+            }else{
+                $('#submit').prop('disabled',true);
+            }
             $("#id_"+id).css('background-color',"");
             $('#current_quantity_'+id).prop('disabled',true);
             $('#product_description_'+id).prop('disabled',true);
@@ -24,28 +30,39 @@ $(document).ready(function (){
             $('#cumulative_bill_amount_'+id).text("");
             getTotals();
         }else{
-            $('#product_description_'+id).prop('disabled',false);
-            $('#current_quantity_'+id).prop('disabled',false);
-            $('#current_quantity_'+id).val(0);
-            $("#id_"+id).css('background-color',"#e1e1e1");
-            var typingTimer;
-            var doneTypingInterval = 500;
-            $('#current_quantity_'+id).rules('add',{
-                required: true,
-                min: 0.000001,
-                max: diff
-            });
-            input.on('keyup', function () {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(doneTyping, doneTypingInterval);
-            });
-            input.on('keydown', function () {
-                clearTimeout(typingTimer);
-            });
-            function doneTyping () {
+            if(diff == 0){
+                $(this).attr('checked',false);
+                $('#boq_quantity_'+id).css('background-color',"ff8884");
+                $('#previous_quantity_'+id).css('background-color',"ff8884");
+            }else{
+                $('#product_description_'+id).prop('disabled',false);
+                $('#current_quantity_'+id).prop('disabled',false);
+                $('#current_quantity_'+id).val(0);
+                $("#id_"+id).css('background-color',"#e1e1e1");
+                var typingTimer;
+                var doneTypingInterval = 500;
+                $('#current_quantity_'+id).rules('add',{
+                    required: true,
+                    min: 0.000001,
+                    max: diff
+                });
+                input.on('keyup', function () {
+                    clearTimeout(typingTimer);
+                    typingTimer = setTimeout(doneTyping, doneTypingInterval);
+                });
+                input.on('keydown', function () {
+                    clearTimeout(typingTimer);
+                });
+                function doneTyping () {
+                    calculateQuantityAmount(input.val(),id);
+                }
                 calculateQuantityAmount(input.val(),id);
             }
-            calculateQuantityAmount(input.val(),id);
+            if($('input:checked').length > 0){
+                $('#submit').prop('disabled',false);
+            }else{
+                $('#submit').prop('disabled',true);
+            }
         }
     });
 });
