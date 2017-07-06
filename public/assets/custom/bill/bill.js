@@ -1,4 +1,5 @@
 $(document).ready(function (){
+    CreateBill.init();
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
         window.location.href = "/bill/view/"+bill_id;
@@ -6,9 +7,16 @@ $(document).ready(function (){
 
     $('input[type="checkbox"]').click(function(){
         var id = $(this).val();
+        var input = $('#current_quantity_'+id);
+        var boq = $('#boq_quantity_'+id).text();
+        var previous_quantity = $('#previous_quantity_'+id).text();
+        var diff = parseFloat(boq - previous_quantity);
         if($(this).prop("checked") == false){
             $("#id_"+id).css('background-color',"");
             $('#current_quantity_'+id).prop('disabled',true);
+            $('#product_description_'+id).prop('disabled',true);
+            $('#current_quantity_'+id).rules('remove');
+            $('#current_quantity_'+id).closest('form-group').removeClass('has-error');
             $('#current_quantity_'+id).val('');
             $('#cumulative_quantity_'+id).text("");
             $('#previous_bill_amount_'+id).text("");
@@ -16,12 +24,17 @@ $(document).ready(function (){
             $('#cumulative_bill_amount_'+id).text("");
             getTotals();
         }else{
+            $('#product_description_'+id).prop('disabled',false);
             $('#current_quantity_'+id).prop('disabled',false);
             $('#current_quantity_'+id).val(0);
             $("#id_"+id).css('background-color',"#e1e1e1");
             var typingTimer;
             var doneTypingInterval = 500;
-            var input = $('#current_quantity_'+id);
+            $('#current_quantity_'+id).rules('add',{
+                required: true,
+                min: 0.000001,
+                max: diff
+            });
             input.on('keyup', function () {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(doneTyping, doneTypingInterval);
@@ -38,6 +51,9 @@ $(document).ready(function (){
 });
 
 function calculateQuantityAmount(current_quantity,id){
+    if(current_quantity == ""){
+        current_quantity = 0;
+    }
     var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
     var prev_bill_amount = parseFloat($('#previous_quantity_'+id).text()) * parseFloat($('#rate_per_unit_'+id).text());
     var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());

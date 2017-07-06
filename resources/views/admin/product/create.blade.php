@@ -95,7 +95,7 @@
                                                         <fieldset>
                                                             <legend> Materials</legend>
                                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productMaterialTable">
-                                                                
+
                                                             </table>
                                                             <div class="col-md-offset-7">
                                                                 <div class="col-md-3 col-md-offset-2">

@@ -10,9 +10,9 @@ use App\ProductVersion;
 use App\ProfitMargin;
 use App\ProfitMarginVersion;
 use App\Unit;
-use App\UnitConversion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\App;
 
 trait ProductTrait{
 
@@ -49,12 +49,12 @@ trait ProductTrait{
 
     public function getEditView(Request $request, $product) {
         try{
-            $product = $product->toArray();
             $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first();
             $product['category'] = Category::where('id',$product['category_id'])->pluck('name')->first();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
             $productProfitMarginsData = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
                                     ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
+                                    ->where('products_profit_margins_relation.product_version_id',$recentProductVersion['id'])
                                     ->select('profit_margins.id as id','profit_margin_versions.percentage as percentage')
                                     ->get();
             $productProfitMargins = array();
@@ -73,12 +73,17 @@ trait ProductTrait{
                                         ->pluck('materials.id')
                                         ->toArray();
             $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
+                                        ->join('units','units.id','=','material_versions.unit_id')
                                         ->join('materials','materials.id','=','material_versions.material_id')
                                         ->where('product_material_relation.product_version_id',$recentProductVersion['id'])
-                                        ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity')
+                                        ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity','units.name as unit')
                                         ->get()->toArray();
             $materialVersionIds = implode(',',ProductMaterialRelation::where('product_version_id','=',$recentProductVersion['id'])->pluck('material_version_id')->toArray());
-            return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            if($request->ajax()){
+                return view('partials.quotation.product-view')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            }else{
+                return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Edit View',
@@ -158,15 +163,6 @@ trait ProductTrait{
             $iterator = 0;
             $subTotal = 0;
             foreach($data['material'] as $key => $materialVersion){
-                $material = Material::findOrFail($key);
-                $fromUnit = $materialVersion['unit_id'];
-                $toUnit = $material->unit_id;
-                if($fromUnit != $toUnit){
-                    $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
-                    Material::where('id',$key)->update(['rate_per_unit' => round($conversionRate,3)]);
-                }else{
-                    Material::where('id',$key)->update(['rate_per_unit' => round($materialVersion['rate_per_unit'],3)]);
-                }
                 $recentVersion = MaterialVersion::where('material_id',$key)->orderBy('created_at','desc')->select('rate_per_unit','unit_id')->first();
                 $subTotal += round($materialVersion['rate_per_unit']*$data['material_quantity'][$key],3);
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
@@ -232,9 +228,9 @@ trait ProductTrait{
     public function productListing(Request $request){
         try{
             if($request->has('search_product_name')){
-                $productData = Product::where('name','ilike','%'.$request->search_product_name.'%')->orderBy('id','asc')->get()->toArray();
+                $productData = Product::where('name','ilike','%'.$request->search_product_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $productData = Product::orderBy('id','asc')->get()->toArray();
+                $productData = Product::orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($productData);
             $records = array();
@@ -267,6 +263,10 @@ trait ProductTrait{
                             <li>
                                 <a href="/product/change-status/'.$productData[$pagination]['id'].'">
                                     <i class="icon-tag"></i> '.$status.' </a>
+                            </li>
+                            <li>
+                                <a href="/product/product-analysis-pdf/'.$productData[$pagination]['id'].'">
+                                    <i class="icon-cloud-download"></i> Download </a>
                             </li>
                         </ul>
                     </div>'
@@ -317,29 +317,22 @@ trait ProductTrait{
             $productMaterialProfitMarginData = array();
             $iterator = 0;
             $subTotal = 0;
-            foreach($data['material_version'] as $key => $materialVersion){
-                $recentVersion = MaterialVersion::where('id',$key)->select('rate_per_unit','unit_id')->first();
-                $subTotal += round($materialVersion['rate_per_unit']*$data['material_quantity'][$key],3);
+            foreach($data['material'] as $key => $materialVersion){
+                if(array_key_exists('material_version_id',$materialVersion)){
+                    $recentVersion = MaterialVersion::where('id',$materialVersion['material_version_id'])->select('rate_per_unit','unit_id')->first();
+                }else{
+                    $recentVersion = MaterialVersion::where('material_id',$key)->orderBy('created_at','desc')->select('rate_per_unit','unit_id')->first();
+                }
+                $subTotal += round($materialVersion['rate_per_unit'] * $data['material_quantity'][$key],3);
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
-                    $materialVersion['material_id'] = MaterialVersion::where('id',$key)->pluck('material_id')->first();
+                    $materialVersion['material_id'] = $key;
                     $newVersion = MaterialVersion::create($materialVersion);
                     $productMaterialProfitMarginData[$iterator]['material_version_id'] = $newVersion->id;
                 }else{
                     $productMaterialProfitMarginData[$iterator]['material_version_id'] = $key;
                 }
                 $iterator++;
-                $material = Material::findOrFail(MaterialVersion::where('id',$key)->pluck('material_id')->first());
-                $fromUnit = $materialVersion['unit_id'];
-                $toUnit = $material->unit_id;
-                if($fromUnit != $toUnit){
-                    $conversionRate = $this->unitConversion($fromUnit,$toUnit,$materialVersion['rate_per_unit']);
-                    if(!(is_array($conversionRate))){
-                        Material::where('id',$key)->update(['rate_per_unit' => round($conversionRate,3)]);
-                    }
-                }else{
-                    Material::where('id',$key)->update(['rate_per_unit' => round($materialVersion['rate_per_unit'],3)]);
-                }
             }
             $iterator = 0;
             $taxAmount = 0;
@@ -433,21 +426,81 @@ trait ProductTrait{
         }
     }
 
-    public function unitConversion($fromUnit,$toUnit, $rate){
-        $conversion = UnitConversion::where('unit_1_id',$fromUnit)->where('unit_2_id',$toUnit)->first();
-        if($conversion != null){
-            $materialRateFrom = $conversion->unit_1_value / $conversion->unit_2_value;
-            $materialRateTo = $rate * $materialRateFrom;
-        }else{
-            $conversion = UnitConversion::where('unit_2_id',$fromUnit)->where('unit_1_id',$toUnit)->first();
-            if($conversion != null){
-                $materialRateFrom = $conversion->unit_2_value / $conversion->unit_1_value;
-                $materialRateTo = $rate * $materialRateFrom;
-            }else{
-                $materialRateTo['unit'] = $fromUnit;
-                $materialRateTo['rate'] = $rate;
+    public function generateProductAnalysisPdf(Request $request, $product){
+        try{
+            $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first();
+            $product['category'] = Category::where('id',$product['category_id'])->pluck('name')->first();
+            $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
+            $productProfitMarginsData = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
+                ->join('profit_margins','profit_margins.id','=','profit_margin_versions.profit_margin_id')
+                ->where('products_profit_margins_relation.product_version_id',$recentProductVersion['id'])
+                ->select('profit_margins.id as id','profit_margin_versions.percentage as percentage')
+                ->get();
+            $productProfitMargins = array();
+            foreach($productProfitMarginsData as $productProfitMargin){
+                $productProfitMargins[$productProfitMargin['id']] = $productProfitMargin['percentage'];
             }
+            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $materials = Material::join('category_material_relations','category_material_relations.material_id','=','materials.id')
+                ->where('category_material_relations.category_id',$product['category_id'])
+                ->where('materials.is_active', true)
+                ->select('materials.id as id','materials.name as name')
+                ->get();
+            $productMaterialIds = Material::join('material_versions','materials.id','=','material_versions.material_id')
+                ->join('product_material_relation','product_material_relation.material_version_id','=','material_versions.id')
+                ->where('product_material_relation.product_version_id',$recentProductVersion['id'])
+                ->pluck('materials.id')
+                ->toArray();
+            $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
+                ->join('units','units.id','=','material_versions.unit_id')
+                ->join('materials','materials.id','=','material_versions.material_id')
+                ->where('product_material_relation.product_version_id',$recentProductVersion['id'])
+                ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.rate_per_unit as rate_per_unit','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity','units.name as unit')
+                ->get()->toArray();
+            $materialVersionIds = implode(',',ProductMaterialRelation::where('product_version_id','=',$recentProductVersion['id'])->pluck('material_version_id')->toArray());
+            $data['product'] = $product;
+            $profitMarginData = array();
+            foreach ($profitMargins as $pms) {
+                array_push($profitMarginData, $pms['name']);
+            }
+            $data['profitMargins'] = $profitMargins;
+            $data['units'] = $units;
+            $data['materials'] = $materials;
+            $data['product'] = $product;
+            $data['productMaterialIds'] = $productMaterialIds;
+            $data['productMaterialVersions'] = $productMaterialVersions;
+            $subtotal = 0;
+            foreach ($productMaterialVersions as $mat) {
+                $subtotal = $subtotal + round(($mat['quantity']*$mat['rate_per_unit']),2);
+            }
+            $data['subtotal'] = $subtotal;
+
+            $finalAmount = $subtotal;
+            $profitMarginRestruct = array();
+            $pmCount = 0;
+            foreach ($productProfitMargins as $pm) {
+                $pmArray = array(
+                    'pm_name' => $profitMarginData[$pmCount],
+                    'percentage' => $pm,
+                    'total' => round(($subtotal*$pm)/100,3)
+                );
+                array_push($profitMarginRestruct, $pmArray);
+                $finalAmount = round($finalAmount + round(($subtotal*$pm)/100,3),2);
+                $pmCount++;
+            }
+            $data['finalAmount'] = $finalAmount;
+            $data['productProfitMargins'] = $profitMarginRestruct;
+            $data['materialVersionIds'] = $materialVersionIds;
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.product.pdf.product_analysis',$data));
+            return $pdf->stream();
+        } catch(\Exception $e) {
+            $data = [
+                'action' => 'Generate Summary PDF',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
         }
-        return $materialRateTo;
     }
 }

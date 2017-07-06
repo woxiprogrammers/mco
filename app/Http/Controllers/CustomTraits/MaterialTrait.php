@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
 use App\CategoryMaterialRelation;
+use App\Helper\MaterialProductHelper;
 use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialVersion;
@@ -9,12 +10,18 @@ use App\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
+use Barryvdh\DomPDF\Facade as PDF;
 
 trait MaterialTrait{
 
     public function getManageView(Request $request) {
        try{
-           return view('admin.material.manage');
+           $categories = null;
+           $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+           $data['categories'] = $categories;
+           return view('admin.material.manage', $data);
        }catch(\Exception $e){
            $data = [
                'action' => 'Get material manage view',
@@ -117,21 +124,21 @@ trait MaterialTrait{
         try{
             $now = Carbon::now();
             $materialData['name'] = ucwords(trim($request->name));
-            $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
-            $materialData['unit_id'] = $request->unit;
             $materialData['updated_at'] = $now;
             $material->update($materialData);
             if($request->category_id != null){
                 $categoryMaterial = CategoryMaterialRelation::create(['category_id' => $request->category_id,'material_id'=>$material->id]);
             }
-            $materialVersionData['material_id'] = $material->id;
-            $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
-            $materialVersionData['unit_id'] = Unit::where('id',$material->unit_id)->pluck('id')->first();
-            $recentMaterialVersion = MaterialVersion::where('material_id',$material->id)->select('material_id','rate_per_unit','unit_id')->orderBy('created_at','desc')->first()->toArray();
-            if($recentMaterialVersion != $materialVersionData){
-                $materialVersion = MaterialVersion::create($materialVersionData);
+            $updateMaterial = array();
+            $updateMaterial[0]['id'] = $material->id;
+            $updateMaterial[0]['rate_per_unit'] = $request->rate_per_unit;
+            $updateMaterial[0]['unit_id'] = $request->unit;
+            $response = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($updateMaterial);
+            if($response['slug'] == 'error'){
+                $request->session()->flash('error',$response['message']);
+            }else{
+                $request->session()->flash('success','Material Edited successfully.');
             }
-            $request->session()->flash('success','Material Edited successfully.');
             return redirect('/material/edit/'.$material->id);
         }catch(\Exception $e){
             $data = [
@@ -147,9 +154,9 @@ trait MaterialTrait{
     public function materialListing(Request $request){
         try{
             if($request->has('search_name')){
-                $materialData = Material::where('name','ilike','%'.$request->search_name.'%')->orderBy('id','asc')->get()->toArray();
+                $materialData = Material::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $materialData = Material::orderBy('id','asc')->get()->toArray();
+                $materialData = Material::orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($materialData);
             $records = array();
@@ -274,4 +281,59 @@ trait MaterialTrait{
         return response()->json($response,$status);
     }
 
+    public function generateBasicRateMaterialPdf(Request $request){
+        try{
+            $materialData = null;
+            if ($request->has('material_category_ids')) {
+                if  (in_array('all', $request->material_category_ids)) {
+                    $materialData = DB::table('materials')
+                        ->join('units','materials.unit_id','=','units.id')
+                        ->join('category_material_relations','materials.id','=', 'category_material_relations.material_id')
+                        ->join('categories','category_material_relations.category_id','=','categories.id')
+                        ->where('materials.is_active',true)
+                        ->orderBy('categories.id')
+                        ->select('categories.name as category_name','materials.name as material_name','units.name as unit_name','materials.rate_per_unit as rate')
+                        ->get()->toArray();
+                }  else {
+                    $materialData = DB::table('materials')
+                        ->join('units','materials.unit_id','=','units.id')
+                        ->join('category_material_relations','materials.id','=', 'category_material_relations.material_id')
+                        ->join('categories','category_material_relations.category_id','=','categories.id')
+                        ->whereIn('categories.id', $request->material_category_ids)
+                        ->where('materials.is_active',true)
+                        ->orderBy('categories.id')
+                        ->select('categories.name as category_name','materials.name as material_name','units.name as unit_name','materials.rate_per_unit as rate')
+                        ->get()->toArray();
+                }
+            }
+            $data = array();
+            $materialDataFinal = array();
+            foreach ($materialData as $material) {
+                if (!in_array($material->category_name, $materialDataFinal)) {
+                    $materialDataFinal[$material->category_name][] = array (
+                        'material_name' => $material->material_name,
+                        'unit_name' =>  $material->unit_name,
+                        'rate' =>  $material->rate,
+                    );
+                } else {
+                    $materialDataFinal[$material->category_name][] = array (
+                        'material_name' => $material->material_name,
+                        'unit_name' =>  $material->unit_name,
+                        'rate' =>  $material->rate,
+                    );
+                }
+            }
+            $data['materialData'] = $materialDataFinal;
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('admin.material.pdf.materialbasicrates',$data));
+            return $pdf->stream();
+        } catch(\Exception $e) {
+            $data = [
+                'action' => 'Generate Basic Rate PDF',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
 }

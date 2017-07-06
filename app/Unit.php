@@ -19,4 +19,8 @@ class Unit extends Model
             ]
         ];
     }
+
+    public function products(){
+        return $this->hasMany('App\Product','unit_id','id');
+    }
 }

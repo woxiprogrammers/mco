@@ -17,9 +17,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
-    Route::get('/dashboard',function(){
-        return view('admin.dashboard');
-    });
+
+    Route::get('/dashboard',array('uses' => 'Admin\DashboardController@index'));
+
 
     Route::group(['prefix' => 'user'],function (){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
@@ -61,6 +61,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{material}',array('uses' => 'Admin\MaterialController@changeMaterialStatus'));
         Route::post('check-name',array('uses' => 'Admin\MaterialController@checkMaterialName'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\MaterialController@autoSuggest'));
+        Route::post('basicrate_material', array('uses' => 'Admin\MaterialController@generateBasicRateMaterialPdf'));
+
     });
     Route::group(['prefix' => 'product'],function(){
         Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));
@@ -74,6 +76,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{product}',array('uses' => 'Admin\ProductController@changeProductStatus'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\ProductController@autoSuggest'));
         Route::post('check-name',array('uses' => 'Admin\ProductController@checkProductName'));
+        Route::get('product-analysis-pdf/{product}', array('uses' => 'Admin\ProductController@generateProductAnalysisPdf'));
     });
     Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
@@ -134,14 +137,19 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('project-sites/{project}',array('uses' => 'Admin\BillController@getProjectSites'));
         Route::get('manage',array('uses' => 'Admin\BillController@getManageView'));
         Route::post('listing',array('uses' => 'Admin\BillController@billListing'));
+        Route::post('approve', array('uses' => 'Admin\BillController@approveBill'));
+        Route::get('current/invoice/{bill}', array('uses' => 'Admin\BillController@generateCurrentBill'));
+        Route::get('cumulative/invoice/{bill}', array('uses' => 'Admin\BillController@generateCumulativeInvoice'));
+        Route::post('image-upload/{billId}',array('uses'=>'Admin\BillController@uploadTempBillImages'));
+        Route::post('display-images/{billId}',array('uses'=>'Admin\BillController@displayBillImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\BillController@removeTempImage'));
     });
-
 
     Route::group(['prefix' => 'quotation'], function(){
         Route::get('create',array('uses'=> 'Admin\QuotationController@getCreateView'));
         Route::post('create',array('uses'=> 'Admin\QuotationController@createQuotation'));
-        Route::get('manage',array('uses'=> 'Admin\QuotationController@getManageView'));
-        Route::post('listing',array('uses'=> 'Admin\QuotationController@quotationListing'));
+        Route::get('manage/{status}',array('uses'=> 'Admin\QuotationController@getManageView'));
+        Route::post('listing/{status}',array('uses'=> 'Admin\QuotationController@quotationListing'));
         Route::post('get-products',array('uses'=> 'Admin\QuotationController@getProducts'));
         Route::post('get-materials', array('uses' => 'Admin\QuotationController@getMaterials'));
         Route::post('get-profit-margins', array('uses' => 'Admin\QuotationController@getProfitMargins'));
@@ -151,6 +159,20 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-project-sites',array('uses'=> 'Admin\QuotationController@getProjectSites'));
         Route::post('check-project-name',array('uses'=> 'Admin\QuotationController@checkProjectNames'));
         Route::post('get-projects',array('uses'=> 'Admin\QuotationController@getProjects'));
+        Route::get('edit/{quotation}',array('uses'=> 'Admin\QuotationController@getEditView'));
+        Route::put('edit/{quotation}',array('uses'=> 'Admin\QuotationController@editQuotation'));
+        Route::post('get-product-calculations',array('uses'=> 'Admin\QuotationController@calculateProductsAmount'));
+        Route::get('invoice/{quotation}/{slug}' ,array('uses' => 'Admin\QuotationController@generateQuotationPdf'));
+        Route::get('summary/{quotation}' ,array('uses' => 'Admin\QuotationController@generateSummaryPdf'));
+        Route::post('image-upload/{quotationId}',array('uses'=>'Admin\QuotationController@uploadTempWorkOrderImages'));
+        Route::post('display-images/{quotationId}',array('uses'=>'Admin\QuotationController@displayWorkOrderImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\QuotationController@removeTempImage'));
+        Route::post('get-work-order-form', array('uses'=> 'Admin\QuotationController@getWorkOrderForm'));
+        Route::post('approve/{quotation}', array('uses'=> 'Admin\QuotationController@approve'));
+        Route::post('disapprove/{quotation}', array('uses'=> 'Admin\QuotationController@disapprove'));
+        Route::group(['prefix' => 'work-order'],function(){
+            Route::post('edit/{work_order}',array('uses'=>'Admin\QuotationController@editWorkOrder'));
+        });
     });
 
     Route::group(['prefix' => 'project'], function(){

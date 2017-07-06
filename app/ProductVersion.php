@@ -11,6 +11,14 @@ class ProductVersion extends Model
     protected $fillable = ['product_id','rate_per_unit'];
 
     public function product(){
-        $this->belongsTo('App\Product');
+        return $this->belongsTo('App\Product','product_id');
+    }
+
+    public function profit_margin_relations(){
+        return $this->hasMany('App\ProductProfitMarginRelation','product_version_id');
+    }
+
+    public function material_relations(){
+        return $this->hasMany('App\ProductMaterialRelation','product_version_id');
     }
 }

@@ -34,7 +34,7 @@
                             <div class="container">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/quotation/manage">Manage Quotations</a>
+                                        <a href="/quotation/manage/state#2">Manage Quotations</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
@@ -94,8 +94,8 @@
                                                                         <th style="width: 18%"> Category </th>
                                                                         <th style="width: 18%"> Product </th>
                                                                         <th style="width: 25%"> Description</th>
-                                                                        <th style="width: 10%"> Rate</th>
                                                                         <th style="width: 8%"> Unit</th>
+                                                                        <th style="width: 10%"> Rate</th>
                                                                         <th style="width: 10%"> Quantity </th>
                                                                         <th  style="width: 10%"> Amount </th>
                                                                         <th> Action </th>
@@ -124,12 +124,12 @@
                                                                         </td>
                                                                         <td>
                                                                             <div class="form-group">
-                                                                                <input name="product_rate[]" class="form-control quotation-product-table" id="productRate1" type="text" readonly>
+                                                                                <input name="product_unit[]" class="form-control quotation-product-table" id="productUnit1" type="text" readonly>
                                                                             </div>
                                                                         </td>
                                                                         <td>
                                                                             <div class="form-group">
-                                                                                <input name="product_rate[]" class="form-control quotation-product-table" id="productUnit1" type="text" readonly>
+                                                                                <input name="product_rate[]" class="form-control quotation-product-table" id="productRate1" type="text" readonly>
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -146,7 +146,7 @@
                                                                             <table>
                                                                                 <tr style="border-bottom: 1px solid black">
                                                                                     <td>
-                                                                                        <a href="javascript:void(0);">
+                                                                                        <a href="javascript:void(0);" onclick="viewProduct(1)">
                                                                                             View
                                                                                         </a>
                                                                                     </td>
@@ -165,7 +165,7 @@
                                                             </div>
 
                                                             <div class="col-md-3 col-md-offset-5">
-                                                                <a class="btn btn-wide btn-primary" id="next1">
+                                                                <a class="btn btn-wide btn-primary" id="materialCosts">
                                                                     Edit Material Cost
                                                                 </a>
                                                             </div>
@@ -180,6 +180,25 @@
                                                     </div>
                                                 </div>
                                             </form>
+                                        </div>
+                                    </div>
+                                    <div id="productView" class="modal fade" role="dialog">
+                                        <div class="modal-dialog">
+
+                                            <!-- Modal content-->
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                    <h4 class="modal-title">Product Analysis.</h4>
+                                                </div>
+                                                <div class="modal-body">
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -201,6 +220,10 @@
 <script>
     $(document).ready(function(){
         CreateQuotation.init();
+        var category_id = $("#categorySelect1").val();
+        getProducts(category_id,1);
+        var selectedProduct = $("#productSelect1").val();
+        getProductDetails(selectedProduct, 1);
     });
 </script>
 @endsection
