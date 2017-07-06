@@ -766,7 +766,6 @@ trait QuotationTrait{
                     QuotationTaxVersion::create($taxData);
                 }
             }
-            $quotationData['carpet_area'] = $data['carpet_area'];
             $quotationData['built_up_area'] = $data['built_up_area'];
             if(in_array(!null,$data['product_summary'])){
                 $quotationData['is_summary_applied'] = true;
@@ -1122,8 +1121,6 @@ trait QuotationTrait{
             Log::critical(json_encode($data));
         }
     }
-
-
 
     public function getWorkOrderForm(Request $request){
         try{

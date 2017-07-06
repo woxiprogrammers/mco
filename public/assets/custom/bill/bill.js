@@ -3,7 +3,12 @@ $(document).ready(function (){
     $('#submit').prop('disabled',true);
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
-        window.location.href = "/bill/view/"+bill_id;
+        if(bill_id == 'default'){
+            var project_site_id = $('#project_site_id').val();
+            window.location.href = "/bill/create/"+project_site_id;
+        }else{
+            window.location.href = "/bill/view/"+bill_id;
+        }
     });
 
     $('input[type="checkbox"]').click(function(){
