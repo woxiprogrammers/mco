@@ -139,28 +139,30 @@
                                                             <span id="rounded_off_cumulative_bill_amount"></span>
                                                         </td>
                                                     </tr>
-                                                <tr>
-                                                    <td colspan="6"><b>Tax Name</b></td>
-                                                    <td colspan="4"><b>Tax Rate</b></td>
-                                                    <td colspan="3"></td>
-                                                </tr>
-                                                @for($j = 0 ; $j < count($taxes); $j++)
-                                                     <tr>
-                                                         <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">
-                                                         <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
-                                                         <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
-                                                         <td>
-                                                             <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}"></span>
-                                                         </td>
-                                                         <td>
-                                                             <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}"></span>
-                                                         </td>
-                                                         <td>
-                                                             <span id="tax_cumulative_bill_amount_{{$taxes[$j]['id']}}"></span>
-                                                         </td>
+                                                @if($taxes != null)
+                                                    <tr>
+                                                        <td colspan="6"><b>Tax Name</b></td>
+                                                        <td colspan="4"><b>Tax Rate</b></td>
+                                                        <td colspan="3"></td>
+                                                    </tr>
+                                                    @for($j = 0 ; $j < count($taxes); $j++)
+                                                         <tr>
+                                                             <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">
+                                                             <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
+                                                             <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
+                                                             <td>
+                                                                 <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}"></span>
+                                                             </td>
+                                                             <td>
+                                                                 <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}"></span>
+                                                             </td>
+                                                             <td>
+                                                                 <span id="tax_cumulative_bill_amount_{{$taxes[$j]['id']}}"></span>
+                                                             </td>
 
-                                                     </tr>
-                                                @endfor
+                                                         </tr>
+                                                    @endfor
+                                                @endif
                                                 <tr>
                                                     <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
                                                     <td>

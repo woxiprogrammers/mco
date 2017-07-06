@@ -283,12 +283,15 @@ trait BillTrait{
                 $bill_quotation_product['description'] = ucfirst($value['product_description']);
                 BillQuotationProducts::create($bill_quotation_product);
             }
-            foreach($request['tax_percentage'] as $key => $value){
-                $bill_taxes['tax_id'] = $key;
-                $bill_taxes['bill_id'] = $bill_created['id'];
-                $bill_taxes['percentage'] = $value;
-                BillTax::create($bill_taxes);
+            if($request->has('tax_percentage')){
+                foreach($request['tax_percentage'] as $key => $value){
+                    $bill_taxes['tax_id'] = $key;
+                    $bill_taxes['bill_id'] = $bill_created['id'];
+                    $bill_taxes['percentage'] = $value;
+                    BillTax::create($bill_taxes);
+                }
             }
+
             $request->session()->flash('success','Bill Created Successfully');
             return redirect('/bill/create/'.$projectSiteId);
         }catch (\Exception $e){

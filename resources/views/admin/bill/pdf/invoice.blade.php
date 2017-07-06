@@ -26,19 +26,17 @@
                 </td></tr>
         </table>
         <hr>
-        <table>
+        <table width="100%">
             <tr>
-                <td style="width: 600px"><b>To : {!! $clientCompany !!} </b></td>
-                <td style=" font-size: 15px"> <i>DATE : {!! $billDate !!}</i> </td>
+                <td style="width: 50%; font-weight:  lighter;">To : {!! $clientCompany !!}</td>
+                <td style="text-align: right;font-weight: bolder;">Quotation No : {!! $billData['quotation_id'] !!}</td>
             </tr>
             <tr>
-                <td><b>Site Name : {!! $projectSiteName !!}</b></td>
+                <td style="font-weight: lighter;" colspan="2">Site Name : {!! $projectSiteName !!}</td>
             </tr>
             <tr>
-                <td><b>Bill No : RA BILL NO - {!! $currentBillID !!}</b></td>
-            </tr>
-            <tr>
-                <td><b>Quotation No : {!! $billData['quotation_id'] !!}</b></td>
+                <td style="width: 50%; font-weight: bolder;">Bill No : RA BILL NO - {!! $currentBillID !!}</td>
+                <td style=" font-size: 15px; text-align: right; font-weight: lighter;"> DATE : {!! $billDate !!} </td>
             </tr>
         </table>
         <hr>
@@ -48,15 +46,14 @@
             </tr>
         </table>
         <hr>
-        <div>
             <table border="1" width="100%" style="font-size: 14px;">
                 <tr>
-                    <th style="width: 12%; text-align: center"><b>Sr no.</b></th>
-                    <th style="width: 40%; text-align: center"><b>Description of item</b></th>
-                    <th style="width: 12%; text-align: center"><b>Quantity</b></th>
-                    <th style="width: 12%; text-align: center"><b>Unit</b></th>
-                    <th style="width: 12%; text-align: center"><b>Rate</b></th>
-                    <th style="width: 12%; text-align: center"><b>Amount</b></th>
+                    <th style="width: 7%;text-align: center">Sr no.</th>
+                    <th style="width: 38%;text-align: center">Description of item</th>
+                    <th style="width: 10%;text-align: center">Quantity</th>
+                    <th style="width: 10%;text-align: center">Unit</th>
+                    <th style="width: 15%;text-align: center">Rate</th>
+                    <th style="width: 20%;text-align: center">Amount</th>
                 </tr>
                 @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
                     <tr>
@@ -68,7 +65,7 @@
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
                     </tr>
                 @endfor
-                @if(count($invoiceData) > 12)
+                @if(count($invoiceData) < 12)
                     @for($i = 0 ; $i < (12 - count($invoiceData)) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
@@ -81,7 +78,7 @@
                     @endfor
                 @endif
                 <tr>
-                    <td colspan="5" style="text-align: right; width: 650px"><b>Total</b></td>
+                    <td colspan="5" style="text-align: right; padding-right: 10px;"><b>Total</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
                 </tr>
                 @for($iterator = 0 ; $iterator < count($taxData) ; $iterator++)
@@ -95,10 +92,9 @@
                     <td style="text-align: right; padding-right: 10px;">{!! $grossTotal !!}</td>
                 </tr>
                 <tr>
-                    <td colspan="6" style="background-color: #808080"><b>Amount in Words : {!! $amountInWords !!}</b></td>
+                    <td colspan="6" style="background-color: #808080"><i>Rs. {!! $amountInWords !!}</i></td>
                 </tr>
             </table>
-        </div>
         <br>
         <table style="font-size:15px" width="100%" border="1">
             <tr>

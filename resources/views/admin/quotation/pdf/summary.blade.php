@@ -57,7 +57,7 @@
             <td style="text-align: center">{!! $summaryData[$iterator]['rate_per_sft'] !!}</td>
         </tr>
         @endfor
-        @if(count($summaryData) > 18)
+        @if(count($summaryData) < 18)
             @for($iterator = 0 ; $iterator < (18 - count($summaryData)) ; $iterator++)
                 <tr>
                     <td>&nbsp;</td>

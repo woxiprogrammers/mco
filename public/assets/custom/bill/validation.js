@@ -35,7 +35,7 @@ var  CreateBill = function () {
             },
 
             submitHandler: function (form) {
-                //$("button[type='submit']").prop('disabled', true);
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
