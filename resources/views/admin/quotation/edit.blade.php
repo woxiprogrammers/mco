@@ -72,16 +72,20 @@
                                                         <a class="btn btn-info" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             <i class="fa fa-edit"></i> Profit Margins
                                                         </a>
-                                                        <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
-                                                             <i class="fa fa-download"></i>Quotation With Tax
-                                                        </a>
-                                                        <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
+                                                        @if($quotation->built_up_area != null)
+                                                            @if($quotation->is_tax_applied == true)
+                                                                <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
+                                                                    <i class="fa fa-download"></i>Quotation With Tax
+                                                                </a>
+                                                            @endif
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
                                                                 <i class="fa fa-download"></i>Quotation Without Tax
-                                                        </a>
-                                                        @if($quotation->is_summary_applied == true)
-                                                            <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info">
-                                                                <i class="fa fa-download"></i>Summary
                                                             </a>
+                                                            @if($quotation->is_summary_applied == true)
+                                                                <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info">
+                                                                    <i class="fa fa-download"></i>Summary
+                                                                </a>
+                                                            @endif
                                                         @endif
                                                     </fieldset>
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
@@ -124,8 +128,48 @@
                                                             </div>
                                                             <div id="collapse_3_2" class="panel-collapse collapse">
                                                                 <div class="panel-body" style="height:400px; overflow-y:auto;">
-                                                                    <a class="btn btn-success btn-md col-md-offset-11" id="addProduct">Add Product</a>
-                                                                    <div class="table-scrollable">
+                                                                    <div class="row" style="background-color: beige">
+                                                                        <div class="col-md-3">
+                                                                            <div class="col-md-6">
+                                                                                <label class="control-label pull-right" style="font-weight: bold; font-size: 15px">
+                                                                                    Enter Discount:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-6 input-group">
+                                                                                <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}">
+                                                                                <span class="input-group-addon">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-md-4">
+                                                                            <div class="col-md-6">
+                                                                                <label class="control-label pull-right" style="font-weight: bold; font-size: 15px">
+                                                                                    Enter Slab Area:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-6 input-group">
+                                                                                <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
+                                                                                <span class="input-group-addon">&nbsp;&nbsp; Sq.Ft &nbsp; &nbsp;</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <div class="col-md-3">
+                                                                                <label class="control-label pull-right" style="font-weight: bold; font-size: 15px">
+                                                                                    Subtotal:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-9">
+                                                                                    <input type="text" class="form-control" id="subtotal" readonly>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <a class="btn btn-success btn-md pull-right" id="addProduct">Add Product</a>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row" style="height: 4%">
+
+                                                                    </div>
+                                                                    <div class="table-scrollable" style="margin-top: 5%">
                                                                         <table class="table table-bordered" id="productTable" style="overflow: scroll;overflow-x: auto; overflow-y: auto">
                                                                             <tr>
                                                                                 <th style="width: 10%"> Category </th>
@@ -230,46 +274,13 @@
                                                                     </div>
                                                                     <div class="col-md-12">
                                                                         <div class="row">
-                                                                            <div class="col-md-10" style="text-align: right">
-                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
-                                                                                    Subtotal:
-                                                                                </label>
-                                                                            </div>
-                                                                            <div class="col-md-2">
-                                                                                <label class="control-label" style="font-weight: bold; font-size: 14px" id="subtotal">
 
-                                                                                </label>
-                                                                            </div>
                                                                         </div>
                                                                         <div class="row">
-                                                                            <div class="col-md-10" style="text-align: right">
-                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
-                                                                                    Discount:
-                                                                                </label>
-                                                                            </div>
-                                                                            <div class="col-md-2">
-                                                                                <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" min="0">
-                                                                            </div>
+
                                                                         </div>
                                                                         <div class="row">
-                                                                            <div class="col-md-10" style="text-align: right">
-                                                                                <label class="control-label  pull-right" style="font-weight: bold; font-size: 15px">
-                                                                                    Carpet Area:
-                                                                                </label>
-                                                                            </div>
-                                                                            <div class="col-md-2">
-                                                                                <input class="form-control" type="number" name="carpet_area" value="{{$quotation->carpet_area}}">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="row">
-                                                                            <div class="col-md-10" style="text-align: right">
-                                                                                <label class="control-label" style="font-weight: bold; font-size: 15px">
-                                                                                    Slab area:
-                                                                                </label>
-                                                                            </div>
-                                                                            <div class="col-md-2">
-                                                                                <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
-                                                                            </div>
+
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -591,8 +602,8 @@
 @endif
 <script>
     $(document).ready(function(){
+        EditQuotation.init();
         calculateSubtotal();
     });
-
 </script>
 @endsection

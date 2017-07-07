@@ -146,27 +146,29 @@
                                                         <span id="rounded_off_cumulative_bill_amount">{{$total_rounded['cumulative_bill_amount']}}</span>
                                                     </td>
                                                 </tr>
-                                                <tr>
-                                                    <td colspan="5"><b>Tax Name</b></td>
-                                                    <td colspan="4"><b>Tax Rate</b></td>
-                                                    <td colspan="3"></td>
-                                                </tr>
-                                                @for($j = 0 ; $j < count($taxes); $j++)
-                                                <tr>
-                                                    <td colspan="5" style="text-align: center">{{$taxes[$j]['taxes']['name']}}</td>
-                                                    <td colspan="4" style="text-align: center"><span id="percentage">{{abs($taxes[$j]['percentage'])}}</td>
-                                                    <td>
-                                                        <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['previous_bill_amount']}}</span>
-                                                    </td>
-                                                    <td>
-                                                        <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['current_bill_amount']}}</span>
-                                                    </td>
-                                                    <td>
-                                                        <span id="tax_cumulative_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['cumulative_bill_amount']}}</span>
-                                                    </td>
+                                                @if($taxes != null)
+                                                    <tr>
+                                                        <td colspan="5"><b>Tax Name</b></td>
+                                                        <td colspan="4"><b>Tax Rate</b></td>
+                                                        <td colspan="3"></td>
+                                                    </tr>
+                                                    @for($j = 0 ; $j < count($taxes); $j++)
+                                                    <tr>
+                                                        <td colspan="5" style="text-align: center">{{$taxes[$j]['taxes']['name']}}</td>
+                                                        <td colspan="4" style="text-align: center"><span id="percentage">{{abs($taxes[$j]['percentage'])}}</td>
+                                                        <td>
+                                                            <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['previous_bill_amount']}}</span>
+                                                        </td>
+                                                        <td>
+                                                            <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['current_bill_amount']}}</span>
+                                                        </td>
+                                                        <td>
+                                                            <span id="tax_cumulative_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['cumulative_bill_amount']}}</span>
+                                                        </td>
 
-                                                </tr>
-                                                @endfor
+                                                    </tr>
+                                                    @endfor
+                                                @endif
                                                 <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
                                                     <td>

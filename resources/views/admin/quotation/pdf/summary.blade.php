@@ -57,13 +57,15 @@
             <td style="text-align: center">{!! $summaryData[$iterator]['rate_per_sft'] !!}</td>
         </tr>
         @endfor
-        @for($iterator = 0 ; $iterator < (18 - count($summaryData)) ; $iterator++)
-            <tr>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-        @endfor
+        @if(count($summaryData) < 18)
+            @for($iterator = 0 ; $iterator < (18 - count($summaryData)) ; $iterator++)
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            @endfor
+        @endif
         <tr>
             <td></td>
             <td style="text-align: center"><b>TOTAL RATE PER Sqft. BUILTUP AREA</b></td>

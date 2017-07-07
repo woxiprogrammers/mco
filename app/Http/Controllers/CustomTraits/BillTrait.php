@@ -17,8 +17,6 @@ use App\QuotationProduct;
 use App\QuotationStatus;
 use App\Tax;
 use App\Unit;
-use Carbon\Carbon;
-use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +26,6 @@ trait BillTrait{
 
     public function getCreateView(Request $request,$project_site){
         try{
-            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
             $bills = Bill::where('quotation_id',$quotation['id'])->get()->toArray();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
@@ -179,6 +176,7 @@ trait BillTrait{
             }
             $iTotalRecords = count($listingData);
             $records = array();
+            $records['data'] = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($listingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['company'],
@@ -282,12 +280,15 @@ trait BillTrait{
                 $bill_quotation_product['description'] = ucfirst($value['product_description']);
                 BillQuotationProducts::create($bill_quotation_product);
             }
-            foreach($request['tax_percentage'] as $key => $value){
-                $bill_taxes['tax_id'] = $key;
-                $bill_taxes['bill_id'] = $bill_created['id'];
-                $bill_taxes['percentage'] = $value;
-                BillTax::create($bill_taxes);
+            if($request->has('tax_percentage')){
+                foreach($request['tax_percentage'] as $key => $value){
+                    $bill_taxes['tax_id'] = $key;
+                    $bill_taxes['bill_id'] = $bill_created['id'];
+                    $bill_taxes['percentage'] = $value;
+                    BillTax::create($bill_taxes);
+                }
             }
+
             $request->session()->flash('success','Bill Created Successfully');
             return redirect('/bill/create/'.$projectSiteId);
         }catch (\Exception $e){
