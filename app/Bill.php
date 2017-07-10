@@ -18,7 +18,12 @@ class Bill extends Model
     {
         return $this->hasMany('App\BillQuotationProducts','bill_id');
     }
-    public function bill_status(){
+    public function bill_status()
+    {
         return $this->belongsTo('App\BillStatus','bill_status_id');
+    }
+    public function bill_tax()
+    {
+        return $this->hasMany('App\BillTax','bill_id');
     }
 }

@@ -53,6 +53,10 @@
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
                                                     @endfor
                                                 </select>
+                                                <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-edit"></i>
+                                                    Bill
+                                                </a>
                                                 @if($bill->bill_status->slug != 'paid')
                                                     <a class="btn green-meadow" id="approve" data-toggle="tab" href="#billApproveTab" style="margin-left: 10px">
                                                         Approve

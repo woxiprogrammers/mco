@@ -24,6 +24,51 @@ use Illuminate\Support\Facades\File;
 
 trait BillTrait{
 
+    public function editBillView(Request $request,$bill){
+        try{
+            $i = 0;
+            $quotationProducts = $bill->quotation->quotation_products;
+            $billQuotationProducts = $bill->bill_quotation_product;
+            foreach($quotationProducts as $key => $quotationProduct){
+                foreach($billQuotationProducts as $key1 =>  $billQuotationProduct){
+                    if($billQuotationProduct['quotation_product_id'] == $quotationProduct['id']){
+                        $quotationProduct['current_quantity'] = $billQuotationProduct['quantity'];
+                        $quotationProduct['bill_description'] = $billQuotationProduct['description'];
+                    }
+                    $quotationProduct['discounted_rate'] = round(($quotationProduct['rate_per_unit'] - ($quotationProduct['rate_per_unit'] * ($quotationProduct->quotation->discount / 100))),3);
+                }
+            }
+            dd($quotationProducts->toArray());
+            $billTaxes = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
+            $taxes = $currentTaxes =  array();
+            if($billTaxes != null){
+                $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->get();
+            }
+            $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
+            foreach($currentTaxes as $key => $tax){
+                if(!(array_key_exists('name',$tax))){
+                    $taxes[$i] = Tax::where('id',$tax['tax_id'])->select('id','name','slug')->first()->toArray();
+                    $taxes[$i]['percentage'] = $tax['percentage'];
+                }else{
+                    $taxes[$i]['id'] = $tax['id'];
+                    $taxes[$i]['name'] = $tax['name'];
+                    $taxes[$i]['slug'] = $tax['slug'];
+                    $taxes[$i]['percentage'] = 0;
+                }
+                $i++;
+            }
+            return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function getCreateView(Request $request,$project_site){
         try{
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
@@ -213,7 +258,7 @@ trait BillTrait{
         return response()->json($records,200);
     }
 
-    public function editBill(Request $request,$bill){
+    public function viewBill(Request $request,$bill){
         try{
             $selectedBillId = $bill['id'];
             $bills = Bill::where('quotation_id',$bill['quotation_id'])->get()->toArray();
