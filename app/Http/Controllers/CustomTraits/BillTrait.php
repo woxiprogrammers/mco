@@ -28,17 +28,22 @@ trait BillTrait{
         try{
             $i = 0;
             $quotationProducts = $bill->quotation->quotation_products;
-            $billQuotationProducts = $bill->bill_quotation_product;
+            $allBillIDs = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->pluck('id')->toArray();
+            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDs)->get();
             foreach($quotationProducts as $key => $quotationProduct){
-                foreach($billQuotationProducts as $key1 =>  $billQuotationProduct){
-                    if($billQuotationProduct['quotation_product_id'] == $quotationProduct['id']){
-                        $quotationProduct['current_quantity'] = $billQuotationProduct['quantity'];
-                        $quotationProduct['bill_description'] = $billQuotationProduct['description'];
-                    }
+                $quotationProduct['previous_quantity'] = 0;
+                foreach($billQuotationProducts as $key1 => $billQuotationProduct){
                     $quotationProduct['discounted_rate'] = round(($quotationProduct['rate_per_unit'] - ($quotationProduct['rate_per_unit'] * ($quotationProduct->quotation->discount / 100))),3);
+                    if($billQuotationProduct->quotation_product_id == $quotationProduct->id){
+                        $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
+                        if($billQuotationProduct->bill_id == $bill->id){
+                            $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity - $billQuotationProduct->quantity;
+                            $quotationProduct['bill_description'] = $billQuotationProduct->description;
+                            $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
+                        }
+                    }
                 }
             }
-            dd($quotationProducts->toArray());
             $billTaxes = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
             $taxes = $currentTaxes =  array();
             if($billTaxes != null){
