@@ -144,6 +144,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('display-images/{billId}',array('uses'=>'Admin\BillController@displayBillImages'));
         Route::post('delete-temp-product-image',array('uses'=>'Admin\BillController@removeTempImage'));
         Route::get('edit/{bill}', array('uses' => 'Admin\BillController@editBillView'));
+        Route::post('edit/{bill}', array('uses' => 'Admin\BillController@editBill'));
     });
 
     Route::group(['prefix' => 'quotation'], function(){

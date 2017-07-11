@@ -40,6 +40,7 @@
                                         <div class="portlet light ">
                                             <div class="portlet-body">
                                                 <div class="tab-content">
+                                                    <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
                                                     <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                         <tr style="text-align: center">
                                                             <th width="1%">
@@ -223,6 +224,7 @@
                                                             <button type="submit" class="btn btn-success" id="submit"> Submit </button>
                                                         </div>
                                                     </div>
+                                                  </form>
                                                 </div>
                                             </div>
                                         </div>

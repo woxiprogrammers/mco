@@ -74,6 +74,14 @@ trait BillTrait{
         }
     }
 
+    public function editBill(Request $request, $bill){
+        try{
+            return redirect('/bill/view/'.$bill->id);
+        }catch(\Exception $e){
+
+        }
+    }
+
     public function getCreateView(Request $request,$project_site){
         try{
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
