@@ -70,4 +70,30 @@ var MaterialListing = function () {
 
 jQuery(document).ready(function() {
     MaterialListing.init();
+    $("input[name='search_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
+
+    $("#changeStatusButton").on('click',function(e){
+        e.stopPropagation();
+        var materialIds = [];
+        $("input:checkbox:checked").each(function(i){
+            materialIds[i] = $(this).val();
+        });
+        console.log(materialIds);
+        $.ajax({
+            url:'/material/change-status',
+            type: "POST",
+            data: {
+                _token: $("input[name='_token']").val(),
+                material_ids: materialIds
+            },
+            success: function(data, textStatus, xhr){
+                $(".filter-submit").trigger('click');
+            },
+            error: function(data){
+
+            }
+        });
+    });
 });

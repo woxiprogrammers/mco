@@ -4,8 +4,6 @@
 
 
 $(document).ready(function(){
-
-
     $(".quotation-category").change(function(){
         var category_id = $(this).val();
         var categoryIdField = $(this).attr('id');
@@ -148,6 +146,11 @@ $(document).ready(function(){
             $(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
         });
         calculateProductSubtotal();
+    });
+
+    $("#generalTabSubmit").on('click',function(e){
+        e.stopPropagation();
+        $("#materialCosts").trigger('click');
     });
 });
 
@@ -373,8 +376,10 @@ function viewProduct(row){
         async: false,
         success: function(data, textStatus, xhr){
             $("#productView .modal-body").html(data);
-            calucalateProductViewTotal();
+
+//            calculateSubTotal(true);
             $("#productView").modal('show');
+            calucalateProductViewTotal();
         },
         error: function(){
 
@@ -416,16 +421,14 @@ function calculateSubtotal(){
 function calucalateProductViewTotal(){
     var subtotal = 0;
     $(".material-amount").each(function(){
-        subtotal = subtotal + parseFloat($(this).text());
+        subtotal = subtotal + parseFloat($(this).val());
     });
     $("#productViewSubtotal").text(Math.round(subtotal * 1000) / 1000);
-
     var total = subtotal;
-    $(".profit-margin-percentage").each(function(){
-        var percentage = parseFloat($(this).text());
-        var amount = subtotal * (percentage/100);
-        $(this).next().text(Math.round(amount * 1000) / 1000);
-        total = total + amount;
+    $(".profit-margin").each(function(){
+        var profitMarginAmount = subtotal * ($(this).val() / 100);
+        total = total + profitMarginAmount;
+        $(this).parent().next().text(Math.round(profitMarginAmount * 1000) / 1000);
     });
     $("#total").text(Math.round(total * 1000) / 1000);
 }
@@ -462,4 +465,10 @@ function convertUnit(materialId,fromUnit){
 
 function openDisapproveModal(){
     $("#disapproveModal").modal('show');
+}
+
+function submitProductEdit(){
+    $("#editProductForm").ajaxSubmit(function(data){
+        // after form submit
+    });
 }

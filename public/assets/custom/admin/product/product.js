@@ -2,7 +2,7 @@ $(document).ready(function(){
 
     calculateSubTotal();
     $("#next_btn").on('click',function(){
-        if($("#material_id option:selected").length > 0){
+        if($("#material_id input:checkbox:checked").length > 0){
             getMaterialDetails();
             $(".materials-table-div").show();
         }
@@ -44,10 +44,10 @@ function getMaterials(category){
 
 function getMaterialDetails(){
     var material_ids = [];
-    $("#material_id option:selected").each(function(i){
+    $("#material_id input:checkbox:checked").each(function(i){
         material_ids[i] = $(this).val();
     });
-
+    console.log(material_ids);
     $.ajax({
         url: '/product/material/listing',
         type: "POST",
