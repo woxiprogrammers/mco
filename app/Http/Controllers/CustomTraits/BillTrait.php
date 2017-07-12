@@ -235,24 +235,14 @@ trait BillTrait{
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
                     }
                 }
-                $billQuotationProducts[$iterator]['previous_bill_amount'] = round(($billQuotationProducts[$iterator]['previous_quantity'] * $billQuotationProducts[$iterator]['rate']),3);
                 $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
-                $billQuotationProducts[$iterator]['cumulative_bill_amount'] = round(($billQuotationProducts[$iterator]['cumulative_quantity'] * $billQuotationProducts[$iterator]['rate']),3);
-                $total['previous_bill_amount'] = round(($total['previous_bill_amount'] + $billQuotationProducts[$iterator]['previous_bill_amount']),3);
                 $total['current_bill_amount'] = round(($total['current_bill_amount'] + $billQuotationProducts[$iterator]['current_bill_amount']),3);
-                $total['cumulative_bill_amount'] = round(($total['cumulative_bill_amount'] + $billQuotationProducts[$iterator]['cumulative_bill_amount']),3);
             }
-            $final['previous_bill_amount'] = $total_rounded['previous_bill_amount'] = round($total['previous_bill_amount']);
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = round($total['current_bill_amount']);
-            $final['cumulative_bill_amount'] = $total_rounded['cumulative_bill_amount'] = round($total['cumulative_bill_amount']);
             $taxes = BillTax::where('bill_id',$bill['id'])->with('taxes')->get()->toArray();
             for($j = 0 ; $j < count($taxes) ; $j++){
-                $taxes[$j]['previous_bill_amount'] = round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
                 $taxes[$j]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                $taxes[$j]['cumulative_bill_amount'] = round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                $final['previous_bill_amount'] = round($final['previous_bill_amount'] + $taxes[$j]['previous_bill_amount']);
                 $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$j]['current_bill_amount']);
-                $final['cumulative_bill_amount'] = round($final['cumulative_bill_amount'] + $taxes[$j]['cumulative_bill_amount']);
             }
             return view('admin.bill.view')->with(compact('bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes'));
         }catch (\Exception $e){
