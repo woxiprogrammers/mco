@@ -30,7 +30,9 @@
                 <tr>
                     <td style="background-color: #c2c2c2">BILL OF QUANTITIES</td>
                 </tr>
-                <tr><td>(SLAB AREA CONSIDERED = <b>{!! $quotation['built_up_area'] !!} SQFT</b>)</td></tr>
+                <tr>
+                    <td>(SLAB AREA CONSIDERED = <b>{!! $quotation['built_up_area'] !!} SQFT</b>)</td>
+                </tr>
             </table>
             <br>
             <div>

@@ -29,7 +29,7 @@
         <table width="100%">
             <tr>
                 <td style="width: 50%; font-weight:  lighter;">To : {!! $clientCompany !!}</td>
-                <td style="text-align: right;font-weight: bolder;">Quotation No : {!! $billData['quotation_id'] !!}</td>
+                <td style="text-align: right;font-weight: bolder;">Invoice No : {!! $invoice_no !!}</td>
             </tr>
             <tr>
                 <td style="font-weight: lighter;" colspan="2">Site Name : {!! $projectSiteName !!}</td>
@@ -65,8 +65,8 @@
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
                     </tr>
                 @endfor
-                @if(count($invoiceData) < 12)
-                    @for($i = 0 ; $i < (12 - count($invoiceData)) ; $i++)
+                @if(count($invoiceData) < 10)
+                    @for($i = 0 ; $i < (10 - count($invoiceData)) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>

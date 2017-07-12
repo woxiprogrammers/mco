@@ -47,7 +47,7 @@
                                       <div class="tab-content">
                                         <div class="tab-pane fade in active">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
+                                            <div class="col-md-offset-5 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -60,7 +60,11 @@
                                                     </a>
 
                                                     <a class="btn green-meadow" id="approve" data-toggle="tab" href="#billApproveTab" style="margin-left: 10px">
-                                                        Approve
+                                                        <i class="fa fa-check-square-o"></i> Approve
+                                                    </a>
+
+                                                    <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#cancel-form" style="margin-left: 10px">
+                                                        <i class="fa fa-remove"></i> Cancel
                                                     </a>
                                                 @endif
                                                 <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
@@ -240,6 +244,33 @@
             </div>
                 <input type="hidden" id="path" name="path" value="">
                 <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+            <div id="cancel-form" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Cancel Bill</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form class="form-horizontal" id="add_enquiry" action="/bill/cancel/{{$selectedBillId}}" method="POST">
+                                {!! csrf_field() !!}
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Remark</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" name="remark" id="remark">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary pull-right">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
