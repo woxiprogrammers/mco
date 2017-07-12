@@ -31,7 +31,7 @@
                                             <i class="fa fa-circle"></i>
                                         </li>
                                         <li>
-                                            <a href="javascript:void(0);">View Bill</a>
+                                            <a href="javascript:void(0);">Edit Bill</a>
                                             <i class="fa fa-circle"></i>
                                         </li>
                                     </ul>
@@ -41,7 +41,7 @@
                                             <div class="portlet-body">
                                                 <div class="tab-content">
                                                     <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
-                                                    <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
+                                                    <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">
                                                         <tr style="text-align: center">
                                                             <th width="1%">
                                                                 <input type="checkbox" class="group-checkable">
