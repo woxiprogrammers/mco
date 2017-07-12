@@ -55,9 +55,7 @@
                                                             <th width="7%" class="numeric"> Previous Quantity </th>
                                                             <th width="7%" class="numeric"> Current Quantity </th>
                                                             <th width="10%" class="numeric"> Cumulative Quantity </th>
-                                                            <th width="10%" class="numeric"> Previous. Bill Amount </th>
                                                             <th width="10%" class="numeric"> Current Bill Amount </th>
-                                                            <th width="10%" class="numeric"> Cumulative Bill Amount </th>
                                                         </tr>
                                                         @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                             <tr id="id_{{$quotationProducts[$iterator]['id']}}">
@@ -115,16 +113,9 @@
                                                                 </td>
 
                                                                 <td>
-                                                                    <span id="previous_bill_amount_{{$quotationProducts[$iterator]['id']}}"></span>
-                                                                </td>
-
-                                                                <td>
                                                                     <span id="current_bill_amount_{{$quotationProducts[$iterator]['id']}}"></span>
                                                                 </td>
 
-                                                                <td>
-                                                                    <span id="cumulative_bill_amount_{{$quotationProducts[$iterator]['id']}}"></span>
-                                                                </td>
                                                             </tr>
                                                         @endfor
 
@@ -134,15 +125,7 @@
                                                             </td>
 
                                                             <td>
-                                                                <span id="total_previous_bill_amount"></span>
-                                                            </td>
-
-                                                            <td>
                                                                 <span id="total_current_bill_amount"></span>
-                                                            </td>
-
-                                                            <td>
-                                                                <span id="total_cumulative_bill_amount"></span>
                                                             </td>
                                                         </tr>
 
@@ -152,16 +135,9 @@
                                                             </td>
 
                                                             <td>
-                                                                <span id="rounded_off_previous_bill_amount"></span>
-                                                            </td>
-
-                                                            <td>
                                                                 <span id="rounded_off_current_bill_amount"></span>
                                                             </td>
 
-                                                            <td>
-                                                                <span id="rounded_off_cumulative_bill_amount"></span>
-                                                            </td>
                                                         </tr>
                                                         @if($taxes != null)
                                                             <tr>
@@ -171,31 +147,29 @@
                                                                 <td colspan="4">
                                                                     <b>Tax Rate</b>
                                                                 </td>
-                                                                <td colspan="3">
+                                                                <td colspan="1">
 
                                                                 </td>
                                                             </tr>
                                                             @for($j = 0 ; $j < count($taxes); $j++)
                                                                 <tr>
-                                                                    <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">
-                                                                    <td colspan="6" style="text-align: center">
-                                                                        {{$taxes[$j]['name']}}
-                                                                    </td>
+                                                                    <input type="hidden" id="is_already_applied" name="tax_data[{{$taxes[$j]['id']}}][is_already_applied]" value="{{$taxes[$j]['already_applied']}}">
+                                                                    @if($taxes[$j]['already_applied'] == 0)
+                                                                        <td colspan="6" style="text-align: center">
+                                                                            {{$taxes[$j]['name']}} (NEWLY APPLIED)
+                                                                        </td>
+                                                                    @else
+                                                                        <td colspan="6" style="text-align: center">
+                                                                            {{$taxes[$j]['name']}}
+                                                                        </td>
+                                                                    @endif
 
                                                                     <td colspan="4" style="text-align: right">
-                                                                        <input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()">
-                                                                    </td>
-
-                                                                    <td>
-                                                                        <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}"></span>
+                                                                        <input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_data[{{$taxes[$j]['id']}}][percentage]" value="{{$taxes[$j]['percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()">
                                                                     </td>
 
                                                                     <td>
                                                                         <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}"></span>
-                                                                    </td>
-
-                                                                    <td>
-                                                                        <span id="tax_cumulative_bill_amount_{{$taxes[$j]['id']}}"></span>
                                                                     </td>
                                                                 </tr>
                                                             @endfor
@@ -207,15 +181,7 @@
                                                             </td>
 
                                                             <td>
-                                                                <span id="final_previous_bill_total"></span>
-                                                            </td>
-
-                                                            <td>
                                                                 <span id="final_current_bill_total"></span>
-                                                            </td>
-
-                                                            <td>
-                                                                <span id="final_cumulative_bill_total"></span>
                                                             </td>
                                                         </tr>
                                                     </table>

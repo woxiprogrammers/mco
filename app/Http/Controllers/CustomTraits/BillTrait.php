@@ -24,64 +24,6 @@ use Illuminate\Support\Facades\File;
 
 trait BillTrait{
 
-    public function editBillView(Request $request,$bill){
-        try{
-            $i = 0;
-            $quotationProducts = $bill->quotation->quotation_products;
-            $allBillIDs = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->pluck('id')->toArray();
-            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDs)->get();
-            foreach($quotationProducts as $key => $quotationProduct){
-                $quotationProduct['previous_quantity'] = 0;
-                foreach($billQuotationProducts as $key1 => $billQuotationProduct){
-                    $quotationProduct['discounted_rate'] = round(($quotationProduct['rate_per_unit'] - ($quotationProduct['rate_per_unit'] * ($quotationProduct->quotation->discount / 100))),3);
-                    if($billQuotationProduct->quotation_product_id == $quotationProduct->id){
-                        $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
-                        if($billQuotationProduct->bill_id == $bill->id){
-                            $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity - $billQuotationProduct->quantity;
-                            $quotationProduct['bill_description'] = $billQuotationProduct->description;
-                            $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
-                        }
-                    }
-                }
-            }
-            $billTaxes = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
-            $taxes = $currentTaxes =  array();
-            if($billTaxes != null){
-                $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->get();
-            }
-            $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
-            foreach($currentTaxes as $key => $tax){
-                if(!(array_key_exists('name',$tax))){
-                    $taxes[$i] = Tax::where('id',$tax['tax_id'])->select('id','name','slug')->first()->toArray();
-                    $taxes[$i]['percentage'] = $tax['percentage'];
-                }else{
-                    $taxes[$i]['id'] = $tax['id'];
-                    $taxes[$i]['name'] = $tax['name'];
-                    $taxes[$i]['slug'] = $tax['slug'];
-                    $taxes[$i]['percentage'] = 0;
-                }
-                $i++;
-            }
-            return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes'));
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Edit Bill',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-    }
-
-    public function editBill(Request $request, $bill){
-        try{
-            return redirect('/bill/view/'.$bill->id);
-        }catch(\Exception $e){
-
-        }
-    }
-
     public function getCreateView(Request $request,$project_site){
         try{
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
@@ -586,6 +528,111 @@ trait BillTrait{
             ];
             Log::critical(json_encode($data));
             abort(500,$e->getMessage());
+        }
+    }
+
+    public function editBillView(Request $request,$bill){
+        try{
+            $i = 0;
+            $quotationProducts = $bill->quotation->quotation_products;
+            $allBillIDs = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->pluck('id')->toArray();
+            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDs)->get();
+            foreach($quotationProducts as $key => $quotationProduct){
+                $quotationProduct['previous_quantity'] = 0;
+                foreach($billQuotationProducts as $key1 => $billQuotationProduct){
+                    $quotationProduct['discounted_rate'] = round(($quotationProduct['rate_per_unit'] - ($quotationProduct['rate_per_unit'] * ($quotationProduct->quotation->discount / 100))),3);
+                    if($billQuotationProduct->quotation_product_id == $quotationProduct->id){
+                        $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
+                        if($billQuotationProduct->bill_id == $bill->id){
+                            $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity - $billQuotationProduct->quantity;
+                            $quotationProduct['bill_description'] = $billQuotationProduct->description;
+                            $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
+                        }
+                    }
+                }
+            }
+            $billTaxes = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
+            $taxes = $currentTaxes =  array();
+            if($billTaxes != null){
+                $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->get();
+            }
+            $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
+            foreach($currentTaxes as $key => $tax){
+                if(!(array_key_exists('name',$tax))){
+                    $taxes[$i] = Tax::where('id',$tax['tax_id'])->select('id','name','slug')->first()->toArray();
+                    $taxes[$i]['percentage'] = $tax['percentage'];
+                    $taxes[$i]['already_applied'] = 1;
+                }else{
+                    $taxes[$i]['id'] = $tax['id'];
+                    $taxes[$i]['name'] = $tax['name'];
+                    $taxes[$i]['slug'] = $tax['slug'];
+                    $taxes[$i]['percentage'] = $tax['base_percentage'];
+                    $taxes[$i]['already_applied'] = 0;
+                }
+                $i++;
+            }
+            return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editBill(Request $request, $bill){
+        try{
+            $products = $request->quotation_product_id;
+            $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();
+            $editQuotationProductIds = array_keys($products);
+            $deletedQuotationProductIds = array_values(array_diff($alreadyExistQuotationProductIds,$editQuotationProductIds));
+            foreach($deletedQuotationProductIds as $productId){
+                BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$productId)->delete();
+            }
+            foreach($products as $key => $product){
+                $alreadyExistProduct = BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->first();
+                if($key == $alreadyExistProduct->quotation_product_id){
+                    if($product['current_quantity'] != $alreadyExistProduct->quantity){
+                        $billQuotationProduct['quantity'] = $product['current_quantity'];
+                    }
+                    $billQuotationProduct['description'] = $product['product_description'];
+                    BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->update($billQuotationProduct);
+                }else{
+                    $billQuotationProduct['bill_id'] = $bill->id;
+                    $billQuotationProduct['quotation_product_id'] = $key;
+                    $billQuotationProduct['quantity'] = $product['current_quantity'];
+                    $billQuotationProduct['description'] = $product['product_description'];
+                    BillQuotationProducts::create($billQuotationProduct);
+                }
+            }
+            $tax_applied = $request->tax_data;
+            foreach($tax_applied as $taxId => $tax){
+                if($tax['is_already_applied'] == true){
+                    $alreadyPresentTax = BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->pluck('percentage');
+                    if($alreadyPresentTax != $tax['percentage']){
+                        BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->update(['percentage' => $tax['percentage']]);
+                    }
+                }else{
+                    if($tax['percentage'] != 0){
+                        $taxData['bill_id'] = $bill->id;
+                        $taxData['tax_id'] = $taxId;
+                        $taxData['percentage'] = $tax['percentage'];
+                        BillTax::create($taxData);
+                    }
+                }
+            }
+            return redirect('/bill/view/'.$bill->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }

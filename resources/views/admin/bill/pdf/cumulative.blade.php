@@ -68,8 +68,8 @@
                             <td style="text-align: center;">{!! $invoiceData[$iterator]['cumulative_bill_amount'] !!}</td>
                         </tr>
                     @endfor
-                    @if(count($invoiceData) < 14)
-                        @for($iterator = 0 ; $iterator < (14 - count($invoiceData)) ; $iterator++ )
+                    @if(count($invoiceData) < 10)
+                        @for($iterator = 0 ; $iterator < (10 - count($invoiceData)) ; $iterator++ )
                         <tr>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
