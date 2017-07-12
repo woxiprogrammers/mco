@@ -635,7 +635,7 @@ trait BillTrait{
             return redirect('/bill/manage');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Edit bill',
+                'action' => 'Cancel bill status',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
