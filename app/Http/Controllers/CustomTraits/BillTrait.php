@@ -271,7 +271,7 @@ trait BillTrait{
             $projectSiteId = $request['project_site_id'];
             $bill_quotation_product = array();
             $bill['quotation_id'] = $request['quotation_id'];
-            $bill['bill_status_id'] = BillStatus::where('slug','unpaid')->pluck('id')->first();
+            $bill['bill_status_id'] = BillStatus::where('slug','draft')->pluck('id')->first();
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
                 $bill_quotation_product['bill_id'] = $bill_created['id'];
