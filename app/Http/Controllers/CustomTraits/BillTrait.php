@@ -27,7 +27,8 @@ trait BillTrait{
     public function getCreateView(Request $request,$project_site){
         try{
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
-            $bills = Bill::where('quotation_id',$quotation['id'])->get()->toArray();
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $bills = Bill::where('quotation_id',$quotation['id'])->where('bill_status_id','!=',$cancelBillStatusId)->get()->toArray();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
             if($bills != null){
                 for($i = 0 ; $i < count($quotationProducts) ; $i++){
@@ -235,24 +236,14 @@ trait BillTrait{
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
                     }
                 }
-                $billQuotationProducts[$iterator]['previous_bill_amount'] = round(($billQuotationProducts[$iterator]['previous_quantity'] * $billQuotationProducts[$iterator]['rate']),3);
                 $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
-                $billQuotationProducts[$iterator]['cumulative_bill_amount'] = round(($billQuotationProducts[$iterator]['cumulative_quantity'] * $billQuotationProducts[$iterator]['rate']),3);
-                $total['previous_bill_amount'] = round(($total['previous_bill_amount'] + $billQuotationProducts[$iterator]['previous_bill_amount']),3);
                 $total['current_bill_amount'] = round(($total['current_bill_amount'] + $billQuotationProducts[$iterator]['current_bill_amount']),3);
-                $total['cumulative_bill_amount'] = round(($total['cumulative_bill_amount'] + $billQuotationProducts[$iterator]['cumulative_bill_amount']),3);
             }
-            $final['previous_bill_amount'] = $total_rounded['previous_bill_amount'] = round($total['previous_bill_amount']);
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = round($total['current_bill_amount']);
-            $final['cumulative_bill_amount'] = $total_rounded['cumulative_bill_amount'] = round($total['cumulative_bill_amount']);
             $taxes = BillTax::where('bill_id',$bill['id'])->with('taxes')->get()->toArray();
             for($j = 0 ; $j < count($taxes) ; $j++){
-                $taxes[$j]['previous_bill_amount'] = round($total['previous_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
                 $taxes[$j]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                $taxes[$j]['cumulative_bill_amount'] = round($total['cumulative_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                $final['previous_bill_amount'] = round($final['previous_bill_amount'] + $taxes[$j]['previous_bill_amount']);
                 $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$j]['current_bill_amount']);
-                $final['cumulative_bill_amount'] = round($final['cumulative_bill_amount'] + $taxes[$j]['cumulative_bill_amount']);
             }
             return view('admin.bill.view')->with(compact('bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes'));
         }catch (\Exception $e){
@@ -451,6 +442,7 @@ trait BillTrait{
             $data['taxData'] = $taxData;
             $data['grossTotal'] = round($data['grossTotal'] + $data['subTotal']);
             $data['amountInWords'] = ucwords(NumberHelper::getIndianCurrency($data['grossTotal']));
+            $data['invoice_no'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('admin.bill.pdf.invoice',$data));
             return $pdf->stream();
@@ -628,6 +620,22 @@ trait BillTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function cancelBill(Request $request,$bill){
+        try{
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $bill->update(['bill_status_id' => $cancelBillStatusId , 'remark' => $request->remark]);
+            return redirect('/bill/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Cancel bill status',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];

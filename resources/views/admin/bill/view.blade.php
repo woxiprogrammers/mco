@@ -47,7 +47,7 @@
                                       <div class="tab-content">
                                         <div class="tab-pane fade in active">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-6 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
+                                            <div class="col-md-offset-5 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -60,7 +60,11 @@
                                                     </a>
 
                                                     <a class="btn green-meadow" id="approve" data-toggle="tab" href="#billApproveTab" style="margin-left: 10px">
-                                                        Approve
+                                                        <i class="fa fa-check-square-o"></i> Approve
+                                                    </a>
+
+                                                    <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#cancel-form" style="margin-left: 10px">
+                                                        <i class="fa fa-remove"></i> Cancel
                                                     </a>
                                                 @endif
                                                 <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
@@ -83,107 +87,101 @@
                                                     <th width="7%" class="numeric"> Previous Quantity </th>
                                                     <th width="7%" class="numeric"> Current Quantity </th>
                                                     <th width="10%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="10%" class="numeric"> Previous. Bill Amount </th>
                                                     <th width="10%" class="numeric"> Current Bill Amount </th>
-                                                    <th width="10%" class="numeric"> Cumulative Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
                                                 <tr>
                                                     <td>
                                                         <span id="quotation_product_id">{{$iterator + 1}}</span>
                                                     </td>
+
                                                     <td>
                                                         <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}}</span>
                                                     </td>
+
                                                     <td>
                                                         <span>{{$billQuotationProducts[$iterator]['unit']}}</span>
                                                     </td>
+
                                                     <td>
                                                         <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate']}}</span>
                                                     </td>
+
                                                     <td>
                                                         <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
                                                     </td>
+
                                                     <td>
                                                         <span>{!! round($billQuotationProducts[$iterator]['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']) !!}</span>
                                                     </td>
+
                                                     <td>
                                                         <span id="previous_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['previous_quantity']}}</span>
                                                     </td>
+
                                                     <td>
                                                         <span id="current_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['quantity']}}</span>
                                                     </td>
+
                                                     <td>
                                                         <span id="cumulative_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['cumulative_quantity']}}</span>
                                                     </td>
-                                                    <td>
-                                                        <span class="previous_bill_amount" id="previous_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['previous_bill_amount']}}</span>
-                                                    </td>
+
                                                     <td>
                                                         <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['current_bill_amount']}}</span>
                                                     </td>
-                                                    <td>
-                                                        <span class="cumulative_bill_amount" id="cumulative_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['cumulative_bill_amount']}}</span>
-                                                    </td>
+
                                                 </tr>
                                                 @endfor
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Total</b></td>
-                                                    <td>
-                                                        <span id="total_previous_bill_amount">{{$total['previous_bill_amount']}}</span>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">
+                                                        <b>Total</b>
                                                     </td>
+
                                                     <td>
                                                         <span id="total_current_bill_amount">{{$total['current_bill_amount']}}</span>
                                                     </td>
-                                                    <td>
-                                                        <span id="total_cumulative_bill_amount">{{$total['cumulative_bill_amount']}}</span>
-                                                    </td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
-                                                    <td>
-                                                        <span id="rounded_off_previous_bill_amount">{{$total_rounded['previous_bill_amount']}}</span>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">
+                                                        <b>Total Round</b>
                                                     </td>
                                                     <td>
                                                         <span id="rounded_off_current_bill_amount">{{$total_rounded['current_bill_amount']}}</span>
                                                     </td>
-                                                    <td>
-                                                        <span id="rounded_off_cumulative_bill_amount">{{$total_rounded['cumulative_bill_amount']}}</span>
-                                                    </td>
                                                 </tr>
                                                 @if($taxes != null)
                                                     <tr>
-                                                        <td colspan="5"><b>Tax Name</b></td>
-                                                        <td colspan="4"><b>Tax Rate</b></td>
-                                                        <td colspan="3"></td>
+                                                        <td colspan="6">
+                                                            <b>Tax Name</b>
+                                                        </td>
+                                                        <td colspan="3">
+                                                            <b>Tax Rate</b>
+                                                        </td>
+                                                        <td colspan="1">
+
+                                                        </td>
                                                     </tr>
                                                     @for($j = 0 ; $j < count($taxes); $j++)
                                                     <tr>
-                                                        <td colspan="5" style="text-align: center">{{$taxes[$j]['taxes']['name']}}</td>
-                                                        <td colspan="4" style="text-align: center"><span id="percentage">{{abs($taxes[$j]['percentage'])}}</td>
-                                                        <td>
-                                                            <span id="tax_previous_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['previous_bill_amount']}}</span>
+                                                        <td colspan="6" style="text-align: center">
+                                                            {{$taxes[$j]['taxes']['name']}}
+                                                        </td>
+                                                        <td colspan="3" style="text-align: center">
+                                                            <span id="percentage">{{abs($taxes[$j]['percentage'])}}</span>
                                                         </td>
                                                         <td>
                                                             <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['current_bill_amount']}}</span>
                                                         </td>
-                                                        <td>
-                                                            <span id="tax_cumulative_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['cumulative_bill_amount']}}</span>
-                                                        </td>
-
                                                     </tr>
                                                     @endfor
                                                 @endif
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
-                                                    <td>
-                                                        <span id="final_previous_bill_total">{{$final['previous_bill_amount']}}</span>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">
+                                                        <b>Final Total</b>
                                                     </td>
                                                     <td>
                                                         <span id="final_current_bill_total">{{$final['current_bill_amount']}}</span>
-                                                    </td>
-                                                    <td>
-                                                        <span id="final_cumulative_bill_total">{{$final['cumulative_bill_amount']}}</span>
                                                     </td>
                                                 </tr>
 
@@ -246,6 +244,33 @@
             </div>
                 <input type="hidden" id="path" name="path" value="">
                 <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+            <div id="cancel-form" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Cancel Bill</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form class="form-horizontal" id="add_enquiry" action="/bill/cancel/{{$selectedBillId}}" method="POST">
+                                {!! csrf_field() !!}
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Remark</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" name="remark" id="remark">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary pull-right">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
