@@ -926,6 +926,7 @@ trait QuotationTrait{
             $data['rounded_total'] = round($rounded_amount);
             $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($data['rounded_total']));
             $data['quotationProductData'] = $quotationProductData;
+            $data['quotation_no'] = "Q-".strtoupper(date('M',strtotime($quotation['created_at'])))."-".$quotation->id."/".date('y',strtotime($quotation['created_at']));
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
             return $pdf->stream();
@@ -1040,6 +1041,7 @@ trait QuotationTrait{
 
     public function generateSummaryPdf(Request $request,$quotation){
         try{
+           // dd($quotation);
             $data = array();
             $data['project_site'] = $quotation->project_site;
             $summaryData = QuotationProduct::where('quotation_id',$quotation['id'])->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get();
@@ -1064,7 +1066,7 @@ trait QuotationTrait{
                 $total['rate_per_sft'] = $total['rate_per_sft'] + $summaryData[$i]['rate_per_sft'];
                 $i++;
             }
-
+            $data['summary_no'] = "S-".strtoupper(date('M',strtotime($quotation['created_at'])))."-".$quotation->id."/".date('y',strtotime($quotation['created_at']));
             $data['summaryData'] = $summaryData;
             $data['total'] = $total;
             $pdf = App::make('dompdf.wrapper');
