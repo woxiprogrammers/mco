@@ -1041,7 +1041,6 @@ trait QuotationTrait{
 
     public function generateSummaryPdf(Request $request,$quotation){
         try{
-           // dd($quotation);
             $data = array();
             $data['project_site'] = $quotation->project_site;
             $summaryData = QuotationProduct::where('quotation_id',$quotation['id'])->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get();
