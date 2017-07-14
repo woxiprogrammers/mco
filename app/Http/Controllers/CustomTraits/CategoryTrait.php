@@ -99,7 +99,8 @@ trait CategoryTrait{
             $iTotalRecords = count($categoriesData);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($categoriesData); $iterator++,$pagination++ ){
+            $end = $request->length < 0 ? count($categoriesData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($categoriesData); $iterator++,$pagination++ ){
                 if($categoriesData[$pagination]['is_active'] == true){
                     $category_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
