@@ -141,12 +141,12 @@ trait BillTrait{
         return response()->json($projectSitesOptions,$status);
     }
 
-    public function getManageView(Request $request){
+    public function getProjectSiteManageView(Request $request){
         try{
             return view('admin.bill.manage');
         }catch (\Exception $e){
             $data = [
-                'action' => 'Get bill manage view',
+                'action' => 'Get project site manage view',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -155,7 +155,23 @@ trait BillTrait{
         }
     }
 
-    public function billListing(Request $request){
+    public function getManageView(Request $request){
+        try{
+            $taxes = Tax::where('is_active',true)->get();
+            dd($taxes);
+            return view('admin.bill.manage-bill')->with(compact('taxes'));
+        }catch(\Exception $e){
+            $data = [
+              'action' => 'Get bill manage view',
+               'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function ProjectSiteListing(Request $request){
         try{
             $iterator = 0;
             $listingData = array();
@@ -191,9 +207,12 @@ trait BillTrait{
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
                                 <a href="/bill/create/'.$listingData[$pagination]['project_site_id'].'">
+                                    <i class="icon-docs"></i> Create </a>
+                            </li>
+                            <li>
+                                <a href="/bill/manage">
                                     <i class="icon-docs"></i> Manage </a>
                             </li>
-
                         </ul>
                     </div>'
                 ];

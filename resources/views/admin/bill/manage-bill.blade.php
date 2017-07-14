@@ -43,13 +43,16 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="projectSiteTable">
+                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="billTable">
                                                 <thead>
                                                 <tr>
-                                                    <th> Company Name </th>
-                                                    <th style="width: 30%"> Project Name </th>
-                                                    <th> Site Name </th>
-                                                    <th> Actions </th>
+                                                    <th> Sr no. </th>
+                                                    <th style="width: 30%"> RA Bill number </th>
+                                                    <th> Bill Number </th>
+                                                    <th> Total round amount </th>
+                                                    @for($iterator = 0 ; $iterator < count($taxes); $iterator++)
+                                                        <th> $taxes[$iterator]['name'] </th>
+                                                    @endfor
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -79,7 +82,7 @@
 <script src="/assets/custom/bill/manage-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
-        $('#projectSiteTable').DataTable();
+        $('#billTable').DataTable();
     });
 </script>
 @endsection
