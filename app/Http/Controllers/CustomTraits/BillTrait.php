@@ -632,7 +632,7 @@ trait BillTrait{
         try{
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $bill->update(['bill_status_id' => $cancelBillStatusId , 'remark' => $request->remark]);
-            return redirect('/bill/manage');
+            return redirect('/bill/manage/project-site');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Cancel bill status',

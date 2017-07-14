@@ -24,7 +24,7 @@ var BillListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/bill/listing", // ajax source
+                    "url": "/bill/listing/project-site", // ajax source
                     "data" :{
                         '_token' : $("input[name='_token']").val()
                     }
