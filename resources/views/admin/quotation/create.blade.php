@@ -182,11 +182,12 @@
 
                                                     </div>
                                                 </div>
+                                                <input type="hidden" name="quotation_materials">
                                             </form>
                                         </div>
                                     </div>
                                     <div id="productView" class="modal fade" role="dialog">
-                                        <div class="modal-dialog">
+                                        <div class="modal-dialog product-view-modal">
 
                                             <!-- Modal content-->
                                             <div class="modal-content">
@@ -196,9 +197,6 @@
                                                 </div>
                                                 <div class="modal-body">
 
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                                                 </div>
                                             </div>
 
@@ -218,7 +216,7 @@
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
 <script src="/assets/custom/admin/quotation/quotation.js"></script>
 <script src="/assets/custom/admin/quotation/validations.js"></script>
-<script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
+<script src="/assets/global/plugins/jquery-form.min.js"></script>
 
 <script>
     $(document).ready(function(){

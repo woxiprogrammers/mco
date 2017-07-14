@@ -78,16 +78,17 @@ function calculateSubTotal(){
     $(".material_amount").each(function(){
         amount = amount+parseFloat($(this).val());
     });
+    debugger;
     if(isNaN(amount)){
         amount = 0;
     }
 
-    $("#subtotal").text(Math.round(amount * 1000) / 1000);
+    $("#subtotal,#productViewSubtotal").text(Math.round(amount * 1000) / 1000);
     calculateProfitMargin();
 }
 
 function calculateProfitMargin(){
-    var amount = parseFloat($("#subtotal").text());
+    var amount = parseFloat($("#subtotal,#productViewSubtotal").text());
     var total = amount;
     $(".profit-margin").each(function(){
         var profitMarginAmount = amount * ($(this).val() / 100);

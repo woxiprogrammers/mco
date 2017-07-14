@@ -4,6 +4,7 @@
 
 
 $(document).ready(function(){
+    $.getScript('/assets/custom/admin/product/product.js');
     $(".quotation-category").change(function(){
         var category_id = $(this).val();
         var categoryIdField = $(this).attr('id');
@@ -420,7 +421,7 @@ function calculateSubtotal(){
 
 function calucalateProductViewTotal(){
     var subtotal = 0;
-    $(".material-amount").each(function(){
+    $(".material_amount").each(function(){
         subtotal = subtotal + parseFloat($(this).val());
     });
     $("#productViewSubtotal").text(Math.round(subtotal * 1000) / 1000);
@@ -468,7 +469,29 @@ function openDisapproveModal(){
 }
 
 function submitProductEdit(){
+    console.log('in submit product edit');
     $("#editProductForm").ajaxSubmit(function(data){
-        // after form submit
+        var quotationMaterialIds = data.data.quotation_materials_id;
+        var quotationProduct = data.data.quotation_product;
+        $("input[name='product_description["+quotationProduct.product_id+"]']").val(quotationProduct.description);
+        $("input[name='product_rate["+quotationProduct.product_id+"]']").val(Math.round(quotationProduct.rate_per_unit * 1000) / 1000);
+        var rowId = $("input[name='product_rate["+quotationProduct.product_id+"]']").closest('tr').attr('id');
+        var rowNumber = rowId.match(/\d+/)[0];
+        calculateAmount(rowNumber);
+        $("input[name='quotation_materials']").val(quotationMaterialIds);
+        $('#QuotationCreateForm').append('<input>',{
+            name: 'quotation_product[]',
+            value: quotationProduct.id,
+            type: hidden
+        });
     });
 }
+/*
+function changedQuantity(materialId){
+    var rate = $("#material_"+materialId+"_rate").val();
+    var quantity = $("#material_"+materialId+"_quantity").val();
+    var amount = rate*quantity;
+    $("#material_"+materialId+"_amount").val(Math.round(amount * 1000) / 1000);
+    calculateSubTotal();
+}*/
+

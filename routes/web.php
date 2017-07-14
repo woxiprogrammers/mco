@@ -173,6 +173,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'work-order'],function(){
             Route::post('edit/{work_order}',array('uses'=>'Admin\QuotationController@editWorkOrder'));
         });
+        Route::group(['prefix' => 'product'],function(){
+            Route::post('create/{product}',array('uses'=>'Admin\QuotationController@saveQuotationProduct'));
+        });
     });
 
     Route::group(['prefix' => 'project'], function(){
