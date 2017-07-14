@@ -348,7 +348,8 @@ trait QuotationTrait{
             $records = array();
             $records['data'] = array();
             $quotations = Quotation::where('quotation_status_id','=', $status)->orderBy('updated_at','desc')->get();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($quotations); $iterator++,$pagination++ ){
+            $end = $request->length < 0 ? count($quotations) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($quotations); $iterator++,$pagination++ ){
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
                     $quotationStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
                 }elseif($quotations[$pagination]->quotation_status->slug == 'approved'){
