@@ -161,7 +161,8 @@ trait MaterialTrait{
             $iTotalRecords = count($materialData);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($materialData); $iterator++,$pagination++ ){
+            $end = $request->length < 0 ? count($materialData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($materialData); $iterator++,$pagination++ ){
                 if($materialData[$pagination]['is_active'] == true){
                     $material_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';

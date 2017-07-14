@@ -96,7 +96,8 @@
                 $iTotalRecords = count($taxData);
                 $records = array();
                 $records['data'] = array();
-                for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($taxData) ; $iterator++ , $pagination++){
+                $end = $request->length < 0 ? count($taxData) : $request->length;
+                for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($taxData) ; $iterator++ , $pagination++){
                     if($taxData[$pagination]['is_active'] == true){
                         $tax_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                         $status = 'Disable';
