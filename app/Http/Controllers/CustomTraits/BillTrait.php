@@ -196,11 +196,14 @@ trait BillTrait{
                 $billTaxes = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
                 if($billTaxes != null){
                     $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->select('id as tax_id','name')->get();
+                    $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
+                    usort($currentTaxes, function($a, $b) {
+                        return $a['tax_id'] > $b['tax_id'];
+                    });
+                }else{
+                    $currentTaxes = Tax::where('is_active',true)->select('id as tax_id')->get();
                 }
-                $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
-                usort($currentTaxes, function($a, $b) {
-                    return $a['tax_id'] > $b['tax_id'];
-                });
+
                 $listingData[$iterator]['final_total'] = $total_amount;
                 foreach($currentTaxes as $key3 => $tax){
                     if(array_key_exists('percentage',$tax)){
