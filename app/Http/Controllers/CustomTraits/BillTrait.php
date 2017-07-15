@@ -537,7 +537,7 @@ trait BillTrait{
                     if($billQuotationProduct->quotation_product_id == $quotationProduct->id){
                         $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
                         if($billQuotationProduct->bill_id == $bill->id){
-                            $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity - $billQuotationProduct->quantity;
+                            $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] - $billQuotationProduct->quantity;
                             $quotationProduct['bill_description'] = $billQuotationProduct->description;
                             $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
                         }
