@@ -218,7 +218,8 @@ trait BillTrait{
     public function viewBill(Request $request,$bill){
         try{
             $selectedBillId = $bill['id'];
-            $bills = Bill::where('quotation_id',$bill['quotation_id'])->get()->toArray();
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $bills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->get()->toArray();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
             $total['previous_bill_amount'] = $total['current_bill_amount'] = $total['cumulative_bill_amount'] = 0;
             for($iterator = 0 ; $iterator < count($billQuotationProducts) ; $iterator++){
@@ -231,7 +232,8 @@ trait BillTrait{
                 $rate_per_unit = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
                 $billQuotationProducts[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
                 $billQuotationProducts[$iterator]['current_bill_amount'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
-                $previousBills = BillQuotationProducts::where('bill_id','<',$bill['id'])->get()->toArray();
+                $billWithoutCancelStatus = Bill::where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
+                $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get()->toArray();
                 foreach($previousBills as $key => $previousBill){
                     if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
@@ -297,8 +299,16 @@ trait BillTrait{
     public function approveBill(Request $request){
         try{
             $paidStatusId = BillStatus::where('slug','paid')->pluck('id')->first();
-            Bill::where('id',$request->bill_id)->update(['remark' => $request->remark , 'bill_status_id' => $paidStatusId]);
-            $imagesUploaded = $this->uploadPaidBillImages($request->bill_images,$request->bill_id);
+            if($request->has('remark')){
+                Bill::where('id',$request->bill_id)->update(['remark' => $request->remark , 'bill_status_id' => $paidStatusId]);
+            }else{
+                Bill::where('id',$request->bill_id)->update(['bill_status_id' => $paidStatusId]);
+            }
+            if($request->has('bill_images')){
+                $imagesUploaded = $this->uploadPaidBillImages($request->bill_images,$request->bill_id);
+            }else{
+                $imagesUploaded = true;
+            }
             if($imagesUploaded == true){
                 $request->session()->flash('success','Bill approved Successfully');
             }else{
@@ -528,7 +538,8 @@ trait BillTrait{
         try{
             $i = 0;
             $quotationProducts = $bill->quotation->quotation_products;
-            $allBillIDs = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->pluck('id')->toArray();
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $allBillIDs = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
             $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDs)->get();
             foreach($quotationProducts as $key => $quotationProduct){
                 $quotationProduct['previous_quantity'] = 0;
@@ -537,7 +548,7 @@ trait BillTrait{
                     if($billQuotationProduct->quotation_product_id == $quotationProduct->id){
                         $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
                         if($billQuotationProduct->bill_id == $bill->id){
-                            $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity - $billQuotationProduct->quantity;
+                            $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] - $billQuotationProduct->quantity;
                             $quotationProduct['bill_description'] = $billQuotationProduct->description;
                             $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
                         }
