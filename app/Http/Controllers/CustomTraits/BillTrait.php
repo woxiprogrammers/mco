@@ -158,7 +158,6 @@ trait BillTrait{
     public function getManageView(Request $request,$project_site){
         try{
             $taxes = Tax::where('is_active',true)->get();
-           // dd($taxes);
             return view('admin.bill.manage-bill')->with(compact('taxes','project_site'));
         }catch(\Exception $e){
             $data = [
@@ -171,25 +170,48 @@ trait BillTrait{
         }
     }
 
-    public function billListing(Request $request){
+    public function billListing(Request $request,$project_site){
         try{
-            $iterator = 0;
-            $listingData = array();
-            $quotationIds = Bill::groupBy('quotation_id')->pluck('quotation_id')->toArray();
-            $projectSiteIds = Quotation::whereIn('id',$quotationIds)->pluck('project_site_id')->toArray();
-            $projectSiteData = ProjectSite::orderBy('updated_at','desc')->whereIn('id',$projectSiteIds)->get()->toArray();
-            for($i = 0 ; $i < count($projectSiteData) ; $i++){
-                $projectData = Project::where('id',$projectSiteData[$i]['project_id'])->get()->toArray();
-                for($j = 0 ; $j < count($projectData) ; $j++){
-                    $clientData = Client::where('id',$projectData[$j]['client_id'])->get()->toArray();
-                    for($k = 0 ; $k < count($clientData); $k++){
-                        $listingData[$iterator]['company'] = $clientData[$j]['company'];
-                        $listingData[$iterator]['project_name'] = $projectData[$j]['name'];
-                        $listingData[$iterator]['project_site_id'] = $projectSiteData[$i]['id'];
-                        $listingData[$iterator]['project_site_name'] = $projectSiteData[$i]['name'];
-                        $iterator++;
-                    }
+            $listingData = $currentTaxes = array();
+            $iterator = $i = 0;
+            $array_no = 1;
+            $quotation = Quotation::where('project_site_id',$project_site->id)->first();
+            $bills = Bill::where('quotation_id',$quotation->id)->get();
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            foreach($bills as $key => $bill){
+                $listingData[$iterator]['bill_id'] = $bill->id;
+                if($bill->bill_status_id != $cancelBillStatusId){
+                    $listingData[$iterator]['array_no'] = $array_no;
+                    $array_no++;
+                }else{
+                    $listingData[$iterator]['array_no'] = '-';
                 }
+                $listingData[$iterator]['bill_no_format'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
+                $total_amount = 0;
+                foreach($bill->bill_quotation_product as $key1 => $product){
+                    $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                    $total_amount = $total_amount + ($product->quantity * $rate) ;
+                }
+                $listingData[$iterator]['subTotal'] = $total_amount;
+                $billTaxes = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
+                if($billTaxes != null){
+                    $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->select('id as tax_id','name')->get();
+                }
+                $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
+                usort($currentTaxes, function($a, $b) {
+                    return $a['tax_id'] > $b['tax_id'];
+                });
+                $listingData[$iterator]['final_total'] = $total_amount;
+                foreach($currentTaxes as $key3 => $tax){
+                    if(array_key_exists('percentage',$tax)){
+                        $listingData[$iterator]['tax'][$i] = $total_amount * ($tax['percentage'] / 100);
+                    }else{
+                        $listingData[$iterator]['tax'][$i] = 0;
+                    }
+                    $listingData[$iterator]['final_total'] = round($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$i]);
+                    $i++;
+                }
+                $iterator++;
             }
             $iTotalRecords = count($listingData);
             $records = array();
@@ -197,26 +219,31 @@ trait BillTrait{
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
-                    $listingData[$pagination]['company'],
-                    $listingData[$pagination]['project_name'],
-                    $listingData[$pagination]['project_site_name'],
-                    '<div class="btn-group">
+                    $iterator+1,
+                    $listingData[$pagination]['array_no'],
+                    $listingData[$pagination]['bill_no_format'],
+                    $listingData[$pagination]['subTotal'],
+                ];
+                foreach($listingData[$pagination]['tax'] as $taxAmount){
+                    array_push($records['data'][$iterator],round($taxAmount,3));
+                }
+                array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
+                array_push($records['data'][$iterator],'<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/bill/create/'.$listingData[$pagination]['project_site_id'].'">
-                                    <i class="icon-docs"></i> Create </a>
+                                <a href="/bill/view/'.$listingData[$pagination]['bill_id'].'">
+                                    <i class="icon-docs"></i> View </a>
                             </li>
                             <li>
-                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
-                                    <i class="icon-docs"></i> Manage </a>
+                                <a href="javascript:void(0);">
+                                    <i class="icon-docs"></i> Make Payment </a>
                             </li>
                         </ul>
-                    </div>'
-                ];
+                    </div>');
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -224,7 +251,7 @@ trait BillTrait{
         }catch(\Exception $e){
             $records = array();
             $data = [
-                'action' => 'Product Listing',
+                'action' => 'Get Bill Detail Listing',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
@@ -274,7 +301,7 @@ trait BillTrait{
                                     <i class="icon-docs"></i> Create </a>
                             </li>
                             <li>
-                                <a href="/bill/manage">
+                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
                                     <i class="icon-docs"></i> Manage </a>
                             </li>
                         </ul>

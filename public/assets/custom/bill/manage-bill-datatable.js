@@ -2,7 +2,8 @@ var BillListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
-        var project_site_id =
+        console.log($('#projectSiteId').val());
+        var project_site_id = $('#projectSiteId').val();
         grid.init({
             src: $("#billTable"),
             onSuccess: function (grid) {
@@ -24,7 +25,7 @@ var BillListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/bill/listing"+project_site_id, // ajax source
+                    "url": "/bill/listing/"+project_site_id, // ajax source
                     "data" :{
                         '_token' : $("input[name='_token']").val()
                     }

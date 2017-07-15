@@ -43,17 +43,19 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <input type="hidden" id="projectSiteId" name="projectSiteId" value={{$project_site_id}}>
+                                            <input type="hidden" id="projectSiteId" name="projectSiteId" value={{$project_site['id']}}>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="billTable">
                                                 <thead>
                                                 <tr>
                                                     <th> Sr no. </th>
-                                                    <th style="width: 30%"> RA Bill number </th>
+                                                    <th> RA Bill number </th>
                                                     <th> Bill Number </th>
                                                     <th> Total round amount </th>
                                                     @for($iterator = 0 ; $iterator < count($taxes); $iterator++)
-                                                        <th> $taxes[$iterator]['name'] </th>
+                                                        <th> {!! $taxes[$iterator]['name'] !!} </th>
                                                     @endfor
+                                                    <th> Final Total </th>
+                                                    <th> Actions </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
