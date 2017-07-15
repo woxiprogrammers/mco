@@ -43,6 +43,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <input type="hidden" id="projectSiteId" name="projectSiteId" value={{$project_site_id}}>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="billTable">
                                                 <thead>
                                                 <tr>
@@ -79,7 +80,7 @@
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-<script src="/assets/custom/bill/manage-datatable.js" type="text/javascript"></script>
+<script src="/assets/custom/bill/manage-bill-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
         $('#billTable').DataTable();

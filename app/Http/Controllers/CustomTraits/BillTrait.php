@@ -155,11 +155,11 @@ trait BillTrait{
         }
     }
 
-    public function getManageView(Request $request){
+    public function getManageView(Request $request,$project_site){
         try{
             $taxes = Tax::where('is_active',true)->get();
-            dd($taxes);
-            return view('admin.bill.manage-bill')->with(compact('taxes'));
+           // dd($taxes);
+            return view('admin.bill.manage-bill')->with(compact('taxes','project_site'));
         }catch(\Exception $e){
             $data = [
               'action' => 'Get bill manage view',
@@ -169,6 +169,69 @@ trait BillTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function billListing(Request $request){
+        try{
+            $iterator = 0;
+            $listingData = array();
+            $quotationIds = Bill::groupBy('quotation_id')->pluck('quotation_id')->toArray();
+            $projectSiteIds = Quotation::whereIn('id',$quotationIds)->pluck('project_site_id')->toArray();
+            $projectSiteData = ProjectSite::orderBy('updated_at','desc')->whereIn('id',$projectSiteIds)->get()->toArray();
+            for($i = 0 ; $i < count($projectSiteData) ; $i++){
+                $projectData = Project::where('id',$projectSiteData[$i]['project_id'])->get()->toArray();
+                for($j = 0 ; $j < count($projectData) ; $j++){
+                    $clientData = Client::where('id',$projectData[$j]['client_id'])->get()->toArray();
+                    for($k = 0 ; $k < count($clientData); $k++){
+                        $listingData[$iterator]['company'] = $clientData[$j]['company'];
+                        $listingData[$iterator]['project_name'] = $projectData[$j]['name'];
+                        $listingData[$iterator]['project_site_id'] = $projectSiteData[$i]['id'];
+                        $listingData[$iterator]['project_site_name'] = $projectSiteData[$i]['name'];
+                        $iterator++;
+                    }
+                }
+            }
+            $iTotalRecords = count($listingData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($listingData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $listingData[$pagination]['company'],
+                    $listingData[$pagination]['project_name'],
+                    $listingData[$pagination]['project_site_name'],
+                    '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/bill/create/'.$listingData[$pagination]['project_site_id'].'">
+                                    <i class="icon-docs"></i> Create </a>
+                            </li>
+                            <li>
+                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
+                                    <i class="icon-docs"></i> Manage </a>
+                            </li>
+                        </ul>
+                    </div>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Product Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records,200);
     }
 
     public function ProjectSiteListing(Request $request){
