@@ -86,6 +86,10 @@ $(document).ready(function(){
             if(url.indexOf("edit") > 0){
                 ajaxData['quotation_id'] = $("#quotationId").val();
             }
+            var quotationId = $("#quotationId").val();
+            if(typeof quotationId != 'undefined'){
+                ajaxData['quotation_id'] = $("#quotationId").val();
+            }
             $.ajax({
                 url: '/quotation/get-materials',
                 async: false,
@@ -470,28 +474,27 @@ function openDisapproveModal(){
 
 function submitProductEdit(){
     console.log('in submit product edit');
+    $("#productViewProjectSiteId").val($('#projectSiteId').val());
     $("#editProductForm").ajaxSubmit(function(data){
-        var quotationMaterialIds = data.data.quotation_materials_id;
-        var quotationProduct = data.data.quotation_product;
+        var quotationMaterialIds = data.quotation_materials_id;
+        var quotationProductIds = data.quotation_product_ids;
         $("input[name='product_description["+quotationProduct.product_id+"]']").val(quotationProduct.description);
-        $("input[name='product_rate["+quotationProduct.product_id+"]']").val(Math.round(quotationProduct.rate_per_unit * 1000) / 1000);
+        $("input[name='product_rate["+data.product_id+"]']").val(Math.round(data.product_amount * 1000) / 1000);
         var rowId = $("input[name='product_rate["+quotationProduct.product_id+"]']").closest('tr').attr('id');
         var rowNumber = rowId.match(/\d+/)[0];
         calculateAmount(rowNumber);
+        var quotationId = $("#quotationId").val();
+        if(typeof quotationId == 'undefined'){
+            $('#QuotationCreateForm').append('<input>',{
+                name: 'quotation_id',
+                id:'quotationId',
+                value: data.quotation_id,
+                type: 'hidden'
+            });
+        }else{
+            $("#quotationId").val(data.quotation_id);
+        }
         $("input[name='quotation_materials']").val(quotationMaterialIds);
-        $('#QuotationCreateForm').append('<input>',{
-            name: 'quotation_product[]',
-            value: quotationProduct.id,
-            type: hidden
-        });
+
     });
 }
-/*
-function changedQuantity(materialId){
-    var rate = $("#material_"+materialId+"_rate").val();
-    var quantity = $("#material_"+materialId+"_quantity").val();
-    var amount = rate*quantity;
-    $("#material_"+materialId+"_amount").val(Math.round(amount * 1000) / 1000);
-    calculateSubTotal();
-}*/
-

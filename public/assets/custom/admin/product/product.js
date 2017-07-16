@@ -78,7 +78,6 @@ function calculateSubTotal(){
     $(".material_amount").each(function(){
         amount = amount+parseFloat($(this).val());
     });
-    debugger;
     if(isNaN(amount)){
         amount = 0;
     }

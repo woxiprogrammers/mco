@@ -6,8 +6,10 @@
  */
 ?>
 
-<form role="form" id="editProductForm" class="form-horizontal" action="/quotation/product/create/{{$product['id']}}" method="post">
+<form role="form" id="editProductForm" class="form-horizontal" action="/quotation/create" method="post">
     {!! csrf_field() !!}
+    <input type="hidden" name="product_id[]" value="{{$product['id']}}">
+    <input type="hidden" name="project_site_id" id="productViewProjectSiteId">
     <div>
         <fieldset>
             <legend> General Information </legend>
@@ -26,15 +28,7 @@
             <div class="form-group">
                 <label class="col-md-3 control-label">Unit</label>
                 <div class="col-md-6">
-                    <select class="form-control" id="unit_id" name="unit_id">
-                        @foreach($units as $unit)
-                        @if($unit['id'] == $product['unit_id'])
-                        <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
-                        @else
-                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                        @endif
-                        @endforeach
-                    </select>
+                    <input type="text" name="product_unit" value="{{$product->unit->name}}" class="form-control" readonly>
                 </div>
             </div>
             <div class="form-group">
@@ -78,7 +72,7 @@
                         </td>
                         <td>
                             <div class="form-group">
-                                <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material_quantity[{{$version['material_id']}}]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],3)}}" required>
+                                <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material_quantity[{{$version['material_id']}}]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],3)}}" readonly>
                             </div>
                         </td>
                         <td>

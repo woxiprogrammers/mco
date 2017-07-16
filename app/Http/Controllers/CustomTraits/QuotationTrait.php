@@ -396,14 +396,40 @@ trait QuotationTrait{
     public function createQuotation(Request $request){
         try{
             $data = $request->all();
-            dd($data);
             $quotationData = array();
-            $draftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
             $quotationData['project_site_id'] = $data['project_site_id'];
-            $quotationData['quotation_status_id'] = $draftStatusId;
-            $quotation = Quotation::create($quotationData);
+            $quotationMaterialIds = array();
+            if($request->json()){
+                $response = array();
+                if($request->has('quotation_id')){
+                    $quotation = Quotation::findOrFail($request->quotation_id);
+                    $quotation->update($quotationData);
+                    foreach($quotation->quotation_products as $quotationProduct){
+                        foreach($quotationProduct->quotation_profit_margin as $profitMargin){
+                            $profitMargin->delete();
+                        }
+                        $quotationProduct->delete();
+                    }
+                    foreach($quotation->quotation_materials as $quotationMaterial){
+                        $quotationMaterial->delete();
+                    }
+                }else{
+                    $quotation = Quotation::create($quotationData);
+                }
+                $response['quotation_id'] = $quotation->id;
+            }else{
+                $draftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
+                $quotationData['quotation_status_id'] = $draftStatusId;
+                if($request->has('quotation_id')){
+                    $quotation = Quotation::findOrFail($request->quotation_id);
+                    $quotation->update($quotationData);
+                }else{
+                    $quotation = Quotation::create($quotationData);
+                }
+            }
             $quotation = $quotation->toArray();
             foreach($data['product_id'] as $productId){
+                $response['product_id'] = $productId;
                 $quotationProductData = array();
                 $quotationProductData['product_id'] = $productId;
                 $quotationProductData['quotation_id'] = $quotation['id'];
@@ -435,7 +461,9 @@ trait QuotationTrait{
                     $productAmount = $productAmount + ($rateConversion * $material['material_quantity']);
                 }
                 $quotationProductData['rate_per_unit'] = $productAmount;
-                $quotationProductData['quantity'] = $data['product_quantity'][$productId];
+                if($request->has('product_quantity')){
+                    $quotationProductData['quantity'] = $data['product_quantity'][$productId];
+                }
                 $quotationProduct = QuotationProduct::create($quotationProductData);
                 $profitMarginAmount = 0;
                 foreach($data['profit_margins'][$productId] as $id => $percentage){
@@ -461,30 +489,59 @@ trait QuotationTrait{
                 }
                 $productAmount = round(($productAmount + $profitMarginAmount),3);
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
+                $response['product_amount'] = $productAmount;
             }
             foreach($data['material_id'] as $materialId){
                 $quotationMaterialData = array();
                 $quotationMaterialData['material_id'] = $materialId;
-                $quotationMaterialData['rate_per_unit'] = round($data['material_rate'][$materialId],3);
-                $quotationMaterialData['unit_id'] = $data['material_unit'][$materialId];
+                if($request->ajax()){
+                    $material = Material::findOrFail($materialId);
+                    $rateConversion = UnitHelper::unitConversion($data['material_unit'][$materialId],$material['unit_id'],$data['material_rate'][$materialId]);
+                    if(!is_array($rateConversion)){
+                        $quotationMaterialData['rate_per_unit'] = round($rateConversion,3);
+                        $quotationMaterialData['unit_id'] = $material->unit_id;
+                    }else{
+                        // If conversion is array
+                    }
+                }else{
+                    $quotationMaterialData['rate_per_unit'] = round($data['material_rate'][$materialId],3);
+                    $quotationMaterialData['unit_id'] = $data['material_unit'][$materialId];
+                }
                 if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
                     $quotationMaterialData['is_client_supplied'] = true;
                 }else{
                     $quotationMaterialData['is_client_supplied'] = false;
                 }
                 $quotationMaterialData['quotation_id'] = $quotation['id'];
-                QuotationMaterial::create($quotationMaterialData);
+                $quotationMaterial = QuotationMaterial::create($quotationMaterialData);
+                $quotationMaterialIds[$materialId] = $quotationMaterial->id;
             }
-            $request->session()->flash('success','Quotation created successfully.');
-            return redirect('/quotation/create');
+            $response['quotation_material_ids'] = $quotationMaterialIds;
+            if($request->ajax()){
+                $status = 200;
+                $response['quotation_product_ids'] = QuotationProduct::where('quotation_id',$quotation->id)->pluck('id');
+                return response()->json($response,$status);
+            }else{
+                $request->session()->flash('success','Quotation created successfully.');
+                return redirect('/quotation/create');
+            }
         }catch(\Exception $e){
+            $status = 200;
+            $response = [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        'message' => 'Something went wrong.'
+            ];
             $data = [
                 'action' => 'Create Quotation',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            abort(500);
+            if($request->json()){
+                return response()->json($response,$status);
+            }else{
+                abort(500);
+            }
+
         }
     }
 

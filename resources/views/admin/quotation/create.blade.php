@@ -50,6 +50,7 @@
                                             <form role="form" id="QuotationCreateForm" class="form-horizontal" action="/quotation/create" method="post">
                                                 {!! csrf_field() !!}
                                                 <div class="tab-content">
+                                                    <input type="hidden" name="quotation_materials" id="quotationMaterialsIds">
                                                     <div class="tab-pane fade in active" id="GeneralTab">
                                                         <fieldset>
                                                             <legend>Project</legend>
