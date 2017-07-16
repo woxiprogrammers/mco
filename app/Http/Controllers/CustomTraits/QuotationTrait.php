@@ -348,7 +348,8 @@ trait QuotationTrait{
             $records = array();
             $records['data'] = array();
             $quotations = Quotation::where('quotation_status_id','=', $status)->orderBy('updated_at','desc')->get();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($quotations); $iterator++,$pagination++ ){
+            $end = $request->length < 0 ? count($quotations) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($quotations); $iterator++,$pagination++ ){
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
                     $quotationStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
                 }elseif($quotations[$pagination]->quotation_status->slug == 'approved'){
@@ -984,6 +985,7 @@ trait QuotationTrait{
             $data['rounded_total'] = round($rounded_amount);
             $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($data['rounded_total']));
             $data['quotationProductData'] = $quotationProductData;
+            $data['quotation_no'] = "Q-".strtoupper(date('M',strtotime($quotation['created_at'])))."-".$quotation->id."/".date('y',strtotime($quotation['created_at']));
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
             return $pdf->stream();
@@ -1122,7 +1124,7 @@ trait QuotationTrait{
                 $total['rate_per_sft'] = $total['rate_per_sft'] + $summaryData[$i]['rate_per_sft'];
                 $i++;
             }
-
+            $data['summary_no'] = "S-".strtoupper(date('M',strtotime($quotation['created_at'])))."-".$quotation->id."/".date('y',strtotime($quotation['created_at']));
             $data['summaryData'] = $summaryData;
             $data['total'] = $total;
             $pdf = App::make('dompdf.wrapper');

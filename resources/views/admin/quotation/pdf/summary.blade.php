@@ -28,8 +28,12 @@
 <div>
     <table width="100%" border="1">
         <tr>
+            <td style="text-align: right; padding: 5px;font-weight: bolder" colspan="3">Summary No : {!! $summary_no !!}</td>
+        </tr>
+        <tr>
             <td colspan="3">
                 <table width="100%" style="text-align: center; ">
+
                     <tr>
                         <td><b>APPROX QUOTATION FOR  PROJECT {!! strtoupper($project_site['name']) !!} AT</b></td>
                     </tr>
@@ -57,8 +61,8 @@
             <td style="text-align: center">{!! $summaryData[$iterator]['rate_per_sft'] !!}</td>
         </tr>
         @endfor
-        @if(count($summaryData) < 18)
-            @for($iterator = 0 ; $iterator < (18 - count($summaryData)) ; $iterator++)
+        @if(count($summaryData) < 15)
+            @for($iterator = 0 ; $iterator < (15 - count($summaryData)) ; $iterator++)
                 <tr>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>

@@ -25,12 +25,16 @@
             </table>
         </td></tr>
 </table>
-            <hr>
             <table width="100%" style="text-align: center" border="1">
                 <tr>
-                    <td style="background-color: #c2c2c2">BILL OF QUANTITIES</td>
+                    <td style="text-align: right; padding: 5px;font-weight: bolder">Quotation No : {!! $quotation_no !!}</td>
                 </tr>
-                <tr><td>(SLAB AREA CONSIDERED = <b>{!! $quotation['built_up_area'] !!} SQFT</b>)</td></tr>
+                <tr>
+                    <td style="background-color: #c2c2c2;font-weight: bolder">BILL OF QUANTITIES</td>
+                </tr>
+                <tr>
+                    <td>(SLAB AREA CONSIDERED = <b>{!! $quotation['built_up_area'] !!} SQFT</b>)</td>
+                </tr>
             </table>
             <br>
             <div>

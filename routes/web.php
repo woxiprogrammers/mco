@@ -130,7 +130,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix' => 'bill'],function(){
         Route::get('create/{project_site}',array('uses' => 'Admin\BillController@getCreateView'));
-        Route::get('view/{bill}',array('uses' => 'Admin\BillController@editBill'));
+        Route::get('view/{bill}',array('uses' => 'Admin\BillController@viewBill'));
         Route::get('create',array('uses' => 'Admin\BillController@getCreateNewBillView'));
         Route::post('create',array('uses' => 'Admin\BillController@createBill'));
         Route::get('projects/{client}',array('uses' => 'Admin\BillController@getProjects'));
@@ -143,6 +143,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('image-upload/{billId}',array('uses'=>'Admin\BillController@uploadTempBillImages'));
         Route::post('display-images/{billId}',array('uses'=>'Admin\BillController@displayBillImages'));
         Route::post('delete-temp-product-image',array('uses'=>'Admin\BillController@removeTempImage'));
+        Route::get('edit/{bill}', array('uses' => 'Admin\BillController@editBillView'));
+        Route::post('edit/{bill}', array('uses' => 'Admin\BillController@editBill'));
+        Route::post('cancel/{bill}', array('uses' => 'Admin\BillController@cancelBill'));
     });
 
     Route::group(['prefix' => 'quotation'], function(){
