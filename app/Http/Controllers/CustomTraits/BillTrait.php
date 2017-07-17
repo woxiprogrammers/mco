@@ -246,7 +246,7 @@ trait BillTrait{
                 }
                 $records['data'][$iterator] = [
                     $iterator+1,
-                    $listingData[$pagination]['array_no'],
+                    "RA Bill ".$listingData[$pagination]['array_no'],
                     $listingData[$pagination]['bill_no_format'],
                     $listingData[$pagination]['subTotal'],
                 ];
