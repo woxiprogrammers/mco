@@ -99,6 +99,7 @@
                                                                 </h4>
                                                             </div>
                                                             <div id="collapse_3_1" class="panel-collapse in">
+                                                                <input type="hidden" name="project_site_id" id="projectSiteId" value="{{$quotation->project_site_id}}">
                                                                 <div class="panel-body" style="font-size: 15px">
                                                                     <div class="row" style="margin-left: 2%">
                                                                         <div class="col-md-3">

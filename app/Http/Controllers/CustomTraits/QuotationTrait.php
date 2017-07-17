@@ -258,7 +258,7 @@ trait QuotationTrait{
                 $isEdit = true;
                 $quotationDraftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
                 $quotationStatusId = Quotation::where('id',$request->quotation_id)->pluck('quotation_status_id')->first();
-                if($quotationDraftStatusId != $quotationStatusId){
+                if($quotationDraftStatusId != $quotationStatusId && $quotationStatusId != null){
                     $hideSubmit = true;
                 }else{
                     $hideSubmit = false;
@@ -397,22 +397,21 @@ trait QuotationTrait{
     public function createQuotation(Request $request){
         try{
             $data = $request->all();
+            Log::info($data);
             $quotationData = array();
             $quotationData['project_site_id'] = $data['project_site_id'];
             $quotationMaterialIds = array();
-            if($request->json()){
+            if($request->ajax()){
                 $response = array();
                 if($request->has('quotation_id')){
                     $quotation = Quotation::findOrFail($request->quotation_id);
                     $quotation->update($quotationData);
-                    foreach($quotation->quotation_products as $quotationProduct){
-                        foreach($quotationProduct->quotation_profit_margin as $profitMargin){
+                    $quotationProduct = QuotationProduct::where('quotation_id',$quotation->id)->where('product_id',$request->product_id[0])->first();
+                    if($quotationProduct != null){
+                        foreach($quotationProduct->quotation_profit_margins as $profitMargin){
                             $profitMargin->delete();
                         }
                         $quotationProduct->delete();
-                    }
-                    foreach($quotation->quotation_materials as $quotationMaterial){
-                        $quotationMaterial->delete();
                     }
                 }else{
                     $quotation = Quotation::create($quotationData);
@@ -424,6 +423,15 @@ trait QuotationTrait{
                 if($request->has('quotation_id')){
                     $quotation = Quotation::findOrFail($request->quotation_id);
                     $quotation->update($quotationData);
+                    foreach($quotation->quotation_products as $quotationProduct){
+                        foreach($quotationProduct->quotation_profit_margins as $profitMargin){
+                            $profitMargin->delete();
+                        }
+                        $quotationProduct->delete();
+                    }
+                    foreach($quotation->quotation_materials as $quotationMaterial){
+                        $quotationMaterial->delete();
+                    }
                 }else{
                     $quotation = Quotation::create($quotationData);
                 }
@@ -431,6 +439,7 @@ trait QuotationTrait{
             $quotation = $quotation->toArray();
             foreach($data['product_id'] as $productId){
                 $response['product_id'] = $productId;
+                $response['product_description'] = $request->product_description[$productId];
                 $quotationProductData = array();
                 $quotationProductData['product_id'] = $productId;
                 $quotationProductData['quotation_id'] = $quotation['id'];
@@ -462,9 +471,9 @@ trait QuotationTrait{
                     $productAmount = $productAmount + ($rateConversion * $material['material_quantity']);
                 }
                 $quotationProductData['rate_per_unit'] = $productAmount;
-                if($request->has('product_quantity')){
-                    $quotationProductData['quantity'] = $data['product_quantity'][$productId];
-                }
+                $quotationProductData['quantity'] = $data['product_quantity'][$productId];
+                $productRecentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                $quotationProductData['product_version_id'] = $productRecentVersion;
                 $quotationProduct = QuotationProduct::create($quotationProductData);
                 $profitMarginAmount = 0;
                 foreach($data['profit_margins'][$productId] as $id => $percentage){
@@ -492,7 +501,8 @@ trait QuotationTrait{
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
                 $response['product_amount'] = $productAmount;
             }
-            foreach($data['material_id'] as $materialId){
+            $materialIds = array_keys($data['material_rate']);
+            foreach($materialIds as $materialId){
                 $quotationMaterialData = array();
                 $quotationMaterialData['material_id'] = $materialId;
                 if($request->ajax()){
@@ -500,7 +510,7 @@ trait QuotationTrait{
                     $rateConversion = UnitHelper::unitConversion($data['material_unit'][$materialId],$material['unit_id'],$data['material_rate'][$materialId]);
                     if(!is_array($rateConversion)){
                         $quotationMaterialData['rate_per_unit'] = round($rateConversion,3);
-                        $quotationMaterialData['unit_id'] = $material->unit_id;
+                        $quotationMaterialData['unit_id'] = $material['unit_id'];
                     }else{
                         // If conversion is array
                     }
@@ -514,22 +524,26 @@ trait QuotationTrait{
                     $quotationMaterialData['is_client_supplied'] = false;
                 }
                 $quotationMaterialData['quotation_id'] = $quotation['id'];
-                $quotationMaterial = QuotationMaterial::create($quotationMaterialData);
+                $quotationMaterial = QuotationMaterial::where('quotation_id',$request->quotation_id)->where('material_id',$materialId)->first();
+                if($quotationMaterial == null){
+                    $quotationMaterial = QuotationMaterial::create($quotationMaterialData);
+                }else{
+                    $quotationMaterial->update($quotationMaterialData);
+                }
+
                 $quotationMaterialIds[$materialId] = $quotationMaterial->id;
             }
-            $response['quotation_material_ids'] = $quotationMaterialIds;
             if($request->ajax()){
                 $status = 200;
-                $response['quotation_product_ids'] = QuotationProduct::where('quotation_id',$quotation->id)->pluck('id');
                 return response()->json($response,$status);
             }else{
                 $request->session()->flash('success','Quotation created successfully.');
                 return redirect('/quotation/create');
             }
         }catch(\Exception $e){
-            $status = 200;
+            $status = 500;
             $response = [
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        'message' => 'Something went wrong.'
+                'message' => "Something went wrong !!",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    'message' => 'Something went wrong.'
             ];
             $data = [
                 'action' => 'Create Quotation',
@@ -537,12 +551,11 @@ trait QuotationTrait{
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            if($request->json()){
+            if($request->ajax()){
                 return response()->json($response,$status);
             }else{
                 abort(500);
             }
-
         }
     }
 
@@ -571,7 +584,7 @@ trait QuotationTrait{
     public function getProjectSites(Request $request){
         try{
             $projectId = $request->project_id;
-            $quotationProjectSiteIds = Quotation::pluck('project_site_id')->toArray();
+            $quotationProjectSiteIds = Quotation::whereNotNull('quotation_status_id')->pluck('project_site_id')->toArray();
             $projectSites = ProjectSite::where('project_id',$projectId)->whereNotIn('id',$quotationProjectSiteIds)->select('id','name')->get();
             $response = array();
             foreach($projectSites as $projectSite){
@@ -1240,89 +1253,38 @@ trait QuotationTrait{
         }
     }
 
-    public function saveQuotationProduct(Request $request, $product){
+    public function getProductEditView(Request $request){
         try{
             $data = $request->all();
-            $quotationProductData = array();
-            $quotationProductData['product_id'] = $product->id;
-            //$quotationProductData['quotation_id'] = $quotation['id'];
-            $quotationProductData['description'] = $data['description'];
-            $recentVersion = ProductVersion::where('product_id',$product->id)->orderBy('created_at','desc')->pluck('id')->first();
-            $productMaterialIds = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
-                ->join('materials','materials.id','=','material_versions.material_id')
-                ->where('product_material_relation.product_version_id', $recentVersion)
-                ->pluck('materials.id')
-                ->toArray();
-            $productMaterials = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
-                ->join('materials','materials.id','=','material_versions.material_id')
-                ->where('product_material_relation.product_version_id', $recentVersion)
-                ->select('materials.id as id','product_material_relation.material_quantity as material_quantity','material_versions.unit_id as unit_id','materials.unit_id as material_unit_id')
-                ->get()
-                ->toArray();
-            $productAmount = 0;
-            $quotationMaterialId = array();
-            $quotationMaterialData = array();
-            foreach($productMaterials as $material){
-                $quotationMaterialData['material_id'] = $material['id'];
-                $quotationMaterialData['unit_id'] = $material['material_unit_id'];
-                $quotationMaterialData['is_client_supplied'] = false;
-                $materialBaseRateConversion = UnitHelper::unitConversion($data['material_unit'][$material['id']], $material['material_unit_id'], $data['material_rate'][$material['id']]);
-                if(!is_array($materialBaseRateConversion)){
-                    $quotationMaterialData['rate_per_unit'] = $materialBaseRateConversion;
-                }else{
-
+            $quotationProduct = QuotationProduct::where('quotation_id',$data['quotation_id'])->where('product_id',$data['product_id'])->first();
+            if($quotationProduct == null){
+                return redirect('/product/edit/'.$data['product_id']);
+            }else{
+                $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
+                    ->join('units','units.id','=','material_versions.unit_id')
+                    ->join('materials','materials.id','=','material_versions.material_id')
+                    ->where('product_material_relation.product_version_id',$quotationProduct->product_version_id)
+                    ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity','units.name as unit','materials.unit_id as material_unit_id')
+                    ->get()->toArray();
+                for($iterator = 0; $iterator < count($productMaterialVersions); $iterator++){
+                    $quotationMaterial = QuotationMaterial::where('material_id',$productMaterialVersions[$iterator]['material_id'])->where('quotation_id',$data['quotation_id'])->select('rate_per_unit','unit_id')->first();
+                    $rateConversion = UnitHelper::unitConversion($quotationMaterial['unit_id'],$productMaterialVersions[$iterator]['unit_id'],$quotationMaterial['rate_per_unit']);
+                    if(!is_array($rateConversion)){
+                        $productMaterialVersions[$iterator]['rate_per_unit'] = $rateConversion;
+                    }else{
+                        Log::info($rateConversion);
+                    }
                 }
-                $quotationMaterial = QuotationMaterial::create($quotationMaterialData);
-                $quotationMaterialId[] = $quotationMaterial->id;
-                $rateConversion = UnitHelper::unitConversion($data['material_unit'][$material['id']],$material['unit_id'],$data['material_rate'][$material['id']]);
-                if(is_array($rateConversion)){
-                    /*$request->session()->flash('error',$rateConversion['message']);
-                    Quotation::where('id',$quotation['id'])->delete();
-                    return redirect('/quotation/create');*/
-                }
-                $productAmount = $productAmount + ($rateConversion * $data['material_quantity'][$material['id']]);
+                return view('partials.quotation.quotation-product-view')->with(compact('quotationProduct','productMaterialVersions'));
             }
-            $quotationProductData['rate_per_unit'] = $productAmount;
-//            $quotationProductData['quantity'] = $data['product_quantity'][$productId];
-            $quotationProduct = QuotationProduct::create($quotationProductData);
-            $profitMarginAmount = 0;
-            foreach($data['profit_margin'] as $id => $percentage){
-                $quotationProfitMarginData = array();
-                $quotationProfitMarginData['profit_margin_id'] = $id;
-                $quotationProfitMarginData['percentage'] = $percentage;
-                $quotationProfitMarginData['quotation_product_id'] = $quotationProduct->id;
-                QuotationProfitMarginVersion::create($quotationProfitMarginData);
-                Log::info('profit margin id');
-                Log::info($id);
-                Log::info('profit margin percentage');
-                Log::info($percentage);
-                $profitMarginAmount = round($profitMarginAmount + ($productAmount * ($percentage / 100)),3);
-            }
-            $productAmount = round(($productAmount + $profitMarginAmount),3);
-            Log::info($productAmount);
-            $quotationProduct->update(['rate_per_unit' => $productAmount]);
-            $response = [
-                'message' => "Quotation Product Saved Successfully",
-                'data' => [
-                    'quotation_product' => $quotationProduct,
-                    'quotation_materials_id' => json_encode($quotationMaterialId)
-                ]
-            ];
-            $status = 200;
-        }catch(\Exception $e){
+        }catch (\Exception $e){
             $data = [
                 'action' => 'Save Quotation Product',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            $status = 500;
-            $response = [
-                'message' => "Something went wrong.",
-                'data' => null
-            ];
         }
-        return response()->json($response,$status);
     }
 
 }
