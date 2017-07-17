@@ -35,6 +35,11 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
+                                                            <div id="bill_status_dropdown">
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="btn-group">
                                                             <div id="sample_editable_1_new" class="btn yellow"><a href="/bill/create" style="color: white"> Create Bill
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>

@@ -161,7 +161,8 @@ trait BillTrait{
             $billIds = Bill::where('quotation_id',$quotation->id)->pluck('id')->toArray();
             $taxes_applied = BillTax::whereIn('bill_id',$billIds)->distinct('tax_id')->orderBy('tax_id')->select('tax_id')->get()->toArray();
             $taxes = Tax::whereIn('id',$taxes_applied)->orderBy('id')->get();
-            return view('admin.bill.manage-bill')->with(compact('taxes','project_site'));
+            $bill_statuses = BillStatus::whereIn('slug',['draft','approved','cancelled'])->get()->toArray();
+            return view('admin.bill.manage-bill')->with(compact('taxes','project_site','bill_statuses'));
         }catch(\Exception $e){
             $data = [
               'action' => 'Get bill manage view',
@@ -173,15 +174,17 @@ trait BillTrait{
         }
     }
 
-    public function billListing(Request $request,$project_site){
+    public function billListing(Request $request,$project_site,$status){
         try{
             $listingData = $currentTaxes = array();
             $iterator = $i = 0;
             $array_no = 1;
             $quotation = Quotation::where('project_site_id',$project_site->id)->first();
-            $bills = Bill::where('quotation_id',$quotation->id)->get();
+            $allBills = Bill::where('quotation_id',$quotation->id)->get();
+            $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
+            $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->get();
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $taxesAppliedToBills = BillTax::whereIn('bill_id',array_column($bills->toArray(),'id'))->distinct('tax_id')->orderBy('tax_id')->pluck('tax_id')->toArray();
+            $taxesAppliedToBills = BillTax::whereIn('bill_id',array_column($allBills->toArray(),'id'))->distinct('tax_id')->orderBy('tax_id')->pluck('tax_id')->toArray();
             foreach($bills as $key => $bill){
                 $listingData[$iterator]['status'] = $bill->bill_status->slug ;
                 $listingData[$iterator]['bill_id'] = $bill->id;
@@ -232,14 +235,6 @@ trait BillTrait{
                     case "draft" :
                         $billStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
                     break;
-
-                    case "paid" :
-                        $billStatus = '<td><span class="btn btn-xs green-meadow"> Paid </span></td>';
-                        break;
-
-                    case "unpaid" :
-                        $billStatus = '<td><span class="btn btn-xs btn-danger"> Unpaid </span></td>';
-                        break;
 
                     case "approved" :
                         $billStatus = '<td><span class="btn btn-xs green-meadow"> Approve </span></td>';
@@ -441,7 +436,7 @@ trait BillTrait{
 
     public function approveBill(Request $request){
         try{
-            $paidStatusId = BillStatus::where('slug','paid')->pluck('id')->first();
+            $paidStatusId = BillStatus::where('slug','approved')->pluck('id')->first();
             if($request->has('remark')){
                 Bill::where('id',$request->bill_id)->update(['remark' => $request->remark , 'bill_status_id' => $paidStatusId]);
             }else{

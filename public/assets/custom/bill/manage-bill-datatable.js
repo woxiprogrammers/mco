@@ -4,6 +4,7 @@ var BillListing = function () {
         var grid = new Datatable();
         console.log($('#projectSiteId').val());
         var project_site_id = $('#projectSiteId').val();
+        var bill_status = $('#bill_status').val();
         grid.init({
             src: $("#billTable"),
             onSuccess: function (grid) {
@@ -25,7 +26,7 @@ var BillListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/bill/listing/"+project_site_id, // ajax source
+                    "url": "/bill/listing/"+project_site_id+"/"+bill_status, // ajax source
                     "data" :{
                         '_token' : $("input[name='_token']").val()
                     }
@@ -79,5 +80,28 @@ var BillListing = function () {
 }();
 
 jQuery(document).ready(function() {
+        var hash = window.location.hash;
+        var s = $('<select />',{id:"bill_status",class:"form-control", name:"bill_status"});
+        if (hash == "#draft") { //DRAFT Status
+            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
+            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
+            $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
+        } else if (hash == "#cancelled") { // CANCELLED STATUS
+            $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
+            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
+            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
+        } else { //Approved Status by default
+            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
+            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
+            $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
+        }
+        s.appendTo('#bill_status_dropdown');
+
     BillListing.init();
-});
+
+        $('#bill_status').on('change',function(e) {
+            window.location.href = "#" + $('#bill_status').val();
+            location.reload();
+        });
+    });
+
