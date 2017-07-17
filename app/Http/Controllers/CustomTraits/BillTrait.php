@@ -157,7 +157,10 @@ trait BillTrait{
 
     public function getManageView(Request $request,$project_site){
         try{
-            $taxes = Tax::where('is_active',true)->get();
+            $quotation = Quotation::where('project_site_id',$project_site->id)->first();
+            $billIds = Bill::where('quotation_id',$quotation->id)->pluck('id')->toArray();
+            $taxes_applied = BillTax::whereIn('bill_id',$billIds)->distinct('tax_id')->orderBy('tax_id')->select('tax_id')->get()->toArray();
+            $taxes = Tax::whereIn('id',$taxes_applied)->orderBy('id')->get();
             return view('admin.bill.manage-bill')->with(compact('taxes','project_site'));
         }catch(\Exception $e){
             $data = [
@@ -178,6 +181,7 @@ trait BillTrait{
             $quotation = Quotation::where('project_site_id',$project_site->id)->first();
             $bills = Bill::where('quotation_id',$quotation->id)->get();
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $taxesAppliedToBills = BillTax::whereIn('bill_id',array_column($bills->toArray(),'id'))->distinct('tax_id')->orderBy('tax_id')->pluck('tax_id')->toArray();
             foreach($bills as $key => $bill){
                 $listingData[$iterator]['bill_id'] = $bill->id;
                 if($bill->bill_status_id != $cancelBillStatusId){
@@ -193,9 +197,10 @@ trait BillTrait{
                     $total_amount = $total_amount + ($product->quantity * $rate) ;
                 }
                 $listingData[$iterator]['subTotal'] = $total_amount;
-                $billTaxes = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
-                if($billTaxes != null){
-                    $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->select('id as tax_id','name')->get();
+                $thisBillTax = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
+                $otherTaxes = array_values(array_diff($taxesAppliedToBills,$thisBillTax));
+                if($thisBillTax != null){
+                    $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->select('id as tax_id','name')->get();
                 }
                 if($currentTaxes != null){
                     $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
