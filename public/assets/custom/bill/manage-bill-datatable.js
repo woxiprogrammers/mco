@@ -2,7 +2,6 @@ var BillListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
-        console.log($('#projectSiteId').val());
         var project_site_id = $('#projectSiteId').val();
         var bill_status = $('#bill_status').val();
         grid.init({
