@@ -141,12 +141,12 @@ trait BillTrait{
         return response()->json($projectSitesOptions,$status);
     }
 
-    public function getManageView(Request $request){
+    public function getProjectSiteManageView(Request $request){
         try{
             return view('admin.bill.manage');
         }catch (\Exception $e){
             $data = [
-                'action' => 'Get bill manage view',
+                'action' => 'Get project site manage view',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -155,7 +155,140 @@ trait BillTrait{
         }
     }
 
-    public function billListing(Request $request){
+    public function getManageView(Request $request,$project_site){
+        try{
+            $quotation = Quotation::where('project_site_id',$project_site->id)->first();
+            $billIds = Bill::where('quotation_id',$quotation->id)->pluck('id')->toArray();
+            $taxes_applied = BillTax::whereIn('bill_id',$billIds)->distinct('tax_id')->orderBy('tax_id')->select('tax_id')->get()->toArray();
+            $taxes = Tax::whereIn('id',$taxes_applied)->orderBy('id')->get();
+            $bill_statuses = BillStatus::whereIn('slug',['draft','approved','cancelled'])->get()->toArray();
+            return view('admin.bill.manage-bill')->with(compact('taxes','project_site','bill_statuses'));
+        }catch(\Exception $e){
+            $data = [
+              'action' => 'Get bill manage view',
+               'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function billListing(Request $request,$project_site,$status){
+        try{
+            $listingData = $currentTaxes = array();
+            $iterator = $i = 0;
+            $array_no = 1;
+            $quotation = Quotation::where('project_site_id',$project_site->id)->first();
+            $allBills = Bill::where('quotation_id',$quotation->id)->get();
+            $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
+            $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->get();
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $taxesAppliedToBills = BillTax::whereIn('bill_id',array_column($allBills->toArray(),'id'))->distinct('tax_id')->orderBy('tax_id')->pluck('tax_id')->toArray();
+            foreach($bills as $key => $bill){
+                $listingData[$iterator]['status'] = $bill->bill_status->slug ;
+                $listingData[$iterator]['bill_id'] = $bill->id;
+                if($bill->bill_status_id != $cancelBillStatusId){
+                    $listingData[$iterator]['array_no'] = $array_no;
+                    $array_no++;
+                }else{
+                    $listingData[$iterator]['array_no'] = '-';
+                }
+                $listingData[$iterator]['bill_no_format'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
+                $total_amount = 0;
+                foreach($bill->bill_quotation_product as $key1 => $product){
+                    $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                    $total_amount = $total_amount + ($product->quantity * $rate) ;
+                }
+                $listingData[$iterator]['subTotal'] = $total_amount;
+                $thisBillTax = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
+                $otherTaxes = array_values(array_diff($taxesAppliedToBills,$thisBillTax));
+                if($thisBillTax != null){
+                    $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->select('id as tax_id','name')->get();
+                }
+                if($currentTaxes != null){
+                    $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
+                    usort($currentTaxes, function($a, $b) {
+                        return $a['tax_id'] > $b['tax_id'];
+                    });
+                }else{
+                    $currentTaxes = Tax::where('is_active',true)->select('id as tax_id')->get();
+                }
+                $listingData[$iterator]['final_total'] = $total_amount;
+                foreach($currentTaxes as $key2 => $tax){
+                    if(array_key_exists('percentage',$tax)){
+                        $listingData[$iterator]['tax'][$i] = $total_amount * ($tax['percentage'] / 100);
+                    }else{
+                        $listingData[$iterator]['tax'][$i] = 0;
+                    }
+                    $listingData[$iterator]['final_total'] = round($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$i]);
+                    $i++;
+                }
+                $iterator++;
+            }
+            $iTotalRecords = count($listingData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($listingData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                switch($listingData[$iterator]['status']){
+                    case "draft" :
+                        $billStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
+                    break;
+
+                    case "approved" :
+                        $billStatus = '<td><span class="btn btn-xs green-meadow"> Approve </span></td>';
+                        break;
+
+                    case "cancelled" :
+                        $billStatus = '<td><span class="btn btn-xs btn-danger"> Cancelled </span></td>';
+                        break;
+                }
+                $records['data'][$iterator] = [
+                    $iterator+1,
+                    $listingData[$pagination]['array_no'],
+                    $listingData[$pagination]['bill_no_format'],
+                    $listingData[$pagination]['subTotal'],
+                ];
+                foreach($listingData[$pagination]['tax'] as $taxAmount){
+                    array_push($records['data'][$iterator],round($taxAmount,3));
+                }
+                array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
+                array_push($records['data'][$iterator],$billStatus);
+                array_push($records['data'][$iterator],'<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/bill/view/'.$listingData[$pagination]['bill_id'].'">
+                                    <i class="icon-docs"></i> View </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <i class="icon-docs"></i> Make Payment </a>
+                            </li>
+                        </ul>
+                    </div>');
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Bill Detail Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records,200);
+    }
+
+    public function ProjectSiteListing(Request $request){
         try{
             $iterator = 0;
             $listingData = array();
@@ -192,9 +325,12 @@ trait BillTrait{
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
                                 <a href="/bill/create/'.$listingData[$pagination]['project_site_id'].'">
+                                    <i class="icon-docs"></i> Create </a>
+                            </li>
+                            <li>
+                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
                                     <i class="icon-docs"></i> Manage </a>
                             </li>
-
                         </ul>
                     </div>'
                 ];
@@ -276,10 +412,12 @@ trait BillTrait{
             }
             if($request->has('tax_percentage')){
                 foreach($request['tax_percentage'] as $key => $value){
-                    $bill_taxes['tax_id'] = $key;
-                    $bill_taxes['bill_id'] = $bill_created['id'];
-                    $bill_taxes['percentage'] = $value;
-                    BillTax::create($bill_taxes);
+                    if($value != 0){
+                        $bill_taxes['tax_id'] = $key;
+                        $bill_taxes['bill_id'] = $bill_created['id'];
+                        $bill_taxes['percentage'] = $value;
+                        BillTax::create($bill_taxes);
+                    }
                 }
             }
 
@@ -298,7 +436,7 @@ trait BillTrait{
 
     public function approveBill(Request $request){
         try{
-            $paidStatusId = BillStatus::where('slug','paid')->pluck('id')->first();
+            $paidStatusId = BillStatus::where('slug','approved')->pluck('id')->first();
             if($request->has('remark')){
                 Bill::where('id',$request->bill_id)->update(['remark' => $request->remark , 'bill_status_id' => $paidStatusId]);
             }else{
@@ -644,7 +782,7 @@ trait BillTrait{
         try{
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $bill->update(['bill_status_id' => $cancelBillStatusId , 'remark' => $request->remark]);
-            return redirect('/bill/manage');
+            return redirect('/bill/manage/project-site');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Cancel bill status',

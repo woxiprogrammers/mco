@@ -135,8 +135,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('create',array('uses' => 'Admin\BillController@createBill'));
         Route::get('projects/{client}',array('uses' => 'Admin\BillController@getProjects'));
         Route::get('project-sites/{project}',array('uses' => 'Admin\BillController@getProjectSites'));
-        Route::get('manage',array('uses' => 'Admin\BillController@getManageView'));
-        Route::post('listing',array('uses' => 'Admin\BillController@billListing'));
+        Route::get('manage/project-site',array('uses' => 'Admin\BillController@getProjectSiteManageView'));
+        Route::post('listing/project-site',array('uses' => 'Admin\BillController@ProjectSiteListing'));
         Route::post('approve', array('uses' => 'Admin\BillController@approveBill'));
         Route::get('current/invoice/{bill}', array('uses' => 'Admin\BillController@generateCurrentBill'));
         Route::get('cumulative/invoice/{bill}', array('uses' => 'Admin\BillController@generateCumulativeInvoice'));
@@ -146,6 +146,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{bill}', array('uses' => 'Admin\BillController@editBillView'));
         Route::post('edit/{bill}', array('uses' => 'Admin\BillController@editBill'));
         Route::post('cancel/{bill}', array('uses' => 'Admin\BillController@cancelBill'));
+        Route::get('manage/{project_site}',array('uses' => 'Admin\BillController@getManageView'));
+        Route::post('listing/{project_site}/{status}',array('uses' => 'Admin\BillController@billListing'));
     });
 
     Route::group(['prefix' => 'quotation'], function(){

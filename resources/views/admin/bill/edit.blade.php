@@ -27,7 +27,7 @@
                                 <div class="container" style="width: 100%">
                                     <ul class="page-breadcrumb breadcrumb">
                                         <li>
-                                            <a href="/bill/manage">Manage Bill</a>
+                                            <a href="/bill/manage/project-site">Manage Bill</a>
                                             <i class="fa fa-circle"></i>
                                         </li>
                                         <li>

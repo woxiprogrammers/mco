@@ -143,7 +143,7 @@
                         </a>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a href="/bill/manage"> Bills
+                        <a href="/bill/manage/project-site"> Bills
                             <span class="arrow"></span>
                         </a>
                     </li>
