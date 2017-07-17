@@ -183,6 +183,7 @@ trait BillTrait{
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $taxesAppliedToBills = BillTax::whereIn('bill_id',array_column($bills->toArray(),'id'))->distinct('tax_id')->orderBy('tax_id')->pluck('tax_id')->toArray();
             foreach($bills as $key => $bill){
+                $listingData[$iterator]['status'] = $bill->bill_status->slug ;
                 $listingData[$iterator]['bill_id'] = $bill->id;
                 if($bill->bill_status_id != $cancelBillStatusId){
                     $listingData[$iterator]['array_no'] = $array_no;
@@ -227,6 +228,27 @@ trait BillTrait{
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                switch($listingData[$iterator]['status']){
+                    case "draft" :
+                        $billStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
+                    break;
+
+                    case "paid" :
+                        $billStatus = '<td><span class="btn btn-xs green-meadow"> Paid </span></td>';
+                        break;
+
+                    case "unpaid" :
+                        $billStatus = '<td><span class="btn btn-xs btn-danger"> Unpaid </span></td>';
+                        break;
+
+                    case "approved" :
+                        $billStatus = '<td><span class="btn btn-xs green-meadow"> Approve </span></td>';
+                        break;
+
+                    case "cancelled" :
+                        $billStatus = '<td><span class="btn btn-xs btn-danger"> Cancelled </span></td>';
+                        break;
+                }
                 $records['data'][$iterator] = [
                     $iterator+1,
                     $listingData[$pagination]['array_no'],
@@ -237,6 +259,7 @@ trait BillTrait{
                     array_push($records['data'][$iterator],round($taxAmount,3));
                 }
                 array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
+                array_push($records['data'][$iterator],$billStatus);
                 array_push($records['data'][$iterator],'<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions

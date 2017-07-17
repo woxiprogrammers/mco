@@ -146,7 +146,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{bill}', array('uses' => 'Admin\BillController@editBillView'));
         Route::post('edit/{bill}', array('uses' => 'Admin\BillController@editBill'));
         Route::post('cancel/{bill}', array('uses' => 'Admin\BillController@cancelBill'));
-        Route::get('manage/{project_site}',array('uses' => 'Admin\BillController@getManageView'));
+        Route::get('manage/{project_site}/{status}',array('uses' => 'Admin\BillController@getManageView'));
         Route::post('listing/{project_site}',array('uses' => 'Admin\BillController@billListing'));
     });
 
