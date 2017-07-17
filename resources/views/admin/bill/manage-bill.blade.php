@@ -19,12 +19,18 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Manage Bill</h1>
+                                <h1>Bill Listing</h1>
                             </div>
                         </div>
                     </div>
                     <div class="page-content">
                         <div class="container">
+                            <ul class="page-breadcrumb breadcrumb">
+                                <li>
+                                    <a href="/bill/manage/project-site">Back</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                            </ul>
                             <div class="row">
                                 <div class="col-md-12">
                                     <!-- BEGIN EXAMPLE TABLE PORTLET-->
