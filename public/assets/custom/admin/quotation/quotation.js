@@ -4,8 +4,7 @@
 
 
 $(document).ready(function(){
-
-
+    $.getScript('/assets/custom/admin/product/product.js');
     $(".quotation-category").change(function(){
         var category_id = $(this).val();
         var categoryIdField = $(this).attr('id');
@@ -87,6 +86,10 @@ $(document).ready(function(){
             if(url.indexOf("edit") > 0){
                 ajaxData['quotation_id'] = $("#quotationId").val();
             }
+            var quotationId = $("#quotationId").val();
+            if(typeof quotationId != 'undefined'){
+                ajaxData['quotation_id'] = $("#quotationId").val();
+            }
             $.ajax({
                 url: '/quotation/get-materials',
                 async: false,
@@ -148,6 +151,11 @@ $(document).ready(function(){
             $(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
         });
         calculateProductSubtotal();
+    });
+
+    $("#generalTabSubmit").on('click',function(e){
+        e.stopPropagation();
+        $("#materialCosts").trigger('click');
     });
 });
 
@@ -343,8 +351,8 @@ function showProfitMargins(){
                 data[$(this).attr('name')] = $(this).val();
             });
         }
-
-        if(url.indexOf("edit") > 0){
+        var quotationId = $("#quotationId").val();
+        if(typeof quotationId != 'undefined'){
             data['quotation_id'] = $("#quotationId").val();
         }
         $.ajax({
@@ -367,19 +375,43 @@ function showProfitMargins(){
 
 function viewProduct(row){
     var productId = $('#productSelect'+row).val();
-    $.ajax({
-        url:'/product/edit/'+productId,
-        type: "GET",
-        async: false,
-        success: function(data, textStatus, xhr){
-            $("#productView .modal-body").html(data);
-            calucalateProductViewTotal();
-            $("#productView").modal('show');
-        },
-        error: function(){
+    var quotationId = $("#quotationId").val();
+    if(typeof quotationId != 'undefined'){
+        $.ajax({
+            url:'/quotation/get-quotation-product-view',
+            type: "POST",
+            async: false,
+            data: {
+                _token: $('input[name="_token"]').val(),
+                quotation_id: quotationId,
+                product_id: productId
+            },
+            success: function(data, textStatus, xhr){
+                $("#productView .modal-body").html(data);
+                $("#productView").modal('show');
+                calucalateProductViewTotal();
+            },
+            error: function(){
 
-        }
-    });
+            }
+        });
+    }else{
+        $.ajax({
+            url:'/product/edit/'+productId,
+            type: "GET",
+            async: false,
+            success: function(data, textStatus, xhr){
+                $("#productView .modal-body").html(data);
+                $("#productView").modal('show');
+                calucalateProductViewTotal();
+            },
+            error: function(){
+
+            }
+        });
+    }
+
+
 }
 
 function calculateProductSubtotal(){
@@ -415,19 +447,17 @@ function calculateSubtotal(){
 
 function calucalateProductViewTotal(){
     var subtotal = 0;
-    $(".material-amount").each(function(){
-        subtotal = subtotal + parseFloat($(this).text());
+    $(".material_amount").each(function(){
+        subtotal = subtotal + parseFloat($(this).val());
     });
     $("#productViewSubtotal").text(Math.round(subtotal * 1000) / 1000);
-
     var total = subtotal;
-    $(".profit-margin-percentage").each(function(){
-        var percentage = parseFloat($(this).text());
-        var amount = subtotal * (percentage/100);
-        $(this).next().text(Math.round(amount * 1000) / 1000);
-        total = total + amount;
+    $(".profit-margin").each(function(){
+        var profitMarginAmount = subtotal * ($(this).val() / 100);
+        total = total + profitMarginAmount;
+        $(this).parent().next().text(Math.round(profitMarginAmount * 1000) / 1000);
     });
-    $("#total").text(Math.round(total * 1000) / 1000);
+    $("#productViewTotal").text(Math.round(total * 1000) / 1000);
 }
 
 function convertUnit(materialId,fromUnit){
@@ -462,4 +492,48 @@ function convertUnit(materialId,fromUnit){
 
 function openDisapproveModal(){
     $("#disapproveModal").modal('show');
+}
+
+function submitProductEdit(){
+    $("#productViewProjectSiteId").val($('#projectSiteId').val());
+    var productId = $("#quotationProductViewId").val();
+    var productQuantity = $("input[name='product_quantity["+productId+"]']").val();
+    if(productQuantity == ""){
+        productQuantity = 0;
+    }
+    $("#quotationProductQuantity").val(productQuantity);
+    var formData = $("#editProductForm").serialize();
+    var url = window.location.href;
+    if(url.indexOf("edit") > 0){
+        var quotationId = $("#quotationId").val();
+        formData = formData + '&quotation_id=' + quotationId;
+    }
+    $.ajax({
+        url: '/quotation/create',
+        async: false,
+        type: 'POST',
+        data: formData,
+        success: function(data,textStatus, xhr){
+            $("input[name='product_description["+data.product_id+"]']").val(data.product_description);
+            $("input[name='product_rate["+data.product_id+"]']").val(Math.round(data.product_amount * 1000) / 1000);
+            var rowId = $("input[name='product_rate["+data.product_id+"]']").closest('tr').attr('id');
+            var rowNumber = rowId.match(/\d+/)[0];
+            calculateAmount(rowNumber);
+            var quotationId = $("#quotationId").val();
+            if(typeof quotationId == 'undefined'){
+                $("<input/>",{
+                    name: 'quotation_id',
+                    id:'quotationId',
+                    value: data.quotation_id,
+                    type: 'hidden'
+                }).appendTo("#QuotationCreateForm")
+            }else{
+                $("#quotationId").val(data.quotation_id);
+            }
+            alert('Product Edited Successfully');
+        },
+        error: function(data){
+            alert('Something went wrong');
+        }
+    });
 }

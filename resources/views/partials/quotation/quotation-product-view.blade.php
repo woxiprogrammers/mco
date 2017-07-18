@@ -1,46 +1,44 @@
 <?php
 /**
  * Created by Ameya Joshi.
- * Date: 20/6/17
- * Time: 6:13 PM
- */
-?>
-    <input type="hidden" name="quotation_product_id" id="quotationProductViewId" value="{{$product['id']}}">
+ * Date: 17/7/17
+ * Time: 3:19 PM
+ */ ?>
+<input type="hidden" name="quotation_product_id" id="quotationProductViewId" value="{{$quotationProduct['product_id']}}">
 <form role="form" id="editProductForm" class="form-horizontal" action="/quotation/create" method="post">
     {!! csrf_field() !!}
-    <input type="hidden" name="product_id[]" value="{{$product['id']}}">
+    <input type="hidden" name="product_id[]" value="{{$quotationProduct['product_id']}}">
     <input type="hidden" name="project_site_id" id="productViewProjectSiteId">
-    <input type="hidden" name="product_quantity[{{$product['id']}}]" id="quotationProductQuantity">
-
+    <input type="hidden" name="product_quantity[{{$quotationProduct->product_id}}]" id="quotationProductQuantity">
     <div>
         <fieldset>
             <legend> General Information </legend>
             <div class="form-group">
+
                 <label class="col-md-3 control-label">Product Title</label>
                 <div class="col-md-6">
-                    <input type="text" id="name" name="name" class="form-control" value="{{$product['name']}}">
+                    <input type="text" id="name" name="name" class="form-control" value="{{$quotationProduct->product->name}}">
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Description</label>
                 <div class="col-md-6">
-                    <textarea class="form-control" rows="2" id="description" name="product_description[{{$product['id']}}]">{{$product['description']}}</textarea>
+
+                    <textarea class="form-control" rows="2" id="description" name="product_description[{{$quotationProduct->product_id}}]">{{$quotationProduct->description}}</textarea>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Unit</label>
                 <div class="col-md-6">
-                    <input type="text" name="product_unit" value="{{$product->unit->name}}" class="form-control" readonly>
+                    <input type="text" name="product_unit" value="{{$quotationProduct->product->unit->name}}" class="form-control" readonly>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Category</label>
                 <div class="col-md-6">
-                    <input type="hidden" name="category_id" value="{{$product['category_id']}}">
-                    <input class="form-control" value="{{$product['category']}}" readonly>
+                    <input class="form-control" value="{{$quotationProduct->product->category->name}}" readonly>
                 </div>
             </div>
-            <input type="hidden" name="material_version_ids" value="{{$materialVersionIds}}">
         </fieldset>
         <div class="materials-table-div">
             <fieldset>
@@ -107,22 +105,18 @@
                             <th style="width: 46%"> Percentage </th>
                             <th style="width: 33%"> Amount </th>
                         </tr>
-                        @foreach($profitMargins as $profitMargin)
-                        <tr>
-                            <td>
-                                {{$profitMargin['name']}}
-                            </td>
-                            <td>
-                                @if(isset($productProfitMargins[$profitMargin['id']]))
-                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margins[{{$product['id']}}][{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
-                                @else
-                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margins[{{$product['id']}}][{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
-                                @endif
-                            </td>
-                            <td class="profit-margin-amount">
+                        @foreach($quotationProduct->quotation_profit_margins as $profitMargin)
+                            <tr>
+                                <td>
+                                    {{$profitMargin->profit_margin->name}}
+                                </td>
+                                <td>
+                                    <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margins[{{$quotationProduct->product_id}}][{{$profitMargin['profit_margin_id']}}]" value="{{$profitMargin->percentage}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                </td>
+                                <td class="profit-margin-amount">
 
-                            </td>
-                        </tr>
+                                </td>
+                            </tr>
                         @endforeach
                     </table>
                     <div class="col-md-offset-7">

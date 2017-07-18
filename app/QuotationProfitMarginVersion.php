@@ -13,4 +13,8 @@ class QuotationProfitMarginVersion extends Model
     public function quotation_product(){
         return $this->belongsTo('App\QuotationProduct','quotation_product_id');
     }
+
+    public function profit_margin(){
+        return $this->belongsTo('App\ProfitMargin','profit_margin_id');
+    }
 }

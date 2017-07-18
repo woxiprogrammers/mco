@@ -2,7 +2,7 @@ $(document).ready(function(){
 
     calculateSubTotal();
     $("#next_btn").on('click',function(){
-        if($("#material_id option:selected").length > 0){
+        if($("#material_id input:checkbox:checked").length > 0){
             getMaterialDetails();
             $(".materials-table-div").show();
         }
@@ -44,10 +44,9 @@ function getMaterials(category){
 
 function getMaterialDetails(){
     var material_ids = [];
-    $("#material_id option:selected").each(function(i){
+    $("#material_id input:checkbox:checked").each(function(i){
         material_ids[i] = $(this).val();
     });
-
     $.ajax({
         url: '/product/material/listing',
         type: "POST",
@@ -82,19 +81,19 @@ function calculateSubTotal(){
         amount = 0;
     }
 
-    $("#subtotal").text(Math.round(amount * 1000) / 1000);
+    $("#subtotal,#productViewSubtotal").text(Math.round(amount * 1000) / 1000);
     calculateProfitMargin();
 }
 
 function calculateProfitMargin(){
-    var amount = parseFloat($("#subtotal").text());
+    var amount = parseFloat($("#subtotal,#productViewSubtotal").text());
     var total = amount;
     $(".profit-margin").each(function(){
         var profitMarginAmount = amount * ($(this).val() / 100);
         total = total + profitMarginAmount;
         $(this).parent().next().text(Math.round(profitMarginAmount * 1000) / 1000);
     });
-    $("#total").text(Math.round(total * 1000) / 1000);
+    $("#total,#productViewTotal").text(Math.round(total * 1000) / 1000);
 }
 
 function convertUnits(materialId){
