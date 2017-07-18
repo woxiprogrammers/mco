@@ -10,6 +10,7 @@
         <td>
             <label>
                 {{$data['material']['name']}}
+                <input type="hidden" name="product_material_id[]" value="{{$data['material']['id']}}" class="product-material-id">
             </label>
         </td>
         <td>

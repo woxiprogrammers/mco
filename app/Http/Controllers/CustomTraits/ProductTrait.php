@@ -101,7 +101,7 @@ trait ProductTrait{
                         ->where('category_material_relations.category_id',$category->id)
                         ->where('materials.is_active', true)
                         ->select('materials.id as id','materials.name as name')
-                        ->orderBy('name','asc')
+                        ->orderBy('materials.name','asc')
                         ->get();
             $materialOptions = array();
             if($materials == null){

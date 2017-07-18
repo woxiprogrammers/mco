@@ -47,12 +47,22 @@ function getMaterialDetails(){
     $("#material_id input:checkbox:checked").each(function(i){
         material_ids[i] = $(this).val();
     });
+    if($(".product-material-id").length > 0){
+        var productMaterialId = [];
+        $(".product-material-id").each(function(i){
+            productMaterialId[i] = $(this).val();
+        });
+
+    }else{
+        var productMaterialId = null;
+    }
     $.ajax({
         url: '/product/material/listing',
         type: "POST",
         data :{
             '_token' : $("input[name='_token']").val(),
-            'material_ids' : material_ids
+            'material_ids' : material_ids,
+            'product_material_id': productMaterialId
         },
         async: false,
         success: function(data,textStatus, xhr){
