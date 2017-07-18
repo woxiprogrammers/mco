@@ -80,7 +80,6 @@ jQuery(document).ready(function() {
         $("input:checkbox:checked").each(function(i){
             materialIds[i] = $(this).val();
         });
-        console.log(materialIds);
         $.ajax({
             url:'/material/change-status',
             type: "POST",

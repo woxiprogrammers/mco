@@ -47,7 +47,6 @@ function getMaterialDetails(){
     $("#material_id input:checkbox:checked").each(function(i){
         material_ids[i] = $(this).val();
     });
-    console.log(material_ids);
     $.ajax({
         url: '/product/material/listing',
         type: "POST",

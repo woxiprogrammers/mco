@@ -14,8 +14,6 @@ class MakeQuotationIdNullableInQuotationProductTable extends Migration
     public function up()
     {
         Schema::table('quotation_products', function (Blueprint $table) {
-//            $table->unsignedInteger('quotation_id')->nullable()->change();
-//            $table->double('quantity')->nullable()->change();
             $table->float('quantity','10','3')->nullable()->change();
         });
     }
@@ -28,7 +26,6 @@ class MakeQuotationIdNullableInQuotationProductTable extends Migration
     public function down()
     {
         Schema::table('quotation_products', function (Blueprint $table) {
-//            $table->unsignedInteger('quotation_id')->nullable(false)->change();
             $table->float('quantity','10','3')->nullable(false)->change();
         });
     }

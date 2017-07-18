@@ -187,7 +187,6 @@ function backToGeneral(){
     if(url.indexOf("edit") > 0){
         formData['quotation_id'] = $("#quotationId").val();
     }
-    console.log(formData);
     $.ajax({
         url: '/quotation/get-product-calculations',
         type: 'POST',
