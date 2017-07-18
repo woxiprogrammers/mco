@@ -87,6 +87,9 @@
                                                                 </a>
                                                             @endif
                                                         @endif
+                                                        <a class="btn btn-success" id="generalTabSubmit">
+                                                            Save
+                                                        </a>
                                                     </fieldset>
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
                                                         <div class="panel panel-default">
@@ -96,6 +99,7 @@
                                                                 </h4>
                                                             </div>
                                                             <div id="collapse_3_1" class="panel-collapse in">
+                                                                <input type="hidden" name="project_site_id" id="projectSiteId" value="{{$quotation->project_site_id}}">
                                                                 <div class="panel-body" style="font-size: 15px">
                                                                     <div class="row" style="margin-left: 2%">
                                                                         <div class="col-md-3">
@@ -518,7 +522,7 @@
                                     </div>
                                 </div>
                                 <div id="productView" class="modal fade" role="dialog">
-                                    <div class="modal-dialog">
+                                    <div class="modal-dialog product-view-modal">
 
                                         <!-- Modal content-->
                                         <div class="modal-content">
@@ -530,7 +534,7 @@
 
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
                                             </div>
                                         </div>
 
@@ -588,6 +592,7 @@
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
 <script src="/assets/custom/admin/quotation/quotation.js"></script>
 <script src="/assets/custom/admin/quotation/validations.js"></script>
+<script src="/assets/global/plugins/jquery-form.min.js"></script>
 @if($quotation->quotation_status->slug != 'disapproved')
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>

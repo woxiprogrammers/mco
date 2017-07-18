@@ -108,7 +108,7 @@ trait ProductTrait{
                 $materialOptions[] = '<option value=""> No material Available </option>';
             }else{
                 foreach($materials as $material){
-                    $materialOptions[] = '<option value="'.$material->id.'"> '.$material->name.' </option>';
+                    $materialOptions[] = '<li  class="list-group-item"><input type="checkbox" name="material_ids" value="'.$material->id.'"> '.$material->name.'</li>';
                 }
             }
             $status = 200;
@@ -310,6 +310,9 @@ trait ProductTrait{
     public function editProduct(Request $request, $product){
         try{
             $data = $request->all();
+            if($request->ajax()){
+                return response()->json(['message' => 'Product Edited successfully'],200);
+            }
             $productData['name'] = ucwords(trim($data['name']));
             $productData['description'] = $data['description'];
             $productData['category_id'] = $data['category_id'];
