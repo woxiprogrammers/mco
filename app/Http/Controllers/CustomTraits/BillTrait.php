@@ -246,7 +246,7 @@ trait BillTrait{
                 }
                 $records['data'][$iterator] = [
                     $iterator+1,
-                    $listingData[$pagination]['array_no'],
+                    "RA Bill ".$listingData[$pagination]['array_no'],
                     $listingData[$pagination]['bill_no_format'],
                     $listingData[$pagination]['subTotal'],
                 ];
@@ -255,7 +255,8 @@ trait BillTrait{
                 }
                 array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
                 array_push($records['data'][$iterator],$billStatus);
-                array_push($records['data'][$iterator],'<div class="btn-group">
+                if($listingData[$iterator]['status'] == "approved"){
+                    array_push($records['data'][$iterator],'<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -271,6 +272,34 @@ trait BillTrait{
                             </li>
                         </ul>
                     </div>');
+                }elseif($listingData[$iterator]['status'] == "cancelled"){
+                    array_push($records['data'][$iterator],'<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <i class="icon-docs"></i> View </a>
+                            </li>
+                        </ul>
+                    </div>');
+                }else{
+                    array_push($records['data'][$iterator],'<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/bill/view/'.$listingData[$pagination]['bill_id'].'">
+                                    <i class="icon-docs"></i> View </a>
+                            </li>
+                        </ul>
+                    </div>');
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
