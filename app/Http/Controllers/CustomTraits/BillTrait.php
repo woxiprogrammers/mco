@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
+use Maatwebsite\Excel\Facades\Excel;
 
 trait BillTrait{
 
@@ -793,6 +794,51 @@ trait BillTrait{
             abort(500);
         }
     }
+
+
+    public function demo(){
+        try{
+            //dd(123);
+
+            Excel::create('Filename', function($excel) {
+                $excel->sheet('Sheetname', function($sheet) {
+                    /*$sheet->row(1, array(
+                        'test1', 'test2'
+                    ));*/
+                    /*$sheet->with(array(
+                        array('data1', 'data2'),
+                        array('data3', 'data4')
+                    ));*/
+                });
+            })->export('xls');   //  ->download('xls');
+            Excel::create('Filename', function($excel) {
+                $excel->sheet('Sheetname', function($sheet) {
+                    $sheet->row(1, array(
+                        'test1', 'test2'
+                    ));
+                    /*$row = 0; $data = $rows = array();
+                    for($i = 0 ; $i < 4 ; $i++){
+                        $data[$i]['name'] = "Harsha";
+                        $data[$i]['id'] = 1;
+                    }
+                    $rows[0] = array("Vendor name", "ID");
+                    foreach($rows as $row){
+                        foreach ($row as $singleRow) {
+
+                    }}*/
+                });
+            })->export('xls');   //  ->download('xls');
+
+        }catch (\Exception $e){
+            $data = [
+                'exceitopn' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 }
+
+
 
 

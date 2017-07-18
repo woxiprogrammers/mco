@@ -148,6 +148,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('cancel/{bill}', array('uses' => 'Admin\BillController@cancelBill'));
         Route::get('manage/{project_site}',array('uses' => 'Admin\BillController@getManageView'));
         Route::post('listing/{project_site}/{status}',array('uses' => 'Admin\BillController@billListing'));
+        Route::get('demo',array('uses' => 'Admin\BillController@demo'));
+
     });
 
     Route::group(['prefix' => 'quotation'], function(){
