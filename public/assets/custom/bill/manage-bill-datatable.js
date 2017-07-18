@@ -1,21 +1,22 @@
-var ProjectSiteListing = function () {
+var BillListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
-
+        var project_site_id = $('#projectSiteId').val();
+        var bill_status = $('#bill_status').val();
         grid.init({
-            src: $("#projectSiteTable"),
+            src: $("#billTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
             onError: function (grid) {
-                // execute some code on network or other general error  
+                // execute some code on network or other general error
             },
             loadingMessage: 'Loading...',
-            dataTable: { // here you can define a typical datatable settings from http://datatables.net/usage/options 
+            dataTable: { // here you can define a typical datatable settings from http://datatables.net/usage/options
                 // Uncomment below line("dom" parameter) to fix the dropdown overflow issue in the datatable cells. The default datatable layout
-                // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js). 
-                // So when dropdowns used the scrollable div should be removed. 
+                // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
+                // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
                 "lengthMenu": [
@@ -24,7 +25,7 @@ var ProjectSiteListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/bill/listing/project-site", // ajax source
+                    "url": "/bill/listing/"+project_site_id+"/"+bill_status, // ajax source
                     "data" :{
                         '_token' : $("input[name='_token']").val()
                     }
@@ -78,5 +79,28 @@ var ProjectSiteListing = function () {
 }();
 
 jQuery(document).ready(function() {
-    ProjectSiteListing.init();
-});
+        var hash = window.location.hash;
+        var s = $('<select />',{id:"bill_status",class:"form-control", name:"bill_status"});
+        if (hash == "#draft") { //DRAFT Status
+            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
+            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
+            $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
+        } else if (hash == "#cancelled") { // CANCELLED STATUS
+            $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
+            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
+            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
+        } else { //Approved Status by default
+            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
+            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
+            $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
+        }
+        s.appendTo('#bill_status_dropdown');
+
+    BillListing.init();
+
+        $('#bill_status').on('change',function(e) {
+            window.location.href = "#" + $('#bill_status').val();
+            location.reload();
+        });
+    });
+
