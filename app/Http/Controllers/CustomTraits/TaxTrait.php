@@ -25,7 +25,9 @@
 
         public function createTax(TaxRequest $request){
             try{
+                dd($request->all());
                 $data = $request->only('name','base_percentage');
+                dd($data);
                 $data['is_active'] = false;
                 $data['name'] = ucwords(trim($data['name']));
                 $tax = Tax::create($data);

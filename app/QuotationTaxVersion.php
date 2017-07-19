@@ -8,7 +8,7 @@ class QuotationTaxVersion extends Model
 {
     protected $table = "quotation_tax_versions";
 
-    protected $fillable = ['tax_id','quotation_id','percentage'];
+    protected $fillable = ['tax_id','quotation_id','percentage','applied_on'];
 
     public function quotation(){
         return $this->belongsTo('App\Quotation','quotation_id');

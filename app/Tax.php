@@ -9,7 +9,7 @@ class Tax extends Model
 {
     protected $table = 'taxes';
 
-    protected $fillable = ['name','slug','base_percentage','is_active'];
+    protected $fillable = ['name','slug','base_percentage','is_active','is_special'];
 
     use Sluggable;
     public function sluggable()

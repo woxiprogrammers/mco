@@ -3,6 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
+<link href="/assets/global/plugins/bootstrap-toggle/bootstrap-toggle.min.css" rel="stylesheet">
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -61,6 +62,15 @@
                                                         <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
                                                     </div>
                                                 </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="is_special" class="control-label">Is Special Tax ?</label>
+                                                        <span>*</span>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="checkbox" class="form-control" data-toggle="toggle" id="isSpecial" name="is_special">
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3">
@@ -80,10 +90,13 @@
 </div>
 @endsection
 @section('javascript')
+<script src="/assets/global/plugins/bootstrap-toggle/bootstrap-toggle.min.js" type="application/javascript"></script>
 <script src="/assets/custom/admin/tax/tax.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
         CreateTax.init();
+        console.log($("#isSpecial").next().find('.toggle-off'));
+        $("#isSpecial").next().find('.toggle-off').removeProp('position');
     });
 </script>
 @endsection
