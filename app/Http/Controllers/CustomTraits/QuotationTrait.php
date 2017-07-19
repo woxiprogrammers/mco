@@ -397,7 +397,6 @@ trait QuotationTrait{
     public function createQuotation(Request $request){
         try{
             $data = $request->all();
-            Log::info($data);
             $quotationData = array();
             $quotationData['project_site_id'] = $data['project_site_id'];
             $quotationMaterialIds = array();
@@ -801,17 +800,19 @@ trait QuotationTrait{
                 $quotationData['is_summary_applied'] = true;
             }
             $quotation->update($quotationData);
-
+            $usedProductVersion = array();
             foreach($quotation->quotation_products as $quotationProduct){
                 foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
                     $quotationProfitMargin->delete();
                 }
+                $usedProductVersion[$quotationProduct->product_id] = $quotationProduct->product_version_id;
                 $quotationProduct->delete();
             }
             foreach($data['product_id'] as $productId){
                 $quotationProductData = array();
                 $quotationProductData['product_id'] = $productId;
                 $quotationProductData['quotation_id'] = $quotation['id'];
+                $quotationProductData['product_version_id'] = $usedProductVersion[$productId];
                 $quotationProductData['description'] = $data['product_description'][$productId];
                 $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
                 $productMaterialsId = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
@@ -1260,6 +1261,13 @@ trait QuotationTrait{
             if($quotationProduct == null){
                 return redirect('/product/edit/'.$data['product_id']);
             }else{
+                $quotationDraftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
+                $quotation = Quotation::findOrFail($data['quotation_id']);
+                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null){
+                    $canUpdateProduct = true;
+                }else{
+                    $canUpdateProduct = false;
+                }
                 $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                     ->join('units','units.id','=','material_versions.unit_id')
                     ->join('materials','materials.id','=','material_versions.material_id')
@@ -1272,10 +1280,10 @@ trait QuotationTrait{
                     if(!is_array($rateConversion)){
                         $productMaterialVersions[$iterator]['rate_per_unit'] = $rateConversion;
                     }else{
-                        Log::info($rateConversion);
+                        // handle if unit conversion is not present
                     }
                 }
-                return view('partials.quotation.quotation-product-view')->with(compact('quotationProduct','productMaterialVersions'));
+                return view('partials.quotation.quotation-product-view')->with(compact('canUpdateProduct','quotationProduct','productMaterialVersions'));
             }
         }catch (\Exception $e){
             $data = [
