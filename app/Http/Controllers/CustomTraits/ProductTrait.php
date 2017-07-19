@@ -101,7 +101,7 @@ trait ProductTrait{
                         ->where('category_material_relations.category_id',$category->id)
                         ->where('materials.is_active', true)
                         ->select('materials.id as id','materials.name as name')
-                        ->orderBy('name','asc')
+                        ->orderBy('materials.name','asc')
                         ->get();
             $materialOptions = array();
             if($materials == null){
@@ -134,7 +134,18 @@ trait ProductTrait{
             $iterator = 0;
             $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             foreach($materials as $material){
-                $materialData[$iterator]['material'] = $material;
+                if($request->has('materials')){
+                    if(array_key_exists($material['id'],$request->materials)){
+                        $materialData[$iterator]['material'] = $request->materials[$material['id']];
+                        $materialData[$iterator]['material']['name'] = $material['name'];
+                    }else{
+                        $materialData[$iterator]['material'] = $material;
+                        $materialData[$iterator]['material']['quantity'] = 0;
+                    }
+                }else{
+                    $materialData[$iterator]['material'] = $material;
+                    $materialData[$iterator]['material']['quantity'] = 0;
+                }
                 $materialData[$iterator]['unit'] = Unit::where('id',$materialData[$iterator]['material']['unit_id'])->select('id','name')->first()->toArray();
                 $iterator++;
             }

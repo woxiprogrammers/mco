@@ -190,7 +190,7 @@ trait BillTrait{
                 $listingData[$iterator]['status'] = $bill->bill_status->slug ;
                 $listingData[$iterator]['bill_id'] = $bill->id;
                 if($bill->bill_status_id != $cancelBillStatusId){
-                    $listingData[$iterator]['array_no'] = $array_no;
+                    $listingData[$iterator]['array_no'] = "RA Bill - ".$array_no;
                     $array_no++;
                 }else{
                     $listingData[$iterator]['array_no'] = '-';
@@ -247,7 +247,7 @@ trait BillTrait{
                 }
                 $records['data'][$iterator] = [
                     $iterator+1,
-                    "RA Bill ".$listingData[$pagination]['array_no'],
+                    $listingData[$pagination]['array_no'],
                     $listingData[$pagination]['bill_no_format'],
                     $listingData[$pagination]['subTotal'],
                 ];
@@ -642,10 +642,11 @@ trait BillTrait{
             $data['currentBillID'] = 1;
             $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
-            $previousBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<',$bill['id'])->pluck('id');
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $previousBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<',$bill['id'])->pluck('id');
             $billProducts = BillQuotationProducts::whereIn('bill_id',$previousBillIds)->get()->toArray();
             $currentBillProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
-            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<=',$bill['id'])->pluck('id');
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
             foreach($allBillIds as $key => $billId){
                 if($billId == $bill['id']){
                     $data['currentBillID'] = $key+1;
