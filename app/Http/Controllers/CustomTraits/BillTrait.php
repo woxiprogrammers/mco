@@ -10,6 +10,7 @@ use App\Category;
 use App\Client;
 use App\Helper\NumberHelper;
 use App\Product;
+use App\ProductDescription;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
@@ -815,6 +816,56 @@ trait BillTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Cancel bill status',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function createProductDescription(Request $request){
+        try{
+            $status = 200;
+            $product_description = array();
+            $alreadyPresent = ProductDescription::where('quotation_id',$request->quotation_id)->where('description',$request->description)->get();
+            if(count($alreadyPresent) == 0){
+                $product_description = ProductDescription::create(['description' => $request->description , 'quotation_id' => $request->quotation_id]);
+            }
+        }catch(\Exception $e){
+            $status = 500;
+            $product_description = array();
+            $data = [
+                'action' => 'Create Product Description',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($product_description,$status);
+    }
+
+    public function updateProductDescription(Request $request){
+        try{
+
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Update Product Description',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function deleteProductDescription(Request $request){
+        try{
+
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Delete Product Description',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];

@@ -39,6 +39,64 @@ $(document).ready(function (){
                 $('#previous_quantity_'+id).css('background-color',"ff8884");
             }else{
                 $('#product_description_'+id).prop('disabled',false);
+                //var description = $('.product_description').val();
+                $('#product_description_create').click(function (){
+                   // alert($('.product_description').val());
+                    $.ajax({
+                        url: '/bill/product_description/create',
+                        type: 'POST',
+                        async: false,
+                        data :{
+                            'description' : $('.product_description').val(),
+                            'quotation_id' : $('#quotation_id').val()
+                        },
+                        success: function(data,textStatus,xhr){
+                            /*if(xhr.status == 200){
+                            }else{
+
+                            }*/
+                        },
+                        error: function(data, textStatus, xhr){
+
+                        }
+                    });
+                });
+                $('#product_description_update').click(function (){
+                    $.ajax({
+                        url: '/bill/product_description/update',
+                        type: 'POST',
+                        async: false,
+                        data: {
+
+                        },
+                        success: function(data,textStatus,xhr){
+                            if(xhr.status == 200){
+                            }else{
+                            }
+                        },
+                        error: function(data, textStatus, xhr){
+
+                        }
+                    });
+                });
+                $('#product_description_delete').click(function (){
+                    $.ajax({
+                        url: '/bill/product_description/delete',
+                        type: 'POST',
+                        async: false,
+                        data: {
+
+                        },
+                        success: function(data,textStatus,xhr){
+                            if(xhr.status == 200){
+                            }else{
+                            }
+                        },
+                        error: function(data, textStatus, xhr){
+
+                        }
+                    });
+                });
                 $('#current_quantity_'+id).prop('disabled',false);
                 $('#current_quantity_'+id).val(0);
                 $("#id_"+id).css('background-color',"#e1e1e1");

@@ -59,15 +59,15 @@
                                                         <input type="checkbox" class="group-checkable" disabled="disabled" >
                                                     </th>
                                                     <th width="5%"> Item no </th>
-                                                    <th width="15%"> Item Description </th>
-                                                    <th width="8%" class="numeric"> UOM </th>
-                                                    <th width="8%" class="numeric"> Rate </th>
-                                                    <th width="9%" class="numeric"> BOQ Quantity </th>
-                                                    <th width="10%" class="numeric"> W.O Amount </th>
-                                                    <th width="8%" class="numeric"> Previous Quantity </th>
-                                                    <th width="8%" class="numeric"> Current Quantity </th>
+                                                    <th width="30%"> Item Description </th>
+                                                    <th width="6%" class="numeric"> UOM </th>
+                                                    <th width="6%" class="numeric"> Rate </th>
+                                                    <th width="6%" class="numeric"> BOQ Quantity </th>
+                                                    <th width="7%" class="numeric"> W.O Amount </th>
+                                                    <th width="5%" class="numeric"> Previous Quantity </th>
+                                                    <th width="5%" class="numeric"> Current Quantity </th>
                                                     <th width="8%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="7%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="8%" class="numeric"> Current Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                     <tr id="id_{{$quotationProducts[$iterator]['id']}}">
@@ -79,7 +79,13 @@
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
-                                                            <input class="form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
+                                                            <div class="input-group" id="inputGroup">
+                                                                <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
+                                                                <span class="input-group-addon" id="product_description_create" style="font-size: 12px">C</span>
+                                                                <span class="input-group-addon" id="product_description_update" style="font-size: 12px">U</span>
+                                                                <span class="input-group-addon" id="product_description_delete" style="font-size: 12px">D</span>
+                                                            </div>
+
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['unit']}}</span>

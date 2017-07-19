@@ -110,7 +110,6 @@
 <script>
     $(document).ready(function() {
         var num = 1.12305;
-        console.log();
        CreateMaterial.init();
         $("#name").rules('add',{
             remote: {
