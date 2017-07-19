@@ -33,7 +33,7 @@
         </td>
         <td>
             <div class="form-group">
-                <input type="number" step="any" class="form-control material-table-input" id="material_{{$data['material']['id']}}_quantity" name="material_quantity[{{$data['material']['id']}}]" onkeyup="changedQuantity({{$data['material']['id']}})" onchange="changedQuantity({{$data['material']['id']}})" required>
+                <input type="number" step="any" class="form-control material-table-input" id="material_{{$data['material']['id']}}_quantity" name="material_quantity[{{$data['material']['id']}}]" value="{{$data['material']['quantity']}}" onkeyup="changedQuantity({{$data['material']['id']}})" onchange="changedQuantity({{$data['material']['id']}})" required>
             </div>
         </td>
         <td>

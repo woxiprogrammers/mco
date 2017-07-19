@@ -44,26 +44,27 @@ function getMaterials(category){
 
 function getMaterialDetails(){
     var material_ids = [];
+    var formData = {};
+    formData['_token'] = $("input[name='_token']").val();
     $("#material_id input:checkbox:checked").each(function(i){
         material_ids[i] = $(this).val();
     });
+    formData['material_ids'] = material_ids;
     if($(".product-material-id").length > 0){
-        var productMaterialId = [];
+        formData['materials'] = {};
         $(".product-material-id").each(function(i){
-            productMaterialId[i] = $(this).val();
+            var materialId = $(this).val();
+            formData['materials'][materialId] = {};
+            formData['materials'][materialId]['id'] = materialId;
+            formData['materials'][materialId]['rate_per_unit'] = $("#material_"+materialId+"_rate").val();
+            formData['materials'][materialId]['unit_id'] = $("#material_"+materialId+"_unit").val();
+            formData['materials'][materialId]['quantity'] = $("#material_"+materialId+"_quantity").val();
         });
-
-    }else{
-        var productMaterialId = null;
     }
     $.ajax({
         url: '/product/material/listing',
         type: "POST",
-        data :{
-            '_token' : $("input[name='_token']").val(),
-            'material_ids' : material_ids,
-            'product_material_id': productMaterialId
-        },
+        data :formData,
         async: false,
         success: function(data,textStatus, xhr){
             $("#productMaterialTable").html(data);
