@@ -437,7 +437,7 @@ trait BillTrait{
                 $bill_quotation_product['bill_id'] = $bill_created['id'];
                 $bill_quotation_product['quotation_product_id'] = $key;
                 $bill_quotation_product['quantity'] = $value['current_quantity'];
-                $bill_quotation_product['description'] = ucfirst($value['product_description']);
+                $bill_quotation_product['product_description_id'] = $value['product_description_id'];
                 BillQuotationProducts::create($bill_quotation_product);
             }
             if($request->has('tax_percentage')){
@@ -718,7 +718,7 @@ trait BillTrait{
                         $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
                         if($billQuotationProduct->bill_id == $bill->id){
                             $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] - $billQuotationProduct->quantity;
-                            $quotationProduct['bill_description'] = $billQuotationProduct->description;
+                            $quotationProduct['bill_description'] = $billQuotationProduct->product_description->description;
                             $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
                         }
                     }

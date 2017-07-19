@@ -26,6 +26,7 @@ $(document).ready(function (){
             $("#id_"+id).css('background-color',"");
             $('#current_quantity_'+id).prop('disabled',true);
             $('#product_description_'+id).prop('disabled',true);
+            $('#product_description_id_'+id).prop('disabled',true);
             $('#current_quantity_'+id).rules('remove');
             $('#current_quantity_'+id).closest('form-group').removeClass('has-error');
             $('#current_quantity_'+id).val('');
@@ -39,9 +40,8 @@ $(document).ready(function (){
                 $('#previous_quantity_'+id).css('background-color',"ff8884");
             }else{
                 $('#product_description_'+id).prop('disabled',false);
-                //var description = $('.product_description').val();
+                $('#product_description_id_'+id).prop('disabled',false);
                 $('#product_description_create').click(function (){
-                   // alert($('.product_description').val());
                     $.ajax({
                         url: '/bill/product_description/create',
                         type: 'POST',
@@ -52,11 +52,7 @@ $(document).ready(function (){
                         },
                         success: function(data,textStatus,xhr){
                             if(xhr.status == 200){
-                                console.log(data.id);
-                                $('#quotation_product_id['+id+']["product_description"]['+data.id+']').val(data.description);
-                                console.log($('#quotation_product_id['+id+']["product_description"]['+data.id+']').val(data.description));
-                            }else{
-
+                                $('#product_description_id_'+id).val(data.id);
                             }
                         },
                         error: function(data, textStatus, xhr){

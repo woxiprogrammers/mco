@@ -80,7 +80,8 @@
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
                                                             <div class="input-group" id="inputGroup">
-                                                                <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description][]" disabled>
+                                                                <input type="hidden" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" disabled>
+                                                                <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
                                                                 <span class="input-group-addon" id="product_description_create" style="font-size: 12px">C</span>
                                                                 <span class="input-group-addon" id="product_description_update" style="font-size: 12px">U</span>
                                                                 <span class="input-group-addon" id="product_description_delete" style="font-size: 12px">D</span>
@@ -139,7 +140,7 @@
                                                     </tr>
                                                     @for($j = 0 ; $j < count($taxes); $j++)
                                                          <tr>
-                                                             <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">
+                                                            <!-- <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">-->
                                                              <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
                                                              <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
 
