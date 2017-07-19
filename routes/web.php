@@ -150,7 +150,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing/{project_site}/{status}',array('uses' => 'Admin\BillController@billListing'));
         Route::post('product_description/create',array('uses' => 'Admin\BillController@createProductDescription'));
         Route::post('product_description/update',array('uses' => 'Admin\BillController@updateProductDescription'));
-        Route::post('product_description/delete',array('uses' => 'Admin\BillController@deleteProductDescription'));
 
     });
 

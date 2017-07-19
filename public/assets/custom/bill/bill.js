@@ -51,10 +51,13 @@ $(document).ready(function (){
                             'quotation_id' : $('#quotation_id').val()
                         },
                         success: function(data,textStatus,xhr){
-                            /*if(xhr.status == 200){
+                            if(xhr.status == 200){
+                                console.log(data.id);
+                                $('#quotation_product_id['+id+']["product_description"]['+data.id+']').val(data.description);
+                                console.log($('#quotation_product_id['+id+']["product_description"]['+data.id+']').val(data.description));
                             }else{
 
-                            }*/
+                            }
                         },
                         error: function(data, textStatus, xhr){
 
@@ -67,7 +70,8 @@ $(document).ready(function (){
                         type: 'POST',
                         async: false,
                         data: {
-
+                            'description' : $('.product_description').val(),
+                            'quotation_id' : $('#quotation_id').val()
                         },
                         success: function(data,textStatus,xhr){
                             if(xhr.status == 200){
@@ -80,7 +84,8 @@ $(document).ready(function (){
                     });
                 });
                 $('#product_description_delete').click(function (){
-                    $.ajax({
+                    $('.product_description').val("");
+                    /*$.ajax({
                         url: '/bill/product_description/delete',
                         type: 'POST',
                         async: false,
@@ -95,7 +100,7 @@ $(document).ready(function (){
                         error: function(data, textStatus, xhr){
 
                         }
-                    });
+                    });*/
                 });
                 $('#current_quantity_'+id).prop('disabled',false);
                 $('#current_quantity_'+id).val(0);

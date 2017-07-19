@@ -826,12 +826,16 @@ trait BillTrait{
 
     public function createProductDescription(Request $request){
         try{
+            //dd($request->all());
             $status = 200;
             $product_description = array();
-            $alreadyPresent = ProductDescription::where('quotation_id',$request->quotation_id)->where('description',$request->description)->get();
+            $alreadyPresent = ProductDescription::where('quotation_id',$request->quotation_id)->where('description',$request->description)->first();
             if(count($alreadyPresent) == 0){
                 $product_description = ProductDescription::create(['description' => $request->description , 'quotation_id' => $request->quotation_id]);
+            }else{
+                $product_description = $alreadyPresent;
             }
+            //dd($product_description);
         }catch(\Exception $e){
             $status = 500;
             $product_description = array();
@@ -848,24 +852,12 @@ trait BillTrait{
 
     public function updateProductDescription(Request $request){
         try{
-
+            dd($request->all());
+            $status = 200;
+            //ProductDescription::where('quotation_id',$request->quotation->id)
         }catch(\Exception $e){
             $data = [
                 'action' => 'Update Product Description',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-    }
-
-    public function deleteProductDescription(Request $request){
-        try{
-
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Delete Product Description',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];

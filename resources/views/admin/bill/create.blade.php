@@ -80,7 +80,7 @@
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
                                                             <div class="input-group" id="inputGroup">
-                                                                <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
+                                                                <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description][]" disabled>
                                                                 <span class="input-group-addon" id="product_description_create" style="font-size: 12px">C</span>
                                                                 <span class="input-group-addon" id="product_description_update" style="font-size: 12px">U</span>
                                                                 <span class="input-group-addon" id="product_description_delete" style="font-size: 12px">D</span>
