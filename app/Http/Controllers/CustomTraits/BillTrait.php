@@ -867,6 +867,38 @@ trait BillTrait{
             abort(500);
         }
     }
+
+    public function getProductDescription(Request $request,$quotation_id,$keyword){
+        try{
+            $keyword = trim($keyword);
+            if($keyword == "" || $keyword == null){
+                $descriptions = ProductDescription::where('quotation_id',$quotation_id)->select('id','description')->get();
+            }else{
+                $descriptions = ProductDescription::where('quotation_id',$quotation_id)->where('description','ILIKE','%'.$keyword.'%')->select('id','description')->get();
+                Log::info($descriptions);
+            }
+            $response = array();
+            if(count($descriptions) > 0){
+                $iterator = 0;
+                foreach($descriptions as $description){
+                    $response[$iterator]['id'] = $description['id'];
+                    $response[$iterator]['description'] = $description['description'];
+                }
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Product Description',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = array();
+            Log::critical(json_encode($data));
+        }
+
+        return response()->json($response,$status);
+    }
 }
 
 

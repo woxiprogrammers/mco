@@ -3,7 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
-<link rel="stylesheet"  href="/assets/global/plugins/typeahead/tyepahead.css"/>
+<link rel="stylesheet"  href="/assets/global/plugins/typeahead/typeahead.css"/>
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')

@@ -47,7 +47,7 @@ $(document).ready(function (){
                         type: 'POST',
                         async: false,
                         data :{
-                            'description' : $('.product_description').val(),
+                            'description' : $('#product_description_'+id).val(),
                             'quotation_id' : $('#quotation_id').val()
                         },
                         success: function(data,textStatus,xhr){

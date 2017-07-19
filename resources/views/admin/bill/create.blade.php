@@ -4,6 +4,7 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+<link rel="stylesheet"  href="/assets/global/plugins/typeahead/typeahead.css"/>
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -72,7 +73,7 @@
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                     <tr id="id_{{$quotationProducts[$iterator]['id']}}">
                                                         <td>
-                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" class="require-one">
+                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" class="product-checkbox">
                                                         </td>
                                                         <td>
                                                             <span>{{$iterator + 1}}</span>
@@ -80,7 +81,7 @@
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
                                                             <div class="input-group" id="inputGroup">
-                                                                <input type="hidden" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" disabled>
+                                                                <input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" disabled>
                                                                 <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
                                                                 <span class="input-group-addon" id="product_description_create" style="font-size: 12px">C</span>
                                                                 <span class="input-group-addon" id="product_description_update" style="font-size: 12px">U</span>
@@ -185,4 +186,7 @@
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/bill.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+<script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
+<script src="/assets/custom/bill/bill-typeahead.js" type="text/javascript"></script>
 @endsection
