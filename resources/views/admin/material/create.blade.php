@@ -109,7 +109,6 @@
 <script src="/assets/custom/admin/material/material.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
-        var num = 1.12305;
        CreateMaterial.init();
         $("#name").rules('add',{
             remote: {
