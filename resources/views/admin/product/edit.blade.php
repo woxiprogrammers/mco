@@ -80,16 +80,20 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Material</label>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="material_id" multiple="true" style="overflow: scroll">
-                                                                @foreach($materials as $material)
-                                                                @if(in_array($material['id'],$productMaterialIds))
-                                                                <option value="{{$material['id']}}" selected> {{$material['name']}}</option>
-                                                                @else
-                                                                <option value="{{$material['id']}}"> {{$material['name']}}</option>
-                                                                @endif
-                                                                @endforeach
-                                                            </select>
+                                                        <div class="col-md-7">
+                                                            <div class="product-material-select form-control">
+                                                                <ul id="material_id" class="list-group">
+                                                                    @foreach($materials as $material)
+                                                                        <li class="list-group-item">
+                                                                            @if(in_array($material['id'],$productMaterialIds))
+                                                                                <input type="checkbox" name="material_ids" value="{{$material['id']}}" checked> {{$material['name']}}
+                                                                            @else
+                                                                                <input type="checkbox" name="material_ids" value="{{$material['id']}}"> {{$material['name']}}
+                                                                            @endif
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">

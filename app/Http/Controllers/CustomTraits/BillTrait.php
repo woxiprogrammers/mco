@@ -182,15 +182,20 @@ trait BillTrait{
             $array_no = 1;
             $quotation = Quotation::where('project_site_id',$project_site->id)->first();
             $allBills = Bill::where('quotation_id',$quotation->id)->get();
-            $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
-            $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->get();
+            if($status == "cancelled"){
+                $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
+                $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->get();
+            }else{
+                $statusId = BillStatus::whereIn('slug',['approved','draft'])->get()->toArray();
+                $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->get();
+            }
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $taxesAppliedToBills = BillTax::whereIn('bill_id',array_column($allBills->toArray(),'id'))->distinct('tax_id')->orderBy('tax_id')->pluck('tax_id')->toArray();
             foreach($bills as $key => $bill){
                 $listingData[$iterator]['status'] = $bill->bill_status->slug ;
                 $listingData[$iterator]['bill_id'] = $bill->id;
                 if($bill->bill_status_id != $cancelBillStatusId){
-                    $listingData[$iterator]['array_no'] = $array_no;
+                    $listingData[$iterator]['array_no'] = "RA Bill - ".$array_no;
                     $array_no++;
                 }else{
                     $listingData[$iterator]['array_no'] = '-';
@@ -256,7 +261,8 @@ trait BillTrait{
                 }
                 array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
                 array_push($records['data'][$iterator],$billStatus);
-                array_push($records['data'][$iterator],'<div class="btn-group">
+                if($listingData[$iterator]['status'] == "approved"){
+                    array_push($records['data'][$iterator],'<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -272,6 +278,34 @@ trait BillTrait{
                             </li>
                         </ul>
                     </div>');
+                }elseif($listingData[$iterator]['status'] == "cancelled"){
+                    array_push($records['data'][$iterator],'<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <i class="icon-docs"></i> View </a>
+                            </li>
+                        </ul>
+                    </div>');
+                }else{
+                    array_push($records['data'][$iterator],'<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/bill/view/'.$listingData[$pagination]['bill_id'].'">
+                                    <i class="icon-docs"></i> View </a>
+                            </li>
+                        </ul>
+                    </div>');
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -613,10 +647,11 @@ trait BillTrait{
             $data['currentBillID'] = 1;
             $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
-            $previousBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<',$bill['id'])->pluck('id');
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $previousBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<',$bill['id'])->pluck('id');
             $billProducts = BillQuotationProducts::whereIn('bill_id',$previousBillIds)->get()->toArray();
             $currentBillProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
-            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('id','<=',$bill['id'])->pluck('id');
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
             foreach($allBillIds as $key => $billId){
                 if($billId == $bill['id']){
                     $data['currentBillID'] = $key+1;
