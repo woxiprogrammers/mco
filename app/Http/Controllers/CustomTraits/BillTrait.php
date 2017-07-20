@@ -433,7 +433,7 @@ trait BillTrait{
 
     public function createBill(Request $request){
         try{
-            dd($request->all());
+            //dd($request->all());
             $projectSiteId = $request['project_site_id'];
             $bill_quotation_product = array();
             $bill['quotation_id'] = $request['quotation_id'];
@@ -723,8 +723,10 @@ trait BillTrait{
                     if($billQuotationProduct->quotation_product_id == $quotationProduct->id){
                         $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
                         if($billQuotationProduct->bill_id == $bill->id){
+                           // dd($billQuotationProduct);
                             $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] - $billQuotationProduct->quantity;
-                            $quotationProduct['bill_description'] = $billQuotationProduct->product_description->description;
+                            $quotationProduct['bill_description'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description->description : "No description";
+                            $quotationProduct['bill_product_description_id'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description_id : null;
                             $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
                         }
                     }
