@@ -11,7 +11,7 @@ $(document).ready(function (){
         }
     });
 
-    $('input[type="checkbox"]').click(function(){
+    $('input[type="checkbox"]:not(".tax-applied-on")').click(function(){
         var id = $(this).val();
         var input = $('#current_quantity_'+id);
         var boq = $('#boq_quantity_'+id).text();
@@ -83,7 +83,7 @@ function calculateQuantityAmount(current_quantity,id){
 
 function getTotals(){
     var total_current_bill_amount = 0.0;
-    var selected_product_length = $('input:checked').length;
+    var selected_product_length = $('input:checked:not(".tax-applied-on")').length;
     if(selected_product_length > 0){
         $('input:checked').each(function(){
             var id = $(this).val();

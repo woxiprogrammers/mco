@@ -154,6 +154,32 @@
 
 
                                                 </tr>
+                                                @if(!empty($specialTaxes))
+                                                    @foreach($specialTaxes as $specialTax)
+                                                        <tr>
+                                                            <td colspan="8" style="text-align: right; padding-right: 30px;"><b>{{$specialTax['name']}}:{{$specialTax['base_percentage']}}%</b></td>
+                                                            <td colspan="2">
+                                                                <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
+                                                                    <i class="fa fa-angle-down"></i>
+                                                                </a>
+                                                                <ul class="dropdown-menu" style="position: relative">
+                                                                    <li>
+                                                                        <input type="checkbox" class="tax-applied-on" name="applied_on[{{$specialTax['id']}}][]" value="0"> Total Round
+                                                                    </li>
+                                                                    @foreach($taxes as $tax)
+                                                                        <li>
+                                                                            <input type="checkbox" class="tax-applied-on" name="applied_on[{{$specialTax['id']}}][]" value="{{$tax['id']}}"> {{$tax['name']}}
+                                                                        </li>
+                                                                    @endforeach
+
+                                                                </ul>
+                                                            </td>
+                                                            <td>
+                                                                <span id="final_current_bill_total"></span>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                @endif
 
                                             </table>
                                             <div class="form-group">

@@ -68,7 +68,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="checkbox" class="form-control" data-toggle="toggle" id="isSpecial" name="is_special">
+                                                        <input type="checkbox" class="make-switch" data-on-text="Yes" data-off-text="No" name="is_special">
                                                     </div>
                                                 </div>
                                             </div>
