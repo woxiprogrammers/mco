@@ -3,7 +3,7 @@
 
 CKEDITOR.plugins.add( 'imageuploader', {
     init: function( editor ) {
-        editor.config.filebrowserBrowseUrl = "http://test.mconstruction.co.in/assets/global/plugins/ckeditor/plugins/imageuploader/imgbrowser.php";
+        editor.config.filebrowserBrowseUrl = "http://mconstruction.co.in/assets/global/plugins/ckeditor/plugins/imageuploader/imgbrowser.php";
 
     }
 });
