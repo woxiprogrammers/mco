@@ -47,7 +47,7 @@
                                       <div class="tab-content">
                                         <div class="tab-pane fade in active">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-4 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
+                                            <div class="col-md-offset-3 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -72,6 +72,10 @@
                                                     Current Bill
                                                 </a>
                                                 <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i> Cumulative Bill
+                                                </a>
+
+                                                <a href="/bill/cumulative/excel-sheet/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                     <i class="fa fa-download"></i> Cumulative Bill
                                                 </a>
                                             </div>

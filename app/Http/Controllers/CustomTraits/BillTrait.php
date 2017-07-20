@@ -906,6 +906,29 @@ trait BillTrait{
 
         return response()->json($response,$status);
     }
+
+    public function generateCumulativeExcelSheet(Request $request){
+        try{
+            ::create('Filename', function($excel) {
+                                $excel->sheet('Sheetname', function($sheet) {
+                                        /*$sheet->row(1, array(
+                        'test1', 'test2'
+                    ));*/
+                                        /*$sheet->with(array(
+                        array('data1', 'data2'),
+                        array('data3', 'data4')
+                   ));*/
+                                    });
+                          })->export('xls');   //  ->download('xls');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Generate excel sheet cumulative bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
 }
 
 
