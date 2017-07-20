@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
+use Maatwebsite\Excel\Facades\Excel;
 
 trait BillTrait{
 
@@ -909,7 +910,7 @@ trait BillTrait{
 
     public function generateCumulativeExcelSheet(Request $request){
         try{
-            ::create('Filename', function($excel) {
+            Excel::create('Filename', function($excel) {
                                 $excel->sheet('Sheetname', function($sheet) {
                                         /*$sheet->row(1, array(
                         'test1', 'test2'
@@ -930,5 +931,7 @@ trait BillTrait{
         }
     }
 }
+
+
 
 
