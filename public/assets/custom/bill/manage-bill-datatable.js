@@ -81,17 +81,11 @@ var BillListing = function () {
 jQuery(document).ready(function() {
         var hash = window.location.hash;
         var s = $('<select />',{id:"bill_status",class:"form-control", name:"bill_status"});
-        if (hash == "#draft") { //DRAFT Status
-            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
-            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
+        if (hash == "#cancelled") { // CANCELLED STATUS
             $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
-        } else if (hash == "#cancelled") { // CANCELLED STATUS
-            $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
-            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
-            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
+            $('<option />', {value:'approved&draft',text:'Approved & Draft'}).appendTo(s);
         } else { //Approved Status by default
-            $('<option />', {value:'approved',text:'Approved'}).appendTo(s);
-            $('<option />', {value:'draft',text:'Draft'}).appendTo(s);
+            $('<option />', {value:'approved&draft',text:'Approved & Draft'}).appendTo(s);
             $('<option />', {value:'cancelled',text:'Cancelled'}).appendTo(s);
         }
         s.appendTo('#bill_status_dropdown');
