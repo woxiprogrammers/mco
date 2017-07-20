@@ -161,7 +161,8 @@ trait MaterialTrait{
             $iTotalRecords = count($materialData);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($materialData); $iterator++,$pagination++ ){
+            $end = $request->length < 0 ? count($materialData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($materialData); $iterator++,$pagination++ ){
                 if($materialData[$pagination]['is_active'] == true){
                     $material_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
@@ -170,6 +171,7 @@ trait MaterialTrait{
                     $status = 'Enable';
                 }
                 $records['data'][$iterator] = [
+                    '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
                     $materialData[$pagination]['name'],
                     Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                     round($materialData[$pagination]['rate_per_unit'],3),
@@ -184,10 +186,6 @@ trait MaterialTrait{
                             <li>
                                 <a href="/material/edit/'.$materialData[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/material/change-status/'.$materialData[$pagination]['id'].'">
-                                    <i class="icon-tag"></i> '.$status.' </a>
                             </li>
                         </ul>
                     </div>'
@@ -210,10 +208,13 @@ trait MaterialTrait{
         return response()->json($records,200);
     }
 
-    public function changeMaterialStatus(Request $request, $material){
+    public function changeMaterialStatus(Request $request){
         try{
-            $newStatus = (boolean)!$material->is_active;
-            $material->update(['is_active' => $newStatus]);
+            foreach($request->material_ids as $materialId){
+                $material = Material::findOrFail($materialId);
+                $newStatus = (boolean)!$material->is_active;
+                $material->update(['is_active' => $newStatus]);
+            }
             $request->session()->flash('success', 'Material Status changed successfully.');
             return redirect('/material/manage');
         }catch(\Exception $e){

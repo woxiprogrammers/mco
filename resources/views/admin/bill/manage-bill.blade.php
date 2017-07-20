@@ -19,12 +19,18 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Manage Bill</h1>
+                                <h1>Bill Listing</h1>
                             </div>
                         </div>
                     </div>
                     <div class="page-content">
                         <div class="container">
+                            <ul class="page-breadcrumb breadcrumb">
+                                <li>
+                                    <a href="/bill/manage/project-site">Back</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                            </ul>
                             <div class="row">
                                 <div class="col-md-12">
                                     <!-- BEGIN EXAMPLE TABLE PORTLET-->
@@ -35,6 +41,11 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
+                                                            <div id="bill_status_dropdown">
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="btn-group">
                                                             <div id="sample_editable_1_new" class="btn yellow"><a href="/bill/create" style="color: white"> Create Bill
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>
@@ -43,12 +54,19 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="projectSiteTable">
+                                            <input type="hidden" id="projectSiteId" name="projectSiteId" value={{$project_site['id']}}>
+                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="billTable">
                                                 <thead>
                                                 <tr>
-                                                    <th> Company Name </th>
-                                                    <th style="width: 30%"> Project Name </th>
-                                                    <th> Site Name </th>
+                                                    <th> Sr no. </th>
+                                                    <th> RA Bill number </th>
+                                                    <th> Bill Number </th>
+                                                    <th> Total round amount </th>
+                                                    @for($iterator = 0 ; $iterator < count($taxes); $iterator++)
+                                                        <th> {!! $taxes[$iterator]['name'] !!} </th>
+                                                    @endfor
+                                                    <th> Final Total </th>
+                                                    <th>Status</th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 </thead>
@@ -76,10 +94,10 @@
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-<script src="/assets/custom/bill/manage-datatable.js" type="text/javascript"></script>
+<script src="/assets/custom/bill/manage-bill-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
-        $('#projectSiteTable').DataTable();
+        $('#billTable').DataTable();
     });
 </script>
 @endsection

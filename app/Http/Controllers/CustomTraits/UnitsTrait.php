@@ -115,7 +115,8 @@ trait UnitsTrait{
             $iTotalRecords = count($unitData);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($unitData) ; $iterator++ , $pagination++){
+            $end = $request->length < 0 ? count($unitData) : $request->length;
+            for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($unitData) ; $iterator++ , $pagination++){
                 if($unitData[$pagination]['is_active'] == true){
                     $unit_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
@@ -217,7 +218,8 @@ trait UnitsTrait{
             $iTotalRecords = count($conversions);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($conversions) ; $iterator++ , $pagination++){
+            $end = $request->length < 0 ? count($conversions) : $request->length;
+            for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($conversions) ; $iterator++ , $pagination++){
                 $fromUnit = Unit::findOrFail($conversions[$pagination]['unit_1_id']);
                 $toUnit = Unit::findOrFail($conversions[$pagination]['unit_2_id']);
                 $records['data'][$iterator] = [
