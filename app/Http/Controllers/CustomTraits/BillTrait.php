@@ -181,8 +181,13 @@ trait BillTrait{
             $array_no = 1;
             $quotation = Quotation::where('project_site_id',$project_site->id)->first();
             $allBills = Bill::where('quotation_id',$quotation->id)->get();
-            $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
-            $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->get();
+            if($status == "cancelled"){
+                $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
+                $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->get();
+            }else{
+                $statusId = BillStatus::whereIn('slug',['approved','draft'])->get()->toArray();
+                $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->get();
+            }
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $taxesAppliedToBills = BillTax::whereIn('bill_id',array_column($allBills->toArray(),'id'))->distinct('tax_id')->orderBy('tax_id')->pluck('tax_id')->toArray();
             foreach($bills as $key => $bill){
