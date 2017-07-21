@@ -504,8 +504,8 @@ function submitProductEdit(){
     $("#quotationProductQuantity").val(productQuantity);
     var formData = $("#editProductForm").serialize();
     var url = window.location.href;
-    if(url.indexOf("edit") > 0){
-        var quotationId = $("#quotationId").val();
+    var quotationId = $("#quotationId").val();
+    if(typeof quotationId != 'undefined'){
         formData = formData + '&quotation_id=' + quotationId;
     }
     $.ajax({
