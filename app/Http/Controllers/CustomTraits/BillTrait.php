@@ -428,7 +428,6 @@ trait BillTrait{
 
     public function createBill(Request $request){
         try{
-            dd($request->all());
             $projectSiteId = $request['project_site_id'];
             $bill_quotation_product = array();
             $bill['quotation_id'] = $request['quotation_id'];
@@ -447,15 +446,17 @@ trait BillTrait{
                         $bill_taxes['tax_id'] = $key;
                         $bill_taxes['bill_id'] = $bill_created['id'];
                         $bill_taxes['percentage'] = $value;
+                        $bill_taxes['applied_on'] = json_encode([0]);
                         BillTax::create($bill_taxes);
                     }
                 }
             }
             if($request->has('applied_on')){
-                foreach($request->applied_on as $taxId => $appliedOn){
+                foreach($request->applied_on as $taxId => $specialTax){
                     $bill_taxes['tax_id'] = $taxId;
                     $bill_taxes['bill_id'] = $bill_created['id'];
-//                    $bill_taxes['percentage'] = Tax::;
+                    $bill_taxes['percentage'] = $specialTax['percentage'];
+                    $bill_taxes['applied_on'] = json_encode($specialTax['on']);
                     BillTax::create($bill_taxes);
                 }
             }
