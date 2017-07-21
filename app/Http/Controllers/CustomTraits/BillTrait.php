@@ -908,19 +908,39 @@ trait BillTrait{
         return response()->json($response,$status);
     }
 
-    public function generateCumulativeExcelSheet(Request $request){
+    public function generateCumulativeExcelSheet(Request $request,$bill){
         try{
-            Excel::create('Filename', function($excel) {
-                                $excel->sheet('Sheetname', function($sheet) {
-                                        /*$sheet->row(1, array(
-                        'test1', 'test2'
-                    ));*/
-                                        /*$sheet->with(array(
-                        array('data1', 'data2'),
-                        array('data3', 'data4')
-                   ));*/
-                                    });
-                          })->export('xls');   //  ->download('xls');
+            $data = array();
+            $data['cancelledBillStatus'] = BillStatus::where('slug','cancelled')->first();
+            $data['tillThisBill'] = Bill::where('quotation_id',$bill->quotation_id)->where('id','<=',$bill->id)->where('bill_status_id','!=',$data['cancelledBillStatus']->id)->get()->toArray();
+            $data['bill'] = $bill;
+            $products = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill'],'id'))->distinct('quotation_product_id')->select('quotation_product_id')->get();
+            dd($products->toArray());
+            Excel::create('Filename', function($excel) use($data) {
+                $excel->sheet('Sheetname', function($sheet) use($data) {
+                    $sheet->row(1, array('SRN','Product with description','Rate','BOQ','W.O.Amount'));
+                    $next_column = 'F';
+                    $row = 1;
+                    for($iterator = 0 ; $iterator < count($data['tillThisBill']); $iterator++,$next_column++){
+                        $current_column = $next_column++;
+                        $sheet->getCell($current_column.($row+1))->setValue('Quantity')->setAlignment('center')->setValignment('center');
+                        $sheet->getCell(($next_column).($row+1))->setValue('Amount');
+                        $sheet->mergeCells($current_column.$row.':'.$next_column.$row);
+                        $sheet->getCell($current_column.$row)->setValue("RA Bill".($iterator+1));
+                    }
+                    $next_column_data = array('Total Quantity','Total Amount');
+                    for($iterator = 0 ; $iterator < count($next_column_data) ; $iterator++,$next_column++){
+                        $data = $next_column_data[$iterator];
+                        $sheet->cell($next_column.$row, function($cell) use($data) {
+                            $cell->setAlignment('center')->setValignment('center');
+                            $cell->setValue($data);
+                        });
+                    }
+                });
+
+
+
+            })->download('xls'); //->export('xls');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Generate excel sheet cumulative bill',

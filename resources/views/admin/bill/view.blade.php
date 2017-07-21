@@ -76,7 +76,7 @@
                                                 </a>
 
                                                 <a href="/bill/cumulative/excel-sheet/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
-                                                    <i class="fa fa-download"></i> Cumulative Bill
+                                                    <i class="fa fa-download"></i>Export Cumulative Bill
                                                 </a>
                                             </div>
                                             @endif
