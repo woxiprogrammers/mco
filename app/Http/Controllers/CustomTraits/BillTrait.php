@@ -806,11 +806,9 @@ trait BillTrait{
                 ->pluck('bill_taxes.tax_id')
                 ->toArray();
             $specialTaxes = $currentSpecialTaxes =  array();
-            if($billSpecialTaxes != null){
-                $currentSpecialTaxes = Tax::whereNotIn('id',$billSpecialTaxes)->where('is_active',true)->where('is_special', true)->get();
-            }
+            $currentSpecialTaxes = Tax::whereNotIn('id',$billSpecialTaxes)->where('is_active',true)->where('is_special', true)->get()->toArray();
             $billTaxInfo = BillTax::where('bill_id',$bill->id)->whereIn('tax_id',$billSpecialTaxes)->get()->toArray();
-            $currentTaxes = array_merge($billTaxInfo,$currentSpecialTaxes->toArray());
+            $currentTaxes = array_merge($billTaxInfo,$currentSpecialTaxes);
             $i = 0;
             foreach($currentTaxes as $key => $tax){
                 if(!(array_key_exists('name',$tax))){
