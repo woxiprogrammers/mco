@@ -124,7 +124,6 @@ function calculateSpecialTax(){
                     if(taxId == 0 || taxId == '0'){
                         taxOnAmount = taxOnAmount + parseFloat($("#rounded_off_current_bill_amount").text());
                     }else{
-                        console.log($("#tax_current_bill_amount_"+taxId).text());
                         taxOnAmount = taxOnAmount + parseFloat($("#tax_current_bill_amount_"+taxId).text());
                     }
                     var taxPercentage = $("#tax_percentage_"+specialTaxId).val();
