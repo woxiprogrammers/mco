@@ -65,6 +65,19 @@
                                                         <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
                                                     </div>
                                                 </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="is_special" class="control-label">Is Special Tax ?</label>
+                                                        <span>*</span>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        @if(isset($tax['is_special']) && $tax['is_special'] == true)
+                                                            <input type="checkbox" class="make-switch" data-on-text="Yes" data-off-text="No" name="is_special" checked>
+                                                        @else
+                                                            <input type="checkbox" class="make-switch" data-on-text="Yes" data-off-text="No" name="is_special">
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3">

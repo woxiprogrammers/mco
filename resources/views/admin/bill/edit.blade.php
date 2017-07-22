@@ -184,6 +184,47 @@
                                                                 <span id="final_current_bill_total"></span>
                                                             </td>
                                                         </tr>
+                                                        @if(!empty($specialTaxes))
+                                                        @foreach($specialTaxes as $specialTax)
+                                                        <tr>
+                                                            <td colspan="7" style="text-align: right; padding-right: 30px;"><b>{{$specialTax['name']}}</b><input type="hidden" class="special-tax" name="special_tax[]" value="{{$specialTax['id']}}"> </td>
+                                                            <input type="hidden" id="is_already_applied" name="applied_on[{{$specialTax['id']}}][is_already_applied]" value="{{$specialTax['already_applied']}}">
+                                                            <td><input class="form-control" name="applied_on[{{$specialTax['id']}}][percentage]" value="{{$specialTax['percentage']}}" id="tax_percentage_{{$specialTax['id']}}" onchange="calculateTax()" onkeyup="calculateTax()"> </td>
+                                                            <td colspan="2">
+                                                                <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
+                                                                    <i class="fa fa-angle-down"></i>
+                                                                </a>
+                                                                <ul class="dropdown-menu" style="position: relative">
+                                                                    <li>
+                                                                        @if(in_array(0,$specialTax['applied_on']))
+                                                                            <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0" checked> Total Round
+                                                                        @else
+                                                                            <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0"> Total Round
+                                                                        @endif
+                                                                    </li>
+                                                                    @foreach($taxes as $tax)
+                                                                    <li>
+                                                                        @if(in_array($tax['id'],$specialTax['applied_on']))
+                                                                        <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" checked> {{$tax['name']}}
+                                                                        @else
+                                                                        <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}"> {{$tax['name']}}
+                                                                        @endif
+                                                                    </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </td>
+                                                            <td>
+                                                                <span id="tax_current_bill_amount_{{$specialTax['id']}}" class="special-tax-amount"></span>
+                                                            </td>
+                                                        </tr>
+                                                        @endforeach
+                                                        @endif
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
+                                                            <td>
+                                                                <span id="grand_current_bill_total"></span>
+                                                            </td>
+                                                        </tr>
                                                     </table>
                                                     <div class="form-group">
                                                         <div class="col-md-offset-11">

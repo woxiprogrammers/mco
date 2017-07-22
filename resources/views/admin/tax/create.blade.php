@@ -3,6 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
+<link href="/assets/global/plugins/bootstrap-toggle/bootstrap-toggle.min.css" rel="stylesheet">
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -59,6 +60,15 @@
                                                     <div class="col-md-6 input-group" id="inputGroup">
                                                         <input type="text" class="form-control" id="percentage" name="base_percentage">
                                                         <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="is_special" class="control-label">Is Special Tax ?</label>
+                                                        <span>*</span>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="checkbox" class="make-switch" data-on-text="Yes" data-off-text="No" name="is_special">
                                                     </div>
                                                 </div>
                                             </div>
