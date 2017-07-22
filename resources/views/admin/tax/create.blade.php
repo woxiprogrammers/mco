@@ -94,8 +94,6 @@
 <script>
     $(document).ready(function() {
         CreateTax.init();
-        console.log($("#isSpecial").next().find('.toggle-off'));
-        $("#isSpecial").next().find('.toggle-off').removeProp('position');
     });
 </script>
 @endsection
