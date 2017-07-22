@@ -877,6 +877,24 @@ trait BillTrait{
                     }
                 }
             }
+            if($request->has('applied_on')){
+                foreach($request->applied_on as $taxId => $specialTax){
+                    if($specialTax['is_already_applied'] == true){
+                        BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->update([
+                                'percentage' => $specialTax['percentage'],
+                                'applied_on' => json_encode($specialTax['on'])
+                            ]);
+                    }else{
+                        if($specialTax['percentage'] != 0){
+                            $bill_taxes['tax_id'] = $taxId;
+                            $bill_taxes['bill_id'] = $bill['id'];
+                            $bill_taxes['percentage'] = $specialTax['percentage'];
+                            $bill_taxes['applied_on'] = json_encode($specialTax['on']);
+                            BillTax::create($bill_taxes);
+                        }
+                    }
+                }
+            }
             return redirect('/bill/view/'.$bill->id);
         }catch(\Exception $e){
             $data = [

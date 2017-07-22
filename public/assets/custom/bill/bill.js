@@ -70,7 +70,7 @@ $(document).ready(function (){
     });
 
     $(".tax-applied-on").on('click',function(){
-        calculateSpecialTax();
+        calculateTax();
     });
 });
 
@@ -97,7 +97,7 @@ function getTotals(){
     }
     $('#total_current_bill_amount').text(total_current_bill_amount.toFixed(3));
     $('#rounded_off_current_bill_amount').text(Math.round(total_current_bill_amount));
-    calculateSpecialTax();
+    calculateTax();
 }
 
 function calculateTax(){
@@ -109,10 +109,10 @@ function calculateTax(){
         $(this).parent().next().find('span').text(tax_amount_current_bill.toFixed(3));
     });
     $("#final_current_bill_total").text(Math.round(final_total_current_bill));
+    calculateSpecialTax()
 }
 
 function calculateSpecialTax(){
-    calculateTax();
     if($(".special-tax").length > 0){
         $(".special-tax").each(function(){
             var specialTaxId = $(this).val();
@@ -142,6 +142,6 @@ function calculateSpecialTax(){
         });
         $("#grand_current_bill_total").text(grossTotal);
     }else{
-        $("#grand_current_bill_total").text(0);
+        $("#grand_current_bill_total").text($("#final_current_bill_total").text());
     }
 }
