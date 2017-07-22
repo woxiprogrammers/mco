@@ -90,7 +90,6 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/global/plugins/bootstrap-toggle/bootstrap-toggle.min.js" type="application/javascript"></script>
 <script src="/assets/custom/admin/tax/tax.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
