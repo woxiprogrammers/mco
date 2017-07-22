@@ -438,18 +438,22 @@ trait BillTrait{
             }else{
                 $specialTaxes = array();
             }
-            for($j = 0 ; $j < count($specialTaxes) ; $j++){
-                $specialTaxes[$j]['applied_on'] = json_decode($specialTaxes[$j]['applied_on']);
-                $specialTaxAmount = 0;
-                foreach($specialTaxes[$j]['applied_on'] as $appliedOnTaxId){
-                    if($appliedOnTaxId == 0){
-                        $specialTaxAmount = $specialTaxAmount + ($total['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
-                    }else{
-                        $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+            if(count($specialTaxes) > 0){
+                for($j = 0 ; $j < count($specialTaxes) ; $j++){
+                    $specialTaxes[$j]['applied_on'] = json_decode($specialTaxes[$j]['applied_on']);
+                    $specialTaxAmount = 0;
+                    foreach($specialTaxes[$j]['applied_on'] as $appliedOnTaxId){
+                        if($appliedOnTaxId == 0){
+                            $specialTaxAmount = $specialTaxAmount + ($total['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+                        }else{
+                            $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+                        }
                     }
+                    $specialTaxes[$j]['current_bill_amount'] = round($specialTaxAmount , 3);
+                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
                 }
-                $specialTaxes[$j]['current_bill_amount'] = round($specialTaxAmount , 3);
-                $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
+            }else{
+                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount']);
             }
             return view('admin.bill.view')->with(compact('bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes'));
         }catch (\Exception $e){
