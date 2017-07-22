@@ -44,8 +44,18 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body">
                                         <input type="hidden" id="billId" value="{{$selectedBillId}}">
-                                      <div class="tab-content">
-                                        <div class="tab-pane fade in active">
+                                        @if($bill->bill_status->slug == 'approved')
+                                            <ul class="nav nav-tabs nav-tabs-lg">
+                                                <li class="active">
+                                                    <a href="#billViewTab" data-toggle="tab"> Bill View </a>
+                                                </li>
+                                                <li>
+                                                    <a href="#billTransactionTab" data-toggle="tab"> Transactions </a>
+                                                </li>
+                                            </ul>
+                                        @endif
+                                        <div class="tab-content">
+                                        <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
                                             <div class="col-md-offset-5 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
@@ -273,6 +283,99 @@
                                                 </div>
                                             </form>
                                         </div>
+                                        <div class="tab-pane fade in" id="billTransactionTab">
+                                            <div class="tab-content">
+                                                <div class="tab-pane fade in active" id="billTransactionListingTab">
+                                                    <div class="table-toolbar">
+                                                        <div class="row" style="text-align: right">
+                                                            <div class="col-md-12">
+                                                                <div class="btn-group">
+                                                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="javascript:void(0);" style="color: white" id="billTransactionCreateButton"> Transaction
+                                                                            <i class="fa fa-plus"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="transactionListingTable">
+                                                        <thead>
+                                                        <tr>
+                                                            <th style="width: 5%"> Sr. No. </th>
+                                                            <th> Subtotal </th>
+                                                            @foreach($taxes as $tax)
+                                                                <th> {{$tax['tax_name']}} </th>
+                                                            @endforeach
+                                                            @foreach($specialTaxes as $specialTax)
+                                                                <th> {{$specialTax['tax_name']}} </th>
+                                                            @endforeach
+                                                            <th> Total </th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="tab-pane fade in" id="billTransactionCreateTab">
+                                                    <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/bill/transaction/create">
+                                                        {!! csrf_field() !!}
+                                                        <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                                                        <div class="form-body">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="name" class="control-label"> Total </label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="number" class="form-control" id="transactionTotal" name="total" onchange="calculateTransactionDetails()">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="name" class="control-label"> Subtotal </label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control" id="transactionSubTotal" name="subtotal" readonly>
+                                                                </div>
+                                                            </div>
+                                                            @foreach($taxes as $tax)
+                                                                <input type="hidden" name="tax_info[{{$tax['tax_id']}}][percent]" value="{{$tax['percentage']}}">
+                                                                <input type="hidden" name="tax_info[{{$tax['tax_id']}}][applied_on]" value="{{$tax['applied_on']}}">
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="name" class="control-label"> {{$tax['tax_name']}} </label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <input type="text" class="form-control" id="TaxAmount_{{$tax['tax_id']}}" name="tax_amount[{{$tax['id']}}]" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                            @foreach($specialTaxes as $specialTax)
+                                                                <input type="hidden" name="tax_info[{{$specialTax['tax_id']}}][percent]" value="{{$specialTax['percentage']}}">
+                                                                <input type="hidden" name="tax_info[{{$specialTax['tax_id']}}][applied_on]" value="{{json_encode($specialTax['applied_on'])}}">
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="name" class="control-label"> {{$specialTax['tax_name']}} </label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <input type="text" class="form-control" id="TaxAmount_{{$specialTax['tax_id']}}" name="tax_amount[{{$specialTax['tax_id']}}]" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        <div class="form-actions noborder row">
+                                                            <div class="col-md-offset-3">
+                                                                <a class="btn blue" id="transactionSubmit">Submit</a>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                       </div>
                                     </div>
                                 </div>
@@ -326,6 +429,7 @@
 <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/image-datatable.js"></script>
+<script src="/assets/custom/bill/transaction-datatable.js"></script>
 <script src="/assets/custom/bill/image-upload.js"></script>
 <script>
     $(document).ready(function (){
@@ -334,7 +438,71 @@
             window.location.href = "/bill/view/"+bill_id;
         });
         $('select[name="change_bill"]').find('option[value={{$selectedBillId}}]').attr("selected",true);
+
+        $("#billTransactionCreateButton").on('click',function(e){
+            e.stopPropagation();
+            $("#billTransactionListingTab").removeClass('active');
+            $("#billTransactionCreateTab").addClass('active');
+        });
+
+        $("#transactionSubmit").on('click',function(e){
+            e.stopPropagation();
+            console.log('in submit');
+            var formData = $("#createTransactionForm").serializeArray();
+            $.ajax({
+                url: '/bill/transaction/create',
+                type: 'POST',
+                async: false,
+                data: formData,
+                success: function(data,textStatus,xhr){
+                    $("#billTransactionCreateTab").removeClass('active');
+                    $("#billTransactionListingTab").addClass('active');
+                },
+                error: function(data){
+
+                }
+            });
+        });
     });
+
+    typingTimer = 0;
+    doneTypingInterval = 1000;
+    $("#transactionTotal").on('keyup', function () {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(calculateTransactionDetails, doneTypingInterval);
+    });
+    $("#transactionTotal").on('keydown', function () {
+        clearTimeout(typingTimer);
+    });
+
+    function calculateTransactionDetails(){
+        var billId = $("#billId").val();
+        var total = $("#transactionTotal").val();
+        $.ajax({
+            url: '/bill/calculate-tax-amounts',
+            type: 'POST',
+            async: false,
+            data:{
+                _token: $("input[name='_token']").val(),
+                bill_id: billId,
+                total: total
+            },
+            success: function(data,textStatus,xhr){
+                $("#transactionSubTotal").val(data.subtotal);
+                console.log(data.taxes);
+                $.each(data.taxes, function(i,v){
+                    console.log(i);
+                    console.log(v);
+                    $("#TaxAmount_"+ v.tax_id).val(v.tax_amount);
+                })
+            },
+            error: function(data){
+
+            }
+        });
+
+
+    }
 </script>
 @endsection
 
