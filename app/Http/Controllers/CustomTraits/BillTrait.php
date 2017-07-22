@@ -881,12 +881,14 @@ trait BillTrait{
             }
             if($request->has('applied_on')){
                 foreach($request->applied_on as $taxId => $specialTax){
-                    if($specialTax['is_already_applied'] == true){
+                    if(!array_key_exists('on',$specialTax) && $specialTax['is_already_applied'] == true){
+                        BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->delete();
+                    }elseif(array_key_exists('on',$specialTax) && $specialTax['is_already_applied'] == true){
                         BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->update([
-                                'percentage' => $specialTax['percentage'],
-                                'applied_on' => json_encode($specialTax['on'])
-                            ]);
-                    }else{
+                            'percentage' => $specialTax['percentage'],
+                            'applied_on' => json_encode($specialTax['on'])
+                        ]);
+                    }elseif(array_key_exists('on',$specialTax) && $specialTax['is_already_applied'] == false){
                         if($specialTax['percentage'] != 0){
                             $bill_taxes['tax_id'] = $taxId;
                             $bill_taxes['bill_id'] = $bill['id'];
