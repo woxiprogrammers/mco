@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Bill')
+@section('title','Constro | View Bill')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -162,19 +162,19 @@
 
                                                         </td>
                                                     </tr>
-                                                    @for($j = 0 ; $j < count($taxes); $j++)
+                                                    @foreach($taxes as $tax)
                                                     <tr>
                                                         <td colspan="6" style="text-align: center">
-                                                            {{$taxes[$j]['taxes']['name']}}
+                                                            {{$tax['tax_name']}}
                                                         </td>
                                                         <td colspan="3" style="text-align: center">
-                                                            <span id="percentage">{{abs($taxes[$j]['percentage'])}}</span>
+                                                            <span id="percentage">{{abs($tax['percentage'])}}</span>
                                                         </td>
                                                         <td>
-                                                            <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['current_bill_amount']}}</span>
+                                                            <span id="tax_current_bill_amount_{{$tax['id']}}">{{$tax['current_bill_amount']}}</span>
                                                         </td>
                                                     </tr>
-                                                    @endfor
+                                                    @endforeach
                                                 @endif
                                                 <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;">
@@ -184,7 +184,46 @@
                                                         <span id="final_current_bill_total">{{$final['current_bill_amount']}}</span>
                                                     </td>
                                                 </tr>
+                                                @if(!empty($specialTaxes))
+                                                @foreach($specialTaxes as $specialTax)
+                                                <tr>
+                                                    <td colspan="7" style="text-align: right; padding-right: 30px;"><b>{{$specialTax['tax_name']}}<i class="fa fa-at"></i>{{$specialTax['percentage']}}%</b><input type="hidden" class="special-tax" name="special_tax[]" value="{{$specialTax['id']}}"> </td>
+                                                    <td colspan="2">
+                                                        <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
+                                                            <i class="fa fa-angle-down"></i>
+                                                        </a>
+                                                        <ul class="dropdown-menu" style="position: relative">
+                                                            <li>
+                                                                @if(in_array(0,$specialTax['applied_on']))
+                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0" checked="checked" disabled> Total Round
+                                                                @else
+                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0" disabled> Total Round
+                                                                @endif
+                                                            </li>
+                                                            @foreach($taxes as $tax)
+                                                            <li>
+                                                                @if(in_array($tax['tax_id'],$specialTax['applied_on']))
+                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" checked="checked" disabled> {{$tax['tax_name']}}
+                                                                @else
+                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" disabled> {{$tax['tax_name']}}
+                                                                @endif
 
+                                                            </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </td>
+                                                    <td>
+                                                        <span id="tax_current_bill_amount_{{$specialTax['id']}}" class="special-tax-amount">{{$specialTax['current_bill_amount']}}</span>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                                @endif
+                                                <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
+                                                    <td>
+                                                        <span id="grand_current_bill_total">{{$final['current_bill_gross_total_amount']}}</span>
+                                                    </td>
+                                                </tr>
                                             </table>
                                         </div>
                                         <div class="tab-pane fade in" id="billApproveTab">
