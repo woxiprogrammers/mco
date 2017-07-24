@@ -912,10 +912,42 @@ trait BillTrait{
         try{
             $data = array();
             $data['cancelledBillStatus'] = BillStatus::where('slug','cancelled')->first();
-            $data['tillThisBill'] = Bill::where('quotation_id',$bill->quotation_id)->where('id','<=',$bill->id)->where('bill_status_id','!=',$data['cancelledBillStatus']->id)->get()->toArray();
+            $data['tillThisBill'] = Bill::where('quotation_id',$bill->quotation_id)->where('id','<=',$bill->id)->where('bill_status_id','!=',$data['cancelledBillStatus']->id)->get();
+/*            foreach($data['tillThisBill'] as $key => $demo->bill_quotation_product){
+                dd($data['tillThisBill']);
+            }*/
             $data['bill'] = $bill;
-            $products = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill'],'id'))->distinct('quotation_product_id')->select('quotation_product_id')->get();
-            dd($products->toArray());
+            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->distinct('quotation_product_id')->select('quotation_product_id')->get();
+            //dd(array_column($products->toArray()));
+            $i = 0;
+            $productArray = array();
+            foreach($billQuotationProducts as $key => $billQuotationProduct){
+                $productArray[$i]['name'] = $billQuotationProduct->quotation_products->product->name;
+                $productArray[$i]['quotation_product_id'] = $billQuotationProduct->quotation_product_id;
+                $productArray[$i]['discounted_rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
+                $productArray[$i]['BOQ'] = $billQuotationProduct->quotation_products->quantity;
+                $productArray[$i]['WO_amount'] = $productArray[$i]['discounted_rate'] * $productArray[$i]['BOQ'];
+
+                $description = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->where('quotation_product_id',$billQuotationProduct->quotation_product_id)->distinct('product_description_id')->select('product_description_id')->get();
+               // $descriptionIds = array_column($description->toArray(),'product_description_id');
+                $j = 0;
+                foreach($description as $key1 => $description_id){
+                    $productArray[$i]['description'][$description_id->product_description->description] = array();
+                   // dd($data['tillThisBill']);
+                    $productArray[$i]['description'][$description_id->product_description->description];
+                    foreach($data['tillThisBill'] as $key2 => $thisBill){
+                        foreach($thisBill->bill_quotation_product as $key3 => $thisBillproducts){
+                            /*if($productArray[$i]['description'][$description_id->product_description->id] == $thisBillproducts['product_description_id']){
+
+                            }
+                            dd($thisBill->bill_quotation_product->toArray());*/
+                        }
+                    }
+                    $j++;
+                }
+                $i++;
+            }
+            dd($productArray);
             Excel::create('Filename', function($excel) use($data) {
                 $excel->sheet('Sheetname', function($sheet) use($data) {
                     $sheet->row(1, array('SRN','Product with description','Rate','BOQ','W.O.Amount'));

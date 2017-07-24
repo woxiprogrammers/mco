@@ -18,4 +18,8 @@ class BillQuotationProducts extends Model
     public function product_description(){
         return $this->belongsTo('App\ProductDescription' ,'product_description_id');
     }
+
+    public function bill(){
+        return $this->belongsTo('App\Bill','id');
+    }
 }
