@@ -6,6 +6,7 @@ use App\BillImage;
 use App\BillQuotationProducts;
 use App\BillStatus;
 use App\BillTax;
+use App\BillTransaction;
 use App\Category;
 use App\Client;
 use App\Helper\NumberHelper;
@@ -65,8 +66,9 @@ trait BillTrait{
                     }
                 }
             }
-            $taxes = Tax::where('is_active',true)->get()->toArray();
-            return view('admin.bill.create')->with(compact('quotation','bills','project_site','quotationProducts','taxes'));
+            $taxes = Tax::where('is_active',true)->where('is_special',false)->get()->toArray();
+            $specialTaxes = Tax::where('is_active', true)->where('is_special',true)->get();
+            return view('admin.bill.create')->with(compact('quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get existing bill create view',
@@ -415,12 +417,48 @@ trait BillTrait{
                 $total['current_bill_amount'] = round(($total['current_bill_amount'] + $billQuotationProducts[$iterator]['current_bill_amount']),3);
             }
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = round($total['current_bill_amount']);
-            $taxes = BillTax::where('bill_id',$bill['id'])->with('taxes')->get()->toArray();
-            for($j = 0 ; $j < count($taxes) ; $j++){
-                $taxes[$j]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$j]['percentage'] / 100) , 3);
-                $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$j]['current_bill_amount']);
+            $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                            ->where('bill_taxes.bill_id','=',$bill['id'])
+                            ->where('taxes.is_special','=', false)
+                            ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
+                            ->get();
+            $taxes = array();
+            if($billTaxes != null){
+                $billTaxes = $billTaxes->toArray();
             }
-            return view('admin.bill.view')->with(compact('bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes'));
+            for($j = 0 ; $j < count($billTaxes) ; $j++){
+                $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
+                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
+                $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']);
+            }
+            $specialTaxes= BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->where('bill_taxes.bill_id','=',$bill['id'])
+                ->where('taxes.is_special','=', true)
+                ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
+                ->get();
+            if($specialTaxes != null){
+                $specialTaxes = $specialTaxes->toArray();
+            }else{
+                $specialTaxes = array();
+            }
+            if(count($specialTaxes) > 0){
+                for($j = 0 ; $j < count($specialTaxes) ; $j++){
+                    $specialTaxes[$j]['applied_on'] = json_decode($specialTaxes[$j]['applied_on']);
+                    $specialTaxAmount = 0;
+                    foreach($specialTaxes[$j]['applied_on'] as $appliedOnTaxId){
+                        if($appliedOnTaxId == 0){
+                            $specialTaxAmount = $specialTaxAmount + ($total['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+                        }else{
+                            $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+                        }
+                    }
+                    $specialTaxes[$j]['current_bill_amount'] = round($specialTaxAmount , 3);
+                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
+                }
+            }else{
+                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount']);
+            }
+            return view('admin.bill.view')->with(compact('bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -453,8 +491,18 @@ trait BillTrait{
                         $bill_taxes['tax_id'] = $key;
                         $bill_taxes['bill_id'] = $bill_created['id'];
                         $bill_taxes['percentage'] = $value;
+                        $bill_taxes['applied_on'] = json_encode([0]);
                         BillTax::create($bill_taxes);
                     }
+                }
+            }
+            if($request->has('applied_on')){
+                foreach($request->applied_on as $taxId => $specialTax){
+                    $bill_taxes['tax_id'] = $taxId;
+                    $bill_taxes['bill_id'] = $bill_created['id'];
+                    $bill_taxes['percentage'] = $specialTax['percentage'];
+                    $bill_taxes['applied_on'] = json_encode($specialTax['on']);
+                    BillTax::create($bill_taxes);
                 }
             }
 
@@ -733,12 +781,17 @@ trait BillTrait{
                     }
                 }
             }
-            $billTaxes = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
+            $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                                ->where('bill_taxes.bill_id','=',$bill->id)
+                                ->where('taxes.is_special','=', false)
+                                ->pluck('bill_taxes.tax_id')
+                                ->toArray();
             $taxes = $currentTaxes =  array();
             if($billTaxes != null){
-                $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->get();
+                $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->where('is_special', false)->get();
             }
-            $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
+            $billTaxInfo = BillTax::where('bill_id',$bill->id)->whereIn('tax_id',$billTaxes)->get()->toArray();
+            $currentTaxes = array_merge($billTaxInfo,$currentTaxes->toArray());
             foreach($currentTaxes as $key => $tax){
                 if(!(array_key_exists('name',$tax))){
                     $taxes[$i] = Tax::where('id',$tax['tax_id'])->select('id','name','slug')->first()->toArray();
@@ -753,7 +806,33 @@ trait BillTrait{
                 }
                 $i++;
             }
-            return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes'));
+            $billSpecialTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->where('bill_taxes.bill_id','=',$bill->id)
+                ->where('taxes.is_special','=', true)
+                ->pluck('bill_taxes.tax_id')
+                ->toArray();
+            $specialTaxes = $currentSpecialTaxes =  array();
+            $currentSpecialTaxes = Tax::whereNotIn('id',$billSpecialTaxes)->where('is_active',true)->where('is_special', true)->get()->toArray();
+            $billTaxInfo = BillTax::where('bill_id',$bill->id)->whereIn('tax_id',$billSpecialTaxes)->get()->toArray();
+            $currentTaxes = array_merge($billTaxInfo,$currentSpecialTaxes);
+            $i = 0;
+            foreach($currentTaxes as $key => $tax){
+                if(!(array_key_exists('name',$tax))){
+                    $specialTaxes[$i] = Tax::where('id',$tax['tax_id'])->select('id','name','slug')->first()->toArray();
+                    $specialTaxes[$i]['percentage'] = $tax['percentage'];
+                    $specialTaxes[$i]['already_applied'] = 1;
+                    $specialTaxes[$i]['applied_on'] = json_decode($tax['applied_on']);
+                }else{
+                    $specialTaxes[$i]['id'] = $tax['id'];
+                    $specialTaxes[$i]['name'] = $tax['name'];
+                    $specialTaxes[$i]['slug'] = $tax['slug'];
+                    $specialTaxes[$i]['percentage'] = $tax['base_percentage'];
+                    $specialTaxes[$i]['already_applied'] = 0;
+                    $specialTaxes[$i]['applied_on'] = [];
+                }
+                $i++;
+            }
+            return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes','specialTaxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Bill',
@@ -803,6 +882,26 @@ trait BillTrait{
                         $taxData['tax_id'] = $taxId;
                         $taxData['percentage'] = $tax['percentage'];
                         BillTax::create($taxData);
+                    }
+                }
+            }
+            if($request->has('applied_on')){
+                foreach($request->applied_on as $taxId => $specialTax){
+                    if(!array_key_exists('on',$specialTax) && $specialTax['is_already_applied'] == true){
+                        BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->delete();
+                    }elseif(array_key_exists('on',$specialTax) && $specialTax['is_already_applied'] == true){
+                        BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->update([
+                            'percentage' => $specialTax['percentage'],
+                            'applied_on' => json_encode($specialTax['on'])
+                        ]);
+                    }elseif(array_key_exists('on',$specialTax) && $specialTax['is_already_applied'] == false){
+                        if($specialTax['percentage'] != 0){
+                            $bill_taxes['tax_id'] = $taxId;
+                            $bill_taxes['bill_id'] = $bill['id'];
+                            $bill_taxes['percentage'] = $specialTax['percentage'];
+                            $bill_taxes['applied_on'] = json_encode($specialTax['on']);
+                            BillTax::create($bill_taxes);
+                        }
                     }
                 }
             }
@@ -913,7 +1012,7 @@ trait BillTrait{
             $data = array();
             $data['cancelledBillStatus'] = BillStatus::where('slug','cancelled')->first();
             $data['tillThisBill'] = Bill::where('quotation_id',$bill->quotation_id)->where('id','<=',$bill->id)->where('bill_status_id','!=',$data['cancelledBillStatus']->id)->get();
-/*            foreach($data['tillThisBill'] as $key => $demo->bill_quotation_product){
+            /*foreach($data['tillThisBill'] as $key => $demo->bill_quotation_product){
                 dd($data['tillThisBill']);
             }*/
             $data['bill'] = $bill;
@@ -982,8 +1081,143 @@ trait BillTrait{
             Log::critical(json_encode($data));
         }
     }
-}
 
+
+    public function calculateTaxAmounts(Request $request){
+        try{
+            $data = $request->except('_token');
+            $taxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                            ->where('taxes.is_special','=',false)
+                            ->where('bill_taxes.bill_id','=', $request->bill_id)
+                            ->orderBy('bill_taxes.tax_id','asc')
+                            ->select('bill_taxes.percentage as percentage','bill_taxes.tax_id as tax_id','bill_taxes.applied_on as applied_on')
+                            ->get();
+            $specialTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->where('taxes.is_special','=', true)
+                ->where('bill_taxes.bill_id','=', $request->bill_id)
+                ->orderBy('bill_taxes.tax_id','asc')
+                ->select('bill_taxes.percentage as percentage','bill_taxes.tax_id as tax_id','bill_taxes.applied_on as applied_on')
+                ->get();
+            $response = array();
+            $iterator = 0;
+            $taxValues = array();
+            foreach($taxes as $tax){
+                $taxValues[$tax['tax_id']] = ($tax['percentage'] / 100);
+            }
+            foreach($specialTaxes as $specialTax){
+                $taxValue = 0;
+                $appliedOn = json_decode($specialTax['applied_on']);
+                foreach($appliedOn as $appliedTaxId){
+                    if($appliedTaxId == 0){                        // On subtotal
+                        $taxValue = $taxValue + ($specialTax['percentage'] / 100);
+                    }else{
+                        $taxValue = $taxValue + ($taxValues[$appliedTaxId] * ($specialTax['percentage'] / 100));
+                    }
+                }
+                $taxValues[$specialTax['tax_id']] = $taxValue;
+            }
+            $subtotal = $data['total'] / (1 + (array_sum($taxValues)));
+            $response['subtotal'] = round($subtotal,3);
+            foreach($taxValues as $taxId => $value){
+                $response['taxes'][$iterator]['tax_id'] = $taxId;
+                $response['taxes'][$iterator]['tax_amount'] = round(($subtotal * $value),3);
+                $iterator++;
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => 'Calculate Tax Amounts',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $response = ['message' => 'Something went wrong.'];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($response,$status);
+    }
+
+    public function saveTransactionDetails(Request $request){
+        try{
+            $transactionData = $request->only('bill_id','total','subtotal');
+            $status = 200;
+            $response['message'] = "Transaction Saved Successfully";
+            BillTransaction::create($transactionData);
+        }catch (\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => 'Save Transaction Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $response['message'] = "Something went Wrong";
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($response,$status);
+    }
+
+    public function billTransactionListing(Request $request, $billId){
+        try{
+            $status = 200;
+            $transactionDetails = BillTransaction::where('bill_id', $billId)->get();
+            $taxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                            ->where('taxes.is_special','=', false)
+                            ->where('bill_taxes.bill_id','=', $billId)
+                            ->orderBy('taxes.id','asc')
+                            ->select('bill_taxes.percentage as percentage','taxes.name as tax_name','taxes.id as id','bill_taxes.applied_on as applied_on')
+                            ->get()->toArray();
+            $specialTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->where('taxes.is_special','=', true)
+                ->where('bill_taxes.bill_id','=', $billId)
+                ->orderBy('taxes.id','asc')
+                ->select('bill_taxes.percentage as percentage','taxes.name as tax_name','taxes.id as id','bill_taxes.applied_on as applied_on')
+                ->get()->toArray();
+            $records = array();
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = count($transactionDetails);
+            $records["recordsFiltered"] = count($transactionDetails);
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($transactionDetails) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($transactionDetails); $iterator++,$pagination++ ){
+                $taxAmounts = array();
+                foreach($taxes as $tax){
+                    $taxAmounts[$tax['id']] = round(($transactionDetails[$pagination]['subtotal'] * ($tax['percentage'] / 100)),3);
+                }
+                foreach($specialTaxes as $specialTax){
+                    $taxAmount = 0;
+                    $appliedOn = json_decode($specialTax['applied_on']);
+                    foreach($appliedOn as $onTaxId){
+                        if($onTaxId == 0){                        // On subtotal
+                            $taxAmount = round(($taxAmount + ($transactionDetails[$pagination]['subtotal'] * ($specialTax['percentage'] / 100))),3);
+                        }else{
+                            $taxAmount = round(($taxAmount + ($taxAmounts[$onTaxId] * ($specialTax['percentage'] / 100))),3);
+                        }
+                    }
+                    $taxAmounts[$specialTax['id']] = $taxAmount;
+                }
+                $records['data'][$iterator][] = $pagination + 1;
+                $records['data'][$iterator][] = $transactionDetails[$pagination]['subtotal'];
+                foreach($taxAmounts as $taxAmnt){
+                    $records['data'][$iterator][] = $taxAmnt;
+                }
+                $records['data'][$iterator][] = round($transactionDetails[$pagination]['subtotal'] + array_sum($taxAmounts));
+            }
+        }catch(\Exception $e){
+            $status = 500;
+            $records = array();
+            $data = [
+                'action' => 'Transaction listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $records = array();
+        }
+        return response()->json($records,$status);
+    }
+}
 
 
 

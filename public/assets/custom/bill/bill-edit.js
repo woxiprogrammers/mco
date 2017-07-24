@@ -1,11 +1,11 @@
 $(document).ready(function (){
     EditBill.init();
-    $('input[type="checkbox"]:checked').each(function(){
+    $('input[type="checkbox"]:checked:not(".tax-applied-on")').each(function(){
         var id = $(this).val();
         checkQuantity(id);
     });
 
-    $('input[type="checkbox"]').click(function(){
+    $('input[type="checkbox"]:not(".tax-applied-on")').click(function(){
         var id = $(this).val();
         if($(this).prop("checked") == false){
             if($('input:checked').length > 0){
@@ -28,7 +28,69 @@ $(document).ready(function (){
             checkQuantity(id);
         }
     });
+
+    $(".tax-applied-on").on('click',function(){
+        calculateTax();
+    });
+
+    $("#billTransactionCreateButton").on('click',function(e){
+        e.stopPropagation();
+        $("#billTransactionListingTab").removeClass('active');
+        $("#billTransactionCreateTab").addClass('active');
+    });
+
+    $("#transactionSubmit").on('click',function(e){
+        e.stopPropagation();
+        var formData = $("#createTransactionForm").serializeArray();
+        $.ajax({
+            url: '/bill/transaction/create',
+            type: 'POST',
+            async: false,
+            data: formData,
+            success: function(data,textStatus,xhr){
+                $("#billTransactionCreateTab").removeClass('active');
+                $("#billTransactionListingTab").addClass('active');
+            },
+            error: function(data){
+
+            }
+        });
+    });
 });
+
+typingTimer = 0;
+doneTypingInterval = 1000;
+$("#transactionTotal").on('keyup', function () {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(calculateTransactionDetails, doneTypingInterval);
+});
+$("#transactionTotal").on('keydown', function () {
+    clearTimeout(typingTimer);
+});
+
+function calculateTransactionDetails(){
+    var billId = $("#billId").val();
+    var total = $("#transactionTotal").val();
+    $.ajax({
+        url: '/bill/calculate-tax-amounts',
+        type: 'POST',
+        async: false,
+        data:{
+            _token: $("input[name='_token']").val(),
+            bill_id: billId,
+            total: total
+        },
+        success: function(data,textStatus,xhr){
+            $("#transactionSubTotal").val(data.subtotal);
+            $.each(data.taxes, function(i,v){
+                $("#TaxAmount_"+ v.tax_id).val(v.tax_amount);
+            })
+        },
+        error: function(data){
+
+        }
+    });
+}
 
 function checkQuantity (id){
     var input = $('#current_quantity_'+id);
@@ -82,9 +144,9 @@ function calculateQuantityAmount(current_quantity,id){
 
 function getTotals(){
     var total_current_bill_amount = 0.0;
-    var selected_product_length = $('input:checked').length;
+    var selected_product_length = $('input:checked:not(".tax-applied-on")').length;
     if(selected_product_length > 0){
-        $('input:checked').each(function(){
+        $('input:checked:not(".tax-applied-on")').each(function(){
             var id = $(this).val();
             var current_bill_amount = parseFloat($('#current_bill_amount_'+id).text());
             total_current_bill_amount = total_current_bill_amount + current_bill_amount;
@@ -101,7 +163,41 @@ function calculateTax(){
     $(".tax").each(function(){
         var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
         final_total_current_bill = final_total_current_bill + tax_amount_current_bill;
-        $(this).parent().next().text(tax_amount_current_bill.toFixed(3));
+        $(this).parent().next().find('span').text(tax_amount_current_bill.toFixed(3));
     });
     $("#final_current_bill_total").text(Math.round(final_total_current_bill));
+    calculateSpecialTax();
+}
+
+function calculateSpecialTax(){
+    if($(".special-tax").length > 0){
+        $(".special-tax").each(function(){
+            var specialTaxId = $(this).val();
+            if($(".special_tax_"+specialTaxId+"_on:checkbox:checked").length > 0){
+                var taxAmount = 0;
+                $(".special_tax_"+specialTaxId+"_on:checkbox:checked").each(function(){
+                    var taxId = $(this).val();
+                    var taxOnAmount = 0;
+                    if(taxId == 0 || taxId == '0'){
+                        taxOnAmount = taxOnAmount + parseFloat($("#rounded_off_current_bill_amount").text());
+                    }else{
+                        taxOnAmount = taxOnAmount + parseFloat($("#tax_current_bill_amount_"+taxId).text());
+                    }
+                    var taxPercentage = $("#tax_percentage_"+specialTaxId).val();
+                    taxAmount = taxAmount + ( taxOnAmount * (taxPercentage / 100));
+
+                });
+                $("#tax_current_bill_amount_"+specialTaxId).text(taxAmount.toFixed(3));
+            }else{
+                $("#tax_current_bill_amount_"+specialTaxId).text(0);
+            }
+        });
+        var grossTotal = parseFloat($("#final_current_bill_total").text());
+        $(".special-tax-amount").each(function(){
+            grossTotal = grossTotal + parseFloat($(this).text());
+        });
+        $("#grand_current_bill_total").text(grossTotal);
+    }else{
+        $("#grand_current_bill_total").text($("#final_current_bill_total").text());
+    }
 }

@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Bill')
+@section('title','Constro | View Bill')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -44,8 +44,18 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body">
                                         <input type="hidden" id="billId" value="{{$selectedBillId}}">
-                                      <div class="tab-content">
-                                        <div class="tab-pane fade in active">
+                                        @if($bill->bill_status->slug == 'approved')
+                                            <ul class="nav nav-tabs nav-tabs-lg">
+                                                <li class="active">
+                                                    <a href="#billViewTab" data-toggle="tab"> Bill View </a>
+                                                </li>
+                                                <li>
+                                                    <a href="#billTransactionTab" data-toggle="tab"> Transactions </a>
+                                                </li>
+                                            </ul>
+                                        @endif
+                                        <div class="tab-content">
+                                        <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
                                             <div class="col-md-offset-3 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
@@ -166,19 +176,19 @@
 
                                                         </td>
                                                     </tr>
-                                                    @for($j = 0 ; $j < count($taxes); $j++)
+                                                    @foreach($taxes as $tax)
                                                     <tr>
                                                         <td colspan="6" style="text-align: center">
-                                                            {{$taxes[$j]['taxes']['name']}}
+                                                            {{$tax['tax_name']}}
                                                         </td>
                                                         <td colspan="3" style="text-align: center">
-                                                            <span id="percentage">{{abs($taxes[$j]['percentage'])}}</span>
+                                                            <span id="percentage">{{abs($tax['percentage'])}}</span>
                                                         </td>
                                                         <td>
-                                                            <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}">{{$taxes[$j]['current_bill_amount']}}</span>
+                                                            <span id="tax_current_bill_amount_{{$tax['id']}}">{{$tax['current_bill_amount']}}</span>
                                                         </td>
                                                     </tr>
-                                                    @endfor
+                                                    @endforeach
                                                 @endif
                                                 <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;">
@@ -188,7 +198,46 @@
                                                         <span id="final_current_bill_total">{{$final['current_bill_amount']}}</span>
                                                     </td>
                                                 </tr>
+                                                @if(!empty($specialTaxes))
+                                                @foreach($specialTaxes as $specialTax)
+                                                <tr>
+                                                    <td colspan="7" style="text-align: right; padding-right: 30px;"><b>{{$specialTax['tax_name']}}<i class="fa fa-at"></i>{{$specialTax['percentage']}}%</b><input type="hidden" class="special-tax" name="special_tax[]" value="{{$specialTax['id']}}"> </td>
+                                                    <td colspan="2">
+                                                        <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
+                                                            <i class="fa fa-angle-down"></i>
+                                                        </a>
+                                                        <ul class="dropdown-menu" style="position: relative">
+                                                            <li>
+                                                                @if(in_array(0,$specialTax['applied_on']))
+                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0" checked="checked" disabled> Total Round
+                                                                @else
+                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0" disabled> Total Round
+                                                                @endif
+                                                            </li>
+                                                            @foreach($taxes as $tax)
+                                                            <li>
+                                                                @if(in_array($tax['tax_id'],$specialTax['applied_on']))
+                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" checked="checked" disabled> {{$tax['tax_name']}}
+                                                                @else
+                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" disabled> {{$tax['tax_name']}}
+                                                                @endif
 
+                                                            </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </td>
+                                                    <td>
+                                                        <span id="tax_current_bill_amount_{{$specialTax['id']}}" class="special-tax-amount">{{$specialTax['current_bill_amount']}}</span>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                                @endif
+                                                <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
+                                                    <td>
+                                                        <span id="grand_current_bill_total">{{$final['current_bill_gross_total_amount']}}</span>
+                                                    </td>
+                                                </tr>
                                             </table>
                                         </div>
                                         <div class="tab-pane fade in" id="billApproveTab">
@@ -237,6 +286,99 @@
                                                     </div>
                                                 </div>
                                             </form>
+                                        </div>
+                                        <div class="tab-pane fade in" id="billTransactionTab">
+                                            <div class="tab-content">
+                                                <div class="tab-pane fade in active" id="billTransactionListingTab">
+                                                    <div class="table-toolbar">
+                                                        <div class="row" style="text-align: right">
+                                                            <div class="col-md-12">
+                                                                <div class="btn-group">
+                                                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="javascript:void(0);" style="color: white" id="billTransactionCreateButton"> Transaction
+                                                                            <i class="fa fa-plus"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="transactionListingTable">
+                                                        <thead>
+                                                        <tr>
+                                                            <th style="width: 5%"> Sr. No. </th>
+                                                            <th> Subtotal </th>
+                                                            @foreach($taxes as $tax)
+                                                                <th> {{$tax['tax_name']}} </th>
+                                                            @endforeach
+                                                            @foreach($specialTaxes as $specialTax)
+                                                                <th> {{$specialTax['tax_name']}} </th>
+                                                            @endforeach
+                                                            <th> Total </th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="tab-pane fade in" id="billTransactionCreateTab">
+                                                    <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/bill/transaction/create">
+                                                        {!! csrf_field() !!}
+                                                        <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                                                        <div class="form-body">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="name" class="control-label"> Total </label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="number" class="form-control" id="transactionTotal" name="total" onchange="calculateTransactionDetails()">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="name" class="control-label"> Subtotal </label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control" id="transactionSubTotal" name="subtotal" readonly>
+                                                                </div>
+                                                            </div>
+                                                            @foreach($taxes as $tax)
+                                                                <input type="hidden" name="tax_info[{{$tax['tax_id']}}][percent]" value="{{$tax['percentage']}}">
+                                                                <input type="hidden" name="tax_info[{{$tax['tax_id']}}][applied_on]" value="{{$tax['applied_on']}}">
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="name" class="control-label"> {{$tax['tax_name']}} </label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <input type="text" class="form-control" id="TaxAmount_{{$tax['tax_id']}}" name="tax_amount[{{$tax['id']}}]" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                            @foreach($specialTaxes as $specialTax)
+                                                                <input type="hidden" name="tax_info[{{$specialTax['tax_id']}}][percent]" value="{{$specialTax['percentage']}}">
+                                                                <input type="hidden" name="tax_info[{{$specialTax['tax_id']}}][applied_on]" value="{{json_encode($specialTax['applied_on'])}}">
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="name" class="control-label"> {{$specialTax['tax_name']}} </label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <input type="text" class="form-control" id="TaxAmount_{{$specialTax['tax_id']}}" name="tax_amount[{{$specialTax['tax_id']}}]" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        <div class="form-actions noborder row">
+                                                            <div class="col-md-offset-3">
+                                                                <a class="btn blue" id="transactionSubmit">Submit</a>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </div>
                                       </div>
                                     </div>
@@ -291,6 +433,7 @@
 <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/image-datatable.js"></script>
+<script src="/assets/custom/bill/transaction-datatable.js"></script>
 <script src="/assets/custom/bill/image-upload.js"></script>
 <script>
     $(document).ready(function (){
@@ -299,7 +442,11 @@
             window.location.href = "/bill/view/"+bill_id;
         });
         $('select[name="change_bill"]').find('option[value={{$selectedBillId}}]').attr("selected",true);
-    });
+
+
+
+
+    }
 </script>
 @endsection
 
