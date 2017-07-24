@@ -83,9 +83,9 @@
                                                             <div class="input-group" id="inputGroup">
                                                                 <input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" disabled>
                                                                 <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
-                                                                <span class="input-group-addon" id="product_description_create" style="font-size: 12px">C</span>
-                                                                <span class="input-group-addon" id="product_description_update" style="font-size: 12px">U</span>
-                                                                <span class="input-group-addon" id="product_description_delete" style="font-size: 12px">D</span>
+                                                                <span class="input-group-addon product_description_create" style="font-size: 12px">C</span>
+                                                                <span class="input-group-addon product_description_update" style="font-size: 12px">U</span>
+                                                                <span class="input-group-addon product_description_delete" style="font-size: 12px">D</span>
                                                             </div>
 
                                                         </td>

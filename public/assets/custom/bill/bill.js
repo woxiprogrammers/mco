@@ -41,7 +41,7 @@ $(document).ready(function (){
             }else{
                 $('#product_description_'+id).prop('disabled',false);
                 $('#product_description_id_'+id).prop('disabled',false);
-                $('#product_description_create').click(function (){
+                $('.product_description_create').click(function (){
                     $.ajax({
                         url: '/bill/product_description/create',
                         type: 'POST',
@@ -60,44 +60,37 @@ $(document).ready(function (){
                         }
                     });
                 });
-                $('#product_description_update').click(function (){
-                    $.ajax({
-                        url: '/bill/product_description/update',
-                        type: 'POST',
-                        async: false,
-                        data: {
-                            'description' : $('.product_description').val(),
-                            'quotation_id' : $('#quotation_id').val()
-                        },
-                        success: function(data,textStatus,xhr){
-                            if(xhr.status == 200){
-                            }else{
+
+                $('.product_description_update').click(function (){
+                    var productDescription = $('#product_description_'+id).val();
+                    var descriptionId = $('#product_description_id_'+id).val();
+                    if(productDescription !="" && descriptionId !=""){
+                        $.ajax({
+                            url: '/bill/product_description/update',
+                            type: 'POST',
+                            async: false,
+                            data: {
+                                'description' : productDescription,
+                                'description_id' : descriptionId
+                            },
+                            success: function(data,textStatus,xhr){
+                                console.log(data);
+                                if(xhr.status == 200){
+                                }else{
+                                }
+                            },
+                            error: function(data, textStatus, xhr){
+
                             }
-                        },
-                        error: function(data, textStatus, xhr){
-
-                        }
-                    });
+                        });
+                    }
                 });
-                $('#product_description_delete').click(function (){
-                    $('.product_description').val("");
-                    /*$.ajax({
-                        url: '/bill/product_description/delete',
-                        type: 'POST',
-                        async: false,
-                        data: {
 
-                        },
-                        success: function(data,textStatus,xhr){
-                            if(xhr.status == 200){
-                            }else{
-                            }
-                        },
-                        error: function(data, textStatus, xhr){
-
-                        }
-                    });*/
+                $('.product_description_delete').click(function (){
+                    $('#product_description_'+id).val("");
+                    $('#previous_quantity_'+id).val("");
                 });
+
                 $('#current_quantity_'+id).prop('disabled',false);
                 $('#current_quantity_'+id).val(0);
                 $("#id_"+id).css('background-color',"#e1e1e1");

@@ -40,26 +40,20 @@ $(document).ready(function(){
                 limit: 30,
                 templates: {
                     empty: [
-                        '<div class="empty-suggest">',
-                        'Unable to find any Result that match the current query',
-                        '</div>'
+
                     ].join('\n'),
                     suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{description}}</strong></div>')
                 }
             }).on('typeahead:selected', function (obj, datum) {
                 var POData = $.parseJSON(JSON.stringify(datum));
                 $("#"+elementId).closest(".input-group").find('.product-description-id').attr('value',POData.id);
-                $("#"+elementId).val(POData.description);
-                console.log($("#"+elementId));
-                console.log($("#"+elementId).val());
-                //debugger;
+                $("#"+elementId).typeahead('val',POData.description);
+                return false;
             }).on('typeahead:open', function (obj, datum) {
 
             });
         }else{
-
-            $("#"+elementId).typeahead('destroy');
-            $("#"+elementId).removeClass('typeahead');
+            $(".typeahead").typeahead('destroy');
         }
 
     });
