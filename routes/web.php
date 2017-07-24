@@ -148,6 +148,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('cancel/{bill}', array('uses' => 'Admin\BillController@cancelBill'));
         Route::get('manage/{project_site}',array('uses' => 'Admin\BillController@getManageView'));
         Route::post('listing/{project_site}/{status}',array('uses' => 'Admin\BillController@billListing'));
+        Route::post('calculate-tax-amounts',array('uses' => 'Admin\BillController@calculateTaxAmounts'));
+        Route::group(['prefix' => 'transaction'], function(){
+            Route::post('create', array('uses' => 'Admin\BillController@saveTransactionDetails'));
+            Route::post('listing/{billId}', array('uses' => 'Admin\BillController@billTransactionListing'));
+        });
     });
 
     Route::group(['prefix' => 'quotation'], function(){
