@@ -309,7 +309,9 @@
                                                             @foreach($specialTaxes as $specialTax)
                                                                 <th> {{$specialTax['tax_name']}} </th>
                                                             @endforeach
-                                                            <th> Total </th>
+                                                            <th> Total
+                                                                <input type="hidden" class="filter-submit">
+                                                            </th>
                                                         </tr>
                                                         </thead>
                                                         <tbody>
@@ -431,18 +433,16 @@
 <script src="/assets/custom/bill/image-datatable.js"></script>
 <script src="/assets/custom/bill/transaction-datatable.js"></script>
 <script src="/assets/custom/bill/image-upload.js"></script>
+<script src="/assets/custom/bill/bill-view.js"></script>
 <script>
-    $(document).ready(function (){
+    $(document).ready(function(){
         $("#change_bill").on('change', function(){
             var bill_id = $(this).val();
             window.location.href = "/bill/view/"+bill_id;
         });
         $('select[name="change_bill"]').find('option[value={{$selectedBillId}}]').attr("selected",true);
+    });
 
-
-
-
-    }
 </script>
 @endsection
 
