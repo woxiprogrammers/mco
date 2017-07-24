@@ -1009,6 +1009,7 @@ trait BillTrait{
 
     public function generateCumulativeExcelSheet(Request $request,$bill){
         try{
+            dd(123);
             $data = array();
             $data['cancelledBillStatus'] = BillStatus::where('slug','cancelled')->first();
             $data['tillThisBill'] = Bill::where('quotation_id',$bill->quotation_id)->where('id','<=',$bill->id)->where('bill_status_id','!=',$data['cancelledBillStatus']->id)->get();
@@ -1068,9 +1069,6 @@ trait BillTrait{
                         });
                     }
                 });
-
-
-
             })->download('xls'); //->export('xls');
         }catch(\Exception $e){
             $data = [

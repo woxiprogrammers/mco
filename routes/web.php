@@ -149,17 +149,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('cancel/{bill}', array('uses' => 'Admin\BillController@cancelBill'));
         Route::get('manage/{project_site}',array('uses' => 'Admin\BillController@getManageView'));
         Route::post('listing/{project_site}/{status}',array('uses' => 'Admin\BillController@billListing'));
-<<<<<<< HEAD
         Route::post('product_description/create',array('uses' => 'Admin\BillController@createProductDescription'));
         Route::post('product_description/update',array('uses' => 'Admin\BillController@updateProductDescription'));
         Route::group(['prefix'=>'product'],function(){
             Route::get('get-descriptions/{quotation_id}/{keyword}',array('uses' => 'Admin\BillController@getProductDescription'));
-=======
+        });
         Route::post('calculate-tax-amounts',array('uses' => 'Admin\BillController@calculateTaxAmounts'));
         Route::group(['prefix' => 'transaction'], function(){
             Route::post('create', array('uses' => 'Admin\BillController@saveTransactionDetails'));
             Route::post('listing/{billId}', array('uses' => 'Admin\BillController@billTransactionListing'));
->>>>>>> develop
         });
     });
 
