@@ -53,9 +53,34 @@ $(document).ready(function(){
 
             });
         }else{
+            $("#"+elementId).closest(".input-group").find('.product-description-id').removeAttr('value');
             $(".typeahead").typeahead('destroy');
         }
+    });
 
+    $(".product-checkbox:checked").each(function(){
+        var elementId = $(this).parent().next().next().find('.product_description').attr('id');
+        $("#"+elementId).addClass('typeahead');
+        citiList.initialize();
+        $("#"+elementId).typeahead(null, {
+            displayKey: 'name',
+            engine: Handlebars,
+            source: citiList.ttAdapter(),
+            limit: 30,
+            templates: {
+                empty: [
+
+                ].join('\n'),
+                suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{description}}</strong></div>')
+            }
+        }).on('typeahead:selected', function (obj, datum) {
+            var POData = $.parseJSON(JSON.stringify(datum));
+            $("#"+elementId).closest(".input-group").find('.product-description-id').attr('value',POData.id);
+            $("#"+elementId).typeahead('val',POData.description);
+            return false;
+        }).on('typeahead:open', function (obj, datum) {
+
+        });
     });
 
 });

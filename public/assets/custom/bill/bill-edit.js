@@ -32,7 +32,7 @@ $(document).ready(function (){
     $(".tax-applied-on").on('click',function(){
         calculateTax();
     });
-
+});
 
 
 function checkQuantity (id){
