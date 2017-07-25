@@ -400,6 +400,7 @@ trait BillTrait{
                 $billQuotationProducts[$iterator]['previous_quantity'] = 0;
                 $billQuotationProducts[$iterator]['quotationProducts'] = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->where('quotation_id',$bill['quotation_id'])->first();
                 $billQuotationProducts[$iterator]['productDetail'] = Product::where('id',$billQuotationProducts[$iterator]['quotationProducts']['product_id'])->first();
+                $billQuotationProducts[$iterator]['product_description'] = ProductDescription::where('id',$billQuotationProducts[$iterator]['product_description_id'])->where('quotation_id',$bill['quotation_id'])->first()->toArray();
                 $billQuotationProducts[$iterator]['unit'] = Unit::where('id',$billQuotationProducts[$iterator]['productDetail']['unit_id'])->pluck('name')->first();
                 $quotation_id = Bill::where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
                 $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
@@ -1020,6 +1021,7 @@ trait BillTrait{
             $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->distinct('quotation_product_id')->select('quotation_product_id')->get();
             $i = 0;
             $productArray = array();
+            $billSubTotal = array();
             foreach($billQuotationProducts as $key => $billQuotationProduct){
                 $currrentProductId = $billQuotationProduct['quotation_product_id'];
                 $productArray[$i]['name'] = $billQuotationProduct->quotation_products->product->name;
@@ -1029,35 +1031,96 @@ trait BillTrait{
                 $productArray[$i]['WO_amount'] = $productArray[$i]['discounted_rate'] * $productArray[$i]['BOQ'];
                 $description = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->where('quotation_product_id',$billQuotationProduct->quotation_product_id)->distinct('product_description_id')->select('product_description_id')->get();
                 $j = 0;
+                $productArray[$i]['description'] = array();
                 foreach($description as $key1 => $description_id){
-                    $productArray[$i]['description'] = array();
-                   // dd($data['tillThisBill']);
                     $productArray[$i]['description'][$description_id->product_description->id]['description'] = $description_id->product_description->description;
                     $productArray[$i]['description'][$description_id->product_description->id]['bills'] =array();
                     $iterator = 0;
                     $totalBillQuantity = 0;
                     $totalBillAmount = 0;
                     foreach($data['tillThisBill'] as $key2 => $thisBill){
-                        $currentProductQuantity = BillQuotationProducts::where('bill_id',$thisBill->id)->where('quotation_product_id',$currrentProductId)->pluck('quantity')->first();
+                        $currentProductQuantity = BillQuotationProducts::where('bill_id',$thisBill->id)->where('quotation_product_id',$currrentProductId)->where('product_description_id',$description_id->product_description_id)->pluck('quantity')->first();
                         if($currentProductQuantity != null){
                             $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'] = $currentProductQuantity;
-                            $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = round(($currentProductQuantity +  $productArray[$i]['discounted_rate']),3);
+                            $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = round(($currentProductQuantity *  $productArray[$i]['discounted_rate']),3);
                         }else{
                             $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'] = 0;
                             $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = 0;
+                        }
+                        if(array_key_exists($thisBill->id,$billSubTotal)){
+                            $billSubTotal[$thisBill->id]['subtotal'] +=  $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
+                        }else{
+                            $billSubTotal[$thisBill->id]['subtotal'] = array();
+                            $billSubTotal[$thisBill->id]['subtotal'] =  $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
                         }
                         $totalBillQuantity += $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'];
                         $totalBillAmount += $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
                         $iterator++;
                     }
+
                     $productArray[$i]['description'][$description_id->product_description->id]['bills']['total_quantity'] = $totalBillQuantity;
                     $productArray[$i]['description'][$description_id->product_description->id]['bills']['total_amount'] = $totalBillAmount;
-                    $j++;
+                      $j++;
                 }
                 $i++;
             }
-            Excel::create('Filename', function($excel) use($data,$productArray) {
-                $excel->sheet('Sheetname', function($sheet) use($data,$productArray) {
+            $TaxIdTillBillWithoutSpecialTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->whereIn('bill_taxes.bill_id',array_column($data['tillThisBill']->toArray(),'id'))
+                ->where('taxes.is_special','!=', true)
+                ->distinct('bill_taxes.tax_id')
+                ->select('bill_taxes.tax_id')
+                ->get();
+            $taxInfo = array();
+            foreach($TaxIdTillBillWithoutSpecialTax as $key => $taxId){
+                $taxInfo[$taxId['tax_id']]['name'] = Tax::where('id',$taxId['tax_id'])->pluck('name')->first();
+                $a = 0;
+                foreach($billSubTotal as $billId => $subTotal){
+                    $taxInfo[$taxId['tax_id']]['bills'][$a]['bill_id'] = $billId;
+                    $taxInfo[$taxId['tax_id']]['bills'][$a]['bill_subtotal'] = $subTotal['subtotal'];
+                    $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
+                    if(count($isAppliedTax) == 0){
+                        $taxInfo[$taxId['tax_id']]['bills'][$a]['percentage'] = 0;
+                    }else{
+                        $taxInfo[$taxId['tax_id']]['bills'][$a]['percentage'] = $isAppliedTax['percentage'];
+                    }
+                    $taxInfo[$taxId['tax_id']]['bills'][$a]['tax_amount'] = round(($subTotal['subtotal'] * ($taxInfo[$taxId['tax_id']]['bills'][$a]['percentage']/100)),3);
+                    $a++;
+                }
+            }
+            $TaxIdTillBillWithSpecialTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->whereIn('bill_taxes.bill_id',array_column($data['tillThisBill']->toArray(),'id'))
+                ->where('taxes.is_special','=', true)
+                ->distinct('bill_taxes.tax_id')
+                ->select('bill_taxes.tax_id')
+                ->get();
+            foreach($TaxIdTillBillWithSpecialTax as $key => $taxId){
+                $taxInfo[$taxId['tax_id']]['name'] = Tax::where('id',$taxId['tax_id'])->pluck('name')->first();
+                foreach($billSubTotal as $billId => $subTotal){
+                    $taxInfo[$taxId['tax_id']]['bills'][$a]['bill_id'] = $billId;
+                    $taxInfo[$taxId['tax_id']]['bills'][$a]['bill_subtotal'] = $subTotal['subtotal'];
+                    $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
+                    //dd($isAppliedTax);
+                    if(count($isAppliedTax) == 0){
+                        $taxInfo[$taxId['tax_id']]['bills'][$a]['percentage'] = 0;
+                    }else{
+                        $taxInfo[$taxId['tax_id']]['bills'][$a]['percentage'] = $isAppliedTax['percentage'];
+                        $specialTaxAppliedID  = json_decode($isAppliedTax['applied_on']);
+                        if(in_array(0,$specialTaxAppliedID)){
+                            Log::info('here');
+                            $taxInfo[$taxId['tax_id']]['bills'][$a]['tax_amount'] = round(($subTotal['subtotal'] * ($taxInfo[$taxId['tax_id']]['bills'][$a]['percentage']/100)),3);
+                        }else{
+                            Log::info('here1213');
+                            $tax_percentage = BillTax::where('tax_id',json_decode($isAppliedTax['applied_on']))->where('bill_id',$billId)->pluck('percentage')->first();
+                            $amount = round((($tax_percentage/100) * $subTotal['subtotal']),3);
+                            $taxInfo[$taxId['tax_id']]['bills'][$a]['tax_amount'] = round(($amount * ($taxInfo[$taxId['tax_id']]['bills'][$a]['percentage']/100)),3);
+                        }
+                    }
+                    $a++;
+                }
+            }
+            dd($taxInfo);
+            Excel::create('Filename', function($excel) use($data,$productArray,$billSubTotal,$taxInfo) {
+                $excel->sheet('Sheetname', function($sheet) use($data,$productArray,$billSubTotal,$taxInfo) {
                     $sheet->row(1, array('SRN','Product with description','Rate','BOQ','W.O.Amount'));
                     $next_column = 'F';
                     $row = 1;
@@ -1067,7 +1130,9 @@ trait BillTrait{
                         $sheet->getCell(($next_column).($row+1))->setValue('Amount');
                         $sheet->mergeCells($current_column.$row.':'.$next_column.$row);
                         $sheet->getCell($current_column.$row)->setValue("RA Bill".($iterator+1));
+
                     }
+                    $totalAmountColumn = $next_column;
                     $next_column_data = array('Total Quantity','Total Amount');
                     for($iterator = 0 ; $iterator < count($next_column_data) ; $iterator++,$next_column++){
                         $columnData = $next_column_data[$iterator];
@@ -1076,35 +1141,50 @@ trait BillTrait{
                             $cell->setValue($columnData);
                         });
                     }
-
                     $serialNumber = 1;
                     $productRow = 4;
                     foreach($productArray as $product){
-                        dd($product);
                         $sheet->row($productRow, array($serialNumber,$product['name'],$product['discounted_rate'],$product['BOQ'],$product['WO_amount']));
-                        $next_column = 'F';
-                        $row = 1;
-                        for($iterator = 0 ; $iterator < count($product['description']); $iterator++,$next_column++){
-
-                            $current_column = $next_column++;
-                            $sheet->getCell($current_column.($row+1))->setValue($product['bills'][$iterator]['quantity']);
-                            $sheet->getCell(($next_column).($row+1))->setValue($product['bills'][$iterator]['amount']);
-                            $sheet->mergeCells($current_column.$row.':'.$next_column.$row);
-                            $sheet->getCell($current_column.$row)->setValue("RA Bill".($iterator+1));
+                        foreach($product['description'] as $description){
+                            $amountColumn = $totalAmountColumn;
+                            $next_column = 'F';
+                            $productRow++;
+                            $sheet->getCell('B'.($productRow))->setValue($description['description']);
+                            foreach($description['bills'] as $bill => $thisBill ){
+                                $current_column = $next_column++;
+                                $sheet->getCell($current_column.($productRow))->setValue($thisBill['quantity']);
+                                $sheet->getCell(($next_column).($productRow))->setValue($thisBill['amount']);
+                                $next_column++;
+                            }
+                            $sheet->getCell(($amountColumn).($productRow))->setValue($description['bills']['total_quantity']);
+                            $amountColumn++;
+                            $sheet->getCell(($amountColumn).($productRow))->setValue($description['bills']['total_amount']);
                         }
-                        $next_column_data = array('Total Quantity','Total Amount');
-                        for($iterator = 0 ; $iterator < count($next_column_data) ; $iterator++,$next_column++){
-                            $columnData = $next_column_data[$iterator];
-                            $sheet->cell($next_column.$row, function($cell) use($columnData) {
-                                $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue($columnData);
-                            });
-                        }
+                        $productRow = $productRow + 1;
                         $productRow++;
                         $serialNumber++;
                     }
+                    $sheet->getCell('B'.($productRow))->setValue('SubTotal');
+                    $columnForSubTotal = 'G';
+                    foreach($billSubTotal as $subTotal){
+                        $sheet->getCell($columnForSubTotal.($productRow))->setValue($subTotal['subtotal']);
+                        $columnForSubTotal++;
+                        $columnForSubTotal++;
+                    }
+                    $productRow++;
+                    foreach($taxInfo as $tax){
+                        $sheet->getCell('B'.($productRow))->setValue($tax['name']);
+                        $next_column = 'F';
+                        foreach($tax['bills'] as $bill){
+                            $current_column = $next_column++;
+                                $sheet->getCell($current_column.($productRow))->setValue($bill['percentage']);
+                                $sheet->getCell($next_column.($productRow))->setValue($bill['tax_amount']);
+                                $next_column++;
+                            }
+                        $productRow++;
+                    }
                 });
-            })->download('xls'); //->export('xls');
+            })->download('xlsx'); //->export('xls');
         }catch(\Exception $e){
             dd($e->getMessage());
             $data = [
