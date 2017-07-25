@@ -473,7 +473,6 @@ trait BillTrait{
 
     public function createBill(Request $request){
         try{
-            //dd($request->all());
             $projectSiteId = $request['project_site_id'];
             $bill_quotation_product = array();
             $bill['quotation_id'] = $request['quotation_id'];
@@ -773,7 +772,6 @@ trait BillTrait{
                     if($billQuotationProduct->quotation_product_id == $quotationProduct->id){
                         $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
                         if($billQuotationProduct->bill_id == $bill->id){
-                           // dd($billQuotationProduct);
                             $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] - $billQuotationProduct->quantity;
                             $quotationProduct['bill_description'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description->description : "No description";
                             $quotationProduct['bill_product_description_id'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description_id : null;
@@ -936,7 +934,6 @@ trait BillTrait{
 
     public function createProductDescription(Request $request){
         try{
-            //dd($request->all());
             $status = 200;
             $product_description = array();
             $alreadyPresent = ProductDescription::where('quotation_id',$request->quotation_id)->where('description',$request->description)->first();
@@ -945,7 +942,6 @@ trait BillTrait{
             }else{
                 $product_description = $alreadyPresent;
             }
-            //dd($product_description);
         }catch(\Exception $e){
             $status = 500;
             $product_description = array();
@@ -986,7 +982,6 @@ trait BillTrait{
                 $descriptions = ProductDescription::where('quotation_id',$quotation_id)->select('id','description')->get();
             }else{
                 $descriptions = ProductDescription::where('quotation_id',$quotation_id)->where('description','ILIKE','%'.$keyword.'%')->select('id','description')->get();
-                Log::info($descriptions);
             }
             $response = array();
             if(count($descriptions) > 0){
@@ -1100,7 +1095,6 @@ trait BillTrait{
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_id'] = $billId;
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_subtotal'] = $subTotal['subtotal'];
                     $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
-                    //dd($isAppliedTax);
                     if(count($isAppliedTax) == 0){
                         $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = 0;
                         $taxAmount = 0;
@@ -1204,7 +1198,6 @@ trait BillTrait{
                 });
             })->download('xlsx'); //->export('xls');
         }catch(\Exception $e){
-            dd($e->getMessage());
             $data = [
                 'action' => 'Generate excel sheet cumulative bill',
                 'params' => $request->all(),
