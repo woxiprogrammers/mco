@@ -1073,18 +1073,18 @@ trait BillTrait{
             $taxInfo = array();
             foreach($TaxIdTillBillWithoutSpecialTax as $key => $taxId){
                 $taxInfo[$taxId['tax_id']]['name'] = Tax::where('id',$taxId['tax_id'])->pluck('name')->first();
-                $a = 0;
+                $taxInfo[$taxId['tax_id']]['total'] = 0;
                 foreach($billSubTotal as $billId => $subTotal){
-                    $taxInfo[$taxId['tax_id']]['bills'][$a]['bill_id'] = $billId;
-                    $taxInfo[$taxId['tax_id']]['bills'][$a]['bill_subtotal'] = $subTotal['subtotal'];
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_id'] = $billId;
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_subtotal'] = $subTotal['subtotal'];
                     $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
                     if(count($isAppliedTax) == 0){
-                        $taxInfo[$taxId['tax_id']]['bills'][$a]['percentage'] = 0;
+                        $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = 0;
                     }else{
-                        $taxInfo[$taxId['tax_id']]['bills'][$a]['percentage'] = $isAppliedTax['percentage'];
+                        $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = $isAppliedTax['percentage'];
                     }
-                    $taxInfo[$taxId['tax_id']]['bills'][$a]['tax_amount'] = round(($subTotal['subtotal'] * ($taxInfo[$taxId['tax_id']]['bills'][$a]['percentage']/100)),3);
-                    $a++;
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'] = round(($subTotal['subtotal'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
+                    $taxInfo[$taxId['tax_id']]['total'] += $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'];
                 }
             }
             $TaxIdTillBillWithSpecialTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -1095,31 +1095,32 @@ trait BillTrait{
                 ->get();
             foreach($TaxIdTillBillWithSpecialTax as $key => $taxId){
                 $taxInfo[$taxId['tax_id']]['name'] = Tax::where('id',$taxId['tax_id'])->pluck('name')->first();
+                $taxInfo[$taxId['tax_id']]['total'] = 0;
                 foreach($billSubTotal as $billId => $subTotal){
-                    $taxInfo[$taxId['tax_id']]['bills'][$a]['bill_id'] = $billId;
-                    $taxInfo[$taxId['tax_id']]['bills'][$a]['bill_subtotal'] = $subTotal['subtotal'];
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_id'] = $billId;
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_subtotal'] = $subTotal['subtotal'];
                     $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
                     //dd($isAppliedTax);
                     if(count($isAppliedTax) == 0){
-                        $taxInfo[$taxId['tax_id']]['bills'][$a]['percentage'] = 0;
+                        $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = 0;
+                        $taxAmount = 0;
                     }else{
-                        $taxInfo[$taxId['tax_id']]['bills'][$a]['percentage'] = $isAppliedTax['percentage'];
+                        $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = $isAppliedTax['percentage'];
                         $specialTaxAppliedID  = json_decode($isAppliedTax['applied_on']);
-                        if(in_array(0,$specialTaxAppliedID)){
-                            Log::info('here');
-                            $taxInfo[$taxId['tax_id']]['bills'][$a]['tax_amount'] = round(($subTotal['subtotal'] * ($taxInfo[$taxId['tax_id']]['bills'][$a]['percentage']/100)),3);
-                        }else{
-                            Log::info('here1213');
-                            $tax_percentage = BillTax::where('tax_id',json_decode($isAppliedTax['applied_on']))->where('bill_id',$billId)->pluck('percentage')->first();
-                            $amount = round((($tax_percentage/100) * $subTotal['subtotal']),3);
-                            $taxInfo[$taxId['tax_id']]['bills'][$a]['tax_amount'] = round(($amount * ($taxInfo[$taxId['tax_id']]['bills'][$a]['percentage']/100)),3);
+                        $taxAmount = 0;
+                        foreach($specialTaxAppliedID as $appliedOnId){
+                            if($appliedOnId == 0){
+                                $taxAmount += round(($subTotal['subtotal'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
+                            }else{
+                                $taxAmount += round(($taxInfo[$appliedOnId]['bills'][$billId]['tax_amount'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
+                            }
                         }
                     }
-                    $a++;
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'] = $taxAmount;
+                    $taxInfo[$taxId['tax_id']]['total'] += $taxAmount;
                 }
             }
-            dd($taxInfo);
-            Excel::create('Filename', function($excel) use($data,$productArray,$billSubTotal,$taxInfo) {
+                Excel::create('Filename', function($excel) use($data,$productArray,$billSubTotal,$taxInfo) {
                 $excel->sheet('Sheetname', function($sheet) use($data,$productArray,$billSubTotal,$taxInfo) {
                     $sheet->row(1, array('SRN','Product with description','Rate','BOQ','W.O.Amount'));
                     $next_column = 'F';
@@ -1166,23 +1167,40 @@ trait BillTrait{
                     }
                     $sheet->getCell('B'.($productRow))->setValue('SubTotal');
                     $columnForSubTotal = 'G';
+                    $rowForSubtotal = $productRow;
+                    $totalSubTotal = 0;
                     foreach($billSubTotal as $subTotal){
+                        $totalSubTotal += $subTotal['subtotal'];
                         $sheet->getCell($columnForSubTotal.($productRow))->setValue($subTotal['subtotal']);
                         $columnForSubTotal++;
                         $columnForSubTotal++;
                     }
+                    $sheet->getCell($columnForSubTotal.($productRow))->setValue($totalSubTotal);
                     $productRow++;
                     foreach($taxInfo as $tax){
                         $sheet->getCell('B'.($productRow))->setValue($tax['name']);
                         $next_column = 'F';
-                        foreach($tax['bills'] as $bill){
+                        foreach($tax['bills'] as $bill) {
                             $current_column = $next_column++;
-                                $sheet->getCell($current_column.($productRow))->setValue($bill['percentage']);
-                                $sheet->getCell($next_column.($productRow))->setValue($bill['tax_amount']);
-                                $next_column++;
-                            }
+                            $sheet->getCell($current_column . ($productRow))->setValue($bill['percentage']);
+                            $sheet->getCell($next_column . ($productRow))->setValue($bill['tax_amount']);
+                            $next_column++;
+                        }
+                        $next_column++;
+                        $sheet->getCell($next_column . ($productRow))->setValue($tax['total']);
                         $productRow++;
                     }
+                    $columnForTotal = 'G';
+                    $productRow++;
+                    $beforeTotalRowNumber = $productRow - 1;
+                    $sheet->getCell('B'.($productRow))->setValue('Total');
+                    foreach($data['tillThisBill'] as $bill){
+                        $sheet->getCell($columnForTotal.($productRow))->setValue("=SUM($columnForTotal$rowForSubtotal:$columnForTotal$beforeTotalRowNumber)");
+                        $columnForTotal++;
+                        $columnForTotal++;
+                    }
+                    $sheet->getCell($columnForTotal.($productRow))->setValue("=SUM($columnForTotal$rowForSubtotal:$columnForTotal$beforeTotalRowNumber)");
+
                 });
             })->download('xlsx'); //->export('xls');
         }catch(\Exception $e){
