@@ -854,18 +854,20 @@ trait BillTrait{
             }
             foreach($products as $key => $product){
                 $alreadyExistProduct = BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->first();
-                if($key == $alreadyExistProduct->quotation_product_id){
-                    if($product['current_quantity'] != $alreadyExistProduct->quantity){
+                if($alreadyExistProduct != null){
+                    if($key == $alreadyExistProduct->quotation_product_id){
+                        if($product['current_quantity'] != $alreadyExistProduct->quantity){
+                            $billQuotationProduct['quantity'] = $product['current_quantity'];
+                        }
+                        $billQuotationProduct['product_description_id'] = $product['product_description_id'];
+                        BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->update($billQuotationProduct);
+                    }else{
+                        $billQuotationProduct['bill_id'] = $bill->id;
+                        $billQuotationProduct['quotation_product_id'] = $key;
                         $billQuotationProduct['quantity'] = $product['current_quantity'];
+                        $billQuotationProduct['product_description_id'] = $product['product_description_id'];
+                        BillQuotationProducts::create($billQuotationProduct);
                     }
-                    $billQuotationProduct['description'] = $product['product_description'];
-                    BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->update($billQuotationProduct);
-                }else{
-                    $billQuotationProduct['bill_id'] = $bill->id;
-                    $billQuotationProduct['quotation_product_id'] = $key;
-                    $billQuotationProduct['quantity'] = $product['current_quantity'];
-                    $billQuotationProduct['description'] = $product['product_description'];
-                    BillQuotationProducts::create($billQuotationProduct);
                 }
             }
             $tax_applied = $request->tax_data;
