@@ -1,39 +1,38 @@
-$(document).ready(function (){
+$(document).ready(function () {
     EditBill.init();
-    $('input[type="checkbox"]:checked:not(".tax-applied-on")').each(function(){
+    $('input[type="checkbox"]:checked:not(".tax-applied-on")').each(function () {
         var id = $(this).val();
         checkQuantity(id);
     });
 
-    $('input[type="checkbox"]:not(".tax-applied-on")').click(function(){
+    $('input[type="checkbox"]:not(".tax-applied-on")').click(function () {
         var id = $(this).val();
-        if($(this).prop("checked") == false){
-            if($('input:checked').length > 0){
-                $('#submit').prop('disabled',false);
-            }else{
-                $('#submit').prop('disabled',true);
+        if ($(this).prop("checked") == false) {
+            if ($('input:checked').length > 0) {
+                $('#submit').prop('disabled', false);
+            } else {
+                $('#submit').prop('disabled', true);
             }
-            $("#id_"+id).css('background-color',"");
-            $('#current_quantity_'+id).prop('disabled',true);
-            $('#product_description_'+id).prop('disabled',true);
-            $('#current_quantity_'+id).rules('remove');
-            $('#current_quantity_'+id).closest('form-group').removeClass('has-error');
-            $('#current_quantity_'+id).val('');
-            $('#product_description_'+id).val('');
-            $('#cumulative_quantity_'+id).text("");
-            $('#current_bill_amount_'+id).text("");
+            $("#id_" + id).css('background-color', "");
+            $('#current_quantity_' + id).prop('disabled', true);
+            $('#product_description_' + id).prop('disabled', true);
+            $('#current_quantity_' + id).rules('remove');
+            $('#current_quantity_' + id).closest('form-group').removeClass('has-error');
+            $('#current_quantity_' + id).val('');
+            $('#product_description_' + id).val('');
+            $('#cumulative_quantity_' + id).text("");
+            $('#current_bill_amount_' + id).text("");
             getTotals();
-        }else{
-            $('#current_quantity_'+id).val(0);
+        } else {
+            $('#current_quantity_' + id).val(0);
             checkQuantity(id);
         }
     });
 
-    $(".tax-applied-on").on('click',function(){
+    $(".tax-applied-on").on('click', function () {
         calculateTax();
     });
 });
-
 
 function checkQuantity (id){
     var input = $('#current_quantity_'+id);

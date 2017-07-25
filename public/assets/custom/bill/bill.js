@@ -74,7 +74,6 @@ $(document).ready(function (){
                                 'description_id' : descriptionId
                             },
                             success: function(data,textStatus,xhr){
-                                console.log(data);
                                 if(xhr.status == 200){
                                 }else{
                                 }

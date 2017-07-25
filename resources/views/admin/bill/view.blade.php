@@ -110,7 +110,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}}</span>
+                                                        <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}} - {{$billQuotationProducts[$iterator]['product_description']['description']}}</span>
                                                     </td>
 
                                                     <td>
