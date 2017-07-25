@@ -4,6 +4,7 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+<link rel="stylesheet"  href="/assets/global/plugins/typeahead/typeahead.css"/>
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -59,27 +60,34 @@
                                                         <input type="checkbox" class="group-checkable" disabled="disabled" >
                                                     </th>
                                                     <th width="5%"> Item no </th>
-                                                    <th width="15%"> Item Description </th>
-                                                    <th width="8%" class="numeric"> UOM </th>
-                                                    <th width="8%" class="numeric"> Rate </th>
-                                                    <th width="9%" class="numeric"> BOQ Quantity </th>
-                                                    <th width="10%" class="numeric"> W.O Amount </th>
-                                                    <th width="8%" class="numeric"> Previous Quantity </th>
-                                                    <th width="8%" class="numeric"> Current Quantity </th>
+                                                    <th width="30%"> Item Description </th>
+                                                    <th width="6%" class="numeric"> UOM </th>
+                                                    <th width="6%" class="numeric"> Rate </th>
+                                                    <th width="6%" class="numeric"> BOQ Quantity </th>
+                                                    <th width="7%" class="numeric"> W.O Amount </th>
+                                                    <th width="5%" class="numeric"> Previous Quantity </th>
+                                                    <th width="5%" class="numeric"> Current Quantity </th>
                                                     <th width="8%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="7%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="8%" class="numeric"> Current Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                     <tr id="id_{{$quotationProducts[$iterator]['id']}}">
                                                         <td>
-                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" class="require-one">
+                                                            <input type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" class="product-checkbox">
                                                         </td>
                                                         <td>
                                                             <span>{{$iterator + 1}}</span>
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
-                                                            <input class="form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
+                                                            <div class="input-group" id="inputGroup">
+                                                                <input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" disabled>
+                                                                <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
+                                                                <span class="input-group-addon product_description_create" style="font-size: 12px">C</span>
+                                                                <span class="input-group-addon product_description_update" style="font-size: 12px">U</span>
+                                                                <span class="input-group-addon product_description_delete" style="font-size: 12px">D</span>
+                                                            </div>
+
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['unit']}}</span>
@@ -133,7 +141,7 @@
                                                     </tr>
                                                     @for($j = 0 ; $j < count($taxes); $j++)
                                                          <tr>
-                                                             <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">
+                                                            <!-- <input class="tax_slug" type="hidden" id="tax_slug_{{$taxes[$j]['id']}}" name="tax_slug_{{$taxes[$j]['slug']}}" value="{{$taxes[$j]['slug']}}">-->
                                                              <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
                                                              <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
 
@@ -210,4 +218,7 @@
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/bill.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+<script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
+<script src="/assets/custom/bill/bill-typeahead.js" type="text/javascript"></script>
 @endsection

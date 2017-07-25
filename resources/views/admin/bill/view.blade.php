@@ -57,7 +57,7 @@
                                         <div class="tab-content">
                                         <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-5 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
+                                            <div class="col-md-offset-3 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -84,6 +84,10 @@
                                                 <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                     <i class="fa fa-download"></i> Cumulative Bill
                                                 </a>
+
+                                                <a href="/bill/cumulative/excel-sheet/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i>Export Cumulative Bill
+                                                </a>
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
@@ -106,7 +110,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}}</span>
+                                                        <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}} - {{$billQuotationProducts[$iterator]['product_description']['description']}}</span>
                                                     </td>
 
                                                     <td>
