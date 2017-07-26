@@ -193,7 +193,20 @@ trait BillTrait{
                 $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->get();
             }
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $taxesAppliedToBills = BillTax::whereIn('bill_id',array_column($allBills->toArray(),'id'))->distinct('tax_id')->orderBy('tax_id')->pluck('tax_id')->toArray();
+            $taxesAppliedToBills = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                                    ->whereIn('bill_taxes.bill_id',array_column($allBills->toArray(),'id'))
+                                    ->where('taxes.is_special', false)
+                                    ->distinct('bill_taxes.tax_id')
+                                    ->orderBy('bill_taxes.tax_id')
+                                    ->pluck('bill_taxes.tax_id')
+                                    ->toArray();
+            $specialTaxesAppliedToBills = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                                    ->whereIn('bill_taxes.bill_id',array_column($allBills->toArray(),'id'))
+                                    ->where('taxes.is_special', true)
+                                    ->distinct('bill_taxes.tax_id')
+                                    ->orderBy('bill_taxes.tax_id')
+                                    ->pluck('bill_taxes.tax_id')
+                                    ->toArray();
             foreach($bills as $key => $bill){
                 $listingData[$iterator]['status'] = $bill->bill_status->slug ;
                 $listingData[$iterator]['bill_id'] = $bill->id;
@@ -210,28 +223,77 @@ trait BillTrait{
                     $total_amount = $total_amount + ($product->quantity * $rate) ;
                 }
                 $listingData[$iterator]['subTotal'] = $total_amount;
-                $thisBillTax = BillTax::where('bill_id',$bill->id)->pluck('tax_id')->toArray();
+                $thisBillTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                                        ->where('bill_taxes.bill_id',$bill->id)
+                                        ->where('taxes.is_special', false)
+                                        ->pluck('bill_taxes.tax_id')
+                                        ->toArray();
                 $otherTaxes = array_values(array_diff($taxesAppliedToBills,$thisBillTax));
                 if($thisBillTax != null){
-                    $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->select('id as tax_id','name')->get();
+                    $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->where('is_special', false)->select('id as tax_id','name')->get();
                 }
                 if($currentTaxes != null){
-                    $currentTaxes = array_merge($bill->bill_tax->toArray(),$currentTaxes->toArray());
+                    $thisBillTaxInfo = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                        ->where('bill_taxes.bill_id',$bill->id)
+                        ->where('taxes.is_special', false)
+                        ->select('bill_taxes.percentage as percentage','bill_taxes.tax_id as tax_id')
+                        ->get()
+                        ->toArray();
+                    $currentTaxes = array_merge($thisBillTaxInfo,$currentTaxes->toArray());
                     usort($currentTaxes, function($a, $b) {
                         return $a['tax_id'] > $b['tax_id'];
                     });
                 }else{
-                    $currentTaxes = Tax::where('is_active',true)->select('id as tax_id')->get();
+                    $currentTaxes = Tax::where('is_active',true)->where('is_special', false)->select('id as tax_id')->get();
                 }
                 $listingData[$iterator]['final_total'] = $total_amount;
                 foreach($currentTaxes as $key2 => $tax){
                     if(array_key_exists('percentage',$tax)){
-                        $listingData[$iterator]['tax'][$i] = $total_amount * ($tax['percentage'] / 100);
+                        $listingData[$iterator]['tax'][$tax['tax_id']] = $total_amount * ($tax['percentage'] / 100);
                     }else{
-                        $listingData[$iterator]['tax'][$i] = 0;
+                        $listingData[$iterator]['tax'][$tax['tax_id']] = 0;
                     }
-                    $listingData[$iterator]['final_total'] = round($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$i]);
+                    $listingData[$iterator]['final_total'] = round($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
                     $i++;
+                }
+                $thisBillSpecialTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                                        ->where('bill_taxes.bill_id',$bill->id)
+                                        ->where('taxes.is_special', true)
+                                        ->pluck('bill_taxes.tax_id')
+                                        ->toArray();
+                $otherSpecialTaxes = array_values(array_diff($specialTaxesAppliedToBills,$thisBillSpecialTax));
+                if($thisBillSpecialTax != null){
+                    $currentSpecialTaxes = Tax::whereIn('id',$otherSpecialTaxes)->where('is_active',true)->where('is_special', true)->select('id as tax_id','name')->get();
+                }
+                if($currentSpecialTaxes != null){
+                    $thisBillSpecialTaxInfo = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                                            ->where('bill_taxes.bill_id',$bill->id)
+                                            ->where('taxes.is_special', true)
+                                            ->select('bill_taxes.percentage as percentage','bill_taxes.applied_on as applied_on','bill_taxes.tax_id as tax_id')
+                                            ->get()
+                                            ->toArray();
+                    if(!is_array($currentSpecialTaxes)){
+                        $currentSpecialTaxes = $currentSpecialTaxes->toArray();
+                    }
+                    $currentSpecialTaxes = array_merge($thisBillSpecialTaxInfo,$currentSpecialTaxes);
+                    usort($currentSpecialTaxes, function($a, $b) {
+                        return $a['tax_id'] > $b['tax_id'];
+                    });
+                }else{
+                    $currentSpecialTaxes = Tax::where('is_active',true)->where('is_special', true)->select('id as tax_id')->get();
+                }
+                foreach($currentSpecialTaxes as $key2 => $tax){
+                    $appliedOnTaxes = json_decode($tax['applied_on']);
+                    $taxAmount = 0;
+                    foreach($appliedOnTaxes as $appliedTaxId){
+                        if($appliedTaxId == 0){                 // On Subtotal
+                            $taxAmount += $total_amount * ($tax['percentage'] / 100);
+                        }else{
+                            $taxAmount += $listingData[$iterator]['tax'][$appliedTaxId] * ($tax['percentage'] / 100);
+                        }
+                    }
+                    $listingData[$iterator]['tax'][$tax['tax_id']] = $taxAmount;
+                    $listingData[$iterator]['final_total'] = round($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
                 }
                 $iterator++;
             }
@@ -274,10 +336,6 @@ trait BillTrait{
                             <li>
                                 <a href="/bill/view/'.$listingData[$pagination]['bill_id'].'">
                                     <i class="icon-docs"></i> View </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);">
-                                    <i class="icon-docs"></i> Make Payment </a>
                             </li>
                         </ul>
                     </div>');
@@ -400,7 +458,7 @@ trait BillTrait{
                 $billQuotationProducts[$iterator]['previous_quantity'] = 0;
                 $billQuotationProducts[$iterator]['quotationProducts'] = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->where('quotation_id',$bill['quotation_id'])->first();
                 $billQuotationProducts[$iterator]['productDetail'] = Product::where('id',$billQuotationProducts[$iterator]['quotationProducts']['product_id'])->first();
-                $billQuotationProducts[$iterator]['product_description'] = ProductDescription::where('id',$billQuotationProducts[$iterator]['product_description_id'])->where('quotation_id',$bill['quotation_id'])->first()->toArray();
+                $billQuotationProducts[$iterator]['product_description'] = ProductDescription::where('id',$billQuotationProducts[$iterator]['product_description_id'])->where('quotation_id',$bill['quotation_id'])->first();
                 $billQuotationProducts[$iterator]['unit'] = Unit::where('id',$billQuotationProducts[$iterator]['productDetail']['unit_id'])->pluck('name')->first();
                 $quotation_id = Bill::where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
                 $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
@@ -408,7 +466,7 @@ trait BillTrait{
                 $billQuotationProducts[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
                 $billQuotationProducts[$iterator]['current_bill_amount'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
                 $billWithoutCancelStatus = Bill::where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
-                $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get()->toArray();
+                $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get();
                 foreach($previousBills as $key => $previousBill){
                     if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
@@ -1116,7 +1174,8 @@ trait BillTrait{
                     $taxInfo[$taxId['tax_id']]['total'] += $taxAmount;
                 }
             }
-                Excel::create('Filename', function($excel) use($data,$productArray,$billSubTotal,$taxInfo) {
+                $now = date('j_M_Y_His');
+                Excel::create('Cummulative_Bill_'.$now, function($excel) use($data,$productArray,$billSubTotal,$taxInfo) {
                 $excel->sheet('Sheetname', function($sheet) use($data,$productArray,$billSubTotal,$taxInfo) {
                     $sheet->row(1, array('SRN','Product with description','Rate','BOQ','W.O.Amount'));
                     $next_column = 'F';

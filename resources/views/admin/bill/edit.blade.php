@@ -51,8 +51,8 @@
                                                             <th width="5%"> Item no </th>
                                                             <th width="30%"> Item Description </th>
                                                             <th width="6%" class="numeric"> UOM </th>
-                                                            <th width="6%" class="numeric"> Rate </th>
                                                             <th width="6%" class="numeric"> BOQ Quantity </th>
+                                                            <th width="6%" class="numeric"> Rate </th>
                                                             <th width="7%" class="numeric"> W.O Amount </th>
                                                             <th width="5%" class="numeric"> Previous Quantity </th>
                                                             <th width="5%" class="numeric"> Current Quantity </th>
@@ -95,11 +95,11 @@
                                                                 </td>
 
                                                                 <td>
-                                                                    <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['discounted_rate']}}</span>
+                                                                    <span id="boq_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['quantity']}}</span>
                                                                 </td>
 
                                                                 <td>
-                                                                    <span id="boq_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['quantity']}}</span>
+                                                                    <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['discounted_rate']}}</span>
                                                                 </td>
 
                                                                 <td>
@@ -166,7 +166,7 @@
                                                                     <input type="hidden" id="is_already_applied" name="tax_data[{{$taxes[$j]['id']}}][is_already_applied]" value="{{$taxes[$j]['already_applied']}}">
                                                                     @if($taxes[$j]['already_applied'] == 0)
                                                                         <td colspan="6" style="text-align: center">
-                                                                            {{$taxes[$j]['name']}} (NEWLY APPLIED)
+                                                                            {{$taxes[$j]['name']}} ("Below tax are newly added, if you don't want then enter 0 in rate field.")
                                                                         </td>
                                                                     @else
                                                                         <td colspan="6" style="text-align: center">

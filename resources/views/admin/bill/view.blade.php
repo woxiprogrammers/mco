@@ -57,7 +57,7 @@
                                         <div class="tab-content">
                                         <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
-                                            <div class="col-md-offset-3 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
+                                            <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -95,8 +95,8 @@
                                                     <th width="3%"> Item no </th>
                                                     <th width="15%"> Item Description </th>
                                                     <th width="6%" class="numeric"> UOM </th>
-                                                    <th width="6%" class="numeric"> Rate </th>
                                                     <th width="7%" class="numeric"> BOQ Quantity </th>
+                                                    <th width="6%" class="numeric"> Rate </th>
                                                     <th width="10%" class="numeric"> W.O Amount </th>
                                                     <th width="7%" class="numeric"> Previous Quantity </th>
                                                     <th width="7%" class="numeric"> Current Quantity </th>
@@ -118,11 +118,11 @@
                                                     </td>
 
                                                     <td>
-                                                        <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate']}}</span>
+                                                        <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
                                                     </td>
 
                                                     <td>
-                                                        <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
+                                                        <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate']}}</span>
                                                     </td>
 
                                                     <td>
