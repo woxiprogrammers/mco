@@ -75,7 +75,7 @@
 
                                                                 <td>
                                                                     <span>{{$quotationProducts[$iterator]->product->name}}</span>
-                                                                    <div class="input-group" id="inputGroup">
+                                                                    <div class="input-group form-group" id="inputGroup">
                                                                         @if(array_key_exists('bill_description',$quotationProducts[$iterator]->toArray()))
                                                                             <input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" value="{{$quotationProducts[$iterator]['bill_product_description_id']}}">
                                                                             <input class="form-control product_description" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" value="{{$quotationProducts[$iterator]['bill_description']}}">

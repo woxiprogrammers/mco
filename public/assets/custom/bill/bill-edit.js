@@ -81,8 +81,11 @@ $(document).ready(function () {
         calculateTax();
     });
 
-    $('input[type="checkbox"]:not(".tax-applied-on")').each(function(){
+    $('input[type="checkbox"]:checked:not(".tax-applied-on")').each(function(){
         var id = $(this).val();
+        $(this).parent().next().next().find('.product_description').rules('add',{
+            required: true
+        });
         $('.product_description_create').click(function (){
             $.ajax({
                 url: '/bill/product_description/create',
