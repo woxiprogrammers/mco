@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Bill;
+use App\BillTransaction;
 use App\Category;
 use App\Client;
 use App\Material;
@@ -57,6 +58,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('project',Project::class);
         Route::model('quotation',Quotation::class);
         Route::model('work_order',QuotationWorkOrder::class);
+        Route::model('bill_transaction',BillTransaction::class);
     }
 
     /**

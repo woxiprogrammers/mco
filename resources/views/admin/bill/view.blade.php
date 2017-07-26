@@ -316,6 +316,9 @@
                                                             <th> Total
                                                                 <input type="hidden" class="filter-submit">
                                                             </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
                                                         </tr>
                                                         </thead>
                                                         <tbody>
@@ -327,6 +330,7 @@
                                                     <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/bill/transaction/create">
                                                         {!! csrf_field() !!}
                                                         <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                                                        <input type="hidden" id="remainingTotal" name="remainingTotal" value="{{$remainingAmount}}">
                                                         <div class="form-body">
                                                             <div class="form-group row">
                                                                 <div class="col-md-3" style="text-align: right">
@@ -372,6 +376,15 @@
                                                                     </div>
                                                                 </div>
                                                             @endforeach
+                                                            <div class="form-group">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="name" class="control-label"> Remark </label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <textarea class="form-control" name="remark" id="transactionRemark"></textarea>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="form-actions noborder row">
                                                             <div class="col-md-offset-3">
@@ -420,6 +433,25 @@
                 </div>
             </div>
         </div>
+        <div id="transactionModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Modal Header</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Some text in the modal.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 </div>
 </div>
@@ -437,9 +469,12 @@
 <script src="/assets/custom/bill/image-datatable.js"></script>
 <script src="/assets/custom/bill/transaction-datatable.js"></script>
 <script src="/assets/custom/bill/image-upload.js"></script>
+<script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
 <script src="/assets/custom/bill/bill-view.js"></script>
+<script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
+
         $("#change_bill").on('change', function(){
             var bill_id = $(this).val();
             window.location.href = "/bill/view/"+bill_id;
