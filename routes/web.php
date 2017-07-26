@@ -158,6 +158,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'transaction'], function(){
             Route::post('create', array('uses' => 'Admin\BillController@saveTransactionDetails'));
             Route::post('listing/{billId}', array('uses' => 'Admin\BillController@billTransactionListing'));
+            Route::get('detail/{bill_transaction}', array('uses' => 'Admin\BillController@billTransactionDetail'));
         });
     });
 

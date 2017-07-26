@@ -75,4 +75,8 @@ var TransactionListing = function () {
 
 jQuery(document).ready(function() {
     TransactionListing.init();
+    $(".transaction-details").on('click',function(e){
+        e.stopPropagation();
+
+    });
 });

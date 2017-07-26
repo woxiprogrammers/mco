@@ -45,7 +45,7 @@ $(document).ready(function () {
             });
 
             $('.product_description_update').click(function (){
-                var productDescription = $('#product_description_'+id).val();
+                var productDescription = $(this).parent().find('.twitter-typeahead').find('.tt-input').val();
                 var descriptionId = $('#product_description_id_'+id).val();
                 if(productDescription !="" && descriptionId !=""){
                     $.ajax({
@@ -86,7 +86,8 @@ $(document).ready(function () {
         $(this).parent().next().next().find('.product_description').rules('add',{
             required: true
         });
-        $('.product_description_create').click(function (){
+        $('.product_description_create').click(function (e){
+            e.stopPropagation();
             $.ajax({
                 url: '/bill/product_description/create',
                 type: 'POST',
@@ -108,8 +109,9 @@ $(document).ready(function () {
             });
         });
 
-        $('.product_description_update').click(function (){
-            var productDescription = $('#product_description_'+id).val();
+        $('.product_description_update').unbind('click').click(function (e){
+            e.stopPropagation();
+            var productDescription = $(this).parent().find('.twitter-typeahead').find('.tt-input').val();
             var descriptionId = $('#product_description_id_'+id).val();
             if(productDescription !="" && descriptionId !=""){
                 $.ajax({
