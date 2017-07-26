@@ -1,5 +1,8 @@
 $(document).ready(function (){
     CreateBill.init();
+    /*$(".product_description").each(function(){
+
+    });*/
     $('#submit').prop('disabled',true);
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
@@ -26,6 +29,7 @@ $(document).ready(function (){
             $("#id_"+id).css('background-color',"");
             $('#current_quantity_'+id).prop('disabled',true);
             $('#product_description_'+id).prop('disabled',true);
+            $('#product_description_'+id).rules('remove');
             $('#product_description_id_'+id).prop('disabled',true);
             $('#current_quantity_'+id).rules('remove');
             $('#current_quantity_'+id).closest('form-group').removeClass('has-error');
@@ -40,6 +44,9 @@ $(document).ready(function (){
                 $('#previous_quantity_'+id).css('background-color',"ff8884");
             }else{
                 $('#product_description_'+id).prop('disabled',false);
+                $('#product_description_'+id).rules('add',{
+                    required: true
+                });
                 $('#product_description_id_'+id).prop('disabled',false);
                 $('.product_description_create').click(function (){
                     $.ajax({
@@ -52,6 +59,7 @@ $(document).ready(function (){
                         },
                         success: function(data,textStatus,xhr){
                             if(xhr.status == 200){
+                                alert("Product Description created.");
                                 $('#product_description_id_'+id).val(data.id);
                             }
                         },
@@ -74,9 +82,7 @@ $(document).ready(function (){
                                 'description_id' : descriptionId
                             },
                             success: function(data,textStatus,xhr){
-                                if(xhr.status == 200){
-                                }else{
-                                }
+                                alert("Product Description updated.");
                             },
                             error: function(data, textStatus, xhr){
 

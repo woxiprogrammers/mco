@@ -24,6 +24,54 @@ $(document).ready(function () {
             $('#current_bill_amount_' + id).text("");
             getTotals();
         } else {
+            $('.product_description_create').click(function (){
+                $.ajax({
+                    url: '/bill/product_description/create',
+                    type: 'POST',
+                    async: false,
+                    data :{
+                        'description' : $('#product_description_'+id).val(),
+                        'quotation_id' : $('#quotation_id').val()
+                    },
+                    success: function(data,textStatus,xhr){
+                        if(xhr.status == 200){
+                            $('#product_description_id_'+id).val(data.id);
+                        }
+                    },
+                    error: function(data, textStatus, xhr){
+
+                    }
+                });
+            });
+
+            $('.product_description_update').click(function (){
+                var productDescription = $('#product_description_'+id).val();
+                var descriptionId = $('#product_description_id_'+id).val();
+                if(productDescription !="" && descriptionId !=""){
+                    $.ajax({
+                        url: '/bill/product_description/update',
+                        type: 'POST',
+                        async: false,
+                        data: {
+                            'description' : productDescription,
+                            'description_id' : descriptionId
+                        },
+                        success: function(data,textStatus,xhr){
+                            if(xhr.status == 200){
+                            }else{
+                            }
+                        },
+                        error: function(data, textStatus, xhr){
+
+                        }
+                    });
+                }
+            });
+
+            $('.product_description_delete').click(function (){
+                $('#product_description_'+id).val("");
+                $('#previous_quantity_'+id).val("");
+            });
             $('#current_quantity_' + id).val(0);
             checkQuantity(id);
         }
@@ -31,6 +79,59 @@ $(document).ready(function () {
 
     $(".tax-applied-on").on('click', function () {
         calculateTax();
+    });
+
+    $('input[type="checkbox"]:checked:not(".tax-applied-on")').each(function(){
+        var id = $(this).val();
+        $(this).parent().next().next().find('.product_description').rules('add',{
+            required: true
+        });
+        $('.product_description_create').click(function (){
+            $.ajax({
+                url: '/bill/product_description/create',
+                type: 'POST',
+                async: false,
+                data :{
+                    'description' : $('#product_description_'+id).val(),
+                    'quotation_id' : $('#quotation_id').val()
+                },
+                success: function(data,textStatus,xhr){
+                    if(xhr.status == 200){
+                        $('#product_description_id_'+id).val(data.id);
+                        alert("Product Description created.");
+
+                    }
+                },
+                error: function(data, textStatus, xhr){
+
+                }
+            });
+        });
+
+        $('.product_description_update').click(function (){
+            var productDescription = $('#product_description_'+id).val();
+            var descriptionId = $('#product_description_id_'+id).val();
+            if(productDescription !="" && descriptionId !=""){
+                $.ajax({
+                    url: '/bill/product_description/update',
+                    type: 'POST',
+                    async: false,
+                    data: {
+                        'description' : productDescription,
+                        'description_id' : descriptionId
+                    },
+                    success: function(data,textStatus,xhr){
+                        alert("Product Description updated.");
+                        if(xhr.status == 200){
+                        }else{
+                        }
+                    },
+                    error: function(data, textStatus, xhr){
+
+                    }
+                });
+            }
+        });
     });
 });
 
