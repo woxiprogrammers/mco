@@ -52,6 +52,7 @@ $(document).ready(function (){
                         },
                         success: function(data,textStatus,xhr){
                             if(xhr.status == 200){
+                                alert("Product Description created.");
                                 $('#product_description_id_'+id).val(data.id);
                             }
                         },
@@ -74,9 +75,7 @@ $(document).ready(function (){
                                 'description_id' : descriptionId
                             },
                             success: function(data,textStatus,xhr){
-                                if(xhr.status == 200){
-                                }else{
-                                }
+                                alert("Product Description updated.");
                             },
                             error: function(data, textStatus, xhr){
 
