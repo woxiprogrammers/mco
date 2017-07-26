@@ -1025,13 +1025,10 @@ trait BillTrait{
 
     public function updateProductDescription(Request $request){
         try{
-            Log::info('in description update');
-            Log::info($request->all());
             $status = 200;
             $data = $request->all();
             ProductDescription::where('id',$data['description_id'])->update(['description' => $data['description']]);
             $response['message'] = "Description edited successfully";
-            Log::info('edited');
         }catch(\Exception $e){
             $response['message'] = 'Something went wrong';
             $data = [
@@ -1042,8 +1039,6 @@ trait BillTrait{
             $status = 500;
             Log::critical(json_encode($data));
         }
-        Log::info('response');
-        Log::info($response);
         return response()->json($response,$status);
     }
 

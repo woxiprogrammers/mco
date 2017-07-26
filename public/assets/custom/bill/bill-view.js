@@ -33,7 +33,6 @@ $(document).ready(function (){
     typingTimer = 0;
     doneTypingInterval = 1000;
     var total = $('#remainingTotal').val();
-    console.log(total);
     $('#transactionTotal').rules('add',{
         max: total
     });
