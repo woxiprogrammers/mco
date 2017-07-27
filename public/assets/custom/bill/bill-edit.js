@@ -2,6 +2,12 @@ $(document).ready(function () {
     EditBill.init();
     $('input[type="checkbox"]:checked:not(".tax-applied-on")').each(function () {
         var id = $(this).val();
+        $('#product_description_'+id).rules('add',{
+            required: true
+        });
+        $('#product_description_id_'+id).rules('add',{
+            required: true
+        });
         checkQuantity(id);
     });
 
@@ -16,6 +22,8 @@ $(document).ready(function () {
             $("#id_" + id).css('background-color', "");
             $('#current_quantity_' + id).prop('disabled', true);
             $('#product_description_' + id).prop('disabled', true);
+            $('#product_description_' + id).rules('remove');
+            $('#product_description_id_' + id).rules('remove');
             $('#current_quantity_' + id).rules('remove');
             $('#current_quantity_' + id).closest('form-group').removeClass('has-error');
             $('#current_quantity_' + id).val('');
@@ -24,6 +32,12 @@ $(document).ready(function () {
             $('#current_bill_amount_' + id).text("");
             getTotals();
         } else {
+            $('#product_description_'+id).rules('add',{
+                required: true
+            });
+            $('#product_description_id_'+id).rules('add',{
+                required: true
+            });
             $('.product_description_create').click(function (){
                 $.ajax({
                     url: '/bill/product_description/create',
