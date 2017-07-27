@@ -30,6 +30,7 @@ $(document).ready(function (){
             $('#current_quantity_'+id).prop('disabled',true);
             $('#product_description_'+id).prop('disabled',true);
             $('#product_description_'+id).rules('remove');
+            $('#product_description_id_'+id).rules('remove');
             $('#product_description_id_'+id).prop('disabled',true);
             $('#current_quantity_'+id).rules('remove');
             $('#current_quantity_'+id).closest('form-group').removeClass('has-error');
@@ -45,6 +46,9 @@ $(document).ready(function (){
             }else{
                 $('#product_description_'+id).prop('disabled',false);
                 $('#product_description_'+id).rules('add',{
+                    required: true
+                });
+                $('#product_description_id_'+id).rules('add',{
                     required: true
                 });
                 $('#product_description_id_'+id).prop('disabled',false);
