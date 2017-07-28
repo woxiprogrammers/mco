@@ -70,9 +70,15 @@
                                                 </div>
                                             </div>
                                             {!! csrf_field() !!}
+                                            <div class="col-md-2 pull-right">
+                                                <a class="btn btn-success btn-md pull-right" id="changeStatusButton">
+                                                    Change status
+                                                </a>
+                                            </div>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="materialTable">
                                                 <thead>
                                                 <tr>
+                                                    <th  style="width: 5%"> </th>
                                                     <th style="width: 25%"> Name </th>
                                                     <th> Unit </th>
                                                     <th> Rate </th>
@@ -81,6 +87,7 @@
                                                     <th style="width: 15%"> Actions </th>
                                                 </tr>
                                                 <tr>
+                                                    <th  style="width: 5%"> </th>
                                                     <th style="width: 25%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_unit" readonly> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_rate" readonly> </th>

@@ -92,7 +92,8 @@ trait SummaryTrait{
             $iTotalRecords = count($summaryData);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0 , $pagination = $request->start ; $iterator < $request->length && $iterator < count($summaryData) ; $iterator++ , $pagination++){
+            $end = $request->length < 0 ? count($summaryData) : $request->length;
+            for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($summaryData) ; $iterator++ , $pagination++){
                 if($summaryData[$pagination]['is_active'] == true){
                     $summary_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';

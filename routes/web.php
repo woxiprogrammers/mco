@@ -58,7 +58,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('create',array('uses' => 'Admin\MaterialController@createMaterial'));
         Route::get('edit/{material}',array('uses' => 'Admin\MaterialController@getEditView'));
         Route::put('edit/{material}',array('uses' => 'Admin\MaterialController@editMaterial'));
-        Route::get('change-status/{material}',array('uses' => 'Admin\MaterialController@changeMaterialStatus'));
+        Route::post('change-status',array('uses' => 'Admin\MaterialController@changeMaterialStatus'));
         Route::post('check-name',array('uses' => 'Admin\MaterialController@checkMaterialName'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\MaterialController@autoSuggest'));
         Route::post('basicrate_material', array('uses' => 'Admin\MaterialController@generateBasicRateMaterialPdf'));
@@ -130,19 +130,36 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix' => 'bill'],function(){
         Route::get('create/{project_site}',array('uses' => 'Admin\BillController@getCreateView'));
-        Route::get('view/{bill}',array('uses' => 'Admin\BillController@editBill'));
+        Route::get('view/{bill}',array('uses' => 'Admin\BillController@viewBill'));
         Route::get('create',array('uses' => 'Admin\BillController@getCreateNewBillView'));
         Route::post('create',array('uses' => 'Admin\BillController@createBill'));
         Route::get('projects/{client}',array('uses' => 'Admin\BillController@getProjects'));
         Route::get('project-sites/{project}',array('uses' => 'Admin\BillController@getProjectSites'));
-        Route::get('manage',array('uses' => 'Admin\BillController@getManageView'));
-        Route::post('listing',array('uses' => 'Admin\BillController@billListing'));
+        Route::get('manage/project-site',array('uses' => 'Admin\BillController@getProjectSiteManageView'));
+        Route::post('listing/project-site',array('uses' => 'Admin\BillController@ProjectSiteListing'));
         Route::post('approve', array('uses' => 'Admin\BillController@approveBill'));
         Route::get('current/invoice/{bill}', array('uses' => 'Admin\BillController@generateCurrentBill'));
         Route::get('cumulative/invoice/{bill}', array('uses' => 'Admin\BillController@generateCumulativeInvoice'));
+        Route::get('cumulative/excel-sheet/{bill}', array('uses' => 'Admin\BillController@generateCumulativeExcelSheet'));
         Route::post('image-upload/{billId}',array('uses'=>'Admin\BillController@uploadTempBillImages'));
         Route::post('display-images/{billId}',array('uses'=>'Admin\BillController@displayBillImages'));
         Route::post('delete-temp-product-image',array('uses'=>'Admin\BillController@removeTempImage'));
+        Route::get('edit/{bill}', array('uses' => 'Admin\BillController@editBillView'));
+        Route::post('edit/{bill}', array('uses' => 'Admin\BillController@editBill'));
+        Route::post('cancel/{bill}', array('uses' => 'Admin\BillController@cancelBill'));
+        Route::get('manage/{project_site}',array('uses' => 'Admin\BillController@getManageView'));
+        Route::post('listing/{project_site}/{status}',array('uses' => 'Admin\BillController@billListing'));
+        Route::post('product_description/create',array('uses' => 'Admin\BillController@createProductDescription'));
+        Route::post('product_description/update',array('uses' => 'Admin\BillController@updateProductDescription'));
+        Route::group(['prefix'=>'product'],function(){
+            Route::get('get-descriptions/{quotation_id}/{keyword}',array('uses' => 'Admin\BillController@getProductDescription'));
+        });
+        Route::post('calculate-tax-amounts',array('uses' => 'Admin\BillController@calculateTaxAmounts'));
+        Route::group(['prefix' => 'transaction'], function(){
+            Route::post('create', array('uses' => 'Admin\BillController@saveTransactionDetails'));
+            Route::post('listing/{billId}', array('uses' => 'Admin\BillController@billTransactionListing'));
+            Route::get('detail/{bill_transaction}', array('uses' => 'Admin\BillController@billTransactionDetail'));
+        });
     });
 
     Route::group(['prefix' => 'quotation'], function(){
@@ -173,6 +190,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'work-order'],function(){
             Route::post('edit/{work_order}',array('uses'=>'Admin\QuotationController@editWorkOrder'));
         });
+        Route::group(['prefix' => 'product'],function(){
+            Route::post('create/{product}',array('uses'=>'Admin\QuotationController@saveQuotationProduct'));
+        });
+        Route::post('get-quotation-product-view',array('uses' => 'Admin\QuotationController@getProductEditView'));
     });
 
     Route::group(['prefix' => 'project'], function(){

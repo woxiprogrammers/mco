@@ -180,6 +180,7 @@ return [
         App\Providers\NavBarProvider::class,
         Cviebrock\EloquentSluggable\ServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
 
         /*
          * Charts Service Providers
@@ -237,6 +238,7 @@ return [
         'UnitHelper' => \App\Helper\UnitHelper::class,
         'PDF' => Barryvdh\DomPDF\Facade::class,
         'Charts' => ConsoleTVs\Charts\Facades\Charts::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];

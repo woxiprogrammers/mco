@@ -1,10 +1,10 @@
-var BillListing = function () {
+var ProjectSiteListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
 
         grid.init({
-            src: $("#billTable"),
+            src: $("#projectSiteTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -24,7 +24,7 @@ var BillListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/bill/listing", // ajax source
+                    "url": "/bill/listing/project-site", // ajax source
                     "data" :{
                         '_token' : $("input[name='_token']").val()
                     }
@@ -78,5 +78,5 @@ var BillListing = function () {
 }();
 
 jQuery(document).ready(function() {
-    BillListing.init();
+    ProjectSiteListing.init();
 });

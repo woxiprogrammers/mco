@@ -79,10 +79,12 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="col-md-3 control-label">Material</label>
-                                                            <div class="col-md-6">
-                                                                <select class="form-control" id="material_id" multiple="true" style="overflow: scroll">
+                                                            <div class="col-md-7">
+                                                                <div class="form-control product-material-select" >
+                                                                    <ul id="material_id" class="list-group">
 
-                                                                </select>
+                                                                    </ul>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="form-group">

@@ -43,7 +43,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="billTable">
+                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="projectSiteTable">
                                                 <thead>
                                                 <tr>
                                                     <th> Company Name </th>
@@ -79,7 +79,7 @@
 <script src="/assets/custom/bill/manage-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
-        $('#billTable').DataTable();
+        $('#projectSiteTable').DataTable();
     });
 </script>
 @endsection
