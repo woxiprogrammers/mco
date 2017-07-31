@@ -26,4 +26,8 @@ class Bill extends Model
     {
         return $this->hasMany('App\BillTax','bill_id');
     }
+
+    public function transactions(){
+        return $this->hasMany('App\BillTransaction','bill_id');
+    }
 }

@@ -28,6 +28,9 @@
                 $data = $request->only('name','base_percentage');
                 $data['is_active'] = false;
                 $data['name'] = ucwords(trim($data['name']));
+                if($request->has('is_special')){
+                    $data['is_special'] = true;
+                }
                 $tax = Tax::create($data);
                 $request->session()->flash('success', 'Tax Created successfully.');
                 return redirect('/tax/create');
