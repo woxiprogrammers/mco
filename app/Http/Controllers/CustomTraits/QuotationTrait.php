@@ -281,8 +281,13 @@ trait QuotationTrait{
                             ->orderBy('profit_margins.name','asc')
                             ->select('profit_margins.name as name','profit_margins.id as id','quotation_profit_margin_versions.percentage as percentage')
                             ->get();
-                        if($productProfitMarginRelation != null){
+                        if($productProfitMarginRelation != null && (count($productProfitMarginRelation) > 0)){
                             foreach($productProfitMarginRelation as $profitMargin){
+                                $productProfitMargins[$id]['profit_margin'][$profitMargin['id']] = $profitMargin->percentage;
+                            }
+                        }else{
+                            $structureProfitMargins = ProfitMargin::where('is_active', true)->orderBy('id','asc')->select('id','base_percentage as percentage')->get();
+                            foreach($structureProfitMargins as $profitMargin){
                                 $productProfitMargins[$id]['profit_margin'][$profitMargin['id']] = $profitMargin->percentage;
                             }
                         }
