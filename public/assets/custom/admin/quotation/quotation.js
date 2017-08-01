@@ -70,6 +70,16 @@ $(document).ready(function(){
                         $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
                     }
                 });
+            }else{
+                var formFields = $("#productTable :input").serializeArray();
+                $.each(formFields, function(i){
+                    if(($.trim(formFields[i].value)) == ""){
+                        $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
+                        validForm = false;
+                    }else{
+                        $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
+                    }
+                });
             }
             if(validForm == true){
                 var ajaxData = {};
