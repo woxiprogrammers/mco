@@ -53,58 +53,72 @@ $(document).ready(function(){
 
     $("#materialCosts").on('click', function(e){
         e.stopPropagation();
-        var productIds = [];
-        $(".quotation-product").each(function(){
-            productIds.push($(this).val());
-        });
-        var validForm = true;
-        var url = window.location.href;
-        if(url.indexOf("edit") <= 0){
-            var formFields = $("#QuotationCreateForm").serializeArray();
-            $.each(formFields, function(i){
-                if(($.trim(formFields[i].value)) == ""){
-                    $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
-                    validForm = false;
-                }else{
-                    $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
-                }
+        if($(".quotation-product").length > 0){
+            var productIds = [];
+            $(".quotation-product").each(function(){
+                productIds.push($(this).val());
             });
-        }
-        if(validForm == true){
-            var ajaxData = {};
-            ajaxData['productIds'] = productIds;
-            if($("#quotationMaterialTable").length > 0){
-                $("#quotationMaterialTable input:not([type='checkbox']),#quotationMaterialTable select").each(function(){
-                    ajaxData[$(this).attr('name')] = $(this).val();
+            var validForm = true;
+            var url = window.location.href;
+            if(url.indexOf("edit") <= 0){
+                var formFields = $("#QuotationCreateForm").serializeArray();
+                $.each(formFields, function(i){
+                    if(($.trim(formFields[i].value)) == ""){
+                        $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
+                        validForm = false;
+                    }else{
+                        $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
+                    }
                 });
-                var clientSuppliedMaterials = [];
-                $("#quotationMaterialTable input:checkbox:checked").each(function(){
-                    clientSuppliedMaterials.push($(this).val());
+            }else{
+                var formFields = $("#productTable :input").serializeArray();
+                $.each(formFields, function(i){
+                    if(($.trim(formFields[i].value)) == ""){
+                        $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
+                        validForm = false;
+                    }else{
+                        $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
+                    }
                 });
-                ajaxData['clientSuppliedMaterial'] = clientSuppliedMaterials;
             }
-            if(url.indexOf("edit") > 0){
-                ajaxData['quotation_id'] = $("#quotationId").val();
-            }
-            var quotationId = $("#quotationId").val();
-            if(typeof quotationId != 'undefined'){
-                ajaxData['quotation_id'] = $("#quotationId").val();
-            }
-            $.ajax({
-                url: '/quotation/get-materials',
-                async: false,
-                type: "POST",
-                data: ajaxData,
-                success: function(data, textStatus, xhr){
-                    $("#GeneralTab").removeClass('active');
-                    $("#ProfitMarginsTab").removeClass('active');
-                    $("#MaterialsTab").addClass('active');
-                    $("#MaterialsTab").html(data);
-                },
-                error: function(errorStatus, data){
+            if(validForm == true){
+                var ajaxData = {};
+                ajaxData['productIds'] = productIds;
+                if($("#quotationMaterialTable").length > 0){
+                    $("#quotationMaterialTable input:not([type='checkbox']),#quotationMaterialTable select").each(function(){
+                        ajaxData[$(this).attr('name')] = $(this).val();
+                    });
+                    var clientSuppliedMaterials = [];
+                    $("#quotationMaterialTable input:checkbox:checked").each(function(){
+                        clientSuppliedMaterials.push($(this).val());
+                    });
+                    ajaxData['clientSuppliedMaterial'] = clientSuppliedMaterials;
+                }
+                if(url.indexOf("edit") > 0){
+                    ajaxData['quotation_id'] = $("#quotationId").val();
+                }
+                var quotationId = $("#quotationId").val();
+                if(typeof quotationId != 'undefined'){
+                    ajaxData['quotation_id'] = $("#quotationId").val();
+                }
+                $.ajax({
+                    url: '/quotation/get-materials',
+                    async: false,
+                    type: "POST",
+                    data: ajaxData,
+                    success: function(data, textStatus, xhr){
+                        $("#GeneralTab").removeClass('active');
+                        $("#ProfitMarginsTab").removeClass('active');
+                        $("#MaterialsTab").addClass('active');
+                        $("#MaterialsTab").html(data);
+                    },
+                    error: function(errorStatus, data){
 
-                }
-            });
+                    }
+                });
+            }
+        }else{
+            alert("Please add atleast one product");
         }
     });
 
