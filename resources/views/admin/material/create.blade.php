@@ -121,7 +121,6 @@
                 }
             }
         });
-
         $('#is_present').on('click',function(){
             if($(this).prop('checked') == true){
                 $('#name').rules('remove', 'remote');
@@ -156,7 +155,6 @@
                     }));
                 })
                 .on('typeahead:open', function (obj, datum) {
-
                 });
             }else{
                 $('#name').removeClass('typeahead');
@@ -178,8 +176,6 @@
                 });
             }
         });
-
-
         var citiList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -203,8 +199,6 @@
                 wildcard: "%QUERY"
             }
         });
-
     });
-
 </script>
 @endsection

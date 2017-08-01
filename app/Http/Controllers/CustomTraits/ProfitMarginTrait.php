@@ -5,7 +5,6 @@ use App\ProfitMargin;
 use App\ProfitMarginVersion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
 trait ProfitMarginTrait{
     public function getManageView(Request $request) {
         try{
@@ -20,7 +19,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function getCreateView(Request $request) {
         try{
             return view('admin.profitMargin.create');
@@ -34,7 +32,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function getEditView(Request $request,$profit_margin){
         try{
             $profit_margin = $profit_margin->toArray();
@@ -49,7 +46,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function createProfitMargin(ProfitMarginRequest $request){
         try{
             $data = $request->only('name','base_percentage');
@@ -71,7 +67,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function editProfitMargin(ProfitMarginRequest $request,$profit_margin){
         try{
             $profit_margin->update(['name' => ucwords(trim($request->name)), 'base_percentage' => $request->base_percentage]);
@@ -88,7 +83,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function profitMarginListing(Request $request){
         try{
             if($request->has('search_name')){
@@ -147,7 +141,6 @@ trait ProfitMarginTrait{
 
         return response()->json($records,200);
     }
-
     public function changeProfitMarginStatus(Request $request, $profitMargin){
         try{
             $newStatus = (boolean)!$profitMargin->is_active;
@@ -164,7 +157,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function checkProfitMarginName(Request $request){
         try{
             $profitMarginName = $request->name;

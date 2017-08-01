@@ -66,7 +66,6 @@
                     <li aria-haspopup="true" class="menu-dropdown mega-menu-dropdown">
                         <a href="javascript:;"> Structure
                         </a>
-
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true"  class="dropdown-submenu ">
                                 <a href="javascript:void(0);" class="nav-link nav-toggle ">
@@ -136,7 +135,6 @@
                             </li>
                         </ul>
                     </li>
-
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/quotation/manage/status#2"> Quotations
                             <span class="arrow"></span>
@@ -144,6 +142,11 @@
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/bill/manage/project-site"> Bills
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a href="/purchase/manage"> Purchase
                             <span class="arrow"></span>
                         </a>
                     </li>
