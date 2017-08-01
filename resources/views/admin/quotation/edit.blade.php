@@ -72,13 +72,22 @@
                                                         <a class="btn btn-info" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             <i class="fa fa-edit"></i> Profit Margins
                                                         </a>
+                                                        @if($quotation->is_tax_applied == true)
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/with-tax/without-summary" class="btn btn-info">
+                                                                <i class="fa fa-download"></i>Quotation With Tax Without Summary
+                                                            </a>
+                                                        @endif
+                                                        <a href="/quotation/invoice/{{$quotation->id}}/without-tax/without-summary" class="btn btn-info">
+                                                                <i class="fa fa-download"></i>Quotation Without Tax Without Summary
+                                                        </a>
+
                                                         @if($quotation->built_up_area != null)
                                                             @if($quotation->is_tax_applied == true)
-                                                                <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
+                                                                <a href="/quotation/invoice/{{$quotation->id}}/with-tax/with-summary" class="btn btn-info">
                                                                     <i class="fa fa-download"></i>Quotation With Tax
                                                                 </a>
                                                             @endif
-                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax/with-summary" class="btn btn-info">
                                                                 <i class="fa fa-download"></i>Quotation Without Tax
                                                             </a>
                                                             @if($quotation->is_summary_applied == true)
