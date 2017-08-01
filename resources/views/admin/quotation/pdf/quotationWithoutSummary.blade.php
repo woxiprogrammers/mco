@@ -73,7 +73,7 @@
                 @elseif($summary_data[$j]['products'][$iterator]['category_id'] != $summary_data[$j]['products'][$iterator-1]['category_id'])
                     <?php $i = 1 ?>
                     <tr>
-                        <td colspan="1" style="text-align: center;"><b>{{$summary_data[$j]['products'][$iterator]['category_name']}}</b></td>
+                        <td colspan="2" style="text-align: center;"><b>{{$summary_data[$j]['products'][$iterator]['category_name']}}</b></td>
                         <td></td>
                         <td></td>
                         <td></td>
