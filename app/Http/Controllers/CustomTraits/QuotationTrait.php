@@ -281,8 +281,13 @@ trait QuotationTrait{
                             ->orderBy('profit_margins.name','asc')
                             ->select('profit_margins.name as name','profit_margins.id as id','quotation_profit_margin_versions.percentage as percentage')
                             ->get();
-                        if($productProfitMarginRelation != null){
+                        if($productProfitMarginRelation != null && (count($productProfitMarginRelation) > 0)){
                             foreach($productProfitMarginRelation as $profitMargin){
+                                $productProfitMargins[$id]['profit_margin'][$profitMargin['id']] = $profitMargin->percentage;
+                            }
+                        }else{
+                            $structureProfitMargins = ProfitMargin::where('is_active', true)->orderBy('id','asc')->select('id','base_percentage as percentage')->get();
+                            foreach($structureProfitMargins as $profitMargin){
                                 $productProfitMargins[$id]['profit_margin'][$profitMargin['id']] = $profitMargin->percentage;
                             }
                         }
@@ -946,9 +951,10 @@ trait QuotationTrait{
         }
     }
 
-    public function generateQuotationPdf(Request $request,$quotation,$slug){
+    public function generateQuotationPdf(Request $request,$quotation,$slug,$summarySlug){
         try{
             $data = $summary_data = array();
+            $data['summary_slug'] = $summarySlug;
             $data['quotation'] = $quotation;
             $data['slug'] = $slug;
             $quotationProductData = array();
@@ -1005,7 +1011,11 @@ trait QuotationTrait{
             $data['quotationProductData'] = $quotationProductData;
             $data['quotation_no'] = "Q-".strtoupper(date('M',strtotime($quotation['created_at'])))."-".$quotation->id."/".date('y',strtotime($quotation['created_at']));
             $pdf = App::make('dompdf.wrapper');
-            $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
+            if($summarySlug == 'with-summary'){
+                $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
+            }else{
+                $pdf->loadHTML(view('admin.quotation.pdf.quotationWithoutSummary',$data));
+            }
             return $pdf->stream();
         }catch (\Exception $e){
             $data = [
