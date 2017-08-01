@@ -951,9 +951,10 @@ trait QuotationTrait{
         }
     }
 
-    public function generateQuotationPdf(Request $request,$quotation,$slug){
+    public function generateQuotationPdf(Request $request,$quotation,$slug,$summarySlug){
         try{
             $data = $summary_data = array();
+            $data['summary_slug'] = $summarySlug;
             $data['quotation'] = $quotation;
             $data['slug'] = $slug;
             $quotationProductData = array();
@@ -1010,7 +1011,11 @@ trait QuotationTrait{
             $data['quotationProductData'] = $quotationProductData;
             $data['quotation_no'] = "Q-".strtoupper(date('M',strtotime($quotation['created_at'])))."-".$quotation->id."/".date('y',strtotime($quotation['created_at']));
             $pdf = App::make('dompdf.wrapper');
-            $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
+            if($summarySlug == 'with-summary'){
+                $pdf->loadHTML(view('admin.quotation.pdf.quotation',$data));
+            }else{
+                $pdf->loadHTML(view('admin.quotation.pdf.quotationWithoutSummary',$data));
+            }
             return $pdf->stream();
         }catch (\Exception $e){
             $data = [
