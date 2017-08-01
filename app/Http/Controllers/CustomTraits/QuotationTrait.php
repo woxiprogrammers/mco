@@ -805,14 +805,18 @@ trait QuotationTrait{
                 foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
                     $quotationProfitMargin->delete();
                 }
-                $usedProductVersion[$quotationProduct->product_id] = $quotationProduct->product_version_id;
+                if($quotationProduct->product_version_id != null){
+                    $usedProductVersion[$quotationProduct->product_id] = $quotationProduct->product_version_id;
+                }
                 $quotationProduct->delete();
             }
             foreach($data['product_id'] as $productId){
                 $quotationProductData = array();
                 $quotationProductData['product_id'] = $productId;
                 $quotationProductData['quotation_id'] = $quotation['id'];
-                $quotationProductData['product_version_id'] = $usedProductVersion[$productId];
+                if(isset($usedProductVersion[$productId])){
+                    $quotationProductData['product_version_id'] = $usedProductVersion[$productId];
+                }
                 $quotationProductData['description'] = $data['product_description'][$productId];
                 $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
                 $productMaterialsId = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
