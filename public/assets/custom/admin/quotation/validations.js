@@ -58,6 +58,7 @@ var  CreateQuotation = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -112,6 +113,7 @@ var  EditQuotation = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
