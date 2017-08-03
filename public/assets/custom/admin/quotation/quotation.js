@@ -387,8 +387,23 @@ function showProfitMargins(){
             }
         });
     }
+
+    $("#next2").on('click',function () {
+        console.log('in ob click');
+        $(this).css('display','none');
+    });
+
+    $("#QuotationEditForm,#QuotationCreateForm").on('submit',function (e) {
+        e.stopPropagation();
+        $("#QuotationEditForm button[type='submit'],#QuotationCreateForm button[type='submit']").css('display','none');
+        $(this).ajaxSubmit();
+    });
 }
 
+function onSubmitClick(){
+    console.log('in ob click');
+    $("#next2").css('display','none');
+}
 function viewProduct(row){
     var productId = $('#productSelect'+row).val();
     var quotationId = $("#quotationId").val();
