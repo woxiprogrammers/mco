@@ -22,6 +22,7 @@ $(document).ready(function(){
     });
 
     $("#addProduct").on('click',function(){
+        $(this).css('pointer-events','none');
         var url = window.location.href;
         var rowCount = $('#productRowCount').val();
         if(url.indexOf("edit") > 0){
@@ -44,6 +45,7 @@ $(document).ready(function(){
             success: function(data,textStatus,xhr){
                 $("#productTable tr:first").after(data);
                 $('#productRowCount').val(parseInt(rowCount)+1);
+                $("#addProduct").css('pointer-events','');
             },
             error: function(errorStatus, xhr){
 
@@ -375,10 +377,10 @@ function showProfitMargins(){
             type: "POST",
             data: data,
             success: function(data, textStatus, xhr){
+                $("#ProfitMarginsTab").html(data);
                 $("#GeneralTab").removeClass('active');
                 $("#MaterialsTab").removeClass('active');
                 $("#ProfitMarginsTab").addClass('active');
-                $("#ProfitMarginsTab").html(data);
             },
             error: function(errorStatus, data){
 
