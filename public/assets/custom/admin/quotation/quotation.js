@@ -109,10 +109,12 @@ $(document).ready(function(){
                     type: "POST",
                     data: ajaxData,
                     success: function(data, textStatus, xhr){
-                        $("#GeneralTab").removeClass('active');
-                        $("#ProfitMarginsTab").removeClass('active');
-                        $("#MaterialsTab").addClass('active');
                         $("#MaterialsTab").html(data);
+                        setTimeout(function () {
+                            $("#GeneralTab").removeClass('active');
+                            $("#ProfitMarginsTab").removeClass('active');
+                            $("#MaterialsTab").addClass('active');
+                        },2000);
                     },
                     error: function(errorStatus, data){
 
@@ -343,6 +345,7 @@ function replaceEditor(row){
 
 function showProfitMargins(){
     var validForm = true;
+    $("#formSubmit").hide();
     $(".quotation-material-rate").each(function(){
         if(($.trim($(this).val())) == ''){
             $(this).closest('.form-group').addClass('has-error');
@@ -377,18 +380,32 @@ function showProfitMargins(){
             type: "POST",
             data: data,
             success: function(data, textStatus, xhr){
-                $("#ProfitMarginsTab").html(data);
-                $("#GeneralTab").removeClass('active');
-                $("#MaterialsTab").removeClass('active');
-                $("#ProfitMarginsTab").addClass('active');
+                $("#profitMarginTable").html(data);
+                setTimeout(function(){
+                    $("#formSubmit").show();
+                    $("#GeneralTab").removeClass('active');
+                    $("#MaterialsTab").removeClass('active');
+                    $("#ProfitMarginsTab").addClass('active');
+                },2000);
             },
             error: function(errorStatus, data){
 
             }
         });
     }
+
+
+    /*$("#QuotationEditForm,#QuotationCreateForm").on('submit',function (e) {
+        e.stopPropagation();
+        $("#QuotationEditForm button[type='submit'],#QuotationCreateForm button[type='submit']").css('display','none');
+        $(this).ajaxSubmit();
+    });*/
 }
 
+/*function onSubmitClick(){
+    console.log('in ob click');
+    $("#next2").css('display','none');
+}*/
 function viewProduct(row){
     var productId = $('#productSelect'+row).val();
     var quotationId = $("#quotationId").val();
