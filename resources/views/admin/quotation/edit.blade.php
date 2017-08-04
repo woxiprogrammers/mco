@@ -98,9 +98,11 @@
                                                                 </a>
                                                             @endif
                                                         @endif
-                                                        <a class="btn btn-success btn-xs" id="generalTabSubmit">
-                                                            Save
-                                                        </a>
+                                                        @if($quotation->quotation_status->slug == 'draft')
+                                                            <a class="btn btn-success btn-xs" id="generalTabSubmit">
+                                                                Save
+                                                            </a>
+                                                        @endif
                                                     </fieldset>
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
                                                         <div class="panel panel-default">
@@ -332,9 +334,11 @@
                                                         <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
                                                             Back
                                                         </a>
-                                                        <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
-                                                            Submit
-                                                        </button>
+                                                        @if($quotation->quotation_status->slug == 'draft')
+                                                            <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
+                                                                Submit
+                                                            </button>
+                                                        @endif
                                                     </fieldset>
                                                     <div id="profitMarginTable">
 
