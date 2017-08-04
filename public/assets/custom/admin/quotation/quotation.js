@@ -175,6 +175,13 @@ $(document).ready(function(){
         e.stopPropagation();
         $("#materialCosts").trigger('click');
     });
+
+    $("#formSubmit").on('click',function(e) {
+        $(this).prop('disabled', true);
+        $("#QuotationEditForm, #QuotationCreateForm").ajaxSubmit(function () {
+            window.location.reload();
+        });
+    });
 });
 
 function backToGeneral(){
