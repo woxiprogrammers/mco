@@ -34,6 +34,7 @@ use App\Unit;
 use App\WorkOrderImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 
@@ -619,6 +620,7 @@ trait QuotationTrait{
 
     public function getEditView(Request $request, $quotation){
         try{
+            $user = Auth::user();
             $orderValue = QuotationProduct::where('quotation_id',$quotation->id)->sum('rate_per_unit');
             if($quotation->quotation_status->slug == 'approved'){
                 if($quotation->work_order != null){
@@ -639,7 +641,7 @@ trait QuotationTrait{
                 $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
             }
             $orderValue = $orderValue + $taxAmount;
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue'));
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',

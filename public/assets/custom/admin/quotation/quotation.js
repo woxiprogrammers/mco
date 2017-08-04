@@ -4,6 +4,12 @@
 
 
 $(document).ready(function(){
+    $(window).keydown(function(event){
+        if(event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
     $.getScript('/assets/custom/admin/product/product.js');
     $(".quotation-category").change(function(){
         var category_id = $(this).val();
@@ -309,7 +315,19 @@ function getProductDetails(product_id,rowNumber){
 }
 
 function removeRow(row){
-    $("#Row"+row).remove();
+    var url = window.location.href;
+    if(url.indexOf("edit") > 0){
+        var userRole = $("#userRole").val();
+        var quotationStatus = $("#quotationStatus").val();
+        if(quotationStatus == 'draft' || userRole == 'superadmin'){
+
+        }else{
+            alert('You can not remove product');
+        }
+
+    }else{
+        $("#Row"+row).remove();
+    }
     var url = window.location.href;
     if(url.indexOf("edit") > 0){
         calculateSubtotal();
