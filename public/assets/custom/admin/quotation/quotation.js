@@ -22,6 +22,7 @@ $(document).ready(function(){
     });
 
     $("#addProduct").on('click',function(){
+        $(this).css('pointer-events','none');
         var url = window.location.href;
         var rowCount = $('#productRowCount').val();
         if(url.indexOf("edit") > 0){
@@ -44,6 +45,7 @@ $(document).ready(function(){
             success: function(data,textStatus,xhr){
                 $("#productTable tr:first").after(data);
                 $('#productRowCount').val(parseInt(rowCount)+1);
+                $("#addProduct").css('pointer-events','');
             },
             error: function(errorStatus, xhr){
 
@@ -107,10 +109,12 @@ $(document).ready(function(){
                     type: "POST",
                     data: ajaxData,
                     success: function(data, textStatus, xhr){
-                        $("#GeneralTab").removeClass('active');
-                        $("#ProfitMarginsTab").removeClass('active');
-                        $("#MaterialsTab").addClass('active');
                         $("#MaterialsTab").html(data);
+                        setTimeout(function () {
+                            $("#GeneralTab").removeClass('active');
+                            $("#ProfitMarginsTab").removeClass('active');
+                            $("#MaterialsTab").addClass('active');
+                        },2000);
                     },
                     error: function(errorStatus, data){
 
@@ -341,6 +345,7 @@ function replaceEditor(row){
 
 function showProfitMargins(){
     var validForm = true;
+    $("#formSubmit").hide();
     $(".quotation-material-rate").each(function(){
         if(($.trim($(this).val())) == ''){
             $(this).closest('.form-group').addClass('has-error');
@@ -375,10 +380,13 @@ function showProfitMargins(){
             type: "POST",
             data: data,
             success: function(data, textStatus, xhr){
-                $("#GeneralTab").removeClass('active');
-                $("#MaterialsTab").removeClass('active');
-                $("#ProfitMarginsTab").addClass('active');
-                $("#ProfitMarginsTab").html(data);
+                $("#profitMarginTable").html(data);
+                setTimeout(function(){
+                    $("#formSubmit").show();
+                    $("#GeneralTab").removeClass('active');
+                    $("#MaterialsTab").removeClass('active');
+                    $("#ProfitMarginsTab").addClass('active');
+                },2000);
             },
             error: function(errorStatus, data){
 
