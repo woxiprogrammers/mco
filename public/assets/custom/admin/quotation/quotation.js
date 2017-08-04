@@ -175,13 +175,6 @@ $(document).ready(function(){
         e.stopPropagation();
         $("#materialCosts").trigger('click');
     });
-
-    $("#formSubmit").on('click',function(e) {
-        $(this).prop('disabled', true);
-        $("#QuotationEditForm, #QuotationCreateForm").ajaxSubmit(function () {
-            window.location.reload();
-        });
-    });
 });
 
 function backToGeneral(){
@@ -400,19 +393,8 @@ function showProfitMargins(){
             }
         });
     }
-
-
-    /*$("#QuotationEditForm,#QuotationCreateForm").on('submit',function (e) {
-        e.stopPropagation();
-        $("#QuotationEditForm button[type='submit'],#QuotationCreateForm button[type='submit']").css('display','none');
-        $(this).ajaxSubmit();
-    });*/
 }
 
-/*function onSubmitClick(){
-    console.log('in ob click');
-    $("#next2").css('display','none');
-}*/
 function viewProduct(row){
     var productId = $('#productSelect'+row).val();
     var quotationId = $("#quotationId").val();

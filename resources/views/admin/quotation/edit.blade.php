@@ -632,7 +632,7 @@
 @endif
 <script>
     $(document).ready(function(){
-        /*EditQuotation.init();*/
+        EditQuotation.init();
         calculateSubtotal();
     });
 </script>

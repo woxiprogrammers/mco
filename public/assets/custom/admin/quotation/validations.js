@@ -58,7 +58,7 @@ var  CreateQuotation = function () {
             },
 
             submitHandler: function (form) {
-                $("button[type='submit']").css('display', 'none');
+                $("button[type='submit']").attr('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -73,7 +73,6 @@ var  CreateQuotation = function () {
     };
 }();
 
-/*
 
 var  EditQuotation = function () {
     var handleEdit = function() {
@@ -114,7 +113,7 @@ var  EditQuotation = function () {
             },
 
             submitHandler: function (form) {
-                $("button[type='submit']").css('display', 'none');
+                $("button[type='submit']").attr('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -127,4 +126,4 @@ var  EditQuotation = function () {
             handleEdit();
         }
     };
-}();*/
+}();
