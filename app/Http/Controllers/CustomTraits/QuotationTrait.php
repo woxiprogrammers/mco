@@ -484,7 +484,7 @@ trait QuotationTrait{
                 $quotationProductData['quantity'] = $data['product_quantity'][$productId];
                 $productRecentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
                 $quotationProductData['product_version_id'] = $productRecentVersion;
-                $quotationProduct = Quotation::where('quotation_id',$quotationProductData['quotation_id'])->where('product_id',$quotationProductData['product_id'])->first();
+                $quotationProduct = QuotationProduct::where('quotation_id',$quotationProductData['quotation_id'])->where('product_id',$quotationProductData['product_id'])->first();
                 if($quotationProduct == null){
                     $quotationProduct = QuotationProduct::create($quotationProductData);
                 }
@@ -815,16 +815,17 @@ trait QuotationTrait{
             }
             $quotation->update($quotationData);
             $usedProductVersion = array();
+
             foreach($quotation->quotation_products as $quotationProduct){
                 foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
-                    QuotationProfitMarginVersion::where('quotation_product_id',$quotationProduct['id'])->where('profit_margin_id',$quotationProfitMargin['profit_margin_id'])->delete();
+                      $quotationProfitMargin->delete();
                 }
                 if($quotationProduct->product_version_id != null){
                     $usedProductVersion[$quotationProduct->product_id] = $quotationProduct->product_version_id;
                 }
-                QuotationProduct::where('quotation_id',$quotationProduct['quotation_id'])->where('product_id',$quotationProduct['product_id'])->delete();
+                $quotationProduct->delete();
             }
-            foreach(array_unique($data['product_id']) as $productId){
+            foreach($data['product_id'] as $productId){
                 $quotationProductData = array();
                 $quotationProductData['product_id'] = $productId;
                 $quotationProductData['quotation_id'] = $quotation['id'];
