@@ -7,6 +7,7 @@
 
 namespace App\Http\Controllers\CustomTraits;
 
+use App\BillQuotationProducts;
 use App\Category;
 use App\Client;
 use App\Helper\NumberHelper;
@@ -422,7 +423,10 @@ trait QuotationTrait{
                         QuotationProduct::where('id',$quotationProduct['id'])->delete();
                     }
                 }else{
-                    $quotation = Quotation::create($quotationData);
+                    $quotation = Quotation::where('project_site_id', $data['project_site_id'])->first();
+                    if($quotation == null){
+                        $quotation = Quotation::create($quotationData);
+                    }
                 }
                 $response['quotation_id'] = $quotation->id;
             }else{
@@ -444,7 +448,12 @@ trait QuotationTrait{
                         QuotationMaterial::where('id',$quotationMaterial['id'])->delete();
                     }
                 }else{
-                    $quotation = Quotation::create($quotationData);
+                    $quotation = Quotation::where('project_site_id', $data['project_site_id'])->first();
+                    if($quotation == null){
+                        $quotation->update($quotationData);
+                    }else{
+                        $quotation = Quotation::create($quotationData);
+                    }
                 }
             }
             $quotation = $quotation->toArray();
@@ -1325,6 +1334,40 @@ trait QuotationTrait{
             ];
             Log::critical(json_encode($data));
         }
+    }
+
+    public function checkProductRemove(Request $request){
+        try{
+            $status = 200;
+            $response = array();
+            $quotationId = $request->quotationId;
+            $productId = $request->productId;
+            $productBillCount = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
+                                                    ->join('quotations','quotations.id','=','bills.quotation_id')
+                                                    ->join('quotation_products',function($join){
+                                                        $join->on('quotation_products.quotation_id','=','quotations.id');
+                                                        $join->on('quotation_products.id','=','bill_quotation_products.quotation_product_id');
+                                                    })
+                                                    ->where('quotation_products.product_id',$productId)
+                                                    ->where('bills.quotation_id',$quotationId)
+                                                    ->count();
+            if($productBillCount > 0){
+                $response['can_remove'] = false;
+                $response['message'] = 'A bill is already created for this product, so you can not remove this product.';
+            }else{
+                $response['can_remove'] = true;
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Save Quotation Product',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = ['message' => 'Something went wrong.'];
+        }
+        return response()->json($response,$status);
     }
 
 }

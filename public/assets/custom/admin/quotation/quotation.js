@@ -319,12 +319,31 @@ function removeRow(row){
     if(url.indexOf("edit") > 0){
         var userRole = $("#userRole").val();
         var quotationStatus = $("#quotationStatus").val();
-        if(quotationStatus == 'draft' || userRole == 'superadmin'){
-
+        if(quotationStatus == 'draft'){
+            $("#Row"+row).remove();
+        }else if (userRole == 'superadmin'){
+            $.ajax({
+                url: '/quotation/check-product-remove',
+                type: 'POST',
+                async: true,
+                data: {
+                    quotationId: $("#quotationId").val(),
+                    productId: $("#productSelect"+row)
+                },
+                success: function(data,textStatus, xhr){
+                    if(data.can_remove == true || data.can_remove == 'true'){
+                        $("#Row"+row).remove();
+                    }else{
+                        alert(data.message);
+                    }
+                },
+                error: function(data){
+                    alert('Something went wrong')
+                }
+            });
         }else{
-            alert('You can not remove product');
+            alert('You can not remove product.');
         }
-
     }else{
         $("#Row"+row).remove();
     }
