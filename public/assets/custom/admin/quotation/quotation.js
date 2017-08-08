@@ -320,7 +320,7 @@ function removeRow(row){
         var userRole = $("#userRole").val();
         var quotationStatus = $("#quotationStatus").val();
         if(quotationStatus == 'draft'){
-            //$("#Row"+row).remove();
+            $("#Row"+row).remove();
             calculateSubtotal();
         }else if (userRole == 'superadmin'){
             setTimeout(function(){
@@ -345,12 +345,11 @@ function removeRow(row){
                     }
                 });
             },2000);
-
         }else{
             alert('You can not remove product.');
         }
     }else{
-        //$("#Row"+row).remove();
+        $("#Row"+row).remove();
     }
 }
 

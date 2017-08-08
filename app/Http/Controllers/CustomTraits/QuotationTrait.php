@@ -640,7 +640,6 @@ trait QuotationTrait{
             $iterator = 0;
             foreach($quotation->quotation_products as $quotationProduct){
                 $quotationProducts[$iterator]['product_id'] = $quotationProduct['product_id'];
-                    /*$quotationProducts[$iterator]['product_bill_count']*/
                 $productBillCount = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
                                 ->join('quotations','quotations.id','=','bills.quotation_id')
                                 ->join('quotation_products',function($join){
