@@ -7,24 +7,36 @@
     </style>
 </head>
 <body>
-        <table border="1" style="padding-top: 20px; padding-bottom:20px " width="100%">
-            <tr><td>
-                    <table width="100%" style="text-align: center; ">
+        <table style="border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black" width="100%">
+            <tr>
+                <td style="width: 20%">
+                    <img style="margin-left: 10%" src="http://mconstruction.co.in/assets/global/img/logo.jpg" height="75px" width="120px">
+                </td>
+                <td style="width: 80%">
+                    <table style="padding-top: 20px; padding-bottom:20px;" width="100%">
                         <tr>
-                            <td style="font-size: 30px"><i>{!! env('COMPANY_NAME') !!}</i></td>
-                        </tr>
-                        <tr>
-                            <td style="font-size: 20px"><i>{!! env('DESIGNATION') !!}</i></td>
-                        </tr>
-                        <tr>
-                            <td style="font-size: 15px"><i>{!! env('ADDRESS') !!}</i></td>
-                        </tr>
-                        <tr>
-                            <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
+                            <td>
+                                <table width="100%" style="text-align: center; ">
+                                    <tr>
+                                        <td style="font-size: 30px"><i>{!! env('COMPANY_NAME') !!}</i></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 20px"><i>{!! env('DESIGNATION') !!}</i></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 15px"><i>{!! env('ADDRESS') !!}</i></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
+                                    </tr>
+                                </table>
+                            </td>
                         </tr>
                     </table>
-                </td></tr>
+                </td>
+            </tr>
         </table>
+
         <hr>
         <table width="100%">
             <tr>
@@ -50,7 +62,7 @@
                 <tr>
                     <th style="width: 7%;text-align: center">Sr no.</th>
                     <th style="width: 30%;text-align: center">Description of item</th>
-                    <th style="width: 8%;text-align: center">HSN code</th>
+                    <th style="width: 8%;text-align: center; font-size: 10px">SAC/HSN Code</th>
                     <th style="width: 10%;text-align: center">Quantity</th>
                     <th style="width: 10%;text-align: center">Unit</th>
                     <th style="width: 15%;text-align: center">Rate</th>
