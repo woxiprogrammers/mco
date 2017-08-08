@@ -9,6 +9,7 @@ namespace App\Http\Controllers\CustomTraits;
 
 
 use App\Client;
+use App\HsnCode;
 use App\Project;
 use App\ProjectSite;
 use Illuminate\Http\Request;
@@ -19,7 +20,8 @@ trait ProjectTrait{
     public function getCreateView(Request $request){
         try{
             $clients = Client::where('is_active', true)->get();
-            return view('admin.project.create')->with(compact('clients'));
+            $hsnCodes = HsnCode::select('id','code','description')->get();
+            return view('admin.project.create')->with(compact('clients','hsnCodes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Project create view',
@@ -147,6 +149,7 @@ trait ProjectTrait{
             $projectData['name'] = ucwords($request->project_name);
             $projectData['client_id'] = $request->client_id;
             $projectData['is_active'] = false;
+            $projectData['hsn_code'] = trim($request->hsn_code);
             $project = Project::create($projectData);
             $projectSiteData = array();
             $projectSiteData['project_id'] = $project->id;
@@ -188,10 +191,12 @@ trait ProjectTrait{
             $projectData['client'] = $project->client->company;
             $projectData['id'] = $project->id;
             $projectData['project'] = $project->name;
+            $projectData['project_hsn_code'] = $project->hsn_code_id;
             $project->project_site = $project->project_site->toArray();
             $projectData['project_site'] = $project->project_site[0]['name'];
             $projectData['project_site_address'] = $project->project_site[0]['address'];
-            return view('admin.project.edit')->with(compact('projectData'));
+            $hsnCodes = HsnCode::select('id','code','description')->get();
+            return view('admin.project.edit')->with(compact('projectData','hsnCodes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'change Project status',
@@ -205,7 +210,10 @@ trait ProjectTrait{
 
     public function editProject(Request $request, $project){
         try{
-            $project->update(['name'=>$request->project_name]);
+            $project->update([
+                'name'=>$request->project_name,
+                'hsn_code_id' => $request->hsn_code
+            ]);
             ProjectSite::where('project_id',$project->id)->update([
                 'name' => $request->project_site_name,
                 'address' => $request->address

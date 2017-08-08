@@ -705,6 +705,11 @@ trait BillTrait{
         try{
             $data = array();
             $invoiceData = $taxData = array();
+            if($bill->quotation->project_site->project->hsn_code == null){
+                $data['hsnCode'] = '';
+            }else{
+                $data['hsnCode'] = $bill->quotation->project_site->project->hsn_code->code;
+            }
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
             $data['company_name'] = $bill->quotation->project_site->project->client->company;
             $data['billData'] = $bill;
