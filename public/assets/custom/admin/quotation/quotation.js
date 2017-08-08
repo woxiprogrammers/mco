@@ -4,6 +4,12 @@
 
 
 $(document).ready(function(){
+    $(window).keydown(function(event){
+        if(event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
     $.getScript('/assets/custom/admin/product/product.js');
     $(".quotation-category").change(function(){
         var category_id = $(this).val();
@@ -309,10 +315,41 @@ function getProductDetails(product_id,rowNumber){
 }
 
 function removeRow(row){
-    $("#Row"+row).remove();
     var url = window.location.href;
     if(url.indexOf("edit") > 0){
-        calculateSubtotal();
+        var userRole = $("#userRole").val();
+        var quotationStatus = $("#quotationStatus").val();
+        if(quotationStatus == 'draft'){
+            $("#Row"+row).remove();
+            calculateSubtotal();
+        }else if (userRole == 'superadmin'){
+            setTimeout(function(){
+                $.ajax({
+                    url: '/quotation/check-product-remove',
+                    type: 'POST',
+                    async: true,
+                    data: {
+                        quotationId: $("#quotationId").val(),
+                        productId: $("#productSelect"+row).val()
+                    },
+                    success: function(data,textStatus, xhr){
+                        if(data.can_remove == true || data.can_remove == 'true'){
+                            $("#Row"+row).remove();
+                            calculateSubtotal();
+                        }else{
+                            alert(data.message);
+                        }
+                    },
+                    error: function(data){
+                        alert('Something went wrong')
+                    }
+                });
+            },2000);
+        }else{
+            alert('You can not remove product.');
+        }
+    }else{
+        $("#Row"+row).remove();
     }
 }
 
