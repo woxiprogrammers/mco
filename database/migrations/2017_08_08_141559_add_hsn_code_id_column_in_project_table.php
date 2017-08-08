@@ -27,7 +27,7 @@ class AddHsnCodeIdColumnInProjectTable extends Migration
     public function down()
     {
         Schema::table('projects', function (Blueprint $table) {
-            //
+            $table->dropColumn('hsn_code_id');
         });
     }
 }
