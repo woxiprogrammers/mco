@@ -52,6 +52,7 @@
                                         <input type="hidden" id="quotationId" value="{{$quotation->id}}">
                                         <input type="hidden" id="userRole" value="{{$user->role->slug}}">
                                         <input type="hidden" id="quotationStatus" value="{{$quotation->quotation_status->slug}}">
+                                        <input type="hidden" id="quotationProducts" value="{{$quotationProducts}}">
                                         <form role="form" id="QuotationEditForm" class="form-horizontal" action="/quotation/edit/{{$quotation->id}}" method="post">
                                             {!! csrf_field() !!}
                                             <input type="hidden" name="_method" value="put">
@@ -636,6 +637,13 @@
     $(document).ready(function(){
         EditQuotation.init();
         calculateSubtotal();
+        var quotationProducts = $("#quotationProducts").val();
+        quotationProducts = jQuery.parseJSON(quotationProducts);
+        $.each(quotationProducts, function(index, value){
+            $("input[name='product_quantity["+value.product_id+"]']").rules('add',{
+                min: parseInt(value.product_bill_count)
+            });
+        });
     });
 </script>
 @endsection

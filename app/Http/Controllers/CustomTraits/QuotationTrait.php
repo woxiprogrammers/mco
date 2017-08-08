@@ -636,6 +636,37 @@ trait QuotationTrait{
                     $quotation->work_order->images = $this->getWorkOrderImagePath($quotation->id,$quotation->work_order->images);
                 }
             }
+            $quotationProducts = array();
+            $iterator = 0;
+            foreach($quotation->quotation_products as $quotationProduct){
+                $quotationProducts[$iterator]['product_id'] = $quotationProduct['product_id'];
+                    /*$quotationProducts[$iterator]['product_bill_count']*/
+                $productBillCount = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
+                                ->join('quotations','quotations.id','=','bills.quotation_id')
+                                ->join('quotation_products',function($join){
+                                    $join->on('quotation_products.quotation_id','=','quotations.id');
+                                    $join->on('quotation_products.id','=','bill_quotation_products.quotation_product_id');
+                                })
+                                ->where('quotation_products.product_id',$quotationProduct['product_id'])
+                                ->where('bills.quotation_id',$quotation['id'])
+                                ->count();
+                if($productBillCount > 0){
+                    $quotationProducts[$iterator]['product_bill_count'] = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
+                                                                        ->join('quotations','quotations.id','=','bills.quotation_id')
+                                                                        ->join('quotation_products',function($join){
+                                                                            $join->on('quotation_products.quotation_id','=','quotations.id');
+                                                                            $join->on('quotation_products.id','=','bill_quotation_products.quotation_product_id');
+                                                                        })
+                                                                        ->where('quotation_products.product_id',$quotationProduct['product_id'])
+                                                                        ->where('bills.quotation_id',$quotation['id'])
+                                                                        ->pluck('bill_quotation_products.quantity')
+                                                                        ->first();
+                }else{
+                    $quotationProducts[$iterator]['product_bill_count'] = 0;
+                }
+                $iterator++;
+            }
+            $quotationProducts = json_encode($quotationProducts);
             $summaries = Summary::where('is_active', true)->select('id','name')->get();
             if($quotation->is_tax_applied == true){
                 $taxes = QuotationTaxVersion::join('taxes','taxes.id','=','quotation_tax_versions.tax_id')
@@ -650,7 +681,7 @@ trait QuotationTrait{
                 $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
             }
             $orderValue = $orderValue + $taxAmount;
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user'));
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',

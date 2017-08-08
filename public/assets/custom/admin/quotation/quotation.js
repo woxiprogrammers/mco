@@ -320,36 +320,37 @@ function removeRow(row){
         var userRole = $("#userRole").val();
         var quotationStatus = $("#quotationStatus").val();
         if(quotationStatus == 'draft'){
-            $("#Row"+row).remove();
+            //$("#Row"+row).remove();
+            calculateSubtotal();
         }else if (userRole == 'superadmin'){
-            $.ajax({
-                url: '/quotation/check-product-remove',
-                type: 'POST',
-                async: true,
-                data: {
-                    quotationId: $("#quotationId").val(),
-                    productId: $("#productSelect"+row)
-                },
-                success: function(data,textStatus, xhr){
-                    if(data.can_remove == true || data.can_remove == 'true'){
-                        $("#Row"+row).remove();
-                    }else{
-                        alert(data.message);
+            setTimeout(function(){
+                $.ajax({
+                    url: '/quotation/check-product-remove',
+                    type: 'POST',
+                    async: true,
+                    data: {
+                        quotationId: $("#quotationId").val(),
+                        productId: $("#productSelect"+row).val()
+                    },
+                    success: function(data,textStatus, xhr){
+                        if(data.can_remove == true || data.can_remove == 'true'){
+                            $("#Row"+row).remove();
+                            calculateSubtotal();
+                        }else{
+                            alert(data.message);
+                        }
+                    },
+                    error: function(data){
+                        alert('Something went wrong')
                     }
-                },
-                error: function(data){
-                    alert('Something went wrong')
-                }
-            });
+                });
+            },2000);
+
         }else{
             alert('You can not remove product.');
         }
     }else{
-        $("#Row"+row).remove();
-    }
-    var url = window.location.href;
-    if(url.indexOf("edit") > 0){
-        calculateSubtotal();
+        //$("#Row"+row).remove();
     }
 }
 
