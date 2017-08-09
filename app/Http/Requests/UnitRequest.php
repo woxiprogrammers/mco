@@ -29,6 +29,12 @@ class UnitRequest extends FormRequest
                     'name' => 'required',
                 ];
                 break;
+
+            case 'PUT':
+                return [
+                    'name' => 'required',
+                ];
+                break;
         }
     }
 }

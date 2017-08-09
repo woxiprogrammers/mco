@@ -12,6 +12,8 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
+<link href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -48,6 +50,9 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
                                         <input type="hidden" id="quotationId" value="{{$quotation->id}}">
+                                        <input type="hidden" id="userRole" value="{{$user->role->slug}}">
+                                        <input type="hidden" id="quotationStatus" value="{{$quotation->quotation_status->slug}}">
+                                        <input type="hidden" id="quotationProducts" value="{{$quotationProducts}}">
                                         <form role="form" id="QuotationEditForm" class="form-horizontal" action="/quotation/edit/{{$quotation->id}}" method="post">
                                             {!! csrf_field() !!}
                                             <input type="hidden" name="_method" value="put">
@@ -55,41 +60,52 @@
                                                 <div class="tab-pane fade in active" id="GeneralTab">
                                                     <fieldset class="row" style="text-align: right">
                                                         @if($quotation->quotation_status->slug == 'draft')
-                                                            <a class="btn green-meadow" id="approve" data-toggle="tab" href="#workOrderTab">
+                                                            <a class="btn green-meadow btn-xs" id="approve" data-toggle="tab" href="#workOrderTab">
                                                                 <i class="fa fa-check-square-o"></i> Approve
                                                             </a>
-                                                            <a class="btn btn-danger" id="disapprove" onclick="openDisapproveModal()">
+                                                            <a class="btn btn-danger btn-xs" id="disapprove" onclick="openDisapproveModal()">
                                                                 <i class="fa fa-remove"></i> Disapprove
                                                             </a>
                                                         @elseif($quotation->quotation_status->slug == 'approved')
-                                                            <a class="btn btn-info" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
-                                                                <i class="fa fa-server"></i> Work Order Details
+                                                            <a class="btn btn-info btn-xs" id="workOrderDetails" data-toggle="tab" href="#workOrderTab">
+                                                                <i class="fa fa-server"></i> Work Order Detail
                                                             </a>
                                                         @endif
-                                                        <a class="btn btn-info" id="materialCosts">
+                                                        <a class="btn btn-info btn-xs" id="materialCosts">
                                                             <i class="fa fa-edit"></i> Material Cost
                                                         </a>
-                                                        <a class="btn btn-info" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
+                                                        <a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             <i class="fa fa-edit"></i> Profit Margins
                                                         </a>
+                                                        @if($quotation->is_tax_applied == true)
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/with-tax/without-summary" class="btn btn-info btn-xs">
+                                                                <i class="fa fa-download"></i>Q. w/ Tax w/o Summary
+                                                            </a>
+                                                        @endif
+                                                        <a href="/quotation/invoice/{{$quotation->id}}/without-tax/without-summary" class="btn btn-info btn-xs">
+                                                                <i class="fa fa-download"></i>Q. w/o Tax w/o Summary
+                                                        </a>
+
                                                         @if($quotation->built_up_area != null)
                                                             @if($quotation->is_tax_applied == true)
-                                                                <a href="/quotation/invoice/{{$quotation->id}}/with-tax" class="btn btn-info">
-                                                                    <i class="fa fa-download"></i>Quotation With Tax
+                                                                <a href="/quotation/invoice/{{$quotation->id}}/with-tax/with-summary" class="btn btn-info btn-xs">
+                                                                    <i class="fa fa-download"></i>Q. w/ Tax
                                                                 </a>
                                                             @endif
-                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax" class="btn btn-info">
-                                                                <i class="fa fa-download"></i>Quotation Without Tax
+                                                            <a href="/quotation/invoice/{{$quotation->id}}/without-tax/with-summary" class="btn btn-info btn-xs">
+                                                                <i class="fa fa-download"></i>Q. w/o Tax
                                                             </a>
                                                             @if($quotation->is_summary_applied == true)
-                                                                <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info">
+                                                                <a href="/quotation/summary/{{$quotation->id}}" class="btn btn-info btn-xs">
                                                                     <i class="fa fa-download"></i>Summary
                                                                 </a>
                                                             @endif
                                                         @endif
-                                                        <a class="btn btn-success" id="generalTabSubmit">
-                                                            Save
-                                                        </a>
+                                                        @if($quotation->quotation_status->slug == 'draft')
+                                                            <a class="btn btn-success btn-xs" id="generalTabSubmit">
+                                                                Save
+                                                            </a>
+                                                        @endif
                                                     </fieldset>
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
                                                         <div class="panel panel-default">
@@ -218,7 +234,7 @@
 
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="number" step="any" class="form-control quotation-product-table" name="product_quantity[{{$quotation->quotation_products[$iterator]->product_id}}]" id="productQuantity{{$iterator}}" onchange="calculateAmount({{$iterator}})" onkeyup="calculateAmount({{$iterator}})"  value="{{$quotation->quotation_products[$iterator]->quantity}}" readonly>
+                                                                                            <input type="number" step="any" class="form-control quotation-product-table" name="product_quantity[{{$quotation->quotation_products[$iterator]->product_id}}]" id="productQuantity{{$iterator}}" onchange="calculateAmount({{$iterator}})" onkeyup="calculateAmount({{$iterator}})"  value="{{$quotation->quotation_products[$iterator]->quantity}}">
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
@@ -317,8 +333,19 @@
 
                                                 </div>
                                                 <div class="tab-pane fade in" id="ProfitMarginsTab">
+                                                    <fieldset class="row">
+                                                        <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
+                                                            Back
+                                                        </a>
+                                                        @if($quotation->quotation_status->slug == 'draft' || $user->role->slug == 'superadmin')
+                                                            <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
+                                                                Submit
+                                                            </button>
+                                                        @endif
+                                                    </fieldset>
+                                                    <div id="profitMarginTable">
 
-
+                                                    </div>
                                                 </div>
                                         </form>
                                                 <div class="tab-pane fade in" id="workOrderTab">
@@ -593,6 +620,7 @@
 <script src="/assets/custom/admin/quotation/quotation.js"></script>
 <script src="/assets/custom/admin/quotation/validations.js"></script>
 <script src="/assets/global/plugins/jquery-form.min.js"></script>
+<script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
 @if($quotation->quotation_status->slug != 'disapproved')
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
@@ -609,6 +637,13 @@
     $(document).ready(function(){
         EditQuotation.init();
         calculateSubtotal();
+        var quotationProducts = $("#quotationProducts").val();
+        quotationProducts = jQuery.parseJSON(quotationProducts);
+        $.each(quotationProducts, function(index, value){
+            $("input[name='product_quantity["+value.product_id+"]']").rules('add',{
+                min: parseInt(value.product_bill_count)
+            });
+        });
     });
 </script>
 @endsection

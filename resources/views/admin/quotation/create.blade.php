@@ -178,8 +178,17 @@
 
                                                     </div>
                                                     <div class="tab-pane fade in" id="ProfitMarginsTab">
+                                                        <fieldset class="row">
+                                                            <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
+                                                                Back
+                                                            </a>
+                                                            <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
+                                                                Submit
+                                                            </button>
+                                                        </fieldset>
+                                                        <div id="profitMarginTable">
 
-
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </form>

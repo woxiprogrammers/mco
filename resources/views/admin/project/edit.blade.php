@@ -86,6 +86,30 @@
                                                         <textarea id="siteAddress" name="address" class="form-control">{{$projectData['project_site_address']}}</textarea>
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">HSN code</label>
+                                                        <span>*</span>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <select class="form-control" name="hsn_code" id="hsnCode">
+                                                            @foreach($hsnCodes as $hsnCode)
+                                                                @if($projectData['project_hsn_code'] == $hsnCode['id'])
+                                                                    <option value="{{$hsnCode['id']}}" selected>{{$hsnCode['code']}}</option>
+                                                                @else
+                                                                    <option value="{{$hsnCode['id']}}">{{$hsnCode['code']}}</option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        @foreach($hsnCodes as $hsnCode)
+                                                            <span class="hsn-description" id="hsnCodeDescription-{{$hsnCode['id']}}" hidden>
+                                                                {{$hsnCode['description']}}
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3">
                                                         <button type="submit" class="btn blue">Submit</button>
@@ -109,6 +133,7 @@
 <script>
     $(document).ready(function() {
         EditProject.init();
+        $("#hsnCode").trigger('change');
     });
 </script>
 @endsection
