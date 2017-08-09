@@ -449,7 +449,7 @@ trait QuotationTrait{
                     }
                 }else{
                     $quotation = Quotation::where('project_site_id', $data['project_site_id'])->first();
-                    if($quotation == null){
+                    if($quotation != null){
                         $quotation->update($quotationData);
                     }else{
                         $quotation = Quotation::create($quotationData);
@@ -648,20 +648,12 @@ trait QuotationTrait{
                                 })
                                 ->where('quotation_products.product_id',$quotationProduct['product_id'])
                                 ->where('bills.quotation_id',$quotation['id'])
-                                ->count();
-                if($productBillCount > 0){
-                    $quotationProducts[$iterator]['product_bill_count'] = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
-                                                                        ->join('quotations','quotations.id','=','bills.quotation_id')
-                                                                        ->join('quotation_products',function($join){
-                                                                            $join->on('quotation_products.quotation_id','=','quotations.id');
-                                                                            $join->on('quotation_products.id','=','bill_quotation_products.quotation_product_id');
-                                                                        })
-                                                                        ->where('quotation_products.product_id',$quotationProduct['product_id'])
-                                                                        ->where('bills.quotation_id',$quotation['id'])
-                                                                        ->pluck('bill_quotation_products.quantity')
-                                                                        ->first();
-                }else{
+                                ->pluck('bill_quotation_products.quantity')
+                                ->first();
+                if($productBillCount == null){
                     $quotationProducts[$iterator]['product_bill_count'] = 0;
+                }else{
+                    $quotationProducts[$iterator]['product_bill_count'] = $productBillCount;
                 }
                 $iterator++;
             }
