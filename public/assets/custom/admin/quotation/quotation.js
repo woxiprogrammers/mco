@@ -57,6 +57,7 @@ $(document).ready(function(){
 
             }
         });
+        $("#profitMargins").hide();
     });
 
     $("#materialCosts").on('click', function(e){
@@ -328,6 +329,7 @@ function removeRow(row){
         var quotationStatus = $("#quotationStatus").val();
         if(quotationStatus == 'draft'){
             $("#Row"+row).remove();
+            $("#profitMargins").hide();
             calculateSubtotal();
         }else if (userRole == 'superadmin'){
             setTimeout(function(){
@@ -342,6 +344,7 @@ function removeRow(row){
                     success: function(data,textStatus, xhr){
                         if(data.can_remove == true || data.can_remove == 'true'){
                             $("#Row"+row).remove();
+                            $("#profitMargins").hide();
                             calculateSubtotal();
                         }else{
                             alert(data.message);
@@ -357,6 +360,7 @@ function removeRow(row){
         }
     }else{
         $("#Row"+row).remove();
+        $("#profitMargins").hide();
     }
 }
 
