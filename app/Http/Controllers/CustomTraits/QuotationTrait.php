@@ -630,6 +630,7 @@ trait QuotationTrait{
     public function getEditView(Request $request, $quotation){
         try{
             $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
             $orderValue = QuotationProduct::where('quotation_id',$quotation->id)->sum('rate_per_unit');
             if($quotation->quotation_status->slug == 'approved'){
                 if($quotation->work_order != null){
@@ -672,7 +673,7 @@ trait QuotationTrait{
                 $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
             }
             $orderValue = $orderValue + $taxAmount;
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts'));
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','userRole','quotationProducts'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
@@ -829,6 +830,7 @@ trait QuotationTrait{
     public function editQuotation(Request $request, $quotation){
         try{
             $data = $request->all();
+            dd($data);
             $quotationData = array();
             $quotationData['discount'] = $data['discount'];
             if($request->has('tax')){

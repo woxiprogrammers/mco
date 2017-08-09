@@ -67,28 +67,33 @@ $(document).ready(function(){
                 productIds.push($(this).val());
             });
             var validForm = true;
-            var url = window.location.href;
-            if(url.indexOf("edit") <= 0){
-                var formFields = $("#QuotationCreateForm").serializeArray();
-                $.each(formFields, function(i){
-                    if(($.trim(formFields[i].value)) == ""){
-                        $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
-                        validForm = false;
-                    }else{
-                        $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
-                    }
-                });
+            if($("#GeneralTab .has-error").length > 0){
+                validForm = false;
             }else{
-                var formFields = $("#productTable :input").serializeArray();
-                $.each(formFields, function(i){
-                    if(($.trim(formFields[i].value)) == ""){
-                        $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
-                        validForm = false;
-                    }else{
-                        $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
-                    }
-                });
+                var url = window.location.href;
+                if(url.indexOf("edit") <= 0){
+                    var formFields = $("#QuotationCreateForm").serializeArray();
+                    $.each(formFields, function(i){
+                        if(($.trim(formFields[i].value)) == ""){
+                            $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
+                            validForm = false;
+                        }else{
+                            $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
+                        }
+                    });
+                }else{
+                    var formFields = $("#productTable :input").serializeArray();
+                    $.each(formFields, function(i){
+                        if(($.trim(formFields[i].value)) == ""){
+                            $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
+                            validForm = false;
+                        }else{
+                            $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
+                        }
+                    });
+                }
             }
+
             if(validForm == true){
                 var ajaxData = {};
                 ajaxData['productIds'] = productIds;
@@ -126,6 +131,8 @@ $(document).ready(function(){
 
                     }
                 });
+            }else{
+                alert("Please enter valid data in your form fields.");
             }
         }else{
             alert("Please add atleast one product");
@@ -393,7 +400,20 @@ function showProfitMargins(){
     });
     var url = window.location.href;
     if(url.indexOf("edit") > 0){
-        validForm = true;
+        var validForm = true;
+        if($("#GeneralTab .has-error").length > 0){
+            validForm = false;
+        }else{
+            var formFields = $("#QuotationCreateForm,#QuotationEditForm").serializeArray();
+            $.each(formFields, function(i){
+                if(($.trim(formFields[i].value)) == ""){
+                    $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
+                    validForm = false;
+                }else{
+                    $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
+                }
+            });
+        }
     }
     if(validForm == true){
         var productIds = [];
@@ -429,6 +449,8 @@ function showProfitMargins(){
 
             }
         });
+    }else{
+        alert("Please enter valid data in your form fields");
     }
 }
 
