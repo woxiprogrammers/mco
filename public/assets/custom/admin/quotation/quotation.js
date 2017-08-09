@@ -39,9 +39,9 @@ $(document).ready(function(){
             }
         }else{
             var data = {
-                    _token: $("input[name='_token']").val(),
-                    row_count: rowCount
-                }
+                _token: $("input[name='_token']").val(),
+                row_count: rowCount
+            }
         }
         $.ajax({
             url: '/quotation/add-product-row',
