@@ -149,7 +149,7 @@ trait ProjectTrait{
             $projectData['name'] = ucwords($request->project_name);
             $projectData['client_id'] = $request->client_id;
             $projectData['is_active'] = false;
-            $projectData['hsn_code'] = trim($request->hsn_code);
+            $projectData['hsn_code_id'] = $request->hsn_code;
             $project = Project::create($projectData);
             $projectSiteData = array();
             $projectSiteData['project_id'] = $project->id;
