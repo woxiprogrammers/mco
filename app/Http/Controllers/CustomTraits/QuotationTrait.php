@@ -498,6 +498,8 @@ trait QuotationTrait{
                 $quotationProduct = QuotationProduct::where('quotation_id',$quotationProductData['quotation_id'])->where('product_id',$quotationProductData['product_id'])->first();
                 if($quotationProduct == null){
                     $quotationProduct = QuotationProduct::create($quotationProductData);
+                }else{
+                    $quotationProduct->update($quotationProductData);
                 }
                 $profitMarginAmount = 0;
                 foreach($data['profit_margins'][$productId] as $id => $percentage){
@@ -1350,10 +1352,15 @@ trait QuotationTrait{
                 }else{
                     $canUpdateProduct = false;
                 }
+                if($quotationProduct->product_version_id == null){
+                    $version = ProductVersion::where('product_id', $quotationProduct->product_id)->orderBy('created_at','desc')->pluck('id')->first();
+                }else{
+                    $version = $quotationProduct->product_version_id;
+                }
                 $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                     ->join('units','units.id','=','material_versions.unit_id')
                     ->join('materials','materials.id','=','material_versions.material_id')
-                    ->where('product_material_relation.product_version_id',$quotationProduct->product_version_id)
+                    ->where('product_material_relation.product_version_id', $version)
                     ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity','units.name as unit','materials.unit_id as material_unit_id')
                     ->get()->toArray();
                 for($iterator = 0; $iterator < count($productMaterialVersions); $iterator++){
@@ -1410,5 +1417,4 @@ trait QuotationTrait{
         }
         return response()->json($response,$status);
     }
-
 }

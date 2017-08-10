@@ -92,7 +92,7 @@
     $(document).ajaxStop(function(){
         setTimeout(function(){
             $.LoadingOverlay("hide");
-        }, 500);
+        }, 1000);
 
     });
 </script>
