@@ -194,6 +194,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create/{product}',array('uses'=>'Admin\QuotationController@saveQuotationProduct'));
         });
         Route::post('get-quotation-product-view',array('uses' => 'Admin\QuotationController@getProductEditView'));
+        Route::post('check-product-remove',array('uses' => 'Admin\QuotationController@checkProductRemove'));
     });
 
     Route::group(['prefix' => 'project'], function(){
