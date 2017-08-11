@@ -8,6 +8,7 @@ use App\Quotation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use ConsoleTVs\Charts\Facades\Charts;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -16,7 +17,10 @@ class DashboardController extends Controller
         /*
          * Quotation Status Wise Chart
          */
+        $user = Auth::user();
+        //$user->givePermissionTo('edit-quotation');
 
+        dd($user->hasPermissionTo('edit-quotation'));
         $quotationApprovedCount = Quotation::where('quotation_status_id', 2)->count();
         $quotationDraftCount = Quotation::where('quotation_status_id', 1)->count();
         $quotationDisapprovedCount = Quotation::where('quotation_status_id', 3)->count();
