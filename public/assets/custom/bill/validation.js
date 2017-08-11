@@ -4,6 +4,7 @@ var  CreateBill = function () {
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
+            ignore: "",
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
@@ -56,6 +57,7 @@ var  EditBill = function () {
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
+            ignore: "",
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
