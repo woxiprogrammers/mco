@@ -17,7 +17,6 @@ class PermissionsTableSeeder extends Seeder
         DB::table('permissions')->insert([
             [
                 'name' => 'create-quotation',
-                'slug' => 'create-quotation',
                 'module_id' => 1,
                 'is_mobile' => false,
                 'is_web' => true,
@@ -27,7 +26,6 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'name' => 'edit-quotation',
-                'slug' => 'edit-quotation',
                 'module_id' => 1,
                 'is_mobile' => false,
                 'is_web' => true,
@@ -36,7 +34,6 @@ class PermissionsTableSeeder extends Seeder
                 'updated_at' => $now],
             [
                 'name' => 'view-quotation',
-                'slug' => 'view-quotation',
                 'module_id' => 1,
                 'is_mobile' => false,
                 'is_web' => true,
@@ -46,7 +43,6 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'name' => 'approve-disapprove-quotation',
-                'slug' => 'approve-disapprove-quotation',
                 'module_id' => 1,
                 'is_mobile' => false,
                 'is_web' => true,

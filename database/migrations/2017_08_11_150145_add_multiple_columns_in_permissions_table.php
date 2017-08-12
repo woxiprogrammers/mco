@@ -14,7 +14,6 @@ class AddMultipleColumnsInPermissionsTable extends Migration
     public function up()
     {
         Schema::table('permissions', function (Blueprint $table) {
-            $table->string('slug',50);
             $table->unsignedInteger('module_id');
             $table->foreign('module_id')->references('id')->on('modules')->onUdate('cascade')->onDelete('cascade');
             $table->boolean('is_web');

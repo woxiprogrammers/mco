@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Quotation;
+use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use ConsoleTVs\Charts\Facades\Charts;
@@ -17,10 +18,6 @@ class DashboardController extends Controller
         /*
          * Quotation Status Wise Chart
          */
-        $user = Auth::user();
-        //$user->givePermissionTo('edit-quotation');
-
-        dd($user->hasPermissionTo('edit-quotation'));
         $quotationApprovedCount = Quotation::where('quotation_status_id', 2)->count();
         $quotationDraftCount = Quotation::where('quotation_status_id', 1)->count();
         $quotationDisapprovedCount = Quotation::where('quotation_status_id', 3)->count();
