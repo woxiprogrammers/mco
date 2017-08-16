@@ -1341,13 +1341,15 @@ trait QuotationTrait{
     public function getProductEditView(Request $request){
         try{
             $data = $request->all();
+            $user = Auth::user();
             $quotationProduct = QuotationProduct::where('quotation_id',$data['quotation_id'])->where('product_id',$data['product_id'])->first();
             if($quotationProduct == null){
                 return redirect('/product/edit/'.$data['product_id']);
             }else{
                 $quotationDraftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
                 $quotation = Quotation::findOrFail($data['quotation_id']);
-                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null){
+                $productBillCount = $this->getProductBillCount($quotation['id'],$data['product_id']);
+                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null || ($user->role->slug == 'superadmin' && $productBillCount <= 0)){
                     $canUpdateProduct = true;
                 }else{
                     $canUpdateProduct = false;
@@ -1390,15 +1392,7 @@ trait QuotationTrait{
             $response = array();
             $quotationId = $request->quotationId;
             $productId = $request->productId;
-            $productBillCount = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
-                                                    ->join('quotations','quotations.id','=','bills.quotation_id')
-                                                    ->join('quotation_products',function($join){
-                                                        $join->on('quotation_products.quotation_id','=','quotations.id');
-                                                        $join->on('quotation_products.id','=','bill_quotation_products.quotation_product_id');
-                                                    })
-                                                    ->where('quotation_products.product_id',$productId)
-                                                    ->where('bills.quotation_id',$quotationId)
-                                                    ->count();
+            $productBillCount = $this->getProductBillCount($quotationId,$productId);
             if($productBillCount > 0){
                 $response['can_remove'] = false;
                 $response['message'] = 'A bill is already created for this product, so you can not remove this product.';
@@ -1416,5 +1410,18 @@ trait QuotationTrait{
             $response = ['message' => 'Something went wrong.'];
         }
         return response()->json($response,$status);
+    }
+
+    public function getProductBillCount($quotationId,$productId){
+        $productBillCount = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
+            ->join('quotations','quotations.id','=','bills.quotation_id')
+            ->join('quotation_products',function($join){
+                $join->on('quotation_products.quotation_id','=','quotations.id');
+                $join->on('quotation_products.id','=','bill_quotation_products.quotation_product_id');
+            })
+            ->where('quotation_products.product_id',$productId)
+            ->where('bills.quotation_id',$quotationId)
+            ->count();
+        return $productBillCount;
     }
 }

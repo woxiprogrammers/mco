@@ -925,6 +925,7 @@ trait BillTrait{
             foreach($products as $key => $product){
                 $alreadyExistProduct = BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->first();
                 if($alreadyExistProduct != null){
+                    $billQuotationProduct = array();
                     if($key == $alreadyExistProduct->quotation_product_id){
                         if($product['current_quantity'] != $alreadyExistProduct->quantity){
                             $billQuotationProduct['quantity'] = $product['current_quantity'];
