@@ -916,6 +916,7 @@ trait BillTrait{
     public function editBill(Request $request, $bill){
         try{
             $products = $request->quotation_product_id;
+            Log::info($request->all());
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();
             $editQuotationProductIds = array_keys($products);
             $deletedQuotationProductIds = array_values(array_diff($alreadyExistQuotationProductIds,$editQuotationProductIds));
@@ -925,6 +926,7 @@ trait BillTrait{
             foreach($products as $key => $product){
                 $alreadyExistProduct = BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->first();
                 if($alreadyExistProduct != null){
+//                    $billQuotationProduct = array();
                     if($key == $alreadyExistProduct->quotation_product_id){
                         if($product['current_quantity'] != $alreadyExistProduct->quantity){
                             $billQuotationProduct['quantity'] = $product['current_quantity'];
