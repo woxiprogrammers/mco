@@ -44,6 +44,14 @@ class ModuleTableSeeder extends Seeder
                 'slug' => 'inventory',
                 'created_at' => $now,
                 'updated_at' => $now
+            ],
+
+            [
+                'name' =>'Users',
+                'slug' => 'users',
+                'created_at' => $now,
+                'updated_at' => $now
+
             ]
         ]);
     }
