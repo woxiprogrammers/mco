@@ -162,11 +162,11 @@ trait ExtraItemTrait{
 
     public function checkExtraItemName(Request $request){
         try{
-            $categoryName = $request->name;
-            if($request->has('category_id')){
-                $nameCount = ExtraItem::where('name','ilike',$categoryName)->where('id','!=',$request->category_id)->count();
+            $extraItemName = $request->name;
+            if($request->has('extra_item_id')){
+                $nameCount = ExtraItem::where('name','ilike',$extraItemName)->where('id','!=',$request->extra_item_id)->count();
             }else{
-                $nameCount = ExtraItem::where('name','ilike',$categoryName)->count();
+                $nameCount = ExtraItem::where('name','ilike',$extraItemName)->count();
             }
             if($nameCount > 0){
                 return 'false';
