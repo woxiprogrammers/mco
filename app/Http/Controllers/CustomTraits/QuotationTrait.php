@@ -36,6 +36,7 @@ use App\WorkOrderImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 
@@ -497,6 +498,8 @@ trait QuotationTrait{
                 $quotationProduct = QuotationProduct::where('quotation_id',$quotationProductData['quotation_id'])->where('product_id',$quotationProductData['product_id'])->first();
                 if($quotationProduct == null){
                     $quotationProduct = QuotationProduct::create($quotationProductData);
+                }else{
+                    $quotationProduct->update($quotationProductData);
                 }
                 $profitMarginAmount = 0;
                 foreach($data['profit_margins'][$productId] as $id => $percentage){
@@ -631,7 +634,8 @@ trait QuotationTrait{
         try{
             $user = Auth::user();
             $userRole = $user->roles[0]->role->slug;
-            $orderValue = QuotationProduct::where('quotation_id',$quotation->id)->sum('rate_per_unit');
+            $orderValue = QuotationProduct::where('quotation_id',$quotation->id)->select(DB::raw('sum(rate_per_unit * quantity)'))->first();
+            $orderValue = $orderValue->sum;
             if($quotation->quotation_status->slug == 'approved'){
                 if($quotation->work_order != null){
                     $quotation->work_order->images = $this->getWorkOrderImagePath($quotation->id,$quotation->work_order->images);
@@ -849,26 +853,29 @@ trait QuotationTrait{
                 $quotationData['is_summary_applied'] = true;
             }
             $quotation->update($quotationData);
-            $usedProductVersion = array();
-
-            foreach($quotation->quotation_products as $quotationProduct){
-                foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
-                      $quotationProfitMargin->delete();
+            $quotationProductsProdcutIds = QuotationProduct::where('quotation_id',$quotation['id'])->pluck('product_id')->toArray();
+            $removedProducts = array_diff($quotationProductsProdcutIds,$data['product_id']);
+            if(count($removedProducts) > 0){
+                foreach($removedProducts as $removedProductId){
+                    $removedQuotationProduct = QuotationProduct::where('quotation_id',$quotation['id'])->where('product_id',$removedProductId)->first();
+                    foreach ($removedQuotationProduct->quotation_profit_margins as $quotationProfitMargin){
+                        $quotationProfitMargin->delete();
+                    }
+                    $removedQuotationProduct->delete();
                 }
-                if($quotationProduct->product_version_id != null){
-                    $usedProductVersion[$quotationProduct->product_id] = $quotationProduct->product_version_id;
-                }
-                $quotationProduct->delete();
             }
             foreach($data['product_id'] as $productId){
                 $quotationProductData = array();
                 $quotationProductData['product_id'] = $productId;
                 $quotationProductData['quotation_id'] = $quotation['id'];
-                if(isset($usedProductVersion[$productId])){
-                    $quotationProductData['product_version_id'] = $usedProductVersion[$productId];
+                $quotationProduct = QuotationProduct::where('quotation_id',$quotation['id'])->where('product_id',$productId)->first();
+                if($quotationProduct != null && $quotationProduct['product_version_id'] != null){
+                    $recentVersion = $quotationProduct['product_version_id'];
+                }else{
+                    $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                    $quotationProductData['product_version_id'] = $recentVersion;
                 }
                 $quotationProductData['description'] = $data['product_description'][$productId];
-                $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
                 $productMaterialsId = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                     ->join('materials','materials.id','=','material_versions.material_id')
                     ->where('product_material_relation.product_version_id', $recentVersion)
@@ -929,6 +936,8 @@ trait QuotationTrait{
                 $quotationProduct = QuotationProduct::where('quotation_id',$quotationProductData['quotation_id'])->where('product_id',$quotationProductData['product_id'])->first();
                 if($quotationProduct == null){
                     $quotationProduct = QuotationProduct::create($quotationProductData);
+                }else{
+                    $quotationProduct->update($quotationProductData);
                 }
                 $profitMarginAmount = 0;
                 foreach($data['profit_margins'][$productId] as $id => $percentage){
@@ -936,15 +945,25 @@ trait QuotationTrait{
                     $quotationProfitMarginData['profit_margin_id'] = $id;
                     $quotationProfitMarginData['percentage'] = $percentage;
                     $quotationProfitMarginData['quotation_product_id'] = $quotationProduct->id;
-                    QuotationProfitMarginVersion::create($quotationProfitMarginData);
+                    $quotationProfitMargin = QuotationProfitMarginVersion::where('profit_margin_id',$id)->where('quotation_product_id', $quotationProduct->id)->first();
+                    if($quotationProfitMargin == null){
+                        QuotationProfitMarginVersion::create($quotationProfitMarginData);
+
+                    }else{
+                        $quotationProfitMargin->update($quotationProfitMarginData);
+                    }
                     $profitMarginAmount = round($profitMarginAmount + ($productAmount * ($percentage / 100)),3);
                 }
                 $productAmount = round(($productAmount + $profitMarginAmount),3);
                 if($request->has('material_rate') && $request->has('material_unit')){
-                    foreach($quotation->quotation_materials as $quotationMaterial){
-                        QuotationMaterial::where('quotation_id',$quotationMaterial['quotation_id'])->where('material_id',$quotationMaterial['material_id'])->delete();
-                    }
                     $materialIds = array_keys($data['material_rate']);
+                    $quotationMaterialIds = QuotationMaterial::where('quotation_id',$quotation['id'])->pluck('material_id')->toArray();
+                    $removedQuotationMaterialIds = array_diff($quotationMaterialIds, $materialIds);
+                    if(count($removedQuotationMaterialIds) > 0){
+                        foreach($removedQuotationMaterialIds as $removedQuotationMaterialId){
+                            QuotationMaterial::where('quotation_id', $quotation['id'])->where('material_id',$removedQuotationMaterialId)->delete();
+                        }
+                    }
                     foreach($materialIds as $materialId){
                         $quotationMaterialData = array();
                         $quotationMaterialData['material_id'] = $materialId;
@@ -959,6 +978,8 @@ trait QuotationTrait{
                         $quotationMaterial = QuotationMaterial::where('quotation_id',$quotation['id'])->where('material_id',$materialId)->first();
                         if($quotationMaterial == null){
                             QuotationMaterial::create($quotationMaterialData);
+                        }else{
+                            $quotationMaterial->update($quotationMaterialData);
                         }
                     }
                     if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && (count(array_intersect($productMaterialsId,$data['clientSuppliedMaterial'])) > 0)){
@@ -1322,21 +1343,28 @@ trait QuotationTrait{
     public function getProductEditView(Request $request){
         try{
             $data = $request->all();
+            $user = Auth::user();
             $quotationProduct = QuotationProduct::where('quotation_id',$data['quotation_id'])->where('product_id',$data['product_id'])->first();
             if($quotationProduct == null){
                 return redirect('/product/edit/'.$data['product_id']);
             }else{
                 $quotationDraftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
                 $quotation = Quotation::findOrFail($data['quotation_id']);
-                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null){
+                $productBillCount = $this->getProductBillCount($quotation['id'],$data['product_id']);
+                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null || ($user->role->slug == 'superadmin' && $productBillCount <= 0)){
                     $canUpdateProduct = true;
                 }else{
                     $canUpdateProduct = false;
                 }
+                if($quotationProduct->product_version_id == null){
+                    $version = ProductVersion::where('product_id', $quotationProduct->product_id)->orderBy('created_at','desc')->pluck('id')->first();
+                }else{
+                    $version = $quotationProduct->product_version_id;
+                }
                 $productMaterialVersions = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                     ->join('units','units.id','=','material_versions.unit_id')
                     ->join('materials','materials.id','=','material_versions.material_id')
-                    ->where('product_material_relation.product_version_id',$quotationProduct->product_version_id)
+                    ->where('product_material_relation.product_version_id', $version)
                     ->select('material_versions.id as id','materials.id as material_id','materials.name as name','material_versions.unit_id as unit_id','product_material_relation.material_quantity as quantity','units.name as unit','materials.unit_id as material_unit_id')
                     ->get()->toArray();
                 for($iterator = 0; $iterator < count($productMaterialVersions); $iterator++){
@@ -1366,15 +1394,7 @@ trait QuotationTrait{
             $response = array();
             $quotationId = $request->quotationId;
             $productId = $request->productId;
-            $productBillCount = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
-                                                    ->join('quotations','quotations.id','=','bills.quotation_id')
-                                                    ->join('quotation_products',function($join){
-                                                        $join->on('quotation_products.quotation_id','=','quotations.id');
-                                                        $join->on('quotation_products.id','=','bill_quotation_products.quotation_product_id');
-                                                    })
-                                                    ->where('quotation_products.product_id',$productId)
-                                                    ->where('bills.quotation_id',$quotationId)
-                                                    ->count();
+            $productBillCount = $this->getProductBillCount($quotationId,$productId);
             if($productBillCount > 0){
                 $response['can_remove'] = false;
                 $response['message'] = 'A bill is already created for this product, so you can not remove this product.';
@@ -1394,4 +1414,16 @@ trait QuotationTrait{
         return response()->json($response,$status);
     }
 
+    public function getProductBillCount($quotationId,$productId){
+        $productBillCount = BillQuotationProducts::join('bills','bills.id','=','bill_quotation_products.bill_id')
+            ->join('quotations','quotations.id','=','bills.quotation_id')
+            ->join('quotation_products',function($join){
+                $join->on('quotation_products.quotation_id','=','quotations.id');
+                $join->on('quotation_products.id','=','bill_quotation_products.quotation_product_id');
+            })
+            ->where('quotation_products.product_id',$productId)
+            ->where('bills.quotation_id',$quotationId)
+            ->count();
+        return $productBillCount;
+    }
 }

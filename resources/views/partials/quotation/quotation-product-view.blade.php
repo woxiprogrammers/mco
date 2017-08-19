@@ -139,6 +139,13 @@
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
                     </div>
+                    @if($canUpdateProduct == false)
+                        <div class="form-group">
+                            <div class="col-md-7 col-md-offset-2">
+                                <label class="control-label" style="color: red">You can not edit this product. Either you are unauthorised or already a bill is created for this product.</label>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </fieldset>
         </div>
