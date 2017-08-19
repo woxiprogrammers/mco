@@ -6,19 +6,22 @@
  */
 ?>
 <fieldset class="row" style="text-align: right">
-        <a class="btn btn-primary" onclick="backToGeneral()" href="javascript:void(0);">
+        <a class="btn btn-primary" onclick="backToGeneral()" href="javascript:void(0);" style="margin-right: 83%">
             Back
         </a>
         <a class="btn btn-primary" id="next2" href="javascript:void(0);" onclick="showProfitMargins()">
             <i class="fa fa-pencil-square-o"></i> Profit Margins
         </a>
 </fieldset>
-<fieldset>
+<fieldset style="margin-top: 1%">
     <legend> Edit Materials </legend>
     <table class="table table-bordered" id="quotationMaterialTable">
         <tr>
             <th style="width: 13%">
                 Is Client supplied?
+            </th>
+            <th style="width: 13%">
+                Required Client Approval
             </th>
             <th>
                 Material Name
@@ -48,6 +51,9 @@
                         @endif
                     @endif
 
+                </td>
+                <td>
+                    <input type="checkbox">
                 </td>
                 <td>
                     {{$material['name']}}

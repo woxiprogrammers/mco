@@ -72,7 +72,7 @@
                                                             </a>
                                                         @endif
                                                         <a class="btn btn-info btn-xs" id="materialCosts">
-                                                            <i class="fa fa-edit"></i> Material Cost
+                                                            <i class="fa fa-edit"></i> Material Rate
                                                         </a>
                                                         <a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             <i class="fa fa-edit"></i> Profit Margins
@@ -406,13 +406,26 @@
                                                                 <div class="form-group">
                                                                     <div class="col-md-3">
                                                                         <label for="order_value" class="control-form pull-right">
-                                                                            Order Value:
+                                                                            Order Value Without Tax:
                                                                         </label>
                                                                     </div>
                                                                     <div class="col-md-3">
                                                                         <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
                                                                     </div>
                                                                 </div>
+
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3">
+                                                                        <label for="order_value" class="control-form pull-right">
+                                                                            Order Value With Tax:
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
+                                                                    </div>
+                                                                </div>
+
+
                                                                 <div class="form-group">
                                                                     <div class="row">
                                                                         <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
