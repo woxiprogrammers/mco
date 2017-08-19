@@ -108,6 +108,11 @@
                                             <i class="fa fa-money"></i> Tax
                                         </a>
                                     </li>
+                                    <li aria-haspopup="true">
+                                        <a href="/extra-item/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-money"></i> Extra-Item
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <li aria-haspopup="true">

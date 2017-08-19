@@ -6,6 +6,7 @@ use App\Bill;
 use App\BillTransaction;
 use App\Category;
 use App\Client;
+use App\ExtraItem;
 use App\Material;
 use App\Product;
 use App\ProfitMargin;
@@ -59,6 +60,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('quotation',Quotation::class);
         Route::model('work_order',QuotationWorkOrder::class);
         Route::model('bill_transaction',BillTransaction::class);
+        Route::model('extra_item',ExtraItem::class);
     }
 
     /**
