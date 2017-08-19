@@ -61,6 +61,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{role}', array('uses' => 'Admin\RoleController@changeRoleStatus'));
         Route::post('check-name', array('uses' => 'Admin\RoleController@checkRoleName'));
     });
+    Route::group(['prefix' => 'extra-item'],function(){
+        Route::get('create',array('uses' => 'Admin\ExtraItemController@getCreateView'));
+        Route::post('create',array('uses' => 'Admin\ExtraItemController@createExtraItem'));
+        Route::get('edit/{extra_item}',array('uses' => 'Admin\ExtraItemController@getEditView'));
+        Route::post('edit/{extra_item}',array('uses' => 'Admin\ExtraItemController@editExtraItem'));
+        Route::get('manage',array('uses' => 'Admin\ExtraItemController@getManageView'));
+        Route::post('listing',array('uses' => 'Admin\ExtraItemController@extraItemListing'));
+        Route::get('change-status/{extra_item}',array('uses' => 'Admin\ExtraItemController@changeExtraItemStatus'));
+        Route::post('check-name',array('uses' => 'Admin\ExtraItemController@checkExtraItemName'));
+    });
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
         Route::post('listing',array('uses' => 'Admin\MaterialController@materialListing'));
