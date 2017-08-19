@@ -110,10 +110,23 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li aria-haspopup="true">
-                                <a href="/user/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-users"></i> Manage Users
+                            <li aria-haspopup="true"  class="dropdown-submenu ">
+                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                    <i class="fa fa-folder"></i> Manage User
                                 </a>
+                                <ul class="dropdown-menu pull-left">
+                                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                        <a href="/role/manage">
+                                            <i class="fa fa-users"></i> Manage Roles
+                                            <span class="arrow"></span>
+                                        </a>
+                                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/user/manage">
+                                    <i class="fa fa-cubes"></i> Manage Users
+                                    <span class="arrow"></span>
+                                </a>
+                            </li>
+                                </ul>
                             </li>
                             <li aria-haspopup="true"  class="dropdown-submenu ">
                                 <a href="javascript:void(0);" class="nav-link nav-toggle ">

@@ -51,6 +51,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
         Route::post('check-name',array('uses' => 'Admin\CategoryController@checkCategoryName'));
     });
+    Route::group(['prefix' => 'role'],function() {
+        Route::get('create', array('uses' => 'Admin\RoleController@getCreateView'));
+        Route::post('create', array('uses' => 'Admin\RoleController@createRole'));
+        Route::get('edit/{role}', array('uses' => 'Admin\RoleController@getEditView'));
+        Route::post('edit/{role}', array('uses' => 'Admin\RoleController@editRole'));
+        Route::get('manage', array('uses' => 'Admin\RoleController@getManageView'));
+        Route::post('listing', array('uses' => 'Admin\RoleController@roleListing'));
+        Route::get('change-status/{role}', array('uses' => 'Admin\RoleController@changeRoleStatus'));
+        Route::post('check-name', array('uses' => 'Admin\RoleController@checkRoleName'));
+    });
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
         Route::post('listing',array('uses' => 'Admin\MaterialController@materialListing'));
