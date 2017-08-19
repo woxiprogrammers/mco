@@ -52,7 +52,15 @@ class ModuleTableSeeder extends Seeder
                 'created_at' => $now,
                 'updated_at' => $now
 
-            ]
+            ],
+
+            [
+                 'name' =>'Clients',
+                 'slug' => 'clients',
+                 'created_at' => $now,
+                 'updated_at' => $now
+
+             ]
         ]);
     }
 }
