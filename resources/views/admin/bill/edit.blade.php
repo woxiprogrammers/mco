@@ -128,6 +128,41 @@
 
                                                             </tr>
                                                         @endfor
+                                                        <tr>
+                                                            <td colspan="5"><b>Settlement Details</b></td>
+                                                            <td colspan="2"><b>Total amount</b></td>
+                                                            <td colspan="2"><b>Previous amount</b></td>
+                                                            <td colspan="2"><b>Current amount</b></td>
+                                                        </tr>
+                                                        @for($iterator = 0; $iterator < count($quotationExtraItems); $iterator++)
+                                                            <tr>
+                                                                <td>
+                                                                    <input type="checkbox" id="id_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}]" value="{{$quotationExtraItems[$iterator]->id}}" class="extra-item-checkbox">
+                                                                </td>
+                                                                <td colspan="4">
+                                                            <span>
+                                                                {{$quotationExtraItems[$iterator]->extraItem->name}}
+                                                                @if(array_key_exists('description',$quotationExtraItems[$iterator]->toArray()))
+                                                                    {{--<input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" value="{{$quotationProducts[$iterator]['bill_product_description_id']}}">--}}
+                                                                    <input class="form-control extra_item_description" type="text" id="extra_item_description_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][description]" value="{{$quotationExtraItems[$iterator]['description']}}">
+                                                                @else
+                                                                {{--    <input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}">--}}
+                                                                    <input class="form-control extra_item_description" type="text" id="extra_item_description_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][description]" disabled>
+                                                                @endif
+                                                                {{--<input class="extra_item_description form-control" type="text" id="extra_item_description_{{$quotationExtraItem[$iterator]->id}}" name="extra_item[{{$quotationExtraItem[$iterator]->id}}][description]" value="{{$quotationExtraItem[$iterator]['']}}" disabled>--}}
+                                                            </span>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <span id="total_extra_item_rate">{{$quotationExtraItems[$iterator]->rate}}</span>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <span id="previous_rates_{{$quotationExtraItems[$iterator]->id}}">0</span>
+                                                                </td>
+                                                                <td colspan="2" class="form-group">
+                                                                    <input class="form-control" type="text" id="extra_item_rate_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][rate]" {{--onchange="getTotals()"--}}  disabled>
+                                                                </td>
+                                                            </tr>
+                                                        @endfor
 
                                                         <tr>
                                                             <td colspan="10" style="text-align: right; padding-right: 30px;">
