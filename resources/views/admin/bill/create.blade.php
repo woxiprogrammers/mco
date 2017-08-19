@@ -117,6 +117,34 @@
 
                                                     </tr>
                                                 @endfor
+                                                <tr>
+                                                    <td colspan="5"><b>Settlement Details</b></td>
+                                                    <td colspan="2"><b>Total amount</b></td>
+                                                    <td colspan="2"><b>Previous amount</b></td>
+                                                    <td colspan="2"><b>Current amount</b></td>
+                                                </tr>
+                                                @for($iterator = 0; $iterator < count($extraItems); $iterator++)
+                                                    <tr>
+                                                        <td>
+                                                            <input type="checkbox" id="id_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}]" value="{{$extraItems[$iterator]->id}}" class="extra-item-checkbox">
+                                                        </td>
+                                                        <td colspan="4">
+                                                            <span>
+                                                                {{$extraItems[$iterator]->extraItem->name}}
+                                                                <input class="extra_item_description form-control" type="text" id="extra_item_description_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][description]" disabled>
+                                                            </span>
+                                                        </td>
+                                                        <td colspan="2">
+                                                            <span id="total_extra_item_rate">{{$extraItems[$iterator]->rate}}</span>
+                                                        </td>
+                                                        <td colspan="2">
+                                                            <span id="previous_rates_{{$extraItems[$iterator]->id}}">0</span>
+                                                        </td>
+                                                        <td colspan="2" class="form-group">
+                                                            <input class="form-control" type="text" id="extra_item_rate_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][rate]" {{--onchange="getTotals()"--}}  disabled>
+                                                        </td>
+                                                    </tr>
+                                                @endfor
                                                     <tr>
                                                         <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total</b></td>
 

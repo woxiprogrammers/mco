@@ -1,8 +1,5 @@
 $(document).ready(function (){
     CreateBill.init();
-    /*$(".product_description").each(function(){
-
-    });*/
     $('#submit').prop('disabled',true);
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
@@ -13,8 +10,44 @@ $(document).ready(function (){
             window.location.href = "/bill/view/"+bill_id;
         }
     });
+    $('input:checkbox.extra-item-checkbox').click(function () {
+        var id = $(this).val();
+        if($(this).prop("checked") == false){
+            $('#extra_item_description_'+id).prop('disabled',true);
+            $('#extra_item_rate_'+id).prop('disabled',true);
+            $('#extra_item_rate_'+id).val('');
+            $('#extra_item_rate_'+id).rules('remove');
+            $('#extra_item_rate_'+id).closest('form-group').removeClass('has-error');
+        }else{
+            $('#extra_item_description_'+id).prop('disabled',false);
+            $('#extra_item_rate_'+id).prop('disabled',false);
+            var enteredRate = $('#extra_item_rate_'+id);
+            $('#extra_item_rate_'+id).val(0);
+            var typingTimer;
+            var doneTypingInterval = 500;
+            var total_extra_item_rate = $('#total_extra_item_rate').text();
+            var previous_rates = $('#previous_rates_'+id).text();
+            var diff = parseFloat(total_extra_item_rate - previous_rates);
+            $('#extra_item_rate_'+id).rules('add',{
+                required: true,
+                min: 0.000001,
+                max: diff
+            });
+            enteredRate.on('keyup', function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(doneTyping, doneTypingInterval);
+            });
+            enteredRate.on('keydown', function () {
+                clearTimeout(typingTimer);
+            });
+            function doneTyping () {
+                getTotals();
+            }
+        }
 
-    $('input[type="checkbox"]:not(".tax-applied-on")').click(function(){
+    });
+
+    $('input:checkbox.product-checkbox').click(function(){
         var id = $(this).val();
         var input = $('#current_quantity_'+id);
         var boq = $('#boq_quantity_'+id).text();
@@ -147,15 +180,28 @@ function calculateQuantityAmount(current_quantity,id){
 }
 
 function getTotals(){
-    var total_current_bill_amount = 0.0;
+    var total_extra_item_rate = 0;
+    var total_product_current_bill_amount = 0.0;
+
     var selected_product_length = $('input:checked:not(".tax-applied-on")').length;
     if(selected_product_length > 0){
-        $('input:checked:not(".tax-applied-on")').each(function(){
+        $('input:checked.product-checkbox').each(function(){
             var id = $(this).val();
             var current_bill_amount = parseFloat($('#current_bill_amount_'+id).text());
-            total_current_bill_amount = total_current_bill_amount + current_bill_amount;
+            total_product_current_bill_amount = total_product_current_bill_amount + current_bill_amount;
         });
     }
+
+    var selected_extra_item_length = $('input:checked.extra-item-checkbox').length;
+    if(selected_extra_item_length > 0){
+        $('input:checked.extra-item-checkbox').each(function () {
+            var id = $(this).val();
+            var enteredRate = $('#extra_item_rate_'+id).val();
+            total_extra_item_rate = total_extra_item_rate + parseFloat(enteredRate);
+        })
+    }
+
+    var total_current_bill_amount = total_extra_item_rate + total_product_current_bill_amount;
     $('#total_current_bill_amount').text(total_current_bill_amount.toFixed(3));
     $('#rounded_off_current_bill_amount').text(Math.round(total_current_bill_amount));
     calculateTax();
