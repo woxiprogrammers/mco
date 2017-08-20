@@ -31,7 +31,6 @@ class AddMultipleColumnsInPermissionsTable extends Migration
     public function down()
     {
         Schema::table('permissions', function (Blueprint $table) {
-            //$table->dropColumn('slug');
             $table->dropColumn('is_web');
             $table->dropColumn('is_mobile');
             $table->dropColumn('type_id');

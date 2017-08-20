@@ -15,7 +15,7 @@ class AddFkTypeIdInPermissionsTable extends Migration
     {
         Schema::table('permissions', function (Blueprint $table) {
             $table->foreign('type_id')->references('id')->on('permission_types')->onUpdate('cascade')->onDelete('cascade');
-        });       //
+        });
     }
 
     /**

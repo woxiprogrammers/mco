@@ -834,7 +834,6 @@ trait QuotationTrait{
     public function editQuotation(Request $request, $quotation){
         try{
             $data = $request->all();
-            dd($data);
             $quotationData = array();
             $quotationData['discount'] = $data['discount'];
             if($request->has('tax')){
