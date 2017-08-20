@@ -186,6 +186,7 @@ return [
          * Charts Service Providers
          */
         ConsoleTVs\Charts\ChartsServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
     ],
 
     /*

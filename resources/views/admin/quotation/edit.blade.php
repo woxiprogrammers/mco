@@ -50,7 +50,7 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
                                         <input type="hidden" id="quotationId" value="{{$quotation->id}}">
-                                        <input type="hidden" id="userRole" value="{{$user->role->slug}}">
+                                        <input type="hidden" id="userRole" value="{{$userRole}}">
                                         <input type="hidden" id="quotationStatus" value="{{$quotation->quotation_status->slug}}">
                                         <input type="hidden" id="quotationProducts" value="{{$quotationProducts}}">
                                         <form role="form" id="QuotationEditForm" class="form-horizontal" action="/quotation/edit/{{$quotation->id}}" method="post">
@@ -337,7 +337,7 @@
                                                         <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
                                                             Back
                                                         </a>
-                                                        @if($quotation->quotation_status->slug == 'draft' || $user->role->slug == 'superadmin')
+                                                        @if($quotation->quotation_status->slug == 'draft' || $userRole == 'superadmin')
                                                             <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
                                                                 Submit
                                                             </button>
