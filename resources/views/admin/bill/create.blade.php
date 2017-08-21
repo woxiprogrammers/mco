@@ -198,7 +198,7 @@
                                             </table>
                                             <div class="form-group">
                                                 <div class="col-md-offset-11">
-                                                    <button type="submit" class="btn btn-success" id="submit"> Submit </button>
+                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
                                                 </div>
                                             </div>
                                                </form>

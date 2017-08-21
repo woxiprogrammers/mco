@@ -3,7 +3,9 @@ $(document).ready(function (){
     /*$(".product_description").each(function(){
 
     });*/
-    $('#submit').prop('disabled',true);
+    //$('#submit').prop('disabled',true);
+    $('#submit').css("padding-left",'6px');
+
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
         if(bill_id == 'default'){
