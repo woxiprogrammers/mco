@@ -254,7 +254,6 @@ function getTotals(){
             var id = $(this).val();
             var current_bill_amount = parseFloat($('#current_bill_amount_'+id).text());
             total_product_current_bill_amount = total_product_current_bill_amount + current_bill_amount;
-            //total_current_bill_amount = total_current_bill_amount + current_bill_amount;
         });
     }
 

@@ -163,7 +163,7 @@
                                                                     @if(array_key_exists('current_rate',$quotationExtraItems[$iterator]->toArray()))
                                                                         <input class="form-control" type="text" id="extra_item_rate_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][rate]" value="{{$quotationExtraItems[$iterator]->current_rate}}" onchange="checkExtraItemRate({{$quotationExtraItems[$iterator]->id}})">
                                                                     @else
-                                                                        <input class="form-control" type="text" id="extra_item_rate_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][rate]" {{--onchange="getTotals()"--}}  disabled>
+                                                                        <input class="form-control" type="text" id="extra_item_rate_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][rate]" disabled>
                                                                     @endif
 
                                                                 </td>

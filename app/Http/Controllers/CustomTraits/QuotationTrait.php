@@ -1463,17 +1463,4 @@ trait QuotationTrait{
             ->count();
         return $productBillCount;
     }
-
-    public function addExtraItems(Request $request){
-        try{
-
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Save Quotation Product',
-                'param' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-        }
-    }
 }

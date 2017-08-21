@@ -141,7 +141,7 @@
                                                             <span id="previous_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->previous_rate}}</span>
                                                         </td>
                                                         <td colspan="2" class="form-group">
-                                                            <input class="form-control" type="text" id="extra_item_rate_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][rate]" {{--onchange="getTotals()"--}}  disabled>
+                                                            <input class="form-control" type="text" id="extra_item_rate_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][rate]" disabled>
                                                         </td>
                                                     </tr>
                                                 @endfor
