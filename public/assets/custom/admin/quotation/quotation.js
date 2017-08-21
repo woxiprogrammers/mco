@@ -409,6 +409,7 @@ function showProfitMargins(){
             validForm = false;
         }else{
             var formFields = $("#QuotationCreateForm,#QuotationEditForm").serializeArray();
+            console.log(formFields);
             $.each(formFields, function(i){
                 if(($.trim(formFields[i].value)) == ""){
                     $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
