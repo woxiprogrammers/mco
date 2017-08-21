@@ -56,7 +56,7 @@ trait ExtraItemTrait{
             $data['is_active'] = false;
             $extraItem = ExtraItem::create($data);
             $request->session()->flash('success', 'Extra Item Created successfully.');
-            return redirect('/extraItem/create');
+            return redirect('/extra-item/create');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Extra Item',

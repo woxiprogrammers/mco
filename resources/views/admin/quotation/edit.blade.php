@@ -349,204 +349,226 @@
                                                 </div>
                                         </form>
                                                 <div class="tab-pane fade in" id="workOrderTab">
-                                                    <fieldset class="row" style="text-align: right">
+                                                    @if($quotation->quotation_status->slug == 'approved')
+                                                        <form id="WorkOrderForm" action="/quotation/work-order/edit/{{$quotation->work_order->id}}" method="post">
+                                                    @elseif($quotation->quotation_status->slug == 'draft')
+                                                                <form id="WorkOrderForm" action="/quotation/approve/{{$quotation->id}}" method="post">
+                                                    @endif
+                                                                    {!! csrf_field() !!}
+
+
+                                                                    <fieldset class="row" style="text-align: right">
                                                         <a class="btn btn-info" href="#GeneralTab" data-toggle="tab">
                                                             Back
                                                         </a>
+                                                        <button type="submit" class="btn btn-success">
+                                                            Approve
+                                                        </button>
                                                     </fieldset>
-                                                    @if($quotation->quotation_status->slug == 'approved')
-                                                        <form id="WorkOrderEditForm" action="/quotation/work-order/edit/{{$quotation->work_order->id}}" method="post">
-                                                            {!! csrf_field() !!}
-                                                            <input type="hidden" name="quotation_id" value="{{$quotation->id}}">
-                                                            <div class="col-md-offset-2">
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="work_order_number" class="control-form pull-right">
-                                                                            Remark:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <textarea class="form-control" name="remark" id="remark">
-                                                                            {{$quotation->remark}}
-                                                                        </textarea>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="work_order_number" class="control-form pull-right">
-                                                                            Work Order Number:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input class="form-control" value="{{$quotation->work_order->work_order_number}}" name="work_order_number" id="workOrderNumber" type="text">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="description" class="control-form pull-right">
-                                                                            Description:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
+                                                    <ul class="nav nav-tabs nav-tabs-lg">
+                                                        <li class="active">
+                                                            <a href="#workOrderFormTab" data-toggle="tab"> Work Order </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#extraItemFormTab" data-toggle="tab"> Extra Items </a>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                        <div class="tab-pane fade in active" id="workOrderFormTab">
+                                                            @if($quotation->quotation_status->slug == 'approved')
+                                                                    {!! csrf_field() !!}
+                                                                    <input type="hidden" name="quotation_id" value="{{$quotation->id}}">
+                                                                    <div class="col-md-offset-2">
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="work_order_number" class="control-form pull-right">
+                                                                                    Remark:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <textarea class="form-control" name="remark" id="remark">
+                                                                                    {{$quotation->remark}}
+                                                                                </textarea>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="work_order_number" class="control-form pull-right">
+                                                                                    Work Order Number:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" value="{{$quotation->work_order->work_order_number}}" name="work_order_number" id="workOrderNumber" type="text">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="description" class="control-form pull-right">
+                                                                                    Description:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
                                                                         <textarea class="form-control" name="description" id="workOrderDescription">
                                                                             {{$quotation->work_order->description}}
                                                                         </textarea>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="scope" class="control-form pull-right">
-                                                                            Scope:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input class="form-control" value="{{$quotation->work_order->scope}}" name="scope" id="scope" type="text">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="order_value" class="control-form pull-right">
-                                                                            Order Value:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="row">
-                                                                        <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                                    </div>
-                                                                    <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                                        <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                                            Browse</a>
-                                                                        <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                            <i class="fa fa-share"></i> Upload Files </a>
-                                                                    </div>
-                                                                    <table class="table table-bordered table-hover" style="width: 700px">
-                                                                        <thead>
-                                                                        <tr role="row" class="heading">
-                                                                            <th> Image </th>
-                                                                            <th> Action </th>
-                                                                        </tr>
-                                                                        </thead>
-                                                                        <tbody id="show-product-images">
-                                                                            @foreach($quotation->work_order->images as $image)
-                                                                                <tr id="image-{{$image->id}}">
-                                                                                    <td>
-                                                                                        <a href="{{$image->path}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
-                                                                                            <img class="img-responsive" src="{{$image->path}}" alt="" style="width:100px; height:100px;"> </a>
-                                                                                        <input type="hidden" class="work-order-image-name" name="work_order_images[$image->id][image_name]" id="work-order-image-{{$image->id}}" value="{{$image->path}}"/>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$image->id}}","{{$image->path}}",0);'>
-                                                                                            <i class="fa fa-times"></i> Remove </a>
-                                                                                    </td>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="scope" class="control-form pull-right">
+                                                                                    Scope:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" value="{{$quotation->work_order->scope}}" name="scope" id="scope" type="text">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="order_value" class="control-form pull-right">
+                                                                                    Order Value:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="row">
+                                                                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                                            </div>
+                                                                            <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                                    Browse</a>
+                                                                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                                    <i class="fa fa-share"></i> Upload Files </a>
+                                                                            </div>
+                                                                            <table class="table table-bordered table-hover" style="width: 700px">
+                                                                                <thead>
+                                                                                <tr role="row" class="heading">
+                                                                                    <th> Image </th>
+                                                                                    <th> Action </th>
                                                                                 </tr>
-                                                                            @endforeach
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-2 col-md-offset-4">
-                                                                        <button type="submit" class="btn btn-success">
-                                                                            Submit
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
+                                                                                </thead>
+                                                                                <tbody id="show-product-images">
+                                                                                @foreach($quotation->work_order->images as $image)
+                                                                                    <tr id="image-{{$image->id}}">
+                                                                                        <td>
+                                                                                            <a href="{{$image->path}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                                                                                                <img class="img-responsive" src="{{$image->path}}" alt="" style="width:100px; height:100px;"> </a>
+                                                                                            <input type="hidden" class="work-order-image-name" name="work_order_images[$image->id][image_name]" id="work-order-image-{{$image->id}}" value="{{$image->path}}"/>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$image->id}}","{{$image->path}}",0);'>
+                                                                                                <i class="fa fa-times"></i> Remove </a>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endforeach
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        <div class="form-group">
 
-                                                        </form>
-                                                    @elseif($quotation->quotation_status->slug == 'draft')
-                                                        <form id="WorkOrderCreateForm" action="/quotation/approve/{{$quotation->id}}" method="post">
-                                                            {!! csrf_field() !!}
-                                                            <input type="hidden" name="quotation_id" value="{{$quotation->id}}">
-                                                            <div class="col-md-offset-2">
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="work_order_number" class="control-form pull-right">
-                                                                            Remark:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <textarea class="form-control" name="remark" id="remark"></textarea>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="work_order_number" class="control-form pull-right">
-                                                                            Work Order Number:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input class="form-control" name="work_order_number" id="workOrderNumber" type="text">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="description" class="control-form pull-right">
-                                                                            Description:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
+                                                                        </div>
+                                                            @elseif($quotation->quotation_status->slug == 'draft')
+                                                                    <input type="hidden" name="quotation_id" value="{{$quotation->id}}">
+                                                                    <div class="col-md-offset-2">
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="work_order_number" class="control-form pull-right">
+                                                                                    Remark:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <textarea class="form-control" name="remark" id="remark"></textarea>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="work_order_number" class="control-form pull-right">
+                                                                                    Work Order Number:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" name="work_order_number" id="workOrderNumber" type="text">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="description" class="control-form pull-right">
+                                                                                    Description:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
                                                                         <textarea class="form-control" name="description" id="workOrderDescription">
                                                                         </textarea>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="scope" class="control-form pull-right">
-                                                                            Scope:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input class="form-control" name="scope" id="scope" type="text">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label for="order_value" class="control-form pull-right">
-                                                                            Order Value:
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="row">
-                                                                        <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                                    </div>
-                                                                    <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                                        <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                                            Browse</a>
-                                                                        <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                            <i class="fa fa-share"></i> Upload Files </a>
-                                                                    </div>
-                                                                    <table class="table table-bordered table-hover" style="width: 700px">
-                                                                        <thead>
-                                                                        <tr role="row" class="heading">
-                                                                            <th> Image </th>
-                                                                            <th> Action </th>
-                                                                        </tr>
-                                                                        </thead>
-                                                                        <tbody id="show-product-images">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="scope" class="control-form pull-right">
+                                                                                    Scope:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" name="scope" id="scope" type="text">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="order_value" class="control-form pull-right">
+                                                                                    Order Value:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="row">
+                                                                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                                            </div>
+                                                                            <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                                    Browse</a>
+                                                                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                                    <i class="fa fa-share"></i> Upload Files </a>
+                                                                            </div>
+                                                                            <table class="table table-bordered table-hover" style="width: 700px">
+                                                                                <thead>
+                                                                                <tr role="row" class="heading">
+                                                                                    <th> Image </th>
+                                                                                    <th> Action </th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody id="show-product-images">
 
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <div class="col-md-2 col-md-offset-4">
-                                                                        <button type="submit" class="btn btn-success">
-                                                                            Submit
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                        </form>
-                                                    @endif
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
 
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="tab-pane fade in" id="extraItemFormTab">
+                                                        @foreach($extraItems as $extraItem)
+                                                            <div class="form-group">
+                                                                <div class="col-md-3">
+                                                                    <label class="control-form pull-right">
+                                                                        {{$extraItem['name']}}
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </form>
+                                        </div>
                                     </div>
+                                </div>
                                 </div>
                                 <div id="productView" class="modal fade" role="dialog">
                                     <div class="modal-dialog product-view-modal">
@@ -636,6 +658,7 @@
 <script>
     $(document).ready(function(){
         EditQuotation.init();
+        WorkOrderFrom.init();
         calculateSubtotal();
         var quotationProducts = $("#quotationProducts").val();
         quotationProducts = jQuery.parseJSON(quotationProducts);
