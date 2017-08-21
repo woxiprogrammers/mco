@@ -63,9 +63,9 @@
                                                             <tr id="id_{{$quotationProducts[$iterator]['id']}}">
                                                                 <td>
                                                                     @if(array_key_exists('current_quantity',$quotationProducts[$iterator]->toArray()))
-                                                                    <input class="product-checkbox" type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" checked>
+                                                                        <input class="product-checkbox" type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}" checked onchange="getTotals()">
                                                                     @else
-                                                                    <input class="product-checkbox" type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}">
+                                                                        <input class="product-checkbox" type="checkbox" id="id_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}]" value="{{$quotationProducts[$iterator]['id']}}">
                                                                     @endif
                                                                 </td>
 
@@ -112,9 +112,9 @@
 
                                                                 <td class="form-group">
                                                                     @if(array_key_exists('current_quantity',$quotationProducts[$iterator]->toArray()))
-                                                                    <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" value="{{$quotationProducts[$iterator]['current_quantity']}}">
+                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" value="{{$quotationProducts[$iterator]['current_quantity']}}">
                                                                     @else
-                                                                    <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" disabled>
+                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" disabled>
                                                                     @endif
                                                                 </td>
 
@@ -137,29 +137,35 @@
                                                         @for($iterator = 0; $iterator < count($quotationExtraItems); $iterator++)
                                                             <tr>
                                                                 <td>
-                                                                    <input type="checkbox" id="id_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}]" value="{{$quotationExtraItems[$iterator]->id}}" class="extra-item-checkbox">
+                                                                    @if(array_key_exists('current_rate',$quotationExtraItems[$iterator]->toArray()))
+                                                                        <input type="checkbox" id="id_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}]" value="{{$quotationExtraItems[$iterator]->id}}" class="extra-item-checkbox" checked>
+                                                                    @else
+                                                                        <input type="checkbox" id="id_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}]" value="{{$quotationExtraItems[$iterator]->id}}" class="extra-item-checkbox">
+                                                                    @endif
                                                                 </td>
                                                                 <td colspan="4">
                                                             <span>
                                                                 {{$quotationExtraItems[$iterator]->extraItem->name}}
                                                                 @if(array_key_exists('description',$quotationExtraItems[$iterator]->toArray()))
-                                                                    {{--<input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" value="{{$quotationProducts[$iterator]['bill_product_description_id']}}">--}}
                                                                     <input class="form-control extra_item_description" type="text" id="extra_item_description_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][description]" value="{{$quotationExtraItems[$iterator]['description']}}">
                                                                 @else
-                                                                {{--    <input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}">--}}
                                                                     <input class="form-control extra_item_description" type="text" id="extra_item_description_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][description]" disabled>
                                                                 @endif
-                                                                {{--<input class="extra_item_description form-control" type="text" id="extra_item_description_{{$quotationExtraItem[$iterator]->id}}" name="extra_item[{{$quotationExtraItem[$iterator]->id}}][description]" value="{{$quotationExtraItem[$iterator]['']}}" disabled>--}}
                                                             </span>
                                                                 </td>
                                                                 <td colspan="2">
                                                                     <span id="total_extra_item_rate">{{$quotationExtraItems[$iterator]->rate}}</span>
                                                                 </td>
                                                                 <td colspan="2">
-                                                                    <span id="previous_rates_{{$quotationExtraItems[$iterator]->id}}">0</span>
+                                                                    <span id="previous_rates_{{$quotationExtraItems[$iterator]->id}}">{{$quotationExtraItems[$iterator]->prev_amount}}</span>
                                                                 </td>
                                                                 <td colspan="2" class="form-group">
-                                                                    <input class="form-control" type="text" id="extra_item_rate_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][rate]" {{--onchange="getTotals()"--}}  disabled>
+                                                                    @if(array_key_exists('current_rate',$quotationExtraItems[$iterator]->toArray()))
+                                                                        <input class="form-control" type="text" id="extra_item_rate_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][rate]" value="{{$quotationExtraItems[$iterator]->current_rate}}" onchange="checkExtraItemRate({{$quotationExtraItems[$iterator]->id}})">
+                                                                    @else
+                                                                        <input class="form-control" type="text" id="extra_item_rate_{{$quotationExtraItems[$iterator]->id}}" name="extra_item[{{$quotationExtraItems[$iterator]->id}}][rate]" {{--onchange="getTotals()"--}}  disabled>
+                                                                    @endif
+
                                                                 </td>
                                                             </tr>
                                                         @endfor

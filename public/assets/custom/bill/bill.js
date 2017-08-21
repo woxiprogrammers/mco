@@ -183,7 +183,7 @@ function getTotals(){
     var total_extra_item_rate = 0;
     var total_product_current_bill_amount = 0.0;
 
-    var selected_product_length = $('input:checked:not(".tax-applied-on")').length;
+    var selected_product_length = $('input:checked.product-checkbox').length;
     if(selected_product_length > 0){
         $('input:checked.product-checkbox').each(function(){
             var id = $(this).val();
