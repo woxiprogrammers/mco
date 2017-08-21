@@ -62,7 +62,6 @@ class UserController extends Controller
     public function getEditView(Request $request,$user){
         try{
             $roles = Role::get()->toArray();
-            $user = $user->toArray();
             return view('user.edit')->with(compact('user','roles'));
         }catch(\Exception $e){
             $data = [
@@ -79,8 +78,9 @@ class UserController extends Controller
         try{
             $data = $request->except('role_id');
             $user->update($data);
-            $userRoleData = array();
-            $userRoleData['role_id'] = $request->
+            $userHasRoleData = array();
+            $userHasRoleData['role_id'] = $request->role_id;
+            UserHasRole::where('user_id', $user->id)->update($userHasRoleData);
             $request->session()->flash('success', 'User Edited successfully.');
             return redirect('/user/edit/'.$user->id);
         }catch(\Exception $e){

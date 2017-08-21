@@ -683,7 +683,7 @@ trait QuotationTrait{
                                             ->where('quotation_extra_items.quotation_id',$quotation['id'])
                                             ->select('quotation_extra_items.extra_item_id as id','quotation_extra_items.rate as rate','extra_items.name as name')
                                             ->get();
-            if($extraItems == null){
+            if($extraItems == null || count($extraItems) == 0){
                 $extraItems = ExtraItem::where('is_active', true)->select('id','name','rate')->orderBy('name','asc')->get();
             }else{
                 $extraItems = $extraItems->toArray();
@@ -696,7 +696,7 @@ trait QuotationTrait{
                     $extraItems = array_merge($extraItems,$newExtraItems);
                 }
             }
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems'));
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
