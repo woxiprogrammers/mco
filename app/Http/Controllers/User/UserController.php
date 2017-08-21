@@ -63,6 +63,7 @@ class UserController extends Controller
         try{
             $roles = Role::get()->toArray();
             $user = $user->toArray();
+            dd($user);
             return view('user.edit')->with(compact('user','roles'));
         }catch(\Exception $e){
             $data = [

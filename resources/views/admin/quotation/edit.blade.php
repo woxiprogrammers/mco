@@ -183,7 +183,7 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="col-md-2">
-                                                                            <a class="btn btn-success btn-md pull-right" id="addProduct">Add Product</a>
+                                                                            <a class="btn btn-success btn-md pull-right" id="addProduct"><i class="fa fa-plus"></i> Product</a>
                                                                         </div>
                                                                     </div>
                                                                     <div class="row" style="height: 4%">
