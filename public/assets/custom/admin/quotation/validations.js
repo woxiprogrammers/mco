@@ -167,8 +167,8 @@ var  WorkOrderFrom = function () {
             },
 
             submitHandler: function (form) {
-                $("button[type='submit']").attr('disabled', true);
                 if (confirm("Please confirm work order details and extra items' costs.") == true) {
+                    $("button[type='submit']").attr('disabled', true);
                     form.submit();
                 }
                 success.show();

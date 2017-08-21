@@ -352,18 +352,22 @@
                                                     @if($quotation->quotation_status->slug == 'approved')
                                                         <form id="WorkOrderForm" action="/quotation/work-order/edit/{{$quotation->work_order->id}}" method="post">
                                                     @elseif($quotation->quotation_status->slug == 'draft')
-                                                                <form id="WorkOrderForm" action="/quotation/approve/{{$quotation->id}}" method="post">
+                                                        <form id="WorkOrderForm" action="/quotation/approve/{{$quotation->id}}" method="post">
                                                     @endif
-                                                                    {!! csrf_field() !!}
-
-
-                                                                    <fieldset class="row" style="text-align: right">
+                                                    {!! csrf_field() !!}
+                                                    <fieldset class="row" style="text-align: right">
                                                         <a class="btn btn-info" href="#GeneralTab" data-toggle="tab">
                                                             Back
                                                         </a>
+                                                        @if(($quotation->quotation_status->slug == 'approved' || $quotation->quotation_status->slug == 'disapproved')&& $userRole == 'superadmin')
                                                         <button type="submit" class="btn btn-success">
-                                                            Approve
+                                                            Submit
                                                         </button>
+                                                        @elseif($quotation->quotation_status->slug == 'draft')
+                                                            <button type="submit" class="btn btn-success">
+                                                                Approve
+                                                            </button>
+                                                        @endif
                                                     </fieldset>
                                                     <ul class="nav nav-tabs nav-tabs-lg">
                                                         <li class="active">
