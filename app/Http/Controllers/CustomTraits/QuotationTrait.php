@@ -10,6 +10,7 @@ namespace App\Http\Controllers\CustomTraits;
 use App\BillQuotationProducts;
 use App\Category;
 use App\Client;
+use App\ExtraItem;
 use App\Helper\NumberHelper;
 use App\Helper\MaterialProductHelper;
 use App\Helper\UnitHelper;
@@ -23,6 +24,7 @@ use App\ProfitMarginVersion;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
+use App\QuotationExtraItem;
 use App\QuotationMaterial;
 use App\QuotationProduct;
 use App\QuotationProfitMarginVersion;
@@ -677,7 +679,24 @@ trait QuotationTrait{
                 $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
             }
             $orderValue = $orderValue + $taxAmount;
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','userRole','quotationProducts'));
+            $extraItems = QuotationExtraItem::join('extra_items','extra_items.id','=','quotation_extra_items.extra_item_id')
+                                            ->where('quotation_extra_items.quotation_id',$quotation['id'])
+                                            ->select('quotation_extra_items.extra_item_id as id','quotation_extra_items.rate as rate','extra_items.name as name')
+                                            ->get();
+            if($extraItems == null){
+                $extraItems = ExtraItem::where('is_active', true)->select('id','name','rate')->orderBy('name','asc')->get();
+            }else{
+                $extraItems = $extraItems->toArray();
+                $newExtraItems = QuotationExtraItem::join('extra_items','extra_items.id','!=','quotation_extra_items.extra_item_id')
+                    ->where('extra_items.is_active', true)
+                    ->select('extra_items.id as id','extra_items.rate as rate','extra_items.name as name')
+                    ->get();
+                if($newExtraItems != null){
+                    $newExtraItems = $newExtraItems->toArray();
+                    $extraItems = array_merge($extraItems,$newExtraItems);
+                }
+            }
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
@@ -1159,6 +1178,13 @@ trait QuotationTrait{
             $quotationData['remark'] = $request->remark;
             $workOrderData = $request->except('_token','product_images','remark');
             $workOrder = QuotationWorkOrder::create($workOrderData);
+            $quotationExtraItemData = array();
+            $quotationExtraItemData['quotation_id'] = $request->quotation_id;
+            foreach($request->extra_item as $extraItemId => $extraItemValue){
+                $quotationExtraItemData['extra_item_id'] = $extraItemId;
+                $quotationExtraItemData['rate'] = $extraItemValue;
+                QuotationExtraItem::create($quotationExtraItemData);
+            }
             $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
             $materials = array();
             $iterator = 0;
@@ -1306,6 +1332,18 @@ trait QuotationTrait{
             $workOrder->update($workOrderData);
             foreach($workOrder->images as $image){
                 $image->delete();
+            }
+            $quotationExtraItemData = array();
+            $quotationExtraItemData['quotation_id'] = $request->quotation_id;
+            foreach($request->extra_item as $extraItemId => $extraItemValue){
+                $quotationExtraItemData['extra_item_id'] = $extraItemId;
+                $quotationExtraItemData['rate'] = $extraItemValue;
+                $quotationExtraItem = QuotationExtraItem::where('quotation_id',$request->quotation_id)->where('extra_item_id',$extraItemId)->first();
+                if($quotationExtraItem != null){
+                    $quotationExtraItem->update($quotationExtraItemData);
+                }else{
+                    QuotationExtraItem::create($quotationExtraItemData);
+                }
             }
             $isImagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$workOrder->quotation_id,$workOrder['id']);
             $request->session()->flash('success','Work Order Updated Successfully');
