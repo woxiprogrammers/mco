@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Quotation;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use ConsoleTVs\Charts\Facades\Charts;
+
 
 class DashboardController extends Controller
 {

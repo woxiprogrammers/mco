@@ -41,6 +41,7 @@
                                         <input type="hidden" id="user_id" value="{{$user['id']}}">
                                         <form role="form" id="edit-user" class="form-horizontal" method="post" action="/user/edit/{{$user['id']}}">
                                             {!! csrf_field() !!}
+                                            <input type="hidden" name="_method" value="PUT">
                                             <div class="form-group row">
                                                 <div class="col-md-3" style="text-align: right">
                                                     <label for="role_id" class="control-label">Select Role</label>
@@ -49,7 +50,7 @@
                                                 <div class="col-md-6">
                                                     <select class="form-control" id="role_id" name="role_id">
                                                         @foreach($roles as $role)
-                                                            @if($role['id'] == $user['role_id'])
+                                                            @if($role['id'] == $user->roles[0]->role_id)
                                                                 <option value="{{$role['id']}}" selected>{{$role['name']}}</option>
                                                             @else
                                                                 <option value="{{$role['id']}}">{{$role['name']}}</option>
