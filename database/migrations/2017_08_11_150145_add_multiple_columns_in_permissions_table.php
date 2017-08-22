@@ -18,7 +18,8 @@ class AddMultipleColumnsInPermissionsTable extends Migration
             $table->foreign('module_id')->references('id')->on('modules')->onUdate('cascade')->onDelete('cascade');
             $table->boolean('is_web');
             $table->boolean('is_mobile');
-            $table->string('type',20);
+            $table->unsignedInteger('type_id');
+            $table->string('description')->nullable();
         });
     }
 
@@ -30,12 +31,12 @@ class AddMultipleColumnsInPermissionsTable extends Migration
     public function down()
     {
         Schema::table('permissions', function (Blueprint $table) {
-            $table->dropColumn('slug');
             $table->dropColumn('is_web');
             $table->dropColumn('is_mobile');
-            $table->dropColumn('type');
+            $table->dropColumn('type_id');
             $table->dropForeign('permissions_module_id_foreign');
             $table->dropColumn('module_id');
+            $table->dropColumn('description');
         });
     }
 }

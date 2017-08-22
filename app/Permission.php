@@ -17,6 +17,7 @@ class Permission extends Model implements PermissionContract
      * @var array
      */
     protected $table = 'permissions';
+    protected $fillable = ['name','slug','module_id','type_id','description'];
     public $guarded = ['id'];
 
     /**

@@ -23,6 +23,13 @@ class ModuleTableSubmoduleSeeder extends Seeder
                 'updated_at' => $now
             ],
             [
+                'name' => 'Material',
+                'slug' => 'material',
+                'module_id' => DB::table('modules')->where('slug','structure')->pluck('id')->first(),
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+            [
                 'name' => 'Profit Margin',
                 'slug' => 'profit-margin',
                 'module_id' => DB::table('modules')->where('slug','structure')->pluck('id')->first(),
@@ -66,6 +73,30 @@ class ModuleTableSubmoduleSeeder extends Seeder
                 'name' => 'Manage Extra Items',
                 'slug' => 'manage-extra-items',
                 'module_id' => DB::table('modules')->where('slug','structure')->pluck('id')->first(),
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+
+            [
+                'name' => 'Manage User',
+                'slug' => 'manage-user',
+                'module_id' => DB::table('modules')->where('slug','users')->pluck('id')->first(),
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+
+            [
+                'name' => 'Manage Client',
+                'slug' => 'manage-client',
+                'module_id' => DB::table('modules')->where('slug','clients')->pluck('id')->first(),
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+
+            [
+                'name' => 'Manage Sites',
+                'slug' => 'manage-sites',
+                'module_id' => DB::table('modules')->where('slug','clients')->pluck('id')->first(),
                 'created_at' => $now,
                 'updated_at' => $now
             ],
@@ -161,8 +192,8 @@ class ModuleTableSubmoduleSeeder extends Seeder
             ],
 
             [
-                'name' => 'Purchase Amendment',
-                'slug' => 'purchase-amendment',
+                'name' => 'Manage Amendment',
+                'slug' => 'manage-amendment',
                 'module_id' => DB::table('modules')->where('slug','purchase')->pluck('id')->first(),
                 'created_at' => $now,
                 'updated_at' => $now
@@ -170,8 +201,8 @@ class ModuleTableSubmoduleSeeder extends Seeder
 
 
             [
-                'name' => 'Inventory IN/OUT',
-                'slug' => 'inventory-in-out',
+                'name' => 'Inventory IN/OUT/TRANSFER',
+                'slug' => 'inventory-in-out-transfer',
                 'module_id' => DB::table('modules')->where('slug','inventory')->pluck('id')->first(),
                 'created_at' => $now,
                 'updated_at' => $now
@@ -207,17 +238,7 @@ class ModuleTableSubmoduleSeeder extends Seeder
                 'module_id' => DB::table('modules')->where('slug','inventory')->pluck('id')->first(),
                 'created_at' => $now,
                 'updated_at' => $now
-            ],
-
-
-            [
-                'name' => 'Manage User',
-                'slug' => 'manage-user',
-                'module_id' => DB::table('modules')->where('slug','users')->pluck('id')->first(),
-                'created_at' => $now,
-                'updated_at' => $now
-            ],
-
+            ]
 
         ]);
     }
