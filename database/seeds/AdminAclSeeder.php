@@ -13,7 +13,7 @@ class AdminAclSeeder extends Seeder
     {
         $userId = \App\User::join('user_has_roles','user_has_roles.user_id','=','users.id')
             ->join('roles','roles.id','=','user_has_roles.role_id')
-            ->where('roles.slug','superadmin')
+            ->where('roles.slug','admin')
             ->pluck('users.id')
             ->first();
         $permissionIds = \App\Permission::join('modules','modules.id','=','permissions.module_id')
