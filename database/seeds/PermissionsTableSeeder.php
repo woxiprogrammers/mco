@@ -770,7 +770,6 @@ class PermissionsTableSeeder extends Seeder
                 'type_id' => DB::table('permission_types')->where('slug','create')->pluck('id')->first(),
                 'created_at' => $now,
                 'updated_at' => $now,
-                'description' => 'Add Comment'
             ],
             [
                 'name' => 'view-purchase-history',
@@ -933,7 +932,6 @@ class PermissionsTableSeeder extends Seeder
                 'type_id' => DB::table('permission_types')->where('slug','create')->pluck('id')->first(),
                 'created_at' => $now,
                 'updated_at' => $now,
-                'description' => 'Add Comment'
             ],
             [
                 'name' => 'view-inventory-history',
