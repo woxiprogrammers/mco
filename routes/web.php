@@ -217,5 +217,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{project}',array('uses' => 'Admin\ProjectController@getEditView'));
         Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
     });
+
+    Route::group(['prefix' => 'vendors'],function(){
+        Route::get('manage',array('uses' => 'Admin\VendorController@getManageView'));
+        Route::get('create',array('uses' => 'Admin\VendorController@getCreateView'));
+        Route::post('create',array('uses' => 'Admin\VendorController@createVendor'));
+        Route::get('edit/{vendor}',array('uses' => 'Admin\VendorController@getEditView'));
+        Route::put('edit/{vendor}',array('uses' => 'Admin\VendorController@editVendor'));
+        Route::post('listing',array('uses'=> 'Admin\VendorController@vendorListing'));
+        Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
+        Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
+    });
 });
 
