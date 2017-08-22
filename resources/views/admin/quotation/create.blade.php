@@ -97,11 +97,11 @@
 
                                                         <fieldset style="margin-top: 1%; margin-bottom: 1%">
                                                             <legend> Products
-                                                                <a class="btn btn-wide btn-primary  col-md-offset-8" id="materialCosts" >
+                                                                <a class="btn btn-wide btn-primary  col-md-offset-8" id="materialCosts" style="margin-left: 72%">
                                                                     <i class="fa fa-pencil-square-o"></i>
                                                                     Material Rate
                                                                 </a>
-                                                                <a class="btn btn-success btn-md" id="addProduct">
+                                                                <a class="btn yellow btn-md" id="addProduct">
                                                                     <i class="fa fa-plus"></i>
                                                                     Product
                                                                 </a>

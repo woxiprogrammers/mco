@@ -118,8 +118,8 @@
                                                 </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn blue">Submit</button>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -141,9 +141,13 @@
 <script src="/assets/custom/user/user.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
+
+        $('#submit').css("padding-left",'6px');
         $('#email').css('pointer-events',"none");
         $('select[name="gender"]').find('option[value={{$user['gender']}}]').attr("selected",true);
         EditUser.init();
+
+
     });
 </script>
 @endsection
