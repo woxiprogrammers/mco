@@ -143,5 +143,28 @@ var  EditRole = function () {
     };
 }();
 
+function getModules(role){
+    $.ajax({
+        url: '/role/get-modules/'+role,
+        type: 'GET',
+        async: false,
+        success: function(data, textStatus, xhr){
+            if(xhr.status == 200){
+                $("#material_id").html(data);
+                $("#roleModulesTable input[type='number']").each(function(){
+                    $(this).rules('add',{
+                        required: true
+                    });
+                });
+
+            }else{
+
+            }
+        },
+        error: function(errorStatus,xhr){
+
+        }
+    });
+
 
 

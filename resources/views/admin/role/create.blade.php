@@ -3,6 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -63,10 +64,39 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-actions noborder row">
-                                                    <div class="col-md-offset-3">
-                                                        <button type="submit" class="btn blue">Submit</button>
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label">Modules</label>
+                                                    <div class="col-md-7">
+                                                        <div class="form-control product-module-select" >
+                                                            <ul id="module_id" class="list-group">
+
+                                                                @foreach($role as $module)
+                                                                <li  class="list-group-item"><input type="checkbox" name="module_id" value="{{$module->id}}"> {{$module->name}}</li>';
+
+                                                                    @endforeach
+                                                            </ul>
+                                                        </div>
                                                     </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-offset-9">
+                                                        <a class="btn btn-success btn-md" id="next_btn">Next >></a>
+                                                    </div>
+                                                </div>
+                                                <div class="modules-table-div" hidden>
+                                                    <fieldset>
+                                                        <legend> Modules</legend>
+                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="moduleTable">
+
+                                                        </table>
+                                                        <div class="col-md-offset-7">
+                                                            <div class="col-md-3 col-md-offset-2">
+                                                                <label class="control-label" style="font-weight: bold">
+                                                                    Sub Module
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </fieldset>
                                                 </div>
                                                 </form>
                                         </div>
@@ -85,6 +115,52 @@
     <script>
         $(document).ready(function() {
             CreateRole.init();
+        });
+
+
+
+
+
+        $(document).ready(function(){
+            getModules($("#role_name").val());
+            CreateRole.init();
+            var citiList = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: "/product/auto-suggest/%QUERY",
+                    filter: function(x) {
+                        if($(window).width()<420){
+                            $("#header").addClass("fixed");
+                        }
+                        return $.map(x, function (data) {
+                            return {
+                                id:data.id,
+                                name:data.name,
+                            };
+                        });
+                    },
+                    wildcard: "%QUERY"
+                }
+            });
+            citiList.initialize();
+            $('.typeahead').typeahead(null, {
+                displayKey: 'name',
+                engine: Handlebars,
+                source: citiList.ttAdapter(),
+                limit: 30,
+                templates: {
+                    empty: [
+                        '<div class="empty-suggest">',
+                        '</div>'
+                    ].join('\n'),
+                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+                },
+            }).on('typeahead:selected', function (obj, datum) {
+
+            }).on('typeahead:open', function (obj, datum) {
+
+            });
         });
     </script>
 @endsection

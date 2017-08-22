@@ -14,6 +14,7 @@ trait RoleTrait{
 
     public function getCreateView(Request $request){
         try{
+//            $modules = Modu
             return view('admin.role.create');
         }catch(\Exception $e){
             $data = [
