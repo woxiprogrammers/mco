@@ -5,6 +5,7 @@
  */
 
 namespace App\Http\Controllers\CustomTraits;
+use App\Module;
 use App\Role;
 use App\Http\Requests\RoleRequest;
 use Illuminate\Http\Request;
@@ -14,8 +15,8 @@ trait RoleTrait{
 
     public function getCreateView(Request $request){
         try{
-//            $modules = Modu
-            return view('admin.role.create');
+            $modules = Module::whereNull('module_id')->get();
+            return view('admin.role.create')->with(compact('modules'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role create view",

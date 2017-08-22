@@ -42,8 +42,11 @@
                                             <form role="form" id="create-role" class="form-horizontal" method="post" action="/role/create">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
+                                                    <fieldset>
+                                                        <legend> General Information </legend>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
+
                                                             <label for="name" class="control-label">Name</label>
                                                             <span>*</span>
                                                         </div>
@@ -63,17 +66,16 @@
                                                             </select>
                                                         </div>
                                                     </div>
+                                                    </fieldset>
                                                 </div>
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">Modules</label>
                                                     <div class="col-md-7">
-                                                        <div class="form-control product-module-select" >
+                                                        <div class="form-control product-material-select" >
                                                             <ul id="module_id" class="list-group">
-
-                                                                @foreach($role as $module)
-                                                                <li  class="list-group-item"><input type="checkbox" name="module_id" value="{{$module->id}}"> {{$module->name}}</li>';
-
-                                                                    @endforeach
+                                                                @foreach($modules as $module)
+                                                                    <li  class="list-group-item"><input type="checkbox" name="module_id" value="{{$module->id}}"> {{$module->name}}</li>
+                                                                @endforeach
                                                             </ul>
                                                         </div>
                                                     </div>
@@ -83,22 +85,9 @@
                                                         <a class="btn btn-success btn-md" id="next_btn">Next >></a>
                                                     </div>
                                                 </div>
-                                                <div class="modules-table-div" hidden>
-                                                    <fieldset>
-                                                        <legend> Modules</legend>
-                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="moduleTable">
-
-                                                        </table>
-                                                        <div class="col-md-offset-7">
-                                                            <div class="col-md-3 col-md-offset-2">
-                                                                <label class="control-label" style="font-weight: bold">
-                                                                    Sub Module
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </fieldset>
                                                 </div>
-                                                </form>
+                                                </fieldset>
+                                                    </form>
                                         </div>
                                     </div>
                                 </div>
@@ -155,7 +144,7 @@
                         '</div>'
                     ].join('\n'),
                     suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
-                },
+                }
             }).on('typeahead:selected', function (obj, datum) {
 
             }).on('typeahead:open', function (obj, datum) {

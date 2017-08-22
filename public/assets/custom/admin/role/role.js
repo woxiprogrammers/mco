@@ -143,28 +143,64 @@ var  EditRole = function () {
     };
 }();
 
-function getModules(role){
+function getModules(role) {
     $.ajax({
-        url: '/role/get-modules/'+role,
+        url: '/role/get-modules/' + role,
         type: 'GET',
         async: false,
-        success: function(data, textStatus, xhr){
-            if(xhr.status == 200){
+        success: function (data, textStatus, xhr) {
+            if (xhr.status == 200) {
                 $("#material_id").html(data);
-                $("#roleModulesTable input[type='number']").each(function(){
-                    $(this).rules('add',{
+                $("#roleModulesTable input[type='number']").each(function () {
+                    $(this).rules('add', {
                         required: true
                     });
                 });
 
-            }else{
+            } else {
 
             }
         },
-        error: function(errorStatus,xhr){
+        error: function (errorStatus, xhr) {
 
         }
     });
+}
+
+function getSubModules(){
+    var module_id = [];
+    var formData = {};
+    formData['_token'] = $("input[name='_token']").val();
+    $("#material_id input:checkbox:checked").each(function(i){
+        module_id[i] = $(this).val();
+    });
+    formData['module_id'] = module_id;
+    if($(".product-material-id").length > 0){
+        formData['modules'] = {};
+        $(".product-material-id").each(function(i){
+            var materialId = $(this).val();
+            formData['modules'][moduleId] = {};
+            formData['modules'][moduleId]['id'] = moduleId;
+            formData['modules'][moduleId]['rate_per_unit'] = $("#module_"+moduleId+"_rate").val();
+            formData['modules'][moduleId]['unit_id'] = $("#module_"+moduleId+"_unit").val();
+            formData['modules'][moduleId]['quantity'] = $("#module_"+moduleId+"_quantity").val();
+        });
+    }
+    $.ajax({
+        url: '/role/get-submodules',
+        type: "POST",
+        data :formData,
+        async: false,
+        success: function(data,textStatus, xhr){
+            $("#productMaterialTable").html(data);
+            calculateSubTotal();
+        },
+        error: function(errorStatus, xhr){
+
+        }
+    });
+}
+
 
 
 
