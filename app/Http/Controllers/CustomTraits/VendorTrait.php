@@ -66,6 +66,7 @@ trait VendorTrait{
             $data['gstin'] = $request->gstin;
             $data['alternate_contact'] = $request->alternate_contact;
             $data['city'] = $request->city;
+            $data['is_active'] = false;
             //dd($data);
             $vendor = Vendor::create($data);
             $request->session()->flash('success', 'Vendor Created successfully.');
@@ -108,7 +109,11 @@ trait VendorTrait{
 
     public function vendorListing(Request $request){
         try{
-            $vendorsData = Vendor::orderBy('id','desc')->get()->toArray();
+            if($request->has('search_name')){
+                $vendorsData = Vendor::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
+            }else{
+                $vendorsData = Vendor::orderBy('name','asc')->get()->toArray();
+            }
             $iTotalRecords = count($vendorsData);
             $records = array();
             $records['data'] = array();

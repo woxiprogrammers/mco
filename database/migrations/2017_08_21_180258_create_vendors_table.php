@@ -18,11 +18,12 @@ class CreateVendorsTable extends Migration
             $table->timestamps();
             $table->string('name',255);
             $table->string('company');
-            $table->integer('mobile');
+            $table->string('mobile');
             $table->string('email');
             $table->string('gstin');
             $table->integer('alternate_contact')->nullable();
             $table->string('city');
+            $table->boolean('is_active')->default(false);
 
         });
     }

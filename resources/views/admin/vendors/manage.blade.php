@@ -49,12 +49,14 @@
                                                         <th style="width: 30%"> Name </th>
                                                         <th> Mobile Number </th>
                                                         <th> City </th>
+                                                        <th> Status </th>
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
                                                         <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_mobile" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_city" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -84,7 +86,7 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/admin/category/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/vendor/manage-datatable.js" type="text/javascript"></script>
    <script>
         $(document).ready(function() {
             $('#vendorTable').DataTable();
