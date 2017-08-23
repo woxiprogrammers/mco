@@ -20,7 +20,6 @@
                                 <h1>Manage Tax</h1>
                             </div>
                             <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 80%"><a href="/tax/create" style="color: white"><i class="fa fa-plus"></i> Tax
-
                                 </a>
                             </div>
                         </div>

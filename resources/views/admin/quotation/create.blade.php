@@ -53,10 +53,7 @@
                                                     <div class="tab-pane fade in active" id="GeneralTab">
                                                         <fieldset>
                                                             <legend>Project</legend>
-
-
                                                             <div class="row">
-
                                                                 <div class="col-md-4 col-md-offset-0">
                                                                     Client Name
                                                                 </div>
@@ -66,12 +63,8 @@
                                                                 <div class="col-md-4">
                                                                     Project Site Name
                                                                 </div>
-
                                                             </div>
-
-
                                                             <div class="row">
-
                                                                 <div class="col-md-4">
                                                                     <select class="form-control" id="clientId" name="client_id">
                                                                         <option value=""> -- Select Client -- </option>
@@ -82,19 +75,14 @@
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <select name="project_id" id="projectId" class="form-control" disabled>
-
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <select name="project_site_id" id="projectSiteId" class="form-control" disabled>
-
                                                                     </select>
                                                                 </div>
-
                                                             </div>
                                                         </fieldset>
-
-
                                                         <fieldset style="margin-top: 1%; margin-bottom: 1%">
                                                             <legend> Products
                                                                 <a class="btn btn-wide btn-primary  col-md-offset-8" id="materialCosts" style="margin-left: 72%">

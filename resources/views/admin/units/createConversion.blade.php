@@ -103,9 +103,7 @@
 <script>
     $(document).ready(function() {
         UnitsConversionCreate.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

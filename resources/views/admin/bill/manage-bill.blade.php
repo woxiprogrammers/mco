@@ -47,7 +47,6 @@
                                                         </div>
                                                         <div class="btn-group">
                                                             <div id="sample_editable_1_new" class="btn yellow"><a href="/bill/create" style="color: white"><i class="fa fa-plus"></i> Create Bill
-
                                                                 </a>
                                                             </div>
                                                         </div>

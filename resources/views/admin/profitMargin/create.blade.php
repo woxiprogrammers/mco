@@ -84,9 +84,7 @@
 <script>
     $(document).ready(function() {
         CreateProfitMargin.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

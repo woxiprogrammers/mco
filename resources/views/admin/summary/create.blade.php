@@ -73,9 +73,7 @@
 <script>
     $(document).ready(function() {
         SummaryCreate.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

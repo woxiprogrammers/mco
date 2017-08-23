@@ -155,9 +155,7 @@
 <script>
     $(document).ready(function(){
         CreateUser.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

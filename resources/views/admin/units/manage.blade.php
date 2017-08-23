@@ -22,7 +22,6 @@
                             </div>
 
                             <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 77%"><a href="/units/create" style="color: white"> <i class="fa fa-plus"></i> Unit
-
                                 </a>
                             </div>
                         </div>

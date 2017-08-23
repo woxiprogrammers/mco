@@ -110,9 +110,7 @@
 <script>
     $(document).ready(function() {
        CreateMaterial.init();
-
        $('#submit').css("padding-left",'6px');
-
         $("#name").rules('add',{
             remote: {
                 url: "/material/check-name",

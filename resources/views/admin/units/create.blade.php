@@ -74,9 +74,7 @@
 <script>
     $(document).ready(function() {
         UnitsCreate.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

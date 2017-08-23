@@ -80,9 +80,7 @@
     <script>
         $(document).ready(function() {
             CreateExtraItem.init();
-
             $('#submit').css("padding-left",'6px');
-
         });
     </script>
 @endsection

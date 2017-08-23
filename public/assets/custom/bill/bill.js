@@ -1,9 +1,5 @@
 $(document).ready(function (){
     CreateBill.init();
-    /*$(".product_description").each(function(){
-
-    });*/
-    //$('#submit').prop('disabled',true);
     $('#submit').css("padding-left",'6px');
     $('#submit').prop('disabled',true);
     $("#change_bill").on('change', function(){

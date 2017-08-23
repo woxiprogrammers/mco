@@ -141,13 +141,10 @@
 <script src="/assets/custom/user/user.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
-
         $('#submit').css("padding-left",'6px');
         $('#email').css('pointer-events',"none");
         $('select[name="gender"]').find('option[value={{$user['gender']}}]').attr("selected",true);
         EditUser.init();
-
-
     });
 </script>
 @endsection

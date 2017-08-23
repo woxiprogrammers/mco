@@ -108,9 +108,7 @@
 <script>
     $(document).ready(function() {
         EditClient.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

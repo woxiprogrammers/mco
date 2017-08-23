@@ -73,8 +73,6 @@
                                         </form>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -90,9 +88,7 @@
 <script>
     $(document).ready(function() {
         EditProfitMargin.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

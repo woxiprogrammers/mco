@@ -64,8 +64,6 @@
                                         </form>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -81,9 +79,7 @@
 <script>
     $(document).ready(function() {
         EditSummary.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

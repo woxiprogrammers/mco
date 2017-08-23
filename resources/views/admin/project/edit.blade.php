@@ -134,9 +134,7 @@
     $(document).ready(function() {
         EditProject.init();
         $("#hsnCode").trigger('change');
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

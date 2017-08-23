@@ -22,7 +22,6 @@
                             <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 70%"><a href="/profit-margin/create" style="color: white"><i class="fa fa-plus"></i> Profit Margin
                                 </a>
                             </div>
-
                         </div>
                     </div>
                     <div class="page-content">

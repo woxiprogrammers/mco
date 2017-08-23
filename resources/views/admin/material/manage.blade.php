@@ -82,8 +82,6 @@
                                                 </tbody>
                                             </table>
                                         </div>
-
-
                                     </div>
                                     <div class="portlet light ">
                                        <div class="portlet-body" style="margin-bottom: 8%">

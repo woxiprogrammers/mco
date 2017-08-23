@@ -96,9 +96,7 @@
 @section('javascript')
 <script>
     $(document).ready(function() {
-
         $('#submit').css("padding-left",'6px');
-
         $("#company").on('change', function(){
             getProjects($('#company').val());
         });

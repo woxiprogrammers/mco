@@ -104,9 +104,7 @@
 <script>
     $(document).ready(function() {
         EditTax.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

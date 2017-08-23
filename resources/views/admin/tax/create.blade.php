@@ -94,9 +94,7 @@
 <script>
     $(document).ready(function() {
         CreateTax.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

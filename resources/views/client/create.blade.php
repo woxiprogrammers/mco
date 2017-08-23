@@ -101,9 +101,7 @@
 <script>
     $(document).ready(function(){
         CreateClient.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

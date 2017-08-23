@@ -233,9 +233,7 @@
 <script>
     $(document).ready(function(){
         EditProduct.init();
-
         $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection

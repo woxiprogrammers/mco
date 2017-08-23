@@ -176,9 +176,7 @@
     $(document).ready(function(){
         getMaterials($("#category_name").val());
         CreateProduct.init();
-
         $('#submit').css("padding-left",'6px');
-
         var citiList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,

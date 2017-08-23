@@ -21,11 +21,8 @@
                                 <h1>Manage Product</h1>
                             </div>
                             <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 75%; margin-top: 1%"><a href="/product/create" style="color: white"><i class="fa fa-plus"></i> Product
-
                                 </a>
                             </div>
-
-
                         </div>
                     </div>
                     <div class="page-content">

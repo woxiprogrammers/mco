@@ -81,9 +81,7 @@
 <script>
     $(document).ready(function() {
         EditCategory.init();
-
             $('#submit').css("padding-left",'6px');
-
     });
 </script>
 @endsection
