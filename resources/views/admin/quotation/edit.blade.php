@@ -559,11 +559,14 @@
                                                             <div class="form-group">
                                                                 <div class="col-md-3">
                                                                     <label class="control-form pull-right">
-                                                                        {{$extraItem['name']}}
+                                                                            {{$extraItem['name']}}
                                                                     </label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
+                                                                    @if(array_key_exists('slug',$extraItem))
+                                                                        <i> Note : This is newly created item and not added to quotation yet</i>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         @endforeach
