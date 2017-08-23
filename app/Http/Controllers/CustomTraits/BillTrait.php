@@ -1255,6 +1255,12 @@ trait BillTrait{
                         $extraItemRate = BillQuotationExtraItem::where('quotation_extra_item_id',$billQuotationExtraItems[$iterator]['quotation_extra_item_id'])->where('bill_id',$thisBill->id)->pluck('rate')->first();
                         $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'] = ($extraItemRate != null) ? $extraItemRate : 0;
                         $total_rate = $total_rate + $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'];
+                        if(array_key_exists($thisBill->id,$billSubTotal)){
+                            $billSubTotal[$thisBill->id]['subtotal'] +=  $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'];
+                        }else{
+                            $billSubTotal[$thisBill->id]['subtotal'] = array();
+                            $billSubTotal[$thisBill->id]['subtotal'] =  $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'];
+                        }
                         $iteratorJ++;
                     }
                     $billQuotationExtraItems[$iterator]['total_rate'] = $total_rate;

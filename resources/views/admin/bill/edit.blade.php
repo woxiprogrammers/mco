@@ -65,7 +65,7 @@
                                                                 @endif
                                                             </div>
                                                         </div>
-                                                        
+
                                                         <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">
                                                         <tr style="text-align: center">
                                                             <th width="1%">
