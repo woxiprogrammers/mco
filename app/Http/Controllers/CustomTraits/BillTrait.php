@@ -1242,7 +1242,6 @@ trait BillTrait{
                 }
                 $i++;
             }
-//dd($productArray);
             $billQuotationExtraItemCollection = BillQuotationExtraItem::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->distinct('quotation_extra_item_id')->select('quotation_extra_item_id')->get();
             $billQuotationExtraItems = $billQuotationExtraItemCollection->toArray();
                 $iterator = 0;
@@ -1363,7 +1362,6 @@ trait BillTrait{
                         $serialNumber++;
                     }
                     foreach ($billQuotationExtraItems as $key => $extraItem){
-                        //$productRow++;
                         $amountColumn = $totalAmountColumn;
                         $amountColumn++;
                         $sheet->getCell('B'.($productRow))->setValue($extraItem['name']);
