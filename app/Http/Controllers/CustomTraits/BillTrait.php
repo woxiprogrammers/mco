@@ -752,7 +752,7 @@ trait BillTrait{
                      $data['currentBillID'] = $key+1;
                  }
              }
-            $data['billDate'] =$bill->created_at->formatLocalized('%d/%m/%Y');
+            $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
             $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
@@ -861,8 +861,8 @@ trait BillTrait{
                 foreach($data['extraItems'] as $key => $extraItem){
                     $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',$allBillIds)->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
                     $total['extra_item_previous_bill_amount'] = $total['extra_item_previous_bill_amount'] + $extraItem['previous_rate'];
-                    $total['extra_item_current_bill_amount'] = $total['extra_item_previous_bill_amount'] + $extraItem['rate'];
-                    $total['extra_item_cumulative_bill_amount'] = $total['extra_item_previous_bill_amount'] + $total['extra_item_previous_bill_amount'];
+                    $total['extra_item_current_bill_amount'] = $total['extra_item_current_bill_amount'] + $extraItem['rate'];
+                    $total['extra_item_cumulative_bill_amount'] = $total['extra_item_previous_bill_amount'] + $total['extra_item_current_bill_amount'];
                 }
             }else{
                 $total['extra_item_previous_bill_amount'] = $total['extra_item_current_bill_amount'] = $total['extra_item_cumulative_bill_amount'] = 0;
