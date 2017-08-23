@@ -175,30 +175,6 @@
                                                     @endfor
                                                 @endif
                                                 <tr>
-                                                    <td colspan="4"><b>Settlement Details</b></td>
-                                                    <td colspan="2"><b>Total amount</b></td>
-                                                    <td colspan="2"><b>Previous amount</b></td>
-                                                    <td colspan="2"><b>Current amount</b></td>
-                                                </tr>
-                                                @for($iterator = 0; $iterator < count($extraItems); $iterator++)
-                                                    <tr>
-                                                        <td colspan="4">
-                                                            <span>
-                                                                {{$extraItems[$iterator]->quotationExtraItems->extraItem->name}} - {{$extraItems[$iterator]->description}}
-                                                            </span>
-                                                        </td>
-                                                        <td colspan="2">
-                                                            <span id="total_extra_item_rate">{{$extraItems[$iterator]->quotationExtraItems->rate}}</span>
-                                                        </td>
-                                                        <td colspan="2">
-                                                            <span id="previous_rates_{{$extraItems[$iterator]->id}}">0</span>
-                                                        </td>
-                                                        <td colspan="2" class="form-group">
-                                                            <span id="current_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>
-                                                        </td>
-                                                    </tr>
-                                                @endfor
-                                                <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;">
                                                         <b>Total</b>
                                                     </td>
