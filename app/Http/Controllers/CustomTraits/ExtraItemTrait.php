@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\ExtraItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 trait ExtraItemTrait{
@@ -103,28 +104,47 @@ trait ExtraItemTrait{
                     $extraItem_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $extraItemData[$pagination]['name'],
-                    $extraItemData[$pagination]['rate'],
-                    $extraItem_status,
-                    date('d M Y',strtotime($extraItemData[$pagination]['created_at'])),
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/extra-item/edit/'.$extraItemData[$pagination]['id'].'">
-                                <i class="icon-docs"></i> Edit </a>
-                        </li>
-                        <li>
-                            <a href="/extra-item/change-status/'.$extraItemData[$pagination]['id'].'">
-                                <i class="icon-tag"></i> '.$status.' </a>
-                        </li>
-                    </ul>
-                </div>'
-                ];
+                if(Auth::user()->hasPermissionTo('edit-manage-extra-items')){
+                    $records['data'][$iterator] = [
+                        $extraItemData[$pagination]['name'],
+                        $extraItemData[$pagination]['rate'],
+                        $extraItem_status,
+                        date('d M Y',strtotime($extraItemData[$pagination]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/extra-item/edit/'.$extraItemData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/extra-item/change-status/'.$extraItemData[$pagination]['id'].'">
+                                        <i class="icon-tag"></i> '.$status.' </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $extraItemData[$pagination]['name'],
+                        $extraItemData[$pagination]['rate'],
+                        $extraItem_status,
+                        date('d M Y',strtotime($extraItemData[$pagination]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                          
+                            </ul>
+                        </div>'
+                    ];
+                }
+
             }
 
             $records["draw"] = intval($request->draw);

@@ -3,6 +3,7 @@ namespace App\Http\Controllers\CustomTraits;
 use App\Http\Requests\SummaryRequest;
 use App\Summary;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use phpDocumentor\Reflection\DocBlock\Tags\Example;
 
@@ -101,27 +102,42 @@ trait SummaryTrait{
                     $summary_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $summaryData[$pagination]['name'],
-                    $summary_status,
-                    date('d M Y',strtotime($summaryData[$pagination]['created_at'])),
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/summary/edit/'.$summaryData[$pagination]['id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/summary/change-status/'.$summaryData[$pagination]['id'].'">
-                                    <i class="icon-tag"></i> '.$status.' </a>
-                            </li>
-                        </ul>
-                    </div>'
-                ];
+                if(Auth::user()->hasPermissionTo('edit-summary')){
+                    $records['data'][$iterator] = [
+                        $summaryData[$pagination]['name'],
+                        $summary_status,
+                        date('d M Y',strtotime($summaryData[$pagination]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/summary/edit/'.$summaryData[$pagination]['id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/summary/change-status/'.$summaryData[$pagination]['id'].'">
+                                        <i class="icon-tag"></i> '.$status.' </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $summaryData[$pagination]['name'],
+                        $summary_status,
+                        date('d M Y',strtotime($summaryData[$pagination]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                        </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;

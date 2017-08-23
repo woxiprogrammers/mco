@@ -35,10 +35,12 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
+                                                            @if($user->hasPermissionTo('edit-category'))
                                                             <div id="sample_editable_1_new" class="btn yellow" ><a href="/category/create" style="color: white"> Category
                                                                 <i class="fa fa-plus"></i>
                                                             </a>
                                                             </div>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>
