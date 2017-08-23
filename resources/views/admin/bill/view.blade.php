@@ -57,7 +57,8 @@
                                         <div class="tab-content">
                                         <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
-                                            <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
+                                            <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px;">
+                                                <label class="control-label" for="date">Selected Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -147,6 +148,32 @@
 
                                                 </tr>
                                                 @endfor
+                                                @if(count($extraItems) > 0)
+                                                    <tr>
+                                                        <td colspan="4"><b>Settlement Details</b></td>
+                                                        <td colspan="2"><b>Total amount</b></td>
+                                                        <td colspan="2"><b>Previous amount</b></td>
+                                                        <td colspan="2"><b>Current amount</b></td>
+                                                    </tr>
+                                                    @for($iterator = 0; $iterator < count($extraItems); $iterator++)
+                                                        <tr>
+                                                            <td colspan="4">
+                                                                <span>
+                                                                    {{$extraItems[$iterator]->quotationExtraItems->extraItem->name}} - {{$extraItems[$iterator]->description}}
+                                                                </span>
+                                                            </td>
+                                                            <td colspan="2">
+                                                                <span id="total_extra_item_rate">{{$extraItems[$iterator]->quotationExtraItems->rate}}</span>
+                                                            </td>
+                                                            <td colspan="2">
+                                                                <span id="previous_rates_{{$extraItems[$iterator]->id}}">{!! $extraItems[$iterator]->previous_rate !!}</span>
+                                                            </td>
+                                                            <td colspan="2" class="form-group">
+                                                                <span id="current_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>
+                                                            </td>
+                                                        </tr>
+                                                    @endfor
+                                                @endif
                                                 <tr>
                                                     <td colspan="4"><b>Settlement Details</b></td>
                                                     <td colspan="2"><b>Total amount</b></td>
