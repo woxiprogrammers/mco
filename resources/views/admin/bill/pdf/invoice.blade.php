@@ -29,6 +29,9 @@
                                     <tr>
                                         <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
                                     </tr>
+                                    <tr>
+                                        <td style="font-size: 15px">{!! env('GSTIN_NUMBER') !!}</td>
+                                    </tr>
                                 </table>
                             </td>
                         </tr>

@@ -86,13 +86,13 @@
                                 <td colspan="6">
                                     <b>{!! $extraItems[$i]->quotationExtraItems->extraItem->name !!}</b>
                                 </td>
-                                <td colspan="1" style="text-align: right; padding-right: 10px;">
+                                <td colspan="1" style="text-align: center; padding-right: 10px;">
                                     {!! $extraItems[$i]->previous_rate !!}
                                 </td>
-                                <td colspan="1" style="text-align: right; padding-right: 10px;">
+                                <td colspan="1" style="text-align: center; padding-right: 10px;">
                                     {!! $extraItems[$i]->rate !!}
                                 </td>
-                                <td colspan="1" style="text-align: right; padding-right: 10px;">
+                                <td colspan="1" style="text-align: center; padding-right: 10px;">
                                     {!! $extraItems[$i]->previous_rate + $extraItems[$i]->rate !!}
                                 </td>
                             </tr>

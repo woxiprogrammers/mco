@@ -65,10 +65,7 @@
                                                                 @endif
                                                             </div>
                                                         </div>
-                                                        {{--<div class="form-group col-md-5">
-                                                            <label class="control-label" for="date">Select Date</label>
-                                                            <input type="date" name="date" id="date" value="2017-7-12--}}{{--{{date('m/d/Y',strtotime($bill['date']))}}--}}{{--">
-                                                        </div>--}}
+
                                                         <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">
                                                         <tr style="text-align: center">
                                                             <th width="1%">
