@@ -429,10 +429,22 @@
                                                                                 <input class="form-control" value="{{$quotation->work_order->scope}}" name="scope" id="scope" type="text">
                                                                             </div>
                                                                         </div>
+
                                                                         <div class="form-group">
                                                                             <div class="col-md-3">
                                                                                 <label for="order_value" class="control-form pull-right">
-                                                                                    Order Value:
+                                                                                    Order Value Without Tax:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" value="{{$beforeTaxOrderValue}}" name="order_value" id="OrderValueWithoutTax" type="text" readonly>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="order_value" class="control-form pull-right">
+                                                                                    Order Value With Tax:
                                                                                 </label>
                                                                             </div>
                                                                             <div class="col-md-3">

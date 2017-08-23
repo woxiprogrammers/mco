@@ -17,19 +17,19 @@
     <legend> Edit Materials </legend>
     <table class="table table-bordered" id="quotationMaterialTable">
         <tr>
-            <th style="width: 13%">
+            <th style="width: 13%; text-align: center" >
                 Is Client supplied?
             </th>
-            <th style="width: 13%">
+            <th style="width: 13%; text-align: center">
                 Required Client Approval
             </th>
-            <th>
+            <th style=" text-align: center">
                 Material Name
             </th>
-            <th>
+            <th style=" text-align: center">
                 Rate per Unit
             </th>
-            <th>
+            <th style=" text-align: center">
                 Unit
             </th>
         </tr>

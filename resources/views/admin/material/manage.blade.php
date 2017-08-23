@@ -85,6 +85,8 @@
 
 
                                     </div>
+                                    <div class="portlet light ">
+                                       <div class="portlet-body" style="margin-bottom: 8%">
                                     @if($categories != NULL)
                                         <form role="form" id="create-material" class="form-horizontal" action="/material/basicrate_material" method="post" novalidate="novalidate">
                                             {!! csrf_field() !!}
@@ -109,6 +111,8 @@
                                             </div>
                                         </form>
                                     @endif
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>

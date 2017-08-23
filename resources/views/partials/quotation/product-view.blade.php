@@ -47,11 +47,11 @@
                 <legend> Materials</legend>
                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productMaterialTable">
                     <tr>
-                        <th style="width: 25%"> Name </th>
-                        <th> Unit </th>
-                        <th> Rate </th>
-                        <th> Quantity </th>
-                        <th> Amount </th>
+                        <th style="width: 25%; text-align: center" > Name </th>
+                        <th style="text-align: center"> Unit </th>
+                        <th style="text-align: center"> Rate </th>
+                        <th style="text-align: center"> Quantity </th>
+                        <th style="text-align: center"> Amount </th>
                     </tr>
                     @foreach($productMaterialVersions as $version)
                     <tr>
@@ -64,34 +64,34 @@
                         <td>
                             <div class="form-group">
                                 <input type="hidden" name="material_unit[{{$version['material_id']}}]" value="{{$version['unit_id']}}" readonly>
-                                <input type="text" class="form-control" name="material_unit_name[{{$version['material_id']}}]" value="{{$version['unit']}}" readonly>
+                                <input type="text" class="form-control" name="material_unit_name[{{$version['material_id']}}]" value="{{$version['unit']}}" readonly style="width: 90%; margin-left: 5%">
                             </div>
                         </td>
                         <td>
                             <div class="form-group">
-                                <input class="form-control material-table-input" step="any" type="number" id="material_{{$version['material_id']}}_rate" name="material_rate[{{$version['material_id']}}]" value="{{round($version['rate_per_unit'],3)}}" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})">
+                                <input class="form-control material-table-input" step="any" type="number" id="material_{{$version['material_id']}}_rate" name="material_rate[{{$version['material_id']}}]" value="{{round($version['rate_per_unit'],3)}}" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" style="text-align: center">
                             </div>
                         </td>
                         <td>
                             <div class="form-group">
-                                <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material_quantity[{{$version['material_id']}}]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],3)}}" readonly>
+                                <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material_quantity[{{$version['material_id']}}]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],3)}}" readonly style="text-align: center">
                             </div>
                         </td>
                         <td>
                             <div class="form-group">
-                                <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}">
+                                <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}" style="text-align: center">
                             </div>
                         </td>
                     </tr>
                     @endforeach
                 </table>
                 <div class="col-md-offset-7">
-                    <div class="col-md-3 col-md-offset-3">
+                    <div class="col-md-1 col-md-offset-1" style="margin-left: 53%">
                         <label class="control-label" style="font-weight: bold">
                             Sub Total:
                         </label>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2" style="margin-left: 8%; margin-top: 4%" >
                         <label class="control-label" style="font-weight: bold" id="productViewSubtotal">
 
                         </label>
@@ -104,8 +104,8 @@
                     <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productMaterialTable">
                         <tr>
                             <th style="width: 33%"> Profit Margin Name </th>
-                            <th style="width: 46%"> Percentage </th>
-                            <th style="width: 33%"> Amount </th>
+                            <th style="width: 46%; text-align: center"> Percentage </th>
+                            <th style="width: 33%; text-align: center"> Amount </th>
                         </tr>
                         @foreach($profitMargins as $profitMargin)
                         <tr>
@@ -114,9 +114,9 @@
                             </td>
                             <td>
                                 @if(isset($productProfitMargins[$profitMargin['id']]))
-                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margins[{{$product['id']}}][{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margins[{{$product['id']}}][{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required style="text-align: center">
                                 @else
-                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margins[{{$product['id']}}][{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margins[{{$product['id']}}][{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required style="text-align: center">
                                 @endif
                             </td>
                             <td class="profit-margin-amount">
@@ -126,7 +126,7 @@
                         @endforeach
                     </table>
                     <div class="col-md-offset-7">
-                        <div class="col-md-3 col-md-offset-3" style="align-items: ">
+                        <div class="col-md-2 col-md-offset-1" style="margin-left: 52%">
                             <label class="control-label" style="font-weight: bold; text-align: right">
                                 Total:
                             </label>
@@ -138,7 +138,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">
+                        <div class="col-md-3 col-md-offset-4" style="margin-left: 84%; margin-top: 2%">
                             <button type="button" class="btn red" onclick="submitProductEdit()" style="padding-left: 6px"><i class="fa fa-check"></i> Submit </button>
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
