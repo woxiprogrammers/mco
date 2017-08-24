@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Edit Category')
+@section('title','Constro | Edit Vendor')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -43,8 +43,9 @@
 
                                         <div class="portlet-body form">
                                             <input type="hidden" id="vendors_id" value="{{$vendor['id']}}">
-                                            <form role="form" id="edit-category" class="form-horizontal" method="post" action="/category/edit/{{$vendor['id']}}">
+                                            <form role="form" id="edit-vendor" class="form-horizontal" method="post" action="/vendors/edit/{{$vendor['id']}}">
                                                 {!! csrf_field() !!}
+                                                <input name="_method" value="put" type="hidden">
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">

@@ -115,10 +115,22 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li aria-haspopup="true">
-                                <a href="/user/manage" class="nav-link nav-toggle ">
+                            <li aria-haspopup="true" class="dropdown-submenu ">
+                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
                                     <i class="fa fa-users"></i> Manage Users
                                 </a>
+                                <ul class="dropdown-menu pull-left">
+                                    <li aria-haspopup="true">
+                                        <a href="/vendors/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-sitemap"></i> Manage Vendors
+                                        </a>
+                                    </li>
+                                    <li aria-haspopup="true">
+                                        <a href="/user/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-sitemap"></i> Manage Users
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                             <li aria-haspopup="true"  class="dropdown-submenu ">
                                 <a href="javascript:void(0);" class="nav-link nav-toggle ">

@@ -18,7 +18,8 @@ var  CreateVendor = function () {
                     required: true
                 },
                 email:{
-                    required: true
+                    required: true,
+                    email: true
                 },
                 gstin:{
                     required: true
@@ -98,12 +99,10 @@ var  EditVendor = function () {
                     required: true
                 },
                 email:{
-                    required: true
+                    required: true,
+                    email: true
                 },
                 gstin:{
-                    required: true
-                },
-                alternate_contact:{
                     required: true
                 },
                 city:{
@@ -125,9 +124,6 @@ var  EditVendor = function () {
                 },
                 gstin:{
                     required: "GSTIN is required."
-                },
-                alternate_contact:{
-                    required: "Alternate Contact is required."
                 },
                 city:{
                     required: "City is required."
