@@ -167,40 +167,21 @@ function getModules(role) {
     });
 }
 
-function getSubModules(){
-    var module_id = [];
-    var formData = {};
-    formData['_token'] = $("input[name='_token']").val();
-    $("#material_id input:checkbox:checked").each(function(i){
-        module_id[i] = $(this).val();
-    });
-    formData['module_id'] = module_id;
-    if($(".product-material-id").length > 0){
-        formData['modules'] = {};
-        $(".product-material-id").each(function(i){
-            var materialId = $(this).val();
-            formData['modules'][moduleId] = {};
-            formData['modules'][moduleId]['id'] = moduleId;
-            formData['modules'][moduleId]['rate_per_unit'] = $("#module_"+moduleId+"_rate").val();
-            formData['modules'][moduleId]['unit_id'] = $("#module_"+moduleId+"_unit").val();
-            formData['modules'][moduleId]['quantity'] = $("#module_"+moduleId+"_quantity").val();
-        });
-    }
-    $.ajax({
-        url: '/role/get-submodules',
-        type: "POST",
-        data :formData,
-        async: false,
-        success: function(data,textStatus, xhr){
-            $("#productMaterialTable").html(data);
-            calculateSubTotal();
-        },
-        error: function(errorStatus, xhr){
+function getSubModules() {
 
+    $.ajax({
+        type: "POST",
+        url: "role/submodules",
+
+        success: function(response){
+            alert('success');
+        },
+        error: function(e){
+            alert('error');
         }
     });
-}
 
+}
 
 
 
