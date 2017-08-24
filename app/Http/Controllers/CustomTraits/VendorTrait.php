@@ -84,16 +84,15 @@ trait VendorTrait{
 
     public function editVendor(Request $request, $vendor){
         try{
-            $vendor->update([
-                'name'=>$request->name,
-                'company' => $request->company,
-                'mobile' => $request->mobile,
-                'email' => $request->email,
-                'gstin' => $request->gstin,
-                'alternate_contact' => $request->alternate_contact,
-                'city' => $request->city,
-
-            ]);
+            $data = $request->all();
+            $vendorData['name'] = ucwords(trim($data['name']));
+            $vendorData['company'] = $data['company'];
+            $vendorData['mobile'] = $data['mobile'];
+            $vendorData['email'] = $data['email'];
+            $vendorData['gstin'] = $data['gstin'];
+            $vendorData['alternate_contact'] = $data['alternate_contact'];
+            $vendorData['city'] = $data['city'];
+            $vendor->update($vendorData);
             $request->session()->flash('success', 'Vendor Edited successfully.');
             return redirect('/vendors/edit/'.$vendor->id);
         }catch(\Exception $e){
@@ -131,7 +130,7 @@ trait VendorTrait{
                     $vendorsData[$pagination]['mobile'],
                     $vendorsData[$pagination]['city'],
                     $vendor_status,
-                    date('d M Y',strtotime($vendorsData[$pagination]['created_at'])),
+
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -141,6 +140,10 @@ trait VendorTrait{
                             <li>
                                 <a href="/vendors/edit/'.$vendorsData[$pagination]['id'].'">
                                 <i class="icon-docs"></i> Edit </a>
+                        </li>
+                        <li>
+                            <a href="/vendors/change-status/'.$vendorsData[$pagination]['id'].'">
+                                <i class="icon-tag"></i> '.$status.' </a>
                         </li>
                     </ul>
                 </div>'
