@@ -48,7 +48,7 @@
                                                <div class="row">
                                                    <div class="form-group">
                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
-                                                           <label class="control-label" for="date">Select Date : </label>
+                                                           <label class="control-label" for="date">Bill Date : </label>
                                                                <input type="text" style="width: 50%" name="date" placeholder="Select Bill Date" id="date"/>
                                                                <button class="btn btn-sm default" type="button">
                                                                    <i class="fa fa-calendar"></i>
@@ -134,10 +134,13 @@
                                                     </tr>
                                                 @endfor
                                                 <tr>
-                                                    <td colspan="5"><b>Settlement Details</b></td>
-                                                    <td colspan="2"><b>Total amount</b></td>
-                                                    <td colspan="2"><b>Previous amount</b></td>
-                                                    <td colspan="2"><b>Current amount</b></td>
+                                                    <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="5"><b>Extra Items</b></td>
+                                                    <td colspan="2"><b>Total Amount Approved</b></td>
+                                                    <td colspan="2"><b>Previous Amount</b></td>
+                                                    <td colspan="2"><b>Current Amount</b></td>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($extraItems); $iterator++)
                                                     <tr>
@@ -151,7 +154,7 @@
                                                             </span>
                                                         </td>
                                                         <td colspan="2">
-                                                            <span id="total_extra_item_rate">{{$extraItems[$iterator]->rate}}</span>
+                                                            <span id="total_extra_item_rate_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>
                                                         </td>
                                                         <td colspan="2">
                                                             <span id="previous_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->previous_rate}}</span>
@@ -267,4 +270,8 @@
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script src="/assets/custom/bill/bill-typeahead.js" type="text/javascript"></script>
+<script>
+    var date=new Date();
+    $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+</script>
 @endsection

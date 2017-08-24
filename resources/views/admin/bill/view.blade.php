@@ -58,7 +58,7 @@
                                         <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
                                             <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px;">
-                                                <label class="control-label" for="date">Selected Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
+                                                <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -148,10 +148,13 @@
 
                                                 </tr>
                                                 @endfor
+                                                <tr>
+                                                    <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
+                                                </tr>
                                                 @if(count($extraItems) > 0)
                                                     <tr>
-                                                        <td colspan="4"><b>Settlement Details</b></td>
-                                                        <td colspan="2"><b>Total amount</b></td>
+                                                        <td colspan="4"><b>Extra Items</b></td>
+                                                        <td colspan="2"><b>Total amount approved</b></td>
                                                         <td colspan="2"><b>Previous amount</b></td>
                                                         <td colspan="2"><b>Current amount</b></td>
                                                     </tr>
