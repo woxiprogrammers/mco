@@ -29,6 +29,9 @@
                                     <tr>
                                         <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
                                     </tr>
+                                    <tr>
+                                        <td style="font-size: 15px">{!! env('GSTIN_NUMBER') !!}</td>
+                                    </tr>
                                 </table>
                             </td>
                         </tr>
@@ -79,16 +82,33 @@
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
                     </tr>
                 @endfor
-                @if(count($invoiceData) < 10)
-                    @for($i = 0 ; $i < (10 - count($invoiceData)) ; $i++)
+                @if(count($extraItems) > 0)
+                    @for($i = 0; $i < count($extraItems); $i++,$iterator++)
+                        <tr>
+                            <td style="text-align: center;">{!! $iterator+1  !!}</td>
+                            <td colspan="2">
+                            {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
+                            </td>
+                            <td colspan="2" style="text-align: right; padding-right: 10px;">
+                                {!! $extraItems[$i]->quotationExtraItems->rate !!}
+                            </td>
+                            <td colspan="1" style="text-align: right; padding-right: 10px;">
+                                {!! $extraItems[$i]->previous_rate !!}
+                            </td>
+                            <td colspan="1" style="text-align: right; padding-right: 10px;">
+                                {!! $extraItems[$i]->rate !!}
+                            </td>
+                        </tr>
+                    @endfor
+                @endif
+                @if((count($invoiceData) + count($extraItems)) < 15)
+                    @for($i = 0 ; $i < (15 - (count($invoiceData) + count($extraItems))) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
+                            <td colspan="2">&nbsp;</td>
+                            <td colspan="2">&nbsp;</td>
+                            <td colspan="1">&nbsp;</td>
+                            <td colspan="1">&nbsp;</td>
                         </tr>
                     @endfor
                 @endif
