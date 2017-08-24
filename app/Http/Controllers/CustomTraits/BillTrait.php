@@ -892,8 +892,9 @@ trait BillTrait{
             $i = 0;
             $quotationProducts = $bill->quotation->quotation_products;
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $allBillIDs = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
-            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDs)->get();
+            $allbills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
+            $allBillIDsTillThisBill = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
+            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDsTillThisBill)->get();
             foreach($quotationProducts as $key => $quotationProduct){
                 $quotationProduct['previous_quantity'] = 0;
                 foreach($billQuotationProducts as $key1 => $billQuotationProduct){
@@ -913,7 +914,7 @@ trait BillTrait{
             $billExtraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
             foreach($quotationExtraItems as $key => $quotationExtraItem){
                 $quotationExtraItem['prev_amount'] = 0;
-                $quotationExtraItem['prev_amount'] = BillQuotationExtraItem::whereIn('bill_id',$allBillIDs)->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$quotationExtraItem['id'])->sum('rate');
+                $quotationExtraItem['prev_amount'] = BillQuotationExtraItem::whereIn('bill_id',array_column($allbills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$quotationExtraItem['id'])->sum('rate');
                 foreach($billExtraItems as $key1 => $billExtraItem){
                     if($billExtraItem['quotation_extra_item_id'] == $quotationExtraItem['id']){
                         $quotationExtraItem['prev_amount'] = $quotationExtraItem['prev_amount'] + $billExtraItem['rate'];
