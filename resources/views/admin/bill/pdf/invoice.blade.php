@@ -86,16 +86,16 @@
                     @for($i = 0; $i < count($extraItems); $i++,$iterator++)
                         <tr>
                             <td style="text-align: center;">{!! $iterator+1  !!}</td>
-                            <td colspan="2">
+                            <td style="text-align: center;">
                             {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
                             </td>
-                            <td colspan="2" style="text-align: right; padding-right: 10px;">
-                                {!! $extraItems[$i]->quotationExtraItems->rate !!}
-                            </td>
+                            <td style="text-align: center;"> {{$hsnCode}}</td>
+                            <td style="text-align: right; padding-right: 10px;">1</td>
+                            <td style="text-align: right; padding-right: 10px;">Nos</td>
                             <td colspan="1" style="text-align: right; padding-right: 10px;">
-                                {!! $extraItems[$i]->previous_rate !!}
+                                {!! $extraItems[$i]->rate !!}
                             </td>
-                            <td colspan="1" style="text-align: right; padding-right: 10px;">
+                            <td style="text-align: right; padding-right: 10px;">
                                 {!! $extraItems[$i]->rate !!}
                             </td>
                         </tr>
@@ -105,10 +105,12 @@
                     @for($i = 0 ; $i < (15 - (count($invoiceData) + count($extraItems))) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
-                            <td colspan="2">&nbsp;</td>
-                            <td colspan="2">&nbsp;</td>
-                            <td colspan="1">&nbsp;</td>
-                            <td colspan="1">&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
                         </tr>
                     @endfor
                 @endif

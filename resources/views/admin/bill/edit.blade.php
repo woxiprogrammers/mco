@@ -49,7 +49,7 @@
                                                     <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
                                                         <div class="form-group">
                                                             <div class="col-md-4 date date-picker" data-date-end-date="0d">
-                                                                <label class="control-label" for="date">Select Date : </label>
+                                                                <label class="control-label" for="date">Select Bill Date : </label>
                                                                 @if(!empty($bill['date']))
                                                                     <input type="text"  name="date" value="{{date('m/d/Y',strtotime($bill['date']))}}" id="date" readonly>
                                                                     <button class="btn btn-sm default" type="button">
@@ -153,7 +153,7 @@
                                                         @endfor
                                                         <tr>
                                                             <td colspan="5"><b>Settlement Details</b></td>
-                                                            <td colspan="2"><b>Total amount</b></td>
+                                                            <td colspan="2"><b>Total amount approved</b></td>
                                                             <td colspan="2"><b>Previous amount</b></td>
                                                             <td colspan="2"><b>Current amount</b></td>
                                                         </tr>
@@ -177,7 +177,7 @@
                                                             </span>
                                                                 </td>
                                                                 <td colspan="2">
-                                                                    <span id="total_extra_item_rate">{{$quotationExtraItems[$iterator]->rate}}</span>
+                                                                    <span id="total_extra_item_rate_{{$quotationExtraItems[$iterator]->id}}">{{$quotationExtraItems[$iterator]->rate}}</span>
                                                                 </td>
                                                                 <td colspan="2">
                                                                     <span id="previous_rates_{{$quotationExtraItems[$iterator]->id}}">{{$quotationExtraItems[$iterator]->prev_amount}}</span>

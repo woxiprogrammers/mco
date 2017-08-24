@@ -759,7 +759,7 @@ trait BillTrait{
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
             foreach($billQuotationProducts as $key => $billQuotationProduct){
                     $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
-                    $invoiceData[$i]['description'] = $billQuotationProduct->description;
+                    $invoiceData[$i]['description'] = $billQuotationProduct->product_description->description;
                     $invoiceData[$i]['quantity'] = round(($billQuotationProduct->quantity),3);
                     $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
                     $invoiceData[$i]['rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
