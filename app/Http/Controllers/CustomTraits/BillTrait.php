@@ -1370,6 +1370,7 @@ trait BillTrait{
                     foreach ($billQuotationExtraItems as $key => $extraItem){
                         $amountColumn = $totalAmountColumn;
                         $amountColumn++;
+                        $sheet->getCell('A'.($productRow))->setValue($serialNumber);
                         $sheet->getCell('B'.($productRow))->setValue($extraItem['name']);
                         $sheet->getCell('E'.($productRow))->setValue($extraItem['quotation_rate']);
                         $next_column = 'G';
@@ -1380,6 +1381,7 @@ trait BillTrait{
                         }
                         $sheet->getCell(($amountColumn).($productRow))->setValue($extraItem['total_rate']);
                         $productRow = $productRow + 1;
+                        $serialNumber++;
                     }
                     $sheet->getCell('B'.($productRow))->setValue('SubTotal');
                     $columnForSubTotal = 'G';
