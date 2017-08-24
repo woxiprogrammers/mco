@@ -74,7 +74,7 @@
                 @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
                     <tr>
                         <td style="text-align: center;">{!! $iterator+1 !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!} @endif</td>
+                        <td style="text-align: left; padding-left: 5px">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!} @endif</td>
                         <td style="text-align: center;"> {{$hsnCode}}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['quantity'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['unit'] !!}</td>
@@ -86,7 +86,7 @@
                     @for($i = 0; $i < count($extraItems); $i++,$iterator++)
                         <tr>
                             <td style="text-align: center;">{!! $iterator+1  !!}</td>
-                            <td style="text-align: center;">
+                            <td style="text-align: left; padding-left: 5px">
                             {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
                             </td>
                             <td style="text-align: center;"> {{$hsnCode}}</td>
@@ -101,8 +101,8 @@
                         </tr>
                     @endfor
                 @endif
-                @if((count($invoiceData) + count($extraItems)) < 15)
-                    @for($i = 0 ; $i < (15 - (count($invoiceData) + count($extraItems))) ; $i++)
+                @if((count($invoiceData) + count($extraItems)) < 16)
+                    @for($i = 0 ; $i < (16 - (count($invoiceData) + count($extraItems))) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>

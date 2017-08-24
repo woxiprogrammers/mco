@@ -152,10 +152,13 @@
                                                             </tr>
                                                         @endfor
                                                         <tr>
-                                                            <td colspan="5"><b>Settlement Details</b></td>
-                                                            <td colspan="2"><b>Total amount approved</b></td>
-                                                            <td colspan="2"><b>Previous amount</b></td>
-                                                            <td colspan="2"><b>Current amount</b></td>
+                                                            <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="5"><b>Extra Items</b></td>
+                                                            <td colspan="2"><b>Total Amount Approved</b></td>
+                                                            <td colspan="2"><b>Previous Amount</b></td>
+                                                            <td colspan="2"><b>Current Amount</b></td>
                                                         </tr>
                                                         @for($iterator = 0; $iterator < count($quotationExtraItems); $iterator++)
                                                             <tr>

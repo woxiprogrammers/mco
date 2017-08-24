@@ -148,9 +148,12 @@
 
                                                 </tr>
                                                 @endfor
+                                                <tr>
+                                                    <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
+                                                </tr>
                                                 @if(count($extraItems) > 0)
                                                     <tr>
-                                                        <td colspan="4"><b>Settlement Details</b></td>
+                                                        <td colspan="4"><b>Extra Items</b></td>
                                                         <td colspan="2"><b>Total amount approved</b></td>
                                                         <td colspan="2"><b>Previous amount</b></td>
                                                         <td colspan="2"><b>Current amount</b></td>
