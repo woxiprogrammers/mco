@@ -34,12 +34,14 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-8">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow">
-                                                                <a href="/material/create" style="color: white">
-                                                                    <i class="fa fa-plus"></i>
-                                                                        Material
-                                                                </a>
-                                                            </div>
+                                                            @if($user->hasPermissionTo('create-material'))
+                                                                <div id="sample_editable_1_new" class="btn yellow">
+                                                                    <a href="/material/create" style="color: white">
+                                                                        <i class="fa fa-plus"></i>
+                                                                            Material
+                                                                    </a>
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                         </div>
                                                             @if($categories != NULL)

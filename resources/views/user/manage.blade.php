@@ -33,10 +33,13 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow"><a href="/user/create" style="color: white"> User
-                                                                    <i class="fa fa-plus"></i>
-                                                                </a>
-                                                            </div>
+                                                            @if($user->hasPermissionTo('create-manage-user'))
+                                                                <div id="sample_editable_1_new" class="btn yellow">
+                                                                    <a href="/user/create" style="color: white"> User
+                                                                        <i class="fa fa-plus"></i>
+                                                                    </a>
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>
