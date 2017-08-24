@@ -101,7 +101,6 @@ trait CategoryTrait{
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($categoriesData) : $request->length;
-            $canUserEdit = Auth::user()->hasPermissionTo('edit-category');
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($categoriesData); $iterator++,$pagination++ ){
                 if($categoriesData[$pagination]['is_active'] == true){
                     $category_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
@@ -110,27 +109,27 @@ trait CategoryTrait{
                     $category_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                if(!$canUserEdit){
+                if(Auth::user()->hasPermissionTo('edit-category')){
                     $records['data'][$iterator] = [
                         $categoriesData[$pagination]['name'],
                         $category_status,
                         date('d M Y',strtotime($categoriesData[$pagination]['created_at'])),
                         '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/category/edit/'.$categoriesData[$pagination]['id'].'">
-                                <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/category/change-status/'.$categoriesData[$pagination]['id'].'">
-                                    <i class="icon-tag"></i> '.$status.' </a>
-                            </li>
-                        </ul>
-                    </div>'
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/category/edit/'.$categoriesData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/category/change-status/'.$categoriesData[$pagination]['id'].'">
+                                        <i class="icon-tag"></i> '.$status.' </a>
+                                </li>
+                            </ul>
+                        </div>'
                     ];
                 }else{
                     $records['data'][$iterator] = [
@@ -138,19 +137,17 @@ trait CategoryTrait{
                         $category_status,
                         date('d M Y',strtotime($categoriesData[$pagination]['created_at'])),
                         '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                      
-                        </ul>
-                    </div>'
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                          
+                            </ul>
+                        </div>'
                     ];
                 }
-
             }
-
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
             $records["recordsFiltered"] = $iTotalRecords;
