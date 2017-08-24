@@ -270,4 +270,8 @@
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script src="/assets/custom/bill/bill-typeahead.js" type="text/javascript"></script>
+<script>
+    var date=new Date();
+    $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+</script>
 @endsection
