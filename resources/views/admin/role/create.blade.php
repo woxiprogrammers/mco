@@ -85,9 +85,26 @@
                                                         <a class="btn btn-success btn-md" id="next_btn">Next >></a>
                                                     </div>
                                                 </div>
+                                            </form>
                                                 </div>
                                                 </fieldset>
-                                                    </form>
+                                        <div class="materials-table-div" hidden>
+                                            <fieldset>
+                                                <legend> Sub Modules</legend>
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="productMaterialTable">
+                                                </table>
+                                            </fieldset>
+                                               <div class="form-group">
+                                                        <div class="col-md-3 col-md-offset-4">
+                                                            <button type="submit" class="btn btn-success"> Submit </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -101,55 +118,96 @@
 @endsection
 @section('javascript')
     <script src="/assets/custom/admin/role/role.js" type="application/javascript"></script>
+    <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+    <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
-        $(document).ready(function() {
-            CreateRole.init();
-        });
 
+            $(document).ready(function () {
+                getModules($("#role_name").val());
+                CreateRole.init();
+                var citiList = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/role/auto-suggest/%QUERY",
+                        filter: function (x) {
+                            if ($(window).width() < 420) {
+                                $("#header").addClass("fixed");
+                            }
+                            return $.map(x, function (data) {
+                                return {
+                                    id: data.id,
+                                    name: data.name,
+                                };
+                            });
+                        },
+                        wildcard: "%QUERY"
+                    }
+                });
+                citiList.initialize();
+                $('.typeahead').typeahead(null, {
+                    displayKey: 'name',
+                    engine: Handlebars,
+                    source: citiList.ttAdapter(),
+                    limit: 30,
+                    templates: {
+                        empty: [
+                            '<div class="empty-suggest">',
+                            '</div>'
+                        ].join('\n'),
+                        suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+                    }
+                }).on('typeahead:selected', function (obj, datum) {
 
+                }).on('typeahead:open', function (obj, datum) {
 
-
-
-        $(document).ready(function(){
-            getModules($("#role_name").val());
-            CreateRole.init();
-            var citiList = new Bloodhound({
-                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
-                queryTokenizer: Bloodhound.tokenizers.whitespace,
-                remote: {
-                    url: "/product/auto-suggest/%QUERY",
-                    filter: function(x) {
-                        if($(window).width()<420){
-                            $("#header").addClass("fixed");
-                        }
-                        return $.map(x, function (data) {
-                            return {
-                                id:data.id,
-                                name:data.name,
-                            };
-                        });
-                    },
-                    wildcard: "%QUERY"
-                }
+                });
             });
-            citiList.initialize();
-            $('.typeahead').typeahead(null, {
-                displayKey: 'name',
-                engine: Handlebars,
-                source: citiList.ttAdapter(),
-                limit: 30,
-                templates: {
-                    empty: [
-                        '<div class="empty-suggest">',
-                        '</div>'
-                    ].join('\n'),
-                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
-                }
-            }).on('typeahead:selected', function (obj, datum) {
 
-            }).on('typeahead:open', function (obj, datum) {
 
-            });
-        });
+
+            $(document).ready(function() {
+                getSubModules($("#role_name").val());
+                CreateRole.init();
+                var citiList = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/role/auto-suggest/%QUERY",
+                        filter: function (x) {
+                            if ($(window).width() < 420) {
+                                $("#header").addClass("fixed");
+                            }
+                            return $.map(x, function (data) {
+                                return {
+                                    id: data.id,
+                                    name: data.name,
+                                };
+                            });
+                        },
+                        wildcard: "%QUERY"
+                    }
+                });
+                citiList.initialize();
+                $('.typeahead').typeahead(null, {
+                    displayKey: 'name',
+                    engine: Handlebars,
+                    source: citiList.ttAdapter(),
+                    limit: 30,
+                    templates: {
+                        empty: [
+                            '<div class="empty-suggest">',
+                            '</div>'
+                        ].join('\n'),
+                        suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+                    }
+                }).on('typeahead:selected', function (obj, datum) {
+
+                }).on('typeahead:open', function (obj, datum) {
+                })
+                });
+
+
+
     </script>
 @endsection

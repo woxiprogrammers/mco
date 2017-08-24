@@ -168,19 +168,44 @@ function getModules(role) {
 }
 
 function getSubModules() {
+    var module_id = [];
+    var formData = {};
+    formData['_token'] = $("input[name='_token']").val();
+    $("#material_id input:checkbox:checked").each(function(i){
+        module_id[i] = $(this).val();
+    });
+    formData['module_id'] = module_id;
+    if($(".product-material-id").length > 0){
+        formData['modules'] = {};
+        $(".product-material-id").each(function(i){
+            var module_id = $(this).val();
+            formData['modules'][module_id] = {};
+            formData['modules'][module_id]['id'] = module_id;
+            formData['modules'][module_id]['module_id'] = $("#module_"+module_id+"_module_id").val();
+            formData['modules'][module_id]['is_web'] = $("#module_"+module_id+"_is_web").val();
+            formData['modules'][module_id]['is_mobile'] = $("#module_"+module_id+"_is_mobile").val();
 
+        });
+    }
     $.ajax({
         type: "POST",
-        url: "role/submodules",
+        url: "/role/module/listing",
+        async: false,
 
-        success: function(response){
-            alert('success');
+        success: function(data,textStatus, xhr){
+            if (xhr.status == 200) {
+                $("#material_id").html(data);
+                $("#roleModulesTable input[type='number']").each(function () {
+                    $(this).rules('add', {
+                        required: true
+                    });
+                });
+            }
         },
-        error: function(e){
+        error : function(e){
             alert('error');
         }
     });
-
 }
 
 

@@ -120,7 +120,6 @@ trait RoleTrait{
                     </div>'
                 ];
             }
-
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
             $records["recordsFiltered"] = $iTotalRecords;
