@@ -4,7 +4,11 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+<link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet"  href="/assets/global/plugins/typeahead/typeahead.css"/>
+<link href="/assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+<link href="/assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/fancybox/source/jquery.fancybox.css" rel="stylesheet" type="text/css" />
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -41,16 +45,28 @@
                                 <div class="portlet light ">
                                         <div class="portlet-body flip-scroll">
                                            <form role="form" id="new_bill" class="form-horizontal" action="/bill/create" method="post">
-                                            @if($bills != NULL)
-                                                <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
-                                                    <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
-                                                        <option value="default">Select Bill</option>
-                                                        @for($i = 0 ; $i < count($bills); $i++)
-                                                            <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
-                                                        @endfor
-                                                    </select>
-                                                </div>
-                                            @endif
+                                               <div class="row">
+                                                   <div class="form-group">
+                                                       <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                           <label class="control-label" for="date">Bill Date : </label>
+                                                               <input type="text" style="width: 50%" name="date" placeholder="Select Bill Date" id="date"/>
+                                                               <button class="btn btn-sm default" type="button">
+                                                                   <i class="fa fa-calendar"></i>
+                                                               </button>
+
+                                                       </div>
+                                                       @if($bills != NULL)
+                                                           <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
+                                                               <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
+                                                                   <option value="default">Select Bill</option>
+                                                                   @for($i = 0 ; $i < count($bills); $i++)
+                                                                       <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
+                                                                   @endfor
+                                                               </select>
+                                                           </div>
+                                                       @endif
+                                                   </div>
+                                               </div>
                                            <input type="hidden" id="project_site_id" name="project_site_id" value="{{$project_site['id']}}">
                                            <input type="hidden" id="quotation_id" name="quotation_id" value="{{$quotation['id']}}">
 
@@ -118,10 +134,13 @@
                                                     </tr>
                                                 @endfor
                                                 <tr>
-                                                    <td colspan="5"><b>Settlement Details</b></td>
-                                                    <td colspan="2"><b>Total amount</b></td>
-                                                    <td colspan="2"><b>Previous amount</b></td>
-                                                    <td colspan="2"><b>Current amount</b></td>
+                                                    <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="5"><b>Extra Items</b></td>
+                                                    <td colspan="2"><b>Total Amount Approved</b></td>
+                                                    <td colspan="2"><b>Previous Amount</b></td>
+                                                    <td colspan="2"><b>Current Amount</b></td>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($extraItems); $iterator++)
                                                     <tr>
@@ -135,7 +154,7 @@
                                                             </span>
                                                         </td>
                                                         <td colspan="2">
-                                                            <span id="total_extra_item_rate">{{$extraItems[$iterator]->rate}}</span>
+                                                            <span id="total_extra_item_rate_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>
                                                         </td>
                                                         <td colspan="2">
                                                             <span id="previous_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->previous_rate}}</span>
@@ -243,10 +262,16 @@
 @endsection
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/bill.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script src="/assets/custom/bill/bill-typeahead.js" type="text/javascript"></script>
+<script>
+    var date=new Date();
+    $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+</script>
 @endsection

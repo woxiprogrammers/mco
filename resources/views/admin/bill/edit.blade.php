@@ -4,7 +4,11 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+<link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet"  href="/assets/global/plugins/typeahead/typeahead.css"/>
+<link href="/assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+<link href="/assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/fancybox/source/jquery.fancybox.css" rel="stylesheet" type="text/css" />
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -43,7 +47,26 @@
                                                 <div class="tab-content">
                                                     <input type="hidden" id="quotation_id" value="{{$bill->quotation_id}}">
                                                     <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
-                                                    <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">
+                                                        <div class="form-group">
+                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                                <label class="control-label" for="date">Select Bill Date : </label>
+                                                                @if(!empty($bill['date']))
+                                                                    <input type="text"  name="date" value="{{date('m/d/Y',strtotime($bill['date']))}}" id="date" readonly>
+                                                                    <button class="btn btn-sm default" type="button">
+                                                                        <i class="fa fa-calendar"></i>
+                                                                    </button>
+                                                                @else
+                                                                    <input type="text" class="form-control" name="date" id="date" readonly/>
+                                                                    <button class="btn btn-sm default" type="button">
+                                                                        <i class="fa fa-calendar"></i>
+                                                                    </button>
+
+
+                                                                @endif
+                                                            </div>
+                                                        </div>
+
+                                                        <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">
                                                         <tr style="text-align: center">
                                                             <th width="1%">
                                                                 <input type="checkbox" class="group-checkable">
@@ -129,10 +152,13 @@
                                                             </tr>
                                                         @endfor
                                                         <tr>
-                                                            <td colspan="5"><b>Settlement Details</b></td>
-                                                            <td colspan="2"><b>Total amount</b></td>
-                                                            <td colspan="2"><b>Previous amount</b></td>
-                                                            <td colspan="2"><b>Current amount</b></td>
+                                                            <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="5"><b>Extra Items</b></td>
+                                                            <td colspan="2"><b>Total Amount Approved</b></td>
+                                                            <td colspan="2"><b>Previous Amount</b></td>
+                                                            <td colspan="2"><b>Current Amount</b></td>
                                                         </tr>
                                                         @for($iterator = 0; $iterator < count($quotationExtraItems); $iterator++)
                                                             <tr>
@@ -154,7 +180,7 @@
                                                             </span>
                                                                 </td>
                                                                 <td colspan="2">
-                                                                    <span id="total_extra_item_rate">{{$quotationExtraItems[$iterator]->rate}}</span>
+                                                                    <span id="total_extra_item_rate_{{$quotationExtraItems[$iterator]->id}}">{{$quotationExtraItems[$iterator]->rate}}</span>
                                                                 </td>
                                                                 <td colspan="2">
                                                                     <span id="previous_rates_{{$quotationExtraItems[$iterator]->id}}">{{$quotationExtraItems[$iterator]->prev_amount}}</span>
@@ -304,6 +330,9 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script src="/assets/custom/bill/bill-typeahead.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
 @endsection
 
 

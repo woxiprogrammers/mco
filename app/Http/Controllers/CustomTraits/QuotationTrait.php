@@ -688,10 +688,7 @@ trait QuotationTrait{
                 $extraItems = ExtraItem::where('is_active', true)->select('id','name','rate')->orderBy('name','asc')->get();
             }else{
                 $extraItems = $extraItems->toArray();
-                $newExtraItems = QuotationExtraItem::join('extra_items','extra_items.id','!=','quotation_extra_items.extra_item_id')
-                    ->where('extra_items.is_active', true)
-                    ->select('extra_items.id as id','extra_items.rate as rate','extra_items.name as name')
-                    ->get();
+                $newExtraItems = ExtraItem::where('is_active',true)->whereNotIn('id',array_column($extraItems,'id'))->select('id','name','rate','slug')->orderBy('name','asc')->get();
                 if($newExtraItems != null){
                     $newExtraItems = $newExtraItems->toArray();
                     $extraItems = array_merge($extraItems,$newExtraItems);
