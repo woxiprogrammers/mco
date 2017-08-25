@@ -367,25 +367,42 @@ trait QuotationTrait{
                 }else{
                     $quotationStatus = '<td><span class="btn btn-xs btn-danger"> Disapproved </span></td>';
                 }
-                $records['data'][] = [
-                    $quotations[$pagination]->project_site->project->client->company,
-                    $quotations[$pagination]->project_site->project->name,
-                    $quotations[$pagination]->project_site->name,
-                    $quotationStatus,
-                    date('d M Y',strtotime($quotations[$pagination]->created_at)),
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/quotation/edit/'.$quotations[$pagination]->id.'">
-                                <i class="icon-docs"></i> Edit </a>
-                            </li>
-                        </ul>
-                    </div>'
-                ];
+                if(Auth::user()->hasPermissionTo('edit-quotation')){
+                    $records['data'][] = [
+                        $quotations[$pagination]->project_site->project->client->company,
+                        $quotations[$pagination]->project_site->project->name,
+                        $quotations[$pagination]->project_site->name,
+                        $quotationStatus,
+                        date('d M Y',strtotime($quotations[$pagination]->created_at)),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/quotation/edit/'.$quotations[$pagination]->id.'">
+                                    <i class="icon-docs"></i> Edit </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][] = [
+                        $quotations[$pagination]->project_site->project->client->company,
+                        $quotations[$pagination]->project_site->project->name,
+                        $quotations[$pagination]->project_site->name,
+                        $quotationStatus,
+                        date('d M Y',strtotime($quotations[$pagination]->created_at)),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                        </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = count($quotations);

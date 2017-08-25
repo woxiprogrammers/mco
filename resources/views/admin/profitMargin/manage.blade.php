@@ -36,7 +36,14 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
-
+                                                            @if($user->hasPermissionTo('create-profit-margin'))
+                                                                <div id="sample_editable_1_new" class="btn yellow">
+                                                                    <a href="/profit-margin/create" style="color: white">
+                                                                        <i class="fa fa-plus"></i>
+                                                                        Profit Margin
+                                                                    </a>
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>

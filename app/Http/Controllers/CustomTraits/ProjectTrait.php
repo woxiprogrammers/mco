@@ -13,6 +13,7 @@ use App\HsnCode;
 use App\Project;
 use App\ProjectSite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 trait ProjectTrait{
@@ -80,28 +81,47 @@ trait ProjectTrait{
                     $projectStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]['company'],
-                    $listingData[$pagination]['project_name'],
-                    $listingData[$pagination]['project_site_name'],
-                    $projectStatus,
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/project/edit/'.$listingData[$pagination]['project_id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/project/change-status/'.$listingData[$pagination]['project_id'].'">
-                                    <i class="icon-docs"></i> '.$status.' </a>
-                            </li>
-                        </ul>
-                    </div>'
-                ];
+                if(Auth::user()->hasPermissionTo('edit-manage-sites')){
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        $projectStatus,
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/project/edit/'.$listingData[$pagination]['project_id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/project/change-status/'.$listingData[$pagination]['project_id'].'">
+                                        <i class="icon-docs"></i> '.$status.' </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        $projectStatus,
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                            
+                            </ul>
+                        </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
