@@ -20,6 +20,12 @@
                             <div class="page-title">
                                 <h1>Manage Material</h1>
                             </div>
+                            <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 75%">
+                                <a href="/material/create" style="color: white">
+                                    <i class="fa fa-plus"></i>
+                                    Material
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="page-content">
@@ -34,41 +40,20 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-8">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow">
-                                                                <a href="/material/create" style="color: white">
-                                                                    <i class="fa fa-plus"></i>
-                                                                        Material
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        </div>
-                                                            @if($categories != NULL)
-                                                                <form role="form" id="create-material" class="form-horizontal" action="/material/basicrate_material" method="post" novalidate="novalidate">
-                                                                    {!! csrf_field() !!}
-                                                                    <div class="form-body">
-                                                                        <div class="col-md-3">
-                                                                            <select class="form-control" id="material_category_ids" name="material_category_ids[]" multiple="true" style="overflow: scroll" aria-invalid="false">
-                                                                                @foreach ($categories as $category)
-                                                                                    <option value="{{$category['id']}}"> {{$category['name']}}</option>
-                                                                                @endforeach
-                                                                                    <option value="all">All Categories</option>
-                                                                            </select>
-                                                                        </div>
-                                                                        <div class="col-md-1">
-                                                                            <div class="btn-group">
-                                                                                <div id="basicreate_material_dwn_id">
-                                                                                    <button type="submit" class="btn btn-success btn-md">
-                                                                                        <i class="fa fa-download"></i> PDF
-                                                                                    </button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </form>
+                                                            @if($user->hasPermissionTo('create-material'))
+                                                                <div id="sample_editable_1_new" class="btn yellow">
+                                                                    <a href="/material/create" style="color: white">
+                                                                        <i class="fa fa-plus"></i>
+                                                                            Material
+                                                                    </a>
+                                                                </div>
                                                             @endif
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+
                                             {!! csrf_field() !!}
                                             <div class="col-md-2 pull-right">
                                                 <a class="btn btn-success btn-md pull-right" id="changeStatusButton">
@@ -104,7 +89,35 @@
                                                 </tbody>
                                             </table>
                                         </div>
-
+                                    </div>
+                                    <div class="portlet light ">
+                                       <div class="portlet-body" style="margin-bottom: 8%">
+                                    @if($categories != NULL)
+                                        <form role="form" id="create-material" class="form-horizontal" action="/material/basicrate_material" method="post" novalidate="novalidate">
+                                            {!! csrf_field() !!}
+                                            <div class="form-body">
+                                                <div class="col-md-3">
+                                                    <select class="form-control" id="material_category_ids" name="material_category_ids[]" multiple="true" style="overflow: scroll" aria-invalid="false">
+                                                        @foreach ($categories as $category)
+                                                            <option value="{{$category['id']}}"> {{$category['name']}}</option>
+                                                        @endforeach
+                                                        <option value="all">All Categories</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="btn-group">
+                                                        <div id="basicreate_material_dwn_id">
+                                                            <button type="submit" class="btn btn-success btn-md">
+                                                                <i class="fa fa-download"></i> PDF
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @endif
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>

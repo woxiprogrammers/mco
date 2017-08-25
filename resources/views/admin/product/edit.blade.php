@@ -206,8 +206,8 @@
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
-                                                                <div class="col-md-3 col-md-offset-4">
-                                                                    <button type="submit" class="btn btn-success"> Submit </button>
+                                                                <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">
+                                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -233,6 +233,7 @@
 <script>
     $(document).ready(function(){
         EditProduct.init();
+        $('#submit').css("padding-left",'6px');
     });
 </script>
 @endsection

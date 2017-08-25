@@ -68,7 +68,7 @@
                     @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
                         <tr>
                             <td style="text-align: center;">{!! $iterator+1 !!}</td>
-                            <td style="text-align: center;"><b>{!! $invoiceData[$iterator]['product_name'] !!}<b></td>
+                            <td style="text-align: left; padding-left: 5px"><b>{!! $invoiceData[$iterator]['product_name'] !!}<b></td>
                             <td style="text-align: center;">{!! $invoiceData[$iterator]['previous_quantity'] !!}</td>
                             <td style="text-align: center;">{!! $invoiceData[$iterator]['current_quantity'] !!}</td>
                             <td style="text-align: center;">{!! $invoiceData[$iterator]['cumulative_quantity'] !!}</td>
@@ -83,23 +83,28 @@
                         @for($i = 0; $i < count($extraItems); $i++,$iterator++)
                             <tr>
                                 <td style="text-align: center;">{!! $iterator+1  !!}</td>
-                                <td colspan="6">
+                                <td style="text-align: left; padding-left: 5px">
                                     <b>{!! $extraItems[$i]->quotationExtraItems->extraItem->name !!}</b>
                                 </td>
-                                <td colspan="1" style="text-align: center; padding-right: 10px;">
+                                <td style="text-align: center;"> - </td>
+                                <td style="text-align: center;"> - </td>
+                                <td style="text-align: center;"> - </td>
+                                <td style="text-align: center;"> - </td>
+                                <td style="text-align: center;"> - </td>
+                                <td style="text-align: center;">
                                     {!! $extraItems[$i]->previous_rate !!}
                                 </td>
-                                <td colspan="1" style="text-align: center; padding-right: 10px;">
+                                <td style="text-align: center; padding-right: 10px;">
                                     {!! $extraItems[$i]->rate !!}
                                 </td>
-                                <td colspan="1" style="text-align: center; padding-right: 10px;">
+                                <td style="text-align: center; padding-right: 10px;">
                                     {!! $extraItems[$i]->previous_rate + $extraItems[$i]->rate !!}
                                 </td>
                             </tr>
                         @endfor
                     @endif
-                    @if((count($invoiceData) + count($extraItems)) < 10)
-                        @for($iterator = 0 ; $iterator < (10 - (count($invoiceData) + count($extraItems))) ; $iterator++ )
+                    @if((count($invoiceData) + count($extraItems)) < 12)
+                        @for($iterator = 0 ; $iterator < (12 - (count($invoiceData) + count($extraItems))) ; $iterator++ )
                         <tr>
                             <td>&nbsp;</td>
                             <td colspan="6">&nbsp;</td>

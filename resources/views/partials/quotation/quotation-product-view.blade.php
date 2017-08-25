@@ -134,7 +134,7 @@
                     <div class="form-group">
                         <div class="col-md-3 col-md-offset-4">
                             @if($canUpdateProduct == true)
-                                <button type="button" class="btn btn-success" onclick="submitProductEdit()"> Submit </button>
+                                <button type="button" class="btn red" onclick="submitProductEdit()" id="submit"><i class="fa fa-check"></i> Submit </button>
                             @endif
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>

@@ -23,6 +23,7 @@ use App\Tax;
 use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
@@ -422,11 +423,12 @@ trait BillTrait{
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]['company'],
-                    $listingData[$pagination]['project_name'],
-                    $listingData[$pagination]['project_site_name'],
-                    '<div class="btn-group">
+                if(Auth::user()->hasPermissionTo('create-billing')){
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -442,7 +444,27 @@ trait BillTrait{
                             </li>
                         </ul>
                     </div>'
-                ];
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
+                                    <i class="icon-docs"></i> Manage </a>
+                            </li>
+                        </ul>
+                    </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -759,7 +781,7 @@ trait BillTrait{
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
             foreach($billQuotationProducts as $key => $billQuotationProduct){
                     $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
-                    $invoiceData[$i]['description'] = $billQuotationProduct->description;
+                    $invoiceData[$i]['description'] = $billQuotationProduct->product_description->description;
                     $invoiceData[$i]['quantity'] = round(($billQuotationProduct->quantity),3);
                     $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
                     $invoiceData[$i]['rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
@@ -892,8 +914,9 @@ trait BillTrait{
             $i = 0;
             $quotationProducts = $bill->quotation->quotation_products;
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $allBillIDs = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
-            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDs)->get();
+            $allbills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
+            $allBillIDsTillThisBill = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
+            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDsTillThisBill)->get();
             foreach($quotationProducts as $key => $quotationProduct){
                 $quotationProduct['previous_quantity'] = 0;
                 foreach($billQuotationProducts as $key1 => $billQuotationProduct){
@@ -913,7 +936,7 @@ trait BillTrait{
             $billExtraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
             foreach($quotationExtraItems as $key => $quotationExtraItem){
                 $quotationExtraItem['prev_amount'] = 0;
-                $quotationExtraItem['prev_amount'] = BillQuotationExtraItem::whereIn('bill_id',$allBillIDs)->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$quotationExtraItem['id'])->sum('rate');
+                $quotationExtraItem['prev_amount'] = BillQuotationExtraItem::whereIn('bill_id',array_column($allbills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$quotationExtraItem['id'])->sum('rate');
                 foreach($billExtraItems as $key1 => $billExtraItem){
                     if($billExtraItem['quotation_extra_item_id'] == $quotationExtraItem['id']){
                         $quotationExtraItem['prev_amount'] = $quotationExtraItem['prev_amount'] + $billExtraItem['rate'];
@@ -1370,6 +1393,7 @@ trait BillTrait{
                     foreach ($billQuotationExtraItems as $key => $extraItem){
                         $amountColumn = $totalAmountColumn;
                         $amountColumn++;
+                        $sheet->getCell('A'.($productRow))->setValue($serialNumber);
                         $sheet->getCell('B'.($productRow))->setValue($extraItem['name']);
                         $sheet->getCell('E'.($productRow))->setValue($extraItem['quotation_rate']);
                         $next_column = 'G';
@@ -1380,6 +1404,7 @@ trait BillTrait{
                         }
                         $sheet->getCell(($amountColumn).($productRow))->setValue($extraItem['total_rate']);
                         $productRow = $productRow + 1;
+                        $serialNumber++;
                     }
                     $sheet->getCell('B'.($productRow))->setValue('SubTotal');
                     $columnForSubTotal = 'G';
