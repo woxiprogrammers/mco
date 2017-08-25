@@ -678,6 +678,7 @@ trait QuotationTrait{
             foreach($taxes as $tax){
                 $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
             }
+            $beforeTaxOrderValue = $orderValue;
             $orderValue = $orderValue + $taxAmount;
             $extraItems = QuotationExtraItem::join('extra_items','extra_items.id','=','quotation_extra_items.extra_item_id')
                                             ->where('quotation_extra_items.quotation_id',$quotation['id'])
@@ -693,7 +694,7 @@ trait QuotationTrait{
                     $extraItems = array_merge($extraItems,$newExtraItems);
                 }
             }
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole'));
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',

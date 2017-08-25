@@ -53,9 +53,19 @@
                                                     <div class="tab-pane fade in active" id="GeneralTab">
                                                         <fieldset>
                                                             <legend>Project</legend>
-                                                            <div class="form-group">
-                                                                <label class="col-md-3 control-label">Client Name</label>
-                                                                <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-4 col-md-offset-0">
+                                                                    Client Name
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    Project Name
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    Project Site Name
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-4">
                                                                     <select class="form-control" id="clientId" name="client_id">
                                                                         <option value=""> -- Select Client -- </option>
                                                                         @foreach($clients as $client)
@@ -63,36 +73,23 @@
                                                                         @endforeach
                                                                     </select>
                                                                 </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label class="col-md-3 control-label">Project Name</label>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-4">
                                                                     <select name="project_id" id="projectId" class="form-control" disabled>
-
                                                                     </select>
                                                                 </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label class="col-md-3 control-label">Project Site Name</label>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-4">
                                                                     <select name="project_site_id" id="projectSiteId" class="form-control" disabled>
-
                                                                     </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <div class="col-md-1 col-md-offset-1">
-
                                                                 </div>
                                                             </div>
                                                         </fieldset>
-                                                        <fieldset>
+                                                        <fieldset style="margin-top: 1%; margin-bottom: 1%">
                                                             <legend> Products
-                                                                <a class="btn btn-wide btn-primary  col-md-offset-9" id="materialCosts">
+                                                                <a class="btn btn-wide btn-primary  col-md-offset-8" id="materialCosts" style="margin-left: 72%">
                                                                     <i class="fa fa-pencil-square-o"></i>
-                                                                    Material Cost
+                                                                    Material Rate
                                                                 </a>
-                                                                <a class="btn btn-success btn-md" id="addProduct">
+                                                                <a class="btn yellow btn-md" id="addProduct">
                                                                     <i class="fa fa-plus"></i>
                                                                     Product
                                                                 </a>

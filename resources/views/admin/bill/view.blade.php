@@ -93,16 +93,16 @@
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                 <tr style="text-align: center">
-                                                    <th width="3%"> Item no </th>
-                                                    <th width="15%"> Item Description </th>
-                                                    <th width="6%" class="numeric"> UOM </th>
-                                                    <th width="7%" class="numeric"> BOQ Quantity </th>
-                                                    <th width="6%" class="numeric"> Rate </th>
-                                                    <th width="10%" class="numeric"> W.O Amount </th>
-                                                    <th width="7%" class="numeric"> Previous Quantity </th>
-                                                    <th width="7%" class="numeric"> Current Quantity </th>
-                                                    <th width="10%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="10%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="3%" style="text-align: center"> Item no </th>
+                                                    <th width="15%" style="text-align: center"> Item Description </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> UOM </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> BOQ Quantity </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> Rate </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> W.O Amount </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> Previous Quantity </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> Current Quantity </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> Current Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
                                                 <tr>
