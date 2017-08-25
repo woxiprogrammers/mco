@@ -21,6 +21,9 @@
                             <div class="page-title">
                                 <h1>Manage Category</h1>
                             </div>
+                            <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 75%; margin-top: 1%"><a href="/category/create" style="color: white"><i class="fa fa-plus"></i> Category
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="page-content">
@@ -36,8 +39,9 @@
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
                                                             @if($user->hasPermissionTo('edit-category'))
-                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="/category/create" style="color: white"> Category
-                                                                <i class="fa fa-plus"></i>
+                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="/category/create" style="color: white">
+                                                                    <i class="fa fa-plus"></i>
+                                                                    Category
                                                             </a>
                                                             </div>
                                                             @endif

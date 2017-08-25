@@ -19,6 +19,9 @@
                             <div class="page-title">
                                 <h1>Manage Summary</h1>
                             </div>
+                            <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 75%"><a href="/summary/create" style="color: white"><i class="fa fa-plus"></i> Summary
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="page-content">
@@ -35,8 +38,9 @@
                                                         <div class="btn-group">
                                                             @if($user->hasPermissionTo('create-summary'))
                                                                 <div id="sample_editable_1_new" class="btn yellow">
-                                                                    <a href="/summary/create" style="color: white"> Summary
+                                                                    <a href="/summary/create" style="color: white">
                                                                         <i class="fa fa-plus"></i>
+                                                                        Summary
                                                                     </a>
                                                                 </div>
                                                             @endif

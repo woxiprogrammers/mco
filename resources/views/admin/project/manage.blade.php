@@ -28,6 +28,9 @@
                             <div class="page-title">
                                 <h1>Manage Projects</h1>
                             </div>
+                            <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 72%"><a href="/project/create" style="color: white"><i class="fa fa-plus"></i> Create Project
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="page-content">
@@ -45,8 +48,9 @@
                                                         <div class="btn-group">
                                                             @if($user->hasPermissionTo('create-manage-sites'))
                                                                 <div id="sample_editable_1_new" class="btn yellow">
-                                                                    <a href="/project/create" style="color: white"> Create Project
+                                                                    <a href="/project/create" style="color: white">
                                                                         <i class="fa fa-plus"></i>
+                                                                        Project
                                                                     </a>
                                                                 </div>
                                                             @endif

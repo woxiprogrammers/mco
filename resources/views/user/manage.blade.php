@@ -19,6 +19,9 @@
                             <div class="page-title">
                                 <h1>Manage User</h1>
                             </div>
+                            <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 80%"><a href="/user/create" style="color: white"><i class="fa fa-plus"></i> User
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="page-content">
@@ -35,8 +38,8 @@
                                                         <div class="btn-group">
                                                             @if($user->hasPermissionTo('create-manage-user'))
                                                                 <div id="sample_editable_1_new" class="btn yellow">
-                                                                    <a href="/user/create" style="color: white"> User
-                                                                        <i class="fa fa-plus"></i>
+                                                                    <a href="/user/create" style="color: white">
+                                                                        <i class="fa fa-plus"></i>User
                                                                     </a>
                                                                 </div>
                                                             @endif

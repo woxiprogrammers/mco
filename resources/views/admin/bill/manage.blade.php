@@ -36,8 +36,9 @@
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
                                                             @if($user->hasPermissionTo('create-billing'))
-                                                                <div id="sample_editable_1_new" class="btn yellow"><a href="/bill/create" style="color: white"> Create Bill
-                                                                        <i class="fa fa-plus"></i>
+                                                                <div id="sample_editable_1_new" class="btn yellow">
+                                                                    <a href="/bill/create" style="color: white">
+                                                                        <i class="fa fa-plus"></i> Bill
                                                                     </a>
                                                                 </div>
                                                             @endif

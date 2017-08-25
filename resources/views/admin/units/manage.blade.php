@@ -20,6 +20,10 @@
                             <div class="page-title">
                                 <h1>Manage Units</h1>
                             </div>
+
+                            <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 77%"><a href="/units/create" style="color: white"> <i class="fa fa-plus"></i> Unit
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="page-content">
@@ -42,8 +46,8 @@
                                                         <div class="btn-group">
                                                             @if($user->hasPermissionTo('create-units'))
                                                                 <div id="sample_editable_1_new" class="btn yellow">
-                                                                      <a href="/units/create" style="color: white"> Unit
-                                                                          <i class="fa fa-plus"></i>
+                                                                      <a href="/units/create" style="color: white">
+                                                                          <i class="fa fa-plus"></i>Unit
                                                                       </a>
                                                                 </div>
                                                             @endif
