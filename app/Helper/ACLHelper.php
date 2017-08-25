@@ -39,7 +39,13 @@ class ACLHelper{
                 return false;
             }
         }catch (\Exception $e){
-
+            $data = [
+                'action' => 'Check module\'s ACL',
+                'slug' => $moduleSlug,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }
