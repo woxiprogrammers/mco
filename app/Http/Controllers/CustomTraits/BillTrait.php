@@ -996,20 +996,26 @@ trait BillTrait{
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();
             $editQuotationProductIds = array_keys($products);
             $deletedQuotationProductIds = array_values(array_diff($alreadyExistQuotationProductIds,$editQuotationProductIds));
-            foreach($deletedQuotationProductIds as $productId){
+            /*foreach($deletedQuotationProductIds as $productId){
                 BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$productId)->delete();
-            }
+            }*/
             foreach($products as $key => $product){
+                Log::info($product);
                 $alreadyExistProduct = BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->first();
+                Log::info($alreadyExistProduct);
                 if($alreadyExistProduct != null){
                     $billQuotationProduct = array();
-                    if($key == $alreadyExistProduct->quotation_product_id){
+                    if(array_key_exists('current_quantity',$product)){
                         if($product['current_quantity'] != $alreadyExistProduct->quantity){
                             $billQuotationProduct['quantity'] = $product['current_quantity'];
                         }
                         $billQuotationProduct['product_description_id'] = $product['product_description_id'];
                         BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->update($billQuotationProduct);
                     }else{
+                        BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->delete();
+                    }
+                }else{
+                    if(array_key_exists('current_quantity',$product)){
                         $billQuotationProduct['bill_id'] = $bill->id;
                         $billQuotationProduct['quotation_product_id'] = $key;
                         $billQuotationProduct['quantity'] = $product['current_quantity'];
