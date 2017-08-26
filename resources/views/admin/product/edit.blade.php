@@ -40,7 +40,11 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
                                         <input type="hidden" id="productId" value="{{$product['id']}}">
-                                        <form role="form" id="edit-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
+                                        @if($copyProduct == true)
+                                            <form role="form" id="edit-product" class="form-horizontal" action="/product/create" method="post">
+                                                @else
+                                                    <form role="form" id="edit-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
+                                                        @endif
                                             {!! csrf_field() !!}
                                             <div>
                                                 <fieldset>
@@ -48,7 +52,11 @@
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Product Title</label>
                                                         <div class="col-md-6">
-                                                            <input type="text" id="name" name="name" class="form-control" value="{{$product['name']}}">
+                                                            @if($copyProduct == true)
+                                                            <input type="text" id="name" name="name" class="form-control" value="Copy of {{$product['name']}}">
+                                                                @else
+                                                                <input type="text" id="name" name="name" class="form-control" value="{{$product['name']}}">
+                                                                @endif
                                                         </div>
                                                     </div>
                                                     <div class="form-group">

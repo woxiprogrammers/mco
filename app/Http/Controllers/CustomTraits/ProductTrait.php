@@ -49,6 +49,12 @@ trait ProductTrait{
 
     public function getEditView(Request $request, $product) {
         try{
+            $request->url();
+            if( strpos( $request->url(), "copy" ) !== false ) {
+                $copyProduct = true;
+            }else{
+                $copyProduct = false;
+            }
             $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first();
             $product['category'] = Category::where('id',$product['category_id'])->pluck('name')->first();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
@@ -82,7 +88,7 @@ trait ProductTrait{
             if($request->ajax()){
                 return view('partials.quotation.product-view')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
             }else{
-                return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+                return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds','copyProduct'));
             }
         }catch(\Exception $e){
             $data = [
@@ -279,6 +285,10 @@ trait ProductTrait{
                             <li>
                                 <a href="/product/product-analysis-pdf/'.$productData[$pagination]['id'].'">
                                     <i class="icon-cloud-download"></i> Download </a>
+                            </li>
+                            <li>
+                                <a href="/product/copy/'.$productData[$pagination]['id'].'">
+                                    <i class="fa fa-files-o"></i> Copy Product</a>
                             </li>
                         </ul>
                     </div>'
