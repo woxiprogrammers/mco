@@ -4,10 +4,12 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     use Notifiable;
+    use HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -15,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'first_name', 'email', 'password','last_name','is_active','mobile','dob','gender','role_id'
+        'first_name', 'email', 'password','last_name','is_active','mobile','dob','gender'
     ];
 
     /**
@@ -27,7 +29,7 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public function role(){
-        return $this->belongsTo('App\Role','role_id');
+    public function roles(){
+        return $this->hasMany('App\UserHasRole','user_id');
     }
 }

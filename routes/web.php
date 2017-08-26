@@ -25,7 +25,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
         Route::post('create',array('uses' => 'User\UserController@createUser'));
         Route::get('edit/{user}',array('uses' => 'User\UserController@getEditView'));
-        Route::post('edit/{user}',array('uses' => 'User\UserController@editUser'));
+        Route::put('edit/{user}',array('uses' => 'User\UserController@editUser'));
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
         Route::post('listing',array('uses' => 'User\UserController@userListing'));
         Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
@@ -50,6 +50,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses' => 'Admin\CategoryController@categoryListing'));
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
         Route::post('check-name',array('uses' => 'Admin\CategoryController@checkCategoryName'));
+    });
+    Route::group(['prefix' => 'extra-item'],function(){
+        Route::get('create',array('uses' => 'Admin\ExtraItemController@getCreateView'));
+        Route::post('create',array('uses' => 'Admin\ExtraItemController@createExtraItem'));
+        Route::get('edit/{extra_item}',array('uses' => 'Admin\ExtraItemController@getEditView'));
+        Route::post('edit/{extra_item}',array('uses' => 'Admin\ExtraItemController@editExtraItem'));
+        Route::get('manage',array('uses' => 'Admin\ExtraItemController@getManageView'));
+        Route::post('listing',array('uses' => 'Admin\ExtraItemController@extraItemListing'));
+        Route::get('change-status/{extra_item}',array('uses' => 'Admin\ExtraItemController@changeExtraItemStatus'));
+        Route::post('check-name',array('uses' => 'Admin\ExtraItemController@checkExtraItemName'));
     });
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
@@ -195,6 +205,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
         Route::post('get-quotation-product-view',array('uses' => 'Admin\QuotationController@getProductEditView'));
         Route::post('check-product-remove',array('uses' => 'Admin\QuotationController@checkProductRemove'));
+        Route::group(['prefix' => 'extra-item'],function(){
+            Route::post('create',array('uses'=>'Admin\QuotationController@addExtraItems'));
+        });
     });
 
     Route::group(['prefix' => 'project'], function(){

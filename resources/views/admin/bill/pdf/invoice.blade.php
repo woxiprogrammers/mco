@@ -29,6 +29,9 @@
                                     <tr>
                                         <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
                                     </tr>
+                                    <tr>
+                                        <td style="font-size: 15px">{!! env('GSTIN_NUMBER') !!}</td>
+                                    </tr>
                                 </table>
                             </td>
                         </tr>
@@ -71,7 +74,7 @@
                 @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
                     <tr>
                         <td style="text-align: center;">{!! $iterator+1 !!}</td>
-                        <td style="text-align: center;">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!} @endif</td>
+                        <td style="text-align: left; padding-left: 5px">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!} @endif</td>
                         <td style="text-align: center;"> {{$hsnCode}}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['quantity'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['unit'] !!}</td>
@@ -79,8 +82,27 @@
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
                     </tr>
                 @endfor
-                @if(count($invoiceData) < 10)
-                    @for($i = 0 ; $i < (10 - count($invoiceData)) ; $i++)
+                @if(count($extraItems) > 0)
+                    @for($i = 0; $i < count($extraItems); $i++,$iterator++)
+                        <tr>
+                            <td style="text-align: center;">{!! $iterator+1  !!}</td>
+                            <td style="text-align: left; padding-left: 5px">
+                            {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
+                            </td>
+                            <td style="text-align: center;"> {{$hsnCode}}</td>
+                            <td style="text-align: right; padding-right: 10px;">1</td>
+                            <td style="text-align: right; padding-right: 10px;">Nos</td>
+                            <td colspan="1" style="text-align: right; padding-right: 10px;">
+                                {!! $extraItems[$i]->rate !!}
+                            </td>
+                            <td style="text-align: right; padding-right: 10px;">
+                                {!! $extraItems[$i]->rate !!}
+                            </td>
+                        </tr>
+                    @endfor
+                @endif
+                @if((count($invoiceData) + count($extraItems)) < 16)
+                    @for($i = 0 ; $i < (16 - (count($invoiceData) + count($extraItems))) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>

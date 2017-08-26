@@ -9,7 +9,9 @@ var  CreateBill = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-
+                date : {
+                    required : true
+                }
             },
             messages: {
 
@@ -62,7 +64,9 @@ var  EditBill = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-
+                date : {
+                    required : true
+                }
             },
             messages: {
 
