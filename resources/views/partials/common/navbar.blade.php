@@ -66,7 +66,6 @@
                     <?php $hasStructurePermission = \App\Helper\ACLHelper::checkModuleAcl('structure'); ?>
                     @if($hasStructurePermission)
                         <li aria-haspopup="true" class="menu-dropdown mega-menu-dropdown">
-
                             <a href="javascript:;"> Structure
                             </a>
                             <ul class="dropdown-menu pull-left">
@@ -134,11 +133,23 @@
                                     </ul>
                                 </li>
                                 @if($user->hasPermissionTo('view-manage-user'))
-                                <li aria-haspopup="true">
-                                    <a href="/user/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-users"></i> Manage Users
-                                    </a>
-                                </li>
+                                    <li aria-haspopup="true" class="dropdown-submenu ">
+                                        <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                            <i class="fa fa-users"></i> Manage Users
+                                        </a>
+                                        <ul class="dropdown-menu pull-left">
+                                            <li aria-haspopup="true">
+                                                <a href="/vendors/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-sitemap"></i> Manage Vendors
+                                                </a>
+                                            </li>
+                                            <li aria-haspopup="true">
+                                                <a href="/user/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-sitemap"></i> Manage Users
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
                                 @endif
                                 <li aria-haspopup="true"  class="dropdown-submenu ">
                                     <a href="javascript:void(0);" class="nav-link nav-toggle ">
@@ -184,7 +195,6 @@
                             </a>
                         </li>
                     @endif
-
                 </ul>
             </div>
             <!-- END MEGA MENU -->
