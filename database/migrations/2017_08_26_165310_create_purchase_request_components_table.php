@@ -15,6 +15,10 @@ class CreatePurchaseRequestComponentsTable extends Migration
     {
         Schema::create('purchase_request_components', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('purchase_request_id');
+            $table->unsignedInteger('material_request_component_id');
+            $table->foreign('purchase_request_id')->references('id')->on('purchase_requests')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('material_request_component_id')->references('id')->on('material_request_components')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

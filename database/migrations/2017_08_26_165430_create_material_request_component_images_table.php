@@ -15,6 +15,9 @@ class CreateMaterialRequestComponentImagesTable extends Migration
     {
         Schema::create('material_request_component_images', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('name',255);
+            $table->unsignedInteger('material_request_component_id');
+            $table->foreign('material_request_component_id')->references('id')->on('material_request_components')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
