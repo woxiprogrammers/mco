@@ -67,7 +67,6 @@ trait VendorTrait{
             $data['alternate_contact'] = $request->alternate_contact;
             $data['city'] = $request->city;
             $data['is_active'] = false;
-            //dd($data);
             $vendor = Vendor::create($data);
             $request->session()->flash('success', 'Vendor Created successfully.');
             return redirect('/vendors/create');
