@@ -73,6 +73,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'Admin\ProductController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\ProductController@createProduct'));
         Route::get('edit/{product}',array('uses' => 'Admin\ProductController@getEditView'));
+        Route::get('copy/{product}',array('uses' => 'Admin\ProductController@getEditView'));
         Route::post('edit/{product}',array('uses' => 'Admin\ProductController@editProduct'));
         Route::get('get-materials/{category}',array('uses' => 'Admin\ProductController@getMaterials'));
         Route::post('material/listing',array('uses' => 'Admin\ProductController@getMaterialsDetails'));
