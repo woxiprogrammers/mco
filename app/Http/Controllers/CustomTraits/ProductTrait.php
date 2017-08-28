@@ -230,7 +230,7 @@ trait ProductTrait{
                 }
             }
             $request->session()->flash('success','Product Created Successfully');
-            return redirect('/product/create');
+            return redirect('/product/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Product',
