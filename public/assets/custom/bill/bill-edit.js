@@ -29,7 +29,7 @@ $(document).ready(function () {
 
     });
 
-    $('input:checked.product-checkbox').click(function () {
+    $('.product-checkbox').click(function () {
         var id = $(this).val();
         if ($(this).prop("checked") == false) {
             if ($('input:checked').length > 0) {
@@ -43,6 +43,7 @@ $(document).ready(function () {
             $('#product_description_' + id).rules('remove');
             $('#product_description_id_' + id).rules('remove');
             $('#current_quantity_' + id).rules('remove');
+            $('#current_quantity_' + id).prop('disabled', true);
             $('#current_quantity_' + id).closest('form-group').removeClass('has-error');
             $('#current_quantity_' + id).val('');
             $('#product_description_' + id).val('');
@@ -50,6 +51,7 @@ $(document).ready(function () {
             $('#current_bill_amount_' + id).text("");
             getTotals();
         } else {
+            $('#current_quantity_' + id).prop('disabled', false);
             $('#product_description_'+id).rules('add',{
                 required: true
             });
@@ -173,7 +175,7 @@ function checkExtraItemRate(id) {
     var enteredRate = $('#extra_item_rate_'+id);
     var typingTimer;
     var doneTypingInterval = 500;
-    var total_extra_item_rate = $('#total_extra_item_rate').text();
+    var total_extra_item_rate = $('#total_extra_item_rate_'+id).text();
     var previous_rates = $('#previous_rates_'+id).text();
     var diff = parseFloat(total_extra_item_rate - previous_rates);
     $('#extra_item_rate_'+id).rules('add',{

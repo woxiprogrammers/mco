@@ -8,5 +8,8 @@ use App\Http\Controllers\Controller;
 
 class ProfitMarginController extends Controller
 {
+    public function __construct(){
+        $this->middleware('custom.auth');
+    }
     use ProfitMarginTrait;
 }

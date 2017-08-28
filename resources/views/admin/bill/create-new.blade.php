@@ -77,8 +77,8 @@
                                                 </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <a class="btn blue" id="submit">Submit</a>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <a class="btn red" id="submit"><i class="fa fa-check"></i> Submit</a>
                                                 </div>
                                             </div>
                                         </form>
@@ -96,6 +96,7 @@
 @section('javascript')
 <script>
     $(document).ready(function() {
+        $('#submit').css("padding-left",'6px');
         $("#company").on('change', function(){
             getProjects($('#company').val());
         });

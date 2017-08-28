@@ -8,15 +8,17 @@ use App\Quotation;
 use App\Http\Controllers\Controller;
 use ConsoleTVs\Charts\Facades\Charts;
 
-
 class DashboardController extends Controller
 {
+    public function __construct(){
+        $this->middleware('custom.auth');
+    }
+
     public function index()
     {
         /*
          * Quotation Status Wise Chart
          */
-
         $quotationApprovedCount = Quotation::where('quotation_status_id', 2)->count();
         $quotationDraftCount = Quotation::where('quotation_status_id', 1)->count();
         $quotationDisapprovedCount = Quotation::where('quotation_status_id', 3)->count();

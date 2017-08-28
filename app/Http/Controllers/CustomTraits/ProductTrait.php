@@ -11,6 +11,7 @@ use App\ProfitMargin;
 use App\ProfitMarginVersion;
 use App\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\App;
 
@@ -262,13 +263,14 @@ trait ProductTrait{
                     $product_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $productData[$pagination]['name'],
-                    Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                    Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
-                    $productVersion['rate_per_unit'],
-                    $product_status,
-                    '<div class="btn-group">
+                if(Auth::user()->hasPermissionTo('edit-product')){
+                    $records['data'][$iterator] = [
+                        $productData[$pagination]['name'],
+                        Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                        $productVersion['rate_per_unit'],
+                        $product_status,
+                        '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -292,7 +294,29 @@ trait ProductTrait{
                             </li>
                         </ul>
                     </div>'
-                ];
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $productData[$pagination]['name'],
+                        Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                        $productVersion['rate_per_unit'],
+                        $product_status,
+                        '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/product/product-analysis-pdf/'.$productData[$pagination]['id'].'">
+                                    <i class="icon-cloud-download"></i> Download </a>
+                            </li>
+                        </ul>
+                    </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
