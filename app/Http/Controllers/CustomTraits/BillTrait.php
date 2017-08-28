@@ -996,13 +996,8 @@ trait BillTrait{
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();
             $editQuotationProductIds = array_keys($products);
             $deletedQuotationProductIds = array_values(array_diff($alreadyExistQuotationProductIds,$editQuotationProductIds));
-            /*foreach($deletedQuotationProductIds as $productId){
-                BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$productId)->delete();
-            }*/
             foreach($products as $key => $product){
-                Log::info($product);
                 $alreadyExistProduct = BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->first();
-                Log::info($alreadyExistProduct);
                 if($alreadyExistProduct != null){
                     $billQuotationProduct = array();
                     if(array_key_exists('current_quantity',$product)){
