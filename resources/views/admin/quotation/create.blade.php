@@ -179,8 +179,8 @@
                                                             <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
                                                                 Back
                                                             </a>
-                                                            <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
-                                                                Submit
+                                                            <button type="submit" class="btn red pull-right" id="formSubmit" hidden style="padding-left: 6px">
+                                                                <i class="fa fa-check"></i> Submit
                                                             </button>
                                                         </fieldset>
                                                         <div id="profitMarginTable">

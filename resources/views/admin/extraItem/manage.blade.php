@@ -21,6 +21,11 @@
                                 <div class="page-title">
                                     <h1>Manage Extra Item</h1>
                                 </div>
+                                @if($user->hasPermissionTo('edit-manage-extra-items'))
+                                    <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 75%; margin-top: 1%"><a href="/extra-item/create" style="color: white"><i class="fa fa-plus"></i> Extra Item
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
@@ -35,11 +40,7 @@
                                                     <div class="row" style="text-align: right">
                                                         <div class="col-md-12">
                                                             <div class="btn-group">
-                                                                @if($user->hasPermissionTo('edit-manage-extra-items'))
-                                                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/extra-item/create" style="color: white"><i class="fa fa-plus"></i> Extra Item
-                                                                        </a>
-                                                                    </div>
-                                                                @endif
+
                                                             </div>
                                                         </div>
                                                     </div>

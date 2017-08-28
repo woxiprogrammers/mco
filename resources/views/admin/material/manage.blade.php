@@ -20,12 +20,14 @@
                             <div class="page-title">
                                 <h1>Manage Material</h1>
                             </div>
-                            <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 75%">
-                                <a href="/material/create" style="color: white">
-                                    <i class="fa fa-plus"></i>
-                                    Material
-                                </a>
-                            </div>
+                            @if($user->hasPermissionTo('create-material'))
+                                <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 77%; margin-top: 1%">
+                                    <a href="/material/create" style="color: white">
+                                        <i class="fa fa-plus"></i>
+                                        Material
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div class="page-content">
@@ -40,14 +42,7 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-8">
                                                         <div class="btn-group">
-                                                            @if($user->hasPermissionTo('create-material'))
-                                                                <div id="sample_editable_1_new" class="btn yellow">
-                                                                    <a href="/material/create" style="color: white">
-                                                                        <i class="fa fa-plus"></i>
-                                                                            Material
-                                                                    </a>
-                                                                </div>
-                                                            @endif
+
                                                         </div>
                                                     </div>
                                                 </div>
