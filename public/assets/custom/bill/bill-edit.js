@@ -29,7 +29,7 @@ $(document).ready(function () {
 
     });
 
-    $('input:checked.product-checkbox').click(function () {
+    $('.product-checkbox').click(function () {
         var id = $(this).val();
         if ($(this).prop("checked") == false) {
             if ($('input:checked').length > 0) {
@@ -43,6 +43,7 @@ $(document).ready(function () {
             $('#product_description_' + id).rules('remove');
             $('#product_description_id_' + id).rules('remove');
             $('#current_quantity_' + id).rules('remove');
+            $('#current_quantity_' + id).prop('disabled', true);
             $('#current_quantity_' + id).closest('form-group').removeClass('has-error');
             $('#current_quantity_' + id).val('');
             $('#product_description_' + id).val('');
@@ -50,6 +51,7 @@ $(document).ready(function () {
             $('#current_bill_amount_' + id).text("");
             getTotals();
         } else {
+            $('#current_quantity_' + id).prop('disabled', false);
             $('#product_description_'+id).rules('add',{
                 required: true
             });
