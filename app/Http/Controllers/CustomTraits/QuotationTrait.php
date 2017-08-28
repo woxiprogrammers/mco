@@ -1403,7 +1403,7 @@ trait QuotationTrait{
                 $quotationDraftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
                 $quotation = Quotation::findOrFail($data['quotation_id']);
                 $productBillCount = $this->getProductBillCount($quotation['id'],$data['product_id']);
-                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null || ($user->role->slug == 'superadmin' && $productBillCount <= 0)){
+                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null || ($user->roles[0]->role->slug == 'superadmin' && $productBillCount <= 0)){
                     $canUpdateProduct = true;
                 }else{
                     $canUpdateProduct = false;
