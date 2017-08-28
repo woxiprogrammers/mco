@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Bill;
 use App\BillImage;
+use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
 use App\BillStatus;
 use App\BillTax;
@@ -15,12 +16,14 @@ use App\ProductDescription;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
+use App\QuotationExtraItem;
 use App\QuotationProduct;
 use App\QuotationStatus;
 use App\Tax;
 use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
@@ -33,7 +36,11 @@ trait BillTrait{
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $bills = Bill::where('quotation_id',$quotation['id'])->where('bill_status_id','!=',$cancelBillStatusId)->get()->toArray();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
+            $extraItems = QuotationExtraItem::where('quotation_id',$quotation['id'])->get();
             if($bills != null){
+                foreach ($extraItems as $key => $extraItem){
+                    $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',array_column($bills,'id'))->where('quotation_extra_item_id',$extraItem->id)->sum('rate');
+                }
                 for($i = 0 ; $i < count($quotationProducts) ; $i++){
                     $quotationProducts[$i]['previous_quantity'] = 0;
                     for($j = 0; $j < count($bills) ; $j++ ){
@@ -54,6 +61,9 @@ trait BillTrait{
                     }
                 }
             }else{
+                foreach ($extraItems as $key => $extraItem){
+                    $extraItem['previous_rate'] = 0;
+                }
                 for($i=0 ; $i < count($quotationProducts) ; $i++){
                     $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
                     $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
@@ -68,7 +78,8 @@ trait BillTrait{
             }
             $taxes = Tax::where('is_active',true)->where('is_special',false)->get()->toArray();
             $specialTaxes = Tax::where('is_active', true)->where('is_special',true)->get();
-            return view('admin.bill.create')->with(compact('quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
+
+            return view('admin.bill.create')->with(compact('extraItems','quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get existing bill create view',
@@ -412,11 +423,12 @@ trait BillTrait{
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]['company'],
-                    $listingData[$pagination]['project_name'],
-                    $listingData[$pagination]['project_site_name'],
-                    '<div class="btn-group">
+                if(Auth::user()->hasPermissionTo('create-billing')){
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -432,7 +444,27 @@ trait BillTrait{
                             </li>
                         </ul>
                     </div>'
-                ];
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
+                                    <i class="icon-docs"></i> Manage </a>
+                            </li>
+                        </ul>
+                    </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -456,7 +488,7 @@ trait BillTrait{
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $bills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
-            $total['previous_bill_amount'] = $total['current_bill_amount'] = $total['cumulative_bill_amount'] = 0;
+            $total['previous_bill_amount'] = $total['current_bill_amount'] = $total['cumulative_bill_amount'] = $total_extra_item =  0;
             for($iterator = 0 ; $iterator < count($billQuotationProducts) ; $iterator++){
                 $billQuotationProducts[$iterator]['previous_quantity'] = 0;
                 $billQuotationProducts[$iterator]['quotationProducts'] = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->where('quotation_id',$bill['quotation_id'])->first();
@@ -478,6 +510,16 @@ trait BillTrait{
                 $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
                 $total['current_bill_amount'] = round(($total['current_bill_amount'] + $billQuotationProducts[$iterator]['current_bill_amount']),3);
             }
+            $extraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
+            if(count($extraItems) > 0){
+                $total_extra_item = 0;
+                foreach($extraItems as $key => $extraItem){
+                    $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',array_column($bills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
+                    $total_extra_item = $total_extra_item + $extraItem['rate'];
+                }
+                $total['current_bill_amount'] = round(($total['current_bill_amount'] + $total_extra_item),3);
+            }
+
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = round($total['current_bill_amount']);
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                             ->where('bill_taxes.bill_id','=',$bill['id'])
@@ -493,6 +535,7 @@ trait BillTrait{
                 $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
                 $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']);
             }
+
             $specialTaxes= BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
                 ->where('taxes.is_special','=', true)
@@ -520,9 +563,10 @@ trait BillTrait{
             }else{
                 $final['current_bill_gross_total_amount'] = round($final['current_bill_amount']);
             }
+
             $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('total')->toArray();
             $remainingAmount = $final['current_bill_gross_total_amount'] - array_sum($BillTransactionTotals);
-            return view('admin.bill.view')->with(compact('bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount'));
+            return view('admin.bill.view')->with(compact('extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -540,6 +584,7 @@ trait BillTrait{
             $bill_quotation_product = array();
             $bill['quotation_id'] = $request['quotation_id'];
             $bill['bill_status_id'] = BillStatus::where('slug','draft')->pluck('id')->first();
+            $bill['date'] = $request->date;
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
                 $bill_quotation_product['bill_id'] = $bill_created['id'];
@@ -548,6 +593,16 @@ trait BillTrait{
                 $bill_quotation_product['product_description_id'] = $value['product_description_id'];
                 BillQuotationProducts::create($bill_quotation_product);
             }
+            if($request->has('extra_item')){
+                foreach($request['extra_item'] as $quotationExtraItemId => $extraItemData){
+                    $bill_quotation_extra_item['bill_id'] = $bill_created['id'];
+                    $bill_quotation_extra_item['quotation_extra_item_id'] = $quotationExtraItemId;
+                    $bill_quotation_extra_item['description'] = $extraItemData['description'];
+                    $bill_quotation_extra_item['rate'] = $extraItemData['rate'];
+                    BillQuotationExtraItem::create($bill_quotation_extra_item);
+                }
+            }
+
             if($request->has('tax_percentage')){
                 foreach($request['tax_percentage'] as $key => $value){
                     if($value != 0){
@@ -705,6 +760,11 @@ trait BillTrait{
         try{
             $data = array();
             $invoiceData = $taxData = array();
+            if($bill->quotation->project_site->project->hsn_code == null){
+                $data['hsnCode'] = '';
+            }else{
+                $data['hsnCode'] = $bill->quotation->project_site->project->hsn_code->code;
+            }
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
             $data['company_name'] = $bill->quotation->project_site->project->client->company;
             $data['billData'] = $bill;
@@ -714,21 +774,32 @@ trait BillTrait{
                      $data['currentBillID'] = $key+1;
                  }
              }
-            $data['billDate'] =$bill->created_at->formatLocalized('%d/%m/%Y');
+            $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
             $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
-            $i = $j = $data['subTotal'] = $data['grossTotal'] = 0;
+            $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
             foreach($billQuotationProducts as $key => $billQuotationProduct){
                     $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
-                    $invoiceData[$i]['description'] = $billQuotationProduct->description;
+                    $invoiceData[$i]['description'] = $billQuotationProduct->product_description->description;
                     $invoiceData[$i]['quantity'] = round(($billQuotationProduct->quantity),3);
                     $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
                     $invoiceData[$i]['rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
                     $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
-                    $data['subTotal'] = round(($data['subTotal'] + $invoiceData[$i]['amount']),3);
+                    $data['productSubTotal'] = round(($data['productSubTotal'] + $invoiceData[$i]['amount']),3);
                 $i++;
             }
+            $data['extraItems'] = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
+            if(count($data['extraItems']) > 0){
+                $total['extra_item'] = 0;
+                foreach($data['extraItems'] as $key => $extraItem){
+                    $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',$allBillIds)->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
+                    $total['extra_item'] = $total['extra_item'] + $extraItem['rate'];
+                }
+            }else{
+                $total['extra_item'] = 0;
+            }
+            $data['subTotal'] = $data['productSubTotal'] + $total['extra_item'];
             $data['invoiceData'] = $invoiceData;
             $taxes = BillTax::where('bill_id',$bill['id'])->get();
             foreach($taxes as $key => $tax){
@@ -775,7 +846,7 @@ trait BillTrait{
             }
             $distinctProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->distinct('quotation_product_id')->orderBy('quotation_product_id')->select('quotation_product_id')->get();
             $invoiceData = $total = array();
-            $i = $total['previous_quantity'] = $total['current_quantity'] = $total['cumulative_quantity'] = $total['rate'] = $total['previous_bill_amount'] = $total['current_bill_amount'] = $total['cumulative_bill_amount'] = 0;
+            $i = $total['previous_quantity'] = $total['current_quantity'] = $total['cumulative_quantity'] = $total['rate'] = $total['product_previous_bill_amount'] = $total['product_current_bill_amount'] = $total['product_cumulative_bill_amount'] = 0;
             foreach($distinctProducts as $key => $distinctProduct){
                 $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
                 $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
@@ -801,11 +872,26 @@ trait BillTrait{
                 $total['current_quantity'] = round(($total['current_quantity'] + $invoiceData[$i]['current_quantity']),3);
                 $total['cumulative_quantity'] = round(($total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity']),3);
                 $total['rate'] = round(($total['rate'] + $invoiceData[$i]['rate']),3);
-                $total['previous_bill_amount'] = round(($total['previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
-                $total['current_bill_amount'] = round(($total['current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
-                $total['cumulative_bill_amount'] = round(($total['cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
+                $total['product_previous_bill_amount'] = round(($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
+                $total['product_current_bill_amount'] = round(($total['product_current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
+                $total['product_cumulative_bill_amount'] = round(($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
                 $i++;
             }
+            $data['extraItems'] = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
+            if(count($data['extraItems']) > 0){
+                $total['extra_item_previous_bill_amount'] = $total['extra_item_current_bill_amount'] = $total['extra_item_cumulative_bill_amount'] = 0;
+                foreach($data['extraItems'] as $key => $extraItem){
+                    $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',$allBillIds)->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
+                    $total['extra_item_previous_bill_amount'] = $total['extra_item_previous_bill_amount'] + $extraItem['previous_rate'];
+                    $total['extra_item_current_bill_amount'] = $total['extra_item_current_bill_amount'] + $extraItem['rate'];
+                    $total['extra_item_cumulative_bill_amount'] = $total['extra_item_previous_bill_amount'] + $total['extra_item_current_bill_amount'];
+                }
+            }else{
+                $total['extra_item_previous_bill_amount'] = $total['extra_item_current_bill_amount'] = $total['extra_item_cumulative_bill_amount'] = 0;
+            }
+            $total['previous_bill_amount'] = $total['product_previous_bill_amount'] + $total['extra_item_previous_bill_amount'];
+            $total['current_bill_amount'] = $total['product_current_bill_amount'] + $total['extra_item_current_bill_amount'];
+            $total['cumulative_bill_amount'] = $total['product_cumulative_bill_amount'] + $total['extra_item_cumulative_bill_amount'];
             $data['total'] = $total;
             $data['invoiceData'] = $invoiceData;
             $pdf = App::make('dompdf.wrapper');
@@ -828,8 +914,9 @@ trait BillTrait{
             $i = 0;
             $quotationProducts = $bill->quotation->quotation_products;
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $allBillIDs = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
-            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDs)->get();
+            $allbills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
+            $allBillIDsTillThisBill = Bill::where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
+            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDsTillThisBill)->get();
             foreach($quotationProducts as $key => $quotationProduct){
                 $quotationProduct['previous_quantity'] = 0;
                 foreach($billQuotationProducts as $key1 => $billQuotationProduct){
@@ -841,6 +928,22 @@ trait BillTrait{
                             $quotationProduct['bill_description'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description->description : '';
                             $quotationProduct['bill_product_description_id'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description_id : null;
                             $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
+                        }
+                    }
+                }
+            }
+            $quotationExtraItems = QuotationExtraItem::where('quotation_id',$bill->quotation->id)->get();
+            $billExtraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
+            foreach($quotationExtraItems as $key => $quotationExtraItem){
+                $quotationExtraItem['prev_amount'] = 0;
+                $quotationExtraItem['prev_amount'] = BillQuotationExtraItem::whereIn('bill_id',array_column($allbills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$quotationExtraItem['id'])->sum('rate');
+                foreach($billExtraItems as $key1 => $billExtraItem){
+                    if($billExtraItem['quotation_extra_item_id'] == $quotationExtraItem['id']){
+                        $quotationExtraItem['prev_amount'] = $quotationExtraItem['prev_amount'] + $billExtraItem['rate'];
+                        if($billExtraItem->bill_id == $bill->id){
+                            $quotationExtraItem['current_rate'] = $billExtraItem['rate'];
+                            $quotationExtraItem['description'] = $billExtraItem['description'];
+                            $quotationExtraItem['prev_amount'] = $quotationExtraItem['prev_amount'] - $billExtraItem['rate'];
                         }
                     }
                 }
@@ -896,7 +999,7 @@ trait BillTrait{
                 }
                 $i++;
             }
-            return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes','specialTaxes'));
+            return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes','specialTaxes','quotationExtraItems'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Bill',
@@ -910,23 +1013,26 @@ trait BillTrait{
 
     public function editBill(Request $request, $bill){
         try{
+            Bill::where('id',$bill->id)->update(['date' => $request->date]);
             $products = $request->quotation_product_id;
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();
             $editQuotationProductIds = array_keys($products);
             $deletedQuotationProductIds = array_values(array_diff($alreadyExistQuotationProductIds,$editQuotationProductIds));
-            foreach($deletedQuotationProductIds as $productId){
-                BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$productId)->delete();
-            }
             foreach($products as $key => $product){
                 $alreadyExistProduct = BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->first();
                 if($alreadyExistProduct != null){
-                    if($key == $alreadyExistProduct->quotation_product_id){
+                    $billQuotationProduct = array();
+                    if(array_key_exists('current_quantity',$product)){
                         if($product['current_quantity'] != $alreadyExistProduct->quantity){
                             $billQuotationProduct['quantity'] = $product['current_quantity'];
                         }
                         $billQuotationProduct['product_description_id'] = $product['product_description_id'];
                         BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->update($billQuotationProduct);
                     }else{
+                        BillQuotationProducts::where('bill_id',$bill->id)->where('quotation_product_id',$key)->delete();
+                    }
+                }else{
+                    if(array_key_exists('current_quantity',$product)){
                         $billQuotationProduct['bill_id'] = $bill->id;
                         $billQuotationProduct['quotation_product_id'] = $key;
                         $billQuotationProduct['quantity'] = $product['current_quantity'];
@@ -935,6 +1041,40 @@ trait BillTrait{
                     }
                 }
             }
+            if($request->has('extra_item')){
+                $extraItems = $request->extra_item;
+                $alreadyExistQuotationExtraItemIds = BillQuotationExtraItem::where('bill_id',$bill->id)->pluck('quotation_extra_item_id')->toArray();
+                $editQuotationExtraItemIds = array_keys($extraItems);
+                $deletedQuotationExtraItemIds = array_values(array_diff($alreadyExistQuotationExtraItemIds,$editQuotationExtraItemIds));
+                if(count($deletedQuotationExtraItemIds) > 0){
+                    foreach($deletedQuotationExtraItemIds as $extraItemId){
+                        BillQuotationExtraItem::where('bill_id',$bill->id)->where('quotation_extra_item_id',$extraItemId)->delete();
+                    }
+                }
+
+                foreach($extraItems as $extraItemId => $extraItem){
+                    $alreadyExistExtraItem = BillQuotationExtraItem::where('bill_id',$bill->id)->where('quotation_extra_item_id',$extraItemId)->first();
+                    if($alreadyExistExtraItem != null){
+                        $billQuotationExtraItem = array();
+                        if($extraItemId == $alreadyExistExtraItem->quotation_extra_item_id){
+                            if($extraItem['rate'] != $alreadyExistExtraItem->rate){
+                                $billQuotationExtraItem['rate'] = $extraItem['rate'];
+                            }
+                            $billQuotationExtraItem['description'] = $extraItem['description'];
+                            BillQuotationExtraItem::where('bill_id',$bill->id)->where('quotation_extra_item_id',$extraItemId)->update($billQuotationExtraItem);
+                        }
+                    }else{
+                        $billQuotationExtraItem['bill_id'] = $bill->id;
+                        $billQuotationExtraItem['quotation_extra_item_id'] = $extraItemId;
+                        $billQuotationExtraItem['rate'] = $extraItem['rate'];
+                        $billQuotationExtraItem['description'] = $extraItem['description'];
+                        BillQuotationExtraItem::create($billQuotationExtraItem);
+                    }
+                }
+            }else{
+                BillQuotationExtraItem::where('bill_id',$bill->id)->delete();
+            }
+
             $tax_applied = $request->tax_data;
             foreach($tax_applied as $taxId => $tax){
                 if($tax['is_already_applied'] == true){
@@ -1126,6 +1266,30 @@ trait BillTrait{
                 }
                 $i++;
             }
+            $billQuotationExtraItemCollection = BillQuotationExtraItem::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->distinct('quotation_extra_item_id')->select('quotation_extra_item_id')->get();
+            $billQuotationExtraItems = $billQuotationExtraItemCollection->toArray();
+                $iterator = 0;
+                foreach($billQuotationExtraItems as $key => $billQuotationExtraItem){
+                    $billQuotationExtraItems[$iterator]['name'] = $billQuotationExtraItemCollection[$iterator]->quotationExtraItems->extraItem->name;
+                    $billQuotationExtraItems[$iterator]['quotation_rate'] = $billQuotationExtraItemCollection[$iterator]->quotationExtraItems->rate;
+                    $billQuotationExtraItems[$iterator]['bills'] = array();
+                    $iteratorJ = 0;
+                    $total_rate = 0;
+                    foreach($data['tillThisBill'] as $key2 => $thisBill){
+                        $extraItemRate = BillQuotationExtraItem::where('quotation_extra_item_id',$billQuotationExtraItems[$iterator]['quotation_extra_item_id'])->where('bill_id',$thisBill->id)->pluck('rate')->first();
+                        $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'] = ($extraItemRate != null) ? $extraItemRate : 0;
+                        $total_rate = $total_rate + $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'];
+                        if(array_key_exists($thisBill->id,$billSubTotal)){
+                            $billSubTotal[$thisBill->id]['subtotal'] +=  $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'];
+                        }else{
+                            $billSubTotal[$thisBill->id]['subtotal'] = array();
+                            $billSubTotal[$thisBill->id]['subtotal'] =  $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'];
+                        }
+                        $iteratorJ++;
+                    }
+                    $billQuotationExtraItems[$iterator]['total_rate'] = $total_rate;
+                    $iterator++;
+                }
             $TaxIdTillBillWithoutSpecialTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->whereIn('bill_taxes.bill_id',array_column($data['tillThisBill']->toArray(),'id'))
                 ->where('taxes.is_special','!=', true)
@@ -1182,8 +1346,8 @@ trait BillTrait{
                 }
             }
                 $now = date('j_M_Y_His');
-                Excel::create('Cummulative_Bill_'.$now, function($excel) use($data,$productArray,$billSubTotal,$taxInfo) {
-                $excel->sheet('Sheetname', function($sheet) use($data,$productArray,$billSubTotal,$taxInfo) {
+                Excel::create('Cummulative_Bill_'.$now, function($excel) use($data,$productArray,$billSubTotal,$taxInfo,$billQuotationExtraItems) {
+                $excel->sheet('Sheetname', function($sheet) use($data,$productArray,$billSubTotal,$taxInfo,$billQuotationExtraItems) {
                     $sheet->row(1, array('SRN','Product with description','Rate','BOQ','W.O.Amount'));
                     $next_column = 'F';
                     $row = 1;
@@ -1225,6 +1389,22 @@ trait BillTrait{
                         }
                         $productRow = $productRow + 1;
                         $productRow++;
+                        $serialNumber++;
+                    }
+                    foreach ($billQuotationExtraItems as $key => $extraItem){
+                        $amountColumn = $totalAmountColumn;
+                        $amountColumn++;
+                        $sheet->getCell('A'.($productRow))->setValue($serialNumber);
+                        $sheet->getCell('B'.($productRow))->setValue($extraItem['name']);
+                        $sheet->getCell('E'.($productRow))->setValue($extraItem['quotation_rate']);
+                        $next_column = 'G';
+                        foreach($extraItem['bills'] as $billIterator => $thisBill ){
+                            $current_column = $next_column++;
+                            $sheet->getCell($current_column.($productRow))->setValue($thisBill['current_rate']);
+                            $next_column++;
+                        }
+                        $sheet->getCell(($amountColumn).($productRow))->setValue($extraItem['total_rate']);
+                        $productRow = $productRow + 1;
                         $serialNumber++;
                     }
                     $sheet->getCell('B'.($productRow))->setValue('SubTotal');

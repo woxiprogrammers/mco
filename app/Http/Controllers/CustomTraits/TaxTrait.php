@@ -5,6 +5,7 @@
     use App\Http\Requests\TaxRequest;
     use App\Tax;
     use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\Log;
 
     trait TaxTrait{
@@ -108,28 +109,47 @@
                         $tax_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                         $status = 'Enable';
                     }
-                    $records['data'][$iterator] = [
-                        $taxData[$pagination]['name'],
-                        $taxData[$pagination]['base_percentage'],
-                        $tax_status,
-                        date('d M Y',strtotime($taxData[$pagination]['created_at'])),
-                        '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="/tax/edit/'.$taxData[$pagination]['id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/tax/change-status/'.$taxData[$pagination]['id'].'">
-                                    <i class="icon-tag"></i> '.$status.' </a>
-                            </li>
-                        </ul>
-                    </div>'
-                    ];
+                    if(Auth::user()->hasPermissionTo('edit-tax')){
+                        $records['data'][$iterator] = [
+                            $taxData[$pagination]['name'],
+                            $taxData[$pagination]['base_percentage'],
+                            $tax_status,
+                            date('d M Y',strtotime($taxData[$pagination]['created_at'])),
+                            '<div class="btn-group">
+                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                    <i class="fa fa-angle-down"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-left" role="menu">
+                                    <li>
+                                        <a href="/tax/edit/'.$taxData[$pagination]['id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                    </li>
+                                    <li>
+                                        <a href="/tax/change-status/'.$taxData[$pagination]['id'].'">
+                                            <i class="icon-tag"></i> '.$status.' </a>
+                                    </li>
+                                </ul>
+                            </div>'
+                        ];
+                    }else{
+                        $records['data'][$iterator] = [
+                            $taxData[$pagination]['name'],
+                            $taxData[$pagination]['base_percentage'],
+                            $tax_status,
+                            date('d M Y',strtotime($taxData[$pagination]['created_at'])),
+                            '<div class="btn-group">
+                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                    <i class="fa fa-angle-down"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-left" role="menu">
+                                    
+                                </ul>
+                            </div>'
+                        ];
+                    }
+
                 }
                 $records["draw"] = intval($request->draw);
                 $records["recordsTotal"] = $iTotalRecords;

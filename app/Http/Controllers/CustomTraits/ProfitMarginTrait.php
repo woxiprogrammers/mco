@@ -4,6 +4,7 @@ use App\Http\Requests\ProfitMarginRequest;
 use App\ProfitMargin;
 use App\ProfitMarginVersion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 trait ProfitMarginTrait{
     public function getManageView(Request $request) {
@@ -102,28 +103,47 @@ trait ProfitMarginTrait{
                     $profitMargin_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $profitMarginData[$pagiantion]['name'],
-                    $profitMarginData[$pagiantion]['base_percentage'],
-                    $profitMargin_status,
-                    date('d M Y',strtotime($profitMarginData[$pagiantion]['created_at'])),
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/profit-margin/edit/'.$profitMarginData[$pagiantion]['id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/profit-margin/change-status/'.$profitMarginData[$pagiantion]['id'].'">
-                                    <i class="icon-tag"></i> '.$status.' </a>
-                            </li>
-                        </ul>
-                    </div>'
-                ];
+                if(Auth::user()->hasPermissionTo('edit-profit-margin')){
+                    $records['data'][$iterator] = [
+                        $profitMarginData[$pagiantion]['name'],
+                        $profitMarginData[$pagiantion]['base_percentage'],
+                        $profitMargin_status,
+                        date('d M Y',strtotime($profitMarginData[$pagiantion]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/profit-margin/edit/'.$profitMarginData[$pagiantion]['id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/profit-margin/change-status/'.$profitMarginData[$pagiantion]['id'].'">
+                                        <i class="icon-tag"></i> '.$status.' </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $profitMarginData[$pagiantion]['name'],
+                        $profitMarginData[$pagiantion]['base_percentage'],
+                        $profitMargin_status,
+                        date('d M Y',strtotime($profitMarginData[$pagiantion]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                
+                            </ul>
+                        </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;

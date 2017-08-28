@@ -101,8 +101,8 @@
                                                 </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn btn-success btn-md" style="width:25%">Submit</button>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red btn-md" id="submit"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -122,6 +122,7 @@
 <script>
     $(document).ready(function() {
         EditMaterial.init();
+        $('#submit').css("padding-left",'6px');
         $("#name").rules('add',{
             remote: {
                 url: "/material/check-name",

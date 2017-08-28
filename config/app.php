@@ -186,6 +186,7 @@ return [
          * Charts Service Providers
          */
         ConsoleTVs\Charts\ChartsServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
     ],
 
     /*
@@ -235,6 +236,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'UnitHelper' => \App\Helper\UnitHelper::class,
+        'ACLHelper' => \App\Helper\ACLHelper::class,
         'PDF' => Barryvdh\DomPDF\Facade::class,
         'Charts' => ConsoleTVs\Charts\Facades\Charts::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,

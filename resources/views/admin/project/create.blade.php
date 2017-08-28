@@ -90,9 +90,29 @@
                                                         <textarea id="siteAddress" name="address" class="form-control"></textarea>
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">HSN code</label>
+                                                        <span>*</span>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <select class="form-control" name="hsn_code" id="hsnCode">
+                                                            @foreach($hsnCodes as $hsnCode)
+                                                                <option value="{{$hsnCode['id']}}">{{$hsnCode['code']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        @foreach($hsnCodes as $hsnCode)
+                                                            <span class="hsn-description" id="hsnCodeDescription-{{$hsnCode['id']}}" hidden>
+                                                                {{$hsnCode['description']}}
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
                                                 <div class="form-actions noborder row">
-                                                    <div class="col-md-offset-3">
-                                                        <button type="submit" class="btn blue">Submit</button>
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -113,6 +133,8 @@
 <script>
     $(document).ready(function() {
         CreateProject.init();
+        $("#hsnCode").trigger('change');
+        $('#submit').css("padding-left",'6px');
     });
 </script>
 @endsection

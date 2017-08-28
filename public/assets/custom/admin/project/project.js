@@ -179,3 +179,13 @@ var  EditProject = function () {
         }
     };
 }();
+
+$(document).ready(function(){
+    $("#hsnCode").on('change', function(){
+        var hsnCodeId = $(this).val();
+        $(".hsn-description").each(function(){
+            $(this).hide()
+        });
+        $("#hsnCodeDescription-"+hsnCodeId).show();
+    });
+});

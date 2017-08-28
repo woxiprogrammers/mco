@@ -7,6 +7,7 @@ use App\ClientUser;
 use App\Http\Requests\UserRequest;
 use App\Role;
 use App\User;
+use App\UserHasRole;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -35,12 +36,16 @@ class UserController extends Controller
 
     public function createUser(UserRequest $request){
         try{
-            $data = $request->all();
+            $data = $request->except('role_id');
             $data['first_name'] = ucfirst($data['first_name']);
             $data['last_name'] = ucfirst($data['last_name']);
             $data['password'] = bcrypt($data['password']);
             $data['is_active'] = (boolean)false;
             $user = User::create($data);
+            $userHasRoleData = array();
+            $userHasRoleData['role_id'] = $request->role_id;
+            $userHasRoleData['user_id'] = $user->id;
+            UserHasRole::create($userHasRoleData);
             $request->session()->flash('success', 'User created successfully');
             return redirect('/user/create');
         }catch(\Exception $e){
@@ -57,7 +62,6 @@ class UserController extends Controller
     public function getEditView(Request $request,$user){
         try{
             $roles = Role::get()->toArray();
-            $user = $user->toArray();
             return view('user.edit')->with(compact('user','roles'));
         }catch(\Exception $e){
             $data = [
@@ -72,7 +76,11 @@ class UserController extends Controller
 
     public function editUser(UserRequest $request, $user){
         try{
-            $user->update($request->all());
+            $data = $request->except('role_id');
+            $user->update($data);
+            $userHasRoleData = array();
+            $userHasRoleData['role_id'] = $request->role_id;
+            UserHasRole::where('user_id', $user->id)->update($userHasRoleData);
             $request->session()->flash('success', 'User Edited successfully.');
             return redirect('/user/edit/'.$user->id);
         }catch(\Exception $e){

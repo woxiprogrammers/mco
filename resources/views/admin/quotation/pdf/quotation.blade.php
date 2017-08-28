@@ -7,23 +7,34 @@
     </style>
 </head>
 <body>
-<table border="1" style="padding-top: 20px; padding-bottom:20px " width="100%">
-    <tr><td>
-            <table width="100%" style="text-align: center; ">
+<table style="border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black" width="100%">
+    <tr>
+        <td style="width: 20%">
+            <img style="margin-left: 10%" src="http://mconstruction.co.in/assets/global/img/logo.jpg" height="75px" width="120px">
+        </td>
+        <td style="width: 80%">
+            <table style="padding-top: 20px; padding-bottom:20px;" width="100%">
                 <tr>
-                    <td style="font-size: 30px"><i>{!! env('COMPANY_NAME') !!}</i></td>
-                </tr>
-                <tr>
-                    <td style="font-size: 20px"><i>{!! env('DESIGNATION') !!}</i></td>
-                </tr>
-                <tr>
-                    <td style="font-size: 15px"><i>{!! env('ADDRESS') !!}</i></td>
-                </tr>
-                <tr>
-                    <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
+                    <td>
+                        <table width="100%" style="text-align: center; ">
+                            <tr>
+                                <td style="font-size: 30px"><i>{!! env('COMPANY_NAME') !!}</i></td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 20px"><i>{!! env('DESIGNATION') !!}</i></td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 15px"><i>{!! env('ADDRESS') !!}</i></td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
             </table>
-        </td></tr>
+        </td>
+    </tr>
 </table>
             <table width="100%" style="text-align: center" border="1">
                 <tr>
@@ -112,20 +123,23 @@
                     </tr>
                     @endfor
                     <tr>
-                        <td colspan="6" style="text-align: right;background-color: #d2d2d2 "><b>Sub Total </b></td>
+                        <td colspan="5" style="text-align: right;background-color: #d2d2d2 "><b>Sub Total </b></td>
                         <td style="text-align: right;background-color: #d2d2d2 "><b>{!! $total !!}</b></td>
+                        <td style="text-align: right;background-color: #d2d2d2 "> </td>
                     </tr>
                     @if($slug == 'with-tax')
                         @for($iterator = 0; $iterator < count($taxData) ; $iterator++)
                             <tr>
-                                <td colspan="6" style="text-align: right;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
+                                <td colspan="5" style="text-align: right;">{!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
                                 <td style="text-align: right;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
+                                <td> </td>
                             </tr>
                         @endfor
                     @endif
                     <tr>
-                        <td colspan="6" style="text-align: right;background-color: #d2d2d2 "><b>Final Total</b></td>
+                        <td colspan="5" style="text-align: right;background-color: #d2d2d2 "><b>Final Total</b></td>
                         <td style="text-align: right;background-color: #d2d2d2 "><b>{!! $rounded_total !!}</b></td>
+                        <td style="text-align: right;background-color: #d2d2d2 "> </td>
                     </tr>
                     <tr>
                         <td colspan="7" style="background-color: #e2e2e2;font-size: 13px"><b><i>Rs. {!! $amount_in_words !!}.</i></b></td>
