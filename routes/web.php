@@ -189,7 +189,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
         Route::post('get-quotation-product-view',array('uses' => 'Admin\QuotationController@getProductEditView'));
     });
-
     Route::group(['prefix' => 'project'], function(){
         Route::get('create',array('uses'=> 'Admin\ProjectController@getCreateView'));
         Route::post('create',array('uses'=> 'Admin\ProjectController@createProject'));
@@ -200,7 +199,18 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{project}',array('uses' => 'Admin\ProjectController@getEditView'));
         Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
     });
-    Route::group(['prefix' => 'purchase'], function(){
-        Route::get('manage',array('uses'=> 'Admin\PurchaseController@getManageView'));
+    Route::group(['prefix' => 'purchase/material-request'], function(){
+        Route::get('manage',array('uses'=> 'User\PurchaseController@getManageView'));
+        Route::get('create',array('uses'=> 'User\PurchaseController@getCreateView'));
+        Route::post('listing',array('uses'=> 'User\PurchaseController@getMaterialRequestListing'));
+        Route::get('edit',array('uses'=> 'User\PurchaseController@editMaterialRequest'));
+    });
+    Route::group(['prefix' => 'purchase/purchase-request'], function(){
+        Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
+        Route::get('create',array('uses'=> 'Purchase\PurchaseRequestController@getCreateView'));
+    });
+    Route::group(['prefix' => 'purchase/purchase-order'], function(){
+        Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
+        Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
     });
 });

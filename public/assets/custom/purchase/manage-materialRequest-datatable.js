@@ -1,8 +1,10 @@
-var CategoryListing = function () {
+var MaterialRequestListing = function () {
     var handleOrders = function () {
+
         var grid = new Datatable();
+
         grid.init({
-            src: $("#categoryTable"),
+            src: $("#materialRequest"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -22,7 +24,10 @@ var CategoryListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/category/listing", // ajax source
+                    "url": "/purchase/material-request/listing", // ajax source
+                    "data" :{
+                        '_token' : $("input[name='_token']").val()
+                    }
                 },
                 "order": [
                     [1, "asc"]
@@ -57,6 +62,7 @@ var CategoryListing = function () {
                 });
             }
         });
+
     }
     return {
 
@@ -64,8 +70,9 @@ var CategoryListing = function () {
         init: function () {
             handleOrders();
         }
+
     };
 }();
 jQuery(document).ready(function() {
-    CategoryListing.init();
+    MaterialRequestListing.init();
 });

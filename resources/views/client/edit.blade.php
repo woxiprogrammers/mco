@@ -37,7 +37,7 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <div class="col-md-11">
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
 
