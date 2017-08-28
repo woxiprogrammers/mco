@@ -41,6 +41,7 @@
                                         <input type="hidden" id="user_id" value="{{$user['id']}}">
                                         <form role="form" id="edit-user" class="form-horizontal" method="post" action="/user/edit/{{$user['id']}}">
                                             {!! csrf_field() !!}
+                                            <input type="hidden" name="_method" value="PUT">
                                             <div class="form-group row">
                                                 <div class="col-md-3" style="text-align: right">
                                                     <label for="role_id" class="control-label">Select Role</label>
@@ -49,7 +50,7 @@
                                                 <div class="col-md-6">
                                                     <select class="form-control" id="role_id" name="role_id">
                                                         @foreach($roles as $role)
-                                                            @if($role['id'] == $user['role_id'])
+                                                            @if($role['id'] == $user->roles[0]->role_id)
                                                                 <option value="{{$role['id']}}" selected>{{$role['name']}}</option>
                                                             @else
                                                                 <option value="{{$role['id']}}">{{$role['name']}}</option>
@@ -117,8 +118,8 @@
                                                 </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn blue">Submit</button>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -140,6 +141,7 @@
 <script src="/assets/custom/user/user.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
+        $('#submit').css("padding-left",'6px');
         $('#email').css('pointer-events',"none");
         $('select[name="gender"]').find('option[value={{$user['gender']}}]').attr("selected",true);
         EditUser.init();

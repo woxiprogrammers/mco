@@ -134,11 +134,18 @@
                     <div class="form-group">
                         <div class="col-md-3 col-md-offset-4">
                             @if($canUpdateProduct == true)
-                                <button type="button" class="btn btn-success" onclick="submitProductEdit()"> Submit </button>
+                                <button type="button" class="btn red" onclick="submitProductEdit()" id="submit"><i class="fa fa-check"></i> Submit </button>
                             @endif
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
                     </div>
+                    @if($canUpdateProduct == false)
+                        <div class="form-group">
+                            <div class="col-md-7 col-md-offset-2">
+                                <label class="control-label" style="color: red">You can not edit this product. Either you are unauthorised or already a bill is created for this product.</label>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </fieldset>
         </div>

@@ -57,7 +57,8 @@
                                         <div class="tab-content">
                                         <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
-                                            <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px; text-align: right">
+                                            <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px;">
+                                                <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -92,16 +93,16 @@
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                 <tr style="text-align: center">
-                                                    <th width="3%"> Item no </th>
-                                                    <th width="15%"> Item Description </th>
-                                                    <th width="6%" class="numeric"> UOM </th>
-                                                    <th width="7%" class="numeric"> BOQ Quantity </th>
-                                                    <th width="6%" class="numeric"> Rate </th>
-                                                    <th width="10%" class="numeric"> W.O Amount </th>
-                                                    <th width="7%" class="numeric"> Previous Quantity </th>
-                                                    <th width="7%" class="numeric"> Current Quantity </th>
-                                                    <th width="10%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="10%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="3%" style="text-align: center"> Item no </th>
+                                                    <th width="15%" style="text-align: center"> Item Description </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> UOM </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> BOQ Quantity </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> Rate </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> W.O Amount </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> Previous Quantity </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> Current Quantity </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> Current Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
                                                 <tr>
@@ -147,6 +148,35 @@
 
                                                 </tr>
                                                 @endfor
+                                                <tr>
+                                                    <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
+                                                </tr>
+                                                @if(count($extraItems) > 0)
+                                                    <tr>
+                                                        <td colspan="4"><b>Extra Items</b></td>
+                                                        <td colspan="2"><b>Total amount approved</b></td>
+                                                        <td colspan="2"><b>Previous amount</b></td>
+                                                        <td colspan="2"><b>Current amount</b></td>
+                                                    </tr>
+                                                    @for($iterator = 0; $iterator < count($extraItems); $iterator++)
+                                                        <tr>
+                                                            <td colspan="4">
+                                                                <span>
+                                                                    {{$extraItems[$iterator]->quotationExtraItems->extraItem->name}} - {{$extraItems[$iterator]->description}}
+                                                                </span>
+                                                            </td>
+                                                            <td colspan="2">
+                                                                <span id="total_extra_item_rate">{{$extraItems[$iterator]->quotationExtraItems->rate}}</span>
+                                                            </td>
+                                                            <td colspan="2">
+                                                                <span id="previous_rates_{{$extraItems[$iterator]->id}}">{!! $extraItems[$iterator]->previous_rate !!}</span>
+                                                            </td>
+                                                            <td colspan="2" class="form-group">
+                                                                <span id="current_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>
+                                                            </td>
+                                                        </tr>
+                                                    @endfor
+                                                @endif
                                                 <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;">
                                                         <b>Total</b>

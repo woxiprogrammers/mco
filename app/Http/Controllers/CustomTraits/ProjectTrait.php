@@ -9,9 +9,11 @@ namespace App\Http\Controllers\CustomTraits;
 
 
 use App\Client;
+use App\HsnCode;
 use App\Project;
 use App\ProjectSite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 trait ProjectTrait{
@@ -19,7 +21,8 @@ trait ProjectTrait{
     public function getCreateView(Request $request){
         try{
             $clients = Client::where('is_active', true)->get();
-            return view('admin.project.create')->with(compact('clients'));
+            $hsnCodes = HsnCode::select('id','code','description')->get();
+            return view('admin.project.create')->with(compact('clients','hsnCodes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Project create view',
@@ -78,28 +81,47 @@ trait ProjectTrait{
                     $projectStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]['company'],
-                    $listingData[$pagination]['project_name'],
-                    $listingData[$pagination]['project_site_name'],
-                    $projectStatus,
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/project/edit/'.$listingData[$pagination]['project_id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/project/change-status/'.$listingData[$pagination]['project_id'].'">
-                                    <i class="icon-docs"></i> '.$status.' </a>
-                            </li>
-                        </ul>
-                    </div>'
-                ];
+                if(Auth::user()->hasPermissionTo('edit-manage-sites')){
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        $projectStatus,
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/project/edit/'.$listingData[$pagination]['project_id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/project/change-status/'.$listingData[$pagination]['project_id'].'">
+                                        <i class="icon-docs"></i> '.$status.' </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        $projectStatus,
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                            
+                            </ul>
+                        </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -147,6 +169,7 @@ trait ProjectTrait{
             $projectData['name'] = ucwords($request->project_name);
             $projectData['client_id'] = $request->client_id;
             $projectData['is_active'] = false;
+            $projectData['hsn_code_id'] = $request->hsn_code;
             $project = Project::create($projectData);
             $projectSiteData = array();
             $projectSiteData['project_id'] = $project->id;
@@ -188,10 +211,12 @@ trait ProjectTrait{
             $projectData['client'] = $project->client->company;
             $projectData['id'] = $project->id;
             $projectData['project'] = $project->name;
+            $projectData['project_hsn_code'] = $project->hsn_code_id;
             $project->project_site = $project->project_site->toArray();
             $projectData['project_site'] = $project->project_site[0]['name'];
             $projectData['project_site_address'] = $project->project_site[0]['address'];
-            return view('admin.project.edit')->with(compact('projectData'));
+            $hsnCodes = HsnCode::select('id','code','description')->get();
+            return view('admin.project.edit')->with(compact('projectData','hsnCodes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'change Project status',
@@ -205,7 +230,10 @@ trait ProjectTrait{
 
     public function editProject(Request $request, $project){
         try{
-            $project->update(['name'=>$request->project_name]);
+            $project->update([
+                'name'=>$request->project_name,
+                'hsn_code_id' => $request->hsn_code
+            ]);
             ProjectSite::where('project_id',$project->id)->update([
                 'name' => $request->project_site_name,
                 'address' => $request->address
