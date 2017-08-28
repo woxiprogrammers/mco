@@ -340,8 +340,9 @@
                                                             Back
                                                         </a>
                                                         @if($quotation->quotation_status->slug == 'draft' || $userRole == 'superadmin')
-                                                            <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
-                                                                Submit
+
+                                                            <button type="submit" class="btn red pull-right" id="formSubmit" hidden style="padding-left: 6px">
+                                                                <i class="fa fa-check"></i> Submit
                                                             </button>
                                                         @endif
                                                     </fieldset>
@@ -362,8 +363,8 @@
                                                             Back
                                                         </a>
                                                         @if(($quotation->quotation_status->slug == 'approved' || $quotation->quotation_status->slug == 'disapproved')&& $userRole == 'superadmin')
-                                                        <button type="submit" class="btn btn-success">
-                                                            Submit
+                                                        <button type="submit" class="btn red" style="padding-left: 6px">
+                                                            <i class="fa fa-check"></i> Submit
                                                         </button>
                                                         @elseif($quotation->quotation_status->slug == 'draft')
                                                             <button type="submit" class="btn btn-success">
