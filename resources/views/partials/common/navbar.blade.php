@@ -63,6 +63,7 @@
                             <span class="arrow"></span>
                         </a>
                     </li>
+
                     <?php $hasStructurePermission = \App\Helper\ACLHelper::checkModuleAcl('structure'); ?>
                     @if($hasStructurePermission)
                         <li aria-haspopup="true" class="menu-dropdown mega-menu-dropdown">
@@ -151,6 +152,7 @@
                                         </ul>
                                     </li>
                                 @endif
+
                                 <li aria-haspopup="true"  class="dropdown-submenu ">
                                     <a href="javascript:void(0);" class="nav-link nav-toggle ">
                                         <i class="fa fa-folder"></i> Manage Sites
@@ -174,28 +176,71 @@
                                         @endif
                                     </ul>
                                 </li>
+                                </ul>
+                            </li>
+                        <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
+                        @if($hasStructurePermission)
+                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/quotation/manage/status#2"> Quotations
+                                    <span class="arrow"></span>
+                                </a>
+                            </li>
+                        @endif
+                        <?php $hasBillPermission = \App\Helper\ACLHelper::checkModuleAcl('bill'); ?>
+                        @if($hasBillPermission)
+                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/bill/manage/project-site"> Bills
+                                    <span class="arrow"></span>
+                                </a>
+                            </li>
+                        @endif
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> Purchase
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Material Request
+                                    </a>
+                                </li>
+                              <!--  <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-bars"></i> Purchase Request
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-bars"></i> Purchase Order
+                                    </a>
+                                </li>
+                              -->
                             </ul>
                         </li>
-                    @endif
-
-                    <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
-                    @if($hasStructurePermission)
+                        <!--
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                            <a href="/quotation/manage/status#2"> Quotations
+                            <a> Inventory
                                 <span class="arrow"></span>
                             </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Store Keeper
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-bars"></i> Manage Asset
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                    @endif
+                        -->
+                        @endif
+                        </ul>
+                    </li>
 
-                    <?php $hasBillPermission = \App\Helper\ACLHelper::checkModuleAcl('bill'); ?>
-                    @if($hasBillPermission)
-                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                            <a href="/bill/manage/project-site"> Bills
-                                <span class="arrow"></span>
-                            </a>
-                        </li>
-                    @endif
-                </ul>
+
             </div>
             <!-- END MEGA MENU -->
         </div>
