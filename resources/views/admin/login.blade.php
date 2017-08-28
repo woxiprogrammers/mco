@@ -5,7 +5,6 @@
 <html lang="en">
 <!--<![endif]-->
 <!-- BEGIN HEAD -->
-
 <head>
     <meta charset="utf-8" />
     <title>Manisha Construction | Admin Login</title>
@@ -35,7 +34,6 @@
     <!-- END THEME LAYOUT STYLES -->
     <link rel="shortcut icon" href="favicon.ico" /> </head>
 <!-- END HEAD -->
-
 <body class=" login">
 <!-- BEGIN LOGO -->
 <div class="logo">
@@ -82,15 +80,10 @@
             <i class="fa fa-lock"></i>
             <input class="form-control placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" /> </div>
     </div>
-
     <div class="form-actions">
-
         <button type="submit" class="btn green pull-right"> Login </button>
     </div>
-
 </form>
-
-
 </div>
 <!-- END LOGIN -->
 <!-- BEGIN COPYRIGHT -->
@@ -133,5 +126,4 @@
     })
 </script>
 </body>
-
 </html>
