@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateVendorCityRelationTable extends Migration
+class AddCityIdColumnInProjectSitesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,9 @@ class CreateVendorCityRelationTable extends Migration
      */
     public function up()
     {
-        Schema::create('vendor_city_relation', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('vendor_id');
-            $table->unsignedInteger('city_id');
-            $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade')->onUpdate('cascade');
+        Schema::table('project_sites', function (Blueprint $table) {
+            $table->unsignedInteger('city_id')->nullable();
             $table->foreign('city_id')->references('id')->on('cities')->onDelete('cascade')->onUpdate('cascade');
-            $table->timestamps();
         });
     }
 
@@ -30,6 +26,9 @@ class CreateVendorCityRelationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('vendor_city_relation');
+        Schema::table('project_sites', function (Blueprint $table) {
+            $table->dropForeign('project_sites_city_id_foreign');
+            $table->dropColumn('city_id');
+        });
     }
 }

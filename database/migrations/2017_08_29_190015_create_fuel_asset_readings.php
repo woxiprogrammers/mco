@@ -15,6 +15,14 @@ class CreateFuelAssetReadings extends Migration
     {
         Schema::create('fuel_asset_reading', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('inventory_component_id');
+            $table->string('start_reading')->nullable();
+            $table->string('stop_reading')->nullable();
+            $table->timestamp('top_up_time')->nullable();
+            $table->timestamp('start_time')->nullable();
+            $table->timestamp('stop_time')->nullable();
+            $table->unsignedInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }

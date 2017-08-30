@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddGstFieldsInMaterialsTable extends Migration
+class AddLitrePerUnitColumnInAssetsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddGstFieldsInMaterialsTable extends Migration
      */
     public function up()
     {
-        Schema::table('materials', function (Blueprint $table) {
-            $table->integer('gst')->nullable();
-            $table->string('hsn_code')->nullable();
+        Schema::table('assets', function (Blueprint $table) {
+            $table->double('litre_per_unit');
         });
     }
 
@@ -26,9 +25,8 @@ class AddGstFieldsInMaterialsTable extends Migration
      */
     public function down()
     {
-        Schema::table('materials', function (Blueprint $table) {
-            $table->dropColumn('gst');
-            $table->dropColumn('hsn_code');
+        Schema::table('assets', function (Blueprint $table) {
+            $table->dropColumn('litre_per_unit');
         });
     }
 }
