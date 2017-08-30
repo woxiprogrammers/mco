@@ -47,7 +47,7 @@
                                                 <div class="tab-content">
                                                     <input type="hidden" id="quotation_id" value="{{$bill->quotation_id}}">
                                                     <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
-                                                        <div class="form-group">
+                                                        <div class="col-md-12 form-group">
                                                             <div class="col-md-4 date date-picker" data-date-end-date="0d">
                                                                 <label class="control-label" for="date">Select Bill Date : </label>
                                                                 @if(!empty($bill['date']))
@@ -64,8 +64,8 @@
 
                                                                 @endif
                                                             </div>
-                                                            <div class="col-md-5 date date-picker" data-date-end-date="0d">
-                                                                <label class="control-label" for="performa_invoice_date">Select Performa Invoice Date : </label>
+                                                            <div class="col-md-5 date date-picker" data-date-end-date="0d" style="margin-left: 25%">
+                                                                <label class="control-label" for="performa_invoice_date" style="margin-left: 12%">Select Performa Invoice Date : </label>
                                                                 @if(!empty($bill['performa_invoice_date']))
                                                                     <input type="text"  name="performa_invoice_date" value="{{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}" id="performa_invoice_date" readonly>
                                                                     <button class="btn btn-sm default" type="button">

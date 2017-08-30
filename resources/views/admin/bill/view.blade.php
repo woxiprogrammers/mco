@@ -58,8 +58,6 @@
                                         <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
                                             <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px;">
-                                                <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
-                                                <label class="control-label" for="date" style="margin-left: 2%"> Performa Invoice Date : {{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}</label>
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill" style="margin-left: 1%">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
@@ -79,14 +77,6 @@
                                                         <i class="fa fa-remove"></i> Cancel
                                                     </a>
                                                 @endif
-                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
-                                                    <i class="fa fa-download"></i>
-                                                    Current Bill
-                                                </a>
-                                                <a href="/bill/current/performa-invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
-                                                    <i class="fa fa-download"></i>
-                                                    Performa Invoice Bill
-                                                </a>
                                                 <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                     <i class="fa fa-download"></i> Cumulative Bill
                                                 </a>
@@ -94,6 +84,21 @@
                                                 <a href="/bill/cumulative/excel-sheet/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                     <i class="fa fa-download"></i>Export Cumulative Bill
                                                 </a>
+                                                <div class="col-md-12" style="margin-top: 1%">
+                                                <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
+
+                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i>
+                                                    Current Bill
+                                                </a>
+                                                <label class="control-label" for="date" style="margin-left: 9%"> Performa Invoice Date : {{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}</label>
+
+                                                <a href="/bill/current/performa-invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i>
+                                                    Performa Invoice Bill
+                                                </a>
+                                                </div>
+
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
