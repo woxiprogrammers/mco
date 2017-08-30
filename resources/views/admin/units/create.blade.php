@@ -68,7 +68,6 @@
     </div>
 </div>
 @endsection
-
 @section('javascript')
 <script src="/assets/custom/admin/units/units.js" type="application/javascript"></script>
 <script>

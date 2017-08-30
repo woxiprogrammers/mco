@@ -4,7 +4,6 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
-
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -21,9 +20,13 @@
                             <div class="page-title">
                                 <h1>Manage Category</h1>
                             </div>
-                            <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 75%; margin-top: 1%"><a href="/category/create" style="color: white"><i class="fa fa-plus"></i> Category
-                                </a>
-                            </div>
+                            @if($user->hasPermissionTo('edit-category'))
+                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 77%"><a href="/category/create" style="color: white">
+                                        <i class="fa fa-plus"></i>
+                                        Category
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div class="page-content">
@@ -38,13 +41,7 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            @if($user->hasPermissionTo('edit-category'))
-                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="/category/create" style="color: white">
-                                                                    <i class="fa fa-plus"></i>
-                                                                    Category
-                                                            </a>
-                                                            </div>
-                                                            @endif
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -83,7 +80,6 @@
 </div>
 </div>
 @endsection
-
 @section('javascript')
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
