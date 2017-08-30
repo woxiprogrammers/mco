@@ -21,6 +21,9 @@ var  CreateQuotation = function () {
                 },
                 'project_site': {
                     required: true
+                },
+                'profit_margin[][]': {
+                    required: true
                 }
             },
 
@@ -33,6 +36,9 @@ var  CreateQuotation = function () {
                 },
                 'project_site': {
                     required: "Project Site name is required."
+                },
+                'profit_margin[][]': {
+                    required: "Project Margin is required."
                 }
             },
 

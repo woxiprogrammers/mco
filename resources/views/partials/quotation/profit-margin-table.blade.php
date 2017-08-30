@@ -35,3 +35,11 @@
         </table>
     </div>
 </fieldset>
+@section('javascript')
+    <script src="/assets/custom/admin/quotation/quotation1.js" type="application/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            CreateVendor.init();
+        });
+    </script>
+@endsection

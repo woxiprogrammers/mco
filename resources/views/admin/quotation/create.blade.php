@@ -74,11 +74,11 @@
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-md-4">
-                                                                    <select name="project_id" id="projectId" class="form-control" disabled>
+                                                                    <select name="project_id" id="projectId" class="form-control" >
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-md-4">
-                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" disabled>
+                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" >
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -219,7 +219,7 @@
 @endsection
 @section('javascript')
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
-<script src="/assets/custom/admin/quotation/quotation.js"></script>
+<script src="/assets/custom/admin/quotation/quotation1.js"></script>
 <script src="/assets/custom/admin/quotation/validations.js"></script>
 <script src="/assets/global/plugins/jquery-form.min.js"></script>
 
