@@ -14,7 +14,7 @@ class AddLitrePerUnitColumnInAssetsTable extends Migration
     public function up()
     {
         Schema::table('assets', function (Blueprint $table) {
-            $table->double('litre_per_unit');
+            $table->double('litre_per_unit')->nullable();
         });
     }
 
