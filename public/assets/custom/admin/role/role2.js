@@ -167,11 +167,18 @@ function getModules(role) {
     });
 }
 
+$("#next_btn").on('click',function(){
+    if($("#module_id input:checkbox:checked").length > 0){
+        getSubModules();
+        $(".submodules-table-div").show();
+    }
+});
+
 function getSubModules() {
     var module_id = [];
     var formData = {};
     formData['_token'] = $("input[name='_token']").val();
-    $("#material_id input:checkbox:checked").each(function(i){
+    $("#module_id input:checkbox:checked").each(function(i){
         module_id[i] = $(this).val();
     });
     formData['module_id'] = module_id;
@@ -190,19 +197,13 @@ function getSubModules() {
     $.ajax({
         type: "POST",
         url: "/role/module/listing",
+        data :formData,
         async: false,
 
         success: function(data,textStatus, xhr){
-            if (xhr.status == 200) {
-                $("#material_id").html(data);
-                $("#roleModulesTable input[type='number']").each(function () {
-                    $(this).rules('add', {
-                        required: true
-                    });
-                });
-            }
+            $("#SubModulesTable").html(data);
         },
-        error : function(e){
+        error : function(errorStatus, xhr){
             alert('error');
         }
     });

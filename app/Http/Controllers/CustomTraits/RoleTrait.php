@@ -43,7 +43,7 @@ trait RoleTrait{
         }
     }
 
-    public function getManageView(Request $request){
+        public function getManageView(Request $request){
         try{
             return view('admin.role.manage');
         }catch(\Exception $e){
@@ -158,6 +158,19 @@ trait RoleTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getSubModules(Request $request){
+        try{
+            $moduleIds = $request->module_id;
+            $modules = Module::join('modules','modules.name','=','');
+            return view('partials.role.module-listing');
+        }
+        catch (\Exception $e){
+
+        }
+
+
     }
 
 }
