@@ -53,10 +53,16 @@
                                                                <button class="btn btn-sm default" type="button">
                                                                    <i class="fa fa-calendar"></i>
                                                                </button>
-
+                                                       </div>
+                                                       <div class="col-md-5 date date-picker" data-date-end-date="0d">
+                                                           <label class="control-label" for="performa_invoice_date">Performa Invoice Date : </label>
+                                                           <input type="text" style="width: 50%" name="performa_invoice_date" placeholder="Select Performa Invoice Date" id="performa_invoice_date"/>
+                                                           <button class="btn btn-sm default" type="button">
+                                                               <i class="fa fa-calendar"></i>
+                                                           </button>
                                                        </div>
                                                        @if($bills != NULL)
-                                                           <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
+                                                           <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px; margin-left: 86%">
                                                                <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                                    <option value="default">Select Bill</option>
                                                                    @for($i = 0 ; $i < count($bills); $i++)
@@ -273,5 +279,6 @@
 <script>
     var date=new Date();
     $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+    $('#performa_invoice_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
 </script>
 @endsection

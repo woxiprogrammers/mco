@@ -585,6 +585,7 @@ trait BillTrait{
             $bill['quotation_id'] = $request['quotation_id'];
             $bill['bill_status_id'] = BillStatus::where('slug','draft')->pluck('id')->first();
             $bill['date'] = $request->date;
+            $bill['performa_invoice_date'] = $request->performa_invoice_date;
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
                 $bill_quotation_product['bill_id'] = $bill_created['id'];
@@ -756,9 +757,10 @@ trait BillTrait{
         }
     }
 
-    public function generateCurrentBill(Request $request,$bill){
+    public function generateCurrentBill(Request $request,$slug,$bill){
         try{
             $data = array();
+            $data['slug'] = $slug;
             $invoiceData = $taxData = array();
             if($bill->quotation->project_site->project->hsn_code == null){
                 $data['hsnCode'] = '';
@@ -774,7 +776,13 @@ trait BillTrait{
                      $data['currentBillID'] = $key+1;
                  }
              }
-            $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
+
+             if($slug == "performa-invoice"){
+                 $data['billDate'] = date('d/m/Y',strtotime($bill['performa_invoice_date']));
+             }else{
+                 $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
+             }
+
             $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
@@ -1013,7 +1021,7 @@ trait BillTrait{
 
     public function editBill(Request $request, $bill){
         try{
-            Bill::where('id',$bill->id)->update(['date' => $request->date]);
+            Bill::where('id',$bill->id)->update(['date' => $request->date,'performa_invoice_date' => $request->performa_invoice_date]);
             $products = $request->quotation_product_id;
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();
             $editQuotationProductIds = array_keys($products);
