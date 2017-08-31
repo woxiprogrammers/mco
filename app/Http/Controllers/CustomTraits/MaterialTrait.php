@@ -57,6 +57,8 @@ trait MaterialTrait{
             $materialData['name'] = $material->name;
             $materialData['rate_per_unit'] = $material->rate_per_unit;
             $materialData['unit'] = $material->unit_id;
+            $materialData['gst'] = $material->gst;
+            $materialData['hsn_code'] = $material->hsn_code;
             $materialData['categories'] =  CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
                                             ->where('category_material_relations.material_id', $material->id)
                                             ->select('category_material_relations.category_id as id','categories.name as name')
@@ -99,6 +101,8 @@ trait MaterialTrait{
                 $materialData['is_active'] = (boolean)0;
                 $materialData['created_at'] = $now;
                 $materialData['updated_at'] = $now;
+                $materialData['gst'] = $request->gst;
+                $materialData['hsn_code'] = $request->hsn_code;
                 $material = Material::create($materialData);
                 $categoryMaterialData['material_id'] = $material['id'];
                 $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
@@ -134,6 +138,8 @@ trait MaterialTrait{
             $updateMaterial[0]['id'] = $material->id;
             $updateMaterial[0]['rate_per_unit'] = $request->rate_per_unit;
             $updateMaterial[0]['unit_id'] = $request->unit;
+            $updateMaterial['gst'] = $request->gst;
+            $updateMaterial['hsn_code'] = $request->hsn_code;
             $response = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($updateMaterial);
             if($response['slug'] == 'error'){
                 $request->session()->flash('error',$response['message']);

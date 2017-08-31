@@ -99,6 +99,18 @@
                                                         </select>
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label">GST</label>
+                                                    <div class="col-md-6">
+                                                        <input type="text" id="gst" name="gst" value="{{$materialData['gst']}}" class="form-control" placeholder="Enter GST">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label">HSN Code</label>
+                                                    <div class="col-md-6">
+                                                        <input type="text" id="hsn_code" name="hsn_code" value="{{$materialData['hsn_code']}}" class="form-control" placeholder="Enter HSN Code">
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3" style="margin-left: 26%">

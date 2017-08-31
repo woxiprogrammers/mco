@@ -56,9 +56,15 @@
         </table>
         <hr>
         <table width="100%">
+            @if($slug == 'performa-invoice')
             <tr>
-                <td style="text-align: center; padding-bottom: 8px;"><i>ABSTRACT</i></td>
+                <td style="text-align: center; padding-bottom: 8px;"><i>Performa Invoice</i></td>
             </tr>
+            @else
+                <tr>
+                    <td style="text-align: center; padding-bottom: 8px;"><i>TAX INVOICE</i></td>
+                </tr>
+            @endif
         </table>
         <hr>
             <table border="1" width="100%" style="font-size: 14px;">
