@@ -14,6 +14,7 @@
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css" />
 <link href="/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -72,7 +73,7 @@
                                                             </a>
                                                         @endif
                                                         <a class="btn btn-info btn-xs" id="materialCosts">
-                                                            <i class="fa fa-edit"></i> Material Cost
+                                                            <i class="fa fa-edit"></i> Material Rate
                                                         </a>
                                                         <a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             <i class="fa fa-edit"></i> Profit Margins
@@ -107,6 +108,7 @@
                                                             </a>
                                                         @endif
                                                     </fieldset>
+
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
                                                         <div class="panel panel-default">
                                                             <div class="panel-heading">
@@ -149,15 +151,15 @@
                                                             <div id="collapse_3_2" class="panel-collapse collapse">
                                                                 <div class="panel-body" style="height:400px; overflow-y:auto;">
                                                                     <div class="row" style="background-color: beige">
-                                                                        <div class="col-md-3">
+                                                                        <div class="col-md-4">
                                                                             <div class="col-md-6">
-                                                                                <label class="control-label pull-right" style="font-weight: bold; font-size: 15px">
+                                                                                <label class="control-label pull-right" style="font-weight: bold; font-size: 15px; margin-right: 17%">
                                                                                     Enter Discount:
                                                                                 </label>
                                                                             </div>
                                                                             <div class="col-md-6 input-group">
-                                                                                <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}">
-                                                                                <span class="input-group-addon">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
+                                                                                <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" style="width: 113%">
+                                                                                <span class="input-group-addon">&nbsp; % </span>
                                                                             </div>
                                                                         </div>
 
@@ -169,7 +171,7 @@
                                                                             </div>
                                                                             <div class="col-md-6 input-group">
                                                                                 <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
-                                                                                <span class="input-group-addon">&nbsp;&nbsp; Sq.Ft &nbsp; &nbsp;</span>
+                                                                                <span class="input-group-addon">Sq.Ft</span>
                                                                             </div>
                                                                         </div>
                                                                         <div class="col-md-3">
@@ -178,12 +180,12 @@
                                                                                     Subtotal:
                                                                                 </label>
                                                                             </div>
-                                                                            <div class="col-md-9">
+                                                                            <div class="col-md-9" style="padding-right: 34px; padding-left:30px ">
                                                                                     <input type="text" class="form-control" id="subtotal" readonly>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="col-md-2">
-                                                                            <a class="btn btn-success btn-md pull-right" id="addProduct">Add Product</a>
+                                                                        <div class="col-md-1">
+                                                                            <a class="btn yellow btn-md pull-right" id="addProduct"><i class="fa fa-plus"></i> Product</a>
                                                                         </div>
                                                                     </div>
                                                                     <div class="row" style="height: 4%">
@@ -192,16 +194,16 @@
                                                                     <div class="table-scrollable" style="margin-top: 5%">
                                                                         <table class="table table-bordered" id="productTable" style="overflow: scroll;overflow-x: auto; overflow-y: auto">
                                                                             <tr>
-                                                                                <th style="width: 10%"> Category </th>
-                                                                                <th style="width: 10%"> Product </th>
-                                                                                <th style="width: 18%"> Description</th>
-                                                                                <th style="width: 8%"> Unit</th>
-                                                                                <th style="width: 8%"> Rate</th>
-                                                                                <th style="width: 5%"> Quantity </th>
-                                                                                <th  style="width: 8%"> Amount </th>
-                                                                                <th  style="width: 8%"> Discounted Amount </th>
-                                                                                <th  style="width: 15%"> Summary </th>
-                                                                                <th> Action </th>
+                                                                                <th style="width: 10%; text-align: center" > Category </th>
+                                                                                <th style="width: 10%; text-align: center"> Product </th>
+                                                                                <th style="width: 18%; text-align: center"> Description</th>
+                                                                                <th style="width: 8%; text-align: center"> Unit</th>
+                                                                                <th style="width: 8%; text-align: center"> Rate</th>
+                                                                                <th style="width: 5%; text-align: center"> Quantity </th>
+                                                                                <th  style="width: 8%; text-align: center"> Amount </th>
+                                                                                <th  style="width: 8%; text-align: center"> Discounted Amount </th>
+                                                                                <th  style="width: 15%; text-align: center"> Summary </th>
+                                                                                <th style="text-align: center"> Action </th>
                                                                             </tr>
                                                                             @for($iterator=0; $iterator < count($quotation->quotation_products); $iterator++)
                                                                                 <tr id="Row{{$iterator}}">
@@ -338,8 +340,9 @@
                                                             Back
                                                         </a>
                                                         @if($quotation->quotation_status->slug == 'draft' || $userRole == 'superadmin')
-                                                            <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
-                                                                Submit
+
+                                                            <button type="submit" class="btn red pull-right" id="formSubmit" hidden style="padding-left: 6px">
+                                                                <i class="fa fa-check"></i> Submit
                                                             </button>
                                                         @endif
                                                     </fieldset>
@@ -360,8 +363,8 @@
                                                             Back
                                                         </a>
                                                         @if(($quotation->quotation_status->slug == 'approved' || $quotation->quotation_status->slug == 'disapproved')&& $userRole == 'superadmin')
-                                                        <button type="submit" class="btn btn-success">
-                                                            Submit
+                                                        <button type="submit" class="btn red" style="padding-left: 6px">
+                                                            <i class="fa fa-check"></i> Submit
                                                         </button>
                                                         @elseif($quotation->quotation_status->slug == 'draft')
                                                             <button type="submit" class="btn btn-success">
@@ -427,10 +430,22 @@
                                                                                 <input class="form-control" value="{{$quotation->work_order->scope}}" name="scope" id="scope" type="text">
                                                                             </div>
                                                                         </div>
+
                                                                         <div class="form-group">
                                                                             <div class="col-md-3">
                                                                                 <label for="order_value" class="control-form pull-right">
-                                                                                    Order Value:
+                                                                                    Order Value Without Tax:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" value="{{$beforeTaxOrderValue}}" name="order_value" id="OrderValueWithoutTax" type="text" readonly>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="order_value" class="control-form pull-right">
+                                                                                    Order Value With Tax:
                                                                                 </label>
                                                                             </div>
                                                                             <div class="col-md-3">
@@ -650,6 +665,7 @@
 <script src="/assets/custom/admin/quotation/validations.js"></script>
 <script src="/assets/global/plugins/jquery-form.min.js"></script>
 <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
+
 @if($quotation->quotation_status->slug != 'disapproved')
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
@@ -661,6 +677,7 @@
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/quotation/image-datatable.js"></script>
     <script src="/assets/custom/admin/quotation/image-upload.js"></script>
+
 @endif
 <script>
     $(document).ready(function(){
@@ -674,6 +691,7 @@
                 min: parseInt(value.product_bill_count)
             });
         });
+
     });
 </script>
 @endsection

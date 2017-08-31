@@ -99,10 +99,22 @@
                                                         </select>
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label">GST</label>
+                                                    <div class="col-md-6">
+                                                        <input type="text" id="gst" name="gst" value="{{$materialData['gst']}}" class="form-control" placeholder="Enter GST">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label">HSN Code</label>
+                                                    <div class="col-md-6">
+                                                        <input type="text" id="hsn_code" name="hsn_code" value="{{$materialData['hsn_code']}}" class="form-control" placeholder="Enter HSN Code">
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn btn-success btn-md" style="width:25%">Submit</button>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red btn-md" id="submit"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -122,6 +134,7 @@
 <script>
     $(document).ready(function() {
         EditMaterial.init();
+        $('#submit').css("padding-left",'6px');
         $("#name").rules('add',{
             remote: {
                 url: "/material/check-name",

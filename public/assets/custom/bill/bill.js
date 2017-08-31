@@ -1,5 +1,6 @@
 $(document).ready(function (){
     CreateBill.init();
+    $('#submit').css("padding-left",'6px');
     $('#submit').prop('disabled',true);
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
@@ -25,7 +26,7 @@ $(document).ready(function (){
             $('#extra_item_rate_'+id).val(0);
             var typingTimer;
             var doneTypingInterval = 500;
-            var total_extra_item_rate = $('#total_extra_item_rate').text();
+            var total_extra_item_rate = $('#total_extra_item_rate_'+id).text();
             var previous_rates = $('#previous_rates_'+id).text();
             var diff = parseFloat(total_extra_item_rate - previous_rates);
             $('#extra_item_rate_'+id).rules('add',{

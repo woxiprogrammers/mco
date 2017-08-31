@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
 <!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
@@ -6,7 +5,6 @@
 <html lang="en">
 <!--<![endif]-->
 <!-- BEGIN HEAD -->
-
 <head>
     <meta charset="utf-8" />
     <title>@yield('title')</title>
@@ -33,7 +31,6 @@
     @yield('css')
     <link rel="shortcut icon" href="favicon.ico" /> </head>
 <!-- END HEAD -->
-
 <body class="page-container-bg-solid page-md">
         @yield('content')
         <div class="page-wrapper-row">
@@ -50,7 +47,6 @@
             </div>
                 <!-- END INNER FOOTER -->
                 <!-- END FOOTER -->
-
     </div>
 <!--[if lt IE 9]>
 <script src="/assets/global/plugins/respond.min.js"></script>
@@ -98,5 +94,4 @@
 </script>
 @yield('javascript')
 </body>
-
 </html>

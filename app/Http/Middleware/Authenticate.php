@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class Authenticate
 {
@@ -18,6 +19,8 @@ class Authenticate
     public function handle($request, Closure $next, $guard = null)
     {
         if (Auth::guard($guard)->check()) {
+            $user = Auth::user();
+            View::share(compact('user'));
             return $next($request);
         }else{
             return redirect('/');

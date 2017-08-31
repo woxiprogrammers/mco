@@ -53,8 +53,8 @@
                                                 </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                        <button type="submit" class="btn btn-success btn-md" style="width:25%">Submit</button>                                                </div>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red btn-md" id="submit"><i class="fa fa-check"></i> Submit</button>                                                </div>
                                             </div>
                                         </form>
                                     </div>
@@ -68,12 +68,12 @@
     </div>
 </div>
 @endsection
-
 @section('javascript')
 <script src="/assets/custom/admin/units/units.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
         UnitsCreate.init();
+        $('#submit').css("padding-left",'6px');
     });
 </script>
 @endsection

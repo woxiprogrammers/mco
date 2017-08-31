@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -10,16 +9,11 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-
 Route::group(['domain' => env('DOMAIN_NAME')], function(){
-
     Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
-
     Route::get('/dashboard',array('uses' => 'Admin\DashboardController@index'));
-
 
     Route::group(['prefix' => 'user'],function (){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
@@ -91,6 +85,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'Admin\ProductController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\ProductController@createProduct'));
         Route::get('edit/{product}',array('uses' => 'Admin\ProductController@getEditView'));
+        Route::get('copy/{product}',array('uses' => 'Admin\ProductController@getEditView'));
         Route::post('edit/{product}',array('uses' => 'Admin\ProductController@editProduct'));
         Route::get('get-materials/{category}',array('uses' => 'Admin\ProductController@getMaterials'));
         Route::post('material/listing',array('uses' => 'Admin\ProductController@getMaterialsDetails'));
@@ -160,7 +155,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage/project-site',array('uses' => 'Admin\BillController@getProjectSiteManageView'));
         Route::post('listing/project-site',array('uses' => 'Admin\BillController@ProjectSiteListing'));
         Route::post('approve', array('uses' => 'Admin\BillController@approveBill'));
-        Route::get('current/invoice/{bill}', array('uses' => 'Admin\BillController@generateCurrentBill'));
+        Route::get('current/{slug}/{bill}', array('uses' => 'Admin\BillController@generateCurrentBill'));
         Route::get('cumulative/invoice/{bill}', array('uses' => 'Admin\BillController@generateCumulativeInvoice'));
         Route::get('cumulative/excel-sheet/{bill}', array('uses' => 'Admin\BillController@generateCumulativeExcelSheet'));
         Route::post('image-upload/{billId}',array('uses'=>'Admin\BillController@uploadTempBillImages'));
@@ -221,7 +216,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=>'Admin\QuotationController@addExtraItems'));
         });
     });
-
     Route::group(['prefix' => 'project'], function(){
         Route::get('create',array('uses'=> 'Admin\ProjectController@getCreateView'));
         Route::post('create',array('uses'=> 'Admin\ProjectController@createProject'));
@@ -232,5 +226,29 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{project}',array('uses' => 'Admin\ProjectController@getEditView'));
         Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
     });
-});
+    Route::group(['prefix' => 'purchase/material-request'], function(){
+        Route::get('manage',array('uses'=> 'User\PurchaseController@getManageView'));
+        Route::get('create',array('uses'=> 'User\PurchaseController@getCreateView'));
+        Route::post('listing',array('uses'=> 'User\PurchaseController@getMaterialRequestListing'));
+        Route::get('edit',array('uses'=> 'User\PurchaseController@editMaterialRequest'));
+    });
+    Route::group(['prefix' => 'purchase/purchase-request'], function(){
+        Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
+        Route::get('create',array('uses'=> 'Purchase\PurchaseRequestController@getCreateView'));
+    });
+    Route::group(['prefix' => 'purchase/purchase-order'], function(){
+        Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
+        Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
+    });
 
+    Route::group(['prefix' => 'vendors'],function(){
+        Route::get('manage',array('uses' => 'Admin\VendorController@getManageView'));
+        Route::get('create',array('uses' => 'Admin\VendorController@getCreateView'));
+        Route::post('create',array('uses' => 'Admin\VendorController@createVendor'));
+        Route::get('edit/{vendor}',array('uses' => 'Admin\VendorController@getEditView'));
+        Route::put('edit/{vendor}',array('uses' => 'Admin\VendorController@editVendor'));
+        Route::post('listing',array('uses'=> 'Admin\VendorController@vendorListing'));
+        Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
+        Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
+    });
+});

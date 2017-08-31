@@ -19,6 +19,14 @@
                             <div class="page-title">
                                 <h1>Manage Profit Margin</h1>
                             </div>
+                            @if($user->hasPermissionTo('create-profit-margin'))
+                                <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 71%; margin-top: 1%">
+                                    <a href="/profit-margin/create" style="color: white">
+                                        <i class="fa fa-plus"></i>
+                                        Profit Margin
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div class="page-content">
@@ -33,10 +41,7 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow"><a href="/profit-margin/create" style="color: white"> Profit Margin
-                                                                    <i class="fa fa-plus"></i>
-                                                                </a>
-                                                            </div>
+
                                                         </div>
                                                     </div>
                                                 </div>

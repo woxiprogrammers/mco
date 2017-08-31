@@ -140,8 +140,8 @@ class UserController extends Controller
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
-                                <a href="/user/change-status/'.$userData[$pagination]['id'].'">
-                                    <i class="icon-tag"></i> '.$status.' </a>
+                                <a data-toggle="modal" data-target="#remarkModal">
+                                    <i class="icon-tag"></i> Approve / Disapprove </a>
                             </li>
                         </ul>
                     </div>'
