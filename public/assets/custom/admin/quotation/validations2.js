@@ -21,9 +21,6 @@ var  CreateQuotation = function () {
                 },
                 'project_site': {
                     required: true
-                },
-                'profit_margin[][]': {
-                    required: true
                 }
             },
 
@@ -36,9 +33,6 @@ var  CreateQuotation = function () {
                 },
                 'project_site': {
                     required: "Project Site name is required."
-                },
-                'profit_margin[][]': {
-                    required: "Project Margin is required."
                 }
             },
 
@@ -64,10 +58,22 @@ var  CreateQuotation = function () {
             },
 
             submitHandler: function (form) {
-                $("button[type='submit']").attr('disabled', true);
-                success.show();
-                error.hide();
-                form.submit();
+                var validForm = true;
+                var formFields = $("#QuotationCreateForm").serializeArray();
+                $.each(formFields, function(i) {
+                    if (($.trim(formFields[i].value)) == "") {
+                        $("[name='" + formFields[i].name + "']").closest(".form-group").addClass("has-error");
+                        validForm = false;
+                    } else {
+                        $("[name='" + formFields[i].name + "']").closest(".form-group").removeClass("has-error");
+                    }
+                });
+                if(validForm == true){
+                    $("button[type='submit']").attr('disabled', true);
+                    success.show();
+                    error.hide();
+                    form.submit();
+                }
             }
         });
     }

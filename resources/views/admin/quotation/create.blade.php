@@ -179,7 +179,7 @@
                                                             <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
                                                                 Back
                                                             </a>
-                                                            <button type="submit" class="btn red pull-right" id="formSubmit" hidden style="padding-left: 6px">
+                                                            <button type="submit" class="btn red pull-right" id="formSubmit"  hidden style="padding-left: 6px">
                                                                 <i class="fa fa-check"></i> Submit
                                                             </button>
                                                         </fieldset>
@@ -220,7 +220,7 @@
 @section('javascript')
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
 <script src="/assets/custom/admin/quotation/quotation1.js"></script>
-<script src="/assets/custom/admin/quotation/validations.js"></script>
+<script src="/assets/custom/admin/quotation/validations2.js"></script>
 <script src="/assets/global/plugins/jquery-form.min.js"></script>
 
 <script>
