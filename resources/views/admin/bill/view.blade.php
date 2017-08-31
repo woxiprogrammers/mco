@@ -64,7 +64,7 @@
                                                     @endfor
                                                 </select>
                                                 @if($bill->bill_status->slug == 'draft')
-                                                    <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 30%">
                                                         <i class="fa fa-edit"></i>
                                                         Bill
                                                     </a>
@@ -91,7 +91,7 @@
                                                     <i class="fa fa-download"></i>
                                                     Current Bill
                                                 </a>
-                                                <label class="control-label" for="date" style="margin-left: 9%"> Performa Invoice Date : {{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}</label>
+                                                <label class="control-label" for="date" style="margin-left: 38%"> Performa Invoice Date : {{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}</label>
 
                                                 <a href="/bill/current/performa-invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                     <i class="fa fa-download"></i>
