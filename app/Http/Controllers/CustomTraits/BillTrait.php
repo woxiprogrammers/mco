@@ -776,7 +776,7 @@ trait BillTrait{
                      $data['currentBillID'] = $key+1;
                  }
              }
-//dd($bill['performa_invoice_date']);
+
              if($slug == "performa-invoice"){
                  $data['billDate'] = date('d/m/Y',strtotime($bill['performa_invoice_date']));
              }else{

@@ -144,7 +144,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing/project-site',array('uses' => 'Admin\BillController@ProjectSiteListing'));
         Route::post('approve', array('uses' => 'Admin\BillController@approveBill'));
         Route::get('current/{slug}/{bill}', array('uses' => 'Admin\BillController@generateCurrentBill'));
-        //Route::get('current/performa-invoice/{bill}', array('uses' => 'Admin\BillController@generateCurrentBill'));
         Route::get('cumulative/invoice/{bill}', array('uses' => 'Admin\BillController@generateCumulativeInvoice'));
         Route::get('cumulative/excel-sheet/{bill}', array('uses' => 'Admin\BillController@generateCumulativeExcelSheet'));
         Route::post('image-upload/{billId}',array('uses'=>'Admin\BillController@uploadTempBillImages'));
