@@ -10,6 +10,7 @@ use App\Role;
 use App\Http\Requests\RoleRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use PhpParser\Node\Expr\Array_;
 
 trait RoleTrait{
 
@@ -163,11 +164,45 @@ trait RoleTrait{
     public function getSubModules(Request $request){
         try{
             $moduleIds = $request->module_id;
-            $modules = Module::join('modules','modules.name','=','');
-            return view('partials.role.module-listing');
+            $modules = Module::join('permissions','modules.id','=','permissions.module_id')
+                        ->whereIn('modules.module_id',$moduleIds)
+                        ->where('permissions.is_web',true)
+                        ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id')
+                        ->get();
+           // dd($modules->toArray());
+            $moduleResponse = array();
+            foreach ($modules as $subModule){
+                if($subModule['module_id'] == null){
+                    $subModule['module_id'] = $subModule['submodule_id'];
+                }
+                if(!array_key_exists($subModule['module_id'],$moduleResponse)){
+                    $moduleResponse[$subModule['module_id']] = array();
+                    $moduleResponse[$subModule['module_id']]['id'] = $subModule['module_id'];
+                    $moduleResponse[$subModule['module_id']]['module_name'] = Module::where('id', $subModule['module_id'])->pluck('name')->first();
+                    $moduleResponse[$subModule['module_id']]['submodules'] = array();
+                }
+                if(!array_key_exists($subModule['submodule_id'],$moduleResponse[$subModule['module_id']]['submodules'])){
+                    $moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['id'] = $subModule['submodule_id'];
+                    $moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['module_id'] = $subModule['module_id'];
+                    $moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['module_name'] = $subModule['module_name'];
+                    $moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'] = array();
+                }
+                if(!array_key_exists($subModule['submodule_id'],$moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'])){
+                    $moduleResponse[$subModule['module_id']]['permissions'][$subModule['submodule_id']]['permissions'][$subModule['submodule_id']]['submodule_id'] = $subModule['submodule_id'];
+                    $moduleResponse[$subModule['module_id']]['permissions'][$subModule['submodule_id']]['permissions'][$subModule['permission_name']]['permission_name'] = $subModule['permission_name'];
+                }
+            }
+            //dd($moduleResponse);
+            return view('partials.role.module-listing')->with(compact('modules','moduleResponse'));
         }
         catch (\Exception $e){
-
+            $data = [
+                'action' => 'Get Submodules',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
 
 
