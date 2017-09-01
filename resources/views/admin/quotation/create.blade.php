@@ -74,11 +74,11 @@
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-md-4">
-                                                                    <select name="project_id" id="projectId" class="form-control" disabled>
+                                                                    <select name="project_id" id="projectId" class="form-control" >
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-md-4">
-                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" disabled>
+                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" >
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -179,7 +179,7 @@
                                                             <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
                                                                 Back
                                                             </a>
-                                                            <button type="submit" class="btn red pull-right" id="formSubmit" hidden style="padding-left: 6px">
+                                                            <button type="submit" class="btn red pull-right" id="formSubmit"  hidden style="padding-left: 6px">
                                                                 <i class="fa fa-check"></i> Submit
                                                             </button>
                                                         </fieldset>
