@@ -769,6 +769,8 @@ trait BillTrait{
             }
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
             $data['company_name'] = $bill->quotation->project_site->project->client->company;
+            $data['gstin']= $bill->quotation->project_site->project->client->gstin;
+            $data['address']= $bill->quotation->project_site->project->client->address;
             $data['billData'] = $bill;
             $data['currentBillID'] = 1;
             foreach($allBillIds as $key => $billId){
@@ -784,6 +786,7 @@ trait BillTrait{
              }
 
             $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
+            $data['projectSiteAddress'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('address')->first();
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
@@ -1021,6 +1024,7 @@ trait BillTrait{
 
     public function editBill(Request $request, $bill){
         try{
+            dd($request->all());
             Bill::where('id',$bill->id)->update(['date' => $request->date,'performa_invoice_date' => $request->performa_invoice_date]);
             $products = $request->quotation_product_id;
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();

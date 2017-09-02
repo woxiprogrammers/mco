@@ -46,8 +46,15 @@
                 <td style="width: 50%; font-weight:  lighter;">To : {!! $clientCompany !!}</td>
                 <td style="text-align: right;font-weight: bolder;">Invoice No : {!! $invoice_no !!}</td>
             </tr>
+            <tr><td style="width: 50%; font-weight:  lighter;">Party Address : {!! $address !!}</td></tr>
             <tr>
                 <td style="font-weight: lighter;" colspan="2">Site Name : {!! $projectSiteName !!}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: lighter;" colspan="2">Site Address : {!! $projectSiteAddress !!}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: lighter;" colspan="2">GSTIN :{!! $gstin !!}
             </tr>
             <tr>
                 <td style="width: 50%; font-weight: bolder;">Bill No : RA BILL NO - {!! $currentBillID !!}</td>

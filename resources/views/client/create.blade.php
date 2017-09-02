@@ -75,7 +75,15 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" id="mobile" name="mobile">
+                                                        <input type="text" class="form-control" id="mobile" name="mobile" maxlength="10">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="mobile" class="control-label">GSTIN</label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="text" class="form-control" id="gstin" name="gstin">
                                                     </div>
                                                 </div>
                                             </div>
@@ -97,7 +105,7 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/client/client.js" type="application/javascript"></script>
+<script src="/assets/custom/client/client17.js" type="application/javascript"></script>
 <script>
     $(document).ready(function(){
         CreateClient.init();
