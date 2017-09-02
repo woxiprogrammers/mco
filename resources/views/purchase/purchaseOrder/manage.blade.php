@@ -17,7 +17,12 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Purchase Order</h1>
+                                    <h1>Manage Purchase Order</h1>
+                                </div>
+                                <div class="btn-group pull-right margin-top-15">
+                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -30,18 +35,6 @@
                                         <div class="portlet light ">
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
-                                                <div class="table-toolbar">
-                                                    <div class="row" style="text-align: right">
-                                                        <div class="col-md-12">
-                                                            <div class="btn-group">
-                                                                <div id="sample_editable_1_new" class="btn dark" ><a href="/purchase/purchase-order/create" style="color: white"> Purchase Order
-                                                                        <i class="fa fa-plus"></i>
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                                 <div class="portlet-body">
                                                     <div class="table-container">
                                                         <div class="table-actions-wrapper right">
