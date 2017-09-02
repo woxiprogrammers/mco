@@ -105,7 +105,7 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/client/client17.js" type="application/javascript"></script>
+<script src="/assets/custom/client/client.js" type="application/javascript"></script>
 <script>
     $(document).ready(function(){
         CreateClient.init();
