@@ -13,6 +13,7 @@ var  CreateCategory = function () {
                     remote: {
                         url: "/category/check-name",
                         type: "POST",
+                        async: true,
                         data: {
                             _token: function(){
                                 return $("input[name='_token']").val();
