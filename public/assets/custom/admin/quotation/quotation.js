@@ -143,9 +143,9 @@ $(document).ready(function(){
     $("#clientId").on('change', function(){
         var clientId = $(this).val();
         if(clientId == ""){
-            $('#projectId').prop('disabled', true);
+            $('#projectId').prop('disabled', false);
             $('#projectId').html('');
-            $('#projectSiteId').prop('disabled', true);
+            $('#projectSiteId').prop('disabled', false);
             $('#projectSiteId').html('');
         }else{
             $.ajax({
@@ -282,7 +282,7 @@ function getProjectSites(projectId){
                 $('#projectSiteId').prop('disabled', false);
             }else{
                 $('#projectSiteId').html("");
-                $('#projectSiteId').prop('disabled', true);
+                $('#projectSiteId').prop('disabled', false);
             }
         },
         error: function(){

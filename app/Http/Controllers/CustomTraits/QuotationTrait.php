@@ -41,13 +41,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
+use Psr\Log\NullLogger;
 
 trait QuotationTrait{
 
     public function getCreateView(Request $request){
         try{
             $clients = Client::where('is_active', true)->select('id','company')->get()->toArray();
-            $categories = Category::orderBy('name','asc')->where('is_active', true)->select('id','name')->get()->toArray();
+            $categories = Category::join('products','categories.id','=','products.category_id')
+                ->where('categories.is_active',true)
+                ->orderBy('categories.name','asc')
+                ->select('categories.id as id','categories.name as name')
+                ->distinct()
+                ->get()
+                ->toArray();
             return view('admin.quotation.create')->with(compact('categories','clients'));
         }catch(\Exception $e){
             $data = [
@@ -128,7 +135,13 @@ trait QuotationTrait{
         try{
             $rowIndex = $request->row_count + 1;
             $isEdit = false;
-            $categories = Category::orderBy('name','asc')->where('is_active', true)->select('id','name')->get()->toArray();
+            $categories = Category::join('products','categories.id','=','products.category_id')
+                ->where('categories.is_active',true)
+                ->orderBy('categories.name','asc')
+                ->select('categories.id as id','categories.name as name')
+                ->distinct()
+                ->get()
+                ->toArray();
             if($request->has('is_edit')){
                 $isEdit = true;
                 $summaries = Summary::where('is_active', true)->select('id','name')->orderBy('name','asc')->get();
@@ -632,8 +645,13 @@ trait QuotationTrait{
             $quotationProjectSiteIds = Quotation::whereNotNull('quotation_status_id')->pluck('project_site_id')->toArray();
             $projectSites = ProjectSite::where('project_id',$projectId)->whereNotIn('id',$quotationProjectSiteIds)->select('id','name')->get();
             $response = array();
-            foreach($projectSites as $projectSite){
-                $response[] = '<option value="'.$projectSite->id.'">'.$projectSite->name.'</option> ';
+            if(count($projectSites) <= 0)
+            {
+                $response[] = '<option value=" "> Project Site Not Available </option>';
+            }else{
+                foreach ($projectSites as $projectSite) {
+                    $response[] = '<option value="' . $projectSite->id . '">' . $projectSite->name . '</option> ';
+                }
             }
             $status = 200;
         }catch(\Exception $e){

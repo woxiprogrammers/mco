@@ -24,9 +24,17 @@
                         <td> {{$data['products']}} </td>
                         @foreach($profitMargins as $profitMargin)
                             @if(array_key_exists($profitMargin['id'],$data['profit_margin']))
-                                <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="{{$data['profit_margin'][$profitMargin['id']]}}"></td>
+                                <td>
+                                    <div class="form-group">
+                                        <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="{{$data['profit_margin'][$profitMargin['id']]}}" style="width:85%; margin-left: 6%">
+                                    </div>
+                                </td>
                             @else
-                                <td> <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="0"></td>
+                                <td>
+                                    <div class="form-group">
+                                         <input class="form-control" type="number" step="any" name="profit_margins[{{$id}}][{{$profitMargin['id']}}]" value="0" style="width:85%; margin-left: 6%">
+                                    </div>
+                                </td>
                             @endif
                         @endforeach
                     </tr>

@@ -204,7 +204,7 @@
                                         <i class="fa fa-sitemap"></i> Material Request
                                     </a>
                                 </li>
-                              <!--  <li aria-haspopup="true">
+                               <li aria-haspopup="true">
                                     <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-bars"></i> Purchase Request
                                     </a>
@@ -214,10 +214,10 @@
                                         <i class="fa fa-bars"></i> Purchase Order
                                     </a>
                                 </li>
-                              -->
+
                             </ul>
                         </li>
-                        <!--
+<!--
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
@@ -235,12 +235,10 @@
                                 </li>
                             </ul>
                         </li>
-                        -->
+-->
                         @endif
                         </ul>
                     </li>
-
-
             </div>
             <!-- END MEGA MENU -->
         </div>

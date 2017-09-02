@@ -223,6 +223,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'purchase/purchase-request'], function(){
         Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
         Route::get('create',array('uses'=> 'Purchase\PurchaseRequestController@getCreateView'));
+        Route::get('edit/{status}',array('uses'=> 'Purchase\PurchaseRequestController@getEditView'));
     });
     Route::group(['prefix' => 'purchase/purchase-order'], function(){
         Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
