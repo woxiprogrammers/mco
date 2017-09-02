@@ -17,7 +17,13 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Material</h1>
+                                    <h1>Manage Purchase Request</h1>
+                                </div>
+                                <div class="btn-group pull-right margin-top-15">
+                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-request/create" style="color: white"> Purchase Request
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -30,18 +36,6 @@
                                         <div class="portlet light ">
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
-                                                <div class="table-toolbar">
-                                                    <div class="row" style="text-align: right">
-                                                        <div class="col-md-12">
-                                                            <div class="btn-group">
-                                                                <div id="sample_editable_1_new" class="btn dark" ><a href="/purchase/purchase-request/create" style="color: white"> Purchase Request
-                                                                        <i class="fa fa-plus"></i>
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                                 <div class="portlet-body">
                                                     <div class="table-container">
                                                         <div class="table-actions-wrapper right">
@@ -62,12 +56,11 @@
                                                                 <th> Project Name - Site Name</th>
                                                                 <th> RM Id </th>
                                                                 <th> status  </th>
-                                                                <th> History </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th><input type="checkbox"></th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"><th>
+                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_status" > </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
@@ -78,10 +71,81 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody>
+                                                            <tr>
+                                                                <td> <input type="checkbox"> </td>
+                                                                <td> 5 </td>
+                                                                <td> Otto </td>
+                                                                <td> makr124 </td>
+                                                                <td><span class="label label-sm label-danger" > Approved</span> </td>
+                                                                <td>
+                                                                    <a href="/purchase/purchase-request/edit/1"><button class="btn btn-xs green dropdown-toggle" type="button"  aria-expanded="true">
+                                                                            Edit
+                                                                        </button></a>
+                                                                    <div class="btn-group open">
+                                                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="modal" data-target="#remarkModal"   aria-expanded="true">
+                                                                            Action
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td> <input type="checkbox"> </td>
+                                                                <td> Jacob </td>
+                                                                <td> Nilson </td>
+                                                                <td> jac123 </td>
+                                                                <td><span class="label label-sm label-danger"> Draft</span> </td>
+                                                                <td>
+                                                                    <a href="/purchase/purchase-request/edit/1"><button class="btn btn-xs green dropdown-toggle" type="button"  aria-expanded="true">
+                                                                            Edit
+                                                                        </button></a>
+                                                                    <div class="btn-group open">
 
+                                                                        <button class="btn btn-xs green dropdown-toggle" data-toggle="modal" data-target="#remarkModal"  type="button"  aria-expanded="true">
+                                                                            Action
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td> <input type="checkbox"> </td>
+                                                                <td> Larry </td>
+                                                                <td> Cooper </td>
+                                                                <td> lar </td>
+                                                                <td><span class="label label-sm label-danger"> Disabled</span> </td>
+                                                                <td>
+                                                                    <a href="/purchase/purchase-request/edit/1"><button  class="btn btn-xs green dropdown-toggle" type="button"  aria-expanded="true">
+                                                                            Edit
+                                                                        </button></a>
+                                                                    <div class="btn-group open">
+
+                                                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="modal" data-target="#remarkModal" aria-expanded="true">
+                                                                            Action
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td> <input type="checkbox"> </td>
+                                                                <td> Sandy </td>
+                                                                <td> Lim </td>
+                                                                <td> sanlim </td>
+                                                                <td><span class="label label-sm label-danger"> Disabled</span> </td>
+                                                                <td>
+                                                                    <a><button class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                                                            Edit
+                                                                        </button></a>
+                                                                    <div class="btn-group open">
+
+                                                                        <button class="btn btn-xs green dropdown-toggle" type="button"  data-toggle="modal" data-target="#remarkModal"  aria-expanded="true">
+                                                                            Action
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
                                                             </tbody>
                                                         </table>
                                                     </div>
+
                                                     <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                                         <div class="modal-dialog">
                                                             <form class="modal-content">

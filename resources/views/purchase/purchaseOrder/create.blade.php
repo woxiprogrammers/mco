@@ -17,208 +17,336 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Create Material Request</h1>
+                                    <h1>Create Purchase Order</h1>
+                                </div>
+                                <div class="form-group " style="text-align: center">
+                                    <a href="#" class="btn red pull-right margin-top-15">
+                                        <i class="fa fa-check" style="font-size: large"></i>
+                                        Submit
+                                    </a>
                                 </div>
                             </div>
                         </div>
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
-                                <div class="col-md-12">
-                                    <!-- BEGIN VALIDATION STATES-->
-                                    <div class="portlet light ">
-                                        <div class="portlet-body form">
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                            <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Client Name</span>&nbsp;<span class="caret"></span></button>
-                                                            <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                </ul>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <!-- BEGIN VALIDATION STATES-->
+                                        <div class="portlet light ">
+                                            <div class="portlet-body form">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
+                                                                <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Client Name</span>&nbsp;<span class="caret"></span></button>
+                                                                <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
+                                                                    <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
+                                                                <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Project Name</span>&nbsp;<span class="caret"></span></button>
+                                                                <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
+                                                                    <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
+                                                                <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select site Name</span>&nbsp;<span class="caret"></span></button>
+                                                                <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
+                                                                    <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
+                                                                    </ul>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                            <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Project Name</span>&nbsp;<span class="caret"></span></button>
-                                                            <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                </ul>
+                                                <div class="row">
+                                                    <div class="col-md-4"><div class="form-group">
+                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
+                                                                <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">For which have to request</span>&nbsp;<span class="caret"></span></button>
+                                                                <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
+                                                                    <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
+                                                                    </ul>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                            <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select site Name</span>&nbsp;<span class="caret"></span></button>
-                                                            <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                </ul>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
+                                                                <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Purchase request number</span>&nbsp;<span class="caret"></span></button>
+                                                                <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
+                                                                    <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
+                                                                    </ul>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-4"><div class="form-group">
-                                                        <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                            <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">For which have to request</span>&nbsp;<span class="caret"></span></button>
-                                                            <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                            <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Purchase request number</span>&nbsp;<span class="caret"></span></button>
-                                                            <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
+                                                    <div class="col-md-4">
 
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-4"></div>
-                                                <div class="col-md-4"></div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group " style="text-align: center">
-                                                        <a href="#" class="btn btn-lg yellow pull-right">
-                                                            <i class="fa fa-plus" style="font-size: large"></i>
-                                                            Submit
-                                                        </a>
+                                                <div class="row">
+                                                    <div class="col-md-4"></div>
+                                                    <div class="col-md-4"></div>
+                                                    <div class="col-md-4">
+
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
-                                    <!-- BEGIN VALIDATION STATES-->
-                                    <div class="portlet light ">
-                                        <div class="portlet-body">
-                                            <div class="table-container">
-                                               <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequest">
-                                                    <thead>
-                                                    <tr>
-                                                        <th><input type="checkbox"></th>
-                                                        <th> Material Name </th>
-                                                        <th> Quantity</th>
-                                                        <th> Unit </th>
-                                                        <th> Vendor </th>
-                                                        <th> Image </th>
-                                                        <th> Is approved </th>
-                                                    </tr>
-                                                    <tr class="filter">
-                                                        <th style="text-align: center"><input type="checkbox"></th>
-                                                        <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                        <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                        <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                        <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                        <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                        <th>
-                                                            <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                            <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                        </th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td><input type="checkbox"></td>
-                                                        <td> ABC </td>
-                                                        <td> 5</td>
-                                                        <td> Kg </td>
-                                                        <td> Vendor lmn </td>
-                                                        <td> <button>Browse</button> <button>Upload</button> </td>
-                                                        <td> Is approved </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><input type="checkbox"></td>
-                                                        <td> ABC </td>
-                                                        <td> 5</td>
-                                                        <td> Kg </td>
-                                                        <td> Vendor lmn </td>
-                                                        <td> <button>Browse</button> <button>Upload</button> </td>
-                                                        <td> Is approved </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><input type="checkbox"></td>
-                                                        <td> ABC </td>
-                                                        <td> 5</td>
-                                                        <td> Kg </td>
-                                                        <td> Vendor lmn </td>
-                                                        <td> <button>Browse</button> <button>Upload</button> </td>
-                                                        <td> Is approved </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><input type="checkbox"></td>
-                                                        <td> ABC </td>
-                                                        <td> 5</td>
-                                                        <td> Kg </td>
-                                                        <td> Vendor lmn </td>
-                                                        <td> <button>Browse</button> <button>Upload</button> </td>
-                                                        <td> Is approved </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><input type="checkbox"></td>
-                                                        <td> ABC </td>
-                                                        <td> 5</td>
-                                                        <td> Kg </td>
-                                                        <td> Vendor lmn </td>
-                                                        <td> <button>Browse</button> <button>Upload</button> </td>
-                                                        <td> Is approved </td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <form class="modal-content">
-                                                        <div class="modal-header" style="background-color:#00844d">
-                                                            <center><h4 class="modal-title" id="exampleModalLongTitle">ADD REMARK</h4></center>
-                                                            <button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form role="form" class="form-horizontal" method="post">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <!-- BEGIN VALIDATION STATES-->
+                                        <div class="portlet light ">
+                                            <div class="portlet-body">
+                                                <div class="table-container">
+                                                    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequest">
+                                                        <thead>
+                                                        <tr>
+                                                            <th><input type="checkbox"></th>
+                                                            <th> Material Name </th>
+                                                            <th> Quantity</th>
+                                                            <th> Unit </th>
+                                                            <th> Vendor </th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                        <tr class="filter">
+                                                            <th style="text-align: center"><input type="checkbox"></th>
+                                                            <th><input type="text" class="form-control form-filter" name="search_name"></th>
+                                                            <th><input type="text" class="form-control form-filter" name="search_name" > </th>
+                                                            <th><input type="text" class="form-control form-filter" name="search_name"></th>
+                                                            <th><input type="text" class="form-control form-filter" name="search_name" > </th>
+                                                            <th>
+                                                                <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                            </th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <td><input type="checkbox"></td>
+                                                            <td> ABC </td>
+                                                            <td> 5</td>
+                                                            <td> Kg </td>
+                                                            <td> Vendor lmn </td>
+                                                            <td> <button id="approve">Approve</button> <button id="disapprove">Disapprove</button> </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><input type="checkbox"></td>
+                                                            <td> ABC </td>
+                                                            <td> 5</td>
+                                                            <td> Kg </td>
+                                                            <td> Vendor lmn </td>
+                                                            <td> <button id="approve">Approve</button> <button id="disapprove">Disapprove</button> </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><input type="checkbox"></td>
+                                                            <td> ABC </td>
+                                                            <td> 5</td>
+                                                            <td> Kg </td>
+                                                            <td> Vendor lmn </td>
+                                                            <td> <button id="approve">Approve</button> <button id="disapprove">Disapprove</button> </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <form class="modal-content">
+                                                            <div class="modal-header" style="background-color:#00844d">
+                                                                <center><h4 class="modal-title" id="exampleModalLongTitle">ADD REMARK</h4></center>
+                                                                <button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form role="form" class="form-horizontal" method="post">
+                                                                    <div class="form-body">
+                                                                        <div class="form-group row">
+                                                                            <div class="col-md-3" style="text-align: right">
+                                                                                <label for="company" class="control-label">Remark</label>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <input type="text" class="form-control" id="remark" name="remark">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                            </div>
+                                                            <div class="modal-footer" style="background-color:#00844d">
+                                                                <button type="submit" class="btn blue">Approve</button>
+                                                                <button type="submit" class="btn blue">disapprove</button>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal fade" id="approveModal" role="dialog">
+                                                    <div class="modal-dialog">
+                                                        <!-- Modal content-->
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <div class="row">
+                                                                    <div class="col-md-4"></div>
+                                                                    <div class="col-md-4" style="font-size: 18px"> Approve</div>
+                                                                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-body" style="padding:40px 50px;">
                                                                 <div class="form-body">
                                                                     <div class="form-group row">
                                                                         <div class="col-md-3" style="text-align: right">
-                                                                            <label for="company" class="control-label">Remark</label>
+                                                                            <label for="name" class="control-label">Quotation Image</label>
+                                                                            <span>*</span>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <input type="text" class="form-control" id="remark" name="remark">
+                                                                            <input type="file" class="form-control" id="name" name="name">
                                                                         </div>
                                                                     </div>
                                                                 </div>
+                                                                <div class="form-body">
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">Client approval note image</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="file" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-body">
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">Delivery date</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-body">
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">Created Date</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-body">
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">Rate</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-body">
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">GST Y</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-body">
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">HSN code</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <a href="#" class="btn btn-set yellow pull-right">
+                                                                    <i class="fa fa-check" style="font-size: large"></i>
+                                                                    Approve &nbsp; &nbsp; &nbsp;
+                                                                </a>
+                                                            </div>
                                                         </div>
-                                                        <div class="modal-footer" style="background-color:#00844d">
-                                                            <button type="submit" class="btn blue">Approve</button>
-                                                            <button type="submit" class="btn blue">disapprove</button>
-                                                        </div>
+                                                    </div>
                                                 </div>
+                                                <div class="modal fade" id="disapproveModal" role="dialog">
+                                                    <div class="modal-dialog">
+                                                        <!-- Modal content-->
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <div class="row">
+                                                                    <div class="col-md-4"></div>
+                                                                    <div class="col-md-4" style="font-size: 18px"> Vendor assignment</div>
+                                                                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-body" style="padding:40px 50px;">
+                                                                <div class="form-body">
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">Quotation image</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="file" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">Client approval image</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="file" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-3" style="text-align: right">
+                                                                            <label for="name" class="control-label">Remark</label>
+                                                                            <span>*</span>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="name" name="name">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <a href="#" class="btn btn-set yellow pull-right">
+                                                                    <i class="fa fa-check" style="font-size: large"></i>
+                                                                    Disapprove&nbsp; &nbsp; &nbsp;
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                </form>
                                             </div>
-                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -241,7 +369,12 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
-            TableData.init();
+            $("#disapprove").click(function(){
+                $("#disapproveModal").modal();
+            })
+            $("#approve").click(function(){
+                $("#approveModal").modal();
+            })
         });
     </script>
 @endsection
