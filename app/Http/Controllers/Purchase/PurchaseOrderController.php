@@ -7,6 +7,10 @@ use App\Http\Controllers\Controller;
 
 class PurchaseOrderController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('custom.auth');
+    }
     public function getManageView(Request $request){
         return view('purchase/purchaseOrder/manage');
     }

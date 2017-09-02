@@ -268,7 +268,7 @@
                                                             <h4 class="panel-title">
                                                                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                                                                     <i class="more-less glyphicon glyphicon-plus"></i>
-                                                                    <span style="float: left ;font-size: 20px">Added asset list</span>
+                                                                    <span style="float: left;font-size: 20px">Added asset list</span>
                                                                 </a>
                                                             </h4>
                                                         </div>
@@ -407,8 +407,7 @@
                                                 </div>
                                                 <button type="submit" class="btn red pull-right"> Create</button>
                                             </form>
-                                        </div>
-                                    </div>
+                                        </div></div>
                                 </div>
                             </div>
                             <div class="modal fade" id="myModal1" role="dialog">
