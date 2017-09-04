@@ -176,6 +176,12 @@
                                         @endif
                                     </ul>
                                 </li>
+                                <li aria-haspopup="true"  class="dropdown-submenu ">
+                                    <a href="/bank/manage">
+                                        <i class="fa fa-folder"></i> Manage Bank
+                                    </a>
+                                    </a>
+                                </li>
                                 </ul>
                             </li>
                         <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>

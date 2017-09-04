@@ -240,4 +240,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
     });
+
+    Route::group(['prefix'=>'bank'],function(){
+        Route::get('manage',array('uses'=>'Admin\BankController@getManageView'));
+        Route::get('create',array('uses' => 'Admin\BankController@getCreateView'));
+        Route::post('create',array('uses' => 'Admin\BankController@CreateBank'));
+    });
 });
