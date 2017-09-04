@@ -25,6 +25,8 @@ class CreateRoleHasPermissionsTable extends Migration
                 ->references('id')
                 ->on('roles')
                 ->onDelete('cascade');
+            $table->boolean('is_web')->default(false);
+            $table->boolean('is_mobile')->default(false);
             $table->timestamps();
         });
     }

@@ -6,6 +6,7 @@
 
 namespace App\Http\Controllers\CustomTraits;
 use App\Module;
+use App\PermissionType;
 use App\Role;
 use App\Http\Requests\RoleRequest;
 use Illuminate\Http\Request;
@@ -59,9 +60,30 @@ trait RoleTrait{
 
     public function createRole(RoleRequest $request){
         try{
+            dd($request->all());
+            $webpermissions=$request->web_permissions;
+            $mobilepermissions=$request->mobile_permissions;
+            dd($mobilepermissions);
+            $webpermissions->givePermissionTo('web_permissions');
+            dd($webpermissions);
             $data = $request->only('name','type');
             $data['name'] = ucwords(trim($data['name']));
+
             $role = Role::create($data);
+            /*
+             * $webPermission & $mobile permission
+             *
+             * $rolepermisiondata = array()
+             * $rolePermissionData[role_id] = $roleId
+             *
+             * foreach(webpermision){
+             * $roleData[permision_id] = $permisonind
+                $roledata[is_weeb] = true;
+             *  if(role permision relation exists )
+             *    // update query
+             *   else
+             *     // create query
+             * }*/
             $request->session()->flash('success', 'Role Created successfully.');
             return redirect('/role/create');
         }catch(\Exception $e){
@@ -164,36 +186,61 @@ trait RoleTrait{
     public function getSubModules(Request $request){
         try{
             $moduleIds = $request->module_id;
-            $modules = Module::join('permissions','modules.id','=','permissions.module_id')
+            $webModules = Module::join('permissions','modules.id','=','permissions.module_id')
                         ->whereIn('modules.module_id',$moduleIds)
                         ->where('permissions.is_web',true)
-                        ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id')
+                        ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
                         ->get();
-           // dd($modules->toArray());
-            $moduleResponse = array();
-            foreach ($modules as $subModule){
+
+            $mobileModules =  Module::join('permissions','modules.id','=','permissions.module_id')
+                ->whereIn('modules.module_id',$moduleIds)
+                ->where('permissions.is_mobile',true)
+                ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
+                ->get();
+            //dd($mobileModules->toArray());
+            $webModuleResponse = array();
+            foreach ($webModules as $subModule){
                 if($subModule['module_id'] == null){
                     $subModule['module_id'] = $subModule['submodule_id'];
                 }
-                if(!array_key_exists($subModule['module_id'],$moduleResponse)){
-                    $moduleResponse[$subModule['module_id']] = array();
-                    $moduleResponse[$subModule['module_id']]['id'] = $subModule['module_id'];
-                    $moduleResponse[$subModule['module_id']]['module_name'] = Module::where('id', $subModule['module_id'])->pluck('name')->first();
-                    $moduleResponse[$subModule['module_id']]['submodules'] = array();
+                if(!array_key_exists($subModule['module_id'],$webModuleResponse)){
+                    $webModuleResponse[$subModule['module_id']] = array();
+                    $webModuleResponse[$subModule['module_id']]['id'] = $subModule['module_id'];
+                    $webModuleResponse[$subModule['module_id']]['module_name'] = Module::where('id', $subModule['module_id'])->pluck('name')->first();
+                    $webModuleResponse[$subModule['module_id']]['submodules'] = array();
                 }
-                if(!array_key_exists($subModule['submodule_id'],$moduleResponse[$subModule['module_id']]['submodules'])){
-                    $moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['id'] = $subModule['submodule_id'];
-                    $moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['module_id'] = $subModule['module_id'];
-                    $moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['module_name'] = $subModule['module_name'];
-                    $moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'] = array();
+                if(!array_key_exists($subModule['submodule_id'],$webModuleResponse[$subModule['module_id']]['submodules'])){
+                    $webModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['id'] = $subModule['submodule_id'];
+                    $webModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['module_id'] = $subModule['module_id'];
+                    $webModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['submodule_name'] = $subModule['module_name'];
+                    $webModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'] = array();
                 }
-                if(!array_key_exists($subModule['submodule_id'],$moduleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'])){
-                    $moduleResponse[$subModule['module_id']]['permissions'][$subModule['submodule_id']]['permissions'][$subModule['submodule_id']]['submodule_id'] = $subModule['submodule_id'];
-                    $moduleResponse[$subModule['module_id']]['permissions'][$subModule['submodule_id']]['permissions'][$subModule['permission_name']]['permission_name'] = $subModule['permission_name'];
-                }
+                $webModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'][$subModule['permission_type_id']] = $subModule['permission_id'];
             }
-            //dd($moduleResponse);
-            return view('partials.role.module-listing')->with(compact('modules','moduleResponse'));
+            //dd($webModuleResponse);
+            $mobileModuleResponse = array();
+            foreach ($mobileModules as $subModule){
+                if($subModule['module_id'] == null){
+                    $subModule['module_id'] = $subModule['submodule_id'];
+                }
+                if(!array_key_exists($subModule['module_id'],$mobileModuleResponse)){
+                    $mobileModuleResponse[$subModule['module_id']] = array();
+                    $mobileModuleResponse[$subModule['module_id']]['id'] = $subModule['module_id'];
+                    $mobileModuleResponse[$subModule['module_id']]['module_name'] = Module::where('id', $subModule['module_id'])->pluck('name')->first();
+                    $mobileModuleResponse[$subModule['module_id']]['submodules'] = array();
+                }
+                if(!array_key_exists($subModule['submodule_id'],$mobileModuleResponse[$subModule['module_id']]['submodules'])){
+                    $mobileModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['id'] = $subModule['submodule_id'];
+                    $mobileModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['module_id'] = $subModule['module_id'];
+                    $mobileModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['submodule_name'] = $subModule['module_name'];
+                    $mobileModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'] = array();
+                }
+                $mobileModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'][$subModule['permission_type_id']] = $subModule['permission_id'];
+            }
+
+            $permissionTypes = PermissionType::select('id','name')->get()->toArray();
+            //dd($mobileModuleResponse);
+            return view('partials.role.module-listing')->with(compact('webModuleResponse','permissionTypes','mobileModuleResponse'));
         }
         catch (\Exception $e){
             $data = [

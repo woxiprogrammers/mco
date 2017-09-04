@@ -85,9 +85,6 @@
                                                         <a class="btn btn-success btn-md" id="next_btn">Next >></a>
                                                     </div>
                                                 </div>
-                                            </form>
-                                                </div>
-                                                </fieldset>
                                         <div class="submodules-table-div" hidden>
                                             <fieldset>
                                                 <legend> Sub Modules</legend>
@@ -97,12 +94,13 @@
                                             </fieldset>
                                                <div class="form-group">
                                                         <div class="col-md-3 col-md-offset-4">
-                                                            <button type="submit" class="btn btn-success"> Submit </button>
+                                                            <button type="submit" class="btn btn-success"> Submitttt </button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </fieldset>
+                                            </form>
                                         </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -112,10 +110,10 @@
                 </div>
             </div>
         </div>
-    </div>
+
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/role/role2.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/role/role3.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 

@@ -25,6 +25,8 @@ class CreateUserHasPermissionsTable extends Migration
                 ->references('id')
                 ->on('permissions')
                 ->onDelete('cascade');
+            $table->boolean('is_web')->default(false);
+            $table->boolean('is_mobile')->default(false);
             $table->timestamps();
         });
     }
