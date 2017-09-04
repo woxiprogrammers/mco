@@ -61,11 +61,10 @@ trait RoleTrait{
     public function createRole(RoleRequest $request){
         try{
             dd($request->all());
-            $webpermissions=$request->web_permissions;
-            $mobilepermissions=$request->mobile_permissions;
-            dd($mobilepermissions);
-            $webpermissions->givePermissionTo('web_permissions');
-            dd($webpermissions);
+            $web_permissions=$request->web_permissions;
+            $mobile_permissions=$request->mobile_permissions;
+            dd($mobile_permissions);
+            dd($web_permissions);
             $data = $request->only('name','type');
             $data['name'] = ucwords(trim($data['name']));
 
@@ -79,11 +78,26 @@ trait RoleTrait{
              * foreach(webpermision){
              * $roleData[permision_id] = $permisonind
                 $roledata[is_weeb] = true;
-             *  if(role permision relation exists )
+            $eif = RoleHasPermission::where('roleid,)->where('permisionid)->first()
+             *  if($eif != null )
              *    // update query
              *   else
              *     // create query
              * }*/
+            $roleId = $role['id'];
+            $permission_id = $web_permissions->permission_id;
+            $rolePermissionData = array();
+            $rolePermissionData['role_id'] = $roleId;
+            foreach ($web_permissions as $permissions)
+            {
+                $permissions['permission_id'] = $permission_id;
+                $val =
+                if($rolePermissionData['mobi'])
+                {
+
+                }
+            }
+
             $request->session()->flash('success', 'Role Created successfully.');
             return redirect('/role/create');
         }catch(\Exception $e){
