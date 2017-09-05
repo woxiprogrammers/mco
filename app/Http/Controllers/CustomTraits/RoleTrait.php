@@ -91,7 +91,7 @@ trait RoleTrait{
             foreach ($web_permissions as $permissions)
             {
                 $permissions['permission_id'] = $permission_id;
-                $val =
+
                 if($rolePermissionData['mobi'])
                 {
 
