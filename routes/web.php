@@ -240,4 +240,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
     });
+
+    Route::group(['prefix' => 'checklist/category-management'], function(){
+        Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
+        Route::get('create',array('uses'=> 'Checklist\CategoryManagementController@getCreateView'));
+    });
 });
