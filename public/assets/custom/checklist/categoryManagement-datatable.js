@@ -1,10 +1,10 @@
-var VendorListing = function () {
+var CategoryListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
 
         grid.init({
-            src: $("##categoryManagementTable"),
+            src: $("#categoryManagementTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -75,5 +75,5 @@ var VendorListing = function () {
 }();
 
 jQuery(document).ready(function() {
-    VendorListing.init();
+    CategoryListing.init();
 });
