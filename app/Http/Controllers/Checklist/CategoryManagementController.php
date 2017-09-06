@@ -14,7 +14,7 @@ class CategoryManagementController extends Controller
     public function getManageView(Request $request){
         return view('checklist/categoryManagement/manage');
     }
-    public function getCreateView(Request $request){
-        return view('checklist/categoryManagement/create');
+    public function getEditView(Request $request){
+        return view('checklist/categoryManagement/edit');
     }
 }

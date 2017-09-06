@@ -21,10 +21,10 @@
                                 <div class="page-title">
                                     <h1>Category Management</h1>
                                 </div>
-                                <div id="mainCat" class="btn yellow" style="margin-top: 1%; margin-left: 78%"><a href="#" style="color: white"><i class="fa fa-plus"></i> Main Category</a>
-                                </div>
-                                <div id="subCat" class="btn yellow" style="margin-top: 1%; margin-left: 87%"><a href="#" style="color: white"><i class="fa fa-plus"></i> Sub Category</a>
-                                </div>
+                                <button id="mainCat" class="btn yellow" style="margin-top: 1%; margin-left: 50%"><a href="#" style="color: white"><i class="fa fa-plus"></i> Main Category</a>
+                                </button>
+                                <button id="subCat" class="btn yellow" style="margin-top: 1%; margin-left: 2%"><a href="#" style="color: white"><i class="fa fa-plus"></i> Sub Category</a>
+                                </button>
                             </div>
                         </div>
                         <div class="page-content">
@@ -61,6 +61,12 @@
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                         </th>
                                                     </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td>Bean</td>
+                                                        <td>Reinforcement</td>
+                                                        <td><button class="btn"><a href="/checklist/category-management/edit">Edit</a></button></td>
+                                                    </tr>
                                                     </thead>
                                                     <tbody>
 
@@ -69,16 +75,16 @@
                                             </div>
                                             <div class="modal fade" id="modal1" tabindex="-1" role="dialog" >
                                                 <div class="modal-dialog">
-                                                    <div class="modal-content">
+                                                    <div class="modal-content" style="height: 55%">
                                                         <div class="modal-header">
                                                             <div class="row">
                                                                 <div class="col-md-4"></div>
-                                                                <div class="col-md-4"> Create Sub Category</div>
-                                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                <div class="col-md-7"> Create Sub Category</div>
+                                                                <div class="col-md-1"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form role="form">
+                                                            <form role="form" id="SubCategoryCreate">
                                                              <div class="form-group">
                                                                  <div class="btn-group bootstrap-select bs-select form-control dropup">
                                                                      <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Main Category</span>&nbsp;<span class="caret"></span></button>
@@ -91,33 +97,32 @@
                                                                  </div>
                                                              </div>
                                                                 <div class="form-group">
-                                                                    <input type="text" class="form-control" id="sub_category" placeholder="Enter Sub Category">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                <button type="submit" class="btn red pull-right"> Create</button>
-                                                                </div>
+                                                                    <input type="text" class="form-control" id="sub_category" name="name_sub" placeholder="Enter Sub Category">
+                                                                    </div>
+                                                                <button type="submit" id="createSubCategory" class="btn red pull-right" style="margin-right: 45%"> Create</button>
                                                             </form>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <div class="modal fade" id="modal2" role="dialog">
                                                 <div class="modal-dialog">
                                                     <!-- Modal content-->
-                                                    <div class="modal-content">
+                                                    <div class="modal-content" style="height: 50%">
                                                         <div class="modal-header">
                                                             <div class="row">
                                                                 <div class="col-md-4"></div>
-                                                                <div class="col-md-4"> Create Category</div>
-                                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                <div class="col-md-6"> Create Category</div>
+                                                                <div class="col-md-2"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-body" style="padding:40px 50px;">
-                                                            <form role="form">
+                                                            <form role="form" id="MainCategoryCreate">
                                                                 <div class="form-group">
-                                                                    <input type="text" class="form-control" id="main_category" placeholder="Enter Main Category">
+                                                                    <input type="text" name="name_main" class="form-control" id="main_category" placeholder="Enter Main Category">
                                                                 </div>
-                                                                <button type="submit" class="btn btn-set red pull-right"> Create</button>
+                                                                <button type="submit"  id="createMainCategory" class="btn btn-set red pull-right" style="margin-right: 45%"> Create</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -144,12 +149,7 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/admin/category-mangement/manage-datatable.js" type="text/javascript"></script>
-    <!--<script>
-        $(document).ready(function() {
-            $('#categoryManagementTable').DataTable();
-        });
-    </script> -->
+    <script src="/assets/custom/checklist/categoryManagement.js"></script>
     <script>
         $(document).ready(function(){
             $("#subCat").click(function(){
@@ -158,6 +158,12 @@
             $("#mainCat").click(function(){
                 $("#modal2").modal();
             });
+        });
+        $(document).ready(function() {
+            CreateMainCategory.init();
+        });
+        $(document).ready(function() {
+            CreateSubCategory.init();
         });
     </script>
 @endsection
