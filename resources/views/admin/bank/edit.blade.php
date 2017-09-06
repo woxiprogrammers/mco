@@ -17,7 +17,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Create Bank</h1>
+                                    <h1>Edit Bank</h1>
                                 </div>
                             </div>
                         </div>
@@ -39,8 +39,10 @@
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-bank" class="form-horizontal" method="post" action="/bank/create">
+                                            <input type="hidden" id="bank_id" value="{{$bank['id']}}">
+                                            <form role="form" id="create-bank" class="form-horizontal" method="post" action="/bank/edit/{{$bank['id']}}">
                                                 {!! csrf_field() !!}
+                                                <input name="_method" value="put" type="hidden">
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
@@ -48,7 +50,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="bank_name" name="bank_name">
+                                                            <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{$bank['bank_name']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -57,7 +59,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="account_number" name="account_number">
+                                                            <input type="text" class="form-control" id="account_number" name="account_number" value="{{$bank['account_number']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -66,7 +68,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="ifs_code" name="ifs_code">
+                                                            <input type="text" class="form-control" id="ifs_code" name="ifs_code" value="{{$bank['ifs_code']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -75,7 +77,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="branch_id" name="branch_id">
+                                                            <input type="text" class="form-control" id="branch_id" name="branch_id" value="{{$bank['branch_id']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -84,7 +86,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="branch_name" name="branch_name">
+                                                            <input type="text" class="form-control" id="branch_name" name="branch_name" value="{{$bank['branch_name']}}">
                                                         </div>
                                                     </div>
                                                 </div>

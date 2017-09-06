@@ -46,7 +46,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="categoryTable">
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="bankTable">
                                                     <thead>
                                                     <tr>
                                                         <th style="width: 30%"> Bank Name </th>
@@ -81,5 +81,14 @@
     </div>
 @endsection
 @section('javascript')
+    <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+    <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/bank/manage-datatable1.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            $('#bankTable').DataTable();
+        });
+    </script>
 
 @endsection
