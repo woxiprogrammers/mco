@@ -157,7 +157,14 @@ trait QuotationTrait{
                 $clientSuppliedMaterial = $request->clientSuppliedMaterial;
             }
             foreach($productIds as $id){
-                $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                if($request->has('quotation_id')){
+                    $recentVersionId = QuotationProduct::where('product_id',$id)->where('quotation_id',$request->quotation_id)->pluck('product_version_id')->first();
+                    if($recentVersionId == null){
+                        $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                    }
+                }else{
+                    $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                }
                 $productMaterialIds = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
                     ->join('materials','materials.id','=','material_versions.material_id')
                     ->where('product_material_relation.product_version_id',$recentVersionId)
