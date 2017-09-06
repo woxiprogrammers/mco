@@ -1,21 +1,19 @@
 var CategoryListing = function () {
     var handleOrders = function () {
-
         var grid = new Datatable();
-
         grid.init({
             src: $("#categoryTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
             onError: function (grid) {
-                // execute some code on network or other general error  
+                // execute some code on network or other general error
             },
             loadingMessage: 'Loading...',
-            dataTable: { // here you can define a typical datatable settings from http://datatables.net/usage/options 
+            dataTable: { // here you can define a typical datatable settings from http://datatables.net/usage/options
                 // Uncomment below line("dom" parameter) to fix the dropdown overflow issue in the datatable cells. The default datatable layout
-                // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js). 
-                // So when dropdowns used the scrollable div should be removed. 
+                // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
+                // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
                 "lengthMenu": [
@@ -31,7 +29,6 @@ var CategoryListing = function () {
                 ] // set first column as a default sort by asc
             }
         });
-
         // handle group actionsubmit button click
         grid.getTableWrapper().on('click', '.table-group-action-submit', function (e) {
             e.preventDefault();
@@ -60,20 +57,15 @@ var CategoryListing = function () {
                 });
             }
         });
-
     }
-
     return {
 
         //main function to initiate the module
         init: function () {
             handleOrders();
         }
-
     };
-
 }();
-
 jQuery(document).ready(function() {
     CategoryListing.init();
 });

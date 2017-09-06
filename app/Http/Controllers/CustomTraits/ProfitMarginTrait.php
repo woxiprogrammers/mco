@@ -4,8 +4,8 @@ use App\Http\Requests\ProfitMarginRequest;
 use App\ProfitMargin;
 use App\ProfitMarginVersion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
 trait ProfitMarginTrait{
     public function getManageView(Request $request) {
         try{
@@ -20,7 +20,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function getCreateView(Request $request) {
         try{
             return view('admin.profitMargin.create');
@@ -34,7 +33,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function getEditView(Request $request,$profit_margin){
         try{
             $profit_margin = $profit_margin->toArray();
@@ -49,7 +47,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function createProfitMargin(ProfitMarginRequest $request){
         try{
             $data = $request->only('name','base_percentage');
@@ -71,7 +68,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function editProfitMargin(ProfitMarginRequest $request,$profit_margin){
         try{
             $profit_margin->update(['name' => ucwords(trim($request->name)), 'base_percentage' => $request->base_percentage]);
@@ -88,7 +84,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function profitMarginListing(Request $request){
         try{
             if($request->has('search_name')){
@@ -108,28 +103,47 @@ trait ProfitMarginTrait{
                     $profitMargin_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $profitMarginData[$pagiantion]['name'],
-                    $profitMarginData[$pagiantion]['base_percentage'],
-                    $profitMargin_status,
-                    date('d M Y',strtotime($profitMarginData[$pagiantion]['created_at'])),
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/profit-margin/edit/'.$profitMarginData[$pagiantion]['id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                            <li>
-                                <a href="/profit-margin/change-status/'.$profitMarginData[$pagiantion]['id'].'">
-                                    <i class="icon-tag"></i> '.$status.' </a>
-                            </li>
-                        </ul>
-                    </div>'
-                ];
+                if(Auth::user()->hasPermissionTo('edit-profit-margin')){
+                    $records['data'][$iterator] = [
+                        $profitMarginData[$pagiantion]['name'],
+                        $profitMarginData[$pagiantion]['base_percentage'],
+                        $profitMargin_status,
+                        date('d M Y',strtotime($profitMarginData[$pagiantion]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/profit-margin/edit/'.$profitMarginData[$pagiantion]['id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/profit-margin/change-status/'.$profitMarginData[$pagiantion]['id'].'">
+                                        <i class="icon-tag"></i> '.$status.' </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $profitMarginData[$pagiantion]['name'],
+                        $profitMarginData[$pagiantion]['base_percentage'],
+                        $profitMargin_status,
+                        date('d M Y',strtotime($profitMarginData[$pagiantion]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                
+                            </ul>
+                        </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -147,7 +161,6 @@ trait ProfitMarginTrait{
 
         return response()->json($records,200);
     }
-
     public function changeProfitMarginStatus(Request $request, $profitMargin){
         try{
             $newStatus = (boolean)!$profitMargin->is_active;
@@ -164,7 +177,6 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
-
     public function checkProfitMarginName(Request $request){
         try{
             $profitMarginName = $request->name;

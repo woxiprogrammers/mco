@@ -41,13 +41,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
+use Psr\Log\NullLogger;
 
 trait QuotationTrait{
 
     public function getCreateView(Request $request){
         try{
             $clients = Client::where('is_active', true)->select('id','company')->get()->toArray();
-            $categories = Category::orderBy('name','asc')->where('is_active', true)->select('id','name')->get()->toArray();
+            $categories = Category::join('products','categories.id','=','products.category_id')
+                ->where('categories.is_active',true)
+                ->orderBy('categories.name','asc')
+                ->select('categories.id as id','categories.name as name')
+                ->distinct()
+                ->get()
+                ->toArray();
             return view('admin.quotation.create')->with(compact('categories','clients'));
         }catch(\Exception $e){
             $data = [
@@ -128,7 +135,13 @@ trait QuotationTrait{
         try{
             $rowIndex = $request->row_count + 1;
             $isEdit = false;
-            $categories = Category::orderBy('name','asc')->where('is_active', true)->select('id','name')->get()->toArray();
+            $categories = Category::join('products','categories.id','=','products.category_id')
+                ->where('categories.is_active',true)
+                ->orderBy('categories.name','asc')
+                ->select('categories.id as id','categories.name as name')
+                ->distinct()
+                ->get()
+                ->toArray();
             if($request->has('is_edit')){
                 $isEdit = true;
                 $summaries = Summary::where('is_active', true)->select('id','name')->orderBy('name','asc')->get();
@@ -374,25 +387,42 @@ trait QuotationTrait{
                 }else{
                     $quotationStatus = '<td><span class="btn btn-xs btn-danger"> Disapproved </span></td>';
                 }
-                $records['data'][] = [
-                    $quotations[$pagination]->project_site->project->client->company,
-                    $quotations[$pagination]->project_site->project->name,
-                    $quotations[$pagination]->project_site->name,
-                    $quotationStatus,
-                    date('d M Y',strtotime($quotations[$pagination]->created_at)),
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/quotation/edit/'.$quotations[$pagination]->id.'">
-                                <i class="icon-docs"></i> Edit </a>
-                            </li>
-                        </ul>
-                    </div>'
-                ];
+                if(Auth::user()->hasPermissionTo('edit-quotation')){
+                    $records['data'][] = [
+                        $quotations[$pagination]->project_site->project->client->company,
+                        $quotations[$pagination]->project_site->project->name,
+                        $quotations[$pagination]->project_site->name,
+                        $quotationStatus,
+                        date('d M Y',strtotime($quotations[$pagination]->created_at)),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/quotation/edit/'.$quotations[$pagination]->id.'">
+                                    <i class="icon-docs"></i> Edit </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][] = [
+                        $quotations[$pagination]->project_site->project->client->company,
+                        $quotations[$pagination]->project_site->project->name,
+                        $quotations[$pagination]->project_site->name,
+                        $quotationStatus,
+                        date('d M Y',strtotime($quotations[$pagination]->created_at)),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                        </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = count($quotations);
@@ -622,8 +652,13 @@ trait QuotationTrait{
             $quotationProjectSiteIds = Quotation::whereNotNull('quotation_status_id')->pluck('project_site_id')->toArray();
             $projectSites = ProjectSite::where('project_id',$projectId)->whereNotIn('id',$quotationProjectSiteIds)->select('id','name')->get();
             $response = array();
-            foreach($projectSites as $projectSite){
-                $response[] = '<option value="'.$projectSite->id.'">'.$projectSite->name.'</option> ';
+            if(count($projectSites) <= 0)
+            {
+                $response[] = '<option value=" "> Project Site Not Available </option>';
+            }else{
+                foreach ($projectSites as $projectSite) {
+                    $response[] = '<option value="' . $projectSite->id . '">' . $projectSite->name . '</option> ';
+                }
             }
             $status = 200;
         }catch(\Exception $e){
@@ -685,6 +720,7 @@ trait QuotationTrait{
             foreach($taxes as $tax){
                 $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
             }
+            $beforeTaxOrderValue = $orderValue;
             $orderValue = $orderValue + $taxAmount;
             $extraItems = QuotationExtraItem::join('extra_items','extra_items.id','=','quotation_extra_items.extra_item_id')
                                             ->where('quotation_extra_items.quotation_id',$quotation['id'])
@@ -700,7 +736,7 @@ trait QuotationTrait{
                     $extraItems = array_merge($extraItems,$newExtraItems);
                 }
             }
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole'));
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
@@ -1392,7 +1428,7 @@ trait QuotationTrait{
                 $quotationDraftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
                 $quotation = Quotation::findOrFail($data['quotation_id']);
                 $productBillCount = $this->getProductBillCount($quotation['id'],$data['product_id']);
-                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null || ($user->role->slug == 'superadmin' && $productBillCount <= 0)){
+                if($quotation->quotation_status_id == $quotationDraftStatusId || $quotation->quotation_status_id == null || ($user->roles[0]->role->slug == 'superadmin' && $productBillCount <= 0)){
                     $canUpdateProduct = true;
                 }else{
                     $canUpdateProduct = false;

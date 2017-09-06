@@ -23,6 +23,7 @@ use App\Tax;
 use App\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
@@ -422,11 +423,12 @@ trait BillTrait{
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]['company'],
-                    $listingData[$pagination]['project_name'],
-                    $listingData[$pagination]['project_site_name'],
-                    '<div class="btn-group">
+                if(Auth::user()->hasPermissionTo('create-billing')){
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -442,7 +444,27 @@ trait BillTrait{
                             </li>
                         </ul>
                     </div>'
-                ];
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]['company'],
+                        $listingData[$pagination]['project_name'],
+                        $listingData[$pagination]['project_site_name'],
+                        '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
+                                    <i class="icon-docs"></i> Manage </a>
+                            </li>
+                        </ul>
+                    </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -563,6 +585,7 @@ trait BillTrait{
             $bill['quotation_id'] = $request['quotation_id'];
             $bill['bill_status_id'] = BillStatus::where('slug','draft')->pluck('id')->first();
             $bill['date'] = $request->date;
+            $bill['performa_invoice_date'] = $request->performa_invoice_date;
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
                 $bill_quotation_product['bill_id'] = $bill_created['id'];
@@ -734,9 +757,10 @@ trait BillTrait{
         }
     }
 
-    public function generateCurrentBill(Request $request,$bill){
+    public function generateCurrentBill(Request $request,$slug,$bill){
         try{
             $data = array();
+            $data['slug'] = $slug;
             $invoiceData = $taxData = array();
             if($bill->quotation->project_site->project->hsn_code == null){
                 $data['hsnCode'] = '';
@@ -752,7 +776,13 @@ trait BillTrait{
                      $data['currentBillID'] = $key+1;
                  }
              }
-            $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
+
+             if($slug == "performa-invoice"){
+                 $data['billDate'] = date('d/m/Y',strtotime($bill['performa_invoice_date']));
+             }else{
+                 $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
+             }
+
             $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
@@ -991,7 +1021,7 @@ trait BillTrait{
 
     public function editBill(Request $request, $bill){
         try{
-            Bill::where('id',$bill->id)->update(['date' => $request->date]);
+            Bill::where('id',$bill->id)->update(['date' => $request->date,'performa_invoice_date' => $request->performa_invoice_date]);
             $products = $request->quotation_product_id;
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();
             $editQuotationProductIds = array_keys($products);

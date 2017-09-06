@@ -1,5 +1,6 @@
 $(document).ready(function (){
     CreateBill.init();
+    $('#submit').css("padding-left",'6px');
     $('#submit').prop('disabled',true);
     $("#change_bill").on('change', function(){
         var bill_id = $(this).val();
