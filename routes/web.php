@@ -244,5 +244,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'checklist/category-management'], function(){
         Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
         Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
+        Route::post('listing',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
     });
 });

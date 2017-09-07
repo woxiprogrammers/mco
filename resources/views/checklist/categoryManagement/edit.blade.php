@@ -40,28 +40,28 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button class="btn yellow" id="mainCat" ><a href="#">Edit Main Category</a></button>
-                                                <button class="btn yellow"  id="subCat" style="margin-left: 2%"><a href="#">Edit Sub Category</a></button>
+                                                <button class="btn yellow" id="mainCat" ><a href="#" style="color: white">Edit Main Category</a></button>
+                                                <button class="btn yellow"  id="subCat" style="margin-left: 2%"><a href="#" style="color: white">Edit Sub Category</a></button>
                                             </div>
                                             <div class="modal fade" id="modal1" tabindex="-1" role="dialog" >
                                                 <div class="modal-dialog">
-                                                    <div class="modal-content" style="height: 50%">
-                                                        <div class="modal-header">
+                                                    <div class="modal-content" style="height: 40%">
+                                                        <div class="modal-header" style="padding-bottom: 10%">
                                                             <div class="row">
                                                                 <div class="col-md-4"></div>
-                                                                <div class="col-md-6"> Edit Sub Category</div>
-                                                                <div class="col-md-2"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                <div class="col-md-6" style="margin-left: -5%"> Edit Sub Category</div>
+                                                                <div class="col-md-2" style="margin-left: 4%"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-body">
                                                             <form role="form" id="SubCategoryEdit">
                                                                 <div class="form-group">
-                                                                    <input type="text" name="sname_main" class="form-control" id="main_category" placeholder="Enter Main Category">
+                                                                    <input type="text" name="sname_main" class="form-control" id="main_category" value="Beam">
                                                                 </div>
                                                                 <div class="form-group">
-                                                                    <input type="text" name="sname_sub" class="form-control" id="sub_category"   placeholder="Name of Sub Category">
+                                                                    <input type="text" name="sname_sub" class="form-control" id="sub_category"   value="Reinforcement">
                                                                 </div>
-                                                                    <button type="submit"  id="editMainCategory" class="btn red pull-right" style="margin-right: 45%"><a href="manage"> Submit </a></button>
+                                                                    <button type="submit"  id="editMainCategory" class="btn red pull-right"><a href="manage" style="color: white"><i class="fa fa-check"></i> Submit </a></button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -69,20 +69,20 @@
                                             </div>
                                             <div class="modal fade" id="modal2" tabindex="-1" role="dialog" >
                                                 <div class="modal-dialog">
-                                                    <div class="modal-content" style="height: 40%">
-                                                        <div class="modal-header">
+                                                    <div class="modal-content" style="height: 30%">
+                                                        <div class="modal-header" style="padding-bottom: 10%">
                                                             <div class="row">
                                                                 <div class="col-md-4"></div>
-                                                                <div class="col-md-6"> Edit Main Category</div>
-                                                                <div class="col-md-2"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                <div class="col-md-6" style="margin-left: -7%"> Edit Main Category</div>
+                                                                <div class="col-md-2" style="margin-left: 5%"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-body">
                                                             <form role="form" id="MainCategoryEdit">
                                                                 <div class="form-group">
-                                                                    <input type="text" name="mname_main" class="form-control" id="main_category" placeholder="Enter Main Category">
+                                                                    <input type="text" name="mname_main" class="form-control" id="main_category" value="Beam">
                                                                 </div>
-                                                                    <button  id="editMainCategory" class="btn red pull-right" style="margin-right: 45%"> <a href="manage"> Submit</a> </button>
+                                                                    <button  id="editMainCategory" class="btn red pull-right"> <a href="manage" style="color: white"><i class="fa fa-check"></i> Submit</a> </button>
                                                             </form>
                                                         </div>
                                                     </div>

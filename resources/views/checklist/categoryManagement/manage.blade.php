@@ -3,7 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
-    <!--<link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>-->
+    <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
 
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
@@ -36,14 +36,19 @@
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
                                                 <div class="table-toolbar">
-                                                    <div class="row" style="text-align: right">
-                                                        <div class="col-md-12">
-                                                            <div class="btn-group">
-
-                                                            </div>
+                                                    <ul class="nav nav-tabs nav-tabs-lg">
+                                                        <li class="active">
+                                                            <a href="#categorytab" data-toggle="tab"> Category </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#subcategorytab" data-toggle="tab"> Sub Category </a>
+                                                        </li>
+                                                    </ul>
                                                         </div>
                                                     </div>
                                                 </div>
+                                        <div class="tab-content">
+                                            <div class="tab-pane" id="subcategorytab">
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="categoryManagementTable">
                                                     <thead>
                                                     <tr>
@@ -61,26 +66,25 @@
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                         </th>
                                                     </tr>
-                                                    <tr>
-                                                        <td>1</td>
-                                                        <td>Bean</td>
-                                                        <td>Reinforcement</td>
-                                                        <td><button class="btn"><a href="/checklist/category-management/edit">Edit</a></button></td>
-                                                    </tr>
                                                     </thead>
                                                     <tbody>
 
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            <div class="tab-pane fade in" id="categorytab">
+
+                                            </div>
+                                        </div>
+                                            </div>
                                             <div class="modal fade" id="modal1" tabindex="-1" role="dialog" >
                                                 <div class="modal-dialog">
-                                                    <div class="modal-content" style="height: 55%">
-                                                        <div class="modal-header">
+                                                    <div class="modal-content" style="height: 35%">
+                                                        <div class="modal-header" style="padding-bottom: 10%">
                                                             <div class="row">
                                                                 <div class="col-md-4"></div>
-                                                                <div class="col-md-7"> Create Sub Category</div>
-                                                                <div class="col-md-1"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                <div class="col-md-7" style="margin-left:-11%"> Create Sub Category</div>
+                                                                <div class="col-md-1" style="margin-left:9%"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-body">
@@ -99,7 +103,7 @@
                                                                 <div class="form-group">
                                                                     <input type="text" class="form-control" id="sub_category" name="name_sub" placeholder="Enter Sub Category">
                                                                     </div>
-                                                                <button type="submit" id="createSubCategory" class="btn red pull-right" style="margin-right: 45%"> Create</button>
+                                                                <button type="submit" id="createSubCategory" class="btn red pull-right"><i class="fa fa-check"></i> Create </button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -109,12 +113,12 @@
                                             <div class="modal fade" id="modal2" role="dialog">
                                                 <div class="modal-dialog">
                                                     <!-- Modal content-->
-                                                    <div class="modal-content" style="height: 50%">
-                                                        <div class="modal-header">
+                                                    <div class="modal-content" style="height: 35%">
+                                                        <div class="modal-header" style="padding-bottom: 10%">
                                                             <div class="row">
                                                                 <div class="col-md-4"></div>
-                                                                <div class="col-md-6"> Create Category</div>
-                                                                <div class="col-md-2"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                <div class="col-md-6" style="margin-left:-8%"> Create Category</div>
+                                                                <div class="col-md-2" style="margin-left:8%"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-body" style="padding:40px 50px;">
@@ -122,7 +126,7 @@
                                                                 <div class="form-group">
                                                                     <input type="text" name="name_main" class="form-control" id="main_category" placeholder="Enter Main Category">
                                                                 </div>
-                                                                <button type="submit"  id="createMainCategory" class="btn btn-set red pull-right" style="margin-right: 45%"> Create</button>
+                                                                <button type="submit"  id="createMainCategory" class="btn btn-set red pull-right"><i class="fa fa-check"></i> Create </button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -150,6 +154,7 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/checklist/categoryManagement.js"></script>
+    <script src="/assets/custom/checklist/categoryManagement-datatable.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
             $("#subCat").click(function(){
@@ -158,6 +163,9 @@
             $("#mainCat").click(function(){
                 $("#modal2").modal();
             });
+        });
+        $(document).ready(function() {
+            $('#categoryManagementTable').DataTable();
         });
         $(document).ready(function() {
             CreateMainCategory.init();
