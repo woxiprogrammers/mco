@@ -9,6 +9,7 @@ use App\Module;
 use App\PermissionType;
 use App\Role;
 use App\Http\Requests\RoleRequest;
+use App\RoleHasPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Expr\Array_;
@@ -91,9 +92,12 @@ trait RoleTrait{
             foreach ($web_permissions as $permissions)
             {
                 $permissions['permission_id'] = $permission_id;
-
-                if($rolePermissionData['mobi'])
+                $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
+                if($check != null)
                 {
+                        RoleHasPermission::
+                }
+                else{
 
                 }
             }
