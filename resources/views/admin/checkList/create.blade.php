@@ -75,6 +75,9 @@
                                                         <input type="text" class="form-control" id="titlename" placeholder="Enter Title Here">
                                                         <div id="sample_editable_1_new" class="btn yellow" style="margin-top: -7%; margin-left: 105%"><button style="color: white" id="add"><i class="fa fa-plus"></i> </button>
                                                         </div>
+                                                        <div id="removeBtn"  style="margin-top: -5%; margin-left: 118%" >
+
+                                                        </div>
                                                     </div>
                                                     <div class="form-body">
                                                         <br>
@@ -142,11 +145,14 @@
 
     <script>
         $('#add').click(function(){
-            alert("S");
             ($('#example').clone()).appendTo('#appendHere');
+            $('#removeBtn').append("<button style=color:white; ><i class=fa fa-minus id=removeBtn></i> </button>");
             $("form").submit(function(e){
                 e.preventDefault();
             });
+        })
+        $('#removeBtn').click(function(){
+            $('#example').remove();
         })
     </script>
 @endsection
