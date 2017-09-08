@@ -1024,7 +1024,6 @@ trait BillTrait{
 
     public function editBill(Request $request, $bill){
         try{
-            dd($request->all());
             Bill::where('id',$bill->id)->update(['date' => $request->date,'performa_invoice_date' => $request->performa_invoice_date]);
             $products = $request->quotation_product_id;
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();
