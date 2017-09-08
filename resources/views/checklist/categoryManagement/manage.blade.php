@@ -46,9 +46,34 @@
                                                     </ul>
                                                         </div>
                                                     </div>
-                                                </div>
+
                                         <div class="tab-content">
-                                            <div class="tab-pane" id="subcategorytab">
+                                            <div class="tab-pane fade in" id="categorytab">
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="CategoryManagementTable">
+                                                    <thead>
+                                                    <tr>
+                                                        <th style="width: 30%"> ID </th>
+                                                        <th> Category Name </th>
+                                                        <th> Actions </th>
+                                                    </tr>
+                                                    <tr class="filter">
+                                                        <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_id" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_category" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
+                                                        <th>
+                                                            <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                            <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+
+                                            <div class="tab-pane fade in" id="subcategorytab">
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="categoryManagementTable">
                                                     <thead>
                                                     <tr>
@@ -71,9 +96,6 @@
 
                                                     </tbody>
                                                 </table>
-                                            </div>
-                                            <div class="tab-pane fade in" id="categorytab">
-
                                             </div>
                                         </div>
                                             </div>
@@ -109,7 +131,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-
+                                        </div>
                                             <div class="modal fade" id="modal2" role="dialog">
                                                 <div class="modal-dialog">
                                                     <!-- Modal content-->
