@@ -13,7 +13,7 @@ class RemoveCityColumnFromVendorsTable extends Migration
      */
     public function up()
     {
-        Schema::table('vendors', function (Blueprint $table) {
+        Schema::table('vendor', function (Blueprint $table) {
             $table->dropColumn('city');
         });
     }
@@ -25,7 +25,7 @@ class RemoveCityColumnFromVendorsTable extends Migration
      */
     public function down()
     {
-        Schema::table('vendors', function (Blueprint $table) {
+        Schema::table('vendor', function (Blueprint $table) {
             $table->string('city')->nullable();
         });
     }

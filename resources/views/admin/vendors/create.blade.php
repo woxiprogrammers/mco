@@ -31,8 +31,16 @@
                                     </li>
                                     <li>
                                         <a href="javascript:void(0);">Create Vendor</a>
-                                        <i class="fa fa-circle"></i>
                                     </li>
+                                </ul>
+                                <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a href="#">General</a>
+                                    </li>
+                                    <li>
+                                        <a href="/vendors/material">Material Assign </a>
+                                    </li>
+
                                 </ul>
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
@@ -84,9 +92,9 @@
                                                             <input type="text" class="form-control" id="email" name="email">
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-body">
                                                     <div class="form-group row">
+                                                    </div>
+                                                    <div class="form-body">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="gstin" class="control-label">GSTIN</label>
                                                             <span>*</span>
@@ -109,12 +117,18 @@
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="city" class="control-label">City</label>
+                                                            <label class="control-label">City Name</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="city" name="city">
+                                                    <div class="col-md-6">
+                                                        <div class="form-control product-material-select" style="height: 150px;" >
+                                                            <ul id="material_id" class="list-group">
+                                                                @foreach($cityArray as $city)
+                                                                    <li><input type="checkbox" name="cities[{{$city['id']}}]" > {{$city['name']}} </li>
+                                                                @endforeach
+                                                            </ul>
                                                         </div>
+                                                    </div>
                                                     </div>
                                                 </div>
                                                 <div class="form-actions noborder row">
@@ -135,9 +149,10 @@
     </div>
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/vendor/vendor.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/vendors/vendor112.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
+            $('#cityId').trigger('change');
             CreateVendor.init();
         });
     </script>

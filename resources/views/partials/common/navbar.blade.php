@@ -176,6 +176,25 @@
                                         @endif
                                     </ul>
                                 </li>
+                                <li aria-haspopup="true"  class="dropdown-submenu ">
+                                    <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                        <i class="fa fa-folder"></i> Manage Users
+                                    </a>
+                                    <ul class="dropdown-menu pull-left">
+                                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                                <a href="/user/manage">
+                                                    <i class="fa fa-users"></i> Manage Users
+                                                    <span class="arrow"></span>
+                                                </a>
+                                            </li>
+                                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                                <a href="/vendors/manage">
+                                                    <i class="fa fa-cubes"></i> Manage Vendors
+                                                    <span class="arrow"></span>
+                                                </a>
+                                            </li>
+                                    </ul>
+                                </li>
                                 </ul>
                             </li>
                         <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
@@ -194,6 +213,22 @@
                                 </a>
                             </li>
                         @endif
+                        <?php $hasCheckListStructurePermission = \App\Helper\ACLHelper::checkModuleAcl('checkliststructure'); ?>
+                        @if($hasStructurePermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> Checklist
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/checkList/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Checklist Structure
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endif
+
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Purchase
                                 <span class="arrow"></span>

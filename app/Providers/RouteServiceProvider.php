@@ -63,6 +63,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('bill_transaction',BillTransaction::class);
         Route::model('extra_item',ExtraItem::class);
         Route::model('vendor',Vendor::class);
+        Route::model('city',City::class);
     }
 
     /**

@@ -17,7 +17,7 @@ class CreateVendorMaterialRelationTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('vendor_id');
             $table->unsignedInteger('material_id');
-            $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('vendor_id')->references('id')->on('vendor')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('material_id')->references('id')->on('materials')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

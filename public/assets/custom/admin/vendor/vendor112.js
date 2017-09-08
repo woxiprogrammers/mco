@@ -157,5 +157,78 @@ var  EditVendor = function () {
         init: function () {
             handleEdit();
         }
-    };
-}();
+    }
+};
+
+
+function getMaterials(category){
+    $.ajax({
+        url: '/vendors/get-materials/'+category,
+        type: 'GET',
+        async: false,
+        success: function(data, textStatus, xhr){
+            if(xhr.status == 200){
+                $("#material_id").html(data);
+                $("#vendorsMaterialTable input[type='number']").each(function(){
+                    $(this).rules('add',{
+                        required: true
+                    });
+                });
+
+            }else{
+
+            }
+        },
+        error: function(errorStatus,xhr){
+
+        }
+    });
+}
+
+
+$(document).ready(function(){
+
+    $("#category_name").on('change', function(){
+        if(!($("#materials-table-div").is(':visible'))){
+            $("#productMaterialTable tr").each(function(){
+                $(this).remove();
+            });
+            $(".materials-table-div").hide();
+        }
+        getMaterials($("#category_name").val());
+    });
+});
+
+function getMaterialDetails(){
+    var material_ids = [];
+    var formData = {};
+    formData['_token'] = $("input[name='_token']").val();
+    $("#material_id input:checkbox:checked").each(function(i){
+        material_ids[i] = $(this).val();
+    });
+    formData['material_ids'] = material_ids;
+    if($(".product-material-id").length > 0){
+        formData['materials'] = {};
+        $(".product-material-id").each(function(i){
+            var materialId = $(this).val();
+            formData['materials'][materialId] = {};
+            formData['materials'][materialId]['id'] = materialId;
+            formData['materials'][materialId]['rate_per_unit'] = $("#material_"+materialId+"_rate").val();
+            formData['materials'][materialId]['unit_id'] = $("#material_"+materialId+"_unit").val();
+            formData['materials'][materialId]['quantity'] = $("#material_"+materialId+"_quantity").val();
+        });
+    }
+    $.ajax({
+        url: '/vendors/material/listing',
+        type: "POST",
+        data :formData,
+        async: false,
+        success: function(data,textStatus, xhr){
+            $("#vendorMaterialTable").html(data);
+            calculateSubTotal();
+        },
+        error: function(errorStatus, xhr){
+
+        }
+    });
+}

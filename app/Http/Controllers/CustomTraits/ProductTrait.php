@@ -139,7 +139,7 @@ trait ProductTrait{
             $materials = Material::whereIn('id',$materialIds)->select('id','name','rate_per_unit','unit_id')->orderBy('name','asc')->get()->toArray();
             $materialData = array();
             $iterator = 0;
-            $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $units = Unit::whee('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             foreach($materials as $material){
                 if($request->has('materials')){
                     if(array_key_exists($material['id'],$request->materials)){

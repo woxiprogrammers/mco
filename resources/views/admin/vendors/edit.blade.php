@@ -114,11 +114,36 @@
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="city" class="control-label">City</label>
+                                                            <label class="control-label">City Name</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="city" name="city" value="{{$vendor['city']}}">
+                                                            <select class="form-control" id="cityId" name="city">
+                                                                <option value=""> -- Select City -- </option>
+                                                                @foreach($cities as $city)
+                                                                    <option value="{{$city['id']}}"> {{$city['name']}} </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-body">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label class="control-label">State Name</label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="state" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-body">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label class="control-label">Country Name</label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="country" readonly>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -143,7 +168,7 @@
 @endsection
 
 @section('javascript')
-    <script src="/assets/custom/admin/vendor/vendor.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/vendor/vendor112.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
             EditVendor.init();
