@@ -217,6 +217,18 @@
 
                             </ul>
                         </li>
+                    <!--                      <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> Checklist
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Category Management
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
