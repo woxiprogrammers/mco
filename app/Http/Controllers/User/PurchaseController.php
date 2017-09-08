@@ -12,10 +12,10 @@ class PurchaseController extends Controller
         $this->middleware('custom.auth');
     }
   public function getManageView(Request $request){
-        return view('purchase/materialRequest/manage');
+        return view('purchase/material-request/manage');
   }
   public function getCreateView(Request $request){
-        return view('purchase/materialRequest/create');
+        return view('purchase/material-request/create');
   }
   public function getMaterialRequestListing(Request $request){
       try{
@@ -75,6 +75,6 @@ class PurchaseController extends Controller
 
   }
     public function editMaterialRequest(Request $request){
-        return view('purchase/materialRequest/edit');
+        return view('purchase/material-request/edit');
     }
 }
