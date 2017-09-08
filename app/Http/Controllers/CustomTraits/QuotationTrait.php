@@ -7,6 +7,7 @@
 
 namespace App\Http\Controllers\CustomTraits;
 
+use App\BankInfo;
 use App\BillQuotationProducts;
 use App\Category;
 use App\Client;
@@ -24,6 +25,7 @@ use App\ProfitMarginVersion;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
+use App\QuotationBankInfo;
 use App\QuotationExtraItem;
 use App\QuotationMaterial;
 use App\QuotationProduct;
@@ -729,7 +731,8 @@ trait QuotationTrait{
                     $extraItems = array_merge($extraItems,$newExtraItems);
                 }
             }
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue'));
+            $bankInfo = BankInfo::where('is_active', true)->get();
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
@@ -1060,6 +1063,7 @@ trait QuotationTrait{
                         }
                     }
                 }
+
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => round($productAmount,3)]);
             }
             $request->session()->flash('success','Quotation Edited Successfully');
@@ -1378,6 +1382,14 @@ trait QuotationTrait{
                     QuotationExtraItem::create($quotationExtraItemData);
                 }
             }
+            if($request->has('bank')){
+                foreach($request->bank as $key => $bankID){
+                    $quotationBankInfoData['bank_info_id'] = $bankID;
+                    $quotationBankInfoData['quotation_id'] = $request->quotation_id;
+                        QuotationBankInfo::create($quotationBankInfoData);
+                }
+            }
+
             $isImagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$workOrder->quotation_id,$workOrder['id']);
             $request->session()->flash('success','Work Order Updated Successfully');
             return redirect('/quotation/edit/'.$request->quotation_id);

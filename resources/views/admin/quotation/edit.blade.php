@@ -379,6 +379,9 @@
                                                         <li>
                                                             <a href="#extraItemFormTab" data-toggle="tab"> Extra Items </a>
                                                         </li>
+                                                        <li>
+                                                            <a href="#bankassignFormTab" data-toggle="tab"> Assign Bank </a>
+                                                        </li>
                                                     </ul>
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="workOrderFormTab">
@@ -585,6 +588,24 @@
                                                                 </div>
                                                             </div>
                                                         @endforeach
+                                                    </div>
+                                                    <div class="tab-pane fade in" id="bankassignFormTab">
+                                                        <div class="form-group" style="margin-top: 3%">
+                                                            <div class="col-md-3" style="margin-left: 2%">
+                                                                <label class="control-form pull-right">
+                                                                    Select Bank :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-control product-material-select" style="height: 150px;" >
+                                                                    <ul id="bank_id" class="list-group">
+                                                                        @foreach($bankInfo as $bank)
+                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}"> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </form>

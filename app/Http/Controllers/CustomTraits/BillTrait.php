@@ -16,6 +16,7 @@ use App\ProductDescription;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
+use App\QuotationBankInfo;
 use App\QuotationExtraItem;
 use App\QuotationProduct;
 use App\QuotationStatus;
@@ -76,10 +77,12 @@ trait BillTrait{
                     }
                 }
             }
+            $banksAssigned = QuotationBankInfo::where('quotation_id',$quotation['id'])->select('bank_info_id')->get();
+
             $taxes = Tax::where('is_active',true)->where('is_special',false)->get()->toArray();
             $specialTaxes = Tax::where('is_active', true)->where('is_special',true)->get();
 
-            return view('admin.bill.create')->with(compact('extraItems','quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
+            return view('admin.bill.create')->with(compact('banksAssigned','extraItems','quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get existing bill create view',
