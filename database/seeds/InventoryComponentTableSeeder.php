@@ -33,6 +33,15 @@ class InventoryComponentTableSeeder extends Seeder
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
+            [
+                'name' => 'Wood Cutter',
+                'project_site_id' => DB::table('project_sites')->where('name','Rose Wood')->pluck('id')->first(),
+                'is_material' => false,
+                'reference_id' => DB::table('assets')->where('name','Wood Cutter')->pluck('id')->first(),
+                'opening_stock' => '1',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
         ]);
     }
 }
