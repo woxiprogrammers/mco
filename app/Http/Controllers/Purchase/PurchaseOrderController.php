@@ -11,13 +11,13 @@ class PurchaseOrderController extends Controller
         $this->middleware('custom.auth');
     }
     public function getManageView(Request $request){
-        return view('purchase/purchaseOrder/manage');
+        return view('purchase/purchase-order/manage');
     }
     public function getCreateView(Request $request){
-        return view('purchase/purchaseOrder/create');
+        return view('purchase/purchase-order/create');
     }
     public function getEditView(Request $request)
     {
-        return view('purchase/purchaseOrder/edit');
+        return view('purchase/purchase-order/edit');
     }
 }
