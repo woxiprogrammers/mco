@@ -95,7 +95,7 @@
                                                                 <td> jac123 </td>
                                                                 <td><span class="label label-sm label-danger"> Draft</span> </td>
                                                                 <td>
-                                                                    <a href="/purchase/purchase-request/edit/1"><button class="btn btn-xs green dropdown-toggle" type="button"  aria-expanded="true">
+                                                                    <a href="/purchase/purchase-request/edit/2"><button class="btn btn-xs green dropdown-toggle" type="button"  aria-expanded="true">
                                                                             Edit
                                                                         </button></a>
                                                                     <div class="btn-group open">
@@ -113,7 +113,7 @@
                                                                 <td> lar </td>
                                                                 <td><span class="label label-sm label-danger"> Disabled</span> </td>
                                                                 <td>
-                                                                    <a href="/purchase/purchase-request/edit/1"><button  class="btn btn-xs green dropdown-toggle" type="button"  aria-expanded="true">
+                                                                    <a><button  class="btn btn-xs green dropdown-toggle" type="button"  aria-expanded="true">
                                                                             Edit
                                                                         </button></a>
                                                                     <div class="btn-group open">
@@ -145,7 +145,6 @@
                                                             </tbody>
                                                         </table>
                                                     </div>
-
                                                     <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                                         <div class="modal-dialog">
                                                             <form class="modal-content">

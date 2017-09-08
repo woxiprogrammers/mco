@@ -12,16 +12,16 @@ class PurchaseRequestController extends Controller
         $this->middleware('custom.auth');
     }
     public function getManageView(Request $request){
-        return view('purchase/purchaseRequest/manage');
+        return view('purchase/purchase-request/manage');
     }
     public function getCreateView(Request $request){
-        return view('purchase/purchaseRequest/create');
+        return view('purchase/purchase-request/create');
     }
     public function getEditView(Request $request,$status){
         if($status == 2){
-            return view('purchase/purchaseRequest/editDraft');
+            return view('purchase/purchase-request/edit-draft');
         }else if($status == 1){
-            return view('purchase/purchaseRequest/editApproved');
+            return view('purchase/purchase-request/edit-approved');
         }
     }
 }

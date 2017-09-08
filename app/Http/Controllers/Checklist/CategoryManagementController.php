@@ -13,10 +13,10 @@ class CategoryManagementController extends Controller
         $this->middleware('custom.auth')->except('categoryManagementListing');
     }
     public function getManageView(Request $request){
-        return view('checklist/categoryManagement/manage');
+        return view('checklist/category-management/manage');
     }
     public function getEditView(Request $request){
-        return view('checklist/categoryManagement/edit');
+        return view('checklist/category-management/edit');
     }
 
     public function getCategoryManagementListing(Request $request){
@@ -47,7 +47,6 @@ class CategoryManagementController extends Controller
                 $records["recordsTotal"] = $iTotalRecords;
                 $records["recordsFiltered"] = $iTotalRecords;
             }
-
         }catch(\Exception $e){
                 $records = array();
                 $data = [
