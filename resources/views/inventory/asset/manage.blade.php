@@ -17,10 +17,11 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Purchase Order</h1>
+                                    <h1>Manage Asset</h1>
                                 </div>
-                                <div class="btn-group pull-right margin-top-15">
-                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order
+                                <div class="btn-group" style="float: right;margin-top:1%">
+                                    <div id="sample_editable_1_new" class="btn yellow"><a href="/inventory/manage-asset/create" style="color: white">                                         <i class="fa fa-plus"></i>
+                                            Asset
                                         </a>
                                     </div>
                                 </div>
@@ -50,19 +51,13 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
                                                             <thead>
                                                             <tr>
-                                                                <th> Client Name </th>
-                                                                <th> Project Name</th>
-                                                                <th> PR Id </th>
-                                                                <th> PO Id </th>
-                                                                <th> Status </th>
+                                                                <th> Asset Id </th>
+                                                                <th> Model Number</th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -70,15 +65,26 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody>
-                                                                   <td>MCO</td>
-                                                                   <td>Mall</td>
-                                                                   <td>154</td>
-                                                                   <td>250</td>
-                                                                   <td><span class="label label-sm label-success"> Enabled </span></td>
-                                                                   <td><div id="sample_editable_1_new" class="btn btn-small blue" ><a href="/purchase/purchase-order/edit" style="color: white">&nbsp; Edit
-                                                                           </a>
-                                                                       </div></td>
-
+                                                            <tr>
+                                                                <td> 5 </td>
+                                                                <td> Otto </td>
+                                                                <td>
+                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-asset/edit" style="color: white">                                         <i class="fa fa-plus"></i>
+                                                                            Edit
+                                                                        </a>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td> 6 </td>
+                                                                <td> Nilson </td>
+                                                                <td>
+                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-asset/edit" style="color: white">                                         <i class="fa fa-plus"></i>
+                                                                            Edit
+                                                                        </a>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
                                                             </tbody>
                                                         </table>
                                                     </div>
