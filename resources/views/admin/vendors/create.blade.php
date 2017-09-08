@@ -149,7 +149,7 @@
     </div>
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/vendors/vendor112.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/vendors/vendor.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
             $('#cityId').trigger('change');
