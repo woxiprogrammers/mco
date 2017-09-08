@@ -21,7 +21,6 @@ trait VendorTrait
     public function getCreateView(Request $request)
     {
         try {
-           //dd($request->all());
             $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             return view('admin.vendors.material')->with(compact('categories'));
             $cities = City::get();
@@ -109,7 +108,6 @@ trait VendorTrait
     public function createVendor(Request $request)
     {
         try {
-            //dd($request->all());
             $data = Array();
             $data['name'] = ucwords($request->name);
             $data['company'] = $request->company;
