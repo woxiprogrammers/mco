@@ -717,7 +717,7 @@ trait QuotationTrait{
             }
             $beforeTaxOrderValue = $orderValue;
             $orderValue = $orderValue + $taxAmount;
-            $extraItems = QuotationExtraItem::join('extra_items','extra_items.id','=','quotation_extra_items.extra_item_id')
+             $extraItems = QuotationExtraItem::join('extra_items','extra_items.id','=','quotation_extra_items.extra_item_id')
                                             ->where('quotation_extra_items.quotation_id',$quotation['id'])
                                             ->select('quotation_extra_items.extra_item_id as id','quotation_extra_items.rate as rate','extra_items.name as name')
                                             ->get();
@@ -732,7 +732,10 @@ trait QuotationTrait{
                 }
             }
             $bankInfo = BankInfo::where('is_active', true)->get();
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo'));
+            $id = $quotation->id;
+            $checkBank = QuotationBankInfo::where('quotation_id',$id)->pluck('bank_info_id')->toArray();
+           // dd($bankInfo->toArray());
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',

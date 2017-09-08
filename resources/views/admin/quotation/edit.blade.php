@@ -600,8 +600,12 @@
                                                                 <div class="form-control product-material-select" style="height: 150px;" >
                                                                     <ul id="bank_id" class="list-group">
                                                                         @foreach($bankInfo as $bank)
+                                                                            @if(in_array($bank['id'],$checkBank))
+                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}" checked> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                            @else
                                                                             <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}"> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
-                                                                        @endforeach
+                                                                        @endif
+                                                                            @endforeach
                                                                     </ul>
                                                                 </div>
                                                             </div>

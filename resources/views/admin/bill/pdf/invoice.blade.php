@@ -114,8 +114,8 @@
                         </tr>
                     @endfor
                 @endif
-                @if((count($invoiceData) + count($extraItems)) < 15)
-                    @for($i = 0 ; $i < (15 - (count($invoiceData) + count($extraItems))) ; $i++)
+                @if((count($invoiceData) + count($extraItems)) < 10)
+                    @for($i = 0 ; $i < (10 - (count($invoiceData) + count($extraItems))) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
@@ -152,7 +152,7 @@
                 <th width="35%" style="background-color: #c2c2c2; text-align: right;"><b>For Manisha Construction</b></th>
             </tr>
             <tr >
-                <td width="32.5%" style="padding-top: 60px; text-align: right"><b>Head-Engineering</b></td>
+                <td width="32.5%" style="padding-bottom: 60px; text-align: left"><b>Bank Details</b></td>
                 <td width="32.5%" style="padding-top: 60px; text-align: right"><b>Authorised Signatory</b></td>
                 <td width="32.5%" style="padding-top: 60px; text-align: right;"><b>Authorised Signatory</b></td>
             </tr>

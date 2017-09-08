@@ -787,9 +787,9 @@ trait BillTrait{
              }else{
                  $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
              }
-
-            $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
-            $data['projectSiteAddress'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('address')->first();
+            $projectSiteData = ProjectSite::where('id',$bill->quotation->project_site_id)->first();
+            $data['projectSiteName'] = $projectSiteData->name;
+            $data['projectSiteAddress'] = $projectSiteData->address;
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
