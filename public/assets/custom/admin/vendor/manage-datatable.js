@@ -24,7 +24,7 @@ var VendorListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/vendor/listing", // ajax source
+                    "url": "/vendors/listing", // ajax source
                 },
                 "order": [
                     [1, "asc"]

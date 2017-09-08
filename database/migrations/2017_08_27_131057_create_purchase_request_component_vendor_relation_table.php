@@ -18,7 +18,7 @@ class CreatePurchaseRequestComponentVendorRelationTable extends Migration
             $table->unsignedInteger('purchase_request_component_id');
             $table->unsignedInteger('vendor_id');
             $table->foreign('purchase_request_component_id')->references('id')->on('purchase_request_components')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('vendor_id')->references('id')->on('vendor')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade')->onUpdate('cascade');
             $table->boolean('is_email_sent')->default(false);
             $table->timestamps();
         });

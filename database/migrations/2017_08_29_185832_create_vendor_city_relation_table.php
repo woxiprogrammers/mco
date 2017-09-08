@@ -17,7 +17,7 @@ class CreateVendorCityRelationTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('vendor_id');
             $table->unsignedInteger('city_id');
-            $table->foreign('vendor_id')->references('id')->on('vendor')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('city_id')->references('id')->on('cities')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
