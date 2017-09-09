@@ -519,9 +519,6 @@ trait BillTrait{
                 }
                 $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $total_extra_item),3);
             }
-            //$final['discount_amount'] = $bill['discount_amount'];
-            /*$total['sub_total'] = $total['current_bill_amount'] - $bill->discount_amount;
-            $total_rounded['current_bill_amount'] = round($total['current_bill_amount']);*/
             $total_rounded['current_bill_subtotal'] = round($total['current_bill_subtotal']);
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = round($total['current_bill_subtotal'] - $bill['discount_amount']);
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
