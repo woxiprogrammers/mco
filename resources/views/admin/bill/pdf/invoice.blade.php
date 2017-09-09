@@ -121,6 +121,14 @@
                     @endfor
                 @endif
                 <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Sub Total</b></td>
+                    <td style="text-align: right; padding-right: 10px;">{!! $sub_total_before_discount !!}</td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total</b></td>
+                    <td style="text-align: right; padding-right: 10px;">{!! $discount_amount !!}</td>
+                </tr>
+                <tr>
                     <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
                 </tr>
