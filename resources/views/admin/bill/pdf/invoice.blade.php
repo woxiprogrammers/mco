@@ -152,7 +152,13 @@
                 <th width="35%" style="background-color: #c2c2c2; text-align: right;"><b>For Manisha Construction</b></th>
             </tr>
             <tr >
-                <td width="32.5%" style="padding-bottom: 60px; text-align: left"><b>Bank Details</b></td>
+                <td width="32.5%" style="padding-bottom: 60px; text-align: left"><b>Bank Details</b><br>
+                    Bank Name :{!! $bankName !!}<br>
+                    Account Number :<br>
+                    IFS Code :<br>
+                    Branch ID :<br>
+                    Branch Name :
+                </td>
                 <td width="32.5%" style="padding-top: 60px; text-align: right"><b>Authorised Signatory</b></td>
                 <td width="32.5%" style="padding-top: 60px; text-align: right;"><b>Authorised Signatory</b></td>
             </tr>
