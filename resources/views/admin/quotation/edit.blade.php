@@ -614,6 +614,9 @@
                                                                             @endforeach
                                                                     </ul>
                                                                 </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     <div class="tab-pane fade in" id="openingExpensesFormTab">
                                                         <div class="form-group">
                                                             <div class="col-md-3">
