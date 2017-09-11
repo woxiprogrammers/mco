@@ -214,19 +214,36 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{project}',array('uses' => 'Admin\ProjectController@getEditView'));
         Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
     });
-    Route::group(['prefix' => 'purchase/material-request'], function(){
-        Route::get('manage',array('uses'=> 'User\PurchaseController@getManageView'));
-        Route::get('create',array('uses'=> 'User\PurchaseController@getCreateView'));
-        Route::post('listing',array('uses'=> 'User\PurchaseController@getMaterialRequestListing'));
-        Route::get('edit',array('uses'=> 'User\PurchaseController@editMaterialRequest'));
+    Route::group(['prefix' => 'purchase'], function(){
+        Route::group(['prefix' => 'material-request'], function(){
+            Route::get('manage',array('uses'=> 'User\PurchaseController@getManageView'));
+            Route::get('create',array('uses'=> 'User\PurchaseController@getCreateView'));
+            Route::post('listing',array('uses'=> 'User\PurchaseController@getMaterialRequestListing'));
+            Route::get('edit',array('uses'=> 'User\PurchaseController@editMaterialRequest'));
+        });
+        Route::group(['prefix' => 'purchase-request'], function(){
+            Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
+            Route::get('create',array('uses'=> 'Purchase\PurchaseRequestController@getCreateView'));
+            Route::get('edit/{status}',array('uses'=> 'Purchase\PurchaseRequestController@getEditView'));
+        });
+        Route::group(['prefix' => 'purchase-order'], function(){
+            Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
+            Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
+            Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
+        });
     });
-    Route::group(['prefix' => 'purchase/purchase-request'], function(){
-        Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
-        Route::get('create',array('uses'=> 'Purchase\PurchaseRequestController@getCreateView'));
-    });
-    Route::group(['prefix' => 'purchase/purchase-order'], function(){
-        Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
-        Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
+
+    Route::group(['prefix' => 'inventory'], function(){
+        Route::group(['prefix' => 'manage-inventory'], function(){
+            Route::get('manage',array('uses'=> 'Inventory\InventoryManageController@getManageView'));
+            Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
+            Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
+        });
+        Route::group(['prefix' => 'manage-asset'], function(){
+            Route::get('manage',array('uses'=> 'Inventory\AssetManagementController@getManageView'));
+            Route::get('create',array('uses'=> 'Inventory\AssetManagementController@getCreateView'));
+            Route::get('edit',array('uses'=> 'Inventory\AssetManagementController@getEditView'));
+        });
     });
 
     Route::group(['prefix' => 'vendors'],function(){
@@ -238,5 +255,23 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses'=> 'Admin\VendorController@vendorListing'));
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
+    });
+
+    Route::group(['prefix'=>'bank'],function() {
+        Route::get('manage', array('uses' => 'Admin\BankController@getManageView'));
+        Route::post('listing', array('uses' => 'Admin\BankController@bankListing'));
+        Route::get('create', array('uses' => 'Admin\BankController@getCreateView'));
+        Route::post('create', array('uses' => 'Admin\BankController@CreateBank'));
+        Route::get('edit/{bank_info}', array('uses' => 'Admin\BankController@getEditView'));
+        Route::put('edit/{bank_info}', array('uses' => 'Admin\BankController@editBank'));
+        Route::get('change-status/{bank_info}', array('uses' => 'Admin\BankController@changeBankStatus'));
+    });
+
+    Route::group(['prefix' => 'checklist'], function(){
+        Route::group(['prefix' => 'category-management'], function(){
+            Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
+            Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
+            Route::post('listing',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
+        });
     });
 });

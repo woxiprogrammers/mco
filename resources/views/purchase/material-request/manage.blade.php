@@ -20,7 +20,7 @@
                                 <h1>Manage Material</h1>
                             </div>
                             <div class="btn-group"  style="float: right;margin-top:1%">
-                                <div id="sample_editable_1_new" class="btn dark" ><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
+                                <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
                                         Material Request
                                     </a>
                                 </div>
@@ -36,6 +36,12 @@
                                   <div class="portlet light ">
                                       {!! csrf_field() !!}
                                       <div class="portlet-body">
+                                          <label class="checkbox-inline">
+                                              <input type="checkbox" value=""><span style="color: salmon">Materialwise Listing</span>
+                                          </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        </label>&nbsp;&nbsp;&nbsp;&nbsp;
+                                          <label class="checkbox-inline">
+                                              <input type="checkbox" value=""><span style="color: salmon">Material Requestwise Listing</span>
+                                          </label>
                                           <div class="portlet-body">
                                           <div class="table-container">
                                           <div class="table-actions-wrapper right">
@@ -62,9 +68,10 @@
                                               </tr>
                                               <tr class="filter">
                                                   <th><input type="checkbox"></th>
-                                                  <th><input type="text" class="form-control form-filter" name="search_name"><th>
+                                                  <th><input type="text" class="form-control form-filter" name="search_name"></th>
                                                   <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
                                                   <th> <input type="text" class="form-control form-filter" name="search_status" > </th>
+                                                  <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
                                                   <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
                                                   <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
                                                   <th>
@@ -82,8 +89,11 @@
                                             <div class="modal-dialog">
                                                 <form class="modal-content">
                                                   <div class="modal-header">
-                                                   <center><h4 class="modal-title" id="exampleModalLongTitle">REMARK</h4></center>
-                                                    <button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button>
+                                                      <div class="row">
+                                                          <div class="col-md-4"></div>
+                                                          <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">REMARK</h4></center></div>
+                                                          <div class="col-md-4"><button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                                      </div>
                                                    </div>
                                                   <div class="modal-body">
                                                       <div class="form-body">
@@ -127,6 +137,7 @@
 <script>
     $(document).ready(function() {
         $('#materialRequest').DataTable();
+        $('[data-toggle="tooltip"]').tooltip();
     });
 </script>
 @endsection

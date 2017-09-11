@@ -17,7 +17,12 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Material</h1>
+                                    <h1>Manage Purchase Order</h1>
+                                </div>
+                                <div class="btn-group pull-right margin-top-15">
+                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -30,18 +35,6 @@
                                         <div class="portlet light ">
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
-                                                <div class="table-toolbar">
-                                                    <div class="row" style="text-align: right">
-                                                        <div class="col-md-12">
-                                                            <div class="btn-group">
-                                                                <div id="sample_editable_1_new" class="btn dark" ><a href="/purchase/purchase-request/create" style="color: white"> Purchase Request
-                                                                        <i class="fa fa-plus"></i>
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                                 <div class="portlet-body">
                                                     <div class="table-container">
                                                         <div class="table-actions-wrapper right">
@@ -54,23 +47,22 @@
                                                             <button class="btn btn-sm green table-group-action-submit">
                                                                 <i class="fa fa-check"></i> Submit</button>
                                                         </div>
-                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequest">
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
                                                             <thead>
                                                             <tr>
-                                                                <th><input type="checkbox"></th>
+                                                                <th> Client Name </th>
+                                                                <th> Project Name</th>
                                                                 <th> PR Id </th>
-                                                                <th> Project Name - Site Name</th>
-                                                                <th> RM Id </th>
-                                                                <th> status  </th>
-                                                                <th> History </th>
+                                                                <th> PO Id </th>
+                                                                <th> Status </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th><input type="checkbox"></th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"><th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_status" > </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
+                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
+                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
+                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
+                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
+                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -78,6 +70,14 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody>
+                                                                   <td>MCO</td>
+                                                                   <td>Mall</td>
+                                                                   <td>154</td>
+                                                                   <td>250</td>
+                                                                   <td><span class="label label-sm label-success"> Enabled </span></td>
+                                                                   <td><div id="sample_editable_1_new" class="btn btn-small blue" ><a href="/purchase/purchase-order/edit" style="color: white">&nbsp; Edit
+                                                                           </a>
+                                                                       </div></td>
 
                                                             </tbody>
                                                         </table>

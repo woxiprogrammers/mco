@@ -379,6 +379,15 @@
                                                         <li>
                                                             <a href="#extraItemFormTab" data-toggle="tab"> Extra Items </a>
                                                         </li>
+                                                        <li>
+                                                            <a href="#bankassignFormTab" data-toggle="tab"> Assign Bank </a>
+                                                        </li>
+                                                        @if($quotation->quotation_status->slug == 'approved'&& $userRole == 'superadmin')
+                                                            <li>
+                                                                <a href="#openingExpensesFormTab" data-toggle="tab"> Opening Expenses </a>
+                                                            </li>
+                                                        @endif
+
                                                     </ul>
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="workOrderFormTab">
@@ -586,9 +595,43 @@
                                                             </div>
                                                         @endforeach
                                                     </div>
+                                                    <div class="tab-pane fade in" id="bankassignFormTab">
+                                                        <div class="form-group" style="margin-top: 3%">
+                                                            <div class="col-md-3" style="margin-left: 2%">
+                                                                <label class="control-form pull-right">
+                                                                    Select Bank :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-control product-material-select" style="height: 150px;" >
+                                                                    <ul id="bank_id" class="list-group">
+                                                                        @foreach($bankInfo as $bank)
+                                                                            @if(in_array($bank['id'],$checkBank))
+                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}" checked> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                            @else
+                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}"> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                        @endif
+                                                                            @endforeach
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tab-pane fade in" id="openingExpensesFormTab">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-form pull-right">
+                                                                    Opening Expenses
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <input class="form-control" name="open_expenses" id="open_expenses" value=0 >
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </form>
-                                        </div>
+
                                     </div>
                                 </div>
                                 </div>

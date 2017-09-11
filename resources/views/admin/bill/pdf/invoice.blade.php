@@ -43,11 +43,18 @@
         <hr>
         <table width="100%">
             <tr>
-                <td style="width: 50%; font-weight:  lighter;">To : {!! $clientCompany !!}</td>
+                <td style="width: 50%; font-weight:  lighter;">Party Name : {!! $clientCompany !!}</td>
                 <td style="text-align: right;font-weight: bolder;">Invoice No : {!! $invoice_no !!}</td>
             </tr>
+            <tr><td style="font-weight: lighter;" colspan="2">Party Address : {!! $address !!}</td></tr>
             <tr>
                 <td style="font-weight: lighter;" colspan="2">Site Name : {!! $projectSiteName !!}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: lighter;" colspan="2">Site Address : {!! $projectSiteAddress !!}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: lighter;" colspan="2">GSTIN :{!! $gstin !!}
             </tr>
             <tr>
                 <td style="width: 50%; font-weight: bolder;">Bill No : RA BILL NO - {!! $currentBillID !!}</td>
@@ -107,8 +114,8 @@
                         </tr>
                     @endfor
                 @endif
-                @if((count($invoiceData) + count($extraItems)) < 16)
-                    @for($i = 0 ; $i < (16 - (count($invoiceData) + count($extraItems))) ; $i++)
+                @if((count($invoiceData) + count($extraItems)) < 8)
+                    @for($i = 0 ; $i < (8 - (count($invoiceData) + count($extraItems))) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
@@ -120,6 +127,14 @@
                         </tr>
                     @endfor
                 @endif
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Sub Total</b></td>
+                    <td style="text-align: right; padding-right: 10px;">{!! $sub_total_before_discount !!}</td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Discount</b></td>
+                    <td style="text-align: right; padding-right: 10px;">{!! $discount_amount !!}</td>
+                </tr>
                 <tr>
                     <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
@@ -144,9 +159,22 @@
                 <th width="65%" colspan="2" style="background-color: #c2c2c2;"><b>For {!! ucwords($company_name) !!}</b></th>
                 <th width="35%" style="background-color: #c2c2c2; text-align: right;"><b>For Manisha Construction</b></th>
             </tr>
-            <tr >
-                <td width="32.5%" style="padding-top: 60px; text-align: right"><b>Head-Engineering</b></td>
-                <td width="32.5%" style="padding-top: 60px; text-align: right"><b>Authorised Signatory</b></td>
+            <tr>
+                <td width="32.5%" style="padding-bottom: 60px; text-align: left"><b>Bank Details</b><br>
+                    @if($bankData != null)
+                        Bank Name : {!! $bankData->bank_name !!}<br>
+                        Account Number : {!! $bankData->account_number !!}<br>
+                        IFS Code : {!! $bankData->ifs_code !!}<br>
+                        Branch ID : {!! $bankData->branch_id !!}<br>
+                        Branch Name : {!! $bankData->branch_name !!}
+                    @else
+                      "No bank assigned"
+                    @endif
+                </td>
+                <td width="32.5%" style="padding-bottom: 60px;text-align: left"><b>Discount Details</b><br>
+                    Discount % : {!! $discount_amount !!}<br>
+                    Decsription : {!! $discount_description !!}<br>
+                </td>
                 <td width="32.5%" style="padding-top: 60px; text-align: right;"><b>Authorised Signatory</b></td>
             </tr>
         </table>

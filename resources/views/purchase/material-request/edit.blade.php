@@ -19,17 +19,22 @@
                                 <div class="page-title">
                                     <h1>Create Material Request</h1>
                                 </div>
+                                <div class="form-group " style="float: right;margin-top:1%">
+                                    <a href="#" class="btn btn-set red pull-right">
+                                        <i class="fa fa-check"></i>
+                                        Edit
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
-                                <div class="col-md-11">
+                                <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
                                             <div class="row">
-                                                <div class="col-md-4"></div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <div class="btn-group bootstrap-select bs-select form-control dropup">
@@ -44,18 +49,6 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <div class="form-group " style="text-align: center">
-                                                        <a href="#" class="btn btn-lg yellow pull-right">
-                                                            <i class="fa fa-plus" style="font-size: large"></i>
-                                                            Submit
-                                                        </a>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-4"></div>
-                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         <div class="btn-group bootstrap-select bs-select form-control dropup">
                                                             <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Project Name</span>&nbsp;<span class="caret"></span></button>
@@ -68,10 +61,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4"></div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-4"></div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <div class="btn-group bootstrap-select bs-select form-control dropup">
@@ -85,16 +74,17 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4"></div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-md-6"><a href="#" class="btn btn-set dark pull-right"  id="assetBtn">
+                                                <div class="col-md-6">
+                                                    <a href="#" class="btn btn-set yellow pull-right"  id="assetBtn">
                                                         <i class="fa fa-plus" style="font-size: large"></i>
                                                         Asset&nbsp &nbsp &nbsp &nbsp
-                                                    </a></div>
+                                                    </a>
+                                                </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group " style="text-align: center">
-                                                        <a href="#" class="btn btn-set dark pull-left"  id="myBtn">
+                                                        <a href="#" class="btn btn-set yellow pull-left"  id="myBtn">
                                                             <i class="fa fa-plus" style="font-size: large"></i>
                                                             Material
                                                         </a>&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
@@ -104,14 +94,164 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-12">
+                                    <div class="portlet light ">
+                                        <div class="portlet-body form">
+                                            <div class="portlet light ">
+                                                <div class="portlet-title">
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" value=""><span style="color: salmon">Materialwise Listing</span>
+                                                    </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        </label>&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    <label class="checkbox-inline ">
+                                                        <input type="checkbox" value=""><span style="color: salmon">Material Requestwise Listing</span>
+                                                    </label>
+                                                    <div class="caption">
+                                                        <i class="fa fa-bars font-red"></i>&nbsp
+                                                        <span class="caption-subject font-red sbold uppercase">Material / Asset List</span>
+                                                        </div>
+                                                </div>
+                                                <div class="portlet-body">
+                                                    <div class="table-scrollable">
+                                                        <table class="table table-hover table-light">
+                                                            <thead>
+                                                            <tr>
+                                                                <th> # </th>
+                                                                <th> Name </th>
+                                                                <th> Quantity </th>
+                                                                <th> Unit </th>
+                                                                <th>Status</th>
+                                                                <th> Action </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td> 1 </td>
+                                                                <td> Mark </td>
+                                                                <td> Otto </td>
+                                                                <td> makr124 </td>
+                                                                <td>
+                                                                    <span class="label label-sm label-warning"> Suspended </span>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="btn-group">
+                                                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                                            Actions
+                                                                            <i class="fa fa-angle-down"></i>
+                                                                        </button>
+                                                                        <ul class="dropdown-menu pull-left" role="menu">
+                                                                            <li>
+                                                                                <a href="/purchase/material-request/edit">
+                                                                                    <i class="icon-docs"></i> Edit </a>
+                                                                            </li>
+                                                                            <li>
+                                                                                <a data-toggle="modal" data-target="#remarkModal">
+                                                                                    <i class="icon-tag"></i> Approve / Disapprove </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td> 2 </td>
+                                                                <td> Jacob </td>
+                                                                <td> Nilson </td>
+                                                                <td> jac123 </td>
+                                                                <td>
+                                                                    <span class="label label-sm label-warning"> Suspended </span>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="btn-group">
+                                                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                                            Actions
+                                                                            <i class="fa fa-angle-down"></i>
+                                                                        </button>
+                                                                        <ul class="dropdown-menu pull-left" role="menu">
+                                                                            <li>
+                                                                                <a href="/purchase/material-request/edit">
+                                                                                    <i class="icon-docs"></i> Edit </a>
+                                                                            </li>
+                                                                            <li>
+                                                                                <a data-toggle="modal" data-target="#remarkModal">
+                                                                                    <i class="icon-tag"></i> Approve / Disapprove </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td> 3 </td>
+                                                                <td> Larry </td>
+                                                                <td> Cooper </td>
+                                                                <td> lar </td>
+                                                                <td>
+                                                                    <span class="label label-sm label-warning"> Suspended </span>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="btn-group">
+                                                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                                            Actions
+                                                                            <i class="fa fa-angle-down"></i>
+                                                                        </button>
+                                                                        <ul class="dropdown-menu pull-left" role="menu">
+                                                                            <li>
+                                                                                <a href="/purchase/material-request/edit">
+                                                                                    <i class="icon-docs"></i> Edit </a>
+                                                                            </li>
+                                                                            <li>
+                                                                                <a data-toggle="modal" data-target="#remarkModal">
+                                                                                    <i class="icon-tag"></i> Approve / Disapprove </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td> 4 </td>
+                                                                <td> Sandy </td>
+                                                                <td> Lim </td>
+                                                                <td> sanlim </td>
+                                                                <td>
+                                                                    <span class="label label-sm label-danger"> Blocked </span>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="btn-group">
+                                                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                                            Actions
+                                                                            <i class="fa fa-angle-down"></i>
+                                                                        </button>
+                                                                        <ul class="dropdown-menu pull-left" role="menu">
+                                                                            <li>
+                                                                                <a href="/purchase/material-request/edit">
+                                                                                    <i class="icon-docs"></i> Edit </a>
+                                                                            </li>
+                                                                            <li>
+                                                                                <a data-toggle="modal" data-target="#remarkModal">
+                                                                                    <i class="icon-tag"></i> Approve / Disapprove </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal fade" id="myModal" role="dialog">
                                 <div class="modal-dialog">
                                     <!-- Modal content-->
                                     <div class="modal-content">
-                                        <div class="modal-header" style="padding:35px 50px;">
-                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                            <h4><span class="glyphicon glyphicon-lock"></span> Material </h4>
+                                        <div class="modal-header" style="padding-bottom:10px">
+                                            <div class="row">
+                                                <div class="col-md-4"></div>
+                                                <div class="col-md-4"> Material</div>
+                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                            </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <form role="form">
@@ -156,11 +296,8 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                <button type="submit" class="btn btn-success btn-block"> Create</button>
+                                                <button type="submit" class="btn red pull-right"> Create</button>
                                             </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-danger btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
                                         </div>
                                     </div>
                                 </div>
@@ -169,14 +306,17 @@
                                 <div class="modal-dialog">
                                     <!-- Modal content-->
                                     <div class="modal-content">
-                                        <div class="modal-header" style="padding:35px 50px;">
-                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                            <h4><span class="glyphicon glyphicon-lock"></span> Asset </h4>
+                                        <div class="modal-header" style="padding-bottom:10px">
+                                            <div class="row">
+                                                <div class="col-md-4"></div>
+                                                <div class="col-md-4"> Material</div>
+                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                            </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <form role="form">
                                                 <div class="form-group">
-                                                    <input type="text" class="form-control" id="usrname" placeholder="Enter asset name">
+                                                    <input type="text" class="form-control" id="usrname" placeholder="Enter material name">
                                                 </div>
                                                 <div class="form-group">
                                                     <input type="number" class="form-control" id="psw" placeholder="Enter quantity">
@@ -213,11 +353,8 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                <button type="submit" class="btn btn-success btn-block"> Create</button>
+                                                <button type="submit" class="btn red pull-right"> Create</button>
                                             </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-danger btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
                                         </div>
                                     </div>
                                 </div>

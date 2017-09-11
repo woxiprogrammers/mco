@@ -20,6 +20,10 @@ var  CreateClient = function () {
                 },
                 mobile: {
                     required: true
+                },
+                gstin: {
+                    maxlength:15,
+                    minlength:15
                 }
             },
 
@@ -35,6 +39,9 @@ var  CreateClient = function () {
                 },
                 mobile: {
                     required: "Contact number is required."
+                },
+                gstin:{
+                    maxlength: "Your GSTIN must be at least 15 characters long"
                 }
             },
 
@@ -64,7 +71,7 @@ var  CreateClient = function () {
                 form.submit();
             }
         });
-    }
+    };
 
     return {
         init: function () {
@@ -95,6 +102,10 @@ var  EditClient = function () {
                 },
                 mobile: {
                     required: true
+                },
+                gstin: {
+                    maxlength:15,
+                    minlength:15
                 }
             },
 
@@ -110,6 +121,9 @@ var  EditClient = function () {
                 },
                 mobile: {
                     required: "Contact number is required."
+                },
+                gstin:{
+                    maxlength: "Your GSTIN must be at least 15 characters long"
                 }
             },
 
@@ -139,7 +153,7 @@ var  EditClient = function () {
                 form.submit();
             }
         });
-    }
+    };
 
     return {
         init: function () {

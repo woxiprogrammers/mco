@@ -7,11 +7,15 @@ use App\Http\Controllers\Controller;
 
 class PurchaseController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('custom.auth');
+    }
   public function getManageView(Request $request){
-        return view('purchase/materialRequest/manage');
+        return view('purchase/material-request/manage');
   }
   public function getCreateView(Request $request){
-        return view('purchase/materialRequest/create');
+        return view('purchase/material-request/create');
   }
   public function getMaterialRequestListing(Request $request){
       try{
@@ -30,9 +34,9 @@ class PurchaseController extends Controller
               $records['data'][$iterator] = [
                   '<input type="checkbox">',
                   '1',
-                  $userData[$pagination]['first_name'].' '.$userData[$pagination]['last_name'] ,
+                  '<span><a href="#" data-toggle="tooltip" title="abbabbabababa"><i class="fa fa-info-circle" aria-hidden="true"></i> </a>&nbsp;&nbsp;'.$userData[$pagination]['first_name'].' '.$userData[$pagination]['last_name'].'</span>' ,
                   $userData[$pagination]['email'],
-                  $userData[$pagination]['mobile'],
+                   '<span><a href="#" data-toggle="tooltip" title="Hooray!"><i class="fa fa-info-circle" aria-hidden="true"></i></a> &nbsp;&nbsp;'. $userData[$pagination]['mobile'].'</span>',
                   date('d M Y',strtotime($userData[$pagination]['created_at'])),
                   $user_status,
                   '<div class="btn-group">
@@ -71,6 +75,6 @@ class PurchaseController extends Controller
 
   }
     public function editMaterialRequest(Request $request){
-        return view('purchase/materialRequest/edit');
+        return view('purchase/material-request/edit');
     }
 }

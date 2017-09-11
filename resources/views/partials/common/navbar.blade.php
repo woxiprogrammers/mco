@@ -176,6 +176,12 @@
                                         @endif
                                     </ul>
                                 </li>
+                                <li aria-haspopup="true"  class="dropdown-submenu ">
+                                    <a href="/bank/manage">
+                                        <i class="fa fa-folder"></i> Manage Bank
+                                    </a>
+                                    </a>
+                                </li>
                                 </ul>
                             </li>
                         <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
@@ -204,7 +210,7 @@
                                         <i class="fa fa-sitemap"></i> Material Request
                                     </a>
                                 </li>
-                              <!--  <li aria-haspopup="true">
+                               <li aria-haspopup="true">
                                     <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-bars"></i> Purchase Request
                                     </a>
@@ -214,33 +220,41 @@
                                         <i class="fa fa-bars"></i> Purchase Order
                                     </a>
                                 </li>
-                              -->
+
                             </ul>
                         </li>
-                        <!--
+                    <!--                      <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> Checklist
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Category Management
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
                             </a>
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
-                                    <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
+                                    <a href="/inventory/manage-inventory/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Store Keeper
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
-                                    <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
+                                    <a href="/inventory/manage-asset/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-bars"></i> Manage Asset
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                        -->
                         @endif
                         </ul>
                     </li>
-
-
             </div>
             <!-- END MEGA MENU -->
         </div>

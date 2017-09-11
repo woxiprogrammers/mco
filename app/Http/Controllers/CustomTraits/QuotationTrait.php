@@ -7,6 +7,7 @@
 
 namespace App\Http\Controllers\CustomTraits;
 
+use App\BankInfo;
 use App\BillQuotationProducts;
 use App\Category;
 use App\Client;
@@ -24,6 +25,7 @@ use App\ProfitMarginVersion;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
+use App\QuotationBankInfo;
 use App\QuotationExtraItem;
 use App\QuotationMaterial;
 use App\QuotationProduct;
@@ -170,7 +172,14 @@ trait QuotationTrait{
                 $clientSuppliedMaterial = $request->clientSuppliedMaterial;
             }
             foreach($productIds as $id){
-                $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                if($request->has('quotation_id')){
+                    $recentVersionId = QuotationProduct::where('product_id',$id)->where('quotation_id',$request->quotation_id)->pluck('product_version_id')->first();
+                    if($recentVersionId == null){
+                        $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                    }
+                }else{
+                    $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                }
                 $productMaterialIds = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
                     ->join('materials','materials.id','=','material_versions.material_id')
                     ->where('product_material_relation.product_version_id',$recentVersionId)
@@ -715,7 +724,7 @@ trait QuotationTrait{
             }
             $beforeTaxOrderValue = $orderValue;
             $orderValue = $orderValue + $taxAmount;
-            $extraItems = QuotationExtraItem::join('extra_items','extra_items.id','=','quotation_extra_items.extra_item_id')
+             $extraItems = QuotationExtraItem::join('extra_items','extra_items.id','=','quotation_extra_items.extra_item_id')
                                             ->where('quotation_extra_items.quotation_id',$quotation['id'])
                                             ->select('quotation_extra_items.extra_item_id as id','quotation_extra_items.rate as rate','extra_items.name as name')
                                             ->get();
@@ -729,7 +738,10 @@ trait QuotationTrait{
                     $extraItems = array_merge($extraItems,$newExtraItems);
                 }
             }
-            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue'));
+            $bankInfo = BankInfo::where('is_active', true)->get();
+            $id = $quotation->id;
+            $checkBank = QuotationBankInfo::where('quotation_id',$id)->pluck('bank_info_id')->toArray();
+            return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
@@ -1060,6 +1072,7 @@ trait QuotationTrait{
                         }
                     }
                 }
+
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => round($productAmount,3)]);
             }
             $request->session()->flash('success','Quotation Edited Successfully');
@@ -1219,31 +1232,7 @@ trait QuotationTrait{
                 QuotationExtraItem::create($quotationExtraItemData);
             }
             $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
-            $materials = array();
-            $iterator = 0;
-            foreach($quotation->quotation_materials as $quotationMaterial){
-                $materials[$iterator]['id'] = $quotationMaterial->material_id;
-                $materials[$iterator]['rate_per_unit'] = $quotationMaterial->rate_per_unit;
-                $materials[$iterator]['unit_id'] = $quotationMaterial->unit_id;
-                $iterator++;
-            }
-            $profitMargins = array();
-            foreach($quotation->quotation_products as $quotationProduct){
-                $profitMargins[$quotationProduct->product_id] = array();
-                $iterator = 0;
-                foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
-                    $profitMargins[$quotationProduct->product_id][$iterator]['profit_margin_id'] = $quotationProfitMargin->profit_margin_id;
-                    $profitMargins[$quotationProduct->product_id][$iterator]['percentage'] = $quotationProfitMargin->percentage;
-                    $iterator++;
-                }
-            }
-            $updateMaterial = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($materials,$profitMargins);
-            if($updateMaterial['slug'] == 'error'){
-                $request->session()->flash('error', $updateMaterial['message']);
-                $quotationData['quotation_status_id'] = QuotationStatus::where('slug','draft')->pluck('id')->first();
-            }else{
-                $request->session()->flash('success','Quotation Approved Successfully');
-            }
+            $request->session()->flash('success','Quotation Approved Successfully');
             Quotation::where('id',$request->quotation_id)->update($quotationData);
             return redirect('/quotation/edit/'.$request->quotation_id);
         }catch (\Exception $e){
@@ -1360,6 +1349,7 @@ trait QuotationTrait{
 
     public function editWorkOrder(Request $request, $workOrder){
         try{
+            Quotation::where('id',$request['quotation_id'])->update(['opening_expenses' => $request['open_expenses']]);
             $workOrder->quotation->update(['remark' => $request->remark]);
             $workOrderData = $request->except('_token','work_order_images');
             $workOrder->update($workOrderData);
@@ -1378,6 +1368,14 @@ trait QuotationTrait{
                     QuotationExtraItem::create($quotationExtraItemData);
                 }
             }
+            if($request->has('bank')){
+                foreach($request->bank as $key => $bankID){
+                    $quotationBankInfoData['bank_info_id'] = $bankID;
+                    $quotationBankInfoData['quotation_id'] = $request->quotation_id;
+                        QuotationBankInfo::create($quotationBankInfoData);
+                }
+            }
+
             $isImagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$workOrder->quotation_id,$workOrder['id']);
             $request->session()->flash('success','Work Order Updated Successfully');
             return redirect('/quotation/edit/'.$request->quotation_id);
