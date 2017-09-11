@@ -409,7 +409,7 @@ Editableform is linked with one of input types, e.g. 'text', 'select' etc.
         /* see also defaults for input */
 
         /**
-        Type of input. Can be <code>text|textarea|select|date|checklist</code>
+        Type of input. Can be <code>text|textarea|select|date|CheckList</code>
 
         @property type 
         @type string
@@ -2085,7 +2085,7 @@ Makes editable any HTML element on the page. Applied as jQuery method.
 
     $.fn.editable.defaults = {
         /**
-        Type of input. Can be <code>text|textarea|select|date|checklist</code> and more
+        Type of input. Can be <code>text|textarea|select|date|CheckList</code> and more
 
         @property type 
         @type string
@@ -2166,7 +2166,7 @@ Makes editable any HTML element on the page. Applied as jQuery method.
         * `value` current value to be displayed
         * `response` server response (if display called after ajax submit), since 1.4.0
          
-        For _inputs with source_ (select, checklist) parameters are different:  
+        For _inputs with source_ (select, CheckList) parameters are different:
           
         * `value` current value to be displayed
         * `sourceData` array of items for current input (e.g. dropdown items) 
@@ -2180,7 +2180,7 @@ Makes editable any HTML element on the page. Applied as jQuery method.
         @since 1.2.0
         @example
         display: function(value, sourceData) {
-           //display checklist as comma-separated values
+           //display CheckList as comma-separated values
            var html = [],
                checked = $.fn.editableutils.itemsByValue(value, sourceData);
                
@@ -3135,7 +3135,7 @@ Internally value stored as javascript array of values.
 @extends list
 @final
 @example
-<a href="#" id="options" data-type="checklist" data-pk="1" data-url="/post" data-original-title="Select options"></a>
+<a href="#" id="options" data-type="CheckList" data-pk="1" data-url="/post" data-original-title="Select options"></a>
 <script>
 $(function(){
     $('#options').editable({
@@ -3257,7 +3257,7 @@ $(function(){
         @property tpl 
         @default <div></div>
         **/         
-        tpl:'<div class="editable-checklist"></div>',
+        tpl:'<div class="editable-CheckList"></div>',
         
         /**
         @property inputclass 

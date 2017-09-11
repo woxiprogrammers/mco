@@ -6,18 +6,31 @@
 
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
+use App\City;
 use App\Http\Requests\CategoryRequest;
+use App\Material;
+use App\State;
 use App\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Expr\Array_;
 
-trait VendorTrait{
+trait VendorTrait
+{
 
-    public function getCreateView(Request $request){
-        try{
-            return view('admin.vendors.create');
-        }catch(\Exception $e){
+    public function getCreateView(Request $request)
+    {
+        try {
+            $cities = City::get();
+            $cityArray = Array();
+            $iterator = 0;
+            foreach ($cities as $city) {
+                $cityArray[$iterator]['id'] = $city->id;
+                $cityArray[$iterator]['name'] = $city->name.", ".$city->state->name.', '.$city->state->country->name;
+                $iterator++;
+            }
+            return view('admin.vendors.create')->with(compact('cityArray'));
+        } catch (\Exception $e) {
             $data = [
                 'action' => "Get vendor create view",
                 'params' => $request->all(),
@@ -28,11 +41,58 @@ trait VendorTrait{
         }
     }
 
-    public function getEditView(Request $request,$vendor){
+    public function getMaterialView(Request $request)
+    {
+        try {
+            $categories = Category::where('is_active', true)->select('id', 'name')->orderBy('name', 'asc')->get()->toArray();
+            return view('admin.vendors.material')->with(compact('categories'));
+        } catch (\Exception $e) {
+            $data = [
+                'action' => "Get vendor material view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getMaterials(Request $request,$category){
         try{
+            $materials = Material::join('category_material_relations','materials.id','=','category_material_relations.material_id')
+                ->where('category_material_relations.category_id',$category->id)
+                ->where('materials.is_active', true)
+                ->select('materials.id as id','materials.name as name')
+                ->orderBy('materials.name','asc')
+                ->get();
+            $materialOptions = array();
+            if($materials == null){
+                $materialOptions[] = '<option value=""> No material Available </option>';
+            }else{
+                foreach($materials as $material){
+                    $materialOptions[] = '<li  class="list-group-item"><input type="checkbox" name="material_ids" value="'.$material->id.'"> '.$material->name.'</li>';
+                }
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $status = 500;
+            $materialOptions = array();
+            $data = [
+                'action' => 'Get Materials',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($materialOptions,$status);
+    }
+    public function getEditView(Request $request, $vendor)
+    {
+        try {
             $vendor = $vendor->toArray();
             return view('admin.vendors.edit')->with(compact('vendor'));
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => "Get vendor edit view",
                 'params' => $request->all(),
@@ -43,21 +103,23 @@ trait VendorTrait{
         }
     }
 
-    public function getManageView(Request $request){
-        try{
+    public function getManageView(Request $request)
+    {
+        try {
             return view('admin.vendors.manage');
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Get Vendor manage view',
-                'exception'=> $e->getMessage()
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
     }
 
-    public function createVendor(Request $request){
-        try{
+    public function createVendor(Request $request)
+    {
+        try {
             $data = Array();
             $data['name'] = ucwords($request->name);
             $data['company'] = $request->company;
@@ -70,19 +132,20 @@ trait VendorTrait{
             $vendor = Vendor::create($data);
             $request->session()->flash('success', 'Vendor Created successfully.');
             return redirect('/vendors/create');
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Create Vendor',
                 'params' => $request->all(),
-                'exception'=> $e->getMessage()
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
     }
 
-    public function editVendor(Request $request, $vendor){
-        try{
+    public function editVendor(Request $request, $vendor)
+    {
+        try {
             $data = $request->all();
             $vendorData['name'] = ucwords(trim($data['name']));
             $vendorData['company'] = $data['company'];
@@ -93,34 +156,35 @@ trait VendorTrait{
             $vendorData['city'] = $data['city'];
             $vendor->update($vendorData);
             $request->session()->flash('success', 'Vendor Edited successfully.');
-            return redirect('/vendors/edit/'.$vendor->id);
-        }catch(\Exception $e){
+            return redirect('/vendors/edit/' . $vendor->id);
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Create Vendor',
                 'params' => $request->all(),
-                'exception'=> $e->getMessage()
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
     }
 
-    public function vendorListing(Request $request){
-        try{
-            if($request->has('search_name')){
-                $vendorsData = Vendor::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
-            }else{
-                $vendorsData = Vendor::orderBy('name','asc')->get()->toArray();
+    public function vendorListing(Request $request)
+    {
+        try {
+            if ($request->has('search_name')) {
+                $vendorsData = Vendor::where('name', 'ilike', '%' . $request->search_name . '%')->orderBy('name', 'asc')->get()->toArray();
+            } else {
+                $vendorsData = Vendor::orderBy('name', 'asc')->get()->toArray();
             }
             $iTotalRecords = count($vendorsData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($vendorsData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($vendorsData); $iterator++,$pagination++ ){
-                if($vendorsData[$pagination]['is_active'] == true){
+            for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($vendorsData); $iterator++, $pagination++) {
+                if ($vendorsData[$pagination]['is_active'] == true) {
                     $vendor_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
-                }else{
+                } else {
                     $vendor_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
@@ -137,12 +201,12 @@ trait VendorTrait{
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/vendors/edit/'.$vendorsData[$pagination]['id'].'">
+                                <a href="/vendors/edit/' . $vendorsData[$pagination]['id'] . '">
                                 <i class="icon-docs"></i> Edit </a>
                         </li>
                         <li>
-                            <a href="/vendors/change-status/'.$vendorsData[$pagination]['id'].'">
-                                <i class="icon-tag"></i> '.$status.' </a>
+                            <a href="/vendors/change-status/' . $vendorsData[$pagination]['id'] . '">
+                                <i class="icon-tag"></i> ' . $status . ' </a>
                         </li>
                     </ul>
                 </div>'
@@ -152,12 +216,12 @@ trait VendorTrait{
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
             $records["recordsFiltered"] = $iTotalRecords;
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $records = array();
             $data = [
                 'action' => 'Get Vendor Listing',
                 'params' => $request->all(),
-                'exception'=> $e->getMessage()
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
@@ -165,13 +229,14 @@ trait VendorTrait{
         return response()->json($records);
     }
 
-    public function changeVendorStatus(Request $request, $vendor){
-        try{
+    public function changeVendorStatus(Request $request, $vendor)
+    {
+        try {
             $newStatus = (boolean)!$vendor->is_active;
             $vendor->update(['is_active' => $newStatus]);
             $request->session()->flash('success', 'Vendor Status changed successfully.');
             return redirect('/vendors/manage');
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Change vendor status',
                 'param' => $request->all(),
@@ -182,20 +247,21 @@ trait VendorTrait{
         }
     }
 
-    public function checkVendorName(Request $request){
-        try{
+    public function checkVendorName(Request $request)
+    {
+        try {
             $vendorName = $request->name;
-            if($request->has('vendor_id')){
-                $nameCount = Vendor::where('name','ilike',$vendorName)->where('id','!=',$request->vendor_id)->count();
-            }else{
-                $nameCount = Vendor::where('name','ilike',$vendorName)->count();
+            if ($request->has('vendor_id')) {
+                $nameCount = Vendor::where('name', 'ilike', $vendorName)->where('id', '!=', $request->vendor_id)->count();
+            } else {
+                $nameCount = Vendor::where('name', 'ilike', $vendorName)->count();
             }
-            if($nameCount > 0){
+            if ($nameCount > 0) {
                 return 'false';
-            }else{
+            } else {
                 return 'true';
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Check Vendor name',
                 'param' => $request->all(),
@@ -205,5 +271,4 @@ trait VendorTrait{
             abort(500);
         }
     }
-
 }
