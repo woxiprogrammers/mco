@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\CustomTraits;
+use App\BankInfo;
 use App\Bill;
 use App\BillImage;
 use App\BillQuotationExtraItem;
@@ -16,6 +17,7 @@ use App\ProductDescription;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
+use App\QuotationBankInfo;
 use App\QuotationExtraItem;
 use App\QuotationProduct;
 use App\QuotationStatus;
@@ -76,10 +78,12 @@ trait BillTrait{
                     }
                 }
             }
+            $banksAssigned = QuotationBankInfo::where('quotation_id',$quotation['id'])->select('bank_info_id')->get();
+
             $taxes = Tax::where('is_active',true)->where('is_special',false)->get()->toArray();
             $specialTaxes = Tax::where('is_active', true)->where('is_special',true)->get();
 
-            return view('admin.bill.create')->with(compact('extraItems','quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
+            return view('admin.bill.create')->with(compact('banksAssigned','extraItems','quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get existing bill create view',
@@ -587,6 +591,7 @@ trait BillTrait{
             $bill['performa_invoice_date'] = $request->performa_invoice_date;
             $bill['discount_amount'] = $request->discount_amount;
             $bill['discount_description'] = $request->discount_description;
+            $bill['bank_info_id'] = $request->assign_bank;
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
                 $bill_quotation_product['bill_id'] = $bill_created['id'];
@@ -762,6 +767,8 @@ trait BillTrait{
         try{
             $data = array();
             $data['slug'] = $slug;
+            $data['bankData'] = ($bill->bankInfo != null) ? $bill->bankInfo : null;
+            $data['discount_description'] = $bill->discount_description;
             $invoiceData = $taxData = array();
             if($bill->quotation->project_site->project->hsn_code == null){
                 $data['hsnCode'] = '';
@@ -785,9 +792,9 @@ trait BillTrait{
              }else{
                  $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
              }
-
-            $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
-            $data['projectSiteAddress'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('address')->first();
+            $projectSiteData = ProjectSite::where('id',$bill->quotation->project_site_id)->first();
+            $data['projectSiteName'] = $projectSiteData->name;
+            $data['projectSiteAddress'] = $projectSiteData->address;
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
