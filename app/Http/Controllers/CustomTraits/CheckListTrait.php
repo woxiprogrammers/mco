@@ -19,7 +19,6 @@ trait CheckListTrait
             abort(500);
         }
     }
-
     public function getCreateView(Request $request)
     {
         try {
