@@ -71,7 +71,7 @@ var  CreateClient = function () {
                 form.submit();
             }
         });
-    }
+    };
 
     return {
         init: function () {
@@ -153,7 +153,7 @@ var  EditClient = function () {
                 form.submit();
             }
         });
-    }
+    };
 
     return {
         init: function () {
