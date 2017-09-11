@@ -8,7 +8,7 @@ trait CheckListTrait
     public function getManageView(Request $request)
     {
         try {
-            return view('admin.checkList.manage');
+            return view('admin.checkliststructure.manage');
         } catch (\Exception $e) {
             $data = [
                 'action' => "Get Check List manage view",
@@ -23,7 +23,7 @@ trait CheckListTrait
     public function getCreateView(Request $request)
     {
         try {
-            return view('admin.checkList.create');
+            return view('admin.checkliststructure.create');
         } catch (\Exception $e) {
             $data = [
                 'action' => "Get check list create view",

@@ -20,7 +20,7 @@
                                     <h1>Create CheckList</h1>
                                 </div>
                                 <div class="form-group " style="float: right;margin-top:1%">
-                                    <a href="/checkList/manage" class="btn btn-set red pull-right">
+                                    <a href="/checkliststructure/manage" class="btn btn-set red pull-right">
                                         <i class="fa fa-check"></i>
                                         Submit
                                     </a>
@@ -35,7 +35,7 @@
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-user" class="form-horizontal" method="post" action="/checkList/create">
+                                            <form role="form" id="create-user" class="form-horizontal" method="post" action="/checkliststructure/create">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body"  id="example">
 
@@ -152,7 +152,7 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/checkliststructure/manage-datatable.js" type="text/javascript"></script>
     <script>
         $('document').ready(function(){
 

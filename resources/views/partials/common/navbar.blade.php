@@ -221,7 +221,7 @@
                             </a>
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
-                                    <a href="/checkList/manage" class="nav-link nav-toggle ">
+                                    <a href="/checkliststructure/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Checklist Structure
                                     </a>
                                 </li>

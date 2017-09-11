@@ -94,51 +94,32 @@
     <script src="/assets/custom/admin/vendors/vendor.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
-
-
-
-<script>
-    $(document).ready(function(){
+    <script>
+    $(document).ready(function() {
         getMaterials($("#category_name").val());
         CreateVendor.init();
-        $('#submit').css("padding-left",'6px');
+        $('#submit').css("padding-left", '6px');
         var citiList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             remote: {
-                url: "/vendor/auto-suggest/%QUERY",
-                filter: function(x) {
-                    if($(window).width()<420){
+                url: "/product/auto-suggest/%QUERY",
+                filter: function (x) {
+                    if ($(window).width() < 420) {
                         $("#header").addClass("fixed");
                     }
                     return $.map(x, function (data) {
                         return {
-                            id:data.id,
-                            name:data.name,
+                            id: data.id,
+                            name: data.name,
                         };
                     });
                 },
                 wildcard: "%QUERY"
             }
-        });
-        citiList.initialize();
-        $('.typeahead').typeahead(null, {
-            displayKey: 'name',
-            engine: Handlebars,
-            source: citiList.ttAdapter(),
-            limit: 30,
-            templates: {
-                empty: [
-                    '<div class="empty-suggest">',
-                    '</div>'
-                ].join('\n'),
-                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
-            },
-        }).on('typeahead:selected', function (obj, datum) {
-
-        }).on('typeahead:open', function (obj, datum) {
 
         });
     });
+
 </script>
 @endsection

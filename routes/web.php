@@ -205,7 +205,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
     });
 
-    Route::group(['prefix' => 'checkList'],function(){
+    Route::group(['prefix' => 'checkliststructure'],function(){
         Route::get('manage',array('uses' => 'CheckList\ChecklistController@getManageView'));
         Route::get('create',array('uses' => 'CheckList\ChecklistController@getCreateView'));
     });
@@ -258,8 +258,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('create',array('uses' => 'Admin\VendorController@createVendor'));
         Route::get('edit/{vendor}',array('uses' => 'Admin\VendorController@getEditView'));
         Route::put('edit/{vendor}',array('uses' => 'Admin\VendorController@editVendor'));
-        Route::get('get-materials/{category}',array('uses' => 'Admin\VendorController@getMaterials'));
-        Route::get('material',array('uses' => 'Admin\VendorController@getCreateView'));
+        Route::get('material/{category}',array('uses' => 'Admin\VendorController@getMaterials'));
+        Route::get('material',array('uses' => 'Admin\VendorController@getMaterialView'));
         Route::post('get-city-info',array('uses'=> 'Admin\VendorController@getCityInfo'));
         Route::post('listing',array('uses'=> 'Admin\VendorController@vendorListing'));
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));

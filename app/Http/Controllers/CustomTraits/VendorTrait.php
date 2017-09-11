@@ -21,8 +21,6 @@ trait VendorTrait
     public function getCreateView(Request $request)
     {
         try {
-            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            return view('admin.vendors.material')->with(compact('categories'));
             $cities = City::get();
             $cityArray = Array();
             $iterator = 0;
@@ -43,9 +41,24 @@ trait VendorTrait
         }
     }
 
+    public function getMaterialView(Request $request)
+    {
+        try {
+            $categories = Category::where('is_active', true)->select('id', 'name')->orderBy('name', 'asc')->get()->toArray();
+            return view('admin.vendors.material')->with(compact('categories'));
+        } catch (\Exception $e) {
+            $data = [
+                'action' => "Get vendor material view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function getMaterials(Request $request,$category){
         try{
-
             $materials = Material::join('category_material_relations','materials.id','=','category_material_relations.material_id')
                 ->where('category_material_relations.category_id',$category->id)
                 ->where('materials.is_active', true)
@@ -74,7 +87,6 @@ trait VendorTrait
         }
         return response()->json($materialOptions,$status);
     }
-
     public function getEditView(Request $request, $vendor)
     {
         try {
