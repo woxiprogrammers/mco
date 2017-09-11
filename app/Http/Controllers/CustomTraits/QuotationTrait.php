@@ -741,7 +741,6 @@ trait QuotationTrait{
             $bankInfo = BankInfo::where('is_active', true)->get();
             $id = $quotation->id;
             $checkBank = QuotationBankInfo::where('quotation_id',$id)->pluck('bank_info_id')->toArray();
-           // dd($bankInfo->toArray());
             return view('admin.quotation.edit')->with(compact('quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank'));
         }catch(\Exception $e){
             $data = [

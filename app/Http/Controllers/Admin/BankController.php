@@ -63,7 +63,6 @@ class BankController extends Controller
 
     public function bankListing(Request $request){
         try{
-            Log::info('info');
             if($request->has('search_name')){
                 $bankData = BankInfo::where('bank_name','ilike','%'.$request->search_name.'%')->orderBy('bank_name','asc')->get()->toArray();
             }else{
