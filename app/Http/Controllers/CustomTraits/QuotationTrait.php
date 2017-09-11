@@ -172,7 +172,14 @@ trait QuotationTrait{
                 $clientSuppliedMaterial = $request->clientSuppliedMaterial;
             }
             foreach($productIds as $id){
-                $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                if($request->has('quotation_id')){
+                    $recentVersionId = QuotationProduct::where('product_id',$id)->where('quotation_id',$request->quotation_id)->pluck('product_version_id')->first();
+                    if($recentVersionId == null){
+                        $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                    }
+                }else{
+                    $recentVersionId = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
+                }
                 $productMaterialIds = ProductMaterialRelation::join('material_versions','product_material_relation.material_version_id','=','material_versions.id')
                     ->join('materials','materials.id','=','material_versions.material_id')
                     ->where('product_material_relation.product_version_id',$recentVersionId)
@@ -1226,31 +1233,7 @@ trait QuotationTrait{
                 QuotationExtraItem::create($quotationExtraItemData);
             }
             $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
-            $materials = array();
-            $iterator = 0;
-            foreach($quotation->quotation_materials as $quotationMaterial){
-                $materials[$iterator]['id'] = $quotationMaterial->material_id;
-                $materials[$iterator]['rate_per_unit'] = $quotationMaterial->rate_per_unit;
-                $materials[$iterator]['unit_id'] = $quotationMaterial->unit_id;
-                $iterator++;
-            }
-            $profitMargins = array();
-            foreach($quotation->quotation_products as $quotationProduct){
-                $profitMargins[$quotationProduct->product_id] = array();
-                $iterator = 0;
-                foreach($quotationProduct->quotation_profit_margins as $quotationProfitMargin){
-                    $profitMargins[$quotationProduct->product_id][$iterator]['profit_margin_id'] = $quotationProfitMargin->profit_margin_id;
-                    $profitMargins[$quotationProduct->product_id][$iterator]['percentage'] = $quotationProfitMargin->percentage;
-                    $iterator++;
-                }
-            }
-            $updateMaterial = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($materials,$profitMargins);
-            if($updateMaterial['slug'] == 'error'){
-                $request->session()->flash('error', $updateMaterial['message']);
-                $quotationData['quotation_status_id'] = QuotationStatus::where('slug','draft')->pluck('id')->first();
-            }else{
-                $request->session()->flash('success','Quotation Approved Successfully');
-            }
+            $request->session()->flash('success','Quotation Approved Successfully');
             Quotation::where('id',$request->quotation_id)->update($quotationData);
             return redirect('/quotation/edit/'.$request->quotation_id);
         }catch (\Exception $e){
@@ -1367,6 +1350,7 @@ trait QuotationTrait{
 
     public function editWorkOrder(Request $request, $workOrder){
         try{
+            Quotation::where('id',$request['quotation_id'])->update(['opening_expenses' => $request['open_expenses']]);
             $workOrder->quotation->update(['remark' => $request->remark]);
             $workOrderData = $request->except('_token','work_order_images');
             $workOrder->update($workOrderData);

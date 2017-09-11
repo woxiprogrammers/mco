@@ -36,6 +36,8 @@ $(document).ready(function () {
                 $('#submit').prop('disabled', false);
             } else {
                 $('#submit').prop('disabled', true);
+                $("#discountAmount").val(0);
+                $('#discountDescription').val('');
             }
             $("#id_" + id).css('background-color', "");
             $('#current_quantity_' + id).prop('disabled', true);
@@ -169,6 +171,15 @@ $(document).ready(function () {
             }
         });
     });
+    var typingTimer;
+    var doneTypingInterval = 500;
+    $('#discountAmount').on('keyup', function () {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(calculateDiscount, doneTypingInterval);
+    });
+    $('#discountAmount').on('keydown', function () {
+        clearTimeout(typingTimer);
+    });
 });
 
 function checkExtraItemRate(id) {
@@ -269,9 +280,9 @@ function getTotals(){
     }
 
     var total_current_bill_amount = total_extra_item_rate + total_product_current_bill_amount;
-    $('#total_current_bill_amount').text(total_current_bill_amount.toFixed(3));
-    $('#rounded_off_current_bill_amount').text(Math.round(total_current_bill_amount));
-    calculateTax();
+    $('#sub_total_current_bill_amount').text(total_current_bill_amount.toFixed(3));
+    $('#rounded_off_current_bill_sub_total').text(Math.round(total_current_bill_amount));
+    calculateDiscount();
 }
 
 function calculateTax(){
@@ -318,3 +329,16 @@ function calculateSpecialTax(){
         $("#grand_current_bill_total").text($("#final_current_bill_total").text());
     }
 }
+
+function calculateDiscount(){
+    var discountAmount = $('#discountAmount').val();
+    var totalBillAmount = parseInt($('#rounded_off_current_bill_sub_total').text());
+    if((typeof discountAmount == 'undefined') || discountAmount == ''){
+        $('#rounded_off_current_bill_amount').text(totalBillAmount);
+    }else{
+        discountAmount = parseInt(discountAmount);
+        $('#rounded_off_current_bill_amount').text((totalBillAmount-discountAmount));
+    }
+    calculateTax();
+}
+

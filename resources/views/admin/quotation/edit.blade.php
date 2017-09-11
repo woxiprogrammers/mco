@@ -382,6 +382,12 @@
                                                         <li>
                                                             <a href="#bankassignFormTab" data-toggle="tab"> Assign Bank </a>
                                                         </li>
+                                                        @if($quotation->quotation_status->slug == 'approved'&& $userRole == 'superadmin')
+                                                            <li>
+                                                                <a href="#openingExpensesFormTab" data-toggle="tab"> Opening Expenses </a>
+                                                            </li>
+                                                        @endif
+
                                                     </ul>
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="workOrderFormTab">
@@ -608,6 +614,18 @@
                                                                             @endforeach
                                                                     </ul>
                                                                 </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tab-pane fade in" id="openingExpensesFormTab">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-form pull-right">
+                                                                    Opening Expenses
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <input class="form-control" name="open_expenses" id="open_expenses" value=0 >
                                                             </div>
                                                         </div>
                                                     </div>
