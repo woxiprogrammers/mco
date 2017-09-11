@@ -38,7 +38,7 @@
         </td>
         <td>
             <div class="form-group">
-                <input type="text" class="form-control material_amount material-table-input" id="material_{{$data['material']['id']}}_amount" name="material_amount[{{$data['material']['id']}}]" required>
+                <input type="text" class="form-control material_amount material-table-input" id="material_{{$data['material']['id']}}_amount" name="material_amount[{{$data['material']['id']}}]" required readonly>
             </div>
         </td>
     </tr>

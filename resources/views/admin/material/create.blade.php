@@ -88,7 +88,7 @@
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">GST</label>
                                                     <div class="col-md-6">
-                                                        <input type="text" id="gst" name="gst" class="form-control" placeholder="Enter GST">
+                                                        <input type="number" id="gst" name="gst" class="form-control" placeholder="Enter GST">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
