@@ -767,7 +767,7 @@ trait BillTrait{
         try{
             $data = array();
             $data['slug'] = $slug;
-            $data['bankData'] = $bill->bankInfo;
+            $data['bankData'] = ($bill->bankInfo != null) ? $bill->bankInfo : null;
             $data['discount_description'] = $bill->discount_description;
             $invoiceData = $taxData = array();
             if($bill->quotation->project_site->project->hsn_code == null){

@@ -161,11 +161,15 @@
             </tr>
             <tr>
                 <td width="32.5%" style="padding-bottom: 60px; text-align: left"><b>Bank Details</b><br>
-                    Bank Name : {!! $bankData->bank_name !!}<br>
-                    Account Number : {!! $bankData->account_number !!}<br>
-                    IFS Code : {!! $bankData->ifs_code !!}<br>
-                    Branch ID : {!! $bankData->branch_id !!}<br>
-                    Branch Name : {!! $bankData->branch_name !!}
+                    @if($bankData != null)
+                        Bank Name : {!! $bankData->bank_name !!}<br>
+                        Account Number : {!! $bankData->account_number !!}<br>
+                        IFS Code : {!! $bankData->ifs_code !!}<br>
+                        Branch ID : {!! $bankData->branch_id !!}<br>
+                        Branch Name : {!! $bankData->branch_name !!}
+                    @else
+                      "No bank assigned"
+                    @endif
                 </td>
                 <td width="32.5%" style="padding-bottom: 60px;text-align: left"><b>Discount Details</b><br>
                     Discount % : {!! $discount_amount !!}<br>
