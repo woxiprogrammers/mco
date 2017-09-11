@@ -387,6 +387,7 @@
                                                                 <a href="#openingExpensesFormTab" data-toggle="tab"> Opening Expenses </a>
                                                             </li>
                                                         @endif
+
                                                     </ul>
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="workOrderFormTab">

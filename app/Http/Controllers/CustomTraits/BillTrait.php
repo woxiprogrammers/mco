@@ -591,6 +591,7 @@ trait BillTrait{
             $bill['performa_invoice_date'] = $request->performa_invoice_date;
             $bill['discount_amount'] = $request->discount_amount;
             $bill['discount_description'] = $request->discount_description;
+            $bill['bank_info_id'] = $request->assign_bank;
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
                 $bill_quotation_product['bill_id'] = $bill_created['id'];
@@ -766,19 +767,14 @@ trait BillTrait{
         try{
             $data = array();
             $data['slug'] = $slug;
+            $data['bankData'] = $bill->bankInfo;
+            $data['discount_description'] = $bill->discount_description;
             $invoiceData = $taxData = array();
             if($bill->quotation->project_site->project->hsn_code == null){
                 $data['hsnCode'] = '';
             }else{
                 $data['hsnCode'] = $bill->quotation->project_site->project->hsn_code->code;
             }
-            $data['bankIDs'] = QuotationBankInfo::where('quotation_id',$bill->quotation_id)->select('bank_info_id')->get();
-            $i = 0;
-            /*foreach($bankIDs as $key => $name){
-                $a[$i]['name'] = $name->bankInfo;
-                $i++;
-            }
-            dd($a);*/
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
             $data['company_name'] = $bill->quotation->project_site->project->client->company;
             $data['gstin']= $bill->quotation->project_site->project->client->gstin;
@@ -863,9 +859,6 @@ trait BillTrait{
             $billProducts = BillQuotationProducts::whereIn('bill_id',$previousBillIds)->get()->toArray();
             $currentBillProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
             $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
-                dd($bill->quotation->id);
-            $data['bankName'] = BankInfo::where('quotation_id',$bill->quotation->id)->first();
-            dd($data['bankName']);
             foreach($allBillIds as $key => $billId){
                 if($billId == $bill['id']){
                     $data['currentBillID'] = $key+1;

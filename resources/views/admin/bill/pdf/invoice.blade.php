@@ -132,7 +132,7 @@
                     <td style="text-align: right; padding-right: 10px;">{!! $sub_total_before_discount !!}</td>
                 </tr>
                 <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total</b></td>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Discount</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $discount_amount !!}</td>
                 </tr>
                 <tr>
@@ -159,15 +159,18 @@
                 <th width="65%" colspan="2" style="background-color: #c2c2c2;"><b>For {!! ucwords($company_name) !!}</b></th>
                 <th width="35%" style="background-color: #c2c2c2; text-align: right;"><b>For Manisha Construction</b></th>
             </tr>
-            <tr >
+            <tr>
                 <td width="32.5%" style="padding-bottom: 60px; text-align: left"><b>Bank Details</b><br>
-                    Bank Name :{!! $bankName !!}<br>
-                    Account Number :<br>
-                    IFS Code :<br>
-                    Branch ID :<br>
-                    Branch Name :
+                    Bank Name : {!! $bankData->bank_name !!}<br>
+                    Account Number : {!! $bankData->account_number !!}<br>
+                    IFS Code : {!! $bankData->ifs_code !!}<br>
+                    Branch ID : {!! $bankData->branch_id !!}<br>
+                    Branch Name : {!! $bankData->branch_name !!}
                 </td>
-                <td width="32.5%" style="padding-top: 60px; text-align: right"><b>Authorised Signatory</b></td>
+                <td width="32.5%" style="padding-bottom: 60px;text-align: left"><b>Discount Details</b><br>
+                    Discount % : {!! $discount_amount !!}<br>
+                    Decsription : {!! $discount_description !!}<br>
+                </td>
                 <td width="32.5%" style="padding-top: 60px; text-align: right;"><b>Authorised Signatory</b></td>
             </tr>
         </table>
