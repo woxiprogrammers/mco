@@ -153,7 +153,7 @@
             </tr>
             <tr >
                 <td width="32.5%" style="padding-bottom: 60px; text-align: left"><b>Bank Details</b><br>
-                    Bank Name :{!! $bankName !!}<br>
+                    Bank Name :<br>
                     Account Number :<br>
                     IFS Code :<br>
                     Branch ID :<br>
