@@ -257,6 +257,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
     });
 
+    Route::group(['prefix'=>'bank'],function() {
+        Route::get('manage', array('uses' => 'Admin\BankController@getManageView'));
+        Route::post('listing', array('uses' => 'Admin\BankController@bankListing'));
+        Route::get('create', array('uses' => 'Admin\BankController@getCreateView'));
+        Route::post('create', array('uses' => 'Admin\BankController@CreateBank'));
+        Route::get('edit/{bank_info}', array('uses' => 'Admin\BankController@getEditView'));
+        Route::put('edit/{bank_info}', array('uses' => 'Admin\BankController@editBank'));
+        Route::get('change-status/{bank_info}', array('uses' => 'Admin\BankController@changeBankStatus'));
+    });
+
     Route::group(['prefix' => 'checklist'], function(){
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));

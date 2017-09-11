@@ -1,6 +1,6 @@
-var  CreateClient = function () {
+var  CreateBank = function () {
     var handleCreate = function() {
-        var form = $('#create-client');
+        var form = $('#create-bank');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -8,40 +8,38 @@ var  CreateClient = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                company: {
+                bank_name: {
                     required: true
                 },
-                address: {
+                account_number: {
                     required: true
                 },
-                email: {
-                    required: true,
-                    email: true
-                },
-                mobile: {
+                ifs_code: {
                     required: true
                 },
-                gstin: {
-                    maxlength:15,
-                    minlength:15
+                branch_id: {
+                    required: true
+                },
+                branch_name: {
+                    required: true
                 }
             },
 
             messages: {
-                company: {
-                    required: "Company is required."
+                bank_name: {
+                    required: "Bank name is required."
                 },
-                address: {
-                    required: "Address is required."
+                account_number: {
+                    required: "Account number is required."
                 },
-                email: {
-                    required: "Email is required."
+                ifs_code: {
+                    required: "IFS code is required."
                 },
-                mobile: {
-                    required: "Contact number is required."
+                branch_id: {
+                    required: "Branch ID is required."
                 },
-                gstin:{
-                    maxlength: "Your GSTIN must be at least 15 characters long"
+                branch_name: {
+                    required: "Branch name is required."
                 }
             },
 
@@ -71,7 +69,7 @@ var  CreateClient = function () {
                 form.submit();
             }
         });
-    };
+    }
 
     return {
         init: function () {
@@ -80,9 +78,9 @@ var  CreateClient = function () {
     };
 }();
 
-var  EditClient = function () {
-    var handleEdit = function() {
-        var form = $('#edit-client');
+var  EditBank = function () {
+    var handleCreate = function() {
+        var form = $('#create-bank');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -90,40 +88,38 @@ var  EditClient = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                company: {
+                bank_name: {
                     required: true
                 },
-                address: {
+                account_number: {
                     required: true
                 },
-                email: {
-                    required: true,
-                    email: true
-                },
-                mobile: {
+                ifs_code: {
                     required: true
                 },
-                gstin: {
-                    maxlength:15,
-                    minlength:15
+                branch_id: {
+                    required: true
+                },
+                branch_name: {
+                    required: true
                 }
             },
 
             messages: {
-                company: {
-                    required: "Company is required."
+                bank_name: {
+                    required: "Bank name is required."
                 },
-                address: {
-                    required: "Address is required."
+                account_number: {
+                    required: "Account number is required."
                 },
-                email: {
-                    required: "Email is required."
+                ifs_code: {
+                    required: "IFS code is required."
                 },
-                mobile: {
-                    required: "Contact number is required."
+                branch_id: {
+                    required: "Branch ID is required."
                 },
-                gstin:{
-                    maxlength: "Your GSTIN must be at least 15 characters long"
+                branch_name: {
+                    required: "Branch name is required."
                 }
             },
 
@@ -153,11 +149,12 @@ var  EditClient = function () {
                 form.submit();
             }
         });
-    };
+    }
 
     return {
         init: function () {
-            handleEdit();
+            handleCreate();
         }
     };
 }();
+
