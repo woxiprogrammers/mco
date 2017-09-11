@@ -39,6 +39,19 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <div class="btn-group bootstrap-select bs-select form-control dropup">
+                                                                <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Purchase Request Number</span>&nbsp;<span class="caret"></span></button>
+                                                                <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
+                                                                    <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
+                                                                                <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
                                                                 <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Client Name</span>&nbsp;<span class="caret"></span></button>
                                                                 <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
                                                                     <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
@@ -62,19 +75,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                                <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select site Name</span>&nbsp;<span class="caret"></span></button>
-                                                                <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                    <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                                <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                                <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-4"><div class="form-group">
@@ -89,19 +89,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                                <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Purchase request number</span>&nbsp;<span class="caret"></span></button>
-                                                                <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                    <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                                <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                                <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+
                                                     <div class="col-md-4">
 
                                                     </div>
@@ -123,21 +111,21 @@
                                         <div class="portlet light ">
                                             <div class="portlet-body">
                                                 <div class="table-container">
-                                                    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequest">
+                                                    <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
                                                         <thead>
                                                         <tr>
-                                                            <th><input type="checkbox"></th>
                                                             <th> Material Name </th>
                                                             <th> Quantity</th>
                                                             <th> Unit </th>
                                                             <th> Vendor </th>
+                                                            <th>Status</th>
                                                             <th>Action</th>
                                                         </tr>
                                                         <tr class="filter">
-                                                            <th style="text-align: center"><input type="checkbox"></th>
                                                             <th><input type="text" class="form-control form-filter" name="search_name"></th>
                                                             <th><input type="text" class="form-control form-filter" name="search_name" > </th>
                                                             <th><input type="text" class="form-control form-filter" name="search_name"></th>
+                                                            <th><input type="text" class="form-control form-filter" name="search_name" > </th>
                                                             <th><input type="text" class="form-control form-filter" name="search_name" > </th>
                                                             <th>
                                                                 <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
@@ -147,56 +135,82 @@
                                                         </thead>
                                                         <tbody>
                                                         <tr>
-                                                            <td><input type="checkbox"></td>
                                                             <td> ABC </td>
                                                             <td> 5</td>
                                                             <td> Kg </td>
                                                             <td> Vendor lmn </td>
-                                                            <td> <button id="approve">Approve</button> <button id="disapprove">Disapprove</button> </td>
+                                                            <td>
+                                                                <select class="table-group-action-input form-control input-inline input-small input-sm">
+                                                                    <option value="">Select...</option>
+                                                                    <option value="Cancel">Approve</option>
+                                                                    <option value="Cancel">Disapprove</option>
+                                                                </select>
+                                                            </td>
+                                                            <td> <button id="image">Upload</button>  </td>
                                                         </tr>
                                                         <tr>
-                                                            <td><input type="checkbox"></td>
                                                             <td> ABC </td>
                                                             <td> 5</td>
                                                             <td> Kg </td>
                                                             <td> Vendor lmn </td>
-                                                            <td> <button id="approve">Approve</button> <button id="disapprove">Disapprove</button> </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><input type="checkbox"></td>
-                                                            <td> ABC </td>
-                                                            <td> 5</td>
-                                                            <td> Kg </td>
-                                                            <td> Vendor lmn </td>
-                                                            <td> <button id="approve">Approve</button> <button id="disapprove">Disapprove</button> </td>
+                                                            <td>
+                                                                <select class="table-group-action-input form-control input-inline input-small input-sm">
+                                                                    <option value="">Select...</option>
+                                                                    <option value="Cancel">Approve</option>
+                                                                    <option value="Cancel">Disapprove</option>
+                                                                </select>
+                                                            </td>
+                                                            <td> <button id="image">Upload</button> </td>
                                                         </tr>
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                                <div class="modal fade" id="ImageUpload" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                                     <div class="modal-dialog">
                                                         <form class="modal-content">
-                                                            <div class="modal-header" style="background-color:#00844d">
-                                                                <center><h4 class="modal-title" id="exampleModalLongTitle">ADD REMARK</h4></center>
-                                                                <button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button>
+                                                            <div class="modal-header" >
+                                                                <div class="row">
+                                                                    <div class="col-md-4"></div>
+                                                                    <div class="col-md-4"> Material</div>
+                                                                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                </div>
                                                             </div>
                                                             <div class="modal-body">
                                                                 <form role="form" class="form-horizontal" method="post">
                                                                     <div class="form-body">
                                                                         <div class="form-group row">
-                                                                            <div class="col-md-3" style="text-align: right">
-                                                                                <label for="company" class="control-label">Remark</label>
-                                                                            </div>
-                                                                            <div class="col-md-6">
-                                                                                <input type="text" class="form-control" id="remark" name="remark">
+                                                                            <div class="col-md-12" style="text-align: right">
+                                                                                <table class="table table-bordered table-hover">
+                                                                                    <thead>
+                                                                                    <tr role="row" class="heading">
+                                                                                        <th> Image </th>
+                                                                                        <th> Action </th>
+                                                                                    </tr>
+                                                                                    </thead>
+                                                                                    <tbody id="show-product-images">
+                                                                                    <tr >
+                                                                                        <td>
+                                                                                            <a  target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                                                                                                <img class="img-responsive"  alt="" style="width:100px; height:100px;"> </a>
+                                                                                            <input type="hidden" class="work-order-image-name"   />
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <a href="javascript:;" class="btn btn-default btn-sm">
+                                                                                                <i class="fa fa-times"></i> Remove </a>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
                                                                             </div>
                                                                         </div>
                                                                     </div>
+                                                                    <div style="padding-bottom: 5px;padding-left: 3px">
+                                                                        <button type="submit" class="btn blue" >Approve</button>
+                                                                        <button type="submit" class="btn blue">disapprove</button>
+                                                                    </div>
+                                                                </form>
                                                             </div>
-                                                            <div class="modal-footer" style="background-color:#00844d">
-                                                                <button type="submit" class="btn blue">Approve</button>
-                                                                <button type="submit" class="btn blue">disapprove</button>
-                                                            </div>
+
                                                     </div>
                                                 </div>
                                                 <div class="modal fade" id="approveModal" role="dialog">
@@ -369,11 +383,8 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
-            $("#disapprove").click(function(){
-                $("#disapproveModal").modal();
-            })
-            $("#approve").click(function(){
-                $("#approveModal").modal();
+            $("#image").click(function(){
+                $("#ImageUpload").modal();
             })
         });
     </script>

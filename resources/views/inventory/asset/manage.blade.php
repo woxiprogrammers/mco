@@ -17,7 +17,13 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Inventory</h1>
+                                    <h1>Manage Asset</h1>
+                                </div>
+                                <div class="btn-group" style="float: right;margin-top:1%">
+                                    <div id="sample_editable_1_new" class="btn yellow"><a href="/inventory/manage-asset/create" style="color: white">                                         <i class="fa fa-plus"></i>
+                                            Asset
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -45,15 +51,11 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
                                                             <thead>
                                                             <tr>
-                                                                <th> Material Name </th>
-                                                                <th> In</th>
-                                                                <th> Out </th>
-                                                                <th> Available  </th>
+                                                                <th> Asset Id </th>
+                                                                <th> Model Number</th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_status" > </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
                                                                 <th>
@@ -66,47 +68,19 @@
                                                             <tr>
                                                                 <td> 5 </td>
                                                                 <td> Otto </td>
-                                                                <td> makr124 </td>
-                                                                <td><span class="label label-sm label-danger" > Approved</span> </td>
                                                                 <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-inventory/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                            Manage
+                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-asset/edit" style="color: white">                                         <i class="fa fa-plus"></i>
+                                                                            Edit
                                                                         </a>
                                                                     </div>
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td> Jacob </td>
+                                                                <td> 6 </td>
                                                                 <td> Nilson </td>
-                                                                <td> jac123 </td>
-                                                                <td><span class="label label-sm label-danger"> Draft</span> </td>
                                                                 <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-inventory/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                            Manage
-                                                                        </a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td> Larry </td>
-                                                                <td> Cooper </td>
-                                                                <td> lar </td>
-                                                                <td><span class="label label-sm label-danger"> Disabled</span> </td>
-                                                                <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-inventory/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                            Manage
-                                                                        </a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td> Sandy </td>
-                                                                <td> Lim </td>
-                                                                <td> sanlim </td>
-                                                                <td><span class="label label-sm label-danger"> Disabled</span> </td>
-                                                                <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                            Manage
+                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-asset/edit" style="color: white">                                         <i class="fa fa-plus"></i>
+                                                                            Edit
                                                                         </a>
                                                                     </div>
                                                                 </td>

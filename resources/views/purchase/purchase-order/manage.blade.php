@@ -47,10 +47,9 @@
                                                             <button class="btn btn-sm green table-group-action-submit">
                                                                 <i class="fa fa-check"></i> Submit</button>
                                                         </div>
-                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequest">
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
                                                             <thead>
                                                             <tr>
-                                                                <th><input type="checkbox"></th>
                                                                 <th> Client Name </th>
                                                                 <th> Project Name</th>
                                                                 <th> PR Id </th>
@@ -59,7 +58,6 @@
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th style="text-align: center"><input type="checkbox"></th>
                                                                 <th><input type="text" class="form-control form-filter" name="search_name"></th>
                                                                 <th><input type="text" class="form-control form-filter" name="search_name" > </th>
                                                                 <th><input type="text" class="form-control form-filter" name="search_name"></th>
@@ -72,6 +70,14 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody>
+                                                                   <td>MCO</td>
+                                                                   <td>Mall</td>
+                                                                   <td>154</td>
+                                                                   <td>250</td>
+                                                                   <td><span class="label label-sm label-success"> Enabled </span></td>
+                                                                   <td><div id="sample_editable_1_new" class="btn btn-small blue" ><a href="/purchase/purchase-order/edit" style="color: white">&nbsp; Edit
+                                                                           </a>
+                                                                       </div></td>
 
                                                             </tbody>
                                                         </table>

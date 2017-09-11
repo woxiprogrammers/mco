@@ -178,22 +178,36 @@
                                                         </td>
                                                     </tr>
                                                 @endfor
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total</b></td>
-
-                                                        <td>
-                                                            <span id="total_current_bill_amount"></span>
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
-
-                                                        <td>
-                                                            <span id="rounded_off_current_bill_amount"></span>
-                                                        </td>
-
-                                                    </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
+                                                    <td>
+                                                        <span id="sub_total_current_bill_amount"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total Round</b></td>
+                                                    <td>
+                                                        <span id="rounded_off_current_bill_sub_total"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Amount</b></td>
+                                                    <td>
+                                                        <input name="discount_amount" id="discountAmount" class="form-control" type="text" value="0">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Description</b></td>
+                                                    <td>
+                                                        <input name="discount_description" id="discountDescription" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
+                                                    <td>
+                                                        <span id="rounded_off_current_bill_amount"></span>
+                                                    </td>
+                                                </tr>
                                                 @if($taxes != null)
                                                     <tr>
                                                         <td colspan="6"><b>Tax Name</b></td>
