@@ -20,6 +20,10 @@ var  CreateClient = function () {
                 },
                 mobile: {
                     required: true
+                },
+                gstin: {
+                    maxlength:15,
+                    minlength:15
                 }
             },
 
@@ -35,7 +39,7 @@ var  CreateClient = function () {
                 },
                 mobile: {
                     required: "Contact number is required."
-                }
+                },
             },
 
             invalidHandler: function (event, validator) { //display error alert on form submit
@@ -95,6 +99,10 @@ var  EditClient = function () {
                 },
                 mobile: {
                     required: true
+                },
+                gstin: {
+                    maxlength:15,
+                    minlength:15
                 }
             },
 
@@ -110,7 +118,7 @@ var  EditClient = function () {
                 },
                 mobile: {
                     required: "Contact number is required."
-                }
+                },
             },
 
             invalidHandler: function (event, validator) { //display error alert on form submit

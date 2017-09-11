@@ -43,11 +43,18 @@
         <hr>
         <table width="100%">
             <tr>
-                <td style="width: 50%; font-weight:  lighter;">To : {!! $clientCompany !!}</td>
+                <td style="width: 50%; font-weight:  lighter;">Party Name : {!! $clientCompany !!}</td>
                 <td style="text-align: right;font-weight: bolder;">Invoice No : {!! $invoice_no !!}</td>
             </tr>
+            <tr><td style="font-weight: lighter;" colspan="2">Party Address : {!! $address !!}</td></tr>
             <tr>
                 <td style="font-weight: lighter;" colspan="2">Site Name : {!! $projectSiteName !!}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: lighter;" colspan="2">Site Address : {!! $projectSiteAddress !!}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: lighter;" colspan="2">GSTIN :{!! $gstin !!}
             </tr>
             <tr>
                 <td style="width: 50%; font-weight: bolder;">Bill No : RA BILL NO - {!! $currentBillID !!}</td>
@@ -107,8 +114,8 @@
                         </tr>
                     @endfor
                 @endif
-                @if((count($invoiceData) + count($extraItems)) < 16)
-                    @for($i = 0 ; $i < (16 - (count($invoiceData) + count($extraItems))) ; $i++)
+                @if((count($invoiceData) + count($extraItems)) < 15)
+                    @for($i = 0 ; $i < (15 - (count($invoiceData) + count($extraItems))) ; $i++)
                         <tr>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
@@ -120,6 +127,14 @@
                         </tr>
                     @endfor
                 @endif
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Sub Total</b></td>
+                    <td style="text-align: right; padding-right: 10px;">{!! $sub_total_before_discount !!}</td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total</b></td>
+                    <td style="text-align: right; padding-right: 10px;">{!! $discount_amount !!}</td>
+                </tr>
                 <tr>
                     <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>

@@ -79,7 +79,15 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" id="mobile" name="mobile" value="{{$client['mobile']}}">
+                                                        <input type="text" class="form-control" id="mobile" name="mobile" value="{{$client['mobile']}}" maxlength="10">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="mobile" class="control-label">GSTIN</label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="text" class="form-control" id="gstin" name="gstin" value="{{$client['gstin']}}">
                                                     </div>
                                                 </div>
                                             </div>
