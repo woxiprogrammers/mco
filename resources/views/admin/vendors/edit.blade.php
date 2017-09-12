@@ -155,8 +155,6 @@
                                             </form>
                                         </div>
                                     </div>
-
-
                                 </div>
                             </div>
                         </div>
@@ -168,7 +166,7 @@
 @endsection
 
 @section('javascript')
-    <script src="/assets/custom/admin/vendor/vendor171.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/vendor/vendor6211.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
             EditVendor.init();

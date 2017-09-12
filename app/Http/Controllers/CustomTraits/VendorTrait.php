@@ -10,6 +10,7 @@ use App\City;
 use App\Http\Requests\CategoryRequest;
 use App\Material;
 use App\State;
+use App\Unit;
 use App\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +22,7 @@ trait VendorTrait
     public function getCreateView(Request $request)
     {
         try {
+
             $cities = City::get();
             $cityArray = Array();
             $iterator = 0;
@@ -29,7 +31,9 @@ trait VendorTrait
                 $cityArray[$iterator]['name'] = $city->name.", ".$city->state->name.', '.$city->state->country->name;
                 $iterator++;
             }
-            return view('admin.vendors.create')->with(compact('cityArray'));
+            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+
+            return view('admin.vendors.create')->with(compact('cityArray','categories'));
         } catch (\Exception $e) {
             $data = [
                 'action' => "Get vendor create view",
@@ -41,26 +45,8 @@ trait VendorTrait
         }
     }
 
-    public function getMaterialView(Request $request)
-    {
-        try {
-            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            return view('admin.vendors.material')->with(compact('categories'));
-        } catch (\Exception $e) {
-            $data = [
-                'action' => "Get vendor material view",
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-    }
-
     public function getMaterials(Request $request,$category){
         try{
-
-           //dd($request->all());
             $materials = Material::join('category_material_relations','materials.id','=','category_material_relations.material_id')
                 ->where('category_material_relations.category_id',$category->id)
                 ->where('materials.is_active', true)
@@ -72,7 +58,7 @@ trait VendorTrait
                 $materialOptions[] = '<option value=""> No material Available </option>';
             }else{
                 foreach($materials as $material){
-                    $materialOptions[] = '<li  class="list-group-item"><input type="checkbox" name="material_ids" value="'.$material->id.'"> '.$material->name.'</li>';
+                    $materialOptions[] = '<li  class="list-group-item"><input type="checkbox" name="material_ids" value="'.$material->id.'"><span> '.$material->name.'</span></li>';
                 }
             }
             $status = 200;
@@ -89,6 +75,7 @@ trait VendorTrait
         }
         return response()->json($materialOptions,$status);
     }
+
 
     public function autoSuggest(Request $request, $keyword){
         try{

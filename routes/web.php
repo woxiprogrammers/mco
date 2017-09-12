@@ -259,13 +259,22 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{vendor}',array('uses' => 'Admin\VendorController@getEditView'));
         Route::put('edit/{vendor}',array('uses' => 'Admin\VendorController@editVendor'));
         Route::get('get-materials/{category}',array('uses' => 'Admin\VendorController@getMaterials'));
-        Route::get('material',array('uses' => 'Admin\VendorController@getMaterialView'));
         Route::post('get-city-info',array('uses'=> 'Admin\VendorController@getCityInfo'));
         Route::post('listing',array('uses'=> 'Admin\VendorController@vendorListing'));
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\VendorController@autoSuggest'));
 
+    });
+
+    Route::group(['prefix'=>'bank'],function() {
+        Route::get('manage', array('uses' => 'Admin\BankController@getManageView'));
+        Route::post('listing', array('uses' => 'Admin\BankController@bankListing'));
+        Route::get('create', array('uses' => 'Admin\BankController@getCreateView'));
+        Route::post('create', array('uses' => 'Admin\BankController@CreateBank'));
+        Route::get('edit/{bank_info}', array('uses' => 'Admin\BankController@getEditView'));
+        Route::put('edit/{bank_info}', array('uses' => 'Admin\BankController@editBank'));
+        Route::get('change-status/{bank_info}', array('uses' => 'Admin\BankController@changeBankStatus'));
     });
 
     Route::group(['prefix' => 'checklist'], function(){

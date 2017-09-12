@@ -194,6 +194,10 @@
                                                 </a>
                                             </li>
                                     </ul>
+                                    <a href="/bank/manage">
+                                        <i class="fa fa-folder"></i> Manage Bank
+                                    </a>
+                                    </a>
                                 </li>
                                 </ul>
                             </li>

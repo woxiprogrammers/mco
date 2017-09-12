@@ -8,7 +8,7 @@ class Bill extends Model
 {
     protected $table = 'bills';
 
-    protected $fillable = ['quotation_id','bill_status_id','remark','date','performa_invoice_date','discount_amount','discount_description'];
+    protected $fillable = ['quotation_id','bill_status_id','remark','date','performa_invoice_date','discount_amount','discount_description','bank_info_id'];
 
     public function quotation()
     {
@@ -29,5 +29,8 @@ class Bill extends Model
 
     public function transactions(){
         return $this->hasMany('App\BillTransaction','bill_id');
+    }
+    public function bankInfo(){
+        return $this->belongsTo('App\BankInfo','bank_info_id');
     }
 }
