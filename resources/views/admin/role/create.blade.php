@@ -87,14 +87,14 @@
                                                 </div>
                                         <div class="submodules-table-div" hidden>
                                             <fieldset>
-                                                <legend> Sub Modules</legend>
+                                                <legend> ACL Assignments</legend>
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="SubModulesTable">
 
                                                 </table>
                                             </fieldset>
                                                <div class="form-group">
                                                         <div class="col-md-3 col-md-offset-4">
-                                                            <button type="submit" class="btn btn-success"> Submitttt </button>
+                                                            <button type="submit" class="btn btn-success"> Submit </button>
                                                         </div>
                                                     </div>
                                                 </div>

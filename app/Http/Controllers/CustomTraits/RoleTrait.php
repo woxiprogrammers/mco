@@ -61,44 +61,43 @@ trait RoleTrait{
 
     public function createRole(RoleRequest $request){
         try{
-            dd($request->all());
             $web_permissions=$request->web_permissions;
             $mobile_permissions=$request->mobile_permissions;
-            dd($mobile_permissions);
-            dd($web_permissions);
             $data = $request->only('name','type');
             $data['name'] = ucwords(trim($data['name']));
 
             $role = Role::create($data);
-            /*
-             * $webPermission & $mobile permission
-             *
-             * $rolepermisiondata = array()
-             * $rolePermissionData[role_id] = $roleId
-             *
-             * foreach(webpermision){
-             * $roleData[permision_id] = $permisonind
-                $roledata[is_weeb] = true;
-            $eif = RoleHasPermission::where('roleid,)->where('permisionid)->first()
-             *  if($eif != null )
-             *    // update query
-             *   else
-             *     // create query
-             * }*/
+
             $roleId = $role['id'];
-            $permission_id = $web_permissions->permission_id;
             $rolePermissionData = array();
             $rolePermissionData['role_id'] = $roleId;
+
             foreach ($web_permissions as $permissions)
             {
-                $permissions['permission_id'] = $permission_id;
+                $rolePermissionData['is_web'] = true;
+                $rolePermissionData['permission_id'] = $permissions;
                 $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
                 if($check != null)
                 {
-                        RoleHasPermission::
+                        RoleHasPermission::where('role_id',$roleId)->update('is_web',true);
                 }
                 else{
+                        RoleHasPermission::create($rolePermissionData);
+                }
+            }
 
+            foreach ($mobile_permissions as $permissions)
+            {
+                $rolePermissionData['is_mobile'] = true;
+                $rolePermissionData['permission_id'] = $permissions;
+                $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
+
+                if($check != null)
+                {
+                    RoleHasPermission::where('role_id',$roleId)->update('is_mobile',true);
+                }
+                else{
+                    RoleHasPermission::create($rolePermissionData);
                 }
             }
 
