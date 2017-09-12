@@ -524,7 +524,7 @@ trait BillTrait{
                 $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $total_extra_item),3);
             }
             $total_rounded['current_bill_subtotal'] = round($total['current_bill_subtotal']);
-            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = round($total['current_bill_subtotal'] - $bill['discount_amount']);
+            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = round(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                             ->where('bill_taxes.bill_id','=',$bill['id'])
                             ->where('taxes.is_special','=', false)
@@ -537,7 +537,7 @@ trait BillTrait{
             for($j = 0 ; $j < count($billTaxes) ; $j++){
                 $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
                 $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
-                $final['current_bill_amount'] = round($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']);
+                $final['current_bill_amount'] = round(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
             }
             $specialTaxes= BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])

@@ -704,7 +704,7 @@
 @endsection
 @section('javascript')
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
-<script src="/assets/custom/admin/quotation/quotation.js"></script>
+<script src="/assets/custom/admin/quotation/quotation5.js"></script>
 <script src="/assets/custom/admin/quotation/validations.js"></script>
 <script src="/assets/global/plugins/jquery-form.min.js"></script>
 <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>

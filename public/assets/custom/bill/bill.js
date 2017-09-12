@@ -225,7 +225,7 @@ function calculateTax(){
         final_total_current_bill = final_total_current_bill + tax_amount_current_bill;
         $(this).parent().next().find('span').text(tax_amount_current_bill.toFixed(3));
     });
-    $("#final_current_bill_total").text(Math.round(final_total_current_bill));
+    $("#final_current_bill_total").text(final_total_current_bill.toFixed(3));
     calculateSpecialTax()
 }
 
@@ -256,9 +256,10 @@ function calculateSpecialTax(){
         $(".special-tax-amount").each(function(){
             grossTotal = grossTotal + parseFloat($(this).text());
         });
-        $("#grand_current_bill_total").text(grossTotal);
+        $("#grand_current_bill_total").text(grossTotal.toFixed());
     }else{
-        $("#grand_current_bill_total").text($("#final_current_bill_total").text());
+        var grossTotal = parseInt($("#final_current_bill_total").text());
+        $("#grand_current_bill_total").text(grossTotal.toFixed());
     }
 }
 
