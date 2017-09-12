@@ -249,7 +249,7 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/product/product5.js"></script>
+<script src="/assets/custom/admin/product/product.js"></script>
 <script src="/assets/custom/admin/product/validations.js"></script>
 <script>
     $(document).ready(function(){

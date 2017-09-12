@@ -10,7 +10,7 @@ $(document).ready(function(){
             return false;
         }
     });
-    $.getScript('/assets/custom/admin/product/product5.js');
+    $.getScript('/assets/custom/admin/product/product.js');
     $(".quotation-category").change(function(){
         var category_id = $(this).val();
         var categoryIdField = $(this).attr('id');

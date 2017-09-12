@@ -178,7 +178,7 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/product/product5.js"></script>
+<script src="/assets/custom/admin/product/product.js"></script>
 <script src="/assets/custom/admin/product/validations.js"></script>
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
