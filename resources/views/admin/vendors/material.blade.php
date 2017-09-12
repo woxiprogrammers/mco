@@ -28,6 +28,15 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
+                                            <ul class="nav nav-tabs">
+                                                <li >
+                                                    <a href="/vendors/create">General</a>
+                                                </li>
+                                                <li class="active">
+                                                    <a href="#">Material Assign </a>
+                                                </li>
+
+                                            </ul>
                                             <form role="form" id="material-vendor" class="form-horizontal" method="post" action="/vendors/material">
                                                 {!! csrf_field() !!}
                                                 <div class="tab-content">
@@ -91,7 +100,7 @@
     </div>
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/vendors/vendor.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/vendor/vendor171.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 

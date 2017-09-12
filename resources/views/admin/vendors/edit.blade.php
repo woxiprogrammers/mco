@@ -168,7 +168,7 @@
 @endsection
 
 @section('javascript')
-    <script src="/assets/custom/admin/vendor/vendor.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/vendor/vendor171.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
             EditVendor.init();

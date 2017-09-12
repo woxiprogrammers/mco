@@ -33,20 +33,21 @@
                                         <a href="javascript:void(0);">Create Vendor</a>
                                     </li>
                                 </ul>
-                                <ul class="nav nav-tabs">
-                                    <li class="active">
-                                        <a href="#">General</a>
-                                    </li>
-                                    <li>
-                                        <a href="/vendors/material">Material Assign </a>
-                                    </li>
 
-                                </ul>
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active">
+                                                    <a href="#">General</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/vendors/material">Material Assign </a>
+                                                </li>
+
+                                            </ul>
                                             <form role="form" id="create-vendor" class="form-horizontal" method="post" action="/vendors/create">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
@@ -117,6 +118,16 @@
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
+                                                            <label for="alternate_email" class="control-label">Alternate Email Address </label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="alternate_email" name="alternate_email">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-body">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
                                                             <label class="control-label">City Name</label>
                                                             <span>*</span>
                                                         </div>
@@ -149,7 +160,7 @@
     </div>
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/vendors/vendor.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/vendor/vendor171.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
             $('#cityId').trigger('change');

@@ -21,8 +21,6 @@ trait VendorTrait
     public function getCreateView(Request $request)
     {
         try {
-            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            return view('admin.vendors.material')->with(compact('categories'));
             $cities = City::get();
             $cityArray = Array();
             $iterator = 0;
@@ -43,9 +41,26 @@ trait VendorTrait
         }
     }
 
+    public function getMaterialView(Request $request)
+    {
+        try {
+            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            return view('admin.vendors.material')->with(compact('categories'));
+        } catch (\Exception $e) {
+            $data = [
+                'action' => "Get vendor material view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function getMaterials(Request $request,$category){
         try{
 
+           //dd($request->all());
             $materials = Material::join('category_material_relations','materials.id','=','category_material_relations.material_id')
                 ->where('category_material_relations.category_id',$category->id)
                 ->where('materials.is_active', true)
@@ -74,6 +89,29 @@ trait VendorTrait
         }
         return response()->json($materialOptions,$status);
     }
+
+    public function autoSuggest(Request $request, $keyword){
+        try{
+            $vendors = Vendor::where('name','ilike','%'.$keyword.'%')->select('id','name')->get();
+            if($vendors == null){
+                $response = array();
+            }else{
+                $response = $vendors->toArray();
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Vendor auto suggest',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = array();
+        }
+        return response()->json($response,$status);
+    }
+
 
     public function getEditView(Request $request, $vendor)
     {
@@ -115,7 +153,6 @@ trait VendorTrait
             $data['email'] = $request->email;
             $data['gstin'] = $request->gstin;
             $data['alternate_contact'] = $request->alternate_contact;
-            $data['city'] = $request->city;
             $data['is_active'] = false;
             $vendor = Vendor::create($data);
             $request->session()->flash('success', 'Vendor Created successfully.');
@@ -179,7 +216,6 @@ trait VendorTrait
                 $records['data'][$iterator] = [
                     $vendorsData[$pagination]['name'],
                     $vendorsData[$pagination]['mobile'],
-                    $vendorsData[$pagination]['city'],
                     $vendor_status,
 
                     '<div class="btn-group">

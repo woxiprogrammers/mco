@@ -169,7 +169,7 @@ function getMaterials(category){
         success: function(data, textStatus, xhr){
             if(xhr.status == 200){
                 $("#material_id").html(data);
-                $("#vendorsMaterialTable input[type='number']").each(function(){
+                $("#productMaterialTable input[type='number']").each(function(){
                     $(this).rules('add',{
                         required: true
                     });
@@ -184,7 +184,6 @@ function getMaterials(category){
         }
     });
 }
-
 
 $(document).ready(function(){
 
