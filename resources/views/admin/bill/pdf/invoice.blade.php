@@ -172,7 +172,7 @@
                     @endif
                 </td>
                 <td width="32.5%" style="padding-bottom: 60px;text-align: left"><b>Discount Details</b><br>
-                    Discount % : {!! $discount_amount !!}<br>
+                    Discount  : {!! $discount_amount !!}<br>
                     Decsription : {!! $discount_description !!}<br>
                 </td>
                 <td width="32.5%" style="padding-top: 60px; text-align: right;"><b>Authorised Signatory</b></td>
