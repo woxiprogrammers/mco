@@ -213,6 +213,19 @@
                                                                     </label>
                                                                 </div>
                                                             </div>
+                                                            <div class="col-md-offset-7">
+                                                                <div class="col-md-3 col-md-offset-3" style="align-items: ">
+                                                                    <label class="control-label" style="font-weight: bold; text-align: right">
+                                                                        Round Total:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label" style="font-weight: bold; margin-left: 1%" id="total">
+
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="form-group">
                                                                 <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">
                                                                     <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
@@ -236,7 +249,7 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/product/product.js"></script>
+<script src="/assets/custom/admin/product/product4.js"></script>
 <script src="/assets/custom/admin/product/validations.js"></script>
 <script>
     $(document).ready(function(){
