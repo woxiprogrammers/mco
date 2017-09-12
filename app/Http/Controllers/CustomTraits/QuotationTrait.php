@@ -656,7 +656,7 @@ trait QuotationTrait{
             $response = array();
             if(count($projectSites) <= 0)
             {
-                $response[] = '<option value=" "> Project Site Not Available </option>';
+                $response[] = '<option value=" " style="text-color:red">Project Site Not Available</option>';
             }else{
                 foreach ($projectSites as $projectSite) {
                     $response[] = '<option value="' . $projectSite->id . '">' . $projectSite->name . '</option> ';
