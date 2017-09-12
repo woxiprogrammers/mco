@@ -137,6 +137,18 @@
                             </label>
                         </div>
                     </div>
+                    <div class="col-md-offset-7">
+                        <div class="col-md-3 col-md-offset-2" style="margin-left: 44%">
+                            <label class="control-label" style="font-weight: bold; text-align: right">
+                               Round Total:
+                            </label>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="control-label" style="font-weight: bold; margin-left: 1%" id="roundproductViewTotal">
+
+                            </label>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <div class="col-md-3 col-md-offset-4" style="margin-left: 84%; margin-top: 2%">
                             <button type="button" class="btn red" onclick="submitProductEdit()" style="padding-left: 6px"><i class="fa fa-check"></i> Submit </button>

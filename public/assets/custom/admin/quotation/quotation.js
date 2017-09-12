@@ -543,6 +543,7 @@ function calucalateProductViewTotal(){
         $(this).parent().next().text(Math.round(profitMarginAmount * 1000) / 1000);
     });
     $("#productViewTotal").text(Math.round(total * 1000) / 1000);
+    $("#roundproductViewTotal,#roundQuotationProductViewTotal").text(total.toFixed());
 }
 
 function convertUnit(materialId,fromUnit){
