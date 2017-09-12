@@ -220,7 +220,7 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                    <label class="control-label" style="font-weight: bold; margin-left: 1%" id="total">
+                                                                    <label class="control-label" style="font-weight: bold; margin-left: 1%" id="roundtotal">
 
                                                                     </label>
                                                                 </div>
@@ -249,7 +249,7 @@
 </div>
 @endsection
 @section('javascript')
-<script src="/assets/custom/admin/product/product4.js"></script>
+<script src="/assets/custom/admin/product/product5.js"></script>
 <script src="/assets/custom/admin/product/validations.js"></script>
 <script>
     $(document).ready(function(){
