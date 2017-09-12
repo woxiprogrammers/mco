@@ -61,7 +61,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6 input-group" id="inputGroup">
-                                                        <input type="text" class="form-control" id="percentage" name="base_percentage" value="{{$tax['base_percentage']}}">
+                                                        <input type="number" class="form-control" id="percentage" name="base_percentage" value="{{$tax['base_percentage']}}">
                                                         <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
                                                     </div>
                                                 </div>

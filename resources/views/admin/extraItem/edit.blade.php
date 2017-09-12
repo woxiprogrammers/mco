@@ -61,13 +61,13 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="rate" name="rate" value="{{$extraItem['rate']}}">
+                                                            <input type="number" class="form-control" id="rate" name="rate" value="{{$extraItem['rate']}}">
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3">
-                                                        <button type="submit" class="btn blue">Submit</button>
+                                                        <button type="submit" class="btn red" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
                                                     </div>
                                                 </div>
                                             </form>
