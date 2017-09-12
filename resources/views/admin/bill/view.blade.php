@@ -63,6 +63,7 @@
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
                                                     @endfor
                                                 </select>
+                                                <label for="bank" class="control-label" style="padding-left: 5%">Assigned Bill : {!! $bill->bankInfo->bank_name !!}</label>
                                                 @if($bill->bill_status->slug == 'draft')
                                                     <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 30%">
                                                         <i class="fa fa-edit"></i>
