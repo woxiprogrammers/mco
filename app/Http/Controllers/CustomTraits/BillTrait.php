@@ -36,7 +36,7 @@ trait BillTrait{
         try{
             $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $bills = Bill::where('quotation_id',$quotation['id'])->where('bill_status_id','!=',$cancelBillStatusId)->get()->toArray();
+            $bills = Bill::where('quotation_id',$quotation['id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
             $extraItems = QuotationExtraItem::where('quotation_id',$quotation['id'])->get();
             if($bills != null){
@@ -871,7 +871,7 @@ trait BillTrait{
             foreach($distinctProducts as $key => $distinctProduct){
                 $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
                 $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
-                $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($distinctProduct->quotation_products->discount / 100))),3);
+                $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
                 $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
                 $invoiceData[$i]['previous_quantity'] = 0;
                 foreach($billProducts as $k => $billProduct){

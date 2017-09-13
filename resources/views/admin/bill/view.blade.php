@@ -64,7 +64,7 @@
                                                     @endfor
                                                 </select>
                                                 @if($bill->bank_info_id != null)
-                                                    <label for="bank" class="control-label" style="padding-left: 5%">Assigned Bill : {!! $bill->bankInfo->bank_name !!}</label>
+                                                    <label for="bank" class="control-label" style="padding-left: 5%">Assigned Bill : {!! $bill->bankInfo->bank_name !!} - {!! $bill->bankInfo->account_number !!}</label>
                                                 @endif
                                                 @if($bill->bill_status->slug == 'draft')
                                                     <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 30%">
