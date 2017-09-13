@@ -274,4 +274,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
         });
     });
+
+    Route::group(['prefix'=>'drawing'],function() {
+        Route::group(['prefix' => 'category-management'], function(){
+            Route::get('manage',array('uses'=> 'Drawing\DrawingController@getManageView'));
+            Route::get('create-main',array('uses'=> 'Drawing\DrawingController@getCreateMainView'));
+            Route::get('create-sub',array('uses'=> 'Drawing\DrawingController@getCreateSubView'));
+            Route::get('edit-main',array('uses'=> 'Drawing\DrawingController@getMainEditView'));
+            Route::get('edit-sub',array('uses'=> 'Drawing\DrawingController@getSubEditView'));
+
+        });
+    });
+
 });

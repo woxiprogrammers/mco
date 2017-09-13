@@ -969,6 +969,7 @@ trait BillTrait{
                     }
                 }
             }
+            dd($allbills);
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                                 ->where('bill_taxes.bill_id','=',$bill->id)
                                 ->where('taxes.is_special','=', false)
@@ -1024,7 +1025,7 @@ trait BillTrait{
             return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
         }catch(\Exception $e){
             $data = [
-                'action' => 'Edit Bill',
+                'action' => 'Edit Bill view',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];

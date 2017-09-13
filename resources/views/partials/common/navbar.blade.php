@@ -214,18 +214,17 @@
                                     <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-bars"></i> Purchase Request
                                     </a>
-                                </li>
+                               </li>
                                 <li aria-haspopup="true">
                                     <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-bars"></i> Purchase Order
                                     </a>
                                 </li>
-
                             </ul>
                         </li>
-                    <!--                      <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                            <a> Checklist
-                                <span class="arrow"></span>
+                        <!--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                               <a> Checklist
+                                 <span class="arrow"></span>
                             </a>
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
@@ -234,7 +233,8 @@
                                     </a>
                                 </li>
                             </ul>
-                        </li>
+                           </li>
+
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
@@ -251,10 +251,31 @@
                                     </a>
                                 </li>
                             </ul>
+                        </li>-->
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> Drawing
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Category Management
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-bars"></i> Add Image
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-bars"></i> Manage Drawing
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        @endif
-                        </ul>
-                    </li>
+                    @endif
+                </ul>
             </div>
             <!-- END MEGA MENU -->
         </div>
