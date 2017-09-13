@@ -38,7 +38,7 @@
                                     <!-- BEGIN VALIDATION STATES-->
 
 
-                                                {!! csrf_field() !!}
+
                                                 <div class="portlet light ">
                                                     <div class="table-toolbar">
                                                         <ul class="nav nav-tabs nav-tabs-lg">
@@ -51,8 +51,8 @@
                                                         </ul>
                                                     </div>
                                                     <div class="portlet-body form">
-                                                    <form role="form" id="create-vendor" class="form-horizontal" method="post" action="/vendor/create">
-
+                                                    <form role="form" id="create-vendor" class="form-horizontal" method="post" action="/vendors/create">
+                                                        {!! csrf_field() !!}
                                                 <div class="form-body">
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="generaltab">
@@ -140,7 +140,7 @@
                                                         <div class="form-control product-material-select" style="height: 150px;" >
                                                             <ul id="cityList" class="list-group">
                                                                 @foreach($cityArray as $city)
-                                                                    <li><input type="checkbox" name="cities[{{$city['id']}}]" > {{$city['name']}} </li>
+                                                                    <li><input type="checkbox" value={{$city['name']}} name="cities[{{$city['id']}}]" > {{$city['name']}} </li>
                                                                 @endforeach
                                                             </ul>
                                                         </div>
@@ -219,7 +219,7 @@
             </div>
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/vendor/vendor6211.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/vendor/vendors1.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
@@ -240,7 +240,12 @@
                     selectMaterialIds.push($(this).val());
                     console.log($(this).next().text());
                 });
-                console.log(selectMaterialIds);
+                var selectCityIds = [];
+                $("#cityList input:checkbox:checked").each(function () {
+                    selectCityIds.push($(this).val());
+                    console.log($(this).next().text());
+                });
+                console.log(selectMaterialIds , selectCityIds);
             });
         });
     </script>

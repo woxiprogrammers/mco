@@ -202,6 +202,11 @@ $(document).ready(function() {
        $("#material_id input:checkbox:checked").each(function () {
             selectMaterialIds.push($(this).val());
        });
+        var selectCityIds = [];
+        $("#cityList input:checkbox:checked").each(function () {
+            selectCityIds.push($(this).val());
+        });
+
        console.log();
     });
 });

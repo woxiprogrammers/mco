@@ -22,7 +22,7 @@ trait VendorTrait
     public function getCreateView(Request $request)
     {
         try {
-
+            //dd($request->all());
             $cities = City::get();
             $cityArray = Array();
             $iterator = 0;
@@ -133,6 +133,7 @@ trait VendorTrait
     public function createVendor(Request $request)
     {
         try {
+
             $data = Array();
             $data['name'] = ucwords($request->name);
             $data['company'] = $request->company;
