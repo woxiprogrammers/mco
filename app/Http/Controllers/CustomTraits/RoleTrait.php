@@ -34,7 +34,25 @@ trait RoleTrait{
     public function getEditView(Request $request,$role){
         try{
             $role = $role->toArray();
-            return view('admin.role.edit')->with(compact('role'));
+            $modules = Module::whereNull('module_id')->get();
+            $subModuleIds = RoleHasPermission::join('permissions','permissions.id','=','role_has_permissions.permission_id')
+                        ->join('modules','modules.id','=','permissions.module_id')
+                        ->where('role_has_permissions.role_id',$role['id'])
+                        ->orderBy('modules.id','asc')
+                        ->select('modules.id as module_id')
+                        ->distinct()
+                        ->get()->toArray();
+            $subModuleIds = array_column($subModuleIds,'module_id');
+            $moduleIds = Module::whereIn('id',$subModuleIds)->select('module_id')->distinct()->get()->toArray();
+            $moduleIds = array_column($moduleIds,'module_id');
+            $data = $this->getPermissions($moduleIds);
+            $roleWebPermissions = RoleHasPermission::where('role_id',$role['id'])->where('is_web', true)->pluck('permission_id')->toArray();
+            $roleMobilePermissions = RoleHasPermission::where('role_id',$role['id'])->where('is_mobile', true)->pluck('permission_id')->toArray();
+            $webModuleResponse = $data['webModuleResponse'];
+            $permissionTypes = $data['permissionTypes'];
+            $mobileModuleResponse = $data['mobileModuleResponse'];
+            return view('admin.role.edit')->with(compact('role','modules','moduleIds','webModuleResponse','permissionTypes','roleWebPermissions','roleMobilePermissions','mobileModuleResponse'));
+//            return view('admin.role.edit')->with($data);
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -203,18 +221,40 @@ trait RoleTrait{
     public function getSubModules(Request $request){
         try{
             $moduleIds = $request->module_id;
+            $data = $this->getPermissions($moduleIds);
+            return view('partials.role.module-listing')->with($data);
+        }
+        catch (\Exception $e){
+            $data = [
+                'action' => 'Get Submodules',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+
+    }
+
+    /*public function getPermissions($webModuleResponse,$permissionTypes,$mobileModuleResponse){
+
+
+    }*/
+
+    public function getPermissions($moduleIds){
+        try{
             $webModules = Module::join('permissions','modules.id','=','permissions.module_id')
-                        ->whereIn('modules.module_id',$moduleIds)
-                        ->where('permissions.is_web',true)
-                        ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
-                        ->get();
+                ->whereIn('modules.module_id',$moduleIds)
+                ->where('permissions.is_web',true)
+                ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
+                ->get();
 
             $mobileModules =  Module::join('permissions','modules.id','=','permissions.module_id')
                 ->whereIn('modules.module_id',$moduleIds)
                 ->where('permissions.is_mobile',true)
                 ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
                 ->get();
-            //dd($mobileModules->toArray());
             $webModuleResponse = array();
             foreach ($webModules as $subModule){
                 if($subModule['module_id'] == null){
@@ -234,7 +274,7 @@ trait RoleTrait{
                 }
                 $webModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'][$subModule['permission_type_id']] = $subModule['permission_id'];
             }
-            //dd($webModuleResponse);
+
             $mobileModuleResponse = array();
             foreach ($mobileModules as $subModule){
                 if($subModule['module_id'] == null){
@@ -254,22 +294,22 @@ trait RoleTrait{
                 }
                 $mobileModuleResponse[$subModule['module_id']]['submodules'][$subModule['submodule_id']]['permissions'][$subModule['permission_type_id']] = $subModule['permission_id'];
             }
-
             $permissionTypes = PermissionType::select('id','name')->get()->toArray();
-            //dd($mobileModuleResponse);
-            return view('partials.role.module-listing')->with(compact('webModuleResponse','permissionTypes','mobileModuleResponse'));
-        }
-        catch (\Exception $e){
+            $data = array();
+            $data['webModuleResponse'] = $webModuleResponse;
+            $data['permissionTypes'] = $permissionTypes;
+            $data['mobileModuleResponse'] = $mobileModuleResponse;
+            return $data;
+        }catch(\Exception $e){
             $data = [
-                'action' => 'Get Submodules',
-                'params' => $request->all(),
+                'action' => 'Get Permissions',
+                'modules' => $moduleIds,
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
-
-
     }
+
 
 }
