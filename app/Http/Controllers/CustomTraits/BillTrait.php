@@ -1312,6 +1312,8 @@ trait BillTrait{
                             $billSubTotal[$thisBill->id]['subtotal'] = array();
                             $billSubTotal[$thisBill->id]['subtotal'] =  $billQuotationExtraItems[$iterator]['bills'][$iteratorJ]['current_rate'];
                         }
+                        $billSubTotal[$thisBill->id]['discounted_total'] = $billSubTotal[$thisBill->id]['subtotal'] - $thisBill->discount_amount;
+                        $billSubTotal[$thisBill->id]['discount'] = $thisBill->discount_amount;
                         $iteratorJ++;
                     }
                     $billQuotationExtraItems[$iterator]['total_rate'] = $total_rate;
@@ -1330,13 +1332,14 @@ trait BillTrait{
                 foreach($billSubTotal as $billId => $subTotal){
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_id'] = $billId;
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_subtotal'] = $subTotal['subtotal'];
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_discountedTotal'] = $subTotal['discounted_total'];
                     $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
                     if(count($isAppliedTax) == 0){
                         $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = 0;
                     }else{
                         $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = $isAppliedTax['percentage'];
                     }
-                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'] = round(($subTotal['subtotal'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'] = round(($subTotal['discounted_total'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
                     $taxInfo[$taxId['tax_id']]['total'] += $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'];
                 }
             }
@@ -1352,6 +1355,7 @@ trait BillTrait{
                 foreach($billSubTotal as $billId => $subTotal){
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_id'] = $billId;
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_subtotal'] = $subTotal['subtotal'];
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_discountedTotal'] = $subTotal['discounted_total'];
                     $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
                     if(count($isAppliedTax) == 0){
                         $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = 0;
@@ -1362,7 +1366,7 @@ trait BillTrait{
                         $taxAmount = 0;
                         foreach($specialTaxAppliedID as $appliedOnId){
                             if($appliedOnId == 0){
-                                $taxAmount += round(($subTotal['subtotal'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
+                                $taxAmount += round(($subTotal['discounted_total'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
                             }else{
                                 $taxAmount += round(($taxInfo[$appliedOnId]['bills'][$billId]['tax_amount'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
                             }
@@ -1446,6 +1450,20 @@ trait BillTrait{
                     }
                     $sheet->getCell($columnForSubTotal.($productRow))->setValue($totalSubTotal);
                     $productRow++;
+
+                    $sheet->getCell('B'.($productRow))->setValue('Discount Total');
+                    $columnForDiscountSubTotal = 'G';
+                    $rowForDiscountSubtotal = $productRow;
+                    $totalDiscountSubTotal = 0;
+                    foreach($billSubTotal as $subTotal){
+                        $totalDiscountSubTotal += $subTotal['discounted_total'];
+                        $sheet->getCell($columnForDiscountSubTotal.($productRow))->setValue($subTotal['discounted_total']);
+                        $columnForDiscountSubTotal++;
+                        $columnForDiscountSubTotal++;
+                    }
+                    $sheet->getCell($columnForDiscountSubTotal.($productRow))->setValue($totalDiscountSubTotal);
+
+                    $productRow++;
                     foreach($taxInfo as $tax){
                         $sheet->getCell('B'.($productRow))->setValue($tax['name']);
                         $next_column = 'F';
@@ -1464,11 +1482,11 @@ trait BillTrait{
                     $beforeTotalRowNumber = $productRow - 1;
                     $sheet->getCell('B'.($productRow))->setValue('Total');
                     foreach($data['tillThisBill'] as $bill){
-                        $sheet->getCell($columnForTotal.($productRow))->setValue("=SUM($columnForTotal$rowForSubtotal:$columnForTotal$beforeTotalRowNumber)");
+                        $sheet->getCell($columnForTotal.($productRow))->setValue("=SUM($columnForTotal$rowForDiscountSubtotal:$columnForTotal$beforeTotalRowNumber)");
                         $columnForTotal++;
                         $columnForTotal++;
                     }
-                    $sheet->getCell($columnForTotal.($productRow))->setValue("=SUM($columnForTotal$rowForSubtotal:$columnForTotal$beforeTotalRowNumber)");
+                    $sheet->getCell($columnForTotal.($productRow))->setValue("=SUM($columnForTotal$rowForDiscountSubtotal:$columnForTotal$beforeTotalRowNumber)");
 
                 });
             })->download('xlsx'); //->export('xls');
