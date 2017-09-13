@@ -18,8 +18,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Edit Role {{$role['name']}}
-                                    </h1>
+                                    <h1>Edit Role</h1>
                                 </div>
                             </div>
                         </div>
@@ -71,7 +70,7 @@
                                                             <div class="form-control product-material-select" >
                                                                 <ul id="module_id" class="list-group">
                                                                     @foreach($modules as $module)
-                                                                        <li  class="list-group-item">
+                                                                        <li class="list-group-item">
                                                                             @if(in_array($module['id'],$moduleIds))
                                                                                 <input type="checkbox" name="module_id" value="{{$module->id}}" checked> {{$module->name}}
                                                                             @else
@@ -88,11 +87,11 @@
                                                             <a class="btn btn-success btn-md" id="next_btn"> Add </a>
                                                         </div>
                                                     </div>
-                                                    {{--<input type="hidden" name="material_version_ids" >--}}
-                                                    <div class="materials-table-div">
+
+                                                    <div class="submodules-table-div">
                                                         <fieldset>
                                                             <legend> ACL Assignments</legend>
-                                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="SubModuleTable">
+                                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="SubModulesTable">
                                                                 <tr>
                                                                     <th style="width: 25%"> Name </th>
                                                                     @foreach($permissionTypes as $permissionType)
@@ -147,7 +146,7 @@
                                                                                 @foreach($permissionTypes as $permissionType)
                                                                                     <td style="text-align: center">
                                                                                         @if(array_key_exists($permissionType['id'],$subModule['permissions']))
-                                                                                            @if(in_array($subModule['permissions'][$permissionType['id']],$rolePermissions))
+                                                                                            @if(in_array($subModule['permissions'][$permissionType['id']],$roleMobilePermissions))
                                                                                                 <input type="checkbox" name="mobile_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}" checked>
                                                                                             @else
                                                                                                 <input type="checkbox" name="mobile_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}">
@@ -166,7 +165,7 @@
                                                     </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3">
-                                                        <button type="submit" class="btn blue">Submit</button>
+                                                        <button type="submit" class="btn blue pull-right">Submit</button>
                                                     </div>
                                                 </div>
                                                 </div>
@@ -184,7 +183,7 @@
 @endsection
 
 @section('javascript')
-    <script src="/assets/custom/admin/role/role3.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/role/role7.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
             EditRole.init();

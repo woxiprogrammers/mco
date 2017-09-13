@@ -134,12 +134,34 @@ trait RoleTrait{
 
     public function editRole(RoleRequest $request, $role){
         try{
-            $role->update(['name' => ucwords(trim($request->name))]);
+            //dd($request->all());
+            $roleId = $role->id;
+            $web_permissions = $request->web_permissions;
+            $mobile_permissions = $request->mobile_permissions;
+            $data = $request->only('name','type');
+            $data['name'] = ucwords(trim($data['name']));
+            $role->update($data);
+
+            $rolePermissionData = array();
+
+            if($request->has('web_permissions'))
+            foreach ($web_permissions as $permissions){
+                $rolePermissionData['is_web'] = true;
+                $rolePermissionData['permission_id'] = $permissions;
+                RoleHasPermission::where('role_id',$roleId)->update($rolePermissionData);
+            }
+            if($request->has('mobile_permissions')) {
+                foreach ($mobile_permissions as $permissions) {
+                    $rolePermissionData['is_mobile'] = true;
+                    $rolePermissionData['permission_id'] = $permissions;
+                    RoleHasPermission::where('role_id', $roleId)->update($rolePermissionData);
+                }
+            }
             $request->session()->flash('success', 'Role Edited successfully.');
             return redirect('/role/edit/'.$role->id);
         }catch(\Exception $e){
             $data = [
-                'action' => 'Create Role',
+                'action' => 'Edit Role',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
@@ -220,9 +242,23 @@ trait RoleTrait{
 
     public function getSubModules(Request $request){
         try{
+
             $moduleIds = $request->module_id;
             $data = $this->getPermissions($moduleIds);
-            return view('partials.role.module-listing')->with($data);
+            $webModuleResponse = $data['webModuleResponse'];
+            $permissionTypes = $data['permissionTypes'];
+            $mobileModuleResponse = $data['mobileModuleResponse'];
+            if($request->has('role_id')){
+                $role = $request->role_id;
+                $roleWebPermissions = RoleHasPermission::where('role_id',$role)->where('is_web', true)->pluck('permission_id')->toArray();
+                $roleMobilePermissions = RoleHasPermission::where('role_id',$role)->where('is_mobile', true)->pluck('permission_id')->toArray();
+
+            }else{
+                $roleWebPermissions = [];
+                $roleMobilePermissions = [];
+            }
+            return view('partials.role.module-listing')->with(compact('moduleIds','webModuleResponse','permissionTypes','mobileModuleResponse','roleWebPermissions','roleMobilePermissions'));
+            //return view('partials.role.module-listing')->with($data);
         }
         catch (\Exception $e){
             $data = [
@@ -236,11 +272,6 @@ trait RoleTrait{
 
 
     }
-
-    /*public function getPermissions($webModuleResponse,$permissionTypes,$mobileModuleResponse){
-
-
-    }*/
 
     public function getPermissions($moduleIds){
         try{

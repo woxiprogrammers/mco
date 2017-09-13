@@ -113,8 +113,12 @@
 
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/role/role3.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/role/role6.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
-
+    <script>
+        $(document).ready(function() {
+            CreateRole.init();
+        });
+    </script>
 @endsection

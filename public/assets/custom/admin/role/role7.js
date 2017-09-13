@@ -86,7 +86,7 @@ var  EditRole = function () {
                         url: "/role/check-name",
                         type: "POST",
                         data: {
-                            category_id: function(){
+                            role_id: function(){
                                 return $("#role_id").val();
                             },
                             _token: function(){
@@ -95,6 +95,7 @@ var  EditRole = function () {
                             name: function() {
                                 return $( "#name" ).val();
                             }
+
                         }
                     }
                 }
@@ -102,8 +103,7 @@ var  EditRole = function () {
 
             messages: {
                 name: {
-                    required: "Name is required.",
-                    remote: "Name already exists."
+                    required: "Name is required."
                 }
             },
 
@@ -182,7 +182,7 @@ function getSubModules() {
         module_id[i] = $(this).val();
     });
     formData['module_id'] = module_id;
-    if($(".product-material-id").length > 0){
+    /*if($(".product-material-id").length > 0){
         formData['modules'] = {};
         $(".product-material-id").each(function(i){
             var module_id = $(this).val();
@@ -193,7 +193,12 @@ function getSubModules() {
             formData['modules'][module_id]['is_mobile'] = $("#module_"+module_id+"_is_mobile").val();
 
         });
+    }*/
+    var url = window.location.href;
+    if(url.indexOf("edit") > 0){
+        formData['role_id'] = $("#role_id").val();
     }
+
     $.ajax({
         type: "POST",
         url: "/role/module/listing",

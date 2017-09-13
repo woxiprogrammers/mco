@@ -21,7 +21,7 @@
                      @foreach($permissionTypes as $permissionType)
                          <td style="text-align: center">
                             @if(array_key_exists($permissionType['id'],$subModule['permissions']))
-                                 @if(in_array($subModule['permissions'][$permissionType['id']],$rolePermissions))
+                                 @if(in_array($subModule['permissions'][$permissionType['id']],$roleWebPermissions))
                                      <input type="checkbox" name="web_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}" checked>
                                  @else
                                      <input type="checkbox" name="web_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}">
@@ -52,7 +52,7 @@
                 @foreach($permissionTypes as $permissionType)
                     <td style="text-align: center">
                         @if(array_key_exists($permissionType['id'],$subModule['permissions']))
-                            @if(in_array($subModule['permissions'][$permissionType['id']],$rolePermissions))
+                            @if(in_array($subModule['permissions'][$permissionType['id']],$roleMobilePermissions))
                             <input type="checkbox" name="mobile_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}" checked>
                             @else
                                 <input type="checkbox" name="mobile_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}">
