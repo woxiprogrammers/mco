@@ -64,8 +64,8 @@
 
                                                                 @endif
                                                             </div>
-                                                            <div class="col-md-5 date date-picker" data-date-end-date="0d" style="margin-left: 25%">
-                                                                <label class="control-label" for="performa_invoice_date" style="margin-left: 12%">Select Performa Invoice Date : </label>
+                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d" style="margin-left: 20%">
+                                                                <label class="control-label" for="performa_invoice_date" style="margin-left: -60%">Select Performa Invoice Date : </label>
                                                                 @if(!empty($bill['performa_invoice_date']))
                                                                     <input type="text"  name="performa_invoice_date" value="{{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}" id="performa_invoice_date" readonly>
                                                                     <button class="btn btn-sm default" type="button">
@@ -76,9 +76,15 @@
                                                                     <button class="btn btn-sm default" type="button">
                                                                         <i class="fa fa-calendar"></i>
                                                                     </button>
-
-
                                                                 @endif
+                                                            </div>
+                                                            <div class="col-md-2" style="margin-left: -4%">
+                                                                <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
+                                                                    <option value="default">Assigned Bank</option>
+                                                                    @foreach($allbankInfoIds as $bank)
+                                                                        <option value="{{$bank['bank_info_id']}}"> {!! $bank->bankInfo->bank_name !!} </option>
+                                                                    @endforeach
+                                                                </select>
                                                             </div>
 
                                                         </div>
@@ -359,6 +365,13 @@
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
+
+<script>
+    $(document).ready(function(){
+        CreateBank.init();
+    });
+    $('select[name="assign_bank"]').find('option[value={{$bill->bank_info_id}}]').attr("selected",true);
+</script>
 @endsection
 
 

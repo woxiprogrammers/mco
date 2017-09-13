@@ -33,7 +33,7 @@
 <!-- END HEAD -->
 <body class="page-container-bg-solid page-md">
         @yield('content')
-        <div class="page-wrapper-row">
+        <!-- <div class="page-wrapper-row">
             <div class="page-wrapper-bottom">
                 <div class="page-footer">
                     <div class="container">
@@ -44,7 +44,7 @@
                     <i class="icon-arrow-up"></i>
                 </div>
                 </div>
-            </div>
+            </div> -->
                 <!-- END INNER FOOTER -->
                 <!-- END FOOTER -->
     </div>
