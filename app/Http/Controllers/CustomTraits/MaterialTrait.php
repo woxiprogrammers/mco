@@ -261,8 +261,6 @@ trait MaterialTrait{
             }else{
                 $nameCount = Material::where('name','ilike',$materialName)->count();
             }
-            Log::info('in check name');
-            Log::info($nameCount);
             if($nameCount > 0){
                 return 'false';
             }else{

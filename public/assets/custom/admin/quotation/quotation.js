@@ -122,8 +122,6 @@ $(document).ready(function(){
 
                     }
                 });
-            }else{
-                //alert("Please enter valid data in your form fields.");
             }
         }else{
             alert("Please add atleast one product");
