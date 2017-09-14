@@ -1,6 +1,6 @@
-var  CreateCheckList = function () {
+var  CreateCheckListStructure = function () {
     var handleCreate = function() {
-        var form = $('#create-checkList');
+        var form = $('#create-user');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -8,44 +8,38 @@ var  CreateCheckList = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                name: {
+                main_cat: {
                     required: true
                 },
-                company:{
+                sub_cat:{
                     required: true
                 },
-                mobile:{
+                title_name:{
                     required: true
                 },
-                email:{
+                nochapter:{
                     required: true,
                     email: true
                 },
-                gstin:{
-                    required: true
-                },
-                city:{
+                description:{
                     required: true
                 }
             },
             messages: {
-                name: {
-                    required: "Vendor Name is required."
+                main_cat: {
+                    required: "Main Category Name is required."
                 },
-                company:{
-                    required: "Company Name is required."
+                sub_cat:{
+                    required: "Sub Category Name is required."
                 },
-                mobile:{
-                    required: "Mobile is required."
+                title_name:{
+                    required: "Title Name is required."
                 },
-                email:{
-                    required: "Email is required."
+                nochapter:{
+                    required: "Number of Images is required."
                 },
-                gstin:{
-                    required: "GSTIN is required."
-                },
-                city:{
-                    required: "City is required."
+                description:{
+                    required: "Description is required."
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
@@ -79,7 +73,7 @@ var  CreateCheckList = function () {
     };
 }();
 
-var  EditVendor = function () {
+var  EditCheckListStructure = function () {
     var handleEdit = function() {
         var form = $('#edit-vendor');
         var error = $('.alert-danger', form);
@@ -89,44 +83,38 @@ var  EditVendor = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                name: {
+                main_cat: {
                     required: true
                 },
-                company:{
+                sub_cat:{
                     required: true
                 },
-                mobile:{
+                title_name:{
                     required: true
                 },
-                email:{
+                nochapter:{
                     required: true,
                     email: true
                 },
-                gstin:{
-                    required: true
-                },
-                city:{
+                description:{
                     required: true
                 }
             },
             messages: {
-                name: {
-                    required: "Vendor Name is required."
+                main_cat: {
+                    required: "Main Category Name is required."
                 },
-                company:{
-                    required: "Company Name is required."
+                sub_cat:{
+                    required: "Sub Category Name is required."
                 },
-                mobile:{
-                    required: "Mobile is required."
+                title_name:{
+                    required: "Title Name is required."
                 },
-                email:{
-                    required: "Email is required."
+                nochapter:{
+                    required: "Number of Images is required."
                 },
-                gstin:{
-                    required: "GSTIN is required."
-                },
-                city:{
-                    required: "City is required."
+                description:{
+                    required: "Description is required."
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit

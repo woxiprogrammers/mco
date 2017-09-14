@@ -133,7 +133,6 @@ trait VendorTrait
     public function createVendor(Request $request)
     {
         try {
-
             $data = Array();
             $data['name'] = ucwords($request->name);
             $data['company'] = $request->company;
@@ -166,7 +165,6 @@ trait VendorTrait
             $vendorData['email'] = $data['email'];
             $vendorData['gstin'] = $data['gstin'];
             $vendorData['alternate_contact'] = $data['alternate_contact'];
-            $vendorData['city'] = $data['city'];
             $vendor->update($vendorData);
             $request->session()->flash('success', 'Vendor Edited successfully.');
             return redirect('/vendors/edit/' . $vendor->id);

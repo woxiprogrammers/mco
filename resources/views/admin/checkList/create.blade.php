@@ -20,10 +20,7 @@
                                     <h1>Create CheckList</h1>
                                 </div>
                                 <div class="form-group " style="float: right;margin-top:1%">
-                                    <a href="/checkList/manage" class="btn btn-set red pull-right">
-                                        <i class="fa fa-check"></i>
-                                        Submit
-                                    </a>
+                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
                                 </div>
                             </div>
                         </div>
@@ -72,7 +69,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" id="titlename" placeholder="Enter Title Here">
+                                                        <input type="text" class="form-control" name="title_name" id="title_name" placeholder="Enter Title Here">
                                                         <div id="sample_editable_1_new" class="btn yellow" style="margin-top: -9%; margin-left: 105%"><button style="color: white" id="add"><i class="fa fa-plus"></i> </button>
                                                         </div>
                                                         <div id="removeBtn"  style="margin-top: -5%; margin-left: 118%" >
@@ -110,7 +107,7 @@
                                                             <div id="extra">
                                                              <div class="row">
                                                                  <div class="col-md-6" >
-                                                                     <input type="checkbox" class="make-switch" data-on-text="Yes" data-off-text="No" name="is_special">
+                                                                     <input type="checkbox" class="make-switch" id="is_special" data-on-text="Yes" data-off-text="No" name="is_special">
                                                                  </div>
                                                                  <div class="col-md-6">
                                                                      <input type="text" class="form-control" id="description" name="description" placeholder="Enter Description Here"  >
@@ -152,7 +149,14 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/checkliststructure/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/checkliststructure/checklist3.js" type="application/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            CreateCheckListStructure.init();
+        });
+        </script>
     <script>
         $('document').ready(function(){
 
