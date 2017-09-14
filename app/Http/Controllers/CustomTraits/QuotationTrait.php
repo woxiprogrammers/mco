@@ -558,9 +558,10 @@ trait QuotationTrait{
                                 ->join('materials','materials.id','=','material_versions.material_id')
                                 ->where('materials.id','=',$materialId)
                                 ->where('product_material_relation.product_version_id',$recentVersion)
-                                ->pluck('product_material_relation.material_quantity')
+                                ->select('product_material_relation.material_quantity','material_versions.unit_id as unit_id')
                                 ->first();
-                            $productAmount = round($productAmount - ($materialQuantity * $data['material_rate'][$materialId]),3);
+                            $rate = UnitHelper::unitConversion($data['material_unit'][$materialId],$materialQuantity['unit_id'],$data['material_rate'][$materialId]);
+                            $productAmount = round($productAmount - ($materialQuantity['material_quantity'] * $rate),3);
                         }
                     }
                 }
@@ -760,7 +761,20 @@ trait QuotationTrait{
             $data = $request->all();
             $productIds = $data['product_ids'];
             foreach($productIds as $productId){
-                $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                if($request->has('quotation_id')){
+                    $quotationProduct = QuotationProduct::where('quotation_id', $request->quotation_id)->where('product_id',$productId)->first();
+                    if($quotationProduct != null){
+                        if($quotationProduct->product_version_id == null || $quotationProduct->product_version_id == ''){
+                            $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                        }else{
+                            $recentVersion = $quotationProduct->product_version_id;
+                        }
+                    }else{
+                        $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                    }
+                }else{
+                    $recentVersion = ProductVersion::where('product_id',$productId)->orderBy('created_at','desc')->pluck('id')->first();
+                }
                 $productMaterialIds = ProductMaterialRelation::join('material_versions','material_versions.id','=','product_material_relation.material_version_id')
                     ->join('materials','materials.id','=','material_versions.material_id')
                     ->where('product_material_relation.product_version_id',$recentVersion)
@@ -874,9 +888,10 @@ trait QuotationTrait{
                                 ->join('materials','materials.id','=','material_versions.material_id')
                                 ->where('materials.id','=',$materialId)
                                 ->where('product_material_relation.product_version_id',$recentVersion)
-                                ->pluck('product_material_relation.material_quantity')
+                                ->select('product_material_relation.material_quantity as material_quantity','material_versions.unit_id as unit_id')
                                 ->first();
-                            $productAmount = $productAmount - ($materialQuantity * $data['material_rate'][$materialId]);
+                            $rate = UnitHelper::unitConversion($data['material_unit'][$materialId],$materialQuantity['unit_id'],$data['material_rate'][$materialId]);
+                            $productAmount = $productAmount - ($materialQuantity['material_quantity'] * $rate);
                         }
                     }
                 }
@@ -1052,9 +1067,10 @@ trait QuotationTrait{
                                     ->join('materials','materials.id','=','material_versions.material_id')
                                     ->where('materials.id','=',$materialId)
                                     ->where('product_material_relation.product_version_id',$recentVersion)
-                                    ->pluck('product_material_relation.material_quantity')
+                                    ->select('product_material_relation.material_quantity','material_versions.unit_id as unit_id')
                                     ->first();
-                                $productAmount = round($productAmount - ($materialQuantity * $data['material_rate'][$materialId]),3);
+                                $rate = UnitHelper::unitConversion($data['material_unit'][$materialId],$materialQuantity['unit_id'],$data['material_rate'][$materialId]);
+                                $productAmount = round($productAmount - ($materialQuantity['material_quantity'] * $rate),3);
                             }
                         }
                     }
@@ -1066,9 +1082,10 @@ trait QuotationTrait{
                                 ->join('materials','materials.id','=','material_versions.material_id')
                                 ->where('materials.id','=',$material['id'])
                                 ->where('product_material_relation.product_version_id',$recentVersion)
-                                ->pluck('product_material_relation.material_quantity')
+                                ->select('product_material_relation.material_quantity','material_versions.unit_id as unit_id')
                                 ->first();
-                            $productAmount = round($productAmount - ($materialQuantity * $material['rate_per_unit']),3);
+                            $rate = UnitHelper::unitConversion($data['material_unit'][$materialId],$materialQuantity['unit_id'],$data['material_rate'][$materialId]);
+                            $productAmount = round($productAmount - ($materialQuantity['material_quantity'] * $rate),3);
                         }
                     }
                 }
