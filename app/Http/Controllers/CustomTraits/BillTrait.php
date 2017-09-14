@@ -1451,6 +1451,19 @@ trait BillTrait{
                     $sheet->getCell($columnForSubTotal.($productRow))->setValue($totalSubTotal);
                     $productRow++;
 
+                    $sheet->getCell('B'.($productRow))->setValue('Discount');
+                    $columnForDiscount = 'G';
+                    $rowForDiscount = $productRow;
+                    $totalDiscount = 0;
+                    foreach($billSubTotal as $subTotal){
+                        $totalDiscount += $subTotal['discount'];
+                        $sheet->getCell($columnForDiscount.($productRow))->setValue($subTotal['discount']);
+                        $columnForDiscount++;
+                        $columnForDiscount++;
+                    }
+                    $sheet->getCell($columnForDiscount.($productRow))->setValue($totalDiscount);
+                    $productRow++;
+
                     $sheet->getCell('B'.($productRow))->setValue('Discount Total');
                     $columnForDiscountSubTotal = 'G';
                     $rowForDiscountSubtotal = $productRow;
