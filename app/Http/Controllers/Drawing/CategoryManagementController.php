@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Drawing;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class DrawingController extends Controller
+class CategoryManagementController extends Controller
 {
     public function __construct(){
         $this->middleware('custom.auth');

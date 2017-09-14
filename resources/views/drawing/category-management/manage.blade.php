@@ -54,8 +54,8 @@
                                                                     <th> Actions </th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_sr"> </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
                                                                     <th>
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
