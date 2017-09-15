@@ -81,7 +81,7 @@
                                                             <div class="col-md-2" style="margin-left: -4%">
                                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
                                                                     @foreach($allbankInfoIds as $bank)
-                                                                        <option value="{{$bank['bank_info_id']}}"> {!! $bank->bankInfo->bank_name !!} </option>
+                                                                        <option value="{{$bank['bank_info_id']}}"> {!! $bank->bankInfo->bank_name !!} - {!! $bank->bankInfo->account_number !!} </option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
