@@ -54,7 +54,7 @@
                                             </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3" style="margin-left: 26%">
-                                                    <button type="submit" class="btn red btn-md" id="submit"><i class="fa fa-check"></i> Submit</button>                                                </div>
+                                                    <button type="submit" class="btn red btn-md"><i class="fa fa-check"></i> Submit</button>                                                </div>
                                             </div>
                                         </form>
                                     </div>
@@ -73,7 +73,6 @@
 <script>
     $(document).ready(function() {
         UnitsCreate.init();
-        $('#submit').css("padding-left",'6px');
     });
 </script>
 @endsection
