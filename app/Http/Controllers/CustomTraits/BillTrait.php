@@ -238,7 +238,7 @@ trait BillTrait{
                     $total_amount = $total_amount + ($product->quantity * $rate) ;
                 }
                 if(count($bill->bill_quotation_extraItems) > 0){
-                    $extraItemsTotal = $bill->bill_quotation_extraItems->sum('rate')
+                    $extraItemsTotal = $bill->bill_quotation_extraItems->sum('rate');
                 }else{
                     $extraItemsTotal = 0;
                 }
