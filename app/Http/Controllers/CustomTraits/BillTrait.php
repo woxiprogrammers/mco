@@ -202,10 +202,10 @@ trait BillTrait{
             $allBills = Bill::where('quotation_id',$quotation->id)->get();
             if($status == "cancelled"){
                 $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
-                $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->get();
+                $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
             }else{
                 $statusId = BillStatus::whereIn('slug',['approved','draft'])->get()->toArray();
-                $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->get();
+                $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->orderBy('created_at','asc')->get();
             }
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $taxesAppliedToBills = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -237,6 +237,12 @@ trait BillTrait{
                     $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
                     $total_amount = $total_amount + ($product->quantity * $rate) ;
                 }
+                if(count($bill->bill_quotation_extraItems) > 0){
+                    $extraItemsTotal = $bill->bill_quotation_extraItems->sum('rate')
+                }else{
+                    $extraItemsTotal = 0;
+                }
+                $total_amount = ($total_amount + $extraItemsTotal) - $bill->discount_amount;
                 $listingData[$iterator]['subTotal'] = $total_amount;
                 $thisBillTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                                         ->where('bill_taxes.bill_id',$bill->id)
