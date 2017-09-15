@@ -13,6 +13,7 @@ use App\HsnCode;
 use App\Project;
 use App\ProjectSite;
 use Illuminate\Http\Request;
+use App\City;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -22,7 +23,15 @@ trait ProjectTrait{
         try{
             $clients = Client::where('is_active', true)->get();
             $hsnCodes = HsnCode::select('id','code','description')->get();
-            return view('admin.project.create')->with(compact('clients','hsnCodes'));
+            $cities = City::get();
+            $cityArray = Array();
+            $iterator = 0;
+            foreach ($cities as $city) {
+                $cityArray[$iterator]['id'] = $city->id;
+                $cityArray[$iterator]['name'] = $city->name.", ".$city->state->name.', '.$city->state->country->name;
+                $iterator++;
+            }
+            return view('admin.project.create')->with(compact('clients','hsnCodes','cityArray'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Project create view',

@@ -106,8 +106,27 @@
                                                         @foreach($hsnCodes as $hsnCode)
                                                             <span class="hsn-description" id="hsnCodeDescription-{{$hsnCode['id']}}" hidden>
                                                                 {{$hsnCode['description']}}
-                                                            </span>
+                                                            </span>6
                                                         @endforeach
+                                                    </div>
+                                                </div>
+                                                <div class="form-body">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label class="control-label">City Name</label>
+                                                            <span>*</span>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+
+                                                                    <select class="form-control" name="city_id" id="city_id">
+                                                                    @foreach($cityArray as $city)
+                                                                        <li><option value={{$city['name']}} name="cities[{{$city['id']}}]"</option> {{$city['name']}} </li>
+                                                                    @endforeach
+                                                                    </select>
+
+
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="form-actions noborder row">

@@ -14,9 +14,7 @@ class City extends Model
     }
 
     public function project_sites(){
-
-        return $this->belongsTo('App\');
-
+        return $this->belongsTo('App\Project_sites','project_id');
     }
 
 
