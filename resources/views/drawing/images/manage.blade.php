@@ -20,7 +20,7 @@
                                     <h1>Image Management</h1>
                                 </div>
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 77%">
-                                    <a href="/drawing/Images/create" style="color: white">
+                                    <a href="/drawing/images/create" style="color: white">
                                         <i class="fa fa-plus"></i> Image
                                     </a>
                                 </div>
@@ -58,7 +58,7 @@
                                                                     <td></td>
                                                                     <td></td>
                                                                     <td></td>
-                                                                    <td><a href="/drawing/category-management/edit-main">Edit</a></td>
+                                                                    <td><a href="/drawing/images/edit">Edit</a></td>
                                                                 </tr>
                                                                 <tbody>
 

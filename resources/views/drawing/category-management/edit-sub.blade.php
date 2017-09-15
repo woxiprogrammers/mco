@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create Main Category')
+@section('title','Constro | Edit Sub Category')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -17,7 +17,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Create Sub Category</h1>
+                                    <h1>Edit Sub Category</h1>
                                 </div>
                             </div>
                         </div>
@@ -30,7 +30,7 @@
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);">Create Sub Category</a>
+                                        <a href="javascript:void(0);">Edit Sub Category</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
@@ -39,7 +39,7 @@
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-main" class="form-horizontal" method="post" action="/drawing/category-management/create">
+                                            <form role="form" id="edit-sub" class="form-horizontal" method="" action="">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
                                                     <div class="form-group row">
@@ -48,7 +48,9 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="select" class="form-control" id="client_name" name="client_name">
+                                                            <select class="form-control" id="client_name" name="client_name">
+                                                                <option value="">Select Client Name from here</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -57,7 +59,9 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="select" class="form-control" id="project_name" name="project_name">
+                                                            <select class="form-control" id="project_name" name="project_name">
+                                                                <option value="">Select Project Name from here</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -66,7 +70,9 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="select" class="form-control" id="site_name" name="site_name">
+                                                            <select class="form-control" id="site_name" name="site_name">
+                                                                <option value="">Select Site Name from here</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -75,7 +81,9 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="select" class="form-control" id="main_category" name="main_category">
+                                                            <select class="form-control" id="main_category" name="main_category">
+                                                                <option value="">Select Main Category from here</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -108,6 +116,7 @@
 @section('javascript')
     <script>
         $(document).ready(function(){
+            EditSub.init();
         });
     </script>
 

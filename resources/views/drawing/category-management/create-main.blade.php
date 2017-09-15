@@ -39,7 +39,7 @@
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-main" class="form-horizontal" method="post" action="/drawing/category-management/create">
+                                            <form role="form" id="create-main" class="form-horizontal" method="" action="#">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
                                                     <div class="form-group row">
@@ -48,7 +48,9 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="select" class="form-control" id="client_name" name="client_name">
+                                                            <select class="form-control" id="client_name" name="client_name">
+                                                                <option value="">Select Client Name from here</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -57,7 +59,9 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="select" class="form-control" id="project_name" name="project_name">
+                                                            <select class="form-control" id="project_name" name="project_name">
+                                                                <option value="">Select Project Name from here</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -66,7 +70,9 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="select" class="form-control" id="site_name" name="site_name">
+                                                            <select class="form-control" id="site_name" name="site_name">
+                                                                <option value="">Select Site Name from here</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -99,6 +105,7 @@
 @section('javascript')
     <script>
         $(document).ready(function(){
+            CreateMain.init();
         });
     </script>
 

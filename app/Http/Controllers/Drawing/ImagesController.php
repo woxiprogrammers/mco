@@ -11,9 +11,12 @@ class ImagesController extends Controller
         $this->middleware('custom.auth');
     }
     public function getManageView(Request $request){
-        return view('drawing/Images/manage');
+        return view('drawing/images/manage');
     }
     public function getCreateView(Request $request){
-        return view('drawing/Images/create');
+        return view('drawing/images/create');
+    }
+    public function getEditView(Request $request){
+        return view('drawing/images/edit');
     }
 }

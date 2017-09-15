@@ -283,9 +283,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('edit-main',array('uses'=> 'Drawing\CategoryManagementController@getMainEditView'));
             Route::get('edit-sub',array('uses'=> 'Drawing\CategoryManagementController@getSubEditView'));
         });
-        Route::group(['prefix' => 'Images'], function(){
+        Route::group(['prefix' => 'images'], function(){
             Route::get('manage',array('uses'=> 'Drawing\ImagesController@getManageView'));
             Route::get('create',array('uses'=> 'Drawing\ImagesController@getCreateView'));
+            Route::get('edit',array('uses'=> 'Drawing\ImagesController@getEditView'));
         });
     });
 
