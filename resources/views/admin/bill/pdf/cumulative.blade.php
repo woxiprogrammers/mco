@@ -84,7 +84,7 @@
                             <tr>
                                 <td style="text-align: center;">{!! $iterator+1  !!}</td>
                                 <td style="text-align: left; padding-left: 5px">
-                                    <b>{!! $extraItems[$i]->quotationExtraItems->extraItem->name !!}</b>
+                                    <b>Extra Item : {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!}</b>
                                 </td>
                                 <td style="text-align: center;"> - </td>
                                 <td style="text-align: center;"> - </td>

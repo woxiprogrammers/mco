@@ -222,16 +222,18 @@ trait ProjectTrait{
 
     public function getEditView(Request $request, $project){
         try{
-           // dd($project);
+           //dd($project);
+
             $projectData['client'] = $project->client->company;
             $projectData['id'] = $project->id;
             $projectData['project'] = $project->name;
             $projectData['project_hsn_code'] = $project->hsn_code_id;
-            $projectData['project_city_id'] = $project->city_id;
 
             $project->project_site = $project->project_site->toArray();
             $projectData['project_site'] = $project->project_site[0]['name'];
             $projectData['project_site_address'] = $project->project_site[0]['address'];
+            $projectData['project_city_id'] = $project->project_site[0]['city_id'];
+
             //$city_id = City::select('id')->get();
 
             $hsnCodes = HsnCode::select('id','code','description')->get();

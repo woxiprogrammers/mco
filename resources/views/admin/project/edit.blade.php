@@ -121,7 +121,11 @@
 
                                                             <select class="form-control" name="city_id" id="city_id">
                                                                 @foreach($cityArray as $city)
-                                                                    <li><option value={{$city['id']}} name="cities[{{$city['id']}}]"</option> {{$city['name']}} </li>
+                                                                    @if($projectData['project_city_id'] == $city['id'])
+                                                                        <option value="{{$city['id']}}" selected>{{$city['name']}}</option>
+                                                                    @else
+                                                                        <option value="{{$city['id']}}">{{$city['name']}}</option>
+                                                                    @endif
                                                                 @endforeach
                                                             </select>
 
@@ -131,7 +135,7 @@
                                                 </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
+                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -153,7 +157,6 @@
     $(document).ready(function() {
         EditProject.init();
         $("#hsnCode").trigger('change');
-        $('#submit').css("padding-left",'6px');
     });
 </script>
 @endsection

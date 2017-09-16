@@ -565,7 +565,7 @@ trait QuotationTrait{
                         }
                     }
                 }
-                $productAmount = round(($productAmount + $profitMarginAmount),3);
+                $productAmount = round(($productAmount + $profitMarginAmount));
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
                 $response['product_amount'] = $productAmount;
             }
@@ -895,7 +895,7 @@ trait QuotationTrait{
                         }
                     }
                 }
-                $response['amount'][$productId] = round($productAmount,3);
+                $response['amount'][$productId] = round($productAmount);
             }
         }catch(\Exception $e){
             $data = [
@@ -1084,13 +1084,12 @@ trait QuotationTrait{
                                 ->where('product_material_relation.product_version_id',$recentVersion)
                                 ->select('product_material_relation.material_quantity','material_versions.unit_id as unit_id')
                                 ->first();
-                            $rate = UnitHelper::unitConversion($data['material_unit'][$materialId],$materialQuantity['unit_id'],$data['material_rate'][$materialId]);
+                            $rate = UnitHelper::unitConversion($data['material_unit'][$material['id']],$materialQuantity['unit_id'],$data['material_rate'][$material['id']]);
                             $productAmount = round($productAmount - ($materialQuantity['material_quantity'] * $rate),3);
                         }
                     }
                 }
-
-                QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => round($productAmount,3)]);
+                QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => round($productAmount)]);
             }
             $request->session()->flash('success','Quotation Edited Successfully');
             return redirect('/quotation/edit/'.$quotation->id);
