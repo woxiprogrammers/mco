@@ -130,6 +130,8 @@ trait MaterialTrait{
             $now = Carbon::now();
             $materialData['name'] = ucwords(trim($request->name));
             $materialData['updated_at'] = $now;
+            $materialData['gst'] = $request->gst;
+            $materialData['hsn_code'] = $request->hsn_code;
             $material->update($materialData);
             if($request->category_id != null){
                 $categoryMaterial = CategoryMaterialRelation::create(['category_id' => $request->category_id,'material_id'=>$material->id]);
@@ -138,8 +140,6 @@ trait MaterialTrait{
             $updateMaterial[0]['id'] = $material->id;
             $updateMaterial[0]['rate_per_unit'] = $request->rate_per_unit;
             $updateMaterial[0]['unit_id'] = $request->unit;
-            $updateMaterial['gst'] = $request->gst;
-            $updateMaterial['hsn_code'] = $request->hsn_code;
             $response = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($updateMaterial);
             if($response['slug'] == 'error'){
                 $request->session()->flash('error',$response['message']);

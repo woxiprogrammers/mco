@@ -139,11 +139,11 @@
                                             <i class="fa fa-users"></i> Manage Users
                                         </a>
                                         <ul class="dropdown-menu pull-left">
-                                            <li aria-haspopup="true">
+                                            {{--<li aria-haspopup="true">
                                                 <a href="/vendors/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Vendors
                                                 </a>
-                                            </li>
+                                            </li>--}}
                                             <li aria-haspopup="true">
                                                 <a href="/user/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Users
@@ -200,7 +200,7 @@
                                 </a>
                             </li>
                         @endif
-                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                       <!-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Purchase
                                 <span class="arrow"></span>
                             </a>
@@ -223,7 +223,7 @@
 
                             </ul>
                         </li>
-                    <!--                      <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                          <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Checklist
                                 <span class="arrow"></span>
                             </a>
