@@ -19,9 +19,9 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage CheckList</h1>
+                                    <h1>Manage Checklist Structure</h1>
                                 </div>
-                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 78%"><a href="/checkList/create" style="color: white"><i class="fa fa-plus"></i> Checklist</a>
+                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 63%"><a href="/checkList/create" style="color: white"><i class="fa fa-plus"></i> Checklist Structure </a>
                                 </div>
                             </div>
                         </div>
@@ -56,7 +56,6 @@
                                                         <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_cub_category" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_no_of_checkpoints" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>

@@ -106,7 +106,7 @@
                                                         @foreach($hsnCodes as $hsnCode)
                                                             <span class="hsn-description" id="hsnCodeDescription-{{$hsnCode['id']}}" hidden>
                                                                 {{$hsnCode['description']}}
-                                                            </span>6
+                                                            </span>
                                                         @endforeach
                                                     </div>
                                                 </div>
@@ -121,7 +121,7 @@
 
                                                                     <select class="form-control" name="city_id" id="city_id">
                                                                     @foreach($cityArray as $city)
-                                                                        <li><option value={{$city['name']}} name="cities[{{$city['id']}}]"</option> {{$city['name']}} </li>
+                                                                        <li><option value={{$city['id']}} name="cities[{{$city['id']}}]"</option> {{$city['name']}} </li>
                                                                     @endforeach
                                                                     </select>
 

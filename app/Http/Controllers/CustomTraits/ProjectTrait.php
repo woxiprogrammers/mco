@@ -174,16 +174,21 @@ trait ProjectTrait{
 
     public function createProject(Request $request){
         try{
+            //dd($request);
             $projectData = array();
             $projectData['name'] = ucwords($request->project_name);
             $projectData['client_id'] = $request->client_id;
             $projectData['is_active'] = false;
             $projectData['hsn_code_id'] = $request->hsn_code;
+
+            //dd($projectData);
             $project = Project::create($projectData);
             $projectSiteData = array();
+            $projectSiteData['city_id'] = $request->city_id;
             $projectSiteData['project_id'] = $project->id;
             $projectSiteData['name'] = ucwords($request->project_site_name);
             $projectSiteData['address'] = $request->address;
+
             $projectSite = ProjectSite::create($projectSiteData);
             $request->session()->flash('success', 'Project Created successfully.');
             return redirect('/project/create');
@@ -217,15 +222,29 @@ trait ProjectTrait{
 
     public function getEditView(Request $request, $project){
         try{
+           // dd($project);
             $projectData['client'] = $project->client->company;
             $projectData['id'] = $project->id;
             $projectData['project'] = $project->name;
             $projectData['project_hsn_code'] = $project->hsn_code_id;
+            $projectData['project_city_id'] = $project->city_id;
+
             $project->project_site = $project->project_site->toArray();
             $projectData['project_site'] = $project->project_site[0]['name'];
             $projectData['project_site_address'] = $project->project_site[0]['address'];
+            //$city_id = City::select('id')->get();
+
             $hsnCodes = HsnCode::select('id','code','description')->get();
-            return view('admin.project.edit')->with(compact('projectData','hsnCodes'));
+            $cities = City::get();
+            $cityArray = Array();
+            $iterator = 0;
+            foreach ($cities as $city) {
+                $cityArray[$iterator]['id'] = $city->id;
+                $cityArray[$iterator]['name'] = $city->name.", ".$city->state->name.', '.$city->state->country->name;
+                $iterator++;
+            }
+            //dd($cityArray);
+            return view('admin.project.edit')->with(compact('projectData','hsnCodes','cityArray'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'change Project status',
@@ -245,7 +264,8 @@ trait ProjectTrait{
             ]);
             ProjectSite::where('project_id',$project->id)->update([
                 'name' => $request->project_site_name,
-                'address' => $request->address
+                'address' => $request->address,
+                'city_id' => $request->city_id
             ]);
             $request->session()->flash('success', 'Project edited successfully.');
             return redirect('/project/edit/'.$project->id);

@@ -34,7 +34,7 @@
                                         <div class="portlet-body form">
                                             <form role="form" id="create-user" class="form-horizontal" method="post" action="/checkList/create">
                                                 {!! csrf_field() !!}
-                                                <div class="form-body"  id="example">
+                                                <div class="form-body">
 
                                                     <div class="form-group row">
                                                         <div class="row">
@@ -62,7 +62,7 @@
 
                                                         </div>
                                                     </div>
-
+                                                    <div id="example">
                                                     <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
 
                                                         <label for="title" class="control-label">Title</label>
@@ -70,26 +70,26 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <input type="text" class="form-control" name="title_name" id="title_name" placeholder="Enter Title Here">
-                                                        <div id="sample_editable_1_new" class="btn yellow" style="margin-top: -9%; margin-left: 105%"><button style="color: white" id="add"><i class="fa fa-plus"></i> </button>
+                                                        <div id="sample_editable_1_new" class="btn yellow" style="margin-top: -7%; margin-left: 105%"><button style="color: white" id="add"><i class="fa fa-plus"></i> </button>
                                                         </div>
                                                         <div id="removeBtn"  style="margin-top: -5%; margin-left: 118%" >
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-5" style="text-align: right ; margin-left: -91% ;margin-top: 12% ; font-size: 14px">
+                                                    <div class="col-md-5" style="text-align: right ; margin-left: -91.5% ;margin-top: 9% ; font-size: 14px">
 
                                                         <label for="title" class="control-label">Is Remark Mandatory</label>
                                                         <span>*</span>
                                                     </div>
 
-                                                        <div class="col-md-5" style="text-align: right ; margin-top: 12% ; margin-left: -78% ">
+                                                        <div class="col-md-5" style="text-align: right ; margin-top: 9% ; margin-left: -81% ">
                                                             <input type="checkbox" class="make-switch" id="is_special" data-on-text="Yes" data-off-text="No" name="is_special">
                                                         </div>
-                                                    <div class="col-md-5" style="text-align: right ; margin-left: -91% ;margin-top: 6% ; font-size: 14px">
+                                                    <div class="col-md-5" style="text-align: right ; margin-left: -91.5% ;margin-top: 4% ; font-size: 14px">
 
                                                         <label for="title" class="control-label"> Description </label>
                                                         <span>*</span>
                                                     </div>
-                                                        <div class="col-md-6" style="text-align: right ; margin-top: 6% ; margin-left: -50% ">
+                                                        <div class="col-md-6" style="text-align: right ; margin-top: 4.5% ; margin-left: -50% ">
                                                             <input type="text" class="form-control" id="description" name="description" placeholder="Enter Description Here"  >
                                                         </div>
 
@@ -97,16 +97,16 @@
 
                                                     <div class="form-body">
                                                         <div class="form-group row">
-                                                            <div class="col-md-5" style="text-align: right ; margin-left: -91% ; margin-top: 12% ; font-size: 14px">
+                                                            <div class="col-md-5" style="text-align: right ; margin-left: -90% ; margin-top: 11% ; font-size: 14px">
                                                                 <label for="no_images" class="control-label"> Number Of Images</label>
                                                                 <span>*</span>
                                                             </div>
-                                                            <div class="col-md-6" style="margin-top: -3% ;margin-left: 34% ; font-size: 14px">
+                                                            <div class="col-md-6" style="margin-top: -2% ;margin-left: 31.5% ; font-size: 14px">
                                                                 <div class="col-md-6">
                                                                     <input type="text" id="nochapter" >
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-6" style="margin-top:-3% ; margin-left: 37%">
+                                                            <div class="col-md-6" style="margin-top:-2% ; margin-left: 31%">
                                                             <input type="button" value="Set" onclick="generate()" >
                                                         </div>
                                                         <div class="form-group row">
@@ -146,7 +146,7 @@
                                                     </div>
                                                 </div>
                                                 <div id="appendHere" >
-
+                                                </div>
                                                 </div>
                                             </form>
                                                 </div>
