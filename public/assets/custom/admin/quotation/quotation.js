@@ -290,7 +290,8 @@ function getProductDetails(product_id,rowNumber){
         success: function(data,textStatus,xhr){
             $("#productDescription"+rowNumber).val(data.description);
             $("#productDescription"+rowNumber).attr('name','product_description['+data.id+']');
-            $("#productRate"+rowNumber).val(Math.round(data.rate_per_unit * 1000) / 1000);
+            var rate = parseInt(data.rate_per_unit);
+            $("#productRate"+rowNumber).val(rate.toFixed());
             $("#productRate"+rowNumber).attr('name','product_rate['+data.id+']');
             $("#productQuantity"+rowNumber).prop('readonly', false);
             $("#productUnit"+rowNumber).val(data.unit);
@@ -360,7 +361,7 @@ function calculateAmount(row){
     if(isNaN(amount)){
         $("#productAmount"+row).val(0);
     }else{
-        $("#productAmount"+row).val(Math.round(amount * 1000) / 1000);
+        $("#productAmount"+row).val(amount.toFixed());
     }
     calculateSubtotal();
 }
@@ -594,9 +595,7 @@ function submitProductEdit(){
 
 function applyValidation(formId){
     var formFields = $("#"+formId).serializeArray();
-    console.log(formFields);
     $.each(formFields, function(i){
-        console.log(formFields[i].name);
         $("[name='"+formFields[i].name+"']").rules('add',{
             required: true
         });
