@@ -28,6 +28,15 @@
                             <div class="page-title">
                                 <h1>Manage Quotations</h1>
                             </div>
+
+                            @if($user->hasPermissionTo('create-quotation'))
+                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 74%">
+                                    <a href="/quotation/create" style="color: white">
+                                        <i class="fa fa-plus"></i> Quotation
+                                    </a>
+                                </div>
+                            @endif
+
                         </div>
                     </div>
                     <div class="page-content">
@@ -46,11 +55,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="btn-group">
-                                                        <div id="sample_editable_1_new" class="btn yellow">
-                                                            <a href="/quotation/create" style="color: white">
-                                                             Quotation <i class="fa fa-plus"></i>
-                                                            </a>
-                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -68,11 +73,9 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-
                                             </tbody>
                                         </table>
                                     </div>
-
                                 </div>
                             </div>
                         </div>

@@ -85,10 +85,22 @@
                                                         </select>
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label">GST</label>
+                                                    <div class="col-md-6">
+                                                        <input type="number" id="gst" name="gst" class="form-control" placeholder="Enter GST">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label">HSN Code</label>
+                                                    <div class="col-md-6">
+                                                        <input type="text" id="hsn_code" name="hsn_code" class="form-control" placeholder="Enter HSN Code">
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn btn-success btn-md" style="width:25%">Submit</button>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red btn-md"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -121,7 +133,6 @@
                 }
             }
         });
-
         $('#is_present').on('click',function(){
             if($(this).prop('checked') == true){
                 $('#name').rules('remove', 'remote');
@@ -156,7 +167,6 @@
                     }));
                 })
                 .on('typeahead:open', function (obj, datum) {
-
                 });
             }else{
                 $('#name').removeClass('typeahead');
@@ -178,8 +188,6 @@
                 });
             }
         });
-
-
         var citiList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -203,8 +211,6 @@
                 wildcard: "%QUERY"
             }
         });
-
     });
-
 </script>
 @endsection

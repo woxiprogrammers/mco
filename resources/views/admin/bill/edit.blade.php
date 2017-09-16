@@ -47,7 +47,7 @@
                                                 <div class="tab-content">
                                                     <input type="hidden" id="quotation_id" value="{{$bill->quotation_id}}">
                                                     <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
-                                                        <div class="form-group">
+                                                        <div class="col-md-12 form-group">
                                                             <div class="col-md-4 date date-picker" data-date-end-date="0d">
                                                                 <label class="control-label" for="date">Select Bill Date : </label>
                                                                 @if(!empty($bill['date']))
@@ -64,6 +64,28 @@
 
                                                                 @endif
                                                             </div>
+                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d" style="margin-left: 20%">
+                                                                <label class="control-label" for="performa_invoice_date" style="margin-left: -60%">Select Performa Invoice Date : </label>
+                                                                @if(!empty($bill['performa_invoice_date']))
+                                                                    <input type="text"  name="performa_invoice_date" value="{{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}" id="performa_invoice_date" readonly>
+                                                                    <button class="btn btn-sm default" type="button">
+                                                                        <i class="fa fa-calendar"></i>
+                                                                    </button>
+                                                                @else
+                                                                    <input type="text" class="form-control" name="performa_invoice_date" id="performa_invoice_date" readonly/>
+                                                                    <button class="btn btn-sm default" type="button">
+                                                                        <i class="fa fa-calendar"></i>
+                                                                    </button>
+                                                                @endif
+                                                            </div>
+                                                            <div class="col-md-2" style="margin-left: -4%">
+                                                                <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
+                                                                    @foreach($allbankInfoIds as $bank)
+                                                                        <option value="{{$bank['bank_info_id']}}"> {!! $bank->bankInfo->bank_name !!} - {!! $bank->bankInfo->account_number !!} </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+
                                                         </div>
 
                                                         <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">
@@ -195,27 +217,36 @@
                                                                 </td>
                                                             </tr>
                                                         @endfor
-
-                                                        <tr>
-                                                            <td colspan="10" style="text-align: right; padding-right: 30px;">
-                                                                <b>Total</b>
-                                                            </td>
-
-                                                            <td>
-                                                                <span id="total_current_bill_amount"></span>
-                                                            </td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td colspan="10" style="text-align: right; padding-right: 30px;">
-                                                                <b>Total Round</b>
-                                                            </td>
-
-                                                            <td>
-                                                                <span id="rounded_off_current_bill_amount"></span>
-                                                            </td>
-
-                                                        </tr>
+                                                            <tr>
+                                                                <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
+                                                                <td>
+                                                                    <span id="sub_total_current_bill_amount"></span>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total Round</b></td>
+                                                                <td>
+                                                                    <span id="rounded_off_current_bill_sub_total"></span>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Amount</b></td>
+                                                                <td>
+                                                                    <input name="discount_amount" id="discountAmount" class="form-control" type="text" value="{{$bill->discount_amount}}">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Description</b></td>
+                                                                <td>
+                                                                    <input name="discount_description" id="discountDescription" class="form-control" type="text" value="{{$bill->discount_description}}">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
+                                                                <td>
+                                                                    <span id="rounded_off_current_bill_amount"></span>
+                                                                </td>
+                                                            </tr>
                                                         @if($taxes != null)
                                                             <tr>
                                                                 <td colspan="6">
@@ -333,6 +364,13 @@
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
+
+<script>
+    $(document).ready(function(){
+        CreateBank.init();
+    });
+    $('select[name="assign_bank"]').find('option[value={{$bill->bank_info_id}}]').attr("selected",true);
+</script>
 @endsection
 
 

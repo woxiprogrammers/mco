@@ -47,16 +47,29 @@
                                            <form role="form" id="new_bill" class="form-horizontal" action="/bill/create" method="post">
                                                <div class="row">
                                                    <div class="form-group">
-                                                       <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                       <div class="col-md-3 date date-picker" data-date-end-date="0d">
                                                            <label class="control-label" for="date">Bill Date : </label>
-                                                               <input type="text" style="width: 50%" name="date" placeholder="Select Bill Date" id="date"/>
+                                                               <input type="text" style="width: 30%" name="date" placeholder="Select Bill Date" id="date"/>
                                                                <button class="btn btn-sm default" type="button">
                                                                    <i class="fa fa-calendar"></i>
                                                                </button>
-
+                                                       </div>
+                                                       <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                           <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Performa Invoice Date : </label>
+                                                           <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Performa Invoice Date" id="performa_invoice_date"/>
+                                                           <button class="btn btn-sm default" type="button">
+                                                               <i class="fa fa-calendar"></i>
+                                                           </button>
+                                                       </div>
+                                                       <div class="col-md-2" style="margin-left: 6%">
+                                                           <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
+                                                               @foreach($banksAssigned as $bankId)
+                                                                   <option value="{{$bankId['bank_info_id']}}">{{$bankId->bankInfo->bank_name}} - {{$bankId->bankInfo->account_number}} </option>
+                                                                @endforeach
+                                                           </select>
                                                        </div>
                                                        @if($bills != NULL)
-                                                           <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px">
+                                                           <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px; margin-left: 86%">
                                                                <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                                    <option value="default">Select Bill</option>
                                                                    @for($i = 0 ; $i < count($bills); $i++)
@@ -75,16 +88,16 @@
                                                     <th width="1%">
                                                         <input type="checkbox" class="group-checkable" disabled="disabled" >
                                                     </th>
-                                                    <th width="5%"> Item no </th>
-                                                    <th width="30%"> Item Description </th>
-                                                    <th width="6%" class="numeric"> UOM </th>
-                                                    <th width="6%" class="numeric"> BOQ Quantity </th>
-                                                    <th width="6%" class="numeric"> Rate </th>
-                                                    <th width="7%" class="numeric"> W.O Amount </th>
-                                                    <th width="5%" class="numeric"> Previous Quantity </th>
-                                                    <th width="5%" class="numeric"> Current Quantity </th>
-                                                    <th width="8%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="8%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="5%" style="text-align: center"> Item no </th>
+                                                    <th width="30%" style="text-align: center"> Item Description </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> UOM </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> BOQ Quantity </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> Rate </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> W.O Amount </th>
+                                                    <th width="5%" class="numeric" style="text-align: center"> Previous Quantity </th>
+                                                    <th width="5%" class="numeric" style="text-align: center"> Current Quantity </th>
+                                                    <th width="8%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
+                                                    <th width="8%" class="numeric" style="text-align: center"> Current Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($quotationProducts); $iterator++)
                                                     <tr id="id_{{$quotationProducts[$iterator]['id']}}">
@@ -96,7 +109,7 @@
                                                         </td>
                                                         <td>
                                                             <span>{{$quotationProducts[$iterator]['product_detail']['name']}}</span>
-                                                            <div class="input-group form-group" id="inputGroup">
+                                                            <div class="input-group form-group" id="inputGroup" style="padding-left: 10%; padding-right: 10%">
                                                                 <input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationProducts[$iterator]['id']}}" disabled>
                                                                 <input class="product_description form-control" type="text" id="product_description_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][product_description]" disabled>
                                                                 <span class="input-group-addon product_description_create" style="font-size: 12px">C</span>
@@ -164,22 +177,36 @@
                                                         </td>
                                                     </tr>
                                                 @endfor
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total</b></td>
-
-                                                        <td>
-                                                            <span id="total_current_bill_amount"></span>
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
-
-                                                        <td>
-                                                            <span id="rounded_off_current_bill_amount"></span>
-                                                        </td>
-
-                                                    </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
+                                                    <td>
+                                                        <span id="sub_total_current_bill_amount"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total Round</b></td>
+                                                    <td>
+                                                        <span id="rounded_off_current_bill_sub_total"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Amount</b></td>
+                                                    <td>
+                                                        <input name="discount_amount" id="discountAmount" class="form-control" type="text" value="0">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Description</b></td>
+                                                    <td>
+                                                        <input name="discount_description" id="discountDescription" class="form-control" type="text">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
+                                                    <td>
+                                                        <span id="rounded_off_current_bill_amount"></span>
+                                                    </td>
+                                                </tr>
                                                 @if($taxes != null)
                                                     <tr>
                                                         <td colspan="6"><b>Tax Name</b></td>
@@ -244,8 +271,8 @@
 
                                             </table>
                                             <div class="form-group">
-                                                <div class="col-md-offset-11">
-                                                    <button type="submit" class="btn btn-success" id="submit"> Submit </button>
+                                                <div class="col-md-offset-11" style="margin-left: 91%">
+                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
                                                 </div>
                                             </div>
                                                </form>
@@ -273,5 +300,6 @@
 <script>
     var date=new Date();
     $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+    $('#performa_invoice_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
 </script>
 @endsection

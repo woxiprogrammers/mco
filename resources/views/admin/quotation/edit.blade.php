@@ -14,6 +14,7 @@
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css" />
 <link href="/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -72,7 +73,7 @@
                                                             </a>
                                                         @endif
                                                         <a class="btn btn-info btn-xs" id="materialCosts">
-                                                            <i class="fa fa-edit"></i> Material Cost
+                                                            <i class="fa fa-edit"></i> Material Rate
                                                         </a>
                                                         <a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="showProfitMargins()" id="profitMargins">
                                                             <i class="fa fa-edit"></i> Profit Margins
@@ -107,6 +108,7 @@
                                                             </a>
                                                         @endif
                                                     </fieldset>
+
                                                     <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
                                                         <div class="panel panel-default">
                                                             <div class="panel-heading">
@@ -149,15 +151,15 @@
                                                             <div id="collapse_3_2" class="panel-collapse collapse">
                                                                 <div class="panel-body" style="height:400px; overflow-y:auto;">
                                                                     <div class="row" style="background-color: beige">
-                                                                        <div class="col-md-3">
+                                                                        <div class="col-md-4">
                                                                             <div class="col-md-6">
-                                                                                <label class="control-label pull-right" style="font-weight: bold; font-size: 15px">
+                                                                                <label class="control-label pull-right" style="font-weight: bold; font-size: 15px; margin-right: 17%">
                                                                                     Enter Discount:
                                                                                 </label>
                                                                             </div>
-                                                                            <div class="col-md-6 input-group">
-                                                                                <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}">
-                                                                                <span class="input-group-addon">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
+                                                                            <div class="col-md-6 input-group form-group">
+                                                                                <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" style="width: 113%">
+                                                                                <span class="input-group-addon">&nbsp; % </span>
                                                                             </div>
                                                                         </div>
 
@@ -167,9 +169,9 @@
                                                                                     Enter Slab Area:
                                                                                 </label>
                                                                             </div>
-                                                                            <div class="col-md-6 input-group">
+                                                                            <div class="col-md-6 input-group form-group">
                                                                                 <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
-                                                                                <span class="input-group-addon">&nbsp;&nbsp; Sq.Ft &nbsp; &nbsp;</span>
+                                                                                <span class="input-group-addon">Sq.Ft</span>
                                                                             </div>
                                                                         </div>
                                                                         <div class="col-md-3">
@@ -178,12 +180,12 @@
                                                                                     Subtotal:
                                                                                 </label>
                                                                             </div>
-                                                                            <div class="col-md-9">
+                                                                            <div class="col-md-9" style="padding-right: 34px; padding-left:30px ">
                                                                                     <input type="text" class="form-control" id="subtotal" readonly>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="col-md-2">
-                                                                            <a class="btn btn-success btn-md pull-right" id="addProduct">Add Product</a>
+                                                                        <div class="col-md-1">
+                                                                            <a class="btn yellow btn-md pull-right" id="addProduct"><i class="fa fa-plus"></i> Product</a>
                                                                         </div>
                                                                     </div>
                                                                     <div class="row" style="height: 4%">
@@ -192,16 +194,16 @@
                                                                     <div class="table-scrollable" style="margin-top: 5%">
                                                                         <table class="table table-bordered" id="productTable" style="overflow: scroll;overflow-x: auto; overflow-y: auto">
                                                                             <tr>
-                                                                                <th style="width: 10%"> Category </th>
-                                                                                <th style="width: 10%"> Product </th>
-                                                                                <th style="width: 18%"> Description</th>
-                                                                                <th style="width: 8%"> Unit</th>
-                                                                                <th style="width: 8%"> Rate</th>
-                                                                                <th style="width: 5%"> Quantity </th>
-                                                                                <th  style="width: 8%"> Amount </th>
-                                                                                <th  style="width: 8%"> Discounted Amount </th>
-                                                                                <th  style="width: 15%"> Summary </th>
-                                                                                <th> Action </th>
+                                                                                <th style="width: 10%; text-align: center" > Category </th>
+                                                                                <th style="width: 10%; text-align: center"> Product </th>
+                                                                                <th style="width: 18%; text-align: center"> Description</th>
+                                                                                <th style="width: 8%; text-align: center"> Unit</th>
+                                                                                <th style="width: 8%; text-align: center"> Rate</th>
+                                                                                <th style="width: 5%; text-align: center"> Quantity </th>
+                                                                                <th  style="width: 8%; text-align: center"> Amount </th>
+                                                                                <th  style="width: 8%; text-align: center"> Discounted Amount </th>
+                                                                                <th  style="width: 15%; text-align: center"> Summary </th>
+                                                                                <th style="text-align: center"> Action </th>
                                                                             </tr>
                                                                             @for($iterator=0; $iterator < count($quotation->quotation_products); $iterator++)
                                                                                 <tr id="Row{{$iterator}}">
@@ -249,7 +251,7 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <select class="form-control" name="product_summary[{{$quotation->quotation_products[$iterator]->product_id}}]" style="width: 80%; margin-left: 10%; font-size: 13px">
+                                                                                            <select class="form-control product-summary" name="product_summary[{{$quotation->quotation_products[$iterator]->product_id}}]" style="width: 80%; margin-left: 10%; font-size: 13px">
                                                                                                 @if($quotation->quotation_products[$iterator]->summary_id == null)
                                                                                                     <option value="" selected>Select Summary</option>
                                                                                                     @foreach($summaries as $summary)
@@ -338,8 +340,9 @@
                                                             Back
                                                         </a>
                                                         @if($quotation->quotation_status->slug == 'draft' || $userRole == 'superadmin')
-                                                            <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
-                                                                Submit
+
+                                                            <button type="submit" class="btn red pull-right" id="formSubmit" hidden style="padding-left: 6px">
+                                                                <i class="fa fa-check"></i> Submit
                                                             </button>
                                                         @endif
                                                     </fieldset>
@@ -360,8 +363,8 @@
                                                             Back
                                                         </a>
                                                         @if(($quotation->quotation_status->slug == 'approved' || $quotation->quotation_status->slug == 'disapproved')&& $userRole == 'superadmin')
-                                                        <button type="submit" class="btn btn-success">
-                                                            Submit
+                                                        <button type="submit" class="btn red" style="padding-left: 6px">
+                                                            <i class="fa fa-check"></i> Submit
                                                         </button>
                                                         @elseif($quotation->quotation_status->slug == 'draft')
                                                             <button type="submit" class="btn btn-success">
@@ -376,6 +379,15 @@
                                                         <li>
                                                             <a href="#extraItemFormTab" data-toggle="tab"> Extra Items </a>
                                                         </li>
+                                                        <li>
+                                                            <a href="#bankassignFormTab" data-toggle="tab"> Assign Bank </a>
+                                                        </li>
+                                                        @if($quotation->quotation_status->slug == 'approved'&& $userRole == 'superadmin')
+                                                            <li>
+                                                                <a href="#openingExpensesFormTab" data-toggle="tab"> Opening Expenses </a>
+                                                            </li>
+                                                        @endif
+
                                                     </ul>
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="workOrderFormTab">
@@ -427,10 +439,22 @@
                                                                                 <input class="form-control" value="{{$quotation->work_order->scope}}" name="scope" id="scope" type="text">
                                                                             </div>
                                                                         </div>
+
                                                                         <div class="form-group">
                                                                             <div class="col-md-3">
                                                                                 <label for="order_value" class="control-form pull-right">
-                                                                                    Order Value:
+                                                                                    Order Value Without Tax:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <input class="form-control" value="{{$beforeTaxOrderValue}}" name="order_value" id="OrderValueWithoutTax" type="text" readonly>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="order_value" class="control-form pull-right">
+                                                                                    Order Value With Tax:
                                                                                 </label>
                                                                             </div>
                                                                             <div class="col-md-3">
@@ -571,9 +595,43 @@
                                                             </div>
                                                         @endforeach
                                                     </div>
+                                                    <div class="tab-pane fade in" id="bankassignFormTab">
+                                                        <div class="form-group" style="margin-top: 3%">
+                                                            <div class="col-md-3" style="margin-left: 2%">
+                                                                <label class="control-form pull-right">
+                                                                    Select Bank :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-control product-material-select" style="height: 150px;" >
+                                                                    <ul id="bank_id" class="list-group">
+                                                                        @foreach($bankInfo as $bank)
+                                                                            @if(in_array($bank['id'],$checkBank))
+                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}" checked> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                            @else
+                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}"> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                        @endif
+                                                                            @endforeach
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tab-pane fade in" id="openingExpensesFormTab">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-form pull-right">
+                                                                    Opening Expenses
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <input class="form-control" name="open_expenses" id="open_expenses" value=0 >
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </form>
-                                        </div>
+
                                     </div>
                                 </div>
                                 </div>
@@ -650,6 +708,7 @@
 <script src="/assets/custom/admin/quotation/validations.js"></script>
 <script src="/assets/global/plugins/jquery-form.min.js"></script>
 <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
+
 @if($quotation->quotation_status->slug != 'disapproved')
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
@@ -661,12 +720,14 @@
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/quotation/image-datatable.js"></script>
     <script src="/assets/custom/admin/quotation/image-upload.js"></script>
+
 @endif
 <script>
     $(document).ready(function(){
         EditQuotation.init();
         WorkOrderFrom.init();
         calculateSubtotal();
+        applyValidation("QuotationEditForm");
         var quotationProducts = $("#quotationProducts").val();
         quotationProducts = jQuery.parseJSON(quotationProducts);
         $.each(quotationProducts, function(index, value){

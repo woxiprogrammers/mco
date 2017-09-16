@@ -62,7 +62,7 @@
                         <th style="width: 9%; text-align: center"><b>Unit</b></th>
                         <th style="width: 9%; text-align: center"><b>Rate (Rs)</b></th>
                         <th style="width: 10%; text-align: center"><b>Prev. Bill Amnt (Rs)</b></th>
-                        <th style="width: 10%; text-align: center"><b>Currnt Bill Amnt (Rs)</b></th>
+                        <th style="width: 10%; text-align: center"><b>Current Bill Amnt (Rs)</b></th>
                         <th style="width: 10%; text-align: center"><b>Cumulative Amnt (Rs)</b></th>
                     </tr>
                     @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
@@ -84,7 +84,7 @@
                             <tr>
                                 <td style="text-align: center;">{!! $iterator+1  !!}</td>
                                 <td style="text-align: left; padding-left: 5px">
-                                    <b>{!! $extraItems[$i]->quotationExtraItems->extraItem->name !!}</b>
+                                    <b>Extra Item : {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!}</b>
                                 </td>
                                 <td style="text-align: center;"> - </td>
                                 <td style="text-align: center;"> - </td>

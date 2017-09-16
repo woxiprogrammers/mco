@@ -53,46 +53,45 @@
                                                     <div class="tab-pane fade in active" id="GeneralTab">
                                                         <fieldset>
                                                             <legend>Project</legend>
-                                                            <div class="form-group">
-                                                                <label class="col-md-3 control-label">Client Name</label>
-                                                                <div class="col-md-6">
-                                                                    <select class="form-control" id="clientId" name="client_id">
+                                                            <div class="row">
+                                                                <div class="col-md-4 col-md-offset-0">
+                                                                    Client Name
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    Project Name
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    Project Site Name
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-4 form-group">
+                                                                    <select class="form-control" id="clientId" name="client_id" style="width: 80%;">
                                                                         <option value=""> -- Select Client -- </option>
                                                                         @foreach($clients as $client)
                                                                             <option value="{{$client['id']}}"> {{$client['company']}} </option>
                                                                         @endforeach
                                                                     </select>
                                                                 </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label class="col-md-3 control-label">Project Name</label>
-                                                                <div class="col-md-6">
-                                                                    <select name="project_id" id="projectId" class="form-control" disabled>
-
+                                                                <div class="col-md-4 form-group">
+                                                                    <select name="project_id" id="projectId" class="form-control" style="width: 80%;">
+                                                                        <option value=""> -- Select Project -- </option>
                                                                     </select>
                                                                 </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label class="col-md-3 control-label">Project Site Name</label>
-                                                                <div class="col-md-6">
-                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" disabled>
-
+                                                                <div class="col-md-4 form-group">
+                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" style="width: 80%;">
+                                                                        <option value=""> -- Select Project s -- </option>
                                                                     </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <div class="col-md-1 col-md-offset-1">
-
                                                                 </div>
                                                             </div>
                                                         </fieldset>
-                                                        <fieldset>
+                                                        <fieldset style="margin-top: 1%; margin-bottom: 1%">
                                                             <legend> Products
-                                                                <a class="btn btn-wide btn-primary  col-md-offset-9" id="materialCosts">
+                                                                <a class="btn btn-wide btn-primary  col-md-offset-8" id="materialCosts" style="margin-left: 72%">
                                                                     <i class="fa fa-pencil-square-o"></i>
-                                                                    Material Cost
+                                                                    Material Rate
                                                                 </a>
-                                                                <a class="btn btn-success btn-md" id="addProduct">
+                                                                <a class="btn yellow btn-md" id="addProduct">
                                                                     <i class="fa fa-plus"></i>
                                                                     Product
                                                                 </a>
@@ -182,8 +181,8 @@
                                                             <a class="btn btn-primary" onclick="backToMaterials()" href="javascript:void(0);">
                                                                 Back
                                                             </a>
-                                                            <button type="submit" class="btn btn-success pull-right" id="formSubmit" hidden>
-                                                                Submit
+                                                            <button type="submit" class="btn red pull-right" id="formSubmit"  hidden style="padding-left: 6px">
+                                                                <i class="fa fa-check"></i> Submit
                                                             </button>
                                                         </fieldset>
                                                         <div id="profitMarginTable">
@@ -233,6 +232,7 @@
         getProducts(category_id,1);
         var selectedProduct = $("#productSelect1").val();
         getProductDetails(selectedProduct, 1);
+        applyValidation("QuotationCreateForm");
     });
 </script>
 @endsection

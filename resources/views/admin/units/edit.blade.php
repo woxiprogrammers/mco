@@ -67,8 +67,8 @@
                                                 </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn btn-success btn-md" style="width:25%">Submit</button>                                                </div>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red btn-md"><i class="fa fa-check"></i> Submit</button>                                                </div>
                                             </div>
                                         </form>
                                     </div>

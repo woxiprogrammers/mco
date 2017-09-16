@@ -37,7 +37,7 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <div class="col-md-11">
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
 
@@ -79,13 +79,21 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control" id="mobile" name="mobile" value="{{$client['mobile']}}">
+                                                        <input type="text" class="form-control" id="mobile" name="mobile" value="{{$client['mobile']}}" maxlength="10">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="mobile" class="control-label">GSTIN</label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="text" class="form-control" id="gstin" name="gstin" value="{{$client['gstin']}}">
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn blue">Submit</button>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -108,6 +116,7 @@
 <script>
     $(document).ready(function() {
         EditClient.init();
+        $('#submit').css("padding-left",'6px');
     });
 </script>
 @endsection

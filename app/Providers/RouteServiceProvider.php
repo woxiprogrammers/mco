@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\BankInfo;
 use App\Bill;
 use App\BillTransaction;
 use App\Category;
@@ -19,6 +20,7 @@ use App\Unit;
 use App\Tax;
 use App\UnitConversion;
 use App\User;
+use App\Vendor;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -61,6 +63,8 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('work_order',QuotationWorkOrder::class);
         Route::model('bill_transaction',BillTransaction::class);
         Route::model('extra_item',ExtraItem::class);
+        Route::model('vendor',Vendor::class);
+        Route::model('bank_info',BankInfo::class);
     }
 
     /**

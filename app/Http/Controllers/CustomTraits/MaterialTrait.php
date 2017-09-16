@@ -9,6 +9,7 @@ use App\MaterialVersion;
 use App\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
@@ -56,6 +57,8 @@ trait MaterialTrait{
             $materialData['name'] = $material->name;
             $materialData['rate_per_unit'] = $material->rate_per_unit;
             $materialData['unit'] = $material->unit_id;
+            $materialData['gst'] = $material->gst;
+            $materialData['hsn_code'] = $material->hsn_code;
             $materialData['categories'] =  CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
                                             ->where('category_material_relations.material_id', $material->id)
                                             ->select('category_material_relations.category_id as id','categories.name as name')
@@ -98,6 +101,8 @@ trait MaterialTrait{
                 $materialData['is_active'] = (boolean)0;
                 $materialData['created_at'] = $now;
                 $materialData['updated_at'] = $now;
+                $materialData['gst'] = $request->gst;
+                $materialData['hsn_code'] = $request->hsn_code;
                 $material = Material::create($materialData);
                 $categoryMaterialData['material_id'] = $material['id'];
                 $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
@@ -125,6 +130,8 @@ trait MaterialTrait{
             $now = Carbon::now();
             $materialData['name'] = ucwords(trim($request->name));
             $materialData['updated_at'] = $now;
+            $materialData['gst'] = $request->gst;
+            $materialData['hsn_code'] = $request->hsn_code;
             $material->update($materialData);
             if($request->category_id != null){
                 $categoryMaterial = CategoryMaterialRelation::create(['category_id' => $request->category_id,'material_id'=>$material->id]);
@@ -170,14 +177,15 @@ trait MaterialTrait{
                     $material_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
-                    $materialData[$pagination]['name'],
-                    Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
-                    round($materialData[$pagination]['rate_per_unit'],3),
-                    $material_status,
-                    date('d M Y',strtotime($materialData[$pagination]['created_at'])),
-                    '<div class="btn-group">
+                if(Auth::user()->hasPermissionTo('edit-material')){
+                    $records['data'][$iterator] = [
+                        '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
+                        $materialData[$pagination]['name'],
+                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
+                        round($materialData[$pagination]['rate_per_unit'],3),
+                        $material_status,
+                        date('d M Y',strtotime($materialData[$pagination]['created_at'])),
+                        '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -189,7 +197,24 @@ trait MaterialTrait{
                             </li>
                         </ul>
                     </div>'
-                ];
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
+                        $materialData[$pagination]['name'],
+                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
+                        round($materialData[$pagination]['rate_per_unit'],3),
+                        $material_status,
+                        date('d M Y',strtotime($materialData[$pagination]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                        </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;

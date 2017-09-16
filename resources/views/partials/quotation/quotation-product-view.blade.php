@@ -131,10 +131,22 @@
                             </label>
                         </div>
                     </div>
+                    <div class="col-md-offset-7">
+                        <div class="col-md-3 col-md-offset-3" style="align-items: ">
+                            <label class="control-label" style="font-weight: bold; text-align: right">
+                               Round Total:
+                            </label>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="control-label" style="font-weight: bold; margin-left: 1%" id="roundQuotationProductViewTotal">
+
+                            </label>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <div class="col-md-3 col-md-offset-4">
                             @if($canUpdateProduct == true)
-                                <button type="button" class="btn btn-success" onclick="submitProductEdit()"> Submit </button>
+                                <button type="button" class="btn red" onclick="submitProductEdit()" id="submit"><i class="fa fa-check"></i> Submit </button>
                             @endif
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>

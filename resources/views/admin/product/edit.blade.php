@@ -40,7 +40,11 @@
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
                                         <input type="hidden" id="productId" value="{{$product['id']}}">
-                                        <form role="form" id="edit-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
+                                        @if($copyProduct == true)
+                                            <form role="form" id="edit-product" class="form-horizontal" action="/product/create" method="post">
+                                                @else
+                                                    <form role="form" id="edit-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
+                                                        @endif
                                             {!! csrf_field() !!}
                                             <div>
                                                 <fieldset>
@@ -48,7 +52,11 @@
                                                     <div class="form-group">
                                                         <label class="col-md-3 control-label">Product Title</label>
                                                         <div class="col-md-6">
-                                                            <input type="text" id="name" name="name" class="form-control" value="{{$product['name']}}">
+                                                            @if($copyProduct == true)
+                                                            <input type="text" id="name" name="name" class="form-control" value="Copy of {{$product['name']}}">
+                                                                @else
+                                                                <input type="text" id="name" name="name" class="form-control" value="{{$product['name']}}">
+                                                                @endif
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
@@ -147,7 +155,7 @@
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}">
+                                                                            <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}" readonly>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -205,9 +213,22 @@
                                                                     </label>
                                                                 </div>
                                                             </div>
+                                                            <div class="col-md-offset-7">
+                                                                <div class="col-md-3 col-md-offset-3" style="align-items: ">
+                                                                    <label class="control-label" style="font-weight: bold; text-align: right">
+                                                                        Round Total:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label" style="font-weight: bold; margin-left: 1%" id="roundtotal">
+
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="form-group">
-                                                                <div class="col-md-3 col-md-offset-4">
-                                                                    <button type="submit" class="btn btn-success"> Submit </button>
+                                                                <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">
+                                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit </button>
                                                                 </div>
                                                             </div>
                                                         </div>

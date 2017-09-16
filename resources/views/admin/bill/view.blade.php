@@ -58,14 +58,16 @@
                                         <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
                                             <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px;">
-                                                <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
-                                                <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
+                                                <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill" style="margin-left: 1%">
                                                     @for($i = 0 ; $i < count($bills); $i++)
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
                                                     @endfor
                                                 </select>
+                                                @if($bill->bank_info_id != null)
+                                                    <label for="bank" class="control-label" style="padding-left: 5%">Assigned Bill : {!! $bill->bankInfo->bank_name !!} - {!! $bill->bankInfo->account_number !!}</label>
+                                                @endif
                                                 @if($bill->bill_status->slug == 'draft')
-                                                    <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 30%">
                                                         <i class="fa fa-edit"></i>
                                                         Bill
                                                     </a>
@@ -78,10 +80,6 @@
                                                         <i class="fa fa-remove"></i> Cancel
                                                     </a>
                                                 @endif
-                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
-                                                    <i class="fa fa-download"></i>
-                                                    Current Bill
-                                                </a>
                                                 <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                     <i class="fa fa-download"></i> Cumulative Bill
                                                 </a>
@@ -89,20 +87,35 @@
                                                 <a href="/bill/cumulative/excel-sheet/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                     <i class="fa fa-download"></i>Export Cumulative Bill
                                                 </a>
+                                                <div class="col-md-12" style="margin-top: 1%">
+                                                <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
+
+                                                <a href="/bill/current/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i>
+                                                    Current Bill
+                                                </a>
+                                                <label class="control-label" for="date" style="margin-left: 38%"> Performa Invoice Date : {{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}</label>
+
+                                                <a href="/bill/current/performa-invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
+                                                    <i class="fa fa-download"></i>
+                                                    Performa Invoice Bill
+                                                </a>
+                                                </div>
+
                                             </div>
                                             @endif
                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                 <tr style="text-align: center">
-                                                    <th width="3%"> Item no </th>
-                                                    <th width="15%"> Item Description </th>
-                                                    <th width="6%" class="numeric"> UOM </th>
-                                                    <th width="7%" class="numeric"> BOQ Quantity </th>
-                                                    <th width="6%" class="numeric"> Rate </th>
-                                                    <th width="10%" class="numeric"> W.O Amount </th>
-                                                    <th width="7%" class="numeric"> Previous Quantity </th>
-                                                    <th width="7%" class="numeric"> Current Quantity </th>
-                                                    <th width="10%" class="numeric"> Cumulative Quantity </th>
-                                                    <th width="10%" class="numeric"> Current Bill Amount </th>
+                                                    <th width="3%" style="text-align: center"> Item no </th>
+                                                    <th width="15%" style="text-align: center"> Item Description </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> UOM </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> BOQ Quantity </th>
+                                                    <th width="6%" class="numeric" style="text-align: center"> Rate </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> W.O Amount </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> Previous Quantity </th>
+                                                    <th width="7%" class="numeric" style="text-align: center"> Current Quantity </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
+                                                    <th width="10%" class="numeric" style="text-align: center"> Current Bill Amount </th>
                                                 </tr>
                                                 @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
                                                 <tr>
@@ -143,7 +156,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['current_bill_amount']}}</span>
+                                                        <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['current_bill_subtotal']}}</span>
                                                     </td>
 
                                                 </tr>
@@ -178,18 +191,31 @@
                                                     @endfor
                                                 @endif
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">
-                                                        <b>Total</b>
-                                                    </td>
-
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
                                                     <td>
-                                                        <span id="total_current_bill_amount">{{$total['current_bill_amount']}}</span>
+                                                        <span id="sub_total_current_bill_amount">{{$total['current_bill_subtotal']}}</span>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">
-                                                        <b>Total Round</b>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Sub Total Round</b></td>
+                                                    <td>
+                                                        <span id="rounded_off_current_bill_sub_total">{{$total_rounded['current_bill_subtotal']}}</span>
                                                     </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Discount Amount</b></td>
+                                                    <td>
+                                                        <span id="discountAmount">{{$bill['discount_amount']}}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Discount Description</b></td>
+                                                    <td>
+                                                        <span id="discountDescription">{{$bill['discount_description']}}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
                                                     <td>
                                                         <span id="rounded_off_current_bill_amount">{{$total_rounded['current_bill_amount']}}</span>
                                                     </td>
@@ -484,7 +510,7 @@
         </div>
     </div>
 </div>
-</div>
+
 
 @endsection
 @section('javascript')

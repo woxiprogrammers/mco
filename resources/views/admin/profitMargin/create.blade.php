@@ -57,14 +57,14 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6 input-group" id="inputGroup">
-                                                        <input type="text" class="form-control" id="percentage" name="base_percentage">
+                                                        <input type="number" class="form-control" id="percentage" name="base_percentage">
                                                         <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3">
-                                                    <button type="submit" class="btn blue">Submit</button>
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>

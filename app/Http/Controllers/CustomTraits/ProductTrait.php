@@ -11,6 +11,7 @@ use App\ProfitMargin;
 use App\ProfitMarginVersion;
 use App\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\App;
 
@@ -49,6 +50,12 @@ trait ProductTrait{
 
     public function getEditView(Request $request, $product) {
         try{
+            $request->url();
+            if( strpos( $request->url(), "copy" ) !== false ) {
+                $copyProduct = true;
+            }else{
+                $copyProduct = false;
+            }
             $recentProductVersion = ProductVersion::where('product_id',$product['id'])->orderBy('created_at','desc')->first();
             $product['category'] = Category::where('id',$product['category_id'])->pluck('name')->first();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
@@ -82,7 +89,7 @@ trait ProductTrait{
             if($request->ajax()){
                 return view('partials.quotation.product-view')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
             }else{
-                return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds'));
+                return view('admin.product.edit')->with(compact('product','profitMargins','units','materials','productMaterialIds','productMaterialVersions','productProfitMargins','materialVersionIds','copyProduct'));
             }
         }catch(\Exception $e){
             $data = [
@@ -224,7 +231,7 @@ trait ProductTrait{
                 }
             }
             $request->session()->flash('success','Product Created Successfully');
-            return redirect('/product/create');
+            return redirect('/product/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Product',
@@ -256,13 +263,14 @@ trait ProductTrait{
                     $product_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $productData[$pagination]['name'],
-                    Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                    Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
-                    $productVersion['rate_per_unit'],
-                    $product_status,
-                    '<div class="btn-group">
+                if(Auth::user()->hasPermissionTo('edit-product')){
+                    $records['data'][$iterator] = [
+                        $productData[$pagination]['name'],
+                        Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                        round($productVersion['rate_per_unit']),
+                        $product_status,
+                        '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -280,9 +288,35 @@ trait ProductTrait{
                                 <a href="/product/product-analysis-pdf/'.$productData[$pagination]['id'].'">
                                     <i class="icon-cloud-download"></i> Download </a>
                             </li>
+                            <li>
+                                <a href="/product/copy/'.$productData[$pagination]['id'].'">
+                                    <i class="fa fa-files-o"></i> Copy Product</a>
+                            </li>
                         </ul>
                     </div>'
-                ];
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $productData[$pagination]['name'],
+                        Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                        round($productVersion['rate_per_unit']),
+                        $product_status,
+                        '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/product/product-analysis-pdf/'.$productData[$pagination]['id'].'">
+                                    <i class="icon-cloud-download"></i> Download </a>
+                            </li>
+                        </ul>
+                    </div>'
+                    ];
+                }
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
