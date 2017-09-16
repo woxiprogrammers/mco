@@ -139,11 +139,11 @@
                                             <i class="fa fa-users"></i> Manage Users
                                         </a>
                                         <ul class="dropdown-menu pull-left">
-                                            {{--<li aria-haspopup="true">
+                                            <li aria-haspopup="true">
                                                 <a href="/vendors/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Vendors
                                                 </a>
-                                            </li>--}}
+                                            </li>
                                             <li aria-haspopup="true">
                                                 <a href="/user/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Users
@@ -175,29 +175,6 @@
                                             </li>
                                         @endif
                                     </ul>
-                                </li>
-                                <li aria-haspopup="true"  class="dropdown-submenu ">
-                                    <a href="javascript:void(0);" class="nav-link nav-toggle ">
-                                        <i class="fa fa-folder"></i> Manage Users
-                                    </a>
-                                    <ul class="dropdown-menu pull-left">
-                                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                                                <a href="/user/manage">
-                                                    <i class="fa fa-users"></i> Manage Users
-                                                    <span class="arrow"></span>
-                                                </a>
-                                            </li>
-                                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                                                <a href="/vendors/manage">
-                                                    <i class="fa fa-cubes"></i> Manage Vendors
-                                                    <span class="arrow"></span>
-                                                </a>
-                                            </li>
-                                    </ul>
-                                    <a href="/bank/manage">
-                                        <i class="fa fa-folder"></i> Manage Bank
-                                    </a>
-                                    </a>
                                 </li>
                                 </ul>
                             </li>

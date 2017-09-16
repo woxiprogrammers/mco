@@ -12,6 +12,8 @@ use App\Material;
 use App\State;
 use App\Unit;
 use App\Vendor;
+use App\VendorCityRelation;
+use App\VendorMaterialRelation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Expr\Array_;
@@ -22,7 +24,6 @@ trait VendorTrait
     public function getCreateView(Request $request)
     {
         try {
-            //dd($request->all());
             $cities = City::get();
             $cityArray = Array();
             $iterator = 0;
@@ -58,7 +59,7 @@ trait VendorTrait
                 $materialOptions[] = '<option value=""> No material Available </option>';
             }else{
                 foreach($materials as $material){
-                    $materialOptions[] = '<li  class="list-group-item"><input type="checkbox" name="material_ids" value="'.$material->id.'"><span> '.$material->name.'</span></li>';
+                    $materialOptions[] = '<li  class="list-group-item"><input type="checkbox" name="material_ids[]" value="'.$material->id.'"><span> '.$material->name.'</span></li>';
                 }
             }
             $status = 200;
@@ -100,8 +101,7 @@ trait VendorTrait
     }
 
 
-    public function getEditView(Request $request, $vendor)
-    {
+    public function getEditView(Request $request, $vendor){
         try {
             $vendor = $vendor->toArray();
             return view('admin.vendors.edit')->with(compact('vendor'));
@@ -116,8 +116,7 @@ trait VendorTrait
         }
     }
 
-    public function getManageView(Request $request)
-    {
+    public function getManageView(Request $request){
         try {
             return view('admin.vendors.manage');
         } catch (\Exception $e) {
@@ -130,10 +129,8 @@ trait VendorTrait
         }
     }
 
-    public function createVendor(Request $request)
-    {
+    public function createVendor(Request $request){
         try {
-
             $data = Array();
             $data['name'] = ucwords($request->name);
             $data['company'] = $request->company;
@@ -143,6 +140,25 @@ trait VendorTrait
             $data['alternate_contact'] = $request->alternate_contact;
             $data['is_active'] = false;
             $vendor = Vendor::create($data);
+            $vendorCityData = array();
+            $vendorMaterialData = array();
+            $vendorCityData['vendor_id'] = $vendor->id;
+            $vendorMaterialData['vendor_id'] = $vendor->id;
+            $vendorCityRelation = array();
+            foreach($request->cities as $cityId){
+                $vendorCityData['city_id'] = $cityId;
+                $vendorCity = VendorCityRelation::create($vendorCityData);
+                $vendorCityRelation[$cityId] = $vendorCity->id;
+            }
+            foreach($request->material_ids as $materialId){
+                $vendorMaterialData['material_id'] = $materialId;
+                $vendorMaterial = VendorMaterialRelation::create($vendorMaterialData);
+                $vendorMaterialCityData = array();
+                $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
+                foreach ($request->material_city[$materialId] as $materialCityId){
+                    $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
+                }
+            }
             $request->session()->flash('success', 'Vendor Created successfully.');
             return redirect('/vendors/create');
         } catch (\Exception $e) {
@@ -156,8 +172,7 @@ trait VendorTrait
         }
     }
 
-    public function editVendor(Request $request, $vendor)
-    {
+    public function editVendor(Request $request, $vendor){
         try {
             $data = $request->all();
             $vendorData['name'] = ucwords(trim($data['name']));
@@ -181,8 +196,7 @@ trait VendorTrait
         }
     }
 
-    public function vendorListing(Request $request)
-    {
+    public function vendorListing(Request $request){
         try {
             if ($request->has('search_name')) {
                 $vendorsData = Vendor::where('name', 'ilike', '%' . $request->search_name . '%')->orderBy('name', 'asc')->get()->toArray();
@@ -241,8 +255,7 @@ trait VendorTrait
         return response()->json($records);
     }
 
-    public function changeVendorStatus(Request $request, $vendor)
-    {
+    public function changeVendorStatus(Request $request, $vendor){
         try {
             $newStatus = (boolean)!$vendor->is_active;
             $vendor->update(['is_active' => $newStatus]);
@@ -259,8 +272,7 @@ trait VendorTrait
         }
     }
 
-    public function checkVendorName(Request $request)
-    {
+    public function checkVendorName(Request $request){
         try {
             $vendorName = $request->name;
             if ($request->has('vendor_id')) {
