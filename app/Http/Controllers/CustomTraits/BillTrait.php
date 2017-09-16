@@ -1432,7 +1432,7 @@ trait BillTrait{
                         $amountColumn = $totalAmountColumn;
                         $amountColumn++;
                         $sheet->getCell('A'.($productRow))->setValue($serialNumber);
-                        $sheet->getCell('B'.($productRow))->setValue($extraItem['name']);
+                        $sheet->getCell('B'.($productRow))->setValue("Extra Item : ".$extraItem['name']);
                         $sheet->getCell('E'.($productRow))->setValue($extraItem['quotation_rate']);
                         $next_column = 'G';
                         foreach($extraItem['bills'] as $billIterator => $thisBill ){
