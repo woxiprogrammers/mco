@@ -26,7 +26,7 @@
                             <div class="container">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/drawing/Image/manage">Manage Image</a>
+                                        <a href="/drawing/images/manage">Manage Image</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
@@ -149,14 +149,14 @@
                                                          </div>--}}
                                                         <button id="version" style="margin-left: 26%"><a href="#"><i class="fa fa-plus"></i> New Version</a>
                                                         </button>
-                                                        <div class="modal fade" id="modal" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static">
+                                                        <div class="modal fade" id="modal" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static" data-dismiss="modal" data-toggle="modal" href="#lost">
                                                             <div class="modal-dialog">
                                                                 <div class="modal-content" style="height: 35%">
                                                                     <div class="modal-header" style="padding-bottom: 10%">
                                                                         <div class="row">
                                                                             <div class="col-md-4"></div>
-                                                                            <div class="col-md-7" style="margin-left:-11%"> Add New Version</div>
-                                                                            <div class="col-md-1" style="margin-left:9%"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button></div>
+                                                                            <div class="col-md-7" style="margin-left:1%"> Add New Version</div>
+                                                                            <div class="col-md-1" style="margin-left:-1%"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button></div>
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-body">
@@ -173,8 +173,8 @@
                                                                             <div class="row">
                                                                                 <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
                                                                             </div>
-                                                                            <div id="tab_images_uploader_container" class="col-md-offset-5" style="margin-left: 57%">
-                                                                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: -70%">
+                                                                            <div id="tab_new_version_images_uploader_container" class="col-md-offset-5" style="margin-left: 57%">
+                                                                                <a id="tab_new_version_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: -70%">
                                                                                     Browse</a>
                                                                                 <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
                                                                                     <i class="fa fa-share"></i> Upload Files </a>
@@ -205,6 +205,7 @@
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/drawing/image/image-datatable.js"></script>
+    <script src="/assets/custom/admin/drawing/image/image-version-datatable.js"></script>
     <script src="/assets/custom/admin/drawing/image/image-upload.js"></script>
     <script src="/assets/custom/admin/drawing/image/validation.js" type="application/javascript"></script>
     <script>

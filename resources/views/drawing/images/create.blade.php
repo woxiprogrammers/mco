@@ -26,7 +26,7 @@
                             <div class="container">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/drawing/Image/manage">Manage Image</a>
+                                        <a href="/drawing/images/manage">Manage Image</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
