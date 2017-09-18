@@ -183,7 +183,7 @@
 @endsection
 
 @section('javascript')
-    <script src="/assets/custom/admin/role/role7.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/role/role9.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
             EditRole.init();

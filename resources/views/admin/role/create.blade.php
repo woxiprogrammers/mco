@@ -113,7 +113,7 @@
 
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/role/role6.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/role/role9.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
