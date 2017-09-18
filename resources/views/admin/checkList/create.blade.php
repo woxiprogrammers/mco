@@ -134,10 +134,9 @@
 
                                                                  </div>
                                                              </div>
-                                                            </div>
-                                                        </div>
-                                                        </div>
-
+                                                         </div>
+                                                     </div>
+                                                 </div>
                                                         <div class="form-group row">
                                                             <div id="append">
 
@@ -145,13 +144,13 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div id="appendHere" >
+                                                    <div class="form-group row">
+                                                <div id="appendHere">
                                                 </div>
-                                                </div>
+                                                    </div>
+                                             </div>
                                             </form>
-                                                </div>
-
-                                        </div>
+                                       </div>
                                     </div>
                                 </div>
                             </div>
@@ -160,6 +159,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
 @endsection
 @section('javascript')
