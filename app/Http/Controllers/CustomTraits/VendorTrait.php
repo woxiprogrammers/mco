@@ -13,6 +13,7 @@ use App\State;
 use App\Unit;
 use App\Vendor;
 use App\VendorCityRelation;
+use App\VendorMaterialCityRelation;
 use App\VendorMaterialRelation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -21,8 +22,7 @@ use PhpParser\Node\Expr\Array_;
 trait VendorTrait
 {
 
-    public function getCreateView(Request $request)
-    {
+    public function getCreateView(Request $request){
         try {
             $cities = City::get();
             $cityArray = Array();
@@ -32,8 +32,13 @@ trait VendorTrait
                 $cityArray[$iterator]['name'] = $city->name.", ".$city->state->name.', '.$city->state->country->name;
                 $iterator++;
             }
-            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-
+            $categories = Category::join('category_material_relations','category_material_relations.category_id','=','categories.id')
+                ->where('is_active', true)
+                ->select('categories.id as id','categories.name as name')
+                ->distinct('id')
+                ->orderBy('name','asc')
+                ->get()
+                ->toArray();
             return view('admin.vendors.create')->with(compact('cityArray','categories'));
         } catch (\Exception $e) {
             $data = [
@@ -56,7 +61,7 @@ trait VendorTrait
                 ->get();
             $materialOptions = array();
             if($materials == null){
-                $materialOptions[] = '<option value=""> No material Available </option>';
+                $materialOptions[] = '<li> No material Available </li>';
             }else{
                 foreach($materials as $material){
                     $materialOptions[] = '<li  class="list-group-item"><input type="checkbox" name="material_ids[]" value="'.$material->id.'"><span> '.$material->name.'</span></li>';
@@ -76,7 +81,6 @@ trait VendorTrait
         }
         return response()->json($materialOptions,$status);
     }
-
 
     public function autoSuggest(Request $request, $keyword){
         try{
@@ -100,11 +104,35 @@ trait VendorTrait
         return response()->json($response,$status);
     }
 
-
     public function getEditView(Request $request, $vendor){
         try {
-            $vendor = $vendor->toArray();
-            return view('admin.vendors.edit')->with(compact('vendor'));
+            $cities = City::all();
+            $cityArray = Array();
+            $iterator = 0;
+            foreach ($cities as $city) {
+                $cityArray[$iterator]['id'] = $city->id;
+                $cityArray[$iterator]['name'] = $city->name.", ".$city->state->name.', '.$city->state->country->name;
+                $iterator++;
+            }
+            $categories = Category::join('category_material_relations','category_material_relations.category_id','=','categories.id')
+                ->where('is_active', true)
+                ->select('categories.id as id','categories.name as name')
+                ->orderBy('name','asc')
+                ->get()
+                ->toArray();
+            $vendorCities = array_column(($vendor->cityRelations->toArray()),'city_id');
+            $vendorMaterialInfo = array();
+            foreach($vendor->materialRelations as $material){
+                $vendorMaterialInfo[$material['material_id']] = array();
+                $vendorMaterialInfo[$material['material_id']]['name'] = $material->material->name;
+                $vendorMaterialInfo[$material['material_id']]['cities'] = VendorMaterialCityRelation::join('vendor_material_relation','vendor_material_relation.id','=','vendor_material_city_relation.vendor_material_relation_id')
+                                                                            ->join('vendor_city_relation','vendor_city_relation.id','=','vendor_material_city_relation.vendor_city_relation_id')
+                                                                            ->where('vendor_material_relation.material_id',$material['material_id'])
+                                                                            ->pluck('vendor_city_relation.city_id')
+                                                                            ->toArray();
+
+            }
+            return view('admin.vendors.edit')->with(compact('vendor','cityArray','categories','vendorCities','vendorMaterialInfo'));
         } catch (\Exception $e) {
             $data = [
                 'action' => "Get vendor edit view",
@@ -150,13 +178,15 @@ trait VendorTrait
                 $vendorCity = VendorCityRelation::create($vendorCityData);
                 $vendorCityRelation[$cityId] = $vendorCity->id;
             }
-            foreach($request->material_ids as $materialId){
+            $materialIds = array_keys($request->material_city);
+            foreach($materialIds as $materialId){
                 $vendorMaterialData['material_id'] = $materialId;
                 $vendorMaterial = VendorMaterialRelation::create($vendorMaterialData);
                 $vendorMaterialCityData = array();
                 $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
                 foreach ($request->material_city[$materialId] as $materialCityId){
                     $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
+                    VendorMaterialCityRelation::create($vendorMaterialCityData);
                 }
             }
             $request->session()->flash('success', 'Vendor Created successfully.');
@@ -174,15 +204,33 @@ trait VendorTrait
 
     public function editVendor(Request $request, $vendor){
         try {
-            $data = $request->all();
-            $vendorData['name'] = ucwords(trim($data['name']));
-            $vendorData['company'] = $data['company'];
-            $vendorData['mobile'] = $data['mobile'];
-            $vendorData['email'] = $data['email'];
-            $vendorData['gstin'] = $data['gstin'];
-            $vendorData['alternate_contact'] = $data['alternate_contact'];
-            $vendorData['city'] = $data['city'];
-            $vendor->update($vendorData);
+            $data = $request->except(['cities','material','material_city','_token','_method']);
+            dd($request->cities);
+            $data['name'] = ucwords(trim($data['name']));
+            //$vendor->update($data);
+            $vendorCityData = array();
+            $vendorMaterialData = array();
+            $vendorCityData['vendor_id'] = $vendor->id;
+            $vendorMaterialData['vendor_id'] = $vendor->id;
+            $vendorCityRelation = array();
+            $currentVendorCities = array_column(($vendor->cityRelations->toArray()),'city_id');
+//            dd($currentVendor);
+            foreach($request->cities as $cityId){
+                $vendorCityData['city_id'] = $cityId;
+                $vendorCity = VendorCityRelation::create($vendorCityData);
+                $vendorCityRelation[$cityId] = $vendorCity->id;
+            }
+            $materialIds = array_keys($request->material_city);
+            foreach($materialIds as $materialId){
+                $vendorMaterialData['material_id'] = $materialId;
+                $vendorMaterial = VendorMaterialRelation::create($vendorMaterialData);
+                $vendorMaterialCityData = array();
+                $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
+                foreach ($request->material_city[$materialId] as $materialCityId){
+                    $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
+                    VendorMaterialCityRelation::create($vendorMaterialCityData);
+                }
+            }
             $request->session()->flash('success', 'Vendor Edited successfully.');
             return redirect('/vendors/edit/' . $vendor->id);
         } catch (\Exception $e) {
@@ -219,7 +267,6 @@ trait VendorTrait
                     $vendorsData[$pagination]['name'],
                     $vendorsData[$pagination]['mobile'],
                     $vendor_status,
-
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions

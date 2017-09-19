@@ -17,4 +17,8 @@ class VendorMaterialRelation extends Model
     public function material(){
         return $this->belongsTo('App\Material','material_id');
     }
+
+    public function vendorCityRelation(){
+        return $this->hasMany('App\VendorMaterialCityRelation','vendor_material_relation_id');
+    }
 }

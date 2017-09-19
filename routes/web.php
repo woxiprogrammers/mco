@@ -264,7 +264,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\VendorController@autoSuggest'));
-
     });
 
     Route::group(['prefix'=>'bank'],function() {
