@@ -135,48 +135,47 @@ trait RoleTrait{
         try{
             //dd($request->all());
             $roleId = $role->id;
-            //dd($dataRequest);
             $web_permissions = $request->web_permissions;
+            //dd($web_permissions);
             $mobile_permissions = $request->mobile_permissions;
+            //dd($mobile_permissions);
             $data = $request->only('name','type');
             $data['name'] = ucwords(trim($data['name']));
             $role->update($data);
             $rolePermissionData = array();
-            RoleHasPermission::where('role_id',$roleId)->delete();
             $rolePermissionData['role_id'] = $roleId;
+
             if($request->has('web_permissions')) {
+               // dd($web_permissions);
                 foreach ($web_permissions as $permissions) {
-                    if ($request->has('web_permissions') && is_array($web_permissions)) {
-                        $rolePermissionData['is_web'] = true;
+                    //dd(123);
+                    $rolePermissionData['is_web'] = true;
+                    $rolePermissionData['is_mobile'] = false;
+                    $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
+                    if ($check != null) {
+                        RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update($rolePermissionData);
+                    }else{
                         $rolePermissionData['permission_id'] = $permissions;
-                        $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
-                        if($check != null)
-                        {
-                            RoleHasPermission::where('role_id',$roleId)->update('is_web',true);
-                        }
-                        else{
-                            RoleHasPermission::create($rolePermissionData);
-                        }
+                        RoleHasPermission::create($rolePermissionData);
                     }
                 }
             }
+//            dd($request->has('mobile_permissions'));
             if($request->has('mobile_permissions')) {
                 foreach ($mobile_permissions as $permissions) {
-                    if ($request->has('mobile_permissions') && is_array($mobile_permissions)) {
-                        $rolePermissionData['is_mobile'] = true;
+                    //dd(123);
+                    $rolePermissionData['is_mobile'] = true;
+                    $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
+                    if ($check != null) {
+                        RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update('is_mobile', true);
+                    } else {
                         $rolePermissionData['permission_id'] = $permissions;
-                        $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
-                        if($check != null)
-                        {
-                            RoleHasPermission::where('role_id',$roleId)->update('is_mobile',true);
-                        }
-                        else{
-                            RoleHasPermission::create($rolePermissionData);
-                        }
+                        RoleHasPermission::create($rolePermissionData);
                     }
                 }
             }
-
+            $deletedIds = RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$web_permissions)->whereNotIn('permission_id',$mobile_permissions)->delete();
+            //dd($deletedIds);
             $request->session()->flash('success', 'Role Edited successfully.');
             return redirect('/role/edit/'.$role->id);
         }catch(\Exception $e){
