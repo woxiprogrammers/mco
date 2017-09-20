@@ -256,8 +256,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'asset'], function(){
         Route::get('manage',array('uses'=> 'Admin\AssetManagementController@getManageView'));
         Route::get('create',array('uses'=> 'Admin\AssetManagementController@getCreateView'));
-        Route::get('edit',array('uses'=> 'Admin\AssetManagementController@getEditView'));
+        Route::get('edit/{asset}',array('uses'=> 'Admin\AssetManagementController@getEditView'));
         Route::post('create',array('uses' => 'Admin\AssetManagementController@createAsset'));
+        Route::post('listing',array('uses'=> 'Admin\AssetManagementController@assetListing'));
+
 
     });
 

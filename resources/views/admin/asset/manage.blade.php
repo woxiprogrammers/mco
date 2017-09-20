@@ -3,6 +3,8 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -38,7 +40,7 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        <div class="table-actions-wrapper right">
+                                                        {{--<div class="table-actions-wrapper right">
                                                             <span> </span>
                                                             <select class="table-group-action-input form-control input-inline input-small input-sm">
                                                                 <option value="">Select...</option>
@@ -47,17 +49,19 @@
                                                             </select>
                                                             <button class="btn btn-sm green table-group-action-submit">
                                                                 <i class="fa fa-check"></i> Submit</button>
-                                                        </div>
-                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
+                                                        </div>--}}
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="assetTable">
                                                             <thead>
                                                             <tr>
-                                                                <th> Asset Id </th>
+                                                                <th> Asset ID </th>
                                                                 <th> Model Number</th>
-                                                                <th> Action </th>
+                                                                <th> Status </th>
+                                                                <th> Actions </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_model_number" > </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_asset_number" > </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -65,7 +69,7 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody>
-                                                            <tr>
+                                                            {{--<tr>
                                                                 <td> 5 </td>
                                                                 <td> Otto </td>
                                                                 <td>
@@ -84,7 +88,7 @@
                                                                         </a>
                                                                     </div>
                                                                 </td>
-                                                            </tr>
+                                                            </tr>--}}
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -140,10 +144,10 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/asset/manage-datatable.js" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-            $('#purchaseRequest').DataTable();
+            $('#assetTable').DataTable();
         });
     </script>
 @endsection

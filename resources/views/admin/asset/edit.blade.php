@@ -34,21 +34,21 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-user" class="form-horizontal" method="post" action="/user/create">
+                                            <form role="form" id="create-user" class="form-horizontal" method="post" action="/asset/edit">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="first_name" class="control-label">Model Number</label>
+                                                            <label for="model_number" class="control-label">Model Number</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="first_name" name="first_name">
+                                                            <input type="text" class="form-control" id="model_number" name="model_number">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="last_name" class="control-label">Asset Name</label>
+                                                            <label for="asset_name" class="control-label">Asset Name</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
@@ -57,34 +57,45 @@
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="dob" class="control-label">Expiry Date</label>
+                                                            <label for="expiry_date" class="control-label ">Expiry Date</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <input type="date" class="form-control" name="dob" id="datepicker">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="number" class="control-label">Price</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="number" name="number">
+                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                            <input type="text"  class="form-control" style="width: 30%" name="date" placeholder="Select Bill Date" id="date"/>
+                                                            <button class="btn btn-sm default" type="button">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="gender" class="control-label">Is It a Diesel</label>
+                                                            <label for="price" class="control-label">Price</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" name="gender">
-                                                                <option value="">Select Gender</option>
-                                                                <option value="F">Female</option>
-                                                                <option value="M">Male</option>
+                                                            <input type="number" class="form-control" id="price" name="price">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="diesel" class="control-label">Is It a Diesel</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <select class="form-control" name="is_fuel_dependent">
+                                                                <option value="">Select Option</option>
+                                                                <option value="true">Yes</option>
+                                                                <option value="false">No</option>
                                                             </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="liter_per_unit" class="control-label">Litre Per Unit</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="number" class="form-control" id="number" name="litre_per_unit">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -107,15 +118,6 @@
                                                                 <tbody id="show-product-images">
                                                                 </tbody>
                                                             </table></center>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="number" class="control-label">Maintenance Hours</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="number" name="number">
-                                                        </div>
                                                     </div>
 
                                                 </div>
