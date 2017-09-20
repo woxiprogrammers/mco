@@ -144,6 +144,12 @@
                                                     <i class="fa fa-sitemap"></i> Manage Vendors
                                                 </a>
                                             </li>
+                                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                                <a href="/role/manage">
+                                                    <i class="fa fa-users"></i> Manage Roles
+                                                    <span class="arrow"></span>
+                                                </a>
+                                            </li>
                                             <li aria-haspopup="true">
                                                 <a href="/user/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Users
@@ -173,11 +179,19 @@
                                                     <span class="arrow"></span>
                                                 </a>
                                             </li>
+                                            <li aria-haspopup="true"  class="dropdown-submenu ">
+                                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-folder"></i> Manage Sites
+                                                </a>
+                                            </li>
                                         @endif
                                     </ul>
                                 </li>
                                 </ul>
                             </li>
+
+
+                    @endif
                         <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
                         @if($hasStructurePermission)
                             <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -246,8 +260,8 @@
                                 </li>
                             </ul>
                         </li>
-                        @endif
-                        </ul>
+                    </ul>
+
                     </li>
             </div>
             <!-- END MEGA MENU -->
