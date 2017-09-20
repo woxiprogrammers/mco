@@ -66,7 +66,6 @@
                                                     </div>
                                                     <div class="input_fields_wrap">
 
-                                                        {{--<div id="example">--}}
                                                         <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
 
                                                             <label for="title" class="control-label">Title</label>
@@ -151,10 +150,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div id="appendHere">
-                                                        </div>
-                                                    </div>
                                                 </div>
                                             </form>
                                         </div>
@@ -195,15 +190,15 @@
     <script>
 
         $(document).ready(function() {
-            var max_fields      = 10; //maximum input boxes allowed
-            var wrapper         = $(".input_fields_wrap"); //Fields wrapper
-            var add_button      = $(".add_field_button"); //Add button ID
+            var max_fields      = 10;
+            var wrapper         = $(".input_fields_wrap");
+            var add_button      = $(".add_field_button");
 
-            var x = 1; //initlal text box count
-            $(add_button).click(function(e){ //on add input button click
+            var x = 1;
+            $(add_button).click(function(e){
                 e.preventDefault();
-                if(x < max_fields){ //max input box allowe
-                    x++; //text box increment
+                if(x < max_fields){
+                    x++;
                     $(wrapper).append('  <form><div class="form-body"><div class="form-group row">  <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">\n' +
                         '\n' +
                         '                                                            <label for="title" class="control-label">Title</label>\n' +
@@ -230,7 +225,7 @@
                 }
             });
 
-            $(wrapper).on("click",".remove_field", function(e) { //user click on remove text
+            $(wrapper).on("click",".remove_field", function(e) {
 
                 e.preventDefault();
                 $(this).parent('div').remove();
@@ -238,5 +233,18 @@
             })
 
         });
+    </script>
+    <script>
+        function generate() {
+
+            var a = parseInt(document.getElementById("nochapter").value);
+
+            for (i = 0; i < a; i++) {
+                ($('#extra').clone()).appendTo('#append')
+                $('#extra').show();
+
+            }
+        }
+
     </script>
 @endsection

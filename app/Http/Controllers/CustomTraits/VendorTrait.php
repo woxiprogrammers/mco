@@ -22,7 +22,6 @@ trait VendorTrait
     public function getCreateView(Request $request)
     {
         try {
-            //dd($request->all());
             $cities = City::get();
             $cityArray = Array();
             $iterator = 0;
