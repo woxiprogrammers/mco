@@ -139,11 +139,11 @@
                                             <i class="fa fa-users"></i> Manage Users
                                         </a>
                                         <ul class="dropdown-menu pull-left">
-                                            {{--<li aria-haspopup="true">
+                                            <li aria-haspopup="true">
                                                 <a href="/vendors/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Vendors
                                                 </a>
-                                            </li>--}}
+                                            </li>
                                             <li aria-haspopup="true">
                                                 <a href="/user/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Users
@@ -175,12 +175,6 @@
                                             </li>
                                         @endif
                                     </ul>
-                                </li>
-                                <li aria-haspopup="true"  class="dropdown-submenu ">
-                                    <a href="/bank/manage">
-                                        <i class="fa fa-folder"></i> Manage Bank
-                                    </a>
-                                    </a>
                                 </li>
                                 </ul>
                             </li>

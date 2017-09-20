@@ -204,6 +204,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=>'Admin\QuotationController@addExtraItems'));
         });
     });
+
+    Route::group(['prefix' => 'checkList'],function(){
+        Route::get('manage',array('uses' => 'CheckList\ChecklistController@getManageView'));
+        Route::get('create',array('uses' => 'CheckList\ChecklistController@getCreateView'));
+    });
+
     Route::group(['prefix' => 'project'], function(){
         Route::get('create',array('uses'=> 'Admin\ProjectController@getCreateView'));
         Route::post('create',array('uses'=> 'Admin\ProjectController@createProject'));
@@ -252,9 +258,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('create',array('uses' => 'Admin\VendorController@createVendor'));
         Route::get('edit/{vendor}',array('uses' => 'Admin\VendorController@getEditView'));
         Route::put('edit/{vendor}',array('uses' => 'Admin\VendorController@editVendor'));
+        Route::get('get-materials/{category}',array('uses' => 'Admin\VendorController@getMaterials'));
+        Route::post('get-city-info',array('uses'=> 'Admin\VendorController@getCityInfo'));
         Route::post('listing',array('uses'=> 'Admin\VendorController@vendorListing'));
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
+        Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\VendorController@autoSuggest'));
     });
 
     Route::group(['prefix'=>'bank'],function() {
