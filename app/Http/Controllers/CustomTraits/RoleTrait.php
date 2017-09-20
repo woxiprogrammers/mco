@@ -52,7 +52,6 @@ trait RoleTrait{
             $permissionTypes = $data['permissionTypes'];
             $mobileModuleResponse = $data['mobileModuleResponse'];
             return view('admin.role.edit')->with(compact('role','modules','moduleIds','webModuleResponse','permissionTypes','roleWebPermissions','roleMobilePermissions','mobileModuleResponse'));
-//            return view('admin.role.edit')->with($data);
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -83,9 +82,7 @@ trait RoleTrait{
             $mobile_permissions=$request->mobile_permissions;
             $data = $request->only('name','type');
             $data['name'] = ucwords(trim($data['name']));
-
             $role = Role::create($data);
-
             $roleId = $role['id'];
             $rolePermissionData = array();
             $rolePermissionData['role_id'] = $roleId;
@@ -266,7 +263,6 @@ trait RoleTrait{
                 $roleMobilePermissions = [];
             }
             return view('partials.role.module-listing')->with(compact('moduleIds','webModuleResponse','permissionTypes','mobileModuleResponse','roleWebPermissions','roleMobilePermissions'));
-            //return view('partials.role.module-listing')->with($data);
         }
         catch (\Exception $e){
             $data = [

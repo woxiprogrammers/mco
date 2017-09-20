@@ -182,23 +182,10 @@ function getSubModules() {
         module_id[i] = $(this).val();
     });
     formData['module_id'] = module_id;
-    /*if($(".product-material-id").length > 0){
-        formData['modules'] = {};
-        $(".product-material-id").each(function(i){
-            var module_id = $(this).val();
-            formData['modules'][module_id] = {};
-            formData['modules'][module_id]['id'] = module_id;
-            formData['modules'][module_id]['module_id'] = $("#module_"+module_id+"_module_id").val();
-            formData['modules'][module_id]['is_web'] = $("#module_"+module_id+"_is_web").val();
-            formData['modules'][module_id]['is_mobile'] = $("#module_"+module_id+"_is_mobile").val();
-
-        });
-    }*/
     var url = window.location.href;
     if(url.indexOf("edit") > 0){
         formData['role_id'] = $("#role_id").val();
     }
-
     $.ajax({
         type: "POST",
         url: "/role/module/listing",
