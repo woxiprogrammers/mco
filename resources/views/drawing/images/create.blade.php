@@ -129,7 +129,7 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody id="show-product-images">
-                                                                <tr id="image-">
+                                                                {{--<tr id="image-{{1}}">
                                                                     <td>
                                                                         <a href="" target="_blank" class="fancybox-button" data-rel="fancybox-button">
                                                                             <img class="img-responsive" src="" alt="" style="width:100px; height:100px;"> </a>
@@ -139,7 +139,7 @@
                                                                         <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image");'>
                                                                             <i class="fa fa-times"></i> Remove </a>
                                                                     </td>
-                                                                </tr>
+                                                                </tr>--}}
                                                             </tbody>
                                                         </table>
                                                        {{-- <div class="form-group">
@@ -150,6 +150,8 @@
                                                     </div>
                                                 </div>
                                             </form>
+                                            <input type="hidden" id="path" name="path" value="">
+                                            <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                                         </div>
                                     </div>
                                 </div>

@@ -287,6 +287,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('manage',array('uses'=> 'Drawing\ImagesController@getManageView'));
             Route::get('create',array('uses'=> 'Drawing\ImagesController@getCreateView'));
             Route::get('edit',array('uses'=> 'Drawing\ImagesController@getEditView'));
+            Route::post('image-upload/{quotationId}',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
+            Route::post('display-images/{quotationId}',array('uses'=>'Drawing\ImagesController@displayDrawingImages'));
+            Route::post('delete-temp-product-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
         });
     });
 

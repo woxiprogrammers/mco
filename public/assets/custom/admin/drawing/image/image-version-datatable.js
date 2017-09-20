@@ -24,9 +24,9 @@ var QuotationImageUpload = function() {
             silverlight_xap_url: "/assets/global/plugins/plupload/js/Moxie.xap",
             init: {
                 PostInit: function() {
-                    $("#tab_images_uploader_filelist").html(""), $("#tab_images_uploader_uploadfiles").click(function() {
+                    $("#tab_new_version_images_uploader_filelist").html(""), $("#tab_new_version_images_uploader_uploadfiles").click(function() {
                         return e.start(), !1
-                    }), $("#tab_images_uploader_filelist").on("click", ".added-files .remove", function() {
+                    }), $("#tab_new_version_images_uploader_filelist").on("click", ".added-files .remove", function() {
                         e.removeFile($(this).parent(".added-files").attr("id")), $(this).parent(".added-files").remove()
                     })
                 },
