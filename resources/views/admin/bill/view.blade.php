@@ -63,6 +63,9 @@
                                                         <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
                                                     @endfor
                                                 </select>
+                                                @if($bill->bank_info_id != null)
+                                                    <label for="bank" class="control-label" style="padding-left: 5%">Assigned Bill : {!! $bill->bankInfo->bank_name !!} - {!! $bill->bankInfo->account_number !!}</label>
+                                                @endif
                                                 @if($bill->bill_status->slug == 'draft')
                                                     <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 30%">
                                                         <i class="fa fa-edit"></i>
@@ -153,7 +156,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['current_bill_amount']}}</span>
+                                                        <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['current_bill_subtotal']}}</span>
                                                     </td>
 
                                                 </tr>
@@ -188,18 +191,31 @@
                                                     @endfor
                                                 @endif
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">
-                                                        <b>Total</b>
-                                                    </td>
-
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
                                                     <td>
-                                                        <span id="total_current_bill_amount">{{$total['current_bill_amount']}}</span>
+                                                        <span id="sub_total_current_bill_amount">{{$total['current_bill_subtotal']}}</span>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="9" style="text-align: right; padding-right: 30px;">
-                                                        <b>Total Round</b>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Sub Total Round</b></td>
+                                                    <td>
+                                                        <span id="rounded_off_current_bill_sub_total">{{$total_rounded['current_bill_subtotal']}}</span>
                                                     </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Discount Amount</b></td>
+                                                    <td>
+                                                        <span id="discountAmount">{{$bill['discount_amount']}}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Discount Description</b></td>
+                                                    <td>
+                                                        <span id="discountDescription">{{$bill['discount_description']}}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
                                                     <td>
                                                         <span id="rounded_off_current_bill_amount">{{$total_rounded['current_bill_amount']}}</span>
                                                     </td>
@@ -494,7 +510,7 @@
         </div>
     </div>
 </div>
-</div>
+
 
 @endsection
 @section('javascript')

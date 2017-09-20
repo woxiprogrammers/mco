@@ -208,7 +208,7 @@
                                 </a>
                             </li>
                         @endif
-                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                       <!-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Purchase
                                 <span class="arrow"></span>
                             </a>
@@ -231,25 +231,37 @@
 
                             </ul>
                         </li>
-<!--
+                                          <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> Checklist
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Category Management
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
                             </a>
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
-                                    <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
+                                    <a href="/inventory/manage-inventory/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Store Keeper
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
-                                    <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
+                                    <a href="/inventory/manage-asset/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-bars"></i> Manage Asset
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                    </ul>
+                        @endif
+                        </ul>
                     </li>
             </div>
             <!-- END MEGA MENU -->

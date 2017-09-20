@@ -157,7 +157,7 @@
                                                                                     Enter Discount:
                                                                                 </label>
                                                                             </div>
-                                                                            <div class="col-md-6 input-group">
+                                                                            <div class="col-md-6 input-group form-group">
                                                                                 <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" style="width: 113%">
                                                                                 <span class="input-group-addon">&nbsp; % </span>
                                                                             </div>
@@ -169,7 +169,7 @@
                                                                                     Enter Slab Area:
                                                                                 </label>
                                                                             </div>
-                                                                            <div class="col-md-6 input-group">
+                                                                            <div class="col-md-6 input-group form-group">
                                                                                 <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
                                                                                 <span class="input-group-addon">Sq.Ft</span>
                                                                             </div>
@@ -251,7 +251,7 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <select class="form-control" name="product_summary[{{$quotation->quotation_products[$iterator]->product_id}}]" style="width: 80%; margin-left: 10%; font-size: 13px">
+                                                                                            <select class="form-control product-summary" name="product_summary[{{$quotation->quotation_products[$iterator]->product_id}}]" style="width: 80%; margin-left: 10%; font-size: 13px">
                                                                                                 @if($quotation->quotation_products[$iterator]->summary_id == null)
                                                                                                     <option value="" selected>Select Summary</option>
                                                                                                     @foreach($summaries as $summary)
@@ -379,6 +379,15 @@
                                                         <li>
                                                             <a href="#extraItemFormTab" data-toggle="tab"> Extra Items </a>
                                                         </li>
+                                                        <li>
+                                                            <a href="#bankassignFormTab" data-toggle="tab"> Assign Bank </a>
+                                                        </li>
+                                                        @if($quotation->quotation_status->slug == 'approved'&& $userRole == 'superadmin')
+                                                            <li>
+                                                                <a href="#openingExpensesFormTab" data-toggle="tab"> Opening Expenses </a>
+                                                            </li>
+                                                        @endif
+
                                                     </ul>
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="workOrderFormTab">
@@ -586,9 +595,43 @@
                                                             </div>
                                                         @endforeach
                                                     </div>
+                                                    <div class="tab-pane fade in" id="bankassignFormTab">
+                                                        <div class="form-group" style="margin-top: 3%">
+                                                            <div class="col-md-3" style="margin-left: 2%">
+                                                                <label class="control-form pull-right">
+                                                                    Select Bank :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-control product-material-select" style="height: 150px;" >
+                                                                    <ul id="bank_id" class="list-group">
+                                                                        @foreach($bankInfo as $bank)
+                                                                            @if(in_array($bank['id'],$checkBank))
+                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}" checked> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                            @else
+                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}"> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                        @endif
+                                                                            @endforeach
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tab-pane fade in" id="openingExpensesFormTab">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-form pull-right">
+                                                                    Opening Expenses
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <input class="form-control" name="open_expenses" id="open_expenses" value=0 >
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </form>
-                                        </div>
+
                                     </div>
                                 </div>
                                 </div>
@@ -684,6 +727,7 @@
         EditQuotation.init();
         WorkOrderFrom.init();
         calculateSubtotal();
+        applyValidation("QuotationEditForm");
         var quotationProducts = $("#quotationProducts").val();
         quotationProducts = jQuery.parseJSON(quotationProducts);
         $.each(quotationProducts, function(index, value){
@@ -691,7 +735,6 @@
                 min: parseInt(value.product_bill_count)
             });
         });
-
     });
 </script>
 @endsection

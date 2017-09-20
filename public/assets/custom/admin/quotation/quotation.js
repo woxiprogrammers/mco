@@ -4,6 +4,12 @@
 
 
 $(document).ready(function(){
+    var url = window.location.href;
+    if(url.indexOf('edit') > 0){
+        quotationFormId = 'QuotationEditForm';
+    }else{
+        quotationFormId = 'QuotationCreateForm';
+    }
     $(window).keydown(function(event){
         if(event.keyCode == 13) {
             event.preventDefault();
@@ -37,11 +43,13 @@ $(document).ready(function(){
                 row_count: rowCount,
                 is_edit: true
             }
+            var formId = "QuotationEditForm";
         }else{
             var data = {
                 _token: $("input[name='_token']").val(),
                 row_count: rowCount
             }
+            var formId = "QuotationCreateForm";
         }
         $.ajax({
             url: '/quotation/add-product-row',
@@ -52,12 +60,14 @@ $(document).ready(function(){
                 $("#productTable tr:first").after(data);
                 $('#productRowCount').val(parseInt(rowCount)+1);
                 $("#addProduct").css('pointer-events','');
+                applyValidation(formId);
             },
             error: function(errorStatus, xhr){
 
             }
         });
         $("#profitMargins").hide();
+
     });
 
     $("#materialCosts").on('click', function(e){
@@ -68,33 +78,12 @@ $(document).ready(function(){
                 productIds.push($(this).val());
             });
             var validForm = true;
-            if($("#GeneralTab .has-error").length > 0){
-                validForm = false;
-            }else{
-                var url = window.location.href;
-                if(url.indexOf("edit") <= 0){
-                    var formFields = $("#QuotationCreateForm").serializeArray();
-                    $.each(formFields, function(i){
-                        if(($.trim(formFields[i].value)) == ""){
-                            $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
-                            validForm = false;
-                        }else{
-                            $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
-                        }
-                    });
-                }else{
-                    var formFields = $("#productTable :input").serializeArray();
-                    $.each(formFields, function(i){
-                        if(($.trim(formFields[i].value)) == ""){
-                            $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
-                            validForm = false;
-                        }else{
-                            $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
-                        }
-                    });
+            var formFields = $("#"+quotationFormId).serializeArray();
+            $.each(formFields, function(i){
+                if(!($("#"+quotationFormId).validate().element("[name='"+formFields[i].name+"']"))){
+                    validForm = false;
                 }
-            }
-
+            });
             if(validForm == true){
                 var ajaxData = {};
                 ajaxData['productIds'] = productIds;
@@ -122,6 +111,7 @@ $(document).ready(function(){
                     data: ajaxData,
                     success: function(data, textStatus, xhr){
                         $("#MaterialsTab").html(data);
+                        applyValidation(quotationFormId);
                         setTimeout(function () {
                             $("#GeneralTab").removeClass('active');
                             $("#ProfitMarginsTab").removeClass('active');
@@ -132,8 +122,6 @@ $(document).ready(function(){
 
                     }
                 });
-            }else{
-                alert("Please enter valid data in your form fields.");
             }
         }else{
             alert("Please add atleast one product");
@@ -302,7 +290,8 @@ function getProductDetails(product_id,rowNumber){
         success: function(data,textStatus,xhr){
             $("#productDescription"+rowNumber).val(data.description);
             $("#productDescription"+rowNumber).attr('name','product_description['+data.id+']');
-            $("#productRate"+rowNumber).val(Math.round(data.rate_per_unit * 1000) / 1000);
+            var rate = parseInt(data.rate_per_unit);
+            $("#productRate"+rowNumber).val(rate.toFixed());
             $("#productRate"+rowNumber).attr('name','product_rate['+data.id+']');
             $("#productQuantity"+rowNumber).prop('readonly', false);
             $("#productUnit"+rowNumber).val(data.unit);
@@ -315,6 +304,7 @@ function getProductDetails(product_id,rowNumber){
                 $("#productDiscountAmount"+rowNumber).attr('name','product_discount_amount['+data.id+']');
             }
             calculateAmount(rowNumber);
+            applyValidation(quotationFormId);
         },
         error: function(errorStatus, xhr){
 
@@ -371,7 +361,7 @@ function calculateAmount(row){
     if(isNaN(amount)){
         $("#productAmount"+row).val(0);
     }else{
-        $("#productAmount"+row).val(Math.round(amount * 1000) / 1000);
+        $("#productAmount"+row).val(amount.toFixed());
     }
     calculateSubtotal();
 }
@@ -393,32 +383,12 @@ function replaceEditor(row){
 
 function showProfitMargins(){
     var validForm = true;
-    $("#formSubmit").hide();
-    $(".quotation-material-rate").each(function(){
-        if(($.trim($(this).val())) == ''){
-            $(this).closest('.form-group').addClass('has-error');
+    var formFields = $("#"+quotationFormId).serializeArray();
+    $.each(formFields, function(i){
+        if(!($("#"+quotationFormId).validate().element("[name='"+formFields[i].name+"']"))){
             validForm = false;
-        }else{
-            $(this).closest('.form-group').removeClass('has-error');
         }
     });
-    var url = window.location.href;
-    if(url.indexOf("edit") > 0){
-        var validForm = true;
-        if($("#GeneralTab .has-error").length > 0){
-            validForm = false;
-        }else{
-            var formFields = $("#QuotationCreateForm,#QuotationEditForm").serializeArray();
-            $.each(formFields, function(i){
-                if(($.trim(formFields[i].value)) == ""){
-                    $("[name='"+formFields[i].name+"']").closest(".form-group").addClass("has-error");
-                    validForm = false;
-                }else{
-                    $("[name='"+formFields[i].name+"']").closest(".form-group").removeClass("has-error");
-                }
-            });
-        }
-    }
     if(validForm == true){
         var productIds = [];
         $(".quotation-product").each(function(){
@@ -442,6 +412,7 @@ function showProfitMargins(){
             data: data,
             success: function(data, textStatus, xhr){
                 $("#profitMarginTable").html(data);
+                applyValidation(quotationFormId);
                 setTimeout(function(){
                     $("#formSubmit").show();
                     $("#GeneralTab").removeClass('active');
@@ -453,8 +424,6 @@ function showProfitMargins(){
 
             }
         });
-    }else{
-        alert("Please enter valid data in your form fields");
     }
 }
 
@@ -543,6 +512,7 @@ function calucalateProductViewTotal(){
         $(this).parent().next().text(Math.round(profitMarginAmount * 1000) / 1000);
     });
     $("#productViewTotal").text(Math.round(total * 1000) / 1000);
+    $("#roundproductViewTotal,#roundQuotationProductViewTotal").text(total.toFixed());
 }
 
 function convertUnit(materialId,fromUnit){
@@ -621,4 +591,14 @@ function submitProductEdit(){
             alert('Something went wrong');
         }
     });
+}
+
+function applyValidation(formId){
+    var formFields = $("#"+formId).serializeArray();
+    $.each(formFields, function(i){
+        $("[name='"+formFields[i].name+"']").rules('add',{
+            required: true
+        });
+    });
+
 }

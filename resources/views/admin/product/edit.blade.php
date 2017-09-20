@@ -155,7 +155,7 @@
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}">
+                                                                            <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}" readonly>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -213,9 +213,22 @@
                                                                     </label>
                                                                 </div>
                                                             </div>
+                                                            <div class="col-md-offset-7">
+                                                                <div class="col-md-3 col-md-offset-3" style="align-items: ">
+                                                                    <label class="control-label" style="font-weight: bold; text-align: right">
+                                                                        Round Total:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label" style="font-weight: bold; margin-left: 1%" id="roundtotal">
+
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="form-group">
                                                                 <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">
-                                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
+                                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit </button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -241,7 +254,6 @@
 <script>
     $(document).ready(function(){
         EditProduct.init();
-        $('#submit').css("padding-left",'6px');
     });
 </script>
 @endsection

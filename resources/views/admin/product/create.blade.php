@@ -145,9 +145,19 @@
                                                                         </label>
                                                                     </div>
                                                                 </div>
+                                                                <div class="col-md-offset-6">
+                                                                    <div class="col-md-5 col-md-offset-2" style="align-items: ">
+                                                                        <label class="control-label" style="font-weight: bold; text-align: right">
+                                                                           Round Total:
+                                                                        </label>
+                                                                        <label class="control-label" style="font-weight: bold; margin-left: 1%" id="roundtotal">
+
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
                                                                 <div class="form-group">
                                                                     <div class="col-md-3 col-md-offset-4" style="margin-left: 78%">
-                                                                        <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
+                                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit </button>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -176,7 +186,6 @@
     $(document).ready(function(){
         getMaterials($("#category_name").val());
         CreateProduct.init();
-        $('#submit').css("padding-left",'6px');
         var citiList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,

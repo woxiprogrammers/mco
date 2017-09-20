@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\BankInfo;
 use App\Bill;
 use App\BillTransaction;
 use App\Category;
@@ -65,6 +66,9 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('role',Role::class);
         Route::model('extra_item',ExtraItem::class);
         Route::model('vendor',Vendor::class);
+        Route::model('city',City::class);
+        Route::model('bank_info',BankInfo::class);
+
     }
 
     /**

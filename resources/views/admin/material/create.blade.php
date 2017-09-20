@@ -88,7 +88,7 @@
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">GST</label>
                                                     <div class="col-md-6">
-                                                        <input type="text" id="gst" name="gst" class="form-control" placeholder="Enter GST">
+                                                        <input type="number" id="gst" name="gst" class="form-control" placeholder="Enter GST">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
@@ -100,7 +100,7 @@
                                             </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3" style="margin-left: 26%">
-                                                    <button type="submit" class="btn red btn-md" id="submit"><i class="fa fa-check"></i> Submit</button>
+                                                    <button type="submit" class="btn red btn-md"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -122,7 +122,6 @@
 <script>
     $(document).ready(function() {
        CreateMaterial.init();
-       $('#submit').css("padding-left",'6px');
         $("#name").rules('add',{
             remote: {
                 url: "/material/check-name",
