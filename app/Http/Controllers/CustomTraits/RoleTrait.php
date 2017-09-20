@@ -133,22 +133,17 @@ trait RoleTrait{
 
     public function editRole(RoleRequest $request, $role){
         try{
-            //dd($request->all());
             $roleId = $role->id;
-            $web_permissions = $request->web_permissions;
             //dd($web_permissions);
-            $mobile_permissions = $request->mobile_permissions;
-            //dd($mobile_permissions);
             $data = $request->only('name','type');
             $data['name'] = ucwords(trim($data['name']));
             $role->update($data);
             $rolePermissionData = array();
             $rolePermissionData['role_id'] = $roleId;
 
-            if($request->has('web_permissions')) {
-               // dd($web_permissions);
-                foreach ($web_permissions as $permissions) {
-                    //dd(123);
+            if($request->web_permissions != null) {
+                Log::info('in web');
+                foreach ($request->web_permissions as $permissions) {
                     $rolePermissionData['is_web'] = true;
                     $rolePermissionData['is_mobile'] = false;
                     $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
@@ -160,9 +155,10 @@ trait RoleTrait{
                     }
                 }
             }
-//            dd($request->has('mobile_permissions'));
-            if($request->has('mobile_permissions')) {
-                foreach ($mobile_permissions as $permissions) {
+            Log::info($request->has('mobile_permissions'));
+            if($request->mobile_permissions != null ) {
+                Log::info('in mobile');
+                foreach ($request->mobile_permissions as $permissions) {
                     //dd(123);
                     $rolePermissionData['is_mobile'] = true;
                     $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
@@ -174,7 +170,7 @@ trait RoleTrait{
                     }
                 }
             }
-            $deletedIds = RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$web_permissions)->whereNotIn('permission_id',$mobile_permissions)->delete();
+            $deletedIds = RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$request->web_permissions)->whereNotIn('permission_id',$request->mobile_permissions)->delete();
             //dd($deletedIds);
             $request->session()->flash('success', 'Role Edited successfully.');
             return redirect('/role/edit/'.$role->id);
