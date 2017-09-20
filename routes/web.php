@@ -239,11 +239,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
             Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
         });
-        Route::group(['prefix' => 'manage-asset'], function(){
-            Route::get('manage',array('uses'=> 'Inventory\AssetManagementController@getManageView'));
-            Route::get('create',array('uses'=> 'Inventory\AssetManagementController@getCreateView'));
-            Route::get('edit',array('uses'=> 'Inventory\AssetManagementController@getEditView'));
-        });
+
     });
 
     Route::group(['prefix' => 'vendors'],function(){
@@ -255,6 +251,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses'=> 'Admin\VendorController@vendorListing'));
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
+    });
+
+    Route::group(['prefix' => 'asset'], function(){
+        Route::get('manage',array('uses'=> 'Admin\AssetManagementController@getManageView'));
+        Route::get('create',array('uses'=> 'Admin\AssetManagementController@getCreateView'));
+        Route::get('edit',array('uses'=> 'Admin\AssetManagementController@getEditView'));
+        Route::post('create',array('uses' => 'Admin\AssetManagementController@createAsset'));
+
     });
 
     Route::group(['prefix'=>'bank'],function() {

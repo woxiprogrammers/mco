@@ -20,7 +20,7 @@
                                     <h1>Manage Asset</h1>
                                 </div>
                                 <div class="btn-group" style="float: right;margin-top:1%">
-                                    <div id="sample_editable_1_new" class="btn yellow"><a href="/inventory/manage-asset/create" style="color: white">                                         <i class="fa fa-plus"></i>
+                                    <div id="sample_editable_1_new" class="btn yellow"><a href="/asset/create" style="color: white">                                         <i class="fa fa-plus"></i>
                                             Asset
                                         </a>
                                     </div>
@@ -69,7 +69,7 @@
                                                                 <td> 5 </td>
                                                                 <td> Otto </td>
                                                                 <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-asset/edit" style="color: white">                                         <i class="fa fa-plus"></i>
+                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/asset/edit" style="color: white">                                         <i class="fa fa-plus"></i>
                                                                             Edit
                                                                         </a>
                                                                     </div>
@@ -79,7 +79,7 @@
                                                                 <td> 6 </td>
                                                                 <td> Nilson </td>
                                                                 <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-asset/edit" style="color: white">                                         <i class="fa fa-plus"></i>
+                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/asset/edit" style="color: white">                                         <i class="fa fa-plus"></i>
                                                                             Edit
                                                                         </a>
                                                                     </div>
@@ -107,11 +107,15 @@
                                                                                 </div>
                                                                             </div>
                                                                         </div>
+                                                                    </form>
                                                                 </div>
                                                                 <div class="modal-footer" style="background-color:#00844d">
                                                                     <button type="submit" class="btn blue">Approve</button>
                                                                     <button type="submit" class="btn blue">disapprove</button>
                                                                 </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                         </div>
                                                     </div>
                                                     </form>

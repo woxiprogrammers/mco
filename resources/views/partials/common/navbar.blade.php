@@ -131,6 +131,11 @@
                                                 </a>
                                             </li>
                                         @endif
+                                            <li aria-haspopup="true">
+                                                <a href="/asset/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-bars"></i> Manage Asset
+                                                </a>
+                                            </li>
                                     </ul>
                                 </li>
                                 @if($user->hasPermissionTo('view-manage-user'))
@@ -234,7 +239,7 @@
                                     </a>
                                 </li>
                             </ul>
-                        </li>
+                        </li>-->
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
@@ -245,11 +250,7 @@
                                         <i class="fa fa-sitemap"></i> Store Keeper
                                     </a>
                                 </li>
-                                <li aria-haspopup="true">
-                                    <a href="/inventory/manage-asset/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-bars"></i> Manage Asset
-                                    </a>
-                                </li>
+
                             </ul>
                         </li>
                         @endif
