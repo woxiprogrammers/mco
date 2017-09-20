@@ -134,15 +134,12 @@ trait RoleTrait{
     public function editRole(RoleRequest $request, $role){
         try{
             $roleId = $role->id;
-            //dd($web_permissions);
             $data = $request->only('name','type');
             $data['name'] = ucwords(trim($data['name']));
             $role->update($data);
             $rolePermissionData = array();
             $rolePermissionData['role_id'] = $roleId;
-
             if($request->web_permissions != null) {
-                Log::info('in web');
                 foreach ($request->web_permissions as $permissions) {
                     $rolePermissionData['is_web'] = true;
                     $rolePermissionData['is_mobile'] = false;
@@ -155,11 +152,8 @@ trait RoleTrait{
                     }
                 }
             }
-            Log::info($request->has('mobile_permissions'));
             if($request->mobile_permissions != null ) {
-                Log::info('in mobile');
                 foreach ($request->mobile_permissions as $permissions) {
-                    //dd(123);
                     $rolePermissionData['is_mobile'] = true;
                     $check = RoleHasPermission::where('role_id')->where('permission_id')->first();
                     if ($check != null) {
@@ -171,7 +165,6 @@ trait RoleTrait{
                 }
             }
             $deletedIds = RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$request->web_permissions)->whereNotIn('permission_id',$request->mobile_permissions)->delete();
-            //dd($deletedIds);
             $request->session()->flash('success', 'Role Edited successfully.');
             return redirect('/role/edit/'.$role->id);
         }catch(\Exception $e){

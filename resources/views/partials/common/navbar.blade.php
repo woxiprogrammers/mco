@@ -260,8 +260,8 @@
                                 </li>
                             </ul>
                         </li>
-                        @endif
-                        </ul>
+                    </ul>
+
                     </li>
             </div>
             <!-- END MEGA MENU -->
