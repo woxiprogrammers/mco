@@ -157,7 +157,7 @@
                                                                 <div class="col-md-6">
                                                                     <input class="form-control typeahead" name="material">
                                                                 </div>
-                                                                <div id="removeMaterial" hidden>
+                                                                <div id="removeMaterial">
                                                                     <a class="btn pull-right blue" id="removeMaterialButton">Remove Material</a>
                                                                 </div>
                                                             </div>
@@ -182,9 +182,9 @@
                                                                                 @foreach($cityArray as $city)
                                                                                     @if(in_array($city['id'],$vendorCities))
                                                                                         @if(in_array($city['id'],$materialInfo['cities']))
-                                                                                            <input type="checkbox" name="material_city[{{$materialId}}][]" value="cityId" checked><span>{{$city['name']}}</span><br>
+                                                                                            <input type="checkbox" name="material_city[{{$materialId}}][]" value="{{$city['id']}}" checked><span>{{$city['name']}}</span><br>
                                                                                         @else
-                                                                                            <input type="checkbox" name="material_city[{{$materialId}}][]" value="cityId"><span>{{$city['name']}}</span><br>
+                                                                                            <input type="checkbox" name="material_city[{{$materialId}}][]" value="{{$city['id']}}"><span>{{$city['name']}}</span><br>
                                                                                         @endif
                                                                                     @endif
                                                                                 @endforeach
