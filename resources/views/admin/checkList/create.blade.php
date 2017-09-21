@@ -75,7 +75,7 @@
                                                             <input type="text" class="form-control" name="mytext[]"  id="title_name" placeholder="Enter Title Here">
                                                             <div id="sample_editable_1_new" class="btn yellow" style="margin-top: -7%; margin-left: 105%"><button style="color: white" class="add_field_button" id="add"><i class="fa fa-plus"></i> </button>
                                                             </div>
-                                                            <div style="margin-top: -5%; margin-left: 118% ; font-size: 14px" ><input type="reset" value="Reset"></div>
+                                                            <div style="margin-top: -6%; margin-left: 118% ; font-size: 14px" ><input type="reset" value="Reset"></div>
 
                                                             <div id="removeBtn"  style="margin-top: -5%; margin-left: 118%" >
                                                             </div>
@@ -127,7 +127,7 @@
                                                                         <span>*</span>
 
                                                                     </div>
-                                                                    <div id="extra">
+                                                                    <div id="extra" >
                                                                         <div class="row">
                                                                             <div class="col-md-6" >
                                                                                 <input type="checkbox" class="make-switch" id="is_special" data-on-text="Yes" data-off-text="No" name="is_special">
@@ -187,6 +187,7 @@
             $('#extra').hide();
         })
     </script>
+
     <script>
 
         $(document).ready(function() {
@@ -199,29 +200,63 @@
                 e.preventDefault();
                 if(x < max_fields){
                     x++;
-                    $(wrapper).append('  <form><div class="form-body"><div class="form-group row">  <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">\n' +
-                        '\n' +
-                        '                                                            <label for="title" class="control-label">Title</label>\n' +
-                        '                                                            <span>*</span>\n' +
-                        '                                                        </div>\n' +
-                        '                                                        <div class="col-md-6">\n' +
-                        '                                                            <input type="text" class="form-control" name="mytext[]"  id="title_name" placeholder="Enter Title Here"><div id="removeBtn"  style="margin-top: -5%; margin-left: 118%" >\n' +
-                        '                                                            </div>\n' +
-                        '                                                        </div>\n' +
-                        '                                                        <div class="col-md-5" style="text-align: right ; margin-left: -91.5% ;margin-top: 9% ; font-size: 14px">\n' +
-                        '\n' +
-                        '                                                            <label for="title" class="control-label">Is Remark Mandatory</label>\n' +
-                        '                                                            <span>*</span>\n' +
-                        '                                                        </div>\n' +
-                        '\n' +
-                        '                                                        <div class="col-md-5" style="text-align: right ; margin-top: 9% ; margin-left: -81% "><div class="bootstrap-switch bootstrap-switch-wrapper bootstrap-switch-id-is_special bootstrap-switch-animate bootstrap-switch-on" style="width: 92px;"><div class="bootstrap-switch-container" style="width: 135px; margin-left: 0px;"><span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 45px;">Yes</span><span class="bootstrap-switch-label" style="width: 45px;">&nbsp;</span><span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 45px;"></span><input type="checkbox" class="make-switch" id="is_special" data-on-text="Yes" data-off-text="No" name="is_special"></div></div> </div><div class="col-md-5" style="text-align: right ; margin-left: -91.5% ;margin-top: 4% ; font-size: 14px">\n' +
-                        '\n' +
-                        '                                                            <label for="title" class="control-label"> Description </label>\n' +
-                        '                                                            <span>*</span>\n' +
-                        '                                                        </div>\n' +
-                        '                                                        <div class="col-md-6" style="text-align: right ; margin-top: 4.5% ; margin-left: -50% ">\n' +
-                        '                                                            <input type="text" class="form-control" id="description" name="description" placeholder="Enter Description Here"  >\n' +
-                        '                                                        </div><div class="col-md-5" style="text-align: right ; margin-left: -91.5% ; margin-top: 13% ; font-size: 14px"> <label for="no_images" class="control-label"> Number Of Images</label><span>*</span></div><div class="col-md-6" style="margin-top: -2% ;margin-left: 31.5% ; font-size: 14px"><div class="col-md-6"><input type="text" id="nochapter" ></div></div></div></form><input type="button" class="remove_field" style="margin-top: -150px ; margin-left: 77%" value="Remove"></div>'); //add input box
+                    $(wrapper).append('  <form>' +
+                        '<div class="form-body">' +
+                        '   <div class="form-group row"> ' +
+                        '       <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">\n' +
+                        '           <label for="title" class="control-label">Title</label>\n' +
+                        '           <span>*</span>\n' +
+                        '       </div>\n' +
+                        '       <div class="col-md-6">\n' +
+                        '           <input type="text" class="form-control" name="mytext[]"  id="title_name" placeholder="Enter Title Here"><div id="removeBtn"  style="margin-top: -5%; margin-left: 118%" >\n' +
+                        '       </div>\n' +
+                        '   </div>\n' +
+                        '   <div class="col-md-5" style="text-align: right ; margin-left: -91.5% ;margin-top: 9% ; font-size: 14px">\n' +
+                        '      <label for="title" class="control-label">Is Remark Mandatory</label>\n' +
+                        '      <span>*</span>\n' +
+                        '   </div>\n' +
+                        '   <div class="col-md-5" style="text-align: right ; margin-top: 9% ; margin-left: -81% "><div class="bootstrap-switch bootstrap-switch-wrapper bootstrap-switch-id-is_special bootstrap-switch-animate bootstrap-switch-on" style="width: 92px"><div class="bootstrap-switch-container" style="width: 135px; margin-left: -46px"><span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 45px;">Yes</span><span class="bootstrap-switch-label" style="width: 45px;">&nbsp;</span><span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 45px;">No</span><input type="checkbox" class="make-switch" id="is_special" data-on-text="Yes" data-off-text="No" name="is_special"></div></div> </div><div class="col-md-5" style="text-align: right ; margin-left: -91.5% ;margin-top: 4% ; font-size: 14px">\n' +
+                        '      <label for="title" class="control-label"> Description </label>\n' +
+                        '      <span>*</span>\n' +
+                        '   </div>\n' +
+                        '   <div class="col-md-6" style="text-align: right ; margin-top: 4.5% ; margin-left: -50% ">' +
+                        '       <input type="text" class="form-control" id="description" name="description" placeholder="Enter Description Here"  >\n' +
+                        '   </div>' +
+                        '   <div class="col-md-5" style="text-align: right ; margin-left: -91.5% ; margin-top: 13% ; font-size: 14px"> ' +
+                        '       <label for="no_images" class="control-label"> Number Of Images</label><span>*</span>' +
+                        '   </div>' +
+                        '   <div class="col-md-6" style="margin-top: -2% ;margin-left: 31.5% ; font-size: 14px">' +
+                        '       <div class="col-md-6">' +
+                        '           <input type="text" id="nochapterid" >' +
+                        '       </div>' +
+                        '   </div>' +
+                        '   <div class="col-md-6" style="margin-top:-2% ; margin-left: 31%">' +
+                        '       <input type="button" value="Set" onclick="generatefun()" >' +
+                        '   </div>' +
+                        '   <div class="col-md-6" style="text-align: right ; margin-left: 12% ; margin-top: 2% ; font-size: 14px" >' +
+                        '       <label for="is_special" class="control-label" style="text-align: right ">Is Mandatory ?</label>' +
+                        '       <span>*</span>' +
+                        '       <label for="description" class="control-label" style=" font-size: 14px ;text-align: left ; margin-left: 23%">Image Caption</label>' +
+                        '       <span>*</span>' +
+                        '   </div>' +
+                        '   <div id="extradiv" hidden>\n' +
+                        '       <div class="row">\n' +
+                        '           <div class="col-md-6" >\n' +
+                        '               <div class="col-md-5" style="text-align: right ; margin-top: 9% ; margin-left: 42% "><div class="bootstrap-switch bootstrap-switch-wrapper bootstrap-switch-id-is_special bootstrap-switch-animate bootstrap-switch-on" style="width: 92px"><div class="bootstrap-switch-container" style="width: 135px; margin-left: -46px"><span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 45px;">Yes</span><span class="bootstrap-switch-label" style="width: 45px;">&nbsp;</span><span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 45px;">No</span><input type="checkbox" class="make-switch" id="is_special" data-on-text="Yes" data-off-text="No" name="is_special"></div></div> </div>' +
+                        '       <div class="col-md-5" style="text-align: right ; margin-left: 102.5% ;margin-top: -6% ; font-size: 14px">\n' +
+                        '           <div class="col-md-6">\n' +
+                        '              <input type="text" class="form-control" id="description2" name="description" placeholder="Enter Description Here " style="width:fit-content">\n' +
+                        '           </div>\n' +
+                        '       </div>\n' +
+                        '   <div class="form-group row">\n' +
+                        '       <div id="appending">\n' +
+                        '       </div>\n' +
+                        '   </div>' +
+                        '</div></div>' +
+                        '   </div>' +
+                        '</form>' +
+                        '<input type="button" class="remove_field" style="margin-top: -22% ; margin-left: 77%" value="Remove">' +
+                        '</div>'); //add input box
                 }
             });
 
@@ -238,10 +273,29 @@
         function generate() {
 
             var a = parseInt(document.getElementById("nochapter").value);
-
             for (i = 0; i < a; i++) {
+
                 ($('#extra').clone()).appendTo('#append')
                 $('#extra').show();
+
+            }
+        }
+
+    </script>
+    <script>
+        $('document').ready(function(){
+
+            $('#extradiv').hide();
+        })
+    </script>
+    <script>
+        function generatefun() {
+
+            var b = parseInt(document.getElementById("nochapterid").value);
+            for (j = 0; j < b; j++) {
+
+                ($('#extradiv').clone()).appendTo('#appending')
+                $('#extradiv').show();
 
             }
         }
