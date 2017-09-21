@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\AssetManagement;
+use Illuminate\Support\Facades\File;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 
 class AssetManagementController extends Controller
 {
@@ -23,7 +26,6 @@ class AssetManagementController extends Controller
 
     public function createAsset(Request $request){
         try{
-          dd($request);
                 $data = Array();
                 $data['name'] = $request->name;
                 $data['model_number'] = $request->model_number;
@@ -33,6 +35,8 @@ class AssetManagementController extends Controller
                 $data['litre_per_unit'] = $request->litre_per_unit;
                 $data['is_active'] = false;
                 $asset = AssetManagement::create($data);
+               $assetId = 1;
+               $imageUpload = $this->uploadTempAssetImages($assetId);
                 $request->session()->flash('success', 'Asset Created successfully.');
                 return redirect('/asset/create');
 
@@ -51,7 +55,6 @@ class AssetManagementController extends Controller
 
     public function editAsset(Request $request){
         try{
-            dd($request->all());
 
         }catch (Exception $e){
             $data = [
@@ -65,62 +68,62 @@ class AssetManagementController extends Controller
 
     }
 
-    public function assetListing(Request $request){
+
+    public function uploadTempAssetImages(Request $request,$assetId){
         try{
-            if($request->has('search_name')){
-                $assetData = AssetManagement::where('model_number','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
-            }else{
-                $assetData = AssetManagement::orderBy('model_number','asc')->get()->toArray();
+            $assetDirectoryName = sha1($assetId);
+            $tempUploadPath = public_path().env('ASSET_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$assetDirectoryName;
+            Log::info($tempImageUploadPath);
+            /* Create Upload Directory If Not Exists */
+            Log::info('result of if');
+            Log::info(!file_exists($tempImageUploadPath));
+            if (!file_exists($tempImageUploadPath)) {
+                Log::info('in if');
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
             }
-            $iTotalRecords = count($assetData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($assetData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
-                if($assetData[$pagination]['is_active'] == true){
-                    $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
-                    $status = 'Disable';
-                }else{
-                    $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
-                    $status = 'Enable';
-                }
-                $records['data'][$iterator] = [
-                    $assetData[$pagination]['id'],
-                    $assetData[$pagination]['model_number'],
-                    $asset_status,
-
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/asset/edit/'.$assetData[$pagination]['id'].'">
-                                <i class="icon-docs"></i> Edit </a>
-                        </li>
-                        <li>
-                            <a href="/asset/change-status/'.$assetData[$pagination]['id'].'">
-                                <i class="icon-tag"></i> '.$status.' </a>
-                        </li>
-                    </ul>
-                </div>'
-                ];
-            }
-
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
-        }catch (Exception $e){
-            $records = array();
-            $data = [
-                'action' => 'Get Asset Listing',
-                'params' => $request->all(),
-                'exception'=> $e->getMessage()
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).'.'.$extension.'';
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            $path = env('ASSET_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path
             ];
-            Log::critical(json_encode($data));
-            abort(500);
+        }catch (\Exception $e){
+            $response = [
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => 101,
+                    'message' => 'Failed to open input stream.',
+                ],
+                'id' => 'id'
+            ];
         }
-        return response()->json($records);
+        return response()->json($response);
     }
+
+    public function displayAssetImages(Request $request){
+        try{
+            $path = $request->path;
+            $count = $request->count;
+            $random = mt_rand(1,10000000000);
+        }catch (\Exception $e){
+            $path = null;
+            $count = null;
+        }
+        return view('admin.asset.create')->with(compact('path','count','random'));
+    }
+
+    public function removeAssetImage(Request $request){
+        try{
+            $sellerUploadPath = public_path().$request->path;
+            File::delete($sellerUploadPath);
+            return response(200);
+        }catch(\Exception $e){
+            return response(500);
+        }
+    }
+
 }
