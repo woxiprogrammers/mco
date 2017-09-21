@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\AssetManagement;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
+
+
 
 class AssetManagementController extends Controller
 {
@@ -18,12 +21,22 @@ class AssetManagementController extends Controller
         return view('admin.asset.create');
     }
     public function getEditView(Request $request,$asset){
-        return view('admin.asset.edit');
+        try{
+            $asset = $asset->toArray();
+            return view('admin.asset.edit')->with(compact('asset'));
+        }catch (Exception $e){
+            $data = [
+                'action' => "Get asset edit view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 
     public function createAsset(Request $request){
         try{
-          dd($request);
                 $data = Array();
                 $data['name'] = $request->name;
                 $data['model_number'] = $request->model_number;
@@ -49,10 +62,18 @@ class AssetManagementController extends Controller
 
     }
 
-    public function editAsset(Request $request){
+    public function editAsset(Request $request,$asset){
         try{
-            dd($request->all());
-
+            $data = $request->all();
+            $assetData['name'] = ucwords(trim($data['name']));
+            $assetData['model_number'] = $data['model_number'];
+            $assetData['expiry_date'] = $data['expiry_date'];
+            $assetData['price'] = $data['price'];
+            $assetData['is_fuel_dependent'] = $data['is_fuel_dependent'];
+            $assetData['litre_per_unit'] = $data['litre_per_unit'];
+            $asset->update($assetData);
+            $request->session()->flash('success', 'Asset Edited successfully.');
+            return redirect('/asset/edit/'.$asset->id);
         }catch (Exception $e){
             $data = [
                 'action' => 'Edit Asset',
@@ -68,9 +89,9 @@ class AssetManagementController extends Controller
     public function assetListing(Request $request){
         try{
             if($request->has('search_name')){
-                $assetData = AssetManagement::where('model_number','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
+                $assetData = AssetManagement::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
-                $assetData = AssetManagement::orderBy('model_number','asc')->get()->toArray();
+                $assetData = AssetManagement::orderBy('id','asc')->get()->toArray();
             }
             $iTotalRecords = count($assetData);
             $records = array();
@@ -123,4 +144,46 @@ class AssetManagementController extends Controller
         }
         return response()->json($records);
     }
+
+    public function changeAssetStatus(Request $request, $asset){
+        try{
+            $newStatus = (boolean)!$asset->is_active;
+            $asset->update(['is_active' => $newStatus]);
+            $request->session()->flash('success', 'Asset Status changed successfully.');
+            return redirect('/asset/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Change asset status',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function checkAssetName(Request $request){
+        try{
+            $assetName = $request->name;
+            if($request->has('id')){
+                $nameCount = AssetManagement::where('name','ilike',$assetName)->where('id','!=',$request->id)->count();
+            }else{
+                $nameCount = AssetManagement::where('name','ilike',$assetName)->count();
+            }
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Asset Name',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
 }
