@@ -150,16 +150,16 @@
                                                         <div class="form-group">
                                                             <label class="col-md-3 control-label">Material</label>
                                                             <div class="col-md-6">
-                                                                <input class="form-control typeahead" name="material">
+                                                                <input class="form-control typeahead" id="material" name="material">
                                                             </div>
                                                             <div id="removeMaterial" hidden>
                                                                 <a class="btn pull-right blue" id="removeMaterialButton">Remove Material</a>
                                                             </div>
                                                         </div>
-                                                        <table border="1" id="materialCityTable" class="table table-striped table-bordered table-hover table-checkable order-column" hidden>
                                                             <thead>
+                                                            <table border="1" id="materialCityTable" class="table table-striped table-bordered table-hover table-checkable order-column" hidden>
                                                                 <tr>
-                                                                    <th style="width: 10%"></th>
+                                                                    <th style="width:10%" ></th>
                                                                     <th style="width: 30%">Material</th>
                                                                     <th>City</th>
                                                                 </tr>
