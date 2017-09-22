@@ -17,7 +17,7 @@ class CreateRolesTable extends Migration
             $table->increments('id');
             $table->string('name',255);
             $table->string('slug',255);
-            $table->string('type',255);
+            $table->string('type');
             $table->timestamps();
         });
     }

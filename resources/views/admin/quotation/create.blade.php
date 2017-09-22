@@ -64,20 +64,22 @@
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-4">
-                                                                    <select class="form-control" id="clientId" name="client_id">
+                                                                <div class="col-md-4 form-group">
+                                                                    <select class="form-control" id="clientId" name="client_id" style="width: 80%;">
                                                                         <option value=""> -- Select Client -- </option>
                                                                         @foreach($clients as $client)
                                                                             <option value="{{$client['id']}}"> {{$client['company']}} </option>
                                                                         @endforeach
                                                                     </select>
                                                                 </div>
-                                                                <div class="col-md-4">
-                                                                    <select name="project_id" id="projectId" class="form-control" >
+                                                                <div class="col-md-4 form-group">
+                                                                    <select name="project_id" id="projectId" class="form-control" style="width: 80%;">
+                                                                        <option value=""> -- Select Project -- </option>
                                                                     </select>
                                                                 </div>
-                                                                <div class="col-md-4">
-                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" >
+                                                                <div class="col-md-4 form-group">
+                                                                    <select name="project_site_id" id="projectSiteId" class="form-control" style="width: 80%;">
+                                                                        <option value=""> -- Select Project s -- </option>
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -228,6 +230,7 @@
         getProducts(category_id,1);
         var selectedProduct = $("#productSelect1").val();
         getProductDetails(selectedProduct, 1);
+        applyValidation("QuotationCreateForm");
     });
 </script>
 @endsection
