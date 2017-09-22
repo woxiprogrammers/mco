@@ -179,13 +179,13 @@
                                                     <span class="arrow"></span>
                                                 </a>
                                             </li>
-                                            <li aria-haspopup="true"  class="dropdown-submenu ">
-                                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
-                                                    <i class="fa fa-folder"></i> Manage Sites
-                                                </a>
-                                            </li>
                                         @endif
                                     </ul>
+                                </li>
+                                <li  aria-haspopup="true">
+                                    <a href="/bank/manage">
+                                        <i class="fa fa-folder"></i> Manage Bank
+                                    </a>
                                 </li>
                                 </ul>
                             </li>
