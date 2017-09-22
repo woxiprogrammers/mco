@@ -24,12 +24,22 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/asset/manage">Manage Asset</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Create Asset</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <input type="hidden" id="assetId" value="1">
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-user" class="form-horizontal" method="post" action="/asset/create">
+                                            <form role="form" id="create-asset" class="form-horizontal" method="post" action="/asset/create">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
                                                     <div class="form-group row">
@@ -56,7 +66,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-4 date date-picker" data-date-end-date="0d">
-                                                            <input type="text"  class="form-control" style="width: 30%" name="date" placeholder="Select Bill Date" id="date"/>
+                                                            <input type="text"   style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date"/>
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
@@ -145,6 +155,7 @@
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/asset/image-datatable.js"></script>
     <script src="/assets/custom/admin/asset/image-upload.js"></script>
+    <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
     <script>
         $(document).ready(function(){
 
@@ -154,6 +165,11 @@
         $('#clcl').click(function(){
 
         })
+    </script>
+    <script>
+        $(document).ready(function() {
+            CreateAsset.init();
+        });
     </script>
     <script>
         var date=new Date();

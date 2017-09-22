@@ -19,22 +19,27 @@
                                 <div class="page-title">
                                     <h1>Edit Asset</h1>
                                 </div>
-                                <div class="form-group " style="float: right;margin-top:1%">
-                                    <a href="#" class="btn btn-set red pull-right">
-                                        <i class="fa fa-check"></i>
-                                        Edit
-                                    </a>
-                                </div>
                             </div>
                         </div>
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/asset/manage">Manage Asset</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Edit Asset</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-user" class="form-horizontal" method="post" action="/asset/edit">
+                                            <input type="hidden" id="vendors_id" value="{{$asset['id']}}">
+                                            <form role="form" id="edit-asset" class="form-horizontal" method="post" action="/asset/edit/{{$asset['id']}}">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
                                                     <div class="form-group row">
@@ -43,7 +48,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="model_number" name="model_number">
+                                                            <input type="number" class="form-control" value="{{$asset['model_number']}}" id="model_number" name="model_number">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -52,7 +57,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="last_name" name="last_name">
+                                                            <input type="text" class="form-control" id="name" name="name" value="{{$asset['name']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -60,8 +65,8 @@
                                                             <label for="expiry_date" class="control-label ">Expiry Date</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
-                                                            <input type="text"  class="form-control" style="width: 30%" name="date" placeholder="Select Bill Date" id="date"/>
+                                                        <div class="col-md-6 date date-picker" data-date-end-date="0d">
+                                                            <input type="text"  style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date" value="{{$asset['expiry_date']}}">
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
@@ -73,7 +78,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="price" name="price">
+                                                            <input type="number" class="form-control" id="price" name="price" value="{{$asset['price']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -83,7 +88,7 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <select class="form-control" name="is_fuel_dependent">
-                                                                <option value="">Select Option</option>
+                                                                <option value="{{$asset['is_fuel_dependent']}}">Select Option</option>
                                                                 <option value="true">Yes</option>
                                                                 <option value="false">No</option>
                                                             </select>
@@ -95,7 +100,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="number" name="litre_per_unit">
+                                                            <input type="number" class="form-control" id="number" name="litre_per_unit" value="{{$asset['litre_per_unit']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
@@ -141,15 +146,23 @@
     </div>
 @endsection
 @section('javascript')
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
     <script src="/assets/custom/user/user.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/asset/image-datatable.js"></script>
     <script src="/assets/custom/admin/asset/image-upload.js"></script>
+    <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
     <script>
         $(document).ready(function(){
-
+            EditAsset.init();
         });
+    </script>
+    <script>
+        var date=new Date();
+        $('#expiry_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
     </script>
 @endsection
