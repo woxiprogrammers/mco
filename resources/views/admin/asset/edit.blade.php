@@ -88,9 +88,14 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <select class="form-control" name="is_fuel_dependent">
-                                                                <option value="{{$asset['is_fuel_dependent']}}">Select Option</option>
-                                                                <option value="true">Yes</option>
-                                                                <option value="false">No</option>
+                                                                @if(isset($asset['is_fuel_dependent']) && $asset['is_fuel_dependent'] == 'true')
+                                                                    <option value="true" selected >Yes</option>
+                                                                    <option value="false">No</option>
+                                                                @else
+                                                                    <option value="true">Yes</option>
+                                                                    <option value="false" selected>No</option>
+                                                                @endif
+
                                                             </select>
                                                         </div>
                                                     </div>
