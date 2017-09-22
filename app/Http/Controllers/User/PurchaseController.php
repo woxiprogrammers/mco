@@ -17,9 +17,11 @@ use App\QuotationProduct;
 use App\Unit;
 use App\UnitConversion;
 use App\User;
+use Carbon\Carbon;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -176,7 +178,7 @@ class PurchaseController extends Controller
     }
     public function getUnitsList(Request $request){
             $data = $request->all();
-            $units = Unit::where('name','like','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
+            $units = Unit::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
             $opt= '';
             foreach ($units as $unit) {
                 $opt .= '<li onclick="selectUnit(\''.htmlspecialchars($unit['name'], ENT_QUOTES).'\')">'.$unit['name'].'</li>';
@@ -188,7 +190,7 @@ class PurchaseController extends Controller
     }
     public function getAssetUnitsList(Request $request){
         $data = $request->all();
-        $units = Unit::where('name','like','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
+        $units = Unit::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
         $opt= '';
         foreach ($units as $unit) {
             $opt .= '<li onclick="selectAssetUnit(\''.htmlspecialchars($unit['name'], ENT_QUOTES).'\')">'.$unit['name'].'</li>';
@@ -200,7 +202,7 @@ class PurchaseController extends Controller
     }
     public function getAssetsList(Request $request){
         $data = $request->all();
-        $units = Assets::where('name','like','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
+        $units = Assets::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
         $opt= '';
         foreach ($units as $unit) {
             $opt .= '<li onclick="selectAssset(\''.htmlspecialchars($unit['name'], ENT_QUOTES).'\')">'.$unit['name'].'</li>';
@@ -212,7 +214,7 @@ class PurchaseController extends Controller
     }
     public function getProjectsList(Request $request){
         $data = $request->all();
-        $projects = ProjectSite::where('name','like','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
+        $projects = ProjectSite::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
         $opt= '';
         foreach ($projects as $project) {
             $opt .= '<li onclick="selectProject(\''.htmlspecialchars($project['name'], ENT_QUOTES).'\','.$project['id'].')">'.$project['name'].'</li>';
@@ -224,7 +226,7 @@ class PurchaseController extends Controller
     }
     public function  getClientsList(Request $request){
         $data = $request->all();
-        $clients = Client::where('company','like','%'.$data['keyword'].'%')->select('company','id')->get()->toarray();
+        $clients = Client::where('company','ilike','%'.$data['keyword'].'%')->select('company','id')->get()->toarray();
         $opt= '';
         foreach ($clients as $client) {
             $opt .= '<li onclick="selectClient(\''.htmlspecialchars($client['company'], ENT_QUOTES).'\')">'.$client['company'].'</li>';
@@ -236,7 +238,7 @@ class PurchaseController extends Controller
     }
     public function getUsersList(Request $request){
         $data = $request->all();
-        $users = User::where('first_name','like','%'.$data['keyword'].'%')->select('first_name','last_name','id')->get()->toarray();
+        $users = User::where('first_name','ilike','%'.$data['keyword'].'%')->select('first_name','last_name','id')->get()->toarray();
         $opt= '';
         foreach ($users as $user) {
             $opt .= '<li onclick="selectUser(\''.htmlspecialchars($user['first_name'], ENT_QUOTES).'\','.$user['id'].')">'.$user['first_name'].' '.$user['last_name'].'</li>';
@@ -248,9 +250,33 @@ class PurchaseController extends Controller
     }
     public function createMaterialList(Request $request){
           $data = $request->all();
-          try{          dd($data);
-
-
+          try{
+                  $user = Auth::user();
+                  $quotationId = Quotation::where('project_site_id',$data['project_site_id'])->pluck('id')->first();
+                  $alreadyCreatedMaterialRequest = MaterialRequests::where('project_site_id',$data['project_site_id'])->where('user_id',$user['id'])->first();
+                  if(count($alreadyCreatedMaterialRequest) > 0){
+                      $materialRequest = $alreadyCreatedMaterialRequest;
+                  }else{
+                      $materialRequest['project_site_id'] = $data['project_site_id'];
+                      $materialRequest['user_id'] = $user['id'];
+                      $materialRequest['quotation_id'] = $quotationId != null ? $quotationId : null;
+                      $materialRequest['assigned_to'] = $user['id'];
+                      $materialRequest['on_behalf_of'] = $data['user_id'];
+                      $materialRequest = MaterialRequests::create($materialRequest);
+                  }
+                  foreach($data['item_list'] as $key => $itemData){
+                      $materialRequestComponentData['material_request_id'] = $materialRequest['id'];
+                      $materialRequestComponentData['name'] = $itemData['name'];
+                      $materialRequestComponentData['quantity'] = $itemData['quantity_id'];
+                      $materialRequestComponentData['unit_id'] = $itemData['unit_id'];
+                      $materialRequestComponentData['component_type_id'] = $itemData['component_type_id'];
+                      $materialRequestComponentData['component_status_id'] = PurchaseRequestComponentStatuses::where('slug','pending')->pluck('id')->first();
+                      $materialRequestComponentData['created_at'] = Carbon::now();
+                      $materialRequestComponentData['updated_at'] = Carbon::now();
+                      $materialRequestComponent[] = MaterialRequestComponents::insertGetId($materialRequestComponentData);
+                  }
+              $request->session()->flash('success', 'Material request created successfully.');
+              return redirect('purchase/material-request/create');
           }catch(Exception $e){
 
           }

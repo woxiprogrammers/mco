@@ -9,6 +9,7 @@
     <form role="form" id="new_material_request" class="form-horizontal" action="/purchase/material-request/create" method="post">
     <input type="hidden" id="component_id">
     <input type="hidden" id="iterator">
+        {!! csrf_field() !!}
     <div class="page-wrapper">
     <div class="page-wrapper-row full-height">
         <div class="page-wrapper-middle">
