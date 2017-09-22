@@ -16,7 +16,6 @@ class UnitConversion extends Model
     }
 
     public function toUnit(){
-        Log::info('a');
         return $this->belongsTo('App\Unit','unit_2_id');
     }
 

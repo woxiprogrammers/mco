@@ -157,7 +157,7 @@
                                                                                     Enter Discount:
                                                                                 </label>
                                                                             </div>
-                                                                            <div class="col-md-6 input-group">
+                                                                            <div class="col-md-6 input-group form-group">
                                                                                 <input class="form-control" id="discount" name="discount" type="number" value="{{$quotation->discount}}" style="width: 113%">
                                                                                 <span class="input-group-addon">&nbsp; % </span>
                                                                             </div>
@@ -169,7 +169,7 @@
                                                                                     Enter Slab Area:
                                                                                 </label>
                                                                             </div>
-                                                                            <div class="col-md-6 input-group">
+                                                                            <div class="col-md-6 input-group form-group">
                                                                                 <input class="form-control" type="number" name="built_up_area" value="{{$quotation->built_up_area}}">
                                                                                 <span class="input-group-addon">Sq.Ft</span>
                                                                             </div>
@@ -251,7 +251,7 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <select class="form-control" name="product_summary[{{$quotation->quotation_products[$iterator]->product_id}}]" style="width: 80%; margin-left: 10%; font-size: 13px">
+                                                                                            <select class="form-control product-summary" name="product_summary[{{$quotation->quotation_products[$iterator]->product_id}}]" style="width: 80%; margin-left: 10%; font-size: 13px">
                                                                                                 @if($quotation->quotation_products[$iterator]->summary_id == null)
                                                                                                     <option value="" selected>Select Summary</option>
                                                                                                     @foreach($summaries as $summary)
@@ -727,6 +727,7 @@
         EditQuotation.init();
         WorkOrderFrom.init();
         calculateSubtotal();
+        applyValidation("QuotationEditForm");
         var quotationProducts = $("#quotationProducts").val();
         quotationProducts = jQuery.parseJSON(quotationProducts);
         $.each(quotationProducts, function(index, value){
