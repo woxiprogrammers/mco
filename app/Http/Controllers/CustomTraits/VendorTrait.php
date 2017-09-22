@@ -173,12 +173,13 @@ trait VendorTrait
             $vendorCityData['vendor_id'] = $vendor->id;
             $vendorMaterialData['vendor_id'] = $vendor->id;
             $vendorCityRelation = array();
-            foreach($request->cities as $cityId){
+            foreach($request->city as $cityId){
                 $vendorCityData['city_id'] = $cityId;
                 $vendorCity = VendorCityRelation::create($vendorCityData);
                 $vendorCityRelation[$cityId] = $vendorCity->id;
             }
             if($request ->has( 'material_city')) {
+
                 $materialIds = array_keys($request->material_city);
 
                 foreach ($materialIds as $materialId) {

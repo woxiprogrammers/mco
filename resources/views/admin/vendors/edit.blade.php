@@ -139,9 +139,9 @@
                                                                         <ul id="cityList" class="list-group">
                                                                             @foreach($cityArray as $city)
                                                                                 @if(in_array($city['id'],$vendorCities))
-                                                                                    <li><input type="checkbox" value={{$city['id']}} name="cities[]" checked> <span>{{$city['name']}}</span> </li>
+                                                                                    <li><input type="checkbox" value={{$city['id']}} name="cities[]" class="cities" checked> <span>{{$city['name']}}</span> </li>
                                                                                 @else
-                                                                                    <li><input type="checkbox" value={{$city['id']}} name="cities[]"> <span>{{$city['name']}}</span> </li>
+                                                                                    <li><input type="checkbox" value={{$city['id']}} name="cities[]" class="cities"> <span>{{$city['name']}}</span> </li>
                                                                                 @endif
                                                                             @endforeach
                                                                         </ul>

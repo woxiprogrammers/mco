@@ -130,14 +130,14 @@
                                                     <div class="form-body">
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
-                                                                <label class="control-label">City Name</label>
+                                                                <label for="city" class="control-label">City Name</label>
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-control product-material-select" style="height: 150px;" >
-                                                                    <ul id="cityList" class="list-group">
+                                                                    <ul id="city" class="list-group">
                                                                         @foreach($cityArray as $city)
-                                                                            <li><input type="checkbox" value={{$city['id']}} name="cities[]" > <span>{{$city['name']}}</span> </li>
+                                                                            <li><input class="cities" type="checkbox" id="city" value={{$city['id']}} name="cities[]" > <span>{{$city['name']}}</span> </li>
                                                                         @endforeach
                                                                     </ul>
                                                                 </div>
@@ -186,6 +186,7 @@
     <script src="/assets/custom/admin/vendor/validation.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
+
     <script>
         $(document).ready(function() {
             CreateVendor.init();

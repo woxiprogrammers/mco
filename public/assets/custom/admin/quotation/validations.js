@@ -70,12 +70,14 @@ var  CreateQuotation = function () {
                     }
                 });
                 if(validForm == true){
-                    $("button[type='submit']").attr('disabled', true);
-                    success.show();
-                    error.hide();
-                    form.submit();
+
+                        $("button[type='submit']").attr('disabled', true);
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }
                 }
-            }
+
         });
     }
 
