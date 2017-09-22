@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Manage Vendor')
+@section('title','Constro | Manage Role')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -19,9 +19,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Vendors</h1>
-                                </div>
-                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 78%"><a href="/vendors/create" style="color: white"><i class="fa fa-plus"></i> Vendor</a>
+                                    <h1>Manage Role</h1>
                                 </div>
                             </div>
                         </div>
@@ -37,24 +35,25 @@
                                                     <div class="row" style="text-align: right">
                                                         <div class="col-md-12">
                                                             <div class="btn-group">
-
+                                                                <div id="sample_editable_1_new" class="btn yellow" ><a href="/role/create" style="color: white"> Role
+                                                                        <i class="fa fa-plus"></i>
+                                                                    </a>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="vendorTable">
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="roleTable">
                                                     <thead>
                                                     <tr>
                                                         <th style="width: 30%"> Name </th>
-                                                        <th> Mobile Number </th>
-
-                                                        <th> Status </th>
-                                                        <th> Actions </th>
+                                                        <th> Type </th>
+                                                        <th> Created On </th>
                                                     </tr>
                                                     <tr class="filter">
                                                         <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_mobile" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -84,10 +83,10 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/admin/vendor/manage-datatable.js" type="text/javascript"></script>
-   <script>
+    <script src="/assets/custom/admin/role/manage-datatable.js" type="text/javascript"></script>
+    <script>
         $(document).ready(function() {
-            $('#vendorTable').DataTable();
+            $('#roleTable').DataTable();
         });
     </script>
 @endsection

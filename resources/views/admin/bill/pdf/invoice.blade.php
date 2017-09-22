@@ -99,7 +99,7 @@
                         <tr >
                             <td style="text-align: center;height: 25px;">{!! $iterator+1  !!}</td>
                             <td style="text-align: left; padding-left: 5px">
-                            {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
+                            Extra Item : {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
                             </td>
                             <td style="text-align: center;"> {{$hsnCode}}</td>
                             <td style="text-align: right; padding-right: 10px;">1</td>
