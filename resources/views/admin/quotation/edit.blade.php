@@ -734,7 +734,6 @@
                 min: parseInt(value.product_bill_count)
             });
         });
-
     });
 </script>
 @endsection

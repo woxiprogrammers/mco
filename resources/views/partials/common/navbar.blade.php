@@ -223,7 +223,7 @@
 
                             </ul>
                         </li>
-                    <!--                      <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                          <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Checklist
                                 <span class="arrow"></span>
                             </a>
