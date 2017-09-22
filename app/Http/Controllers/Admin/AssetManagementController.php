@@ -102,56 +102,16 @@ class AssetManagementController extends Controller
             if (!file_exists($tempImageUploadPath)) {
                 Log::info('in if');
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
-                if ($request->has('search_name')) {
-                    $assetData = AssetManagement::where('id', 'ilike', '%' . $request->search_name . '%')->orderBy('name', 'asc')->get()->toArray();
-                } else {
-                    $assetData = AssetManagement::orderBy('id', 'asc')->get()->toArray();
-                }
-                $iTotalRecords = count($assetData);
-                $records = array();
-                $records['data'] = array();
-                $end = $request->length < 0 ? count($assetData) : $request->length;
-                for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++, $pagination++) {
-                    if ($assetData[$pagination]['is_active'] == true) {
-                        $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
-                        $status = 'Disable';
-                    } else {
-                        $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
-                        $status = 'Enable';
-                    }
-                    $records['data'][$iterator] = [
-                        $assetData[$pagination]['id'],
-                        $assetData[$pagination]['model_number'],
-                        $asset_status,
-
-                        '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/asset/edit/' . $assetData[$pagination]['id'] . '">
-                                <i class="icon-docs"></i> Edit </a>
-                        </li>
-                        <li>
-                            <a href="/asset/change-status/' . $assetData[$pagination]['id'] . '">
-                                <i class="icon-tag"></i> ' . $status . ' </a>
-                        </li>
-                    </ul>
-                </div>'
-                    ];
-                }
-                $extension = $request->file('file')->getClientOriginalExtension();
-                $filename = mt_rand(1, 10000000000) . sha1(time()) . '.' . $extension . '';
-                $request->file('file')->move($tempImageUploadPath, $filename);
-                $path = env('ASSET_TEMP_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $assetDirectoryName . DIRECTORY_SEPARATOR . $filename;
-                $response = [
-                    'jsonrpc' => '2.0',
-                    'result' => 'OK',
-                    'path' => $path
-                ];
             }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            $path = env('ASSET_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path
+            ];
         }catch (\Exception $e){
             $response = [
                 'jsonrpc' => '2.0',
@@ -165,6 +125,65 @@ class AssetManagementController extends Controller
         return response()->json($response);
     }
 
+    public function assetListing(Request $request){
+                    try{
+                        if($request->has('search_name')){
+                            $assetData = AssetManagement::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
+                        }else{
+                            $assetData = AssetManagement::orderBy('id','asc')->get()->toArray();
+                        }
+                        $iTotalRecords = count($assetData);
+                        $records = array();
+                        $records['data'] = array();
+                        $end = $request->length < 0 ? count($assetData) : $request->length;
+                        for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
+                            if($assetData[$pagination]['is_active'] == true){
+                                $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                                $status = 'Disable';
+                            }else{
+                                $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                                $status = 'Enable';
+                            }
+                            $records['data'][$iterator] = [
+                                $assetData[$pagination]['id'],
+                                $assetData[$pagination]['model_number'],
+                                $asset_status,
+
+                                '<div class="btn-group">
+                       <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                           Actions
+                           <i class="fa fa-angle-down"></i>
+                       </button>
+                       <ul class="dropdown-menu pull-left" role="menu">
+                           <li>
+                               <a href="/asset/edit/'.$assetData[$pagination]['id'].'">
+                               <i class="icon-docs"></i> Edit </a>
+                       </li>
+                       <li>
+                           <a href="/asset/change-status/'.$assetData[$pagination]['id'].'">
+                               <i class="icon-tag"></i> '.$status.' </a>
+                       </li>
+                   </ul>
+               </div>'
+                            ];
+                        }
+
+                        $records["draw"] = intval($request->draw);
+                        $records["recordsTotal"] = $iTotalRecords;
+                        $records["recordsFiltered"] = $iTotalRecords;
+                    }catch (Exception $e){
+                        $records = array();
+                        $data = [
+                            'action' => 'Get Asset Listing',
+                            'params' => $request->all(),
+                            'exception'=> $e->getMessage()
+                        ];
+                        Log::critical(json_encode($data));
+                        abort(500);
+                    }
+                    return response()->json($records);
+    }
+
     public function displayAssetImages(Request $request){
         try{
             $path = $request->path;
@@ -174,7 +193,7 @@ class AssetManagementController extends Controller
             $path = null;
             $count = null;
         }
-        return view('admin.asset.create')->with(compact('path','count','random'));
+        return view('partials.asset.image')->with(compact('path','count','random'));
     }
 
     public function removeAssetImage(Request $request)
