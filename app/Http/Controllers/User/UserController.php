@@ -4,8 +4,11 @@ namespace App\Http\Controllers\User;
 
 use App\Client;
 use App\ClientUser;
+use App\Helper\ACLHelper;
 use App\Http\Requests\UserRequest;
+use App\Module;
 use App\Role;
+use App\RoleHasPermission;
 use App\User;
 use App\UserHasRole;
 use Illuminate\Http\Request;
@@ -178,6 +181,35 @@ class UserController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getRoleAcls(Request $request, $roleId){
+        try{
+            $subModuleIds = RoleHasPermission::join('permissions','permissions.id','=','role_has_permissions.permission_id')
+                ->join('modules','modules.id','=','permissions.module_id')
+                ->where('role_has_permissions.role_id',$roleId)
+                ->orderBy('modules.id','asc')
+                ->select('modules.id as module_id')
+                ->distinct()
+                ->get()->toArray();
+            $subModuleIds = array_column($subModuleIds,'module_id');
+            $moduleIds = Module::whereIn('id',$subModuleIds)->select('module_id')->distinct()->get()->toArray();
+            $moduleIds = array_column($moduleIds,'module_id');
+            $data = ACLHelper::getPermissions($moduleIds);
+            $roleWebPermissions = RoleHasPermission::where('role_id',$roleId)->where('is_web', true)->pluck('permission_id')->toArray();
+            $roleMobilePermissions = RoleHasPermission::where('role_id',$roleId)->where('is_mobile', true)->pluck('permission_id')->toArray();
+            $webModuleResponse = $data['webModuleResponse'];
+            $permissionTypes = $data['permissionTypes'];
+            $mobileModuleResponse = $data['mobileModuleResponse'];
+            return view('partials.role.module-listing')->with(compact('roleWebPermissions','roleMobilePermissions','permissionTypes','webModuleResponse','mobileModuleResponse'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Role Acls',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
         }
     }
 

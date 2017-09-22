@@ -50,7 +50,7 @@
                                                     <div class="col-md-6">
                                                         <select class="form-control" id="role_id" name="role_id">
                                                             @foreach($roles as $role)
-                                                            <option value="{{$role['id']}}">{{$role['name']}}</option>
+                                                                <option value="{{$role['id']}}">{{$role['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -137,6 +137,9 @@
                                                     <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
+                                            <table id="aclTable">
+
+                                            </table>
                                         </form>
                                     </div>
                                 </div>
@@ -152,10 +155,12 @@
 @section('javascript')
 <script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
 <script src="/assets/custom/user/user.js" type="application/javascript"></script>
+<script src="/assets/custom/user/user-management.js" type="application/javascript"></script>
 <script>
     $(document).ready(function(){
         CreateUser.init();
         $('#submit').css("padding-left",'6px');
+        $("#role_id").trigger('change');
     });
 </script>
 @endsection
