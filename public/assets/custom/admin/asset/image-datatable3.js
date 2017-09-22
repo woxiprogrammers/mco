@@ -3,14 +3,14 @@
  */
 
 var AssetImageUpload = function() {
-    var assetId = $("#assetId").val();
+    var data =  $('input[name="_token"]').val();
     var e = function() {
             var e = new plupload.Uploader({
                 max_files : 20,
                 runtimes: "html5,html4",
                 browse_button: document.getElementById("tab_images_uploader_pickfiles"),
                 container: document.getElementById("tab_images_uploader_container"),
-                url: "/asset/image-upload/"+assetId,
+                url: "/asset/image-upload?_token="+data,
                 async:false,
                 multi_selection : true,
                 filters: {

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\AssetManagement;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use PhpParser\Node\Expr\Array_;
 
 
 class AssetManagementController extends Controller
@@ -47,9 +50,34 @@ class AssetManagementController extends Controller
                 $data['litre_per_unit'] = $request->litre_per_unit;
                 $data['is_active'] = false;
                 $asset = AssetManagement::create($data);
-               $assetId = 1;
-               $imageUpload = $this->uploadTempAssetImages($assetId);
+                $imageUpload = $this->uploadTempAssetImages();
+                $user = Auth::user();
+
+            $assetDirectoryName = sha1($user->id);
+            $tempUploadPath = public_path() . env('ASSET_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+            Log::info($tempImageUploadPath);
+            /* Create Upload Directory If Not Exists */
+            Log::info('result of if');
+            Log::info(!file_exists($tempImageUploadPath));
+            if (!file_exists($tempImageUploadPath)) {
+                Log::info('in if');
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+
+            Storage::move();
+
+
+            $path = env('ASSET_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path
+            ];
                 $request->session()->flash('success', 'Asset Created successfully.');
+
                 return redirect('/asset/create');
 
         }catch (\Exception $e){
@@ -90,9 +118,14 @@ class AssetManagementController extends Controller
     }
 
 
-    public function uploadTempAssetImages(Request $request,$assetId){
+    public function uploadTempAssetImages(Request $request){
         try {
-            $assetDirectoryName = sha1($assetId);
+           // dd($request);
+//            Log::info($request);
+//            $assetDirectoryName = sha1($assetId);
+            $user = Auth::user();
+//            dd($user);
+            $assetDirectoryName = sha1($user->id);
             $tempUploadPath = public_path() . env('ASSET_TEMP_IMAGE_UPLOAD');
             $tempImageUploadPath = $tempUploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
             Log::info($tempImageUploadPath);
@@ -106,6 +139,7 @@ class AssetManagementController extends Controller
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
+            $filenameArray = Array();
             $path = env('ASSET_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
