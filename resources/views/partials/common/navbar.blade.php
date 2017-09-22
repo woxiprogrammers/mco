@@ -133,7 +133,7 @@
                                         @endif
                                             <li aria-haspopup="true">
                                                 <a href="/asset/manage" class="nav-link nav-toggle ">
-                                                    <i class="fa fa-bars"></i> Manage Asset
+                                                    <i class="fa fa-bars"></i> Asset
                                                 </a>
                                             </li>
                                     </ul>

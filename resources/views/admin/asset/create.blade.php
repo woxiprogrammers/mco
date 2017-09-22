@@ -37,6 +37,7 @@
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
+                                        <input type="hidden" id="assetId" value="1">
                                         <div class="portlet-body form">
                                             <form role="form" id="create-asset" class="form-horizontal" method="post" action="/asset/create">
                                                 {!! csrf_field() !!}
@@ -102,26 +103,27 @@
                                                             <input type="number" class="form-control" id="number" name="litre_per_unit">
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
+                                                    <div class="form-group">
                                                         <div class="row">
-                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
                                                         </div>
                                                         <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: 26%">
                                                                 Browse</a>
                                                             <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
                                                                 <i class="fa fa-share"></i> Upload Files </a>
                                                         </div>
-                                                        <center><table class="table table-bordered table-hover row" style="width: 200px">
-                                                            <thead class="pull-right">
+                                                        <table class="table table-bordered table-hover" style="width: 554px; margin-left: 26%; margin-top: 1%">
+                                                            <thead>
                                                             <tr role="row" class="heading">
                                                                 <th> Image </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody id="show-product-images">
+
                                                             </tbody>
-                                                        </table></center>
+                                                        </table>
                                                     </div>
                                                     <div class="form-actions noborder row">
                                                         <div class="col-md-offset-3" style="margin-left: 26%">
@@ -130,6 +132,8 @@
                                                     </div>
                                                 </div>
                                             </form>
+                                            <input type="hidden" id="path" name="path" value="">
+                                            <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                                         </div>
                                     </div>
                                 </div>
@@ -147,7 +151,16 @@
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
     <script src="/assets/custom/user/user.js" type="application/javascript"></script>
+    <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/asset/image-datatable.js"></script>
+    <script src="/assets/custom/admin/asset/image-upload.js"></script>
     <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
+    <script>
+        $(document).ready(function(){
+
+        });
+    </script>
     <script>
         $('#clcl').click(function(){
 

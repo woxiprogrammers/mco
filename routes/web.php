@@ -260,9 +260,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('edit/{asset}',array('uses' => 'Admin\AssetManagementController@editAsset'));
         Route::post('create',array('uses' => 'Admin\AssetManagementController@createAsset'));
         Route::post('listing',array('uses'=> 'Admin\AssetManagementController@assetListing'));
+        Route::post('image-upload/{assetId}',array('uses'=>'Admin\AssetManagementController@uploadTempAssetImages'));
+        Route::post('display-images/{assetId}',array('uses'=>'Admin\AssetManagementController@displayAssetImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
         Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkAssetName'));
         Route::get('change-status/{asset}',array('uses' => 'Admin\AssetManagementController@changeAssetStatus'));
-
     });
 
     Route::group(['prefix'=>'bank'],function() {
