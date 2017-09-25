@@ -166,6 +166,7 @@ trait VendorTrait
             $data['email'] = $request->email;
             $data['gstin'] = $request->gstin;
             $data['alternate_contact'] = $request->alternate_contact;
+            $data['alternate_email'] = $request->alternate_email;
             $data['is_active'] = false;
             $vendor = Vendor::create($data);
             $vendorCityData = array();
@@ -173,15 +174,13 @@ trait VendorTrait
             $vendorCityData['vendor_id'] = $vendor->id;
             $vendorMaterialData['vendor_id'] = $vendor->id;
             $vendorCityRelation = array();
-            foreach($request->city as $cityId){
+            foreach($request->cities as $cityId){
                 $vendorCityData['city_id'] = $cityId;
                 $vendorCity = VendorCityRelation::create($vendorCityData);
                 $vendorCityRelation[$cityId] = $vendorCity->id;
             }
             if($request ->has( 'material_city')) {
-
                 $materialIds = array_keys($request->material_city);
-
                 foreach ($materialIds as $materialId) {
                     $vendorMaterialData['material_id'] = $materialId;
                     $vendorMaterial = VendorMaterialRelation::create($vendorMaterialData);
