@@ -173,20 +173,24 @@ trait VendorTrait
             $vendorCityData['vendor_id'] = $vendor->id;
             $vendorMaterialData['vendor_id'] = $vendor->id;
             $vendorCityRelation = array();
-            foreach($request->cities as $cityId){
+            foreach($request->city as $cityId){
                 $vendorCityData['city_id'] = $cityId;
                 $vendorCity = VendorCityRelation::create($vendorCityData);
                 $vendorCityRelation[$cityId] = $vendorCity->id;
             }
-            $materialIds = array_keys($request->material_city);
-            foreach($materialIds as $materialId){
-                $vendorMaterialData['material_id'] = $materialId;
-                $vendorMaterial = VendorMaterialRelation::create($vendorMaterialData);
-                $vendorMaterialCityData = array();
-                $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
-                foreach ($request->material_city[$materialId] as $materialCityId){
-                    $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
-                    VendorMaterialCityRelation::create($vendorMaterialCityData);
+            if($request ->has( 'material_city')) {
+
+                $materialIds = array_keys($request->material_city);
+
+                foreach ($materialIds as $materialId) {
+                    $vendorMaterialData['material_id'] = $materialId;
+                    $vendorMaterial = VendorMaterialRelation::create($vendorMaterialData);
+                    $vendorMaterialCityData = array();
+                    $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
+                    foreach ($request->material_city[$materialId] as $materialCityId) {
+                        $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
+                        VendorMaterialCityRelation::create($vendorMaterialCityData);
+                    }
                 }
             }
             $request->session()->flash('success', 'Vendor Created successfully.');
@@ -225,22 +229,24 @@ trait VendorTrait
                 }
                 $vendorCityRelation[$cityId] = $vendorCity->id;
             }
-            $materialIds = array_keys($request->material_city);
-            VendorMaterialRelation::where('vendor_id',$vendor->id)->whereNotIn('material_id',$materialIds)->delete();
-            foreach($materialIds as $materialId){
-                $vendorMaterial = VendorMaterialRelation::where('vendor_id',$vendor->id)->where('material_id',$materialId)->first();
-                if($vendorMaterial == null){
-                    $vendorMaterialData['material_id'] = $materialId;
-                    $vendorMaterial = VendorMaterialRelation::create($vendorMaterialData);
-                }
-                $vendorMaterialCityData = array();
-                $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
-                foreach ($request->material_city[$materialId] as $materialCityId){
-                    $vendorMaterialCity = VendorMaterialCityRelation::where('vendor_material_relation_id',$vendorMaterial->id)->where('vendor_city_relation_id',$vendorCityRelation[$materialCityId])->first();
-                    VendorMaterialCityRelation::whereNotIn('vendor_city_relation_id',$vendorCityRelation)->delete();
-                    if($vendorMaterialCity == null){
-                        $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
-                        VendorMaterialCityRelation::create($vendorMaterialCityData);
+            if($request ->has( 'material_city')) {
+                $materialIds = array_keys($request->material_city);
+                VendorMaterialRelation::where('vendor_id', $vendor->id)->whereNotIn('material_id', $materialIds)->delete();
+                foreach ($materialIds as $materialId) {
+                    $vendorMaterial = VendorMaterialRelation::where('vendor_id', $vendor->id)->where('material_id', $materialId)->first();
+                    if ($vendorMaterial == null) {
+                        $vendorMaterialData['material_id'] = $materialId;
+                        $vendorMaterial = VendorMaterialRelation::create($vendorMaterialData);
+                    }
+                    $vendorMaterialCityData = array();
+                    $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
+                    foreach ($request->material_city[$materialId] as $materialCityId) {
+                        $vendorMaterialCity = VendorMaterialCityRelation::where('vendor_material_relation_id', $vendorMaterial->id)->where('vendor_city_relation_id', $vendorCityRelation[$materialCityId])->first();
+                        VendorMaterialCityRelation::whereNotIn('vendor_city_relation_id', $vendorCityRelation)->delete();
+                        if ($vendorMaterialCity == null) {
+                            $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
+                            VendorMaterialCityRelation::create($vendorMaterialCityData);
+                        }
                     }
                 }
             }

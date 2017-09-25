@@ -58,10 +58,20 @@
                                                                  <span>*</span>
                                                              </div>
                                                             <div class="col-md-6">
-                                                                <select class="form-control" id="type" name="type" value="{{$role['type']}}">
-                                                                    <option value="active">Active</option>
-                                                                    <option value="not-active">Not-Active</option>
+
+                                                                <select class="form-control" id="type" name="type" >
+                                                                    @if(isset($role['type']) && $role['type'] == 'active')
+
+                                                                            <option value="active" selected>Active</option>
+                                                                            <option value="not-active">Not-Active</option>
+                                                                    @else
+                                                                        <option value="active">Active</option>
+                                                                        <option value="not-active" selected>Not-Active</option>
+                                                                    @endif
                                                                 </select>
+
+
+
                                                             </div>
                                                         </div>
                                                     <div class="form-group">
