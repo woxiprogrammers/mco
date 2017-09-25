@@ -65,10 +65,14 @@ var  CreateVendor = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
-                $("button[type='submit']").prop('disabled', true);
-                success.show();
-                error.hide();
-                form.submit();
+                if($(".cities:checkbox:checked").length > 0) {
+                    $("button[type='submit']").prop('disabled', true);
+                    success.show();
+                    error.hide();
+                    form.submit();
+                }else{
+                    alert('please select atleast one city');
+                }
             }
         });
     }
