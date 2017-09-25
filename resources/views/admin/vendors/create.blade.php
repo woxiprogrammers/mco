@@ -135,9 +135,9 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-control product-material-select" style="height: 150px;" >
-                                                                    <ul id="city" class="list-group">
+                                                                    <ul id="cityList" class="list-group">
                                                                         @foreach($cityArray as $city)
-                                                                            <li><input class="cities" type="checkbox" id="city" value={{$city['id']}} name="cities[]" > <span>{{$city['name']}}</span> </li>
+                                                                            <li><input class="cities" type="checkbox" id="city" value="{{$city['id']}}" name="cities[]" > <span>{{$city['name']}}</span> </li>
                                                                         @endforeach
                                                                     </ul>
                                                                 </div>
@@ -190,7 +190,6 @@
     <script>
         $(document).ready(function() {
             CreateVendor.init();
-            $("#categoryId").trigger('change');
             var citiList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -240,7 +239,6 @@
                 }else{
                     alert("Please select atleast one city first");
                 }
-
             })
             .on('typeahead:open', function (obj, datum) {
 

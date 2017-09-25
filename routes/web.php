@@ -22,6 +22,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::put('edit/{user}',array('uses' => 'User\UserController@editUser'));
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
         Route::post('listing',array('uses' => 'User\UserController@userListing'));
+        Route::post('check-mobile',array('uses' => 'User\UserController@checkMobile'));
         Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
         Route::get('get-route-acls/{roleId}',array('uses' => 'User\UserController@getRoleAcls'));
     });

@@ -40,51 +40,54 @@ class UserController extends Controller
 
     public function createUser(UserRequest $request){
         try{
-            $data = $request->except('role_id');
-            $data['first_name'] = ucfirst($data['first_name']);
-            $data['last_name'] = ucfirst($data['last_name']);
-            $data['password'] = bcrypt($data['password']);
-            $data['is_active'] = (boolean)false;
-            $user = User::create($data);
-            $userHasRoleData = array();
-            $userHasRoleData['role_id'] = $request->role_id;
-            $userHasRoleData['user_id'] = $user->id;
-            UserHasRole::create($userHasRoleData);
-            if($request->has('web_permissions')){
-                $userPermissionData = array();
-                $userPermissionData['user_id'] = $user->id;
-                $web_permissions=$request->web_permissions;
-                foreach ($web_permissions as $permissions){
-                    $userPermissionData['is_web'] = true;
-                    $userPermissionData['permission_id'] = $permissions;
-                    $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
-                    if($check != null){
-                        UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->update(['is_web'=>true]);
-                    }
-                    else{
-                        UserHasPermission::create($userPermissionData);
-                    }
-                }
-            }
-            if($request->has('mobile_permissions')){
-                $userPermissionData = array();
-                $userPermissionData['user_id'] = $user->id;
-                $mobile_permissions=$request->mobile_permissions;
-                foreach ($mobile_permissions as $permissions){
-                    $userPermissionData['is_mobile'] = true;
-                    $userPermissionData['permission_id'] = $permissions;
-                    $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
-                    if($check != null){
-                        UserHasPermission::where('user_id',$user->id)->update(['is_mobile' => true]);
-                    }
-                    else{
-                        UserHasPermission::create($userPermissionData);
+            $userExists = User::where('mobile',$request->mobile)->first();
+            if($userExists == null){
+                $data = $request->except('role_id');
+                $data['first_name'] = ucfirst($data['first_name']);
+                $data['last_name'] = ucfirst($data['last_name']);
+                $data['password'] = bcrypt($data['password']);
+                $data['is_active'] = (boolean)false;
+                $user = User::create($data);
+                $userHasRoleData = array();
+                $userHasRoleData['role_id'] = $request->role_id;
+                $userHasRoleData['user_id'] = $user->id;
+                UserHasRole::create($userHasRoleData);
+                if($request->has('web_permissions')){
+                    $userPermissionData = array();
+                    $userPermissionData['user_id'] = $user->id;
+                    $web_permissions=$request->web_permissions;
+                    foreach ($web_permissions as $permissions){
+                        $userPermissionData['is_web'] = true;
+                        $userPermissionData['permission_id'] = $permissions;
+                        $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
+                        if($check != null){
+                            UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->update(['is_web'=>true]);
+                        }
+                        else{
+                            UserHasPermission::create($userPermissionData);
+                        }
                     }
                 }
+                if($request->has('mobile_permissions')){
+                    $userPermissionData = array();
+                    $userPermissionData['user_id'] = $user->id;
+                    $mobile_permissions=$request->mobile_permissions;
+                    foreach ($mobile_permissions as $permissions){
+                        $userPermissionData['is_mobile'] = true;
+                        $userPermissionData['permission_id'] = $permissions;
+                        $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
+                        if($check != null){
+                            UserHasPermission::where('user_id',$user->id)->update(['is_mobile' => true]);
+                        }
+                        else{
+                            UserHasPermission::create($userPermissionData);
+                        }
+                    }
+                }
+                $request->session()->flash('success', 'User created successfully');
+            }else{
+                $request->session()->flash('error', 'Mobile number is already registered with other user.');
             }
-
-
-            $request->session()->flash('success', 'User created successfully');
             return redirect('/user/create');
         }catch(\Exception $e){
             $data = [
@@ -312,4 +315,26 @@ class UserController extends Controller
         }
     }
 
+    public function checkMobile(Request $request){
+        try{
+            if($request->has('user_id')){
+                $nameCount = User::where('mobile',$request->mobile)->where('id','!=',$request->user_id)->count();
+            }else{
+                $nameCount = User::where('mobile',$request->mobile)->count();
+            }
+            if($nameCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Check user mobile',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return null;
+        }
+    }
 }
