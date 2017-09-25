@@ -87,8 +87,11 @@
                                                             <a class="btn btn-success btn-md" id="next_btn"> Add </a>
                                                         </div>
                                                     </div>
-
-                                                    <div class="submodules-table-div">
+                                                    @if($showAclTable == false)
+                                                        <div class="submodules-table-div" hidden>
+                                                    @else
+                                                        <div class="submodules-table-div">
+                                                    @endif
                                                         <fieldset>
                                                             <legend> ACL Assignments</legend>
                                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="SubModulesTable">

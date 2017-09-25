@@ -29,7 +29,11 @@
                         <div class="container">
                             <ul class="page-breadcrumb breadcrumb">
                                 <li>
-                                    <a href="/user/manage">Back</a>
+                                    <a href="/role/manage">Manage Role</a>
+                                    <i class="fa fa-circle"></i>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);">Edit Role</a>
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
@@ -48,15 +52,7 @@
                                                     <span>*</span>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <select class="form-control" id="role_id" name="role_id">
-                                                        @foreach($roles as $role)
-                                                            @if($role['id'] == $user->roles[0]->role_id)
-                                                                <option value="{{$role['id']}}" selected>{{$role['name']}}</option>
-                                                            @else
-                                                                <option value="{{$role['id']}}">{{$role['name']}}</option>
-                                                            @endif
-                                                        @endforeach
-                                                    </select>
+                                                    <input type="text" id="role" value="{{$user->roles[0]->role->name}}" class="form-control" disabled>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
@@ -117,16 +113,86 @@
                                                     <input type="text" class="form-control" id="mobile" name="mobile" value="{{$user['mobile']}}">
                                                 </div>
                                             </div>
+                                            <div class="form-group">
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="aclTable">
+                                                    <tr>
+                                                        <th style="width: 25%"> Name </th>
+                                                        @foreach($permissionTypes as $permissionType)
+                                                            <th>{{$permissionType['name']}}</th>
+                                                        @endforeach
+                                                    </tr>
+                                                    <tr>
+                                                        <th style="font-size:150%;" colspan="{!! count($permissionTypes) + 1!!}">WEB</th>
+                                                    </tr>
+                                                    @foreach($webModuleResponse as $data)
+                                                        <tr>
+                                                            <td colspan="{!! count($permissionTypes) + 1!!}">
+                                                                {{$data['module_name']}}
+                                                            </td>
+                                                        </tr>
+                                                        @foreach($data['submodules'] as $subModule)
+                                                            <tr>
+                                                                <td>
+                                                                    {{$subModule['submodule_name']}}
+                                                                </td>
+                                                                @foreach($permissionTypes as $permissionType)
+                                                                    <td style="text-align: center">
+                                                                        @if(array_key_exists($permissionType['id'],$subModule['permissions']))
+                                                                            @if(in_array($subModule['permissions'][$permissionType['id']],$userWebPermissions))
+                                                                                <input type="checkbox" name="web_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}" checked>
+                                                                            @else
+                                                                                <input type="checkbox" name="web_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}">
+                                                                            @endif
+                                                                        @else
+                                                                            <span>-</span>
+                                                                        @endif
+                                                                    </td>
+                                                                @endforeach
+                                                            </tr>
+                                                        @endforeach
+                                                    @endforeach
+                                                    @if(count($mobileModuleResponse) > 0)
+                                                        <tr>
+                                                            <th style="font-size:150%;" colspan="{!! count($permissionTypes) + 1!!}">MOBILE</th>
+                                                        </tr>
+                                                        @foreach($mobileModuleResponse as $data)
+                                                            <tr>
+                                                                <td colspan="{!! count($permissionTypes) + 1!!}">
+                                                                    {{$data['module_name']}}
+                                                                </td>
+                                                            </tr>
+                                                            @foreach($data['submodules'] as $subModule)
+                                                                <tr>
+                                                                    <td>
+                                                                        {{$subModule['submodule_name']}}
+                                                                    </td>
+                                                                    @foreach($permissionTypes as $permissionType)
+                                                                        <td style="text-align: center">
+                                                                            @if(array_key_exists($permissionType['id'],$subModule['permissions']))
+                                                                                @if(in_array($subModule['permissions'][$permissionType['id']],$userMobilePermissions))
+                                                                                    <input type="checkbox" name="mobile_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}" checked>
+                                                                                @else
+                                                                                    <input type="checkbox" name="mobile_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}">
+                                                                                @endif
+                                                                            @else
+                                                                                <span>-</span>
+                                                                            @endif
+                                                                        </td>
+                                                                    @endforeach
+                                                                </tr>
+                                                            @endforeach
+                                                        @endforeach
+                                                    @endif
+                                                </table>
+                                            </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3" style="margin-left: 26%">
-                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
+                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>

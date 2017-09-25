@@ -8,6 +8,7 @@
 namespace App\Helper;
 
 use App\Module;
+use App\PermissionType;
 use App\UserHasPermission;
 use Illuminate\Support\Facades\Auth;
 
@@ -51,12 +52,12 @@ class ACLHelper{
 
     public static function getPermissions($moduleIds){
         try{
+
             $webModules = Module::join('permissions','modules.id','=','permissions.module_id')
                 ->whereIn('modules.module_id',$moduleIds)
                 ->where('permissions.is_web',true)
                 ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
                 ->get();
-
             $mobileModules =  Module::join('permissions','modules.id','=','permissions.module_id')
                 ->whereIn('modules.module_id',$moduleIds)
                 ->where('permissions.is_mobile',true)

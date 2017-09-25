@@ -132,14 +132,16 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3" style="margin-left: 26%">
-                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
-                                                </div>
-                                            </div>
-                                            <table id="aclTable">
+
+                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="aclTable">
+
 
                                             </table>
+                                            <div class="form-actions noborder row">
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                </div>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>

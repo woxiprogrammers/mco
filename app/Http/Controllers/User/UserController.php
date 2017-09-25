@@ -10,6 +10,7 @@ use App\Module;
 use App\Role;
 use App\RoleHasPermission;
 use App\User;
+use App\UserHasPermission;
 use App\UserHasRole;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -49,6 +50,40 @@ class UserController extends Controller
             $userHasRoleData['role_id'] = $request->role_id;
             $userHasRoleData['user_id'] = $user->id;
             UserHasRole::create($userHasRoleData);
+            if($request->has('web_permissions')){
+                $userPermissionData = array();
+                $userPermissionData['user_id'] = $user->id;
+                $web_permissions=$request->web_permissions;
+                foreach ($web_permissions as $permissions){
+                    $userPermissionData['is_web'] = true;
+                    $userPermissionData['permission_id'] = $permissions;
+                    $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
+                    if($check != null){
+                        UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->update(['is_web'=>true]);
+                    }
+                    else{
+                        UserHasPermission::create($userPermissionData);
+                    }
+                }
+            }
+            if($request->has('mobile_permissions')){
+                $userPermissionData = array();
+                $userPermissionData['user_id'] = $user->id;
+                $mobile_permissions=$request->mobile_permissions;
+                foreach ($mobile_permissions as $permissions){
+                    $userPermissionData['is_mobile'] = true;
+                    $userPermissionData['permission_id'] = $permissions;
+                    $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
+                    if($check != null){
+                        UserHasPermission::where('user_id',$user->id)->update(['is_mobile' => true]);
+                    }
+                    else{
+                        UserHasPermission::create($userPermissionData);
+                    }
+                }
+            }
+
+
             $request->session()->flash('success', 'User created successfully');
             return redirect('/user/create');
         }catch(\Exception $e){
@@ -64,8 +99,34 @@ class UserController extends Controller
 
     public function getEditView(Request $request,$user){
         try{
-            $roles = Role::get()->toArray();
-            return view('user.edit')->with(compact('user','roles'));
+            $subModuleIds = UserHasPermission::join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                ->join('modules','modules.id','=','permissions.module_id')
+                ->where('user_has_permissions.user_id',$user->id)
+                ->orderBy('modules.id','asc')
+                ->select('modules.id as module_id')
+                ->distinct()
+                ->get()->toArray();
+            if(count($subModuleIds) > 0){
+                $subModuleIds = array_column($subModuleIds,'module_id');
+                $moduleIds = Module::whereIn('id',$subModuleIds)->select('module_id')->distinct()->get()->toArray();
+                $moduleIds = array_column($moduleIds,'module_id');
+                $data = ACLHelper::getPermissions($moduleIds);
+                $userWebPermissions = UserHasPermission::where('user_id',$user->id)->where('is_web', true)->pluck('permission_id')->toArray();
+                $userMobilePermissions = UserHasPermission::where('user_id',$user->id)->where('is_mobile', true)->pluck('permission_id')->toArray();
+                $webModuleResponse = $data['webModuleResponse'];
+                $permissionTypes = $data['permissionTypes'];
+                $mobileModuleResponse = $data['mobileModuleResponse'];
+                $showAclTable = true;
+            }else{
+                $moduleIds = array();
+                $webModuleResponse = array();
+                $mobileModuleResponse = array();
+                $permissionTypes = array();
+                $userMobilePermissions = array();
+                $userWebPermissions = array();
+                $showAclTable = false;
+            }
+            return view('user.edit')->with(compact('user','roles','userWebPermissions','userMobilePermissions','webModuleResponse','mobileModuleResponse','showAclTable','permissionTypes'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get user edit view",
@@ -79,11 +140,49 @@ class UserController extends Controller
 
     public function editUser(UserRequest $request, $user){
         try{
-            $data = $request->except('role_id');
+            $data = $request->except('role_id','web_permissions','mobile_permissions');
             $user->update($data);
-            $userHasRoleData = array();
-            $userHasRoleData['role_id'] = $request->role_id;
-            UserHasRole::where('user_id', $user->id)->update($userHasRoleData);
+            if($request->has('web_permissions')){
+                $userPermissionData = array();
+                $userPermissionData['user_id'] = $user->id;
+                $web_permissions = $request->web_permissions;
+                foreach ($web_permissions as $permissions){
+                    $userPermissionData['is_web'] = true;
+                    $userPermissionData['is_mobile'] = false;
+                    $userPermissionData['permission_id'] = $permissions;
+                    $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
+                    if($check != null){
+                        UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->update(['is_web'=>true]);
+                    }
+                    else{
+                        UserHasPermission::create($userPermissionData);
+                    }
+                }
+            }else{
+                $web_permissions = array();
+            }
+            if($request->has('mobile_permissions')){
+                $userPermissionData = array();
+                $userPermissionData['user_id'] = $user->id;
+                $mobile_permissions = $request->mobile_permissions;
+                foreach ($mobile_permissions as $permissions){
+                    $userPermissionData['is_mobile'] = true;
+                    $userPermissionData['permission_id'] = $permissions;
+                    $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
+                    if($check != null){
+                        UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->update(['is_mobile' => true]);
+                    }
+                    else{
+                        UserHasPermission::create($userPermissionData);
+                    }
+                }
+            }else{
+                $mobile_permissions = array();
+            }
+            $deletedPermissions = UserHasPermission::where('user_id',$user->id)->whereNotIn('permission_id',$web_permissions)->whereNotIn('permission_id',$mobile_permissions)->get();
+            foreach($deletedPermissions as $deletedPermission){
+                $deletedPermission->delete();
+            }
             $request->session()->flash('success', 'User Edited successfully.');
             return redirect('/user/edit/'.$user->id);
         }catch(\Exception $e){
