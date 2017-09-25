@@ -244,6 +244,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('get-clients',array('uses'=> 'User\PurchaseController@getClientsList'));
             Route::post('get-users',array('uses'=> 'User\PurchaseController@getUsersList'));
             Route::post('create',array('uses'=> 'User\PurchaseController@createMaterialList'));
+            Route::post('material-requestWise-listing',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListing'));
+            Route::get('material-requestWise-listing-view',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListingView'));
 
         });
         Route::group(['prefix' => 'purchase-request'], function(){

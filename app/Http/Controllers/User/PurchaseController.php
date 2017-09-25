@@ -37,27 +37,54 @@ class PurchaseController extends Controller
   public function getCreateView(Request $request){
         return view('purchase/material-request/create');
   }
+  public function getMaterialRequestIDFormat($project_site_id,$created_at,$serial_no){
+        $format = "MR".$project_site_id.date_format($created_at,'y').date_format($created_at,'m').date_format($created_at,'d').$serial_no;
+        return $format;
+  }
   public function getMaterialRequestListing(Request $request){
       try{
-          $userData = User::orderBy('id','asc')->get()->toArray();
-          $iTotalRecords = count($userData);
+          $materialRequests = MaterialRequests::get();
+          $materialRequestList = array();
+          $iterator = 0;
+          foreach($materialRequests as $key => $materialRequest){
+              foreach($materialRequest->materialRequestComponents as $key => $materialRequestComponents){
+                  $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponents->id;
+                  $materialRequestList[$iterator]['name'] = $materialRequestComponents->name;
+                  $materialRequestList[$iterator]['quantity'] = $materialRequestComponents->quantity;
+                  $materialRequestList[$iterator]['unit_id'] = $materialRequestComponents->unit_id;
+                  $materialRequestList[$iterator]['unit'] = $materialRequestComponents->unit->name;
+                  $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponents->component_type_id;
+                  $materialRequestList[$iterator]['component_type'] = $materialRequestComponents->materialRequestComponentTypes->name;
+                  $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponents->component_status_id;
+                  $materialRequestList[$iterator]['component_status'] = $materialRequestComponents->purchaseRequestComponentStatuses->name;
+                  $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
+                  $pro = $materialRequest->projectSite->project;
+                  $materialRequestList[$iterator]['project_name'] =$pro->name;
+                  $materialRequestList[$iterator]['client_name'] =$pro->client->company;
+                  $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
+                  $rm_id=2;
+                  $materialRequestList[$iterator]['rm_id'] = $this->getMaterialRequestIDFormat($materialRequest['project_site_id'],$materialRequest['created_at'], $rm_id=2);
+                  $iterator++;
+              }
+          }
+          $iTotalRecords = count($materialRequestList);
           $records = array();
           $iterator = 0;
-          for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($userData); $iterator++,$pagination++ ){
-              if($userData[$pagination]['is_active'] == true){
-                  $user_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+          for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+              if($materialRequestList[$pagination]['component_status'] == "pending"){
+                  $user_status = '<td><span class="label label-sm label-danger">'. $materialRequestList[$pagination]['component_status'].' </span></td>';
                   $status = 'Disable';
               }else{
-                  $user_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                  $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status'].'</span></td>';
                   $status = 'Enable';
               }
               $records['data'][$iterator] = [
                   '<input type="checkbox">',
-                  '1',
-                  '<span><a href="#" data-toggle="tooltip" title="abbabbabababa"><i class="fa fa-info-circle" aria-hidden="true"></i> </a>&nbsp;&nbsp;'.$userData[$pagination]['first_name'].' '.$userData[$pagination]['last_name'].'</span>' ,
-                  $userData[$pagination]['email'],
-                   '<span><a href="#" data-toggle="tooltip" title="Hooray!"><i class="fa fa-info-circle" aria-hidden="true"></i></a> &nbsp;&nbsp;'. $userData[$pagination]['mobile'].'</span>',
-                  date('d M Y',strtotime($userData[$pagination]['created_at'])),
+                  $materialRequestList[$pagination]['material_request_component_id'],
+                  $materialRequestList[$pagination]['name'],
+                  $materialRequestList[$pagination]['client_name'],
+                  $materialRequestList[$pagination]['project_name'],
+                  $materialRequestList[$pagination]['rm_id'],
                   $user_status,
                   '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -66,7 +93,7 @@ class PurchaseController extends Controller
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                         <li>
-                                <a href="/purchase/material-request/edit">
+                                <a href="/purchase/material-request/edit/">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
@@ -83,16 +110,12 @@ class PurchaseController extends Controller
       }catch(\Exception $e){
           $records = array();
           $data = [
-              'action' => 'User listing',
+              'action' => 'Material Request listing',
               'params' => $request->all(),
               'exception'=> $e->getMessage()
           ];
-          Log::critical(json_encode($data));
-          abort(500);
       }
-
       return response()->json($records,200);
-
   }
     public function editMaterialRequest(Request $request){
         return view('purchase/material-request/edit');
@@ -278,11 +301,69 @@ class PurchaseController extends Controller
               $request->session()->flash('success', 'Material request created successfully.');
               return redirect('purchase/material-request/create');
           }catch(Exception $e){
-
+                 dd($e->getMessage());
           }
 
+    }
+    public function getMaterialRequestWiseListing(Request $request){
+          try{
+              $materialRequests = MaterialRequests::get();
+              $materialRequestList = array();
+              $iterator = 0;
+              foreach($materialRequests as $key => $materialRequest){
+                  foreach($materialRequest->materialRequestComponents as $key => $materialRequestComponents){
+                      $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
+                      $pro = $materialRequest->projectSite->project;
+                      $materialRequestList[$iterator]['project_name'] =$pro->name;
+                      $materialRequestList[$iterator]['client_name'] =$pro->client->company;
+                      $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
+                      $rm_id=2;
+                      $materialRequestList[$iterator]['rm_id'] = $this->getMaterialRequestIDFormat($materialRequest['project_site_id'],$materialRequest['created_at'], $rm_id=2);
+                      $iterator++;
+                  }
+              }
+              $iTotalRecords = count($materialRequestList);
+              $records = array();
+              $iterator = 0;
+              for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+                  $records['data'][$iterator] = [
+                      '<input type="checkbox">',
+                      $materialRequestList[$pagination]['rm_id'],
+                      $materialRequestList[$pagination]['client_name'],
+                      $materialRequestList[$pagination]['project_name'],
+                      '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                        <li>
+                                <a href="/purchase/material-request/edit/">
+                                    <i class="icon-docs"></i> Edit </a>
+                            </li>
+                            <li>
+                                <a data-toggle="modal" data-target="#remarkModal">
+                                    <i class="icon-tag"></i> Approve / Disapprove </a>
+                            </li>
+                        </ul>
+                    </div>'
+                  ];
+              }
+              $records["draw"] = intval($request->draw);
+              $records["recordsTotal"] = $iTotalRecords;
+              $records["recordsFiltered"] = $iTotalRecords;
 
-
-
+          }catch(\Exception $e){
+              $records = array();
+              $data = [
+                  'action' => 'Material Request listing',
+                  'params' => $request->all(),
+                  'exception'=> $e->getMessage()
+              ];
+          }
+        return response()->json($records,200);
+    }
+    public function getMaterialRequestWiseListingView(){
+        return view ('purchase/material-request/material-request-listing');
     }
 }

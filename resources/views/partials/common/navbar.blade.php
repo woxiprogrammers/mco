@@ -208,7 +208,7 @@
                                 </a>
                             </li>
                         @endif
-                       <!-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Purchase
                                 <span class="arrow"></span>
                             </a>
