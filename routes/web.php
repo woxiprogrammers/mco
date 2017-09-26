@@ -25,6 +25,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-mobile',array('uses' => 'User\UserController@checkMobile'));
         Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
         Route::get('get-route-acls/{roleId}',array('uses' => 'User\UserController@getRoleAcls'));
+        Route::group(['prefix' => 'project-site'],function(){
+            Route::get('auto-suggest/{keyword}',array('uses' => 'User\UserController@projectSiteAutoSuggest'));
+            Route::post('assign/{user}',array('uses' => 'User\UserController@assignProjectSites'));
+        });
     });
 
     Route::group(['prefix' => 'client'],function (){
