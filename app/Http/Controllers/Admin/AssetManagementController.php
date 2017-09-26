@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\AssetManagement;
+use App\Asset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
@@ -41,6 +41,7 @@ class AssetManagementController extends Controller
 
     public function createAsset(Request $request){
         try{
+//            dd($request->all());
                 $data = Array();
                 $data['name'] = $request->name;
                 $data['model_number'] = $request->model_number;
@@ -49,11 +50,10 @@ class AssetManagementController extends Controller
                 $data['is_fuel_dependent'] = $request->is_fuel_dependent;
                 $data['litre_per_unit'] = $request->litre_per_unit;
                 $data['is_active'] = false;
-                $asset = AssetManagement::create($data);
-                $imageUpload = $this->uploadTempAssetImages();
-                $user = Auth::user();
+//                $asset = Asset::create($data);
+                $work_order_images = $request->work_order_images;
 
-            $assetDirectoryName = sha1($user->id);
+            $assetDirectoryName = sha1($asset->id);
             $tempUploadPath = public_path() . env('ASSET_IMAGE_UPLOAD');
             $tempImageUploadPath = $tempUploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
             Log::info($tempImageUploadPath);
@@ -65,9 +65,18 @@ class AssetManagementController extends Controller
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
             }
             $extension = $request->file('file')->getClientOriginalExtension();
-            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                foreach ($work_order_images as $images){
+//                    dd($images);
+                    $imageNames = $images['image_name'];
 
-            Storage::move();
+                }
+            dd($imageNames);
+
+
+
+//            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+
+//            Storage::move(,$filename);
 
 
             $path = env('ASSET_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
@@ -138,13 +147,14 @@ class AssetManagementController extends Controller
             }
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $oldFileName = $filename;
             $request->file('file')->move($tempImageUploadPath,$filename);
-            $filenameArray = Array();
             $path = env('ASSET_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
-                'path' => $path
+                'path' => $path,
+                'oldFileName' => $oldFileName
             ];
         }catch (\Exception $e){
             $response = [
@@ -162,9 +172,9 @@ class AssetManagementController extends Controller
     public function assetListing(Request $request){
                     try{
                         if($request->has('search_name')){
-                            $assetData = AssetManagement::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
+                            $assetData = Asset::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
                         }else{
-                            $assetData = AssetManagement::orderBy('id','asc')->get()->toArray();
+                            $assetData = Asset::orderBy('id','asc')->get()->toArray();
                         }
                         $iTotalRecords = count($assetData);
                         $records = array();
@@ -261,9 +271,9 @@ class AssetManagementController extends Controller
         try{
             $assetName = $request->name;
             if($request->has('id')){
-                $nameCount = AssetManagement::where('name','ilike',$assetName)->where('id','!=',$request->id)->count();
+                $nameCount = Asset::where('name','ilike',$assetName)->where('id','!=',$request->id)->count();
             }else{
-                $nameCount = AssetManagement::where('name','ilike',$assetName)->count();
+                $nameCount = Asset::where('name','ilike',$assetName)->count();
             }
             if($nameCount > 0){
                 return 'false';
