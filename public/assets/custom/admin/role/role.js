@@ -1,6 +1,6 @@
-var  CreateUser = function () {
+var  CreateRole = function () {
     var handleCreate = function() {
-        var form = $('#create-user');
+        var form = $('#create-role');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -8,68 +8,27 @@ var  CreateUser = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                first_name: {
-                    required: true
-                },
-                last_name: {
-                    required: true
-                },
-                email: {
+                name: {
                     required: true,
-                    email: true
-                },
-                mobile: {
-                    required: true,
-                    digits: true,
-                    maxlength: 10,
-                    minlength: 10,
                     remote: {
-                        url: "/user/check-mobile",
+                        url: "/role/check-name",
                         type: "POST",
                         data: {
-                            _token: function() {
+                            _token: function(){
                                 return $("input[name='_token']").val();
                             },
-                            mobile: function() {
-                                return $( "#mobile" ).val();
+                            name: function() {
+                                return $( "#name" ).val();
                             }
                         }
                     }
-                },
-                password: {
-                    required: true,
-                    minlength: 6,
-                    maxlength:20
-                },
-                confirm_password: {
-                    required: true,
-                    minlength: 6,
-                    maxlength:20,
-                    equalTo: "#password"
                 }
             },
 
             messages: {
-                first_name: {
-                    required: "First name is required."
-                },
-                last_name: {
-                    required: "Last name is required."
-                },
-                email: {
-                    required: "Email is required."
-                },
-                mobile: {
-                    required: "Contact number is required.",
-                    digits: "Only numbers are valid.",
-                    remote: 'This mobile is registered already'
-                },
-                password:{
-                  required: "Password is required"
-                },
-                confirm_password: {
-                    required: "Confirm password is required.",
-                    equalTo: "Please re-enter the same password again."
+                name: {
+                    required: "Name is required.",
+                    remote: "Name already exists."
                 }
             },
 
@@ -94,6 +53,7 @@ var  CreateUser = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -108,9 +68,11 @@ var  CreateUser = function () {
     };
 }();
 
-var  EditUser = function () {
+
+
+var  EditRole = function () {
     var handleEdit = function() {
-        var form = $('#edit-user');
+        var form = $('#edit-role');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -118,46 +80,30 @@ var  EditUser = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                first_name: {
-                    required: true
-                },
-                last_name: {
-                    required: true
-                },
-                mobile: {
+                name: {
                     required: true,
-                    digits: true,
-                    maxlength: 10,
-                    minlength: 10,
                     remote: {
-                        url: "/user/check-mobile",
+                        url: "/role/check-name",
                         type: "POST",
                         data: {
-                            _token: function() {
+                            role_id: function(){
+                                return $("#role_id").val();
+                            },
+                            _token: function(){
                                 return $("input[name='_token']").val();
                             },
-                            mobile: function() {
-                                return $( "#mobile" ).val();
-                            },
-                            user_id: function(){
-                                return $("#user_id").val();
+                            name: function() {
+                                return $( "#name" ).val();
                             }
+
                         }
                     }
                 }
             },
 
             messages: {
-                first_name: {
-                    required: "First name is required."
-                },
-                last_name: {
-                    required: "Last name is required."
-                },
-                mobile: {
-                    required: "Contact number is required.",
-                    digits: "Only numbers are valid.",
-                    remote: 'This mobile is registered already with other user'
+                name: {
+                    required: "Name is required."
                 }
             },
 
@@ -182,6 +128,7 @@ var  EditUser = function () {
             },
 
             submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
                 success.show();
                 error.hide();
                 form.submit();
@@ -195,3 +142,64 @@ var  EditUser = function () {
         }
     };
 }();
+
+function getModules(role) {
+    $.ajax({
+        url: '/role/get-modules/' + role,
+        type: 'GET',
+        async: false,
+        success: function (data, textStatus, xhr) {
+            if (xhr.status == 200) {
+                $("#material_id").html(data);
+                $("#roleModulesTable input[type='number']").each(function () {
+                    $(this).rules('add', {
+                        required: true
+                    });
+                });
+
+            } else {
+
+            }
+        },
+        error: function (errorStatus, xhr) {
+
+        }
+    });
+}
+
+$("#next_btn").on('click',function(){
+    if($("#module_id input:checkbox:checked").length > 0){
+        getSubModules();
+        $(".submodules-table-div").show();
+    }
+});
+
+function getSubModules() {
+    var module_id = [];
+    var formData = {};
+    formData['_token'] = $("input[name='_token']").val();
+    $("#module_id input:checkbox:checked").each(function(i){
+        module_id[i] = $(this).val();
+    });
+    formData['module_id'] = module_id;
+    var url = window.location.href;
+    if(url.indexOf("edit") > 0){
+        formData['role_id'] = $("#role_id").val();
+    }
+    $.ajax({
+        type: "POST",
+        url: "/role/module/listing",
+        data :formData,
+        async: false,
+
+        success: function(data,textStatus, xhr){
+            $("#SubModulesTable").html(data);
+        },
+        error : function(errorStatus, xhr){
+            alert('error');
+        }
+    });
+}
+
+
+

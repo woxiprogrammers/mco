@@ -65,10 +65,14 @@ var  CreateVendor = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
-                $("button[type='submit']").prop('disabled', true);
-                success.show();
-                error.hide();
-                form.submit();
+                if($(".cities:checkbox:checked").length > 0) {
+                    $("button[type='submit']").prop('disabled', true);
+                    success.show();
+                    error.hide();
+                    form.submit();
+                }else{
+                    alert('please select atleast one city');
+                }
             }
         });
     }
@@ -161,53 +165,10 @@ var  EditVendor = function () {
 };
 
 
-function getMaterials(category){
-    $.ajax({
-        url: '/vendors/get-materials/'+category,
-        type: 'GET',
-        async: false,
-        success: function(data, textStatus, xhr){
-            if(xhr.status == 200){
-                $("#material_id").html(data);
-                $("#productMaterialTable input[type='number']").each(function(){
-                    $(this).rules('add',{
-                        required: true
-                    });
-                });
 
-            }else{
-
-            }
-        },
-        error: function(errorStatus,xhr){
-
-        }
-    });
-}
 
 $(document).ready(function() {
 
-    $("#category_name").on('change', function () {
-        if (!($("#materials-table-div").is(':visible'))) {
-            $("#productMaterialTable tr").each(function () {
-                $(this).remove();
-            });
-            $(".materials-table-div").hide();
-        }
-        getMaterials($("#category_name").val());
-    });
 
-    $("#next").on('click', function(){
-       var selectMaterialIds = [];
-       $("#material_id input:checkbox:checked").each(function () {
-            selectMaterialIds.push($(this).val());
-       });
-        var selectCityIds = [];
-        $("#cityList input:checkbox:checked").each(function () {
-            selectCityIds.push($(this).val());
-        });
-
-       console.log();
-    });
 });
 

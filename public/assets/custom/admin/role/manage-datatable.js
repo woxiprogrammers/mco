@@ -1,8 +1,10 @@
-var CheckListListing = function () {
+var RoleListing = function () {
     var handleOrders = function () {
+
         var grid = new Datatable();
+
         grid.init({
-            src: $("#checkListTable"),
+            src: $("#roleTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -22,13 +24,14 @@ var CheckListListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/check-list/listing", // ajax source
+                    "url": "/role/listing", // ajax source
                 },
                 "order": [
                     [1, "asc"]
                 ] // set first column as a default sort by asc
             }
         });
+
         // handle group actionsubmit button click
         grid.getTableWrapper().on('click', '.table-group-action-submit', function (e) {
             e.preventDefault();
@@ -57,15 +60,20 @@ var CheckListListing = function () {
                 });
             }
         });
+
     }
+
     return {
 
         //main function to initiate the module
         init: function () {
             handleOrders();
         }
+
     };
+
 }();
+
 jQuery(document).ready(function() {
-    CheckListListing.init();
+    RoleListing.init();
 });

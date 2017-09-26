@@ -22,7 +22,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::put('edit/{user}',array('uses' => 'User\UserController@editUser'));
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
         Route::post('listing',array('uses' => 'User\UserController@userListing'));
+        Route::post('check-mobile',array('uses' => 'User\UserController@checkMobile'));
         Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
+        Route::get('get-route-acls/{roleId}',array('uses' => 'User\UserController@getRoleAcls'));
     });
 
     Route::group(['prefix' => 'client'],function (){
@@ -44,6 +46,18 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('listing',array('uses' => 'Admin\CategoryController@categoryListing'));
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
         Route::post('check-name',array('uses' => 'Admin\CategoryController@checkCategoryName'));
+    });
+    Route::group(['prefix' => 'role'],function() {
+        Route::get('create', array('uses' => 'Admin\RoleController@getCreateView'));
+        Route::post('create', array('uses' => 'Admin\RoleController@createRole'));
+        Route::get('edit/{role}', array('uses' => 'Admin\RoleController@getEditView'));
+        Route::post('edit/{role}', array('uses' => 'Admin\RoleController@editRole'));
+        Route::get('manage', array('uses' => 'Admin\RoleController@getManageView'));
+        Route::get('get-module/{role}',array('uses' => 'Admin\RoleController@getModules'));
+        Route::post('module/listing',array('uses' => 'Admin\RoleController@getSubModules'));
+        Route::post('listing', array('uses' => 'Admin\RoleController@roleListing'));
+        Route::get('change-status/{role}', array('uses' => 'Admin\RoleController@changeRoleStatus'));
+        Route::post('check-name', array('uses' => 'Admin\RoleController@checkRoleName'));
     });
     Route::group(['prefix' => 'extra-item'],function(){
         Route::get('create',array('uses' => 'Admin\ExtraItemController@getCreateView'));
@@ -205,11 +219,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
     });
 
-    Route::group(['prefix' => 'checkList'],function(){
-        Route::get('manage',array('uses' => 'CheckList\ChecklistController@getManageView'));
-        Route::get('create',array('uses' => 'CheckList\ChecklistController@getCreateView'));
-    });
-
     Route::group(['prefix' => 'project'], function(){
         Route::get('create',array('uses'=> 'Admin\ProjectController@getCreateView'));
         Route::post('create',array('uses'=> 'Admin\ProjectController@createProject'));
@@ -264,7 +273,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\VendorController@autoSuggest'));
-
     });
 
     Route::group(['prefix'=>'bank'],function() {

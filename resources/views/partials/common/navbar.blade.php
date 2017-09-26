@@ -144,6 +144,12 @@
                                                     <i class="fa fa-sitemap"></i> Manage Vendors
                                                 </a>
                                             </li>
+                                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                                <a href="/role/manage">
+                                                    <i class="fa fa-users"></i> Manage Roles
+                                                    <span class="arrow"></span>
+                                                </a>
+                                            </li>
                                             <li aria-haspopup="true">
                                                 <a href="/user/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Users
@@ -176,14 +182,20 @@
                                         @endif
                                     </ul>
                                 </li>
+<<<<<<< HEAD
                                 <li aria-haspopup="true"  >
+=======
+                                <li  aria-haspopup="true">
+>>>>>>> develop
                                     <a href="/bank/manage">
                                         <i class="fa fa-folder"></i> Manage Bank
-                                    </a>
                                     </a>
                                 </li>
                                 </ul>
                             </li>
+
+
+                    @endif
                         <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
                         @if($hasStructurePermission)
                             <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -200,7 +212,11 @@
                                 </a>
                             </li>
                         @endif
+<<<<<<< HEAD
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+=======
+                       <!-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+>>>>>>> develop
                             <a> Purchase
                                 <span class="arrow"></span>
                             </a>
@@ -258,8 +274,8 @@
                                 </li>
                             </ul>
                         </li>
-                        @endif
-                        </ul>
+                    </ul>
+
                     </li>
             </div>
             <!-- END MEGA MENU -->
