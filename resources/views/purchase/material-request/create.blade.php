@@ -150,9 +150,6 @@
                                         </div>
                                     </div>
                                     <div class="modal-body" style="padding:40px 50px;">
-                                            <div class="checkbox">
-                                                <label><input type="checkbox" class="empty" id="diesel">Is it a diesel ?</label>
-                                            </div>
                                             <div class="form-group">
                                                 <input type="text" class="form-control empty" id="searchbox"  placeholder="Enter material name" >
 
@@ -206,10 +203,10 @@
                                             <div id="asset_suggesstion-box"></div>
                                         </div>
                                         <div class="form-group">
-                                            <input type="number" class="form-control empty" id="Assetqty" placeholder="Enter quantity">
+                                            <input type="number" class="form-control empty" id="Assetqty" value="1" readonly>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" class="form-control empty" id="AssetUnitsearchbox"  placeholder="Enter Unit" >
+                                            <input type="text" class="form-control empty" id="AssetUnitsearchbox"  value="Nos" readonly >
                                             <div id="asset_unit-suggesstion-box"></div>
                                         </div>
                                         <div class="form-group">
@@ -256,6 +253,8 @@
     $(document).ready(function(){
         var site_name = '';
         var search_in = '';
+        $( "#assetBtn" ).hide();
+        $( "#myBtn" ).hide();
         var iterator = parseInt(0);
         $('#iterator').val(iterator);
 
@@ -308,28 +307,6 @@
                 });
             }else{
                 $("#unit-suggesstion-box").hide();
-            }
-
-        });
-        $("#Assetsearchbox").keyup(function(){
-            if($(this).val().length > 0){
-                $.ajax({
-                    type: "POST",
-                    url: "/purchase/material-request/get-units",
-                    data:'keyword='+$(this).val(),
-                    beforeSend: function(){
-                        $.LoadingOverlay("hide");
-                        $("#unit-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
-                    },
-                    success: function(data){
-                        console.log(data);
-                        $("#asset_suggesstion-box").show();
-                        $("#asset_suggesstion-box").html(data);
-                        $("#AssetUnitsearchbox").css("background-color","#FFF");
-                    }
-                });
-            }else{
-                $("#asset_suggesstion-box").hide();
             }
         });
     });
@@ -423,17 +400,72 @@
 </script>
 <script>
     function selectProject(nameProject,id) {
-        var search_in = 'material';
+        $( "#assetBtn" ).show();
+        $( "#myBtn" ).show();
+        var search_in = 'asset';
         var site_name = nameProject;
         var project_site_id = id;
         $('#project_side_id').val(project_site_id);
         $("#projectSearchbox").val(nameProject);
         $("#project-suggesstion-box").hide();
+        var assetList = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                url: '/purchase/material-request/get-items?site='+site_name+'&search_in='+search_in+'&keyword=%QUERY',
+                filter: function(x) {
+                    if($(window).width()<420){
+                        $("#header").addClass("fixed");
+                    }
+                    return $.map(x, function (data) {
+                        return {
+                            name:data.asset_name,
+                            unit:data.asset_unit,
+                            component_type_id:data.material_request_component_type_id,
+                        };
+                    });
+                },
+                wildcard: "%QUERY"
+            }
+        });
+        $('#Assetsearchbox').addClass('assetTypeahead');
+        assetList.initialize();
+        $('.assetTypeahead').typeahead(null, {
+            displayKey: 'name',
+            engine: Handlebars,
+            source: assetList.ttAdapter(),
+            limit: 30,
+            templates: {
+                empty: [
+                    '<div class="empty-suggest">',
+                    'Unable to find any Result that match the current query',
+                    '</div>'
+                ].join('\n'),
+                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+            },
+        }).on('typeahead:selected', function (obj, datum) {
+            var POData = datum.unit;
+            var componentTypeId = datum.component_type_id;
+            $('#component_id').val(componentTypeId);
+            var options = '';
+            $.each( POData, function( key, value ) {
+                var unitId = value.unit_id;
+                var unitName = value.unit_name;
+                options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
+            });
+            $('#unitDrpdn').html('');
+            var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
+            $('#unitDrpdn').append(str1);
+            $('#component_type_id').val();
+        })
+            .on('typeahead:open', function (obj, datum) {
+            });
+        var search_in = 'material';
         var materialList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             remote: {
-                url: '/purchase/material-request/get-materials?site='+site_name+'&search_in='+search_in+'&keyword=%QUERY',
+                url: '/purchase/material-request/get-items?site='+site_name+'&search_in='+search_in+'&keyword=%QUERY',
                 filter: function(x) {
                     if($(window).width()<420){
                         $("#header").addClass("fixed");
@@ -443,16 +475,12 @@
                             name:data.material_name,
                             unit:data.unit_quantity,
                             component_type_id:data.material_request_component_type_id,
-                           // unit_id:data.unit_id,
-                          //  unit:data.unit,
-                            //rate_per_unit:data.rate_per_unit
                         };
                     });
                 },
                 wildcard: "%QUERY"
             }
         });
-        $('#searchbox').keyup(function(){
             $('#searchbox').addClass('typeahead');
             materialList.initialize();
             $('.typeahead').typeahead(null, {
@@ -479,27 +507,13 @@
 
                     options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
                            });
-                  var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
+                  $('#unitDrpdn').html('');
+                var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
                   $('#unitDrpdn').append(str1);
-                //var componentTypeId = material_request_component_type_id;
-                $('#component_type_id').val();
-
-                /*POData.name = POData.name.replace(/\&/g,'%26');
-                $("#rate_per_unit").val(POData.rate_per_unit);
-                $("#rate_per_unit").prop('disabled', true);
-                $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
-                $("#unit").prop('disabled', true);
-                $("#name").val(POData.name);
-                $("#name").prop('disabled', true);
-                $("#create-material .form-body").append($("<input>", {'id': "material_id",
-                    'type': 'hidden',
-                    'value': POData.id,
-                    'name': "material_id"
-                }));*/
+                  $('#component_type_id').val();
             })
                 .on('typeahead:open', function (obj, datum) {
                 });
-        });
     }
 </script>
 <script>
@@ -511,19 +525,38 @@
 </script>
 <script>
     $('#createMaterial').click(function(){
-        alert("E");
+        $('#searchbox').html('');
+        $('#qty').html('');
+        $('#unitDrpdn').html('');
         var material_name = $('#searchbox').val();
         var quantity = $('#qty').val();
         var unit = $('#materialUnit').val();
         var componentTypeId = $('#component_id').val();
         var iterator = $('#iterator').val();
-        alert(iterator);
         var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unit+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
         var rows = '<tr>'+materials+'</tr>';
         $('#myModal').modal('hide');
         $('#Materialrows').append(rows);
         var iterator = parseInt(iterator) + 1;
-        alert(iterator);
+        $('#iterator').val(iterator);
+        $('#component_id').val(null);
+    })
+</script>
+<script>
+    $('#createAsset').click(function(){
+        $('#searchbox').html('');
+        $('#qty').html('');
+        $('#unitDrpdn').html('');
+        var asset_name = $('#Assetsearchbox').val();
+        var quantity = $('#Assetqty').val();
+        var unit = $('#AssetUnitsearchbox').val();
+        var componentTypeId = $('#component_id').val();
+        var iterator = $('#iterator').val();
+        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unit+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
+        var rows = '<tr>'+assets+'</tr>';
+        $('#myModal1').modal('hide');
+        $('#Assetrows').append(rows);
+        var iterator = parseInt(iterator) + 1;
         $('#iterator').val(iterator);
         $('#component_id').val(null);
     })
