@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\User;
-use App\Assets;
+use App\Asset;
 use App\Client;
 use App\Material;
 use App\MaterialRequestComponents;
@@ -219,7 +219,7 @@ class PurchaseController extends Controller
                     break;
                 case "asset" :
                     $assetList = array();
-                    $alreadyExistAsset = Assets::where('name','ilike','%'.$request['keyword'].'%')->get();
+                    $alreadyExistAsset = Asset::where('name','ilike','%'.$request['keyword'].'%')->get();
                     $assetUnit = Unit::where('slug','nos')->pluck('name')->first();
                     $systemAssetStatus = MaterialRequestComponentTypes::where('slug','system-asset')->first();
                     foreach ($alreadyExistAsset as $key => $asset){
