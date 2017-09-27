@@ -158,12 +158,8 @@ class AssetManagementController extends Controller
             $assetDirectoryName = sha1($user->id);
             $tempUploadPath = public_path() . env('ASSET_TEMP_IMAGE_UPLOAD');
             $tempImageUploadPath = $tempUploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
-            Log::info($tempImageUploadPath);
             /* Create Upload Directory If Not Exists */
-            Log::info('result of if');
-            Log::info(!file_exists($tempImageUploadPath));
             if (!file_exists($tempImageUploadPath)) {
-                Log::info('in if');
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
             }
             $extension = $request->file('file')->getClientOriginalExtension();
@@ -193,7 +189,7 @@ class AssetManagementController extends Controller
                         if($request->has('search_name')){
                             $assetData = Asset::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
                         }else{
-                            $assetData = Asset::orderBy('id','asc')->get()->toArray();
+                            $assetData = Asset::orderBy('id','a[sc')->get()->toArray();
                         }
                         $iTotalRecords = count($assetData);
                         $records = array();
