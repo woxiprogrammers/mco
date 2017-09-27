@@ -239,6 +239,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses'=> 'User\PurchaseController@getCreateView'));
             Route::post('listing',array('uses'=> 'User\PurchaseController@getMaterialRequestListing'));
             Route::get('edit',array('uses'=> 'User\PurchaseController@editMaterialRequest'));
+            Route::get('get-items',array('uses'=> 'User\PurchaseController@autoSuggest'));
+            Route::post('get-units',array('uses'=> 'User\PurchaseController@getUnitsList'));
+            Route::post('get-projects',array('uses'=> 'User\PurchaseController@getProjectsList'));
+            Route::post('get-clients',array('uses'=> 'User\PurchaseController@getClientsList'));
+            Route::post('get-users',array('uses'=> 'User\PurchaseController@getUsersList'));
+            Route::post('create',array('uses'=> 'User\PurchaseController@createMaterialList'));
+            Route::post('material-requestWise-listing',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListing'));
+            Route::get('material-requestWise-listing-view',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListingView'));
+
         });
         Route::group(['prefix' => 'purchase-request'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
