@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Asset;
+use App\AssetImage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
@@ -27,8 +28,13 @@ class AssetManagementController extends Controller
     public function getEditView(Request $request,$asset){
         try{
             $asset = $asset->toArray();
-            return view('admin.asset.edit')->with(compact('asset'));
-        }catch (Exception $e){
+            $assetId = $asset['id'];
+            $assetImages = AssetImage::where('asset_id',$assetId)->select('id','name')->get();
+            if($assetImages != null){
+                $assetImage = $this->getImagePath($assetId,$assetImages);
+            }
+            return view('admin.asset.edit')->with(compact('asset','assetImage'));
+        }catch (\Exception $e){
             $data = [
                 'action' => "Get asset edit view",
                 'params' => $request->all(),
@@ -41,54 +47,37 @@ class AssetManagementController extends Controller
 
     public function createAsset(Request $request){
         try{
-//            dd($request->all());
-                $data = Array();
-                $data['name'] = $request->name;
-                $data['model_number'] = $request->model_number;
-                $data['expiry_date'] = $request->expiry_date;
-                $data['price'] = $request->price;
-                $data['is_fuel_dependent'] = $request->is_fuel_dependent;
-                $data['litre_per_unit'] = $request->litre_per_unit;
-                $data['is_active'] = false;
-//                $asset = Asset::create($data);
-                $work_order_images = $request->work_order_images;
-
-            $assetDirectoryName = sha1($asset->id);
-            $tempUploadPath = public_path() . env('ASSET_IMAGE_UPLOAD');
-            $tempImageUploadPath = $tempUploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
-            Log::info($tempImageUploadPath);
-            /* Create Upload Directory If Not Exists */
-            Log::info('result of if');
-            Log::info(!file_exists($tempImageUploadPath));
-            if (!file_exists($tempImageUploadPath)) {
-                Log::info('in if');
-                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            $data = Array();
+            $data['name'] = $request->name;
+            $data['model_number'] = $request->model_number;
+            $data['expiry_date'] = $request->expiry_date;
+            $data['price'] = $request->price;
+            $data['is_fuel_dependent'] = $request->is_fuel_dependent;
+            $data['litre_per_unit'] = $request->litre_per_unit;
+            $data['is_active'] = false;
+            $asset = Asset::create($data);
+            $assetId = $asset['id'];
+            $work_order_images = $request->work_order_images;
+            $assetDirectoryName = sha1($assetId);
+            $UploadPath = public_path() . env('ASSET_IMAGE_UPLOAD');
+            $ImageUploadPath = $UploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+            if (!file_exists($ImageUploadPath)) {
+                File::makeDirectory($ImageUploadPath, $mode = 0777, true, true);
             }
-            $extension = $request->file('file')->getClientOriginalExtension();
-                foreach ($work_order_images as $images){
-//                    dd($images);
-                    $imageNames = $images['image_name'];
-
-                }
-            dd($imageNames);
-
-
-
-//            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-
-//            Storage::move(,$filename);
-
-
-            $path = env('ASSET_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
-            $response = [
-                'jsonrpc' => '2.0',
-                'result' => 'OK',
-                'path' => $path
-            ];
-                $request->session()->flash('success', 'Asset Created successfully.');
-
-                return redirect('/asset/create');
-
+            foreach ($work_order_images as $images){
+                    $imagePath = $images['image_name'];
+                    $imageName = explode("/",$imagePath);
+                    $filename = $imageName[4];
+                    $data = Array();
+                    $data['name'] = $filename;
+                    $data['asset_id'] = $assetId;
+                    AssetImage::create($data);
+                    $oldFilePath = public_path().$imagePath;
+                    $newFilePath = public_path().env('ASSET_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
+                    File::move($oldFilePath, $newFilePath);
+            }
+            $request->session()->flash('success', 'Asset Created successfully.');
+            return redirect('/asset/create');
         }catch (\Exception $e){
             $data = [
                 'action' => 'Create Asset',
@@ -112,6 +101,45 @@ class AssetManagementController extends Controller
             $assetData['is_fuel_dependent'] = $data['is_fuel_dependent'];
             $assetData['litre_per_unit'] = $data['litre_per_unit'];
             $asset->update($assetData);
+
+            $assetId = $asset->id;
+            $work_order_images = $request->work_order_images;
+            $assetDirectoryName = sha1($assetId);
+            if($work_order_images != null) {
+                foreach ($work_order_images as $images) {
+                    $imagePath = $images['image_name'];
+                    $imageName = explode("/", $imagePath);
+                    $filename = $imageName[4];
+                    $data = Array();
+                    $data['name'] = $filename;
+                    $data['asset_id'] = $assetId;
+                    AssetImage::create($data);
+                    $oldFilePath = public_path() . $imagePath;
+                    $newFilePath = public_path() . env('ASSET_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $assetDirectoryName . DIRECTORY_SEPARATOR . $filename;
+                    File::move($oldFilePath, $newFilePath);
+                }
+            }
+
+            $assetImages = $request->asset_images;
+            if($work_order_images != null && $assetImages != null){
+                $existingImages = array_column(array_merge($work_order_images,$assetImages),"image_name");
+            }elseif($work_order_images != null){
+               $existingImages = array_column($work_order_images,"image_name");
+            }else{
+                $existingImages = array_column($assetImages,"image_name");
+            }
+            $filename = Array();
+            if($existingImages != null) {
+                foreach ($existingImages as $images) {
+                    $imagePath = $images;
+                    $imageName = explode("/", $imagePath);
+                    $filename[] = end($imageName);
+                }
+            }
+            $deletedAssetImages = AssetImage::where('asset_id',$assetId)->whereNotIn('name',$filename)->get();
+            foreach($deletedAssetImages as $images){
+                $images->delete();
+            }
             $request->session()->flash('success', 'Asset Edited successfully.');
             return redirect('/asset/edit/'.$asset->id);
         }catch (Exception $e){
@@ -129,11 +157,7 @@ class AssetManagementController extends Controller
 
     public function uploadTempAssetImages(Request $request){
         try {
-           // dd($request);
-//            Log::info($request);
-//            $assetDirectoryName = sha1($assetId);
             $user = Auth::user();
-//            dd($user);
             $assetDirectoryName = sha1($user->id);
             $tempUploadPath = public_path() . env('ASSET_TEMP_IMAGE_UPLOAD');
             $tempImageUploadPath = $tempUploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
@@ -147,14 +171,12 @@ class AssetManagementController extends Controller
             }
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-            $oldFileName = $filename;
             $request->file('file')->move($tempImageUploadPath,$filename);
             $path = env('ASSET_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
                 'path' => $path,
-                'oldFileName' => $oldFileName
             ];
         }catch (\Exception $e){
             $response = [
@@ -174,7 +196,7 @@ class AssetManagementController extends Controller
                         if($request->has('search_name')){
                             $assetData = Asset::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
                         }else{
-                            $assetData = Asset::orderBy('id','asc')->get()->toArray();
+                            $assetData = Asset::orderBy('id','dsc')->get()->toArray();
                         }
                         $iTotalRecords = count($assetData);
                         $records = array();
@@ -291,4 +313,17 @@ class AssetManagementController extends Controller
         }
     }
 
+    public function getImagePath($assetId,$images){
+        $assetDirectoryName = sha1($assetId);
+        $imageUploadPath = env('ASSET_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName;
+        $iterator = 0;
+        $imagePaths = array();
+        foreach($images as $image){
+            $imagePaths[$iterator] = array();
+            $imagePaths[$iterator]['path'] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
+            $imagePaths[$iterator]['id'] = $image['id'];
+            $iterator++;
+        }
+        return $imagePaths;
+    }
 }

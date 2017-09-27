@@ -6,9 +6,8 @@
 var $hello= $('#path');
 $hello.on("change", function(event, path,count){
     if (typeof path !== "undefined") {
-        var assetId = $("#assetId").val();
         $.ajax({
-            url: "/asset/display-images/"+assetId,
+            url: "/asset/display-images",
             data: {'path':path,'count':count},
             async:false,
             error: function(data) {

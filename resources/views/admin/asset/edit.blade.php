@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create User')
+@section('title','Constro | Edit Asset')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -126,7 +126,19 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody id="show-product-images">
-
+                                                            @foreach($assetImage as $image)
+                                                                <tr id="image-{{$image['id']}}">
+                                                                    <td>
+                                                                        <a href="{{$image['path']}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                                                                            <img class="img-responsive" src="{{$image['path']}}" alt="" style="width:100px; height:100px;"> </a>
+                                                                        <input type="hidden" class="work-order-image-name" name="asset_images[{{$image['id']}}][image_name]" id="work-order-image-{{$image['id']}}" value="{{$image['path']}}"/>
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeAssetImage("#image-{{$image['id']}}","{{$image['path']}}",0);'>
+                                                                            <i class="fa fa-times"></i> Remove </a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -158,8 +170,8 @@
     <script src="/assets/custom/user/user.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/admin/asset/image-datatable.js"></script>
-    <script src="/assets/custom/admin/asset/image-upload.js"></script>
+    <script src="/assets/custom/admin/asset/image-datatable3.js"></script>
+    <script src="/assets/custom/admin/asset/image-upload4.js"></script>
     <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
     <script>
         $(document).ready(function(){
