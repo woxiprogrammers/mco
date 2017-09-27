@@ -153,8 +153,8 @@
     <script src="/assets/custom/user/user.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/admin/asset/image-datatable3.js"></script>
-    <script src="/assets/custom/admin/asset/image-upload4.js"></script>
+    <script src="/assets/custom/admin/asset/image-datatable.js"></script>
+    <script src="/assets/custom/admin/asset/image-upload.js"></script>
     <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
     <script>
         $('#clcl').click(function(){

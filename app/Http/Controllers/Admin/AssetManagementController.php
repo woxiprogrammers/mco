@@ -87,8 +87,6 @@ class AssetManagementController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
-
-
     }
 
     public function editAsset(Request $request,$asset){
@@ -151,7 +149,6 @@ class AssetManagementController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
-
     }
 
 
