@@ -22,7 +22,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::put('edit/{user}',array('uses' => 'User\UserController@editUser'));
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
         Route::post('listing',array('uses' => 'User\UserController@userListing'));
+        Route::post('check-mobile',array('uses' => 'User\UserController@checkMobile'));
         Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
+        Route::get('get-route-acls/{roleId}',array('uses' => 'User\UserController@getRoleAcls'));
+        Route::group(['prefix' => 'project-site'],function(){
+            Route::get('auto-suggest/{keyword}',array('uses' => 'User\UserController@projectSiteAutoSuggest'));
+            Route::post('assign/{user}',array('uses' => 'User\UserController@assignProjectSites'));
+        });
     });
 
     Route::group(['prefix' => 'client'],function (){
@@ -215,11 +221,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'extra-item'],function(){
             Route::post('create',array('uses'=>'Admin\QuotationController@addExtraItems'));
         });
-    });
-
-    Route::group(['prefix' => 'checkList'],function(){
-        Route::get('manage',array('uses' => 'CheckList\ChecklistController@getManageView'));
-        Route::get('create',array('uses' => 'CheckList\ChecklistController@getCreateView'));
     });
 
     Route::group(['prefix' => 'project'], function(){

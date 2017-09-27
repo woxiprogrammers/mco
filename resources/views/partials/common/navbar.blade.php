@@ -3,7 +3,7 @@
         <div class="container">
             <!-- BEGIN LOGO -->
             <div class="page-logo">
-                <a href="javascript:void(0)">
+                <a href="/">
                     <img src="/assets/global/img/logo.jpg" alt="logo" class="logo-default">
                 </a>
             </div>

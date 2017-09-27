@@ -130,14 +130,14 @@
                                                     <div class="form-body">
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
-                                                                <label class="control-label">City Name</label>
+                                                                <label for="city" class="control-label">City Name</label>
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-control product-material-select" style="height: 150px;" >
                                                                     <ul id="cityList" class="list-group">
                                                                         @foreach($cityArray as $city)
-                                                                            <li><input type="checkbox" value={{$city['id']}} name="cities[]" > <span>{{$city['name']}}</span> </li>
+                                                                            <li><input class="cities" type="checkbox" id="city" value="{{$city['id']}}" name="cities[]" > <span>{{$city['name']}}</span> </li>
                                                                         @endforeach
                                                                     </ul>
                                                                 </div>
@@ -150,16 +150,16 @@
                                                         <div class="form-group">
                                                             <label class="col-md-3 control-label">Material</label>
                                                             <div class="col-md-6">
-                                                                <input class="form-control typeahead" name="material">
+                                                                <input class="form-control typeahead" id="material" name="material">
                                                             </div>
                                                             <div id="removeMaterial" hidden>
                                                                 <a class="btn pull-right blue" id="removeMaterialButton">Remove Material</a>
                                                             </div>
                                                         </div>
-                                                        <table border="1" id="materialCityTable" class="table table-striped table-bordered table-hover table-checkable order-column" hidden>
                                                             <thead>
+                                                            <table border="1" id="materialCityTable" class="table table-striped table-bordered table-hover table-checkable order-column" hidden>
                                                                 <tr>
-                                                                    <th style="width: 10%"></th>
+                                                                    <th style="width:10%" ></th>
                                                                     <th style="width: 30%">Material</th>
                                                                     <th>City</th>
                                                                 </tr>
@@ -186,10 +186,10 @@
     <script src="/assets/custom/admin/vendor/validation.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
+
     <script>
         $(document).ready(function() {
             CreateVendor.init();
-            $("#categoryId").trigger('change');
             var citiList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -239,7 +239,6 @@
                 }else{
                     alert("Please select atleast one city first");
                 }
-
             })
             .on('typeahead:open', function (obj, datum) {
 
