@@ -1,3 +1,4 @@
+
 /**
  * Created by Ameya Joshi on 13/6/17.
  */
@@ -69,12 +70,14 @@ var  CreateQuotation = function () {
                     }
                 });
                 if(validForm == true){
-                    $("button[type='submit']").attr('disabled', true);
-                    success.show();
-                    error.hide();
-                    form.submit();
+
+                        $("button[type='submit']").attr('disabled', true);
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }
                 }
-            }
+
         });
     }
 
