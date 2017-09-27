@@ -193,7 +193,7 @@ class AssetManagementController extends Controller
                         if($request->has('search_name')){
                             $assetData = Asset::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
                         }else{
-                            $assetData = Asset::orderBy('id','dsc')->get()->toArray();
+                            $assetData = Asset::orderBy('id','asc')->get()->toArray();
                         }
                         $iTotalRecords = count($assetData);
                         $records = array();
