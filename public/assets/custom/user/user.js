@@ -19,7 +19,22 @@ var  CreateUser = function () {
                     email: true
                 },
                 mobile: {
-                    required: true
+                    required: true,
+                    digits: true,
+                    maxlength: 10,
+                    minlength: 10,
+                    remote: {
+                        url: "/user/check-mobile",
+                        type: "POST",
+                        data: {
+                            _token: function() {
+                                return $("input[name='_token']").val();
+                            },
+                            mobile: function() {
+                                return $( "#mobile" ).val();
+                            }
+                        }
+                    }
                 },
                 password: {
                     required: true,
@@ -45,7 +60,9 @@ var  CreateUser = function () {
                     required: "Email is required."
                 },
                 mobile: {
-                    required: "Contact number is required."
+                    required: "Contact number is required.",
+                    digits: "Only numbers are valid.",
+                    remote: 'This mobile is registered already'
                 },
                 password:{
                   required: "Password is required"
@@ -108,7 +125,25 @@ var  EditUser = function () {
                     required: true
                 },
                 mobile: {
-                    required: true
+                    required: true,
+                    digits: true,
+                    maxlength: 10,
+                    minlength: 10,
+                    remote: {
+                        url: "/user/check-mobile",
+                        type: "POST",
+                        data: {
+                            _token: function() {
+                                return $("input[name='_token']").val();
+                            },
+                            mobile: function() {
+                                return $( "#mobile" ).val();
+                            },
+                            user_id: function(){
+                                return $("#user_id").val();
+                            }
+                        }
+                    }
                 }
             },
 
@@ -120,7 +155,9 @@ var  EditUser = function () {
                     required: "Last name is required."
                 },
                 mobile: {
-                    required: "Contact number is required."
+                    required: "Contact number is required.",
+                    digits: "Only numbers are valid.",
+                    remote: 'This mobile is registered already with other user'
                 }
             },
 

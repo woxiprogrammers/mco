@@ -4,7 +4,6 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
-
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -72,7 +71,6 @@
     </div>
 </div>
 @endsection
-
 @section('javascript')
 <!--<script src="/assets/custom/bill/bill.js" type="application/javascript"></script>-->
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>

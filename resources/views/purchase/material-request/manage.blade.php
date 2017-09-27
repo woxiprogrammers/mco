@@ -37,10 +37,10 @@
                                       {!! csrf_field() !!}
                                       <div class="portlet-body">
                                           <label class="checkbox-inline">
-                                              <input type="checkbox" value=""><span style="color: salmon">Materialwise Listing</span>
+                                              <input type="checkbox" id="materialtWiseListing" value=""><span style="color: salmon">Materialwise Listing</span>
                                           </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        </label>&nbsp;&nbsp;&nbsp;&nbsp;
                                           <label class="checkbox-inline">
-                                              <input type="checkbox" value=""><span style="color: salmon">Material Requestwise Listing</span>
+                                              <input type="checkbox" id="materialRequestWiseListing" value=""><span style="color: salmon">Material Requestwise Listing</span>
                                           </label>
                                           <div class="portlet-body">
                                           <div class="table-container">
@@ -138,6 +138,13 @@
     $(document).ready(function() {
         $('#materialRequest').DataTable();
         $('[data-toggle="tooltip"]').tooltip();
+        $('#materialtWiseListing').attr ( "checked" ,"checked" );
     });
+</script>
+<script>
+    $('#materialRequestWiseListing').change(function(){
+        window.location.replace("/purchase/material-request/material-requestWise-listing-view");
+    })
+
 </script>
 @endsection

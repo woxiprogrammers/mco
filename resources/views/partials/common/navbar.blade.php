@@ -3,7 +3,7 @@
         <div class="container">
             <!-- BEGIN LOGO -->
             <div class="page-logo">
-                <a href="javascript:void(0)">
+                <a href="/">
                     <img src="/assets/global/img/logo.jpg" alt="logo" class="logo-default">
                 </a>
             </div>
@@ -144,11 +144,17 @@
                                             <i class="fa fa-users"></i> Manage Users
                                         </a>
                                         <ul class="dropdown-menu pull-left">
-                                            {{--<li aria-haspopup="true">
+                                            <li aria-haspopup="true">
                                                 <a href="/vendors/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Vendors
                                                 </a>
-                                            </li>--}}
+                                            </li>
+                                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                                <a href="/role/manage">
+                                                    <i class="fa fa-users"></i> Manage Roles
+                                                    <span class="arrow"></span>
+                                                </a>
+                                            </li>
                                             <li aria-haspopup="true">
                                                 <a href="/user/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Users
@@ -181,14 +187,16 @@
                                         @endif
                                     </ul>
                                 </li>
-                                <li aria-haspopup="true"  class="dropdown-submenu ">
+                                <li  aria-haspopup="true">
                                     <a href="/bank/manage">
                                         <i class="fa fa-folder"></i> Manage Bank
-                                    </a>
                                     </a>
                                 </li>
                                 </ul>
                             </li>
+
+
+                    @endif
                         <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
                         @if($hasStructurePermission)
                             <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -205,7 +213,7 @@
                                 </a>
                             </li>
                         @endif
-                       <!-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Purchase
                                 <span class="arrow"></span>
                             </a>
@@ -253,8 +261,8 @@
 
                             </ul>
                         </li>
-                        @endif
-                        </ul>
+                    </ul>
+
                     </li>
             </div>
             <!-- END MEGA MENU -->

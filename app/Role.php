@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
@@ -21,6 +22,17 @@ class Role extends Model implements RoleContract
     public $guarded = ['id'];
     protected $table = 'roles';
 
+    protected $fillable = ['name','slug','type'];
+
+    use Sluggable;
+    public function sluggable()
+    {
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
+    }
     /**
      * Create a new Eloquent model instance.
      *
