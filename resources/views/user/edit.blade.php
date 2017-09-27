@@ -18,7 +18,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Edit User {{$user['first_name']}} {{$user['last_name']}}
+                                <h1>Edit User {{$userEdit['first_name']}} {{$userEdit['last_name']}}
 
                                 </h1>
                             </div>
@@ -41,7 +41,7 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <input type="hidden" id="user_id" value="{{$user['id']}}">
+                                        <input type="hidden" id="user_id" value="{{$userEdit['id']}}">
                                         <ul class="nav nav-tabs nav-tabs-lg">
                                             <li class="active">
                                                 <a href="#generalInfoTab" data-toggle="tab"> General Information </a>
@@ -52,7 +52,7 @@
                                         </ul>
                                         <div class="tab-content">
                                             <div class="tab-pane fade in active" id="generalInfoTab">
-                                                <form role="form" id="edit-user" class="form-horizontal" method="post" action="/user/edit/{{$user['id']}}">
+                                                <form role="form" id="edit-user" class="form-horizontal" method="post" action="/user/edit/{{$userEdit['id']}}">
                                                     {!! csrf_field() !!}
                                                     <input type="hidden" name="_method" value="PUT">
                                                     <div class="form-group row">
@@ -61,7 +61,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" id="role" value="{{$user->roles[0]->role->name}}" class="form-control" disabled>
+                                                            <input type="text" id="role" value="{{$userEdit->roles[0]->role->name}}" class="form-control" disabled>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -70,7 +70,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{$user['first_name']}}">
+                                                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{$userEdit['first_name']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -79,7 +79,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{$user['last_name']}}">
+                                                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{$userEdit['last_name']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -88,7 +88,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="date" class="form-control" name="dob" id="datepicker" value="{{$user['dob']}}">
+                                                            <input type="date" class="form-control" name="dob" id="datepicker" value="{{$userEdit['dob']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -99,7 +99,7 @@
                                                         <div class="col-md-6">
                                                             <select class="form-control" name="gender">
                                                                 <option value="">Select Gender</option>
-                                                                @if($user['gender'] == 'M' || $user['gender'] == 'm')
+                                                                @if($userEdit['gender'] == 'M' || $userEdit['gender'] == 'm')
                                                                     <option value="F">Female</option>
                                                                     <option value="M" selected>Male</option>
                                                                 @else
@@ -115,7 +115,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="email" class="form-control" id="email" name="email" value="{{$user['email']}}" tabindex="-1">
+                                                            <input type="email" class="form-control" id="email" name="email" value="{{$userEdit['email']}}" tabindex="-1">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -124,7 +124,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="mobile" name="mobile" value="{{$user['mobile']}}">
+                                                            <input type="text" class="form-control" id="mobile" name="mobile" value="{{$userEdit['mobile']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
@@ -227,7 +227,7 @@
                                                     </div>
                                                 <div class="row"  style="margin-top: 0.5%">
                                                     <div class="col-md-8 col-md-offset-2">
-                                                        <form role="form" id="assignSiteForm" action="/user/project-site/assign/{{$user->id}}" method="POST">
+                                                        <form role="form" id="assignSiteForm" action="/user/project-site/assign/{{$userEdit->id}}" method="POST">
                                                             {{ csrf_field() }}
                                                             @if($showSiteTable == true)
                                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assignSiteTable">

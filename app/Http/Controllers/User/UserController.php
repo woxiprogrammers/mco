@@ -102,11 +102,11 @@ class UserController extends Controller
         }
     }
 
-    public function getEditView(Request $request,$user){
+    public function getEditView(Request $request,$userEdit){
         try{
             $subModuleIds = UserHasPermission::join('permissions','permissions.id','=','user_has_permissions.permission_id')
                 ->join('modules','modules.id','=','permissions.module_id')
-                ->where('user_has_permissions.user_id',$user->id)
+                ->where('user_has_permissions.user_id',$userEdit->id)
                 ->orderBy('modules.id','asc')
                 ->select('modules.id as module_id')
                 ->distinct()
@@ -116,8 +116,8 @@ class UserController extends Controller
                 $moduleIds = Module::whereIn('id',$subModuleIds)->select('module_id')->distinct()->get()->toArray();
                 $moduleIds = array_column($moduleIds,'module_id');
                 $data = ACLHelper::getPermissions($moduleIds);
-                $userWebPermissions = UserHasPermission::where('user_id',$user->id)->where('is_web', true)->pluck('permission_id')->toArray();
-                $userMobilePermissions = UserHasPermission::where('user_id',$user->id)->where('is_mobile', true)->pluck('permission_id')->toArray();
+                $userWebPermissions = UserHasPermission::where('user_id',$userEdit->id)->where('is_web', true)->pluck('permission_id')->toArray();
+                $userMobilePermissions = UserHasPermission::where('user_id',$userEdit->id)->where('is_mobile', true)->pluck('permission_id')->toArray();
                 $webModuleResponse = $data['webModuleResponse'];
                 $permissionTypes = $data['permissionTypes'];
                 $mobileModuleResponse = $data['mobileModuleResponse'];
@@ -134,7 +134,7 @@ class UserController extends Controller
             $projectSites = UserProjectSiteRelation::join('project_sites','project_sites.id','=','user_project_site_relation.project_site_id')
                                         ->join('projects','projects.id','=','project_sites.project_id')
                                         ->join('clients','clients.id','=','projects.client_id')
-                                        ->where('user_project_site_relation.user_id',$user->id)
+                                        ->where('user_project_site_relation.user_id',$userEdit->id)
                                         ->select('project_sites.id as project_site_id','project_sites.address as address','project_sites.name as project_site_name','projects.name as project_name','clients.company as client_company')
                                         ->get();
             if(count($projectSites) > 0){
@@ -144,7 +144,7 @@ class UserController extends Controller
                 $showSiteTable = false;
                 $projectSites = array();
             }
-            return view('user.edit')->with(compact('user','roles','userWebPermissions','userMobilePermissions','webModuleResponse','mobileModuleResponse','showAclTable','permissionTypes','projectSites','showSiteTable'));
+            return view('user.edit')->with(compact('userEdit','roles','userWebPermissions','userMobilePermissions','webModuleResponse','mobileModuleResponse','showAclTable','permissionTypes','projectSites','showSiteTable'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get user edit view",
