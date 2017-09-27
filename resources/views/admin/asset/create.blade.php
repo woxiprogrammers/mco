@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Create User')
+@section('title','Constro | Create Asset')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -19,107 +19,121 @@
                                 <div class="page-title">
                                     <h1>Create Asset</h1>
                                 </div>
-                                <div class="form-group " style="float: right;margin-top:1%">
-                                    <a href="#" class="btn btn-set red pull-right">
-                                        <i class="fa fa-check"></i>
-                                        Submit
-                                    </a>
-                                </div>
                             </div>
                         </div>
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/asset/manage">Manage Asset</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Create Asset</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
-
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-user" class="form-horizontal" method="post" action="/user/create">
+                                            <form role="form" id="create-asset" class="form-horizontal" method="post" action="/asset/create">
                                                 {!! csrf_field() !!}
+                                                <input type="hidden"  id="csrf-token" name="csrf-token" value="{{ csrf_token() }}">
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="first_name" class="control-label">Model Number</label>
+                                                            <label for="model_number" class="control-label">Model Number</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="first_name" name="first_name">
+                                                            <input type="number" class="form-control" id="model_number" name="model_number">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="last_name" class="control-label">Asset Name</label>
+                                                            <label for="name" class="control-label">Asset Name</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="last_name" name="last_name">
+                                                            <input type="text" class="form-control" id="name" name="name">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="dob" class="control-label">Expiry Date</label>
+                                                            <label for="expiry_date" class="control-label ">Expiry Date</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <input type="date" class="form-control" name="dob" id="datepicker">
+                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                            <input type="text"   style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date"/>
+                                                            <button class="btn btn-sm default" type="button">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
-
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="number" class="control-label">Price</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="number" name="number">
+                                                            <input type="number" class="form-control" id="number" name="price">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="gender" class="control-label">Is It a Diesel</label>
+                                                            <label for="diesel" class="control-label">Is It a Diesel</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" name="gender">
-                                                                <option value="">Select Gender</option>
-                                                                <option value="F">Female</option>
-                                                                <option value="M">Male</option>
+                                                            <select class="form-control" name="is_fuel_dependent">
+                                                                <option value="">Select Option</option>
+                                                                <option value="true">Yes</option>
+                                                                <option value="false">No</option>
                                                             </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="liter_per_unit" class="control-label">Litre Per Unit</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="number" class="form-control" id="number" name="litre_per_unit">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
                                                         <div class="row">
-                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
                                                         </div>
                                                         <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: 26%">
                                                                 Browse</a>
                                                             <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
                                                                 <i class="fa fa-share"></i> Upload Files </a>
                                                         </div>
-                                                        <center><table class="table table-bordered table-hover row" style="width: 200px">
-                                                            <thead class="pull-right">
+                                                        <table class="table table-bordered table-hover" style="width: 554px; margin-left: 26%; margin-top: 1%">
+                                                            <thead>
                                                             <tr role="row" class="heading">
                                                                 <th> Image </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody id="show-product-images">
+
                                                             </tbody>
-                                                        </table></center>
+                                                        </table>
                                                     </div>
-                                                    <div class="form-group row" >
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="number" class="control-label">Maintenance Hours</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="number" name="number">
+                                                    <div class="form-actions noborder row">
+                                                        <div class="col-md-offset-3" style="margin-left: 26%">
+                                                            <button type="submit" class="btn red" style=" padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </form>
+                                            <input type="hidden" id="path" name="path" value="">
+                                            <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                                         </div>
                                     </div>
                                 </div>
@@ -132,16 +146,28 @@
     </div>
 @endsection
 @section('javascript')
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
     <script src="/assets/custom/user/user.js" type="application/javascript"></script>
-    <script>
-        $(document).ready(function(){
-
-        });
-    </script>
+    <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/asset/image-datatable.js"></script>
+    <script src="/assets/custom/admin/asset/image-upload.js"></script>
+    <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
     <script>
         $('#clcl').click(function(){
 
         })
+    </script>
+    <script>
+        $(document).ready(function() {
+            CreateAsset.init();
+        });
+    </script>
+    <script>
+        var date=new Date();
+        $('#expiry_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
     </script>
 @endsection

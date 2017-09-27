@@ -267,11 +267,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
             Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
         });
-        Route::group(['prefix' => 'manage-asset'], function(){
-            Route::get('manage',array('uses'=> 'Inventory\AssetManagementController@getManageView'));
-            Route::get('create',array('uses'=> 'Inventory\AssetManagementController@getCreateView'));
-            Route::get('edit',array('uses'=> 'Inventory\AssetManagementController@getEditView'));
-        });
+
     });
 
     Route::group(['prefix' => 'vendors'],function(){
@@ -286,6 +282,20 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\VendorController@autoSuggest'));
+    });
+
+    Route::group(['prefix' => 'asset'], function(){
+        Route::get('manage',array('uses'=> 'Admin\AssetManagementController@getManageView'));
+        Route::get('create',array('uses'=> 'Admin\AssetManagementController@getCreateView'));
+        Route::get('edit/{asset}',array('uses'=> 'Admin\AssetManagementController@getEditView'));
+        Route::post('edit/{asset}',array('uses' => 'Admin\AssetManagementController@editAsset'));
+        Route::post('create',array('uses' => 'Admin\AssetManagementController@createAsset'));
+        Route::post('listing',array('uses'=> 'Admin\AssetManagementController@assetListing'));
+        Route::post('image-upload',array('uses'=>'Admin\AssetManagementController@uploadTempAssetImages'));
+        Route::post('display-images',array('uses'=>'Admin\AssetManagementController@displayAssetImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
+        Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkAssetName'));
+        Route::get('change-status/{asset}',array('uses' => 'Admin\AssetManagementController@changeAssetStatus'));
     });
 
     Route::group(['prefix'=>'bank'],function() {
