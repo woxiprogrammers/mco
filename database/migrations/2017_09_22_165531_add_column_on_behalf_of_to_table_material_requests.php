@@ -14,7 +14,7 @@ class AddColumnOnBehalfOfToTableMaterialRequests extends Migration
     public function up()
     {
         Schema::table('material_requests', function (Blueprint $table) {
-            $table->unsignedInteger('on_behalf_of');
+            $table->unsignedInteger('on_behalf_of')->nullable();
         });
     }
 
