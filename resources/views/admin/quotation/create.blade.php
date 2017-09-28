@@ -5,7 +5,6 @@
  * Time: 4:10 PM
  */
 ?>
-
 @extends('layout.master')
 @section('title','Constro | Create Quotation')
 @include('partials.common.navbar')
@@ -224,7 +223,6 @@
 <script src="/assets/custom/admin/quotation/quotation.js"></script>
 <script src="/assets/custom/admin/quotation/validations.js"></script>
 <script src="/assets/global/plugins/jquery-form.min.js"></script>
-
 <script>
     $(document).ready(function(){
         CreateQuotation.init();

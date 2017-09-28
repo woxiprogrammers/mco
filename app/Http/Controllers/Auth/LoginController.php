@@ -45,21 +45,18 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $this->validateLogin($request);
-        // If the class is using the ThrottlesLogins trait, we can automatically throttle
-        // the login attempts for this application. We'll key this by the username and
-        // the IP address of the client making these requests into this application.
-        if ($this->hasTooManyLoginAttempts($request)) {
-            $this->fireLockoutEvent($request);
-            return $this->sendLockoutResponse($request);
+        $credentials = $request->except('_token');
+        if(Auth::attempt($credentials)){
+            $user = Auth::user();
+            if($user->is_active == true){
+                $request->session()->flash('success','Logged in Successfully.');
+                return redirect('/dashboard');
+            }else{
+                Auth::logout();
+                $request->session()->flash('error','User is not activated yet. Please activate user first.');
+                return redirect('/');
+            }
         }
-        if ($this->attemptLogin($request)) {
-            return $this->sendLoginResponse($request);
-        }
-        // If the login attempt was unsuccessful we will increment the number of attempts
-        // to login and redirect the user back to the login form. Of course, when this
-        // user surpasses their maximum number of attempts they will get locked out.
-        $this->incrementLoginAttempts($request);
         return $this->sendFailedLoginResponse($request);
     }
 

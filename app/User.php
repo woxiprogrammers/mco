@@ -32,4 +32,8 @@ class User extends Authenticatable
     public function roles(){
         return $this->hasMany('App\UserHasRole','user_id');
     }
+
+    public function userProjectSitesRelation(){
+        return $this->hasMany('App\UserProjectSiteRelation','user_id');
+    }
 }
