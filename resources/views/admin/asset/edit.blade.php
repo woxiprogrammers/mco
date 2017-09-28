@@ -3,6 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -65,7 +66,7 @@
                                                             <label for="expiry_date" class="control-label ">Expiry Date</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-6 date date-picker" data-date-end-date="0d">
+                                                        <div class="col-md-6 date date-picker">
                                                             <input type="text"  style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date" value="{{$asset['expiry_date']}}">
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
@@ -87,7 +88,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" name="is_fuel_dependent">
+                                                            <select class="form-control" name="is_fuel_dependent" id="select-litre">
                                                                 @if(isset($asset['is_fuel_dependent']) && $asset['is_fuel_dependent'] == 'true')
                                                                     <option value="true" selected >Yes</option>
                                                                     <option value="false">No</option>
@@ -99,7 +100,8 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
+                                                    @if($asset['is_fuel_dependent'] == 'true')
+                                                    <div class="form-group row" id="Litre">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="liter_per_unit" class="control-label">Litre Per Unit</label>
                                                             <span>*</span>
@@ -108,6 +110,17 @@
                                                             <input type="number" class="form-control" id="number" name="litre_per_unit" value="{{$asset['litre_per_unit']}}">
                                                         </div>
                                                     </div>
+                                                    @else
+                                                        <div class="form-group row" id="Litre" hidden>
+                                                            <div class="col-md-3" style="text-align: right">
+                                                                <label for="liter_per_unit" class="control-label">Litre Per Unit</label>
+                                                                <span>*</span>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="number" class="form-control" id="number" name="litre_per_unit" value=" ">
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                     <div class="form-group">
                                                         <div class="row">
                                                             <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
@@ -176,6 +189,14 @@
     <script>
         $(document).ready(function(){
             EditAsset.init();
+            $('#select-litre').change(function(){
+                var selected = $(this).val();
+                if(selected == 'true'){
+                    $('#Litre').show();
+                }else{
+                    $('#Litre').hide();
+                }
+            });
         });
     </script>
     <script>

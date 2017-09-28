@@ -247,7 +247,7 @@
                                     </a>
                                 </li>
                             </ul>
-                        </li>-->
+                        </li>
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
