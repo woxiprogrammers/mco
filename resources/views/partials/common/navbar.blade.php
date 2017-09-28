@@ -182,11 +182,8 @@
                                         @endif
                                     </ul>
                                 </li>
-<<<<<<< HEAD
-                                <li aria-haspopup="true"  >
-=======
+
                                 <li  aria-haspopup="true">
->>>>>>> develop
                                     <a href="/bank/manage">
                                         <i class="fa fa-folder"></i> Manage Bank
                                     </a>
@@ -212,10 +209,9 @@
                                 </a>
                             </li>
                         @endif
-<<<<<<< HEAD
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-=======
-                       <!-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+
+               {{--        <!-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
 >>>>>>> develop
                             <a> Purchase
                                 <span class="arrow"></span>
@@ -238,7 +234,7 @@
                                 </li>
 
                             </ul>
-                        </li>
+                        </li>--}}
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                                           <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Checklist
@@ -251,13 +247,13 @@
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
-                                    <a href="/checkList/manage" class="nav-link nav-toggle ">
+                                    <a href="/checklist/checkList/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Checklist Structure
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        {{--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
                             </a>
@@ -273,13 +269,16 @@
                                     </a>
                                 </li>
                             </ul>
-                        </li>
+                        </li>--}}
                     </ul>
 
                     </li>
             </div>
             <!-- END MEGA MENU -->
+                        </li>
+                </ul>
         </div>
     </div>
     <!-- END HEADER MENU -->
     </div>
+</div>
