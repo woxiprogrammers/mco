@@ -16,6 +16,8 @@ class VerifyCsrfToken extends BaseVerifier
         '/summary/listing','/tax/listing','/quotation/get-materials','/quotation/get-profit-margins','/quotation/listing/*','bill/create','/project/listing','/quotation/get-product-calculations',
         '/quotation/image-upload/*','/quotation/display-images/*','/quotation/delete-temp-product-image','bill/approve','/bill/image-upload/*','/bill/display-images/*','/bill/delete-temp-product-image','/bill/edit/*',
         '/bill/product_description/create','/bill/product_description/update','/bill/calculate-tax-amounts','/bill/transaction/listing/*',
-        '/quotation/check-product-remove','/extra-item/listing','/vendors/listing','/checkList/listing','/checklist/category-management/listing','/bank/listing','role/listing'
-   ];
+         '/quotation/check-product-remove','/extra-item/listing','/vendors/listing','/bank/listing','/checklist/category-management/listing','purchase/material-request/get-materials','/purchase/material-request/get-units',
+        '/purchase/material-request/get-projects','purchase/material-request/get-clients','purchase/material-request/get-users','purchase/material-request/create','/checkList/listing','/checklist/category-management/listing','role/listing',
+        '/user/project-site/auto-suggest/*','/asset/listing','/asset/display-images','/asset/delete-temp-product-image'
+    ];
 }

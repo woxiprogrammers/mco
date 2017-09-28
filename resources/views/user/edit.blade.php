@@ -18,7 +18,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Edit User {{$user['first_name']}} {{$user['last_name']}}
+                                <h1>Edit User {{$userEdit['first_name']}} {{$userEdit['last_name']}}
 
                                 </h1>
                             </div>
@@ -37,23 +37,22 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <div class="col-md-11">
+                            <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
-
                                     <div class="portlet-body form">
-                                        <input type="hidden" id="user_id" value="{{$user['id']}}">
+                                        <input type="hidden" id="user_id" value="{{$userEdit['id']}}">
                                         <ul class="nav nav-tabs nav-tabs-lg">
                                             <li class="active">
                                                 <a href="#generalInfoTab" data-toggle="tab"> General Information </a>
                                             </li>
-                                            {{--<li>--}}
-                                                {{--<a href="#projectSiteAssignmentTab" data-toggle="tab"> Assign Project Sites </a>--}}
-                                            {{--</li>--}}
+                                            <li>
+                                                <a href="#projectSiteAssignmentTab" data-toggle="tab"> Assign Project Sites </a>
+                                            </li>
                                         </ul>
                                         <div class="tab-content">
                                             <div class="tab-pane fade in active" id="generalInfoTab">
-                                                <form role="form" id="edit-user" class="form-horizontal" method="post" action="/user/edit/{{$user['id']}}">
+                                                <form role="form" id="edit-user" class="form-horizontal" method="post" action="/user/edit/{{$userEdit['id']}}">
                                                     {!! csrf_field() !!}
                                                     <input type="hidden" name="_method" value="PUT">
                                                     <div class="form-group row">
@@ -62,7 +61,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" id="role" value="{{$user->roles[0]->role->name}}" class="form-control" disabled>
+                                                            <input type="text" id="role" value="{{$userEdit->roles[0]->role->name}}" class="form-control" disabled>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -71,7 +70,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{$user['first_name']}}">
+                                                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{$userEdit['first_name']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -80,7 +79,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{$user['last_name']}}">
+                                                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{$userEdit['last_name']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -89,7 +88,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="date" class="form-control" name="dob" id="datepicker" value="{{$user['dob']}}">
+                                                            <input type="date" class="form-control" name="dob" id="datepicker" value="{{$userEdit['dob']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -100,7 +99,7 @@
                                                         <div class="col-md-6">
                                                             <select class="form-control" name="gender">
                                                                 <option value="">Select Gender</option>
-                                                                @if($user['gender'] == 'M' || $user['gender'] == 'm')
+                                                                @if($userEdit['gender'] == 'M' || $userEdit['gender'] == 'm')
                                                                     <option value="F">Female</option>
                                                                     <option value="M" selected>Male</option>
                                                                 @else
@@ -116,7 +115,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="email" class="form-control" id="email" name="email" value="{{$user['email']}}" tabindex="-1">
+                                                            <input type="email" class="form-control" id="email" name="email" value="{{$userEdit['email']}}" tabindex="-1">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -125,7 +124,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="mobile" name="mobile" value="{{$user['mobile']}}">
+                                                            <input type="text" class="form-control" id="mobile" name="mobile" value="{{$userEdit['mobile']}}">
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
@@ -207,9 +206,102 @@
                                                     </div>
                                                 </form>
                                             </div>
-                                            {{--<div class="tab-pane fade in" id="projectSiteAssignmentTab">--}}
-                                                {{--Assign project sites here--}}
-                                            {{--</div>--}}
+                                            <div class="tab-pane fade in" id="projectSiteAssignmentTab">
+                                                <div class="row" style="margin-top: 2%">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label pull-right">Project Site Name</label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="text" class="form-control typeahead" id="siteTypeahead">
+                                                    </div>
+
+                                                </div>
+                                                @if($showSiteTable == true)
+                                                    <div class="row"  style="margin-top: 2%">
+                                                @else
+                                                    <div class="row"  style="margin-top: 2%" hidden>
+                                                @endif
+                                                        <div class="col-md-3">
+                                                            <a class="btn blue pull-right" id="removeButton" >Remove Project Site</a>
+                                                        </div>
+                                                    </div>
+                                                <div class="row"  style="margin-top: 0.5%">
+                                                    <div class="col-md-8 col-md-offset-2">
+                                                        <form role="form" id="assignSiteForm" action="/user/project-site/assign/{{$userEdit->id}}" method="POST">
+                                                            {{ csrf_field() }}
+                                                            @if($showSiteTable == true)
+                                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assignSiteTable">
+                                                            @else
+                                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assignSiteTable" hidden>
+                                                            @endif
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 10%;">Remove</th>
+                                                                        <th> Project Site Information</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach($projectSites as $projectData)
+                                                                        <tr>
+                                                                            <td style="width: 10%;">
+                                                                                <input type="checkbox" class="project-row-checkbox">
+                                                                            </td>
+                                                                            <td>
+                                                                                <input name="project_sites[]" type="hidden" value="{{$projectData['project_site_id']}}">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-3">
+                                                                                        <label class="control-label pull-right">
+                                                                                            <b>Client</b>
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class="col-md-9"  style="text-align: left">
+                                                                                        <label class="control-label">{{$projectData['client_company']}}</label>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class="col-md-3"  style="text-align: left">
+                                                                                        <label class="control-label pull-right">
+                                                                                            <b>Project</b>
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class="col-md-9"  style="text-align: left">
+                                                                                        <label class="control-label">{{$projectData['project_name']}}</label>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class="col-md-3">
+                                                                                        <label class="control-label pull-right">
+                                                                                            <b>Project Site</b>
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class="col-md-9"  style="text-align: left">
+                                                                                        <label class="control-label" style="text-align: left">{{$projectData['project_site_name']}}</label>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class="col-md-3">
+                                                                                        <label class="control-label pull-right">
+                                                                                            <b>Project Site Address</b>
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class="col-md-9"  style="text-align: left">
+                                                                                        <label class="control-label">{{$projectData['address']}}</label>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                            <div class="form-actions noborder row">
+                                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -225,10 +317,73 @@
 
 @section('javascript')
 <script src="/assets/custom/user/user.js" type="application/javascript"></script>
+<script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+<script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
     $(document).ready(function() {
         $('#email').css('pointer-events',"none");
         EditUser.init();
+        var citiList = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                url: "/user/project-site/auto-suggest/%QUERY",
+                filter: function(x) {
+                    if($(window).width()<420){
+                        $("#header").addClass("fixed");
+                    }
+                    return $.map(x, function (data) {
+                        return {
+                            id:data.project_site_id,
+                            client_company:data.client_company,
+                            project_name:data.project_name,
+                            project_site_name:data.project_site_name,
+                            tr_view:data.tr_view
+                        };
+                    });
+                },
+                wildcard: "%QUERY"
+            }
+        });
+        citiList.initialize();
+        $('.typeahead').typeahead(null, {
+            displayKey: 'name',
+            engine: Handlebars,
+            source: citiList.ttAdapter(),
+            limit: 30,
+            templates: {
+                empty: [
+                    '<div class="empty-suggest">',
+                    'Unable to find any Result that match the current query',
+                    '</div>'
+                ].join('\n'),
+                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{client_company}}, @{{project_name}}, @{{project_site_name}}</strong></div>')
+            },
+        })
+        .on('typeahead:selected', function (obj, datum) {
+            var POData = $.parseJSON(JSON.stringify(datum));
+            var trString = '<tr>' +
+                '           <th style="width: 10%;"><input type="checkbox" class="project-row-checkbox"></th>\n' +
+                '           <th>'+POData.tr_view+'</th></tr>';
+            $("#assignSiteTable tbody").append(trString);
+            $("#removeButton").closest('.row').show();
+            $("#assignSiteTable").show();
+        })
+        .on('typeahead:open', function (obj, datum) {
+
+        });
+
+        $("#removeButton").on('click',function(){
+            if($("#assignSiteTable tbody input:checkbox:checked").length > 0){
+                $("#assignSiteTable tbody input:checkbox:checked").each(function(){
+                    $(this).closest('tr').remove();
+                });
+            }
+            if($("#assignSiteTable tbody input:checkbox").length <= 0){
+                $("#removeButton").closest('.row').hide();
+                $("#assignSiteTable").hide();
+            }
+        });
     });
 </script>
 @endsection

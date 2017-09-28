@@ -7,11 +7,13 @@ use App\ClientUser;
 use App\Helper\ACLHelper;
 use App\Http\Requests\UserRequest;
 use App\Module;
+use App\ProjectSite;
 use App\Role;
 use App\RoleHasPermission;
 use App\User;
 use App\UserHasPermission;
 use App\UserHasRole;
+use App\UserProjectSiteRelation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -100,11 +102,11 @@ class UserController extends Controller
         }
     }
 
-    public function getEditView(Request $request,$user){
+    public function getEditView(Request $request,$userEdit){
         try{
             $subModuleIds = UserHasPermission::join('permissions','permissions.id','=','user_has_permissions.permission_id')
                 ->join('modules','modules.id','=','permissions.module_id')
-                ->where('user_has_permissions.user_id',$user->id)
+                ->where('user_has_permissions.user_id',$userEdit->id)
                 ->orderBy('modules.id','asc')
                 ->select('modules.id as module_id')
                 ->distinct()
@@ -114,8 +116,8 @@ class UserController extends Controller
                 $moduleIds = Module::whereIn('id',$subModuleIds)->select('module_id')->distinct()->get()->toArray();
                 $moduleIds = array_column($moduleIds,'module_id');
                 $data = ACLHelper::getPermissions($moduleIds);
-                $userWebPermissions = UserHasPermission::where('user_id',$user->id)->where('is_web', true)->pluck('permission_id')->toArray();
-                $userMobilePermissions = UserHasPermission::where('user_id',$user->id)->where('is_mobile', true)->pluck('permission_id')->toArray();
+                $userWebPermissions = UserHasPermission::where('user_id',$userEdit->id)->where('is_web', true)->pluck('permission_id')->toArray();
+                $userMobilePermissions = UserHasPermission::where('user_id',$userEdit->id)->where('is_mobile', true)->pluck('permission_id')->toArray();
                 $webModuleResponse = $data['webModuleResponse'];
                 $permissionTypes = $data['permissionTypes'];
                 $mobileModuleResponse = $data['mobileModuleResponse'];
@@ -129,7 +131,20 @@ class UserController extends Controller
                 $userWebPermissions = array();
                 $showAclTable = false;
             }
-            return view('user.edit')->with(compact('user','roles','userWebPermissions','userMobilePermissions','webModuleResponse','mobileModuleResponse','showAclTable','permissionTypes'));
+            $projectSites = UserProjectSiteRelation::join('project_sites','project_sites.id','=','user_project_site_relation.project_site_id')
+                                        ->join('projects','projects.id','=','project_sites.project_id')
+                                        ->join('clients','clients.id','=','projects.client_id')
+                                        ->where('user_project_site_relation.user_id',$userEdit->id)
+                                        ->select('project_sites.id as project_site_id','project_sites.address as address','project_sites.name as project_site_name','projects.name as project_name','clients.company as client_company')
+                                        ->get();
+            if(count($projectSites) > 0){
+                $showSiteTable = true;
+                $projectSites = $projectSites->toArray();
+            }else{
+                $showSiteTable = false;
+                $projectSites = array();
+            }
+            return view('user.edit')->with(compact('userEdit','roles','userWebPermissions','userMobilePermissions','webModuleResponse','mobileModuleResponse','showAclTable','permissionTypes','projectSites','showSiteTable'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get user edit view",
@@ -245,7 +260,7 @@ class UserController extends Controller
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                             <li>
-                                <a data-toggle="modal" data-target="#remarkModal">
+                                <a href="/user/change-status/'.$userData[$pagination]['id'].'">
                                     <i class="icon-tag"></i> Approve / Disapprove </a>
                             </li>
                         </ul>
@@ -335,6 +350,120 @@ class UserController extends Controller
             ];
             Log::critical(json_encode($data));
             return null;
+        }
+    }
+
+    public function projectSiteAutoSuggest(Request $request,$keyword){
+        try{
+            $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                                    ->join('clients','clients.id','=','projects.client_id')
+                                    ->where('project_sites.name','ilike','%'.$keyword.'%')
+                                    ->select('project_sites.id as project_site_id','project_sites.address as address','project_sites.name as project_site_name','projects.name as project_name','clients.company as client_company')
+                                    ->get();
+            $response = array();
+            if(count($projectSites) > 0){
+                $response = $projectSites->toArray();
+                $iterator = 0;
+                foreach($response as $projectData){
+                    $response[$iterator]['tr_view'] = '<input name="project_sites[]" type="hidden" value="'.$projectData['project_site_id'].'">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">
+                                                                    <b>Client</b>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label class="control-label">
+                                                                    '.$projectData['client_company'].'
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">
+                                                                    <b>Project</b>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                <label class="control-label">
+                                                                    '.$projectData['project_name'].'
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">
+                                                                    <b>Project Site</b>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                <label class="control-label">
+                                                                    '.$projectData['project_site_name'].'
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">
+                                                                    <b>Project Site Address</b>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                <label class="control-label">
+                                                                    '.$projectData['address'].'
+                                                                </label>
+                                                            </div>
+                                                        </div>';
+                    $iterator++;
+                }
+            }
+
+            $status = 200;
+        }catch (\Exception $e){
+            $status = 500;
+            $response = array();
+            $data = [
+                'action' => 'User Project Site',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
+    }
+
+    public function assignProjectSites(Request $request,$user){
+        try{
+            if($request->has('project_sites')){
+                $userProjectSiteData = array();
+                $userProjectSiteData['user_id'] = $user->id;
+                foreach($request->project_sites as $projectSiteID){
+                    $check = UserProjectSiteRelation::where('user_id',$user->id)->where('project_site_id',$projectSiteID)->first();
+                    if($check == null){
+                        $userProjectSiteData['project_site_id'] = $projectSiteID;
+                        UserProjectSiteRelation::create($userProjectSiteData);
+                    }
+                }
+                $userSites = UserProjectSiteRelation::where('user_id',$user->id)->whereNotIn('project_site_id',$request->project_sites)->get();
+                foreach ($userSites as $site){
+                    $site->delete();
+                }
+            }else{
+                $userSites = UserProjectSiteRelation::where('user_id',$user->id)->get();
+                foreach ($userSites as $site){
+                    $site->delete();
+                }
+            }
+            $request->session()->flash('success', 'Project sites assigned to users successfully.');
+            return redirect('/user/edit/'.$user->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Assign User Project Site',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }
