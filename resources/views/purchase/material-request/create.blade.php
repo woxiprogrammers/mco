@@ -508,7 +508,7 @@
                     options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
                            });
                   $('#unitDrpdn').html('');
-                var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
+                var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center"><option>Select Unit</option>'+options+ '</select>';
                   $('#unitDrpdn').append(str1);
                   $('#component_type_id').val();
             })
@@ -525,12 +525,11 @@
 </script>
 <script>
     $('#createMaterial').click(function(){
-        $('#searchbox').html('');
-        $('#qty').html('');
-        $('#unitDrpdn').html('');
+
         var material_name = $('#searchbox').val();
         var quantity = $('#qty').val();
         var unit = $('#materialUnit').val();
+        alert(unit);
         var componentTypeId = $('#component_id').val();
         var iterator = $('#iterator').val();
         var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unit+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
@@ -540,6 +539,9 @@
         var iterator = parseInt(iterator) + 1;
         $('#iterator').val(iterator);
         $('#component_id').val(null);
+        $('#searchbox').html('');
+        $('#qty').html('');
+        $('#unitDrpdn').html('');
     })
 </script>
 <script>
