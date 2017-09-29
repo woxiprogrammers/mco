@@ -110,6 +110,29 @@
                                                         @endforeach
                                                     </div>
                                                 </div>
+                                                <div class="form-body">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label class="control-label">City Name</label>
+                                                            <span>*</span>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+
+                                                            <select class="form-control" name="city_id" id="city_id">
+                                                                @foreach($cityArray as $city)
+                                                                    @if($projectData['project_city_id'] == $city['id'])
+                                                                        <option value="{{$city['id']}}" selected>{{$city['name']}}</option>
+                                                                    @else
+                                                                        <option value="{{$city['id']}}">{{$city['name']}}</option>
+                                                                    @endif
+                                                                @endforeach
+                                                            </select>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
                                                         <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>

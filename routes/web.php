@@ -314,5 +314,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
             Route::post('listing',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
         });
+        Route::group(['prefix' => 'checkList'],function(){
+            Route::get('manage',array('uses' => 'Checklist\ChecklistController@getManageView'));
+            Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
+        });
     });
 });

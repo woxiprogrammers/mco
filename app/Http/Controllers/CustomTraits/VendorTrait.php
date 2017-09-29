@@ -207,7 +207,7 @@ trait VendorTrait
 
     public function editVendor(Request $request, $vendor){
         try {
-            $data = $request->except(['cities','material','material_city','_token','_method']);
+             $data = $request->except(['cities','material','material_city','_token','_method']);
             $data['name'] = ucwords(trim($data['name']));
             $vendor->update($data);
             $vendorCityData = array();
@@ -303,7 +303,6 @@ trait VendorTrait
                 </div>'
                 ];
             }
-
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
             $records["recordsFiltered"] = $iTotalRecords;
