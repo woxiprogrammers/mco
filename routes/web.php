@@ -247,7 +247,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=> 'User\PurchaseController@createMaterialList'));
             Route::post('material-requestWise-listing',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListing'));
             Route::get('material-requestWise-listing-view',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListingView'));
-
+            Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
         });
         Route::group(['prefix' => 'purchase-request'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
@@ -294,7 +294,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('image-upload',array('uses'=>'Admin\AssetManagementController@uploadTempAssetImages'));
         Route::post('display-images',array('uses'=>'Admin\AssetManagementController@displayAssetImages'));
         Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
-        Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkAssetName'));
+        Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkModel'));
         Route::get('change-status/{asset}',array('uses' => 'Admin\AssetManagementController@changeAssetStatus'));
     });
 
