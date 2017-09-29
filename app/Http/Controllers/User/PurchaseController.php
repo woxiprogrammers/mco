@@ -497,54 +497,6 @@ class PurchaseController extends Controller
         return view ('purchase/material-request/material-request-listing');
     }
 
-    /*public function changeStatus(Request $request){
-        try{
-            $materialRequestComponent = MaterialRequestComponents::where('id',$request['material_request_component_id'])->first();
-            $quotationMaterialType = MaterialRequestComponentTypes::where('slug','quotation-material')->first();
-            if($materialRequestComponent['component_type_id'] == $quotationMaterialType->id){
-                $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
-                $usedQuantity = MaterialRequestComponents::where('id','!=',$materialRequestComponent->id)
-                                ->where('material_request_id',$materialRequestComponent['material_request_id'])
-                                ->where('component_type_id',$quotationMaterialType['id'])
-                                ->where('component_status_id',$adminApproveComponentStatusId)
-                                ->where('name',$materialRequestComponent['name'])->sum('quantity');
-                $quotation = Quotation::where('project_site_id',$request['project_site_id'])->first();
-                $quotationMaterialId = Material::whereIn('id',array_column($quotation->quotation_materials->toArray(),'material_id'))
-                    ->where('name',$materialRequestComponent->name)->pluck('id')->first();
-                $quotationMaterial = QuotationMaterial::where('quotation_id',$quotation->id)->where('material_id',$quotationMaterialId)->first();
-                $materialVersions = MaterialVersion::where('material_id',$quotationMaterial['material_id'])->where('unit_id',$quotationMaterial['unit_id'])->pluck('id');
-                $material_quantity = QuotationProduct::where('quotation_products.quotation_id',$quotation->id)
-                    ->join('product_material_relation','quotation_products.product_version_id','=','product_material_relation.product_version_id')
-                    ->whereIn('product_material_relation.material_version_id',$materialVersions)
-                    ->sum(DB::raw('quotation_products.quantity * product_material_relation.material_quantity'));
-                $allowedQuantity = $material_quantity - $usedQuantity;
-                if((int)$materialRequestComponent['quantity'] < $allowedQuantity){
-                    MaterialRequestComponents::where('id',$request['material_request_component_id'])->update(['component_status_id' => $request['change_component_status_id_to']]);
-                    $message = "Status Updated Successfully";
-                }else{
-                    $message = "Allowed quantity is ".$allowedQuantity;
-                }
-            }else{
-                MaterialRequestComponents::where('id',$request['material_request_component_id'])->update(['component_status_id' => $request['change_component_status_id_to']]);
-                $message = "Status Updated Successfully";
-            }
-
-           $status = 200;
-        }catch(\Exception $e){
-            $status = 500;
-            $message = "Fail";
-            $data = [
-                'action' => 'Change status of material request',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-        }
-        $response = [
-            "message" => $message,
-        ];
-        return response()->json($response,$status);
-    }*/
     public function changeMaterialRequestComponentStatus(Request $request,$newStatus,$componentId = null){
         try{
             switch($newStatus){
