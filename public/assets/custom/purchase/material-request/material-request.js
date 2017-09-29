@@ -8,15 +8,12 @@ $(document).ready(function(){
     $( "#myBtn" ).hide();
     var iterator = parseInt(0);
     $('#iterator').val(iterator);
-
-
     $("#myBtn").click(function(){
         $("#myModal").modal();
     });
     $("#assetBtn").click(function(){
         $("#myModal1").modal();
     });
-
     $("#Unitsearchbox").keyup(function(){
         if($(this).val().length > 0){
             $.ajax({
@@ -70,7 +67,6 @@ $(document).ready(function(){
                     $("#client-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
                 },
                 success: function(data){
-                    console.log(data);
                     $("#client-suggesstion-box").show();
                     $("#client-suggesstion-box").html(data);
                     $("#clientSearchbox").css("background-color","#FFF");
@@ -92,7 +88,6 @@ $(document).ready(function(){
                     $("#project-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
                 },
                 success: function(data){
-                    console.log(data);
                     $("#project-suggesstion-box").show();
                     $("#project-suggesstion-box").html(data);
                     $("#projectSearchbox").css("background-color","#FFF");
@@ -127,7 +122,6 @@ $(document).ready(function(){
     $('#createMaterial').click(function(){
         $('#searchbox').html('');
         $('#qty').html('');
-        //$('#unitDrpdn').html('');
         var material_name = $('#searchbox').val();
         var quantity = $('#qty').val();
         var unitId = $('#materialUnit').val();
@@ -146,7 +140,6 @@ $(document).ready(function(){
     $('#createAsset').click(function(){
         $('#searchbox').html('');
         $('#qty').html('');
-        // $('#unitDrpdn').html('');
         var asset_name = $('#Assetsearchbox').val();
         var quantity = $('#Assetqty').val();
         var unit = $('#AssetUnitsearchbox').val();
@@ -231,7 +224,6 @@ function selectProject(nameProject,id) {
             var unitName = value.unit_name;
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
-        //$('#unitDrpdn').html('');
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
         $('#unitDrpdn').append(str1);
         $('#component_type_id').val();
@@ -249,7 +241,6 @@ function selectProject(nameProject,id) {
                     $("#header").addClass("fixed");
                 }
                 return $.map(x, function (data) {
-                    console.log(data);
                     return {
                         name:data.material_name,
                         unit:data.unit_quantity,
@@ -285,8 +276,6 @@ function selectProject(nameProject,id) {
             var unitName = value.unit_name;
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
-        // $('#unitDrpdn').html('');
-        // var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
         $('#materialUnit').html(options);
         $('#component_type_id').val();
     })
