@@ -110,9 +110,15 @@ class AssetManagementController extends Controller
             }
             $asset->update($assetData);
             $work_order_images = $request->work_order_images;
+            $assetImages = $request->asset_images;
             $assetId = $asset->id;
             if($work_order_images != null) {
                 $assetDirectoryName = sha1($assetId);
+                $UploadPath = public_path() . env('ASSET_IMAGE_UPLOAD');
+                $ImageUploadPath = $UploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+                if (!file_exists($ImageUploadPath)) {
+                    File::makeDirectory($ImageUploadPath, $mode = 0777, true, true);
+                }
                 foreach ($work_order_images as $images) {
                     $imagePath = $images['image_name'];
                     $imageName = explode("/", $imagePath);
@@ -128,7 +134,6 @@ class AssetManagementController extends Controller
 
             }
 
-            $assetImages = $request->asset_images;
             if ($work_order_images != null && $assetImages != null) {
                 $existingImages = array_column(array_merge($work_order_images, $assetImages), "image_name");
             } elseif ($work_order_images != null) {
@@ -201,10 +206,10 @@ class AssetManagementController extends Controller
 
     public function assetListing(Request $request){
                     try{
-                        if($request->has('search_name')){
-                            $assetData = Asset::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
+                        if($request->has('search_model_number')){
+                            $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get()->toArray();
                         }else{
-                            $assetData = Asset::orderBy('id','asc')->get()->toArray();
+                            $assetData = Asset::orderBy('model_number','asc')->get()->toArray();
                         }
                         $iTotalRecords = count($assetData);
                         $records = array();
@@ -297,22 +302,22 @@ class AssetManagementController extends Controller
         }
     }
 
-    public function checkAssetName(Request $request){
+    public function checkModel(Request $request){
         try{
-            $assetName = $request->name;
+            $modelNumber = $request->search_model_number;
             if($request->has('id')){
-                $nameCount = Asset::where('name','ilike',$assetName)->where('id','!=',$request->id)->count();
+                $modelCount = Asset::where('model_number','ilike',$modelNumber)->where('id','!=',$request->id)->count();
             }else{
-                $nameCount = Asset::where('name','ilike',$assetName)->count();
+                $modelCount = Asset::where('model_number','ilike',$modelNumber)->count();
             }
-            if($nameCount > 0){
+            if($modelCount > 0){
                 return 'false';
             }else{
                 return 'true';
             }
         }catch(\Exception $e){
             $data = [
-                'action' => 'Check Asset Name',
+                'action' => 'Check Model Number',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];

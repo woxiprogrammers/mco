@@ -49,8 +49,8 @@
                                                                 <th> Actions </th>
                                                             </tr>
                                                             <tr class="filter">
+                                                                <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_model_number" > </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_asset_number" > </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
