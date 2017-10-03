@@ -108,9 +108,12 @@ class PurchaseController extends Controller
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/purchase/material-request/change-status/in-indent/'.$materialRequestList[$pagination]['material_request_component_id'].'">
-                                        <i class="icon-tag"></i> Move To indent 
-                                    </a>
+                                    <form action="/purchase/material-request/change-status/in-indent/'.$materialRequestList[$pagination]['material_request_component_id'].'" method="post">
+                                        <a href="javascript:void(0);" onclick="submitIndentForm(this)">
+                                            <i class="icon-tag"></i> Move To indent 
+                                        </a>
+                                        <input type="hidden" name="_token">
+                                    </form>
                                 </li>
                             </ul>
                         </div>';
@@ -580,6 +583,7 @@ class PurchaseController extends Controller
                     $materialComponentHistoryData = array();
                     $materialComponentHistoryData['component_status_id'] = $inIndentStatusId;
                     $materialComponentHistoryData['user_id'] = Auth::user()->id;
+                    $materialComponentHistoryData['material_request_component_id'] = $componentId;
                     MaterialRequestComponentHistory::create($materialComponentHistoryData);
                     break;
             }
