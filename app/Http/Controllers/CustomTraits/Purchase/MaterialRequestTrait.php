@@ -65,4 +65,9 @@ trait MaterialRequestTrait{
         }
         return $materialRequestComponent;
     }
+
+    public function getMaterialRequestIDFormat($project_site_id,$created_at,$serial_no){
+        $format = "MR".$project_site_id.date_format($created_at,'ymd').$serial_no;
+        return $format;
+    }
 }
