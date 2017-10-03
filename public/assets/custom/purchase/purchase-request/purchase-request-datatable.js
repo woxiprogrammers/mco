@@ -1,19 +1,21 @@
-/**
- * Created by Ameya Joshi on 27/9/17.
- */
+
 $(document).ready(function(){
+    $('.deleteRowButton').click(DeleteRow);
     var site_name = '';
     var search_in = '';
     $( "#assetBtn" ).hide();
     $( "#myBtn" ).hide();
     var iterator = parseInt(0);
     $('#iterator').val(iterator);
+
+
     $("#myBtn").click(function(){
         $("#myModal").modal();
     });
     $("#assetBtn").click(function(){
         $("#myModal1").modal();
     });
+
     $("#Unitsearchbox").keyup(function(){
         if($(this).val().length > 0){
             $.ajax({
@@ -55,122 +57,80 @@ $(document).ready(function(){
             $("#unit-suggesstion-box").hide();
         }
     });
-
-    $("#clientSearchbox").keyup(function(){
-        if($(this).val().length > 0){
-            $.ajax({
-                type: "POST",
-                url: "/purchase/material-request/get-clients",
-                data:'keyword='+$(this).val(),
-                beforeSend: function(){
-                    $.LoadingOverlay("hide");
-                    $("#client-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
-                },
-                success: function(data){
-                    $("#client-suggesstion-box").show();
-                    $("#client-suggesstion-box").html(data);
-                    $("#clientSearchbox").css("background-color","#FFF");
-                }
-            });
-        }else{
-            $("#client-suggesstion-box").hide();
-        }
-    });
-
-    $("#projectSearchbox").keyup(function(){
-        if($(this).val().length > 0){
-            $.ajax({
-                type: "POST",
-                url: "/purchase/material-request/get-projects",
-                data:'keyword='+$(this).val(),
-                beforeSend: function(){
-                    $.LoadingOverlay("hide");
-                    $("#project-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
-                },
-                success: function(data){
-                    $("#project-suggesstion-box").show();
-                    $("#project-suggesstion-box").html(data);
-                    $("#projectSearchbox").css("background-color","#FFF");
-                }
-            });
-        }else{
-            $("#project-suggesstion-box").hide();
-        }
-    });
-
-    $("#userSearchbox").keyup(function(){
-        if($(this).val().length > 0){
-            $.ajax({
-                type: "POST",
-                url: "/purchase/material-request/get-users",
-                data:'keyword='+$(this).val(),
-                beforeSend: function(){
-                    $.LoadingOverlay("hide");
-                    $("#user-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
-                },
-                success: function(data){
-                    $("#user-suggesstion-box").show();
-                    $("#user-suggesstion-box").html(data);
-                    $("#userSearchbox").css("background-color","#FFF");
-                }
-            });
-        }else{
-            $("#user-suggesstion-box").hide();
-        }
-    });
-
-    $('#createMaterial').click(function(){
-        $('#searchbox').html('');
-        $('#qty').html('');
-        var material_name = $('#searchbox').val();
-        var quantity = $('#qty').val();
-        var unitId = $('#materialUnit').val();
-        var unitName = $('#materialUnit option[value="'+unitId+'"]').text();
-        var componentTypeId = $('#component_id').val();
-        var iterator = $('#iterator').val();
-        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
-        var rows = '<tr>'+materials+'</tr>';
-        $('#myModal').modal('hide');
-        $('#Materialrows').append(rows);
-        var iterator = parseInt(iterator) + 1;
-        $('#iterator').val(iterator);
-        $('#component_id').val(null);
-    });
-
-    $('#createAsset').click(function(){
-        $('#searchbox').html('');
-        $('#qty').html('');
-        var asset_name = $('#Assetsearchbox').val();
-        var quantity = $('#Assetqty').val();
-        var unit = $('#AssetUnitsearchbox').val();
-        var unitId = $('#nosUnitId').val();
-        var componentTypeId = $('#component_id').val();
-        var iterator = $('#iterator').val();
-        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
-        var rows = '<tr>'+assets+'</tr>';
-        $('#myModal1').modal('hide');
-        $('#Assetrows').append(rows);
-        var iterator = parseInt(iterator) + 1;
-        $('#iterator').val(iterator);
-        $('#component_id').val(null);
-    });
 });
-
 function selectAsset(id) {
     $("#searchbox").val(id);
     $("#suggesstion-box").hide();
 }
-
 function selectAssetUnit(id) {
     $("#AssetUnitsearchbox").val(id);
     $("#asset_suggesstion-box").hide();
 }
+$("#clientSearchbox").keyup(function(){
+    if($(this).val().length > 0){
+        $.ajax({
+            type: "POST",
+            url: "/purchase/material-request/get-clients",
+            data:'keyword='+$(this).val(),
+            beforeSend: function(){
+                $.LoadingOverlay("hide");
+                $("#client-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
+            },
+            success: function(data){
+                $("#client-suggesstion-box").show();
+                $("#client-suggesstion-box").html(data);
+                $("#clientSearchbox").css("background-color","#FFF");
+            }
+        });
+    }else{
+        $("#client-suggesstion-box").hide();
+    }
+});
+$("#projectSearchbox").keyup(function(){
+    if($(this).val().length > 0){
+        $.ajax({
+            type: "POST",
+            url: "/purchase/material-request/get-projects",
+            data:'keyword='+$(this).val(),
+            beforeSend: function(){
+                $.LoadingOverlay("hide");
+                $("#project-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
+            },
+            success: function(data){
+                $("#project-suggesstion-box").show();
+                $("#project-suggesstion-box").html(data);
+                $("#projectSearchbox").css("background-color","#FFF");
+            }
+        });
+    }else{
+        $("#project-suggesstion-box").hide();
+    }
 
+});
+$("#userSearchbox").keyup(function(){
+    if($(this).val().length > 0){
+        $.ajax({
+            type: "POST",
+            url: "/purchase/material-request/get-users",
+            data:'keyword='+$(this).val(),
+            beforeSend: function(){
+                $.LoadingOverlay("hide");
+                $("#user-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
+            },
+            success: function(data){
+                $("#user-suggesstion-box").show();
+                $("#user-suggesstion-box").html(data);
+                $("#userSearchbox").css("background-color","#FFF");
+            }
+        });
+    }else{
+        $("#user-suggesstion-box").hide();
+    }
+});
 function selectClient(id) {
     $("#clientSearchbox").val(id);
     $("#client-suggesstion-box").hide();
 }
-
 function selectProject(nameProject,id) {
     $( "#assetBtn" ).show();
     $( "#myBtn" ).show();
@@ -225,8 +185,10 @@ function selectProject(nameProject,id) {
             var unitName = value.unit_name;
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
+        $('#unitDrpdn').html('');
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
         $('#unitDrpdn').append(str1);
+        $('#component_type_id').val();
     })
         .on('typeahead:open', function (obj, datum) {
         });
@@ -264,7 +226,7 @@ function selectProject(nameProject,id) {
                 'Unable to find any Result that match the current query',
                 '</div>'
             ].join('\n'),
-            suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
+            suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
         },
     }).on('typeahead:selected', function (obj, datum) {
         var POData = datum.unit;
@@ -274,17 +236,61 @@ function selectProject(nameProject,id) {
         $.each( POData, function( key, value ) {
             var unitId = value.unit_id;
             var unitName = value.unit_name;
+
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
-        $('#materialUnit').html(options);
+        $('#unitDrpdn').html('');
+        var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center"><option>Select Unit</option>'+options+ '</select>';
+        $('#unitDrpdn').append(str1);
+        $('#component_type_id').val();
     })
         .on('typeahead:open', function (obj, datum) {
         });
 }
-
 function selectUser(id,id1) {
     $('#user_id_').val(id1);
     $("#userSearchbox").val(id);
-
     $("#user-suggesstion-box").hide();
+}
+$('#createMaterial').click(function(){
+    var material_name = $('#searchbox').val();
+    var quantity = $('#qty').val();
+    var unit = $('#materialUnit option:selected').text();
+    var unitId = $('#materialUnit').val();
+    var componentTypeId = $('#component_id').val();
+    var iterator = $('#iterator').val();
+    var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
+    var rows = '<tr>'+materials+'</tr>';
+    $('#myModal').modal('hide');
+    $('#Materialrows').append(rows);
+    var iterator = parseInt(iterator) + 1;
+    $('#iterator').val(iterator);
+    $('#deleteRowButton').click(DeleteRow);
+    $('#component_id').val(null);
+    $('#searchbox').html('');
+    $('#qty').html('');
+    $('#unitDrpdn').html('');
+})
+$('#createAsset').click(function(){
+    $('#searchbox').html('');
+    $('#qty').html('');
+    $('#unitDrpdn').html('');
+    var asset_name = $('#Assetsearchbox').val();
+    var quantity = $('#Assetqty').val();
+    var unit = $('#AssetUnitsearchbox').val();
+    var unitId = $('#AssetUnitId').val();
+    var componentTypeId = $('#component_id').val();
+    var iterator = $('#iterator').val();
+    var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
+    var rows = '<tr>'+assets+'</tr>';
+    $('#myModal1').modal('hide');
+    $('#Assetrows').append(rows);
+    var iterator = parseInt(iterator) + 1;
+    $('#deleteAssetRowButton').click(DeleteRow);
+    $('#iterator').val(iterator);
+    $('#component_id').val(null);
+});
+
+function removeTableRow(element){
+    $(element).closest('tr').remove();
 }
