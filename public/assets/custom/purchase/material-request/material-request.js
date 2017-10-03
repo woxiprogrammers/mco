@@ -286,6 +286,6 @@ function selectProject(nameProject,id) {
 function selectUser(id,id1) {
     $('#user_id_').val(id1);
     $("#userSearchbox").val(id);
+
     $("#user-suggesstion-box").hide();
 }
-
