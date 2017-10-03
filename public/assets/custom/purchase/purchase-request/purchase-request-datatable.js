@@ -27,7 +27,6 @@ $(document).ready(function(){
                     $("#unit-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
                 },
                 success: function(data){
-                    console.log(data);
                     $("#unit-suggesstion-box").show();
                     $("#unit-suggesstion-box").html(data);
                     $("#Unitsearchbox").css("background-color","#FFF");
@@ -49,7 +48,6 @@ $(document).ready(function(){
                     $("#unit-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
                 },
                 success: function(data){
-                    console.log(data);
                     $("#unit-suggesstion-box").show();
                     $("#unit-suggesstion-box").html(data);
                     $("#Unitsearchbox").css("background-color","#FFF");
@@ -79,7 +77,6 @@ $("#clientSearchbox").keyup(function(){
                 $("#client-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
             },
             success: function(data){
-                console.log(data);
                 $("#client-suggesstion-box").show();
                 $("#client-suggesstion-box").html(data);
                 $("#clientSearchbox").css("background-color","#FFF");
@@ -100,7 +97,6 @@ $("#projectSearchbox").keyup(function(){
                 $("#project-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
             },
             success: function(data){
-                console.log(data);
                 $("#project-suggesstion-box").show();
                 $("#project-suggesstion-box").html(data);
                 $("#projectSearchbox").css("background-color","#FFF");
