@@ -6,8 +6,11 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="iterator" value="0">
+    <input type="hidden" id="component_id">
     <form role="form" id="new_purchase_request" class="form-horizontal" action="/purchase/purchase-request/create" method="post">
-    <div class="page-wrapper">
+    {!! csrf_field() !!}
+        <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
                 <!-- BEGIN CONTAINER -->
@@ -105,15 +108,15 @@
                                                                     <tbody>
                                                                     @foreach($materialRequestList as $components)
                                                                     <tr>
-                                                                        <td> <input type="checkbox"> </td>
+                                                                        <td> <input type="checkbox"> <input type="hidden" name="material_request_component_ids[]" value="{{$components['material_request_component_id']}}"></td>
                                                                         <td> <input type="text" value="{{$components['name']}}" readonly> </td>
                                                                         <td> <input type="text" value="{{$components['quantity']}}" readonly> </td>
                                                                         <td> <input type="text" value="{{$components['unit']}}" readonly> </td>
                                                                         <td>
                                                                             <div class="btn-group open">
-                                                                                <button class="btn btn-xs green dropdown-toggle deleteRowButton" type="button" aria-expanded="true">
+                                                                                <a class="btn btn-xs green dropdown-toggle deleteRowButton" href="javascript:void(0);" onclick="removeTableRow(this)">
                                                                                     Remove
-                                                                                </button>
+                                                                                </a>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -202,7 +205,7 @@
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <div class="form-group">
-                                                <input type="text" class="form-control empty" id="searchbox"  placeholder="Enter material name" >
+                                                <input type="text" class="form-control empty typeahead" id="searchbox"  placeholder="Enter material name" >
 
                                             </div>
                                             <div class="form-group">
@@ -257,6 +260,7 @@
                                                 <input type="number" class="form-control empty" id="Assetqty" value="1" readonly>
                                             </div>
                                             <div class="form-group">
+                                                <input type="hidden" id="AssetUnitId" value="{{$nosUnitId}}">
                                                 <input type="text" class="form-control empty" id="AssetUnitsearchbox"  value="Nos" readonly >
                                                 <div id="asset_unit-suggesstion-box"></div>
                                             </div>

@@ -143,9 +143,10 @@ $(document).ready(function(){
         var asset_name = $('#Assetsearchbox').val();
         var quantity = $('#Assetqty').val();
         var unit = $('#AssetUnitsearchbox').val();
+        var unitId = $('#nosUnitId').val();
         var componentTypeId = $('#component_id').val();
         var iterator = $('#iterator').val();
-        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unit+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
+        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
         var rows = '<tr>'+assets+'</tr>';
         $('#myModal1').modal('hide');
         $('#Assetrows').append(rows);
@@ -226,7 +227,6 @@ function selectProject(nameProject,id) {
         });
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
         $('#unitDrpdn').append(str1);
-        $('#component_type_id').val();
     })
         .on('typeahead:open', function (obj, datum) {
         });
@@ -277,7 +277,6 @@ function selectProject(nameProject,id) {
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
         $('#materialUnit').html(options);
-        $('#component_type_id').val();
     })
         .on('typeahead:open', function (obj, datum) {
         });

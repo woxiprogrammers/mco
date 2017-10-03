@@ -257,14 +257,13 @@ function selectUser(id,id1) {
     $("#user-suggesstion-box").hide();
 }
 $('#createMaterial').click(function(){
-
     var material_name = $('#searchbox').val();
     var quantity = $('#qty').val();
-    var unit = $('#materialUnit').val();
-    alert(unit);
+    var unit = $('#materialUnit option:selected').text();
+    var unitId = $('#materialUnit').val();
     var componentTypeId = $('#component_id').val();
     var iterator = $('#iterator').val();
-    var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unit+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><button class="btn btn-xs green dropdown-toggle" id="deleteRowButton" type="button" aria-expanded="true">Remove</button></td>';
+    var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
     var rows = '<tr>'+materials+'</tr>';
     $('#myModal').modal('hide');
     $('#Materialrows').append(rows);
@@ -283,9 +282,10 @@ $('#createAsset').click(function(){
     var asset_name = $('#Assetsearchbox').val();
     var quantity = $('#Assetqty').val();
     var unit = $('#AssetUnitsearchbox').val();
+    var unitId = $('#AssetUnitId').val();
     var componentTypeId = $('#component_id').val();
     var iterator = $('#iterator').val();
-    var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unit+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><button class="btn btn-xs green dropdown-toggle" id="deleteAssetRowButton" type="button" aria-expanded="true">Remove</button></td>';
+    var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
     var rows = '<tr>'+assets+'</tr>';
     $('#myModal1').modal('hide');
     $('#Assetrows').append(rows);
@@ -293,4 +293,8 @@ $('#createAsset').click(function(){
     $('#deleteAssetRowButton').click(DeleteRow);
     $('#iterator').val(iterator);
     $('#component_id').val(null);
-})
+});
+
+function removeTableRow(element){
+    $(element).closest('tr').remove();
+}

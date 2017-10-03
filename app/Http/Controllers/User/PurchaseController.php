@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 use App\Asset;
 use App\Client;
+use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
@@ -34,7 +35,8 @@ class PurchaseController extends Controller
         return view('purchase/material-request/manage');
     }
     public function getCreateView(Request $request){
-        return view('purchase/material-request/create');
+        $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
+        return view('purchase/material-request/create')->with(compact('nosUnitId'));
     }
     public function getMaterialRequestIDFormat($project_site_id,$created_at,$serial_no){
         $format = "MR".$project_site_id.date_format($created_at,'y').date_format($created_at,'m').date_format($created_at,'d').$serial_no;
@@ -56,6 +58,7 @@ class PurchaseController extends Controller
                   $materialRequestList[$iterator]['component_type'] = $materialRequestComponents->materialRequestComponentTypes->name;
                   $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponents->component_status_id;
                   $materialRequestList[$iterator]['component_status'] = $materialRequestComponents->purchaseRequestComponentStatuses->slug;
+                  $materialRequestList[$iterator]['component_status_name'] = $materialRequestComponents->purchaseRequestComponentStatuses->name;
                   $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
                   $pro = $materialRequest->projectSite->project;
                   $materialRequestList[$iterator]['project_name'] =$pro->name;
@@ -70,10 +73,9 @@ class PurchaseController extends Controller
           $records = array();
           $records['data'] = array();
           for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
-              Log::info(strtolower($materialRequestList[$pagination]['component_status']));
               switch(strtolower($materialRequestList[$pagination]['component_status'])){
                   case 'pending':
-                      $user_status = '<td><span class="label label-sm label-danger">'. $materialRequestList[$pagination]['component_status'].' </span></td>';
+                      $user_status = '<td><span class="label label-sm label-danger">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                       $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -95,7 +97,7 @@ class PurchaseController extends Controller
                       break;
 
                   case 'admin-approved':
-                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status'].' </span></td>';
+                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                       $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -120,7 +122,7 @@ class PurchaseController extends Controller
                       break;
 
                   case 'admin-disapproved':
-                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status'].' </span></td>';
+                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                       $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -137,7 +139,24 @@ class PurchaseController extends Controller
                       break;
 
                   case 'in-indent':
-                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status'].' </span></td>';
+                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
+                      $actionDropDown = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Edit 
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>';
+                      break;
+
+                  default:
+                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                       $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -396,38 +415,17 @@ class PurchaseController extends Controller
         $users = $str3;
         return ($users);
     }
+    use MaterialRequestTrait;
     public function createMaterialList(Request $request){
         try{
             $data = $request->all();
             $user = Auth::user();
-            $quotationId = Quotation::where('project_site_id',$data['project_site_id'])->pluck('id')->first();
-            $materialRequestData = array();
-            $materialRequestData['project_site_id'] = $data['project_site_id'];
-            $materialRequestData['user_id'] = $user['id'];
-            $materialRequestData['quotation_id'] = $quotationId != null ? $quotationId : null;
-            $materialRequestData['assigned_to'] = $user['id'];
-            $materialRequestData['on_behalf_of'] = $data['user_id'];
-            $materialRequest = MaterialRequests::create($materialRequestData);
-            $pendingStatusId = PurchaseRequestComponentStatuses::where('slug','pending')->pluck('id')->first();
-            $iterator = 0;
-            $materialComponentHistoryData = array();
-            $materialComponentHistoryData['component_status_id'] = $pendingStatusId;
-            $materialComponentHistoryData['remark'] = '';
-            $materialComponentHistoryData['user_id'] = Auth::user()->id;
-            foreach($data['item_list'] as $key => $itemData){
-                $materialRequestComponentData['material_request_id'] = $materialRequest['id'];
-                $materialRequestComponentData['name'] = $itemData['name'];
-                $materialRequestComponentData['quantity'] = $itemData['quantity_id'];
-                $materialRequestComponentData['unit_id'] = $itemData['unit_id'];
-                $materialRequestComponentData['component_type_id'] = $itemData['component_type_id'];
-                $materialRequestComponentData['component_status_id'] = $pendingStatusId;
-                $materialRequestComponentData['created_at'] = Carbon::now();
-                $materialRequestComponentData['updated_at'] = Carbon::now();
-                $materialRequestComponent[$iterator] = MaterialRequestComponents::insertGetId($materialRequestComponentData);
-                $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponent[$iterator];
-                MaterialRequestComponentHistory::create($materialComponentHistoryData);
+            $materialRequestComponentId = $this->createMaterialRequest($data,$user,false);
+            if($materialRequestComponentId == null){
+                $request->session()->flash('error', 'Material request could not be created.');
+            }else{
+                $request->session()->flash('success', 'Material request created successfully.');
             }
-            $request->session()->flash('success', 'Material request created successfully.');
             return redirect('purchase/material-request/create');
         }catch(\Exception $e){
             $data = [

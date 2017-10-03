@@ -6,6 +6,7 @@
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input id="nosUnitId" type="hidden" value="{{$nosUnitId}}">
     <form role="form" id="new_material_request" class="form-horizontal" action="/purchase/material-request/create" method="post">
     <input type="hidden" id="component_id">
     <input type="hidden" id="iterator">
