@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Purchase;
 
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
+use App\Http\Requests\MaterialRequest;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponentImages;
 use App\MaterialRequestComponents;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Log;
 
 class PurchaseRequestController extends Controller
 {
+    use MaterialRequestTrait;
     public function __construct()
     {
         $this->middleware('custom.auth');
@@ -57,7 +59,7 @@ class PurchaseRequestController extends Controller
         }
     }
 
-    use MaterialRequestTrait;
+
     public function create(Request $request){
         try{
             $user = Auth::user();
@@ -109,6 +111,183 @@ class PurchaseRequestController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+        }
+    }
+
+    public function purchaseRequestListing(Request $request){
+        try{
+            $response = array();
+            $responseStatus = 200;
+            $purchaseRequests = PurchaseRequest::all();
+            $start = $request->start;
+            $end = ($start + $request->length) > count($purchaseRequests) ? count($purchaseRequests) : ($start + $request->length);
+            $iTotalRecords = count($purchaseRequests);
+            $records = array();
+            $records['data'] = array();
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+            $purchaseRequestsData = $purchaseRequests->slice($start,$request->length);
+            $iterator = 0;
+            foreach($purchaseRequestsData as $purchaseRequest){
+                switch ($purchaseRequest->status->slug){
+                    case 'purchase-requested':
+                        $status = "<span class=\"btn btn-xs btn-warning\"> ".$purchaseRequest->status->name." </span>";
+                        $action = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Edit 
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);" onclick="openApproveModal('.$purchaseRequest->id.')">
+                                        <i class="icon-tag"></i> Approve / Disapprove 
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>';
+                        break;
+
+                    case 'p-r-admin-approved':
+                    case 'p-r-manager-approved':
+                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$purchaseRequest->status->name." </span>";
+                        $action = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Edit 
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>';
+                        break;
+
+                    case 'p-r-manager-disapproved':
+                    case 'p-r-admin-disapproved':
+                        $status = "<span class=\"btn btn-xs btn-danger\"> ".$purchaseRequest->status->name." </span>";
+                        $action = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Edit 
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>';
+                        break;
+
+                    default:
+                        $status = "<span class=\"btn btn-xs btn-success\"> ".$purchaseRequest->status->name." </span>";
+                        $action = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Edit 
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>';
+                        break;
+                }
+                $records['data'][$iterator] = [
+                    $purchaseRequest->id,
+                    $purchaseRequest->projectSite->project->client->company,
+                    $purchaseRequest->projectSite->project->name.' - '.$purchaseRequest->projectSite->name,
+                    $status,
+                    $action
+                ];
+                $iterator++;
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Purchase Requests listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $responseStatus = 500;
+            $records = array();
+        }
+        return response()->json($records,$responseStatus);
+    }
+
+    public function changePurchaseRequestStatus(Request $request,$newStatus,$purchaseRequestId = null){
+        try{
+            if($purchaseRequestId == null){
+                $purchaseRequestId = $request->purchaseRequestId;
+            }
+            $user = Auth::user();
+            $materialComponentHistoryData = array();
+            $materialComponentHistoryData['remark'] = $request->remark;
+            $materialComponentHistoryData['user_id'] = $user->id;
+            switch ($newStatus){
+                case 'approved':
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
+                        $approveStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-admin-approved')->pluck('id')->first();
+                    }else{
+                        $approveStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-manager-approved')->pluck('id')->first();
+                    }
+                    PurchaseRequest::where('id',$purchaseRequestId)->update([
+                                        'purchase_component_status_id' => $approveStatusId
+                                    ]);
+                    $materialComponentIds = PurchaseRequestComponent::where('purchase_request_id',$purchaseRequestId)->pluck('material_request_component_id')->toArray();
+                    MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $approveStatusId]);
+                    $materialComponentHistoryData['component_status_id'] = $approveStatusId;
+                    foreach($materialComponentIds as $materialComponentId) {
+                        $materialComponentHistoryData['material_request_component_id'] = $materialComponentId;
+                        MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                    }
+                    break;
+
+                case 'disapproved':
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
+                        $disapproveStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-admin-disapproved')->pluck('id')->first();
+                    }else{
+                        $disapproveStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-manager-disapproved')->pluck('id')->first();
+                    }
+                    PurchaseRequest::where('id',$purchaseRequestId)->update([
+                        'purchase_component_status_id' => $disapproveStatusId
+                    ]);
+                    $materialComponentIds = PurchaseRequestComponent::where('purchase_request_id',$purchaseRequestId)->pluck('material_request_component_id')->toArray();
+                    MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $disapproveStatusId]);
+                    $materialComponentHistoryData['component_status_id'] = $disapproveStatusId;
+                    foreach($materialComponentIds as $materialComponentId) {
+                        $materialComponentHistoryData['material_request_component_id'] = $materialComponentId;
+                        MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+            $request->session()->flash('success', 'Purchase Request status changed successfully.');
+            return redirect('/purchase/purchase-request/manage');
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Change Purchase request status',
+                'params' => $request->all(),
+                'newStatus' => $newStatus,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }

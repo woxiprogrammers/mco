@@ -254,6 +254,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses'=> 'Purchase\PurchaseRequestController@getCreateView'));
             Route::get('edit/{status}',array('uses'=> 'Purchase\PurchaseRequestController@getEditView'));
             Route::post('create',array('uses'=> 'Purchase\PurchaseRequestController@create'));
+            Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
+            Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));

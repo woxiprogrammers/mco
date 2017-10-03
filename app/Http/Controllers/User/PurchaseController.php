@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Log;
 
 class PurchaseController extends Controller
 {
+    use MaterialRequestTrait;
     public function __construct()
     {
         $this->middleware('custom.auth');
@@ -37,10 +38,6 @@ class PurchaseController extends Controller
     public function getCreateView(Request $request){
         $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
         return view('purchase/material-request/create')->with(compact('nosUnitId'));
-    }
-    public function getMaterialRequestIDFormat($project_site_id,$created_at,$serial_no){
-        $format = "MR".$project_site_id.date_format($created_at,'y').date_format($created_at,'m').date_format($created_at,'d').$serial_no;
-        return $format;
     }
     public function getMaterialRequestListing(Request $request){
       try{
@@ -415,7 +412,7 @@ class PurchaseController extends Controller
         $users = $str3;
         return ($users);
     }
-    use MaterialRequestTrait;
+
     public function createMaterialList(Request $request){
         try{
             $data = $request->all();
