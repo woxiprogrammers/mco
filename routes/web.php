@@ -247,7 +247,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=> 'User\PurchaseController@createMaterialList'));
             Route::post('material-requestWise-listing',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListing'));
             Route::get('material-requestWise-listing-view',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListingView'));
-
+            Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
         });
         Route::group(['prefix' => 'purchase-request'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
@@ -268,11 +268,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
             Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
         });
-        Route::group(['prefix' => 'manage-asset'], function(){
-            Route::get('manage',array('uses'=> 'Inventory\AssetManagementController@getManageView'));
-            Route::get('create',array('uses'=> 'Inventory\AssetManagementController@getCreateView'));
-            Route::get('edit',array('uses'=> 'Inventory\AssetManagementController@getEditView'));
-        });
+
     });
 
     Route::group(['prefix' => 'vendors'],function(){
@@ -287,6 +283,20 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-name',array('uses'=> 'Admin\VendorController@checkVendorName'));
         Route::get('change-status/{vendor}',array('uses' => 'Admin\VendorController@changeVendorStatus'));
         Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\VendorController@autoSuggest'));
+    });
+
+    Route::group(['prefix' => 'asset'], function(){
+        Route::get('manage',array('uses'=> 'Admin\AssetManagementController@getManageView'));
+        Route::get('create',array('uses'=> 'Admin\AssetManagementController@getCreateView'));
+        Route::get('edit/{asset}',array('uses'=> 'Admin\AssetManagementController@getEditView'));
+        Route::post('edit/{asset}',array('uses' => 'Admin\AssetManagementController@editAsset'));
+        Route::post('create',array('uses' => 'Admin\AssetManagementController@createAsset'));
+        Route::post('listing',array('uses'=> 'Admin\AssetManagementController@assetListing'));
+        Route::post('image-upload',array('uses'=>'Admin\AssetManagementController@uploadTempAssetImages'));
+        Route::post('display-images',array('uses'=>'Admin\AssetManagementController@displayAssetImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
+        Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkModel'));
+        Route::get('change-status/{asset}',array('uses' => 'Admin\AssetManagementController@changeAssetStatus'));
     });
 
     Route::group(['prefix'=>'bank'],function() {
@@ -304,6 +314,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
             Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
             Route::post('listing',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
+        });
+        Route::group(['prefix' => 'checkList'],function(){
+            Route::get('manage',array('uses' => 'Checklist\ChecklistController@getManageView'));
+            Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
         });
     });
 });
