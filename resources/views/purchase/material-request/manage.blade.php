@@ -194,6 +194,14 @@
         $("#remarkModal #componentId").val(componentId);
         $("#remarkModal").modal('show');
     }
+
+
+    function submitIndentForm(element){
+        console.log($(element));
+        var token = $('input[name="_token"]').val();
+        $(element).next('input[name="_token"]').val(token);
+        $(element).closest('form').submit();
+    }
 </script>
 <script>
 
