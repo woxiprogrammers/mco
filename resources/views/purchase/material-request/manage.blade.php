@@ -149,8 +149,6 @@
             window.location.replace("/purchase/material-request/material-requestWise-listing-view");
         });
         $(".approve-modal-footer-buttons").on('click',function(){
-            console.log('in on click');
-//             action="/purchase/material-request/change-status/admin-approved"
             var buttonType = $(this).text();
             if(buttonType == 'Approve'){
                 var action = "/purchase/material-request/change-status/admin-approved";
@@ -197,7 +195,6 @@
 
 
     function submitIndentForm(element){
-        console.log($(element));
         var token = $('input[name="_token"]').val();
         $(element).next('input[name="_token"]').val(token);
         $(element).closest('form').submit();
