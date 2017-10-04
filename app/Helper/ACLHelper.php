@@ -25,16 +25,18 @@ class ACLHelper{
                     ->where('user_has_permissions.user_id', $user->id)
                     ->where('modules.module_id', $moduleId)
                     ->select('user_has_permissions.permission_id as permission_id','modules.name as module_name')
-                    ->get()->toArray();
+                    ->get()
+                    ->toArray();
             }else{
                 $userPermissionCount = UserHasPermission::join('permissions','user_has_permissions.permission_id','=','permissions.id')
                     ->join('modules','modules.id','=','permissions.module_id')
                     ->where('user_has_permissions.user_id', $user->id)
                     ->where('modules.id', $moduleId)
                     ->select('user_has_permissions.permission_id as permission_id','modules.name as module_name')
-                    ->get()->toArray();
+                    ->get()
+                    ->toArray();
             }
-            if($userPermissionCount > 0){
+            if(count($userPermissionCount) > 0){
                 return true;
             }else{
                 return false;
