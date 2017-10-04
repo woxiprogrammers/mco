@@ -3,7 +3,7 @@
         <div class="container">
             <!-- BEGIN LOGO -->
             <div class="page-logo">
-                <a href="javascript:void(0)">
+                <a href="/">
                     <img src="/assets/global/img/logo.jpg" alt="logo" class="logo-default">
                 </a>
             </div>
@@ -131,6 +131,11 @@
                                                 </a>
                                             </li>
                                         @endif
+                                            <li aria-haspopup="true">
+                                                <a href="/asset/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-bars"></i> Asset
+                                                </a>
+                                            </li>
                                     </ul>
                                 </li>
                                 @if($user->hasPermissionTo('view-manage-user'))
@@ -142,6 +147,12 @@
                                             <li aria-haspopup="true">
                                                 <a href="/vendors/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Vendors
+                                                </a>
+                                            </li>
+                                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                                <a href="/role/manage">
+                                                    <i class="fa fa-users"></i> Manage Roles
+                                                    <span class="arrow"></span>
                                                 </a>
                                             </li>
                                             <li aria-haspopup="true">
@@ -176,65 +187,58 @@
                                         @endif
                                     </ul>
                                 </li>
-                                <li aria-haspopup="true"  class="dropdown-submenu ">
+
+                                <li  aria-haspopup="true">
                                     <a href="/bank/manage">
                                         <i class="fa fa-folder"></i> Manage Bank
-                                    </a>
                                     </a>
                                 </li>
                                 </ul>
                             </li>
-                        <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
-                        @if($hasStructurePermission)
-                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                                <a href="/quotation/manage/status#2"> Quotations
-                                    <span class="arrow"></span>
-                                </a>
-                            </li>
-                        @endif
-                        <?php $hasBillPermission = \App\Helper\ACLHelper::checkModuleAcl('bill'); ?>
-                        @if($hasBillPermission)
-                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                                <a href="/bill/manage/project-site"> Bills
-                                    <span class="arrow"></span>
-                                </a>
-                            </li>
-                        @endif
+                    @endif
+                    <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
+                    @if($hasStructurePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                            <a> Purchase
+                            <a href="/quotation/manage/status#2"> Quotations
                                 <span class="arrow"></span>
                             </a>
-                            <ul class="dropdown-menu pull-left">
-                                <li aria-haspopup="true">
-                                    <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Material Request
-                                    </a>
-                                </li>
-                               <li aria-haspopup="true">
-                                    <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-bars"></i> Purchase Request
-                                    </a>
-                               </li>
-                                <li aria-haspopup="true">
-                                    <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-bars"></i> Purchase Order
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
-                        <!--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                               <a> Checklist
-                                 <span class="arrow"></span>
+                    @endif
+                    <?php $hasBillPermission = \App\Helper\ACLHelper::checkModuleAcl('bill'); ?>
+                    @if($hasBillPermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a href="/bill/manage/project-site"> Bills
+                                <span class="arrow"></span>
                             </a>
-                            <ul class="dropdown-menu pull-left">
-                                <li aria-haspopup="true">
-                                    <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Category Management
-                                    </a>
-                                </li>
-                            </ul>
-                           </li>
-
+                        </li>
+                    @endif
+                    <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?>
+                    @if($hasPurchasePermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> Purchase
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Material Request
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Purchase Request
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Purchase Order
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endif
+                    <?php $hasInventoryPermission = \App\Helper\ACLHelper::checkModuleAcl('inventory');?>
+                    @if($hasInventoryPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
                                 <span class="arrow"></span>
@@ -245,40 +249,57 @@
                                         <i class="fa fa-sitemap"></i> Store Keeper
                                     </a>
                                 </li>
-                                <li aria-haspopup="true">
-                                    <a href="/inventory/manage-asset/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-bars"></i> Manage Asset
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>-->
-                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                            <a> Drawing
-                                <span class="arrow"></span>
-                            </a>
-                            <ul class="dropdown-menu pull-left">
-                                <li aria-haspopup="true">
-                                    <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Category Management
-                                    </a>
-                                </li>
-                                <li aria-haspopup="true">
-                                    <a href="/drawing/images/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-bars"></i> Add Image
-                                    </a>
-                                </li>
-                                <li aria-haspopup="true">
-                                    <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-bars"></i> Manage Drawing
-                                    </a>
-                                </li>
                             </ul>
                         </li>
                     @endif
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> Drawing
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/drawing/images/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Add Image
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Manage Drawing
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                      <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> Checklist
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/checklist/checkList/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Checklist Structure
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
-            </div>
-            <!-- END MEGA MENU -->
+            </li>
         </div>
-    </div>
+            <!-- END MEGA MENU -->
+    </li>
+</ul>
+</div>
+</div>
     <!-- END HEADER MENU -->
-    </div>
+</div>
+</div>

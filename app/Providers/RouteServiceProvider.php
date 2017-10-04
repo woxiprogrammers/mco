@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Asset;
 use App\BankInfo;
 use App\Bill;
 use App\BillTransaction;
@@ -15,6 +16,7 @@ use App\Project;
 use App\ProjectSite;
 use App\Quotation;
 use App\QuotationWorkOrder;
+use App\Role;
 use App\Summary;
 use App\Unit;
 use App\Tax;
@@ -62,9 +64,12 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('quotation',Quotation::class);
         Route::model('work_order',QuotationWorkOrder::class);
         Route::model('bill_transaction',BillTransaction::class);
+        Route::model('role',Role::class);
         Route::model('extra_item',ExtraItem::class);
         Route::model('vendor',Vendor::class);
+        Route::model('city',City::class);
         Route::model('bank_info',BankInfo::class);
+        Route::model('asset',Asset::class);
     }
 
     /**

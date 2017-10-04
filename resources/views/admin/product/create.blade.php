@@ -71,8 +71,8 @@
                                                             <label class="col-md-3 control-label">Category</label>
                                                             <div class="col-md-6">
                                                                 <select class="form-control" id="category_name" name="category_id">
-                                                                    @foreach($categories as $category)
-                                                                        <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                                                     @foreach($categories as $category)
+                                                                       <option value="{{$category['id']}}">{{$category['name']}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -157,7 +157,7 @@
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <div class="col-md-3 col-md-offset-4" style="margin-left: 78%">
-                                                                        <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
+                                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit </button>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -186,7 +186,6 @@
     $(document).ready(function(){
         getMaterials($("#category_name").val());
         CreateProduct.init();
-        $('#submit').css("padding-left",'6px');
         var citiList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,

@@ -67,7 +67,7 @@
                                                 </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3">
-                                                        <button type="submit" class="btn red" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                        <button type="submit" id="edit-submit" class="btn red" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
                                                     </div>
                                                 </div>
                                             </form>
