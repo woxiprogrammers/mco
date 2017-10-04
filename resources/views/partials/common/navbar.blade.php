@@ -267,11 +267,11 @@
                                     <i class="fa fa-bars"></i> Add Image
                                 </a>
                             </li>
-                            <li aria-haspopup="true">
+                            {{--<li aria-haspopup="true">
                                 <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Manage Drawing
                                 </a>
-                            </li>
+                            </li>--}}
                         </ul>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
