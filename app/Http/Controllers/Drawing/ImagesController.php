@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Drawing;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 
 class ImagesController extends Controller
 {
@@ -22,7 +23,7 @@ class ImagesController extends Controller
 
     public function uploadTempDrawingImages(Request $request){
         try{
-            $drawingDirectoryName = sha1(1);
+            $drawingDirectoryName = sha1(1); // Need to change directory name at time of implementation
             $tempUploadPath = public_path().env('DRAWING_TEMP_IMAGE_UPLOAD');
             $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$drawingDirectoryName;
             /* Create Upload Directory If Not Exists */
