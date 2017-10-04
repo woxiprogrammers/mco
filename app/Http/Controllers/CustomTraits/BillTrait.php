@@ -1030,7 +1030,7 @@ trait BillTrait{
             return view('admin.bill.edit')->with(compact('bill','quotationProducts','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
         }catch(\Exception $e){
             $data = [
-                'action' => 'Edit Bill',
+                'action' => 'Edit Bill view',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
