@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Category;
 use App\CategoryMaterialRelation;
+use App\Helper\MaterialProductHelper;
 use App\Quotation;
 use App\Http\Controllers\Controller;
 use ConsoleTVs\Charts\Facades\Charts;
