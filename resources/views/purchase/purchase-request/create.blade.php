@@ -46,14 +46,14 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="projectSearchbox"  placeholder="Enter project name" >
+                                                            <input type="text" class="form-control empty" id="projectSearchbox"  placeholder="Enter project site name" >
                                                             <input type="hidden"  id="project_side_id" name="project_site_id">
                                                             <div id="project-suggesstion-box"></div>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter user name" >
+                                                            <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter username" >
                                                             <input type="hidden" name="user_id" id="user_id_">
                                                             <div id="user-suggesstion-box"></div>
                                                         </div>
@@ -308,6 +308,4 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-request/purchase-request-datatable.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/purchase-request/purchase-request-typeahead.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/purchase-request/purchase-request.js" type="text/javascript"></script>
 @endsection
