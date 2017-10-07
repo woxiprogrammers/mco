@@ -51,14 +51,20 @@ class PurchaseRequestController extends Controller
         }
         return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId'));
     }
-    public function getEditView(Request $request,$status){
-        if($status == 2){
+
+    public function getEditView(Request $request,$status,$id){
+        $user = Auth::user();
+        $userRole = $user->roles[0]->role->slug;
+        if($status == "p-r-admin-approved"){
+            $purchaseRequest = PurchaseRequest::where('id',$id)->first();
+            $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('material_request_component_id');
+            $materialRequestComponentDetails = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','asc')->get();
+
+            return view('purchase/purchase-request/edit-approved')->with(compact('purchaseRequest','materialRequestComponentDetails','userRole'));
+        }else{
             return view('purchase/purchase-request/edit-draft');
-        }else if($status == 1){
-            return view('purchase/purchase-request/edit-approved');
         }
     }
-
 
     public function create(Request $request){
         try{
@@ -139,9 +145,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                <li>.'
+                                    .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                        '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
                                 <li>
@@ -162,9 +168,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                <li>'
+                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'/'.$purchaseRequest->id.'">'.
+                                        '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
                             </ul>
@@ -180,9 +186,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                <li>'
+                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                        '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
                             </ul>
@@ -197,9 +203,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                <li>'
+                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                        '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
                             </ul>
