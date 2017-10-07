@@ -504,12 +504,12 @@ function calucalateProductViewTotal(){
     $(".material_amount").each(function(){
         subtotal = subtotal + parseFloat($(this).val());
     });
-    $("#productViewSubtotal").text(customRound(subtotal));
+    $("#productViewSubtotal").text((subtotal).toFixed(3));
     var total = subtotal;
     $(".profit-margin").each(function(){
-        var profitMarginAmount = subtotal * ($(this).val() / 100);
-        total = total + profitMarginAmount;
-        $(this).parent().next().text(customRound(profitMarginAmount));
+        var profitMarginAmount = (subtotal * ($(this).val() / 100)).toFixed(3);
+        total = total + parseFloat(profitMarginAmount);
+        $(this).parent().next().text((profitMarginAmount));
     });
     $("#productViewTotal").text(customRound(total));
     $("#roundproductViewTotal,#roundQuotationProductViewTotal").text(customRound(total));

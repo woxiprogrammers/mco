@@ -78,7 +78,7 @@ function changedQuantity(materialId){
     var rate = $("#material_"+materialId+"_rate").val();
     var quantity = $("#material_"+materialId+"_quantity").val();
     var amount = rate*quantity;
-    $("#material_"+materialId+"_amount").val(customRound(amount));
+    $("#material_"+materialId+"_amount").val(amount.toFixed(3));
     calculateSubTotal();
 }
 
@@ -91,7 +91,7 @@ function calculateSubTotal(){
         amount = 0;
     }
 
-    $("#subtotal,#productViewSubtotal").text(Math.round(amount * 1000) / 1000);
+    $("#subtotal,#productViewSubtotal").text(amount.toFixed(3));
     calculateProfitMargin();
 }
 
@@ -99,10 +99,11 @@ function calculateProfitMargin(){
     var amount = parseFloat($("#subtotal,#productViewSubtotal").text());
     var total = amount;
     $(".profit-margin").each(function(){
-        var profitMarginAmount = amount * ($(this).val() / 100);
-        total = customRound(total + profitMarginAmount);
-        $(this).parent().next().text(customRound(profitMarginAmount));
+        var profitMarginAmount = parseFloat((amount * ($(this).val() / 100)).toFixed(3));
+        total = (total + profitMarginAmount);
+        $(this).parent().next().text(profitMarginAmount);
     });
+    total = parseFloat(total);
     $("#total,#productViewTotal").text(customRound(total));
     $("#roundtotal,#productViewTotal").text(total.toFixed());
 }
