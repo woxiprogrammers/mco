@@ -1,6 +1,5 @@
 
 $(document).ready(function(){
-   // $('.deleteRowButton').click(DeleteRow);
     var site_name = '';
     var search_in = '';
     $( "#assetBtn" ).hide();

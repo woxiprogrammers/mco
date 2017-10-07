@@ -322,4 +322,23 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
         });
     });
+
+    Route::group(['prefix'=>'drawing'],function() {
+        Route::group(['prefix' => 'category-management'], function(){
+            Route::get('manage',array('uses'=> 'Drawing\CategoryManagementController@getManageView'));
+            Route::get('create-main',array('uses'=> 'Drawing\CategoryManagementController@getCreateMainView'));
+            Route::get('create-sub',array('uses'=> 'Drawing\CategoryManagementController@getCreateSubView'));
+            Route::get('edit-main',array('uses'=> 'Drawing\CategoryManagementController@getMainEditView'));
+            Route::get('edit-sub',array('uses'=> 'Drawing\CategoryManagementController@getSubEditView'));
+        });
+        Route::group(['prefix' => 'images'], function(){
+            Route::get('manage',array('uses'=> 'Drawing\ImagesController@getManageView'));
+            Route::get('create',array('uses'=> 'Drawing\ImagesController@getCreateView'));
+            Route::get('edit',array('uses'=> 'Drawing\ImagesController@getEditView'));
+            Route::post('image-upload/{quotationId}',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
+            Route::post('display-images/{quotationId}',array('uses'=>'Drawing\ImagesController@displayDrawingImages'));
+            Route::post('delete-temp-product-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
+        });
+    });
+
 });
