@@ -168,7 +168,7 @@ trait RoleTrait{
                     $rolePermissionData['is_mobile'] = true;
                     $check = RoleHasPermission::where('role_id',$roleId)->where('permission_id',$permissions)->first();
                     if ($check != null) {
-                        RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update('is_mobile', true);
+                        RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update(['is_mobile', true]);
                     } else {
                         $rolePermissionData['permission_id'] = $permissions;
                         RoleHasPermission::create($rolePermissionData);
