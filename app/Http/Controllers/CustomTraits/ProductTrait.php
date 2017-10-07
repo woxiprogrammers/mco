@@ -184,8 +184,6 @@ trait ProductTrait{
             foreach($data['material'] as $key => $materialVersion){
                 $recentVersion = MaterialVersion::where('material_id',$key)->orderBy('created_at','desc')->select('rate_per_unit','unit_id')->first();
                 $subTotal += round($data['material_amount'][$key],3);
-                Log::info('subtotal in loop');
-                Log::info($subTotal);
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
                     $materialVersion['material_id'] = $key;
@@ -196,18 +194,11 @@ trait ProductTrait{
                 }
                 $iterator++;
             }
-            Log::info('subtotal out of loop');
-            Log::info($subTotal);
             $iterator = 0;
             $taxAmount = 0;
             if(array_key_exists('profit_margin',$data)){
-                Log::info('in profit margin');
                 foreach($data['profit_margin'] as $key => $profitMargin){
-                    Log::info('current taxAmount');
-                    Log::info(round(($subTotal * ($profitMargin / 100)),3));
                     $taxAmount += round(($subTotal * ($profitMargin / 100)),3);
-                    Log::info('till this total amount');
-                    Log::info($taxAmount);
                     $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$key)->orderBy('created_at','desc')->select('id','percentage')->first()->toArray();
                     if($profitMargin == $recentProfitMarginVersion['percentage']){
                         $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
@@ -223,8 +214,6 @@ trait ProductTrait{
             }
             $productVersionData = array();
             $productVersionData['product_id'] = $product->id;
-            Log::info('product rate per unit');
-            Log::info(MaterialProductHelper::customRound(($subTotal + $taxAmount)));
             $productVersionData['rate_per_unit'] = MaterialProductHelper::customRound(($subTotal + $taxAmount));
             $productVersion = ProductVersion::create($productVersionData);
             foreach($productMaterialProfitMarginData as $versions){
