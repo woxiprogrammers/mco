@@ -906,7 +906,7 @@ trait BillTrait{
                 $total['product_cumulative_bill_amount'] = MaterialProductHelper::customRound(($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
                 $i++;
             }
-            $data['extraItems'] = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
+            $data['extraItems'] = BillQuotationExtraItem::whereIn('bill_id',$allBillIds)->get();
             if(count($data['extraItems']) > 0){
                 $total['extra_item_previous_bill_amount'] = $total['extra_item_current_bill_amount'] = $total['extra_item_cumulative_bill_amount'] = 0;
                 foreach($data['extraItems'] as $key => $extraItem){
