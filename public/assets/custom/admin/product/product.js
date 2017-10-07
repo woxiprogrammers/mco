@@ -1,6 +1,4 @@
 $(document).ready(function(){
-    var a = 1.5;
-    console.log(a%1);
     calculateSubTotal();
     $("#next_btn").on('click',function(){
         if($("#material_id input:checkbox:checked").length > 0){
