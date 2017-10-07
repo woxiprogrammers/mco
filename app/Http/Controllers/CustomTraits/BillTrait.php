@@ -531,8 +531,8 @@ trait BillTrait{
                 }
                 $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $total_extra_item),3);
             }
-            $total_MaterialProductHelper::customRounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
-            $final['current_bill_amount'] = $total_MaterialProductHelper::customRounded['current_bill_amount'] =$total['current_bill_amount'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
+            $total_rounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
+            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                             ->where('bill_taxes.bill_id','=',$bill['id'])
                             ->where('taxes.is_special','=', false)
@@ -577,7 +577,7 @@ trait BillTrait{
 
             $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('total')->toArray();
             $remainingAmount = $final['current_bill_gross_total_amount'] - array_sum($BillTransactionTotals);
-            return view('admin.bill.view')->with(compact('extraItems','bill','selectedBillId','total','total_MaterialProductHelper::customRounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount'));
+            return view('admin.bill.view')->with(compact('extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -809,7 +809,7 @@ trait BillTrait{
             foreach($billQuotationProducts as $key => $billQuotationProduct){
                     $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
                     $invoiceData[$i]['description'] = $billQuotationProduct->product_description->description;
-                    $invoiceData[$i]['quantity'] = MaterialProductHelper::customRound(($billQuotationProduct->quantity),3);
+                    $invoiceData[$i]['quantity'] = (($billQuotationProduct->quantity));
                     $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
                     $invoiceData[$i]['rate'] = MaterialProductHelper::customRound(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
                     $invoiceData[$i]['amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
@@ -884,22 +884,22 @@ trait BillTrait{
                 $invoiceData[$i]['previous_quantity'] = 0;
                 foreach($billProducts as $k => $billProduct){
                     if($distinctProduct['quotation_product_id'] == $billProduct['quotation_product_id']){
-                        $invoiceData[$i]['previous_quantity'] = MaterialProductHelper::customRound(($invoiceData[$i]['previous_quantity'] + $billProduct['quantity']),3);
+                        $invoiceData[$i]['previous_quantity'] = (($invoiceData[$i]['previous_quantity'] + $billProduct['quantity']));
                         $invoiceData[$i]['current_quantity'] = 0;
                     }
                 }
                 foreach($currentBillProducts as $j => $currentBillProduct){
                     if($distinctProduct['quotation_product_id'] == $currentBillProduct['quotation_product_id']){
-                        $invoiceData[$i]['current_quantity'] = MaterialProductHelper::customRound(($currentBillProduct['quantity']),3);
+                        $invoiceData[$i]['current_quantity'] = (($currentBillProduct['quantity']));
                     }
                 }
-                $invoiceData[$i]['cumulative_quantity'] = MaterialProductHelper::customRound(($invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity']),3);
+                $invoiceData[$i]['cumulative_quantity'] = (($invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity']));
                 $invoiceData[$i]['previous_bill_amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate']),3);
                 $invoiceData[$i]['current_bill_amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate']),3);
                 $invoiceData[$i]['cumulative_bill_amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate']),3);
-                $total['previous_quantity'] = MaterialProductHelper::customRound(($total['previous_quantity'] + $invoiceData[$i]['previous_quantity']),3);
-                $total['current_quantity'] = MaterialProductHelper::customRound(($total['current_quantity'] + $invoiceData[$i]['current_quantity']),3);
-                $total['cumulative_quantity'] = MaterialProductHelper::customRound(($total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity']),3);
+                $total['previous_quantity'] = (($total['previous_quantity'] + $invoiceData[$i]['previous_quantity']));
+                $total['current_quantity'] = (($total['current_quantity'] + $invoiceData[$i]['current_quantity']));
+                $total['cumulative_quantity'] = (($total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity']));
                 $total['rate'] = MaterialProductHelper::customRound(($total['rate'] + $invoiceData[$i]['rate']),3);
                 $total['product_previous_bill_amount'] = MaterialProductHelper::customRound(($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
                 $total['product_current_bill_amount'] = MaterialProductHelper::customRound(($total['product_current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
