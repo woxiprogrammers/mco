@@ -176,8 +176,12 @@ class MaterialProductHelper{
         try{
             $responseNumber = (int)$number/1;
             $remainder = fmod($number,1);
-            if($remainder >= 0.5){
-                $responseNumber += 0.5;
+            if(abs($remainder) >= 0.5){
+                if($responseNumber >= 0 ){
+                    $responseNumber += 0.5;
+                }else{
+                    $responseNumber -= 0.5;
+                }
             }
         }catch(\Exception $e){
             $data = [
