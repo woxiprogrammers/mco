@@ -93,9 +93,13 @@
     });
 
     function customRound(number){
-        var floorNumber = Math.floor(number);
-        if((number%1) >= 0.5){
-            floorNumber = floorNumber + 0.5;
+        var floorNumber = parseInt(number);
+        if((Math.abs(number%1)) >= 0.5){
+            if(number >= 0){
+                floorNumber = floorNumber + 0.5;
+            }else{
+                floorNumber = floorNumber - 0.5;
+            }
         }
         return floorNumber;
     }
