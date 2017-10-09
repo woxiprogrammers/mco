@@ -82,6 +82,7 @@
 
 @section('javascript')
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+    <link rel="stylesheet"  href="/assets/global/css/app.css"/>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>

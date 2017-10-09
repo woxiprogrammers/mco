@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Purchase;
 
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Http\Requests\MaterialRequest;
+use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponentImages;
 use App\MaterialRequestComponents;
+use App\MaterialRequestComponentTypes;
 use App\MaterialRequests;
 use App\PurchaseRequest;
 use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use App\Unit;
+use App\Vendor;
+use App\VendorMaterialRelation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -34,6 +38,7 @@ class PurchaseRequestController extends Controller
         $user = Auth::user();
         $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
         $materialRequestList = array();
+
         $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
         $iterator = 0;
         $materialRequestComponents = MaterialRequestComponents::where('component_status_id',$inIndentStatusId)->get();
@@ -51,14 +56,45 @@ class PurchaseRequestController extends Controller
         }
         return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId'));
     }
-    public function getEditView(Request $request,$status){
-        if($status == 2){
+
+    public function getEditView(Request $request,$status,$id){
+        $user = Auth::user();
+        $userRole = $user->roles[0]->role->slug;
+        if($status == "p-r-admin-approved"){
+            $purchaseRequest = PurchaseRequest::where('id',$id)->first();
+            $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('material_request_component_id');
+            $materialRequestComponentDetails = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','asc')->get();
+            $materialRequestComponentID = MaterialRequestComponentTypes::where('slug','quotation-material')->pluck('id')->first();
+            $allVendors = Vendor::where('is_active','true')->get();
+            $iterator = $i = 0;
+            $vendors1 = array();
+            foreach($allVendors as $key => $vendor){
+                $vendors1[$i]['id'] = $vendor->id;
+                $vendors1[$i]['name'] = $vendor->name;
+                $i++;
+            }
+            foreach($materialRequestComponentDetails as $key => $materialRequestComponent){
+                if($materialRequestComponentID == $materialRequestComponent->component_type_id){
+                    $material_id = Material::where('name','like',$materialRequestComponent->name)->pluck('id');
+                    $vendorAssignedIds = VendorMaterialRelation::where('material_id',$material_id)->pluck('vendor_id');
+                    $i = 0;
+                    $vendors = array();
+                    foreach ($vendorAssignedIds as $key1 => $vendorId){
+                        $vendors[$i]['id'] = $vendorId;
+                        $vendors[$i]['name'] = Vendor::where('id',$vendorId)->pluck('name')->first();
+                        $i++;
+                    }
+                    $materialRequestComponentDetails[$iterator]['vendors'] = $vendors;
+                }else{
+                    $materialRequestComponentDetails[$iterator]['vendors'] = $vendors1;
+                }
+                $iterator++;
+            }
+            return view('purchase/purchase-request/edit-approved')->with(compact('purchaseRequest','materialRequestComponentDetails','userRole'));
+        }else{
             return view('purchase/purchase-request/edit-draft');
-        }else if($status == 1){
-            return view('purchase/purchase-request/edit-approved');
         }
     }
-
 
     public function create(Request $request){
         try{
@@ -139,9 +175,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                <li>.'
+                                    .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                        '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
                                 <li>
@@ -162,9 +198,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                <li>'
+                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'/'.$purchaseRequest->id.'">'.
+                                        '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
                             </ul>
@@ -180,9 +216,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                <li>'
+                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                        '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
                             </ul>
@@ -197,9 +233,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                <li>'
+                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                        '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
                             </ul>

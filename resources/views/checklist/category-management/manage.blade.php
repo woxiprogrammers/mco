@@ -101,8 +101,8 @@
                                             </div>
                                             <div class="modal fade" id="modal1" tabindex="-1" role="dialog" >
                                                 <div class="modal-dialog">
-                                                    <div class="modal-content" style="height: 35%">
-                                                        <div class="modal-header" style="padding-bottom: 10%">
+                                                    <div class="modal-content" style="height: 50%">
+                                                        <div class="modal-header">
                                                             <div class="row">
                                                                 <div class="col-md-4"></div>
                                                                 <div class="col-md-7" style="margin-left:-11%"> Create Sub Category</div>
@@ -135,8 +135,8 @@
                                             <div class="modal fade" id="modal2" role="dialog">
                                                 <div class="modal-dialog">
                                                     <!-- Modal content-->
-                                                    <div class="modal-content" style="height: 35%">
-                                                        <div class="modal-header" style="padding-bottom: 10%">
+                                                    <div class="modal-content" style="height: 50%">
+                                                        <div class="modal-header" >
                                                             <div class="row">
                                                                 <div class="col-md-4"></div>
                                                                 <div class="col-md-6" style="margin-left:-8%"> Create Category</div>
