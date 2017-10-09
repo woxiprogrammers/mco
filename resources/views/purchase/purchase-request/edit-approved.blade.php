@@ -17,7 +17,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Create Purchase Request</h1>
+                                    <h1>Edit Purchase Request</h1>
                                 </div>
                                 <div class="form-group " style="float: right;margin-top:1%">
                                     <a href="#" class="btn btn-set red pull-right">
@@ -59,6 +59,7 @@
                                                             </div>
                                                     </div>
                                                 </div>
+                                                </div>
                                             </div>
                                         @if($userRole == 'superadmin')
                                             <div class="row">
@@ -96,8 +97,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="portlet-body">
-                                                    <div class="table-scrollable">
-                                                        <table class="table table-hover table-light">
+                                                        <table class="table table-hover table-light" style="overflow-y: scroll">
                                                             <thead>
                                                             <tr>
                                                                 <th> ID </th>
@@ -107,7 +107,7 @@
                                                                 <th> Action </th>
                                                             </tr>
                                                             </thead>
-                                                            <tbody>
+                                                            <tbody style="height: 500px">
                                                                 @for($iterator = 0 ; $iterator < count($materialRequestComponentDetails); $iterator++)
                                                                     <tr>
                                                                         <td> {{$materialRequestComponentDetails[$iterator]['id']}} </td>
@@ -115,16 +115,12 @@
                                                                         <td> {{$materialRequestComponentDetails[$iterator]['quantity']}} </td>
                                                                         <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
                                                                         <td>
-                                                                            <div class="form-group">
-                                                                                <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                                                    <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Assign Vendor</span>&nbsp;<span class="caret"></span></button>
-                                                                                    <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                                        <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                                                    <span class="text">Algeria</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                                                    <span class="text">American Samoa</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                                        </ul>
-                                                                                    </div>
-                                                                                </div>
+                                                                            <div>
+                                                                                <select class="example-getting-started"  multiple="multiple" style="overflow:hidden">
+                                                                                    @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
+                                                                                    <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['name']}}</option>
+                                                                                    @endfor
+                                                                                </select>
                                                                             </div>
 
                                                                         </td>
@@ -132,10 +128,8 @@
                                                                 @endfor
                                                             </tbody>
                                                         </table>
-                                                    </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -377,15 +371,11 @@
     </div>
 @endsection
 @section('javascript')
-    <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
     <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
     <link rel="stylesheet"  href="/assets/global/css/app.css"/>
-    <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
-    <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/manage-datatable.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/assets/global/plugins/bootstrap/css/bootstrap.min.css" type="text/css"/>
+            <script type="text/javascript" src="/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
+            <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
     <script>
         $(document).ready(function(){
             $("#myBtn").click(function(){
@@ -397,6 +387,7 @@
             $("#previewBtn").click(function(){
                 $("#myModal3").modal();
             });
+            $('.example-getting-started').multiselect();
         });
     </script>
 @endsection
