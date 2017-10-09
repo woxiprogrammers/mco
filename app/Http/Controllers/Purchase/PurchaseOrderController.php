@@ -18,6 +18,7 @@ class PurchaseOrderController extends Controller
     }
     public function getEditView(Request $request)
     {
+
         return view('purchase/purchase-order/edit');
     }
 }
