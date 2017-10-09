@@ -496,7 +496,6 @@ trait BillTrait{
 
     public function viewBill(Request $request,$bill){
         try{
-            MaterialProductHelper::customRound(-10.8);
             $selectedBillId = $bill['id'];
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $bills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
