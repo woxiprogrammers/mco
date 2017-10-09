@@ -290,7 +290,7 @@ function calculateTax(){
     var final_total_current_bill = total_rounded_current_bill;
     $(".tax").each(function(){
         var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
-        final_total_current_bill = final_total_current_bill + tax_amount_current_bill;
+        final_total_current_bill = final_total_current_bill + customRound(tax_amount_current_bill);
         $(this).parent().next().find('span').text(customRound(tax_amount_current_bill));
     });
     $("#final_current_bill_total").text(customRound(final_total_current_bill));
@@ -326,14 +326,14 @@ function calculateSpecialTax(){
         });
         $("#grand_current_bill_total").text(customRound(grossTotal));
     }else{
-        var grossTotal = parseInt($("#final_current_bill_total").text());
+        var grossTotal = parseFloat($("#final_current_bill_total").text());
         $("#grand_current_bill_total").text(customRound(grossTotal));
     }
 }
 
 function calculateDiscount(){
     var discountAmount = $('#discountAmount').val();
-    var totalBillAmount = parseInt($('#rounded_off_current_bill_sub_total').text());
+    var totalBillAmount = parseFloat($('#rounded_off_current_bill_sub_total').text());
     if((typeof discountAmount == 'undefined') || discountAmount == ''){
         $('#rounded_off_current_bill_amount').text(totalBillAmount);
     }else{
