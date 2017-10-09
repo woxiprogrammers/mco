@@ -24,6 +24,7 @@
                                         <i class="fa fa-check"></i>
                                         Submit
                                     </a>
+                                    {!! csrf_field() !!}
                                 </div>
                             </div>
                         </div>
@@ -97,37 +98,36 @@
                                                     </div>
                                                 </div>
                                                 <div class="portlet-body">
-                                                        <table class="table table-hover table-light" style="overflow-y: scroll">
-                                                            <thead>
-                                                            <tr>
-                                                                <th> ID </th>
-                                                                <th> Name </th>
-                                                                <th> Quantity </th>
-                                                                <th> Unit </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody style="height: 500px">
-                                                                @for($iterator = 0 ; $iterator < count($materialRequestComponentDetails); $iterator++)
-                                                                    <tr>
-                                                                        <td> {{$materialRequestComponentDetails[$iterator]['id']}} </td>
-                                                                        <td> {{$materialRequestComponentDetails[$iterator]['name']}} </td>
-                                                                        <td> {{$materialRequestComponentDetails[$iterator]['quantity']}} </td>
-                                                                        <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
-                                                                        <td>
-                                                                            <div>
-                                                                                <select class="example-getting-started"  multiple="multiple" style="overflow:hidden">
-                                                                                    @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
-                                                                                    <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['name']}}</option>
-                                                                                    @endfor
-                                                                                </select>
-                                                                            </div>
-
-                                                                        </td>
-                                                                    </tr>
-                                                                @endfor
-                                                            </tbody>
-                                                        </table>
+                                                    <table class="table table-hover table-light" style="overflow-y: scroll" id="componentTable">
+                                                        <thead>
+                                                        <tr>
+                                                            <th> ID </th>
+                                                            <th> Name </th>
+                                                            <th> Quantity </th>
+                                                            <th> Unit </th>
+                                                            <th> Action </th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody style="height: 500px">
+                                                            @for($iterator = 0 ; $iterator < count($materialRequestComponentDetails); $iterator++)
+                                                                <tr>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]['id']}} </td>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]['name']}} </td>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]['quantity']}} </td>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
+                                                                    <td>
+                                                                        <div>
+                                                                            <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
+                                                                                @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
+                                                                                    <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                @endfor
+                                                                            </select>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            @endfor
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
@@ -251,7 +251,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal fade" id="myModal3" role="dialog">
+                            <div class="modal fade" id="vendorPreviewModal" role="dialog">
                                 <div class="modal-dialog">
                                     <!-- Modal content-->
                                     <div class="modal-content">
@@ -378,16 +378,96 @@
             <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
     <script>
         $(document).ready(function(){
+            $('.example-getting-started').multiselect();
             $("#myBtn").click(function(){
                 $("#myModal").modal();
             });
             $("#assetBtn").click(function(){
                 $("#myModal1").modal();
             });
+
             $("#previewBtn").click(function(){
-                $("#myModal3").modal();
+                var vendor = [];
+                $(".multiselect-container li.active").each(function(){
+                    var vendorName = $(this).find('label').text();
+                    var vendorId = $(this).find('input').attr('value');
+                    var materialId = $(this).closest('tr').find('td:nth-child(1)').text();
+                    var materialName = $(this).closest('tr').find('td:nth-child(2)').text();
+                    if(vendor.length > 0){
+                        var found = false;
+                        $.each(vendor,function(i,v){
+                            if(vendor[i].id == vendorId){
+                                var newVendorMaterial = {
+                                    id: materialId,
+                                    name: materialName
+                                };
+                                vendor[i].material.push(newVendorMaterial);
+                                found = true;
+                                return true;
+                            }
+                        });
+                        if(found == false){
+                            var newVendor = {
+                                id: vendorId,
+                                name: vendorName,
+                                material:[
+                                    {
+                                        id: materialId,
+                                        name: materialName
+                                    }
+                                ]
+                            };
+                            vendor.push(newVendor);
+                        }
+                    }else{
+                        var newVendor = {
+                            id: vendorId,
+                            name: vendorName,
+                            material:[
+                                {
+                                    id: materialId,
+                                    name: materialName
+                                }
+                            ]
+                        };
+                        vendor.push(newVendor);
+                    }
+                });
+                var modalBodyString = '';
+                $.each(vendor, function(i,v){
+                    modalBodyString += '<div class="panel panel-default">\n' +
+            '            <div class="panel-heading" role="tab" id="headingOne">\n' +
+'                                                        <h4 class="panel-title">\n' +
+'                                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse_'+i+'" aria-expanded="true" aria-controls="collapseOne">\n' +
+                        '                                                                <span style="font-size: 20px;text-align: left !important;">'+vendor[i].name+'</span>\n' +
+                        '                                                                <i class="more-less glyphicon glyphicon-plus"></i>\n' +
+'                                                            </a>\n' +
+'                                                        </h4>\n' +
+'                                                    </div>\n' +
+'                                                    <div id="collapse_'+i+'" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">\n' +
+'                                                        <div class="panel-body">\n' +
+'                                                            <table class="table table-hover table-light">\n' +
+'                                                                <tbody>' +
+'<tr>\n' +
+'                                                                    <th> Send mail </th>\n' +
+'                                                                    <th> Material \\ Asset Name </th>\n' +
+'                                                                </tr>';
+                    $.each(vendor[i].material,function(j,w){
+                        modalBodyString += '<tr>\n' +
+                            '                                                                    <td><input type="checkbox"> </td>\n' +
+                            '                                                                    <td> '+vendor[i].material[j].name+' </td>\n' +
+                            '                                                                </tr>';
+                    });
+                    modalBodyString += '</tbody>\n' +
+                        '                                                            </table>\n' +
+                        '\n' +
+                        '                                                        </div>\n' +
+                        '                                                    </div>\n' +
+                        '                                                </div>';
+                });
+                $("#vendorPreviewModal .modal-body .panel-group").html(modalBodyString);
+                $("#vendorPreviewModal").modal('show');
             });
-            $('.example-getting-started').multiselect();
         });
     </script>
 @endsection
