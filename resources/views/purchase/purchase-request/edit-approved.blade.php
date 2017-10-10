@@ -263,97 +263,9 @@
                                             </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
+                                            <form role="form" action="/purchase/purchase-order/"
                                             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                                                <div class="panel panel-default">
-                                                    <div class="panel-heading" role="tab" id="headingOne">
-                                                        <h4 class="panel-title">
-                                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                                <i class="more-less glyphicon glyphicon-plus"></i>
-                                                                <span style="float: left ;font-size: 20px">Vendor 1</span>
-                                                            </a>
-                                                        </h4>
-                                                    </div>
-                                                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                                                        <div class="panel-body">
-                                                            <table class="table table-hover table-light">
-                                                                <thead>
-                                                                <tr>
-                                                                    <th> Send mail </th>
-                                                                    <th> Material \ Asset Name </th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td><input type="checkbox"> </td>
-                                                                    <td> Jacob </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"> </td>
-                                                                    <td> Larry </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"> </td>
-                                                                    <td> Sandy </td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
 
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="panel panel-default">
-                                                    <div class="panel-heading" role="tab" id="headingTwo">
-                                                        <h4 class="panel-title">
-                                                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                                                <i class="more-less glyphicon glyphicon-plus"></i>
-                                                                <span style="float: left;font-size: 20px">Vendor 2</span>
-                                                            </a>
-                                                        </h4>
-                                                    </div>
-                                                    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-                                                        <div class="panel-body">
-                                                            <table class="table table-hover table-light">
-                                                                <thead>
-                                                                <tr>
-                                                                    <th> Send mail </th>
-                                                                    <th> Material Name</th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                <tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                </tr>
-                                                                <tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                </tr>
-                                                                <tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                </tr>
-                                                                <tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </div><!-- panel-group -->
                                             <a href="#" class="btn btn-set yellow pull-right">
                                                 <i class="fa fa-check" style="font-size: large"></i>
@@ -454,7 +366,7 @@
 '                                                                </tr>';
                     $.each(vendor[i].material,function(j,w){
                         modalBodyString += '<tr>\n' +
-                            '                                                                    <td><input type="checkbox"> </td>\n' +
+                            '                                                                    <td><input type="checkbox" name="vendor_materials['+vendor[i].id+'][]"> </td>\n' +
                             '                                                                    <td> '+vendor[i].material[j].name+' </td>\n' +
                             '                                                                </tr>';
                     });
