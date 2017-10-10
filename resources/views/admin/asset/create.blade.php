@@ -3,6 +3,8 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -62,10 +64,10 @@
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="expiry_date" class="control-label ">Expiry Date</label>
+                                                            <label for="date" class="control-label ">Expiry Date</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                        <div class="col-md-4 date date-picker">
                                                             <input type="text"   style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date"/>
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
@@ -81,20 +83,20 @@
                                                             <input type="number" class="form-control" id="number" name="price">
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
+                                                    <div class="form-group row" >
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="diesel" class="control-label">Is It a Diesel</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" name="is_fuel_dependent">
+                                                            <select class="form-control" name="is_fuel_dependent" id="select-litre">
                                                                 <option value="">Select Option</option>
                                                                 <option value="true">Yes</option>
                                                                 <option value="false">No</option>
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
+                                                    <div class="form-group row" id="Litre" hidden>
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="liter_per_unit" class="control-label">Litre Per Unit</label>
                                                             <span>*</span>
@@ -164,10 +166,19 @@
     <script>
         $(document).ready(function() {
             CreateAsset.init();
+            $('#select-litre').change(function(){
+                var selected = $(this).val();
+                if(selected == 'true'){
+                    $('#Litre').show();
+                }else{
+                    $('#Litre').hide();
+                }
+            });
         });
     </script>
     <script>
         var date=new Date();
         $('#expiry_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
     </script>
+
 @endsection

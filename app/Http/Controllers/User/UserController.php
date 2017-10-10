@@ -27,7 +27,7 @@ class UserController extends Controller
 
     public function getUserView(Request $request){
         try{
-            $roles = Role::get()->toArray();
+            $roles = Role::whereNotIn('slug',['admin','superadmin'])->get()->toArray();
             return view('user.create')->with(compact('roles'));
         }catch(\Exception $e){
             $data = [
@@ -231,10 +231,21 @@ class UserController extends Controller
 
     public function userListing(Request $request){
         try{
-            $userData = User::orderBy('id','asc')->get()->toArray();
+            $userData = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                            ->join('roles','roles.id','=','user_has_roles.role_id')
+                            ->whereNotIn('roles.slug',['admin','superadmin'])
+                            ->orderBy('users.id','asc')
+                            ->select('users.id as id','users.first_name as first_name','users.last_name as last_name','users.email as email','users.mobile as mobile','users.created_at as created_at','users.is_active as is_active')
+                            ->get();
+
             $iTotalRecords = count($userData);
             $records = array();
-            $iterator = 0;
+            if(count($userData) > 0){
+                $userData = $userData->toArray();
+            }else{
+                $userData = array();
+            }
+            $records['data'] = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($userData); $iterator++,$pagination++ ){
                 if($userData[$pagination]['is_active'] == true){
                     $user_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';

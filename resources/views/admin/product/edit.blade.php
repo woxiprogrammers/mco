@@ -213,7 +213,7 @@
                                                                     </label>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-offset-7">
+                                                            {{--<div class="col-md-offset-7">
                                                                 <div class="col-md-3 col-md-offset-3" style="align-items: ">
                                                                     <label class="control-label" style="font-weight: bold; text-align: right">
                                                                         Round Total:
@@ -224,7 +224,7 @@
 
                                                                     </label>
                                                                 </div>
-                                                            </div>
+                                                            </div>--}}
 
                                                             <div class="form-group">
                                                                 <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">

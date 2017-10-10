@@ -53,28 +53,34 @@ class AssetManagementController extends Controller
             $data['expiry_date'] = $request->expiry_date;
             $data['price'] = $request->price;
             $data['is_fuel_dependent'] = $request->is_fuel_dependent;
-            $data['litre_per_unit'] = $request->litre_per_unit;
+            if($request->is_fuel_dependent == 'true'){
+                $data['litre_per_unit'] = $request->litre_per_unit;
+            }else{
+                $data['litre_per_unit'] = null;
+            }
             $data['is_active'] = false;
             $asset = Asset::create($data);
-            $assetId = $asset['id'];
-            $work_order_images = $request->work_order_images;
-            $assetDirectoryName = sha1($assetId);
-            $UploadPath = public_path() . env('ASSET_IMAGE_UPLOAD');
-            $ImageUploadPath = $UploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
-            if (!file_exists($ImageUploadPath)) {
-                File::makeDirectory($ImageUploadPath, $mode = 0777, true, true);
-            }
-            foreach ($work_order_images as $images){
+            if($request->work_order_images != null) {
+                $assetId = $asset['id'];
+                $work_order_images = $request->work_order_images;
+                $assetDirectoryName = sha1($assetId);
+                $UploadPath = public_path() . env('ASSET_IMAGE_UPLOAD');
+                $ImageUploadPath = $UploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+                if (!file_exists($ImageUploadPath)) {
+                    File::makeDirectory($ImageUploadPath, $mode = 0777, true, true);
+                }
+                foreach ($work_order_images as $images) {
                     $imagePath = $images['image_name'];
-                    $imageName = explode("/",$imagePath);
+                    $imageName = explode("/", $imagePath);
                     $filename = $imageName[4];
                     $data = Array();
                     $data['name'] = $filename;
                     $data['asset_id'] = $assetId;
                     AssetImage::create($data);
-                    $oldFilePath = public_path().$imagePath;
-                    $newFilePath = public_path().env('ASSET_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
+                    $oldFilePath = public_path() . $imagePath;
+                    $newFilePath = public_path() . env('ASSET_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $assetDirectoryName . DIRECTORY_SEPARATOR . $filename;
                     File::move($oldFilePath, $newFilePath);
+                }
             }
             $request->session()->flash('success', 'Asset Created successfully.');
             return redirect('/asset/create');
@@ -97,13 +103,22 @@ class AssetManagementController extends Controller
             $assetData['expiry_date'] = $data['expiry_date'];
             $assetData['price'] = $data['price'];
             $assetData['is_fuel_dependent'] = $data['is_fuel_dependent'];
-            $assetData['litre_per_unit'] = $data['litre_per_unit'];
+            if($assetData['is_fuel_dependent'] == "true"){
+                $assetData['litre_per_unit'] = $data['litre_per_unit'];
+            }else{
+                $assetData['litre_per_unit'] = null;
+            }
             $asset->update($assetData);
-
-            $assetId = $asset->id;
             $work_order_images = $request->work_order_images;
-            $assetDirectoryName = sha1($assetId);
+            $assetImages = $request->asset_images;
+            $assetId = $asset->id;
             if($work_order_images != null) {
+                $assetDirectoryName = sha1($assetId);
+                $UploadPath = public_path() . env('ASSET_IMAGE_UPLOAD');
+                $ImageUploadPath = $UploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+                if (!file_exists($ImageUploadPath)) {
+                    File::makeDirectory($ImageUploadPath, $mode = 0777, true, true);
+                }
                 foreach ($work_order_images as $images) {
                     $imagePath = $images['image_name'];
                     $imageName = explode("/", $imagePath);
@@ -116,28 +131,33 @@ class AssetManagementController extends Controller
                     $newFilePath = public_path() . env('ASSET_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $assetDirectoryName . DIRECTORY_SEPARATOR . $filename;
                     File::move($oldFilePath, $newFilePath);
                 }
+
             }
 
-            $assetImages = $request->asset_images;
-            if($work_order_images != null && $assetImages != null){
-                $existingImages = array_column(array_merge($work_order_images,$assetImages),"image_name");
-            }elseif($work_order_images != null){
-               $existingImages = array_column($work_order_images,"image_name");
-            }else{
-                $existingImages = array_column($assetImages,"image_name");
+            if ($work_order_images != null && $assetImages != null) {
+                $existingImages = array_column(array_merge($work_order_images, $assetImages), "image_name");
+            } elseif ($work_order_images != null) {
+                $existingImages = array_column($work_order_images, "image_name");
+            } elseif ($assetImages != null) {
+                $existingImages = array_column($assetImages, "image_name");
+            } else {
+                $existingImages = null;
             }
             $filename = Array();
-            if($existingImages != null) {
+            if ($existingImages != null) {
                 foreach ($existingImages as $images) {
                     $imagePath = $images;
                     $imageName = explode("/", $imagePath);
                     $filename[] = end($imageName);
                 }
+            } else {
+                $filename[] = emptyArray();
             }
-            $deletedAssetImages = AssetImage::where('asset_id',$assetId)->whereNotIn('name',$filename)->get();
-            foreach($deletedAssetImages as $images){
+            $deletedAssetImages = AssetImage::where('asset_id', $assetId)->whereNotIn('name', $filename)->get();
+            foreach ($deletedAssetImages as $images) {
                 $images->delete();
             }
+
             $request->session()->flash('success', 'Asset Edited successfully.');
             return redirect('/asset/edit/'.$asset->id);
         }catch (Exception $e){
@@ -186,10 +206,10 @@ class AssetManagementController extends Controller
 
     public function assetListing(Request $request){
                     try{
-                        if($request->has('search_name')){
-                            $assetData = Asset::where('id','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
+                        if($request->has('search_model_number')){
+                            $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get()->toArray();
                         }else{
-                            $assetData = Asset::orderBy('id','a[sc')->get()->toArray();
+                            $assetData = Asset::orderBy('model_number','asc')->get()->toArray();
                         }
                         $iTotalRecords = count($assetData);
                         $records = array();
@@ -282,22 +302,22 @@ class AssetManagementController extends Controller
         }
     }
 
-    public function checkAssetName(Request $request){
+    public function checkModel(Request $request){
         try{
-            $assetName = $request->name;
+            $modelNumber = $request->search_model_number;
             if($request->has('id')){
-                $nameCount = Asset::where('name','ilike',$assetName)->where('id','!=',$request->id)->count();
+                $modelCount = Asset::where('model_number','ilike',$modelNumber)->where('id','!=',$request->id)->count();
             }else{
-                $nameCount = Asset::where('name','ilike',$assetName)->count();
+                $modelCount = Asset::where('model_number','ilike',$modelNumber)->count();
             }
-            if($nameCount > 0){
+            if($modelCount > 0){
                 return 'false';
             }else{
                 return 'true';
             }
         }catch(\Exception $e){
             $data = [
-                'action' => 'Check Asset Name',
+                'action' => 'Check Model Number',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];

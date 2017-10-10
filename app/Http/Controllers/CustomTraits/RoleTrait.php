@@ -168,7 +168,7 @@ trait RoleTrait{
                     $rolePermissionData['is_mobile'] = true;
                     $check = RoleHasPermission::where('role_id',$roleId)->where('permission_id',$permissions)->first();
                     if ($check != null) {
-                        RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update('is_mobile', true);
+                        RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update(['is_mobile', true]);
                     } else {
                         $rolePermissionData['permission_id'] = $permissions;
                         RoleHasPermission::create($rolePermissionData);
@@ -194,9 +194,9 @@ trait RoleTrait{
     public function roleListing(Request $request){
         try{
             if($request->has('search_name')){
-                $rolesData = Role::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
+                $rolesData = Role::where('name','ilike','%'.$request->search_name.'%')->whereNotIn('slug',['admin','superadmin'])->orderBy('name','asc')->get()->toArray();
             }else{
-                $rolesData = Role::orderBy('name','asc')->get()->toArray();
+                $rolesData = Role::whereNotIn('slug',['admin','superadmin'])->orderBy('name','asc')->get()->toArray();
             }
             $iTotalRecords = count($rolesData);
             $records = array();

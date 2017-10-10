@@ -1,10 +1,8 @@
-var MaterialRequestListing = function () {
+var PurchaseRequestListing = function () {
     var handleOrders = function () {
-
         var grid = new Datatable();
-
         grid.init({
-            src: $("#materialRequest"),
+            src: $("#purchaseRequestTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -24,10 +22,7 @@ var MaterialRequestListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/purchase/material-request/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
+                    "url": "/purchase/purchase-request/listing?_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -62,7 +57,6 @@ var MaterialRequestListing = function () {
                 });
             }
         });
-
     }
     return {
 
@@ -70,9 +64,8 @@ var MaterialRequestListing = function () {
         init: function () {
             handleOrders();
         }
-
     };
 }();
 jQuery(document).ready(function() {
-    MaterialRequestListing.init();
+    PurchaseRequestListing.init();
 });

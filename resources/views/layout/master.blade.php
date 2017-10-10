@@ -91,6 +91,18 @@
         }, 1000);
 
     });
+
+    function customRound(number){
+        var floorNumber = parseInt(number);
+        if((Math.abs(number%1)) >= 0.5){
+            if(number >= 0){
+                floorNumber = floorNumber + 0.5;
+            }else{
+                floorNumber = floorNumber - 0.5;
+            }
+        }
+        return floorNumber;
+    }
 </script>
 @yield('javascript')
 </body>

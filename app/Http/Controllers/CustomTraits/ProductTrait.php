@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
+use App\Helper\MaterialProductHelper;
 use App\Material;
 use App\MaterialVersion;
 use App\Product;
@@ -182,7 +183,7 @@ trait ProductTrait{
             $subTotal = 0;
             foreach($data['material'] as $key => $materialVersion){
                 $recentVersion = MaterialVersion::where('material_id',$key)->orderBy('created_at','desc')->select('rate_per_unit','unit_id')->first();
-                $subTotal += round($materialVersion['rate_per_unit']*$data['material_quantity'][$key],3);
+                $subTotal += round($data['material_amount'][$key],3);
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
                     $materialVersion['material_id'] = $key;
@@ -197,7 +198,7 @@ trait ProductTrait{
             $taxAmount = 0;
             if(array_key_exists('profit_margin',$data)){
                 foreach($data['profit_margin'] as $key => $profitMargin){
-                    $taxAmount += $subTotal * ($profitMargin / 100);
+                    $taxAmount += round(($subTotal * ($profitMargin / 100)),3);
                     $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$key)->orderBy('created_at','desc')->select('id','percentage')->first()->toArray();
                     if($profitMargin == $recentProfitMarginVersion['percentage']){
                         $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
@@ -213,7 +214,7 @@ trait ProductTrait{
             }
             $productVersionData = array();
             $productVersionData['product_id'] = $product->id;
-            $productVersionData['rate_per_unit'] = round(($subTotal + $taxAmount),3);
+            $productVersionData['rate_per_unit'] = MaterialProductHelper::customRound(($subTotal + $taxAmount));
             $productVersion = ProductVersion::create($productVersionData);
             foreach($productMaterialProfitMarginData as $versions){
                 if(array_key_exists('material_version_id',$versions) && array_key_exists('material_quantity',$versions)){
@@ -268,7 +269,7 @@ trait ProductTrait{
                         $productData[$pagination]['name'],
                         Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
                         Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
-                        round($productVersion['rate_per_unit']),
+                        MaterialProductHelper::customRound($productVersion['rate_per_unit']),
                         $product_status,
                         '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -300,7 +301,7 @@ trait ProductTrait{
                         $productData[$pagination]['name'],
                         Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
                         Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
-                        round($productVersion['rate_per_unit']),
+                        MaterialProductHelper::customRound($productVersion['rate_per_unit']),
                         $product_status,
                         '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -372,7 +373,7 @@ trait ProductTrait{
                 }else{
                     $recentVersion = MaterialVersion::where('material_id',$key)->orderBy('created_at','desc')->select('rate_per_unit','unit_id')->first();
                 }
-                $subTotal += round($materialVersion['rate_per_unit'] * $data['material_quantity'][$key],3);
+                $subTotal += round(($materialVersion['rate_per_unit'] * $data['material_quantity'][$key]),3);
                 $productMaterialProfitMarginData[$iterator]['material_quantity'] = $data['material_quantity'][$key];
                 if($materialVersion != $recentVersion){
                     $materialVersion['material_id'] = $key;
@@ -386,7 +387,7 @@ trait ProductTrait{
             $iterator = 0;
             $taxAmount = 0;
             foreach($data['profit_margin'] as $key => $profitMargin){
-                $taxAmount += round($subTotal * ($profitMargin / 100),3);
+                $taxAmount += round(($subTotal * ($profitMargin / 100)),3);
                 $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$key)->orderBy('created_at','desc')->select('id','percentage')->first()->toArray();
                 if($profitMargin == $recentProfitMarginVersion['percentage']){
                     $productMaterialProfitMarginData[$iterator]['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
@@ -401,7 +402,7 @@ trait ProductTrait{
             }
             $productVersionData = array();
             $productVersionData['product_id'] = $product->id;
-            $productVersionData['rate_per_unit'] = round(($subTotal + $taxAmount),3);
+            $productVersionData['rate_per_unit'] = MaterialProductHelper::customRound(($subTotal + $taxAmount));
             $productVersion = ProductVersion::create($productVersionData);
             foreach($productMaterialProfitMarginData as $versions){
                 if(array_key_exists('material_version_id',$versions) && array_key_exists('material_quantity',$versions)){
@@ -520,7 +521,7 @@ trait ProductTrait{
             $data['productMaterialVersions'] = $productMaterialVersions;
             $subtotal = 0;
             foreach ($productMaterialVersions as $mat) {
-                $subtotal = $subtotal + round(($mat['quantity']*$mat['rate_per_unit']),2);
+                $subtotal = $subtotal + MaterialProductHelper::customRound(($mat['quantity']*$mat['rate_per_unit']));
             }
             $data['subtotal'] = $subtotal;
 
@@ -531,10 +532,10 @@ trait ProductTrait{
                 $pmArray = array(
                     'pm_name' => $profitMarginData[$pmCount],
                     'percentage' => $pm,
-                    'total' => round(($subtotal*$pm)/100,3)
+                    'total' => MaterialProductHelper::customRound(($subtotal*$pm)/100)
                 );
                 array_push($profitMarginRestruct, $pmArray);
-                $finalAmount = round($finalAmount + round(($subtotal*$pm)/100,3),2);
+                $finalAmount = MaterialProductHelper::customRound($finalAmount + MaterialProductHelper::customRound(($subtotal*$pm)/100));
                 $pmCount++;
             }
             $data['finalAmount'] = $finalAmount;

@@ -247,12 +247,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=> 'User\PurchaseController@createMaterialList'));
             Route::post('material-requestWise-listing',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListing'));
             Route::get('material-requestWise-listing-view',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListingView'));
-
+            Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
         });
         Route::group(['prefix' => 'purchase-request'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
             Route::get('create',array('uses'=> 'Purchase\PurchaseRequestController@getCreateView'));
-            Route::get('edit/{status}',array('uses'=> 'Purchase\PurchaseRequestController@getEditView'));
+            Route::get('edit/{status}/{id}',array('uses'=> 'Purchase\PurchaseRequestController@getEditView'));
+            Route::post('create',array('uses'=> 'Purchase\PurchaseRequestController@create'));
+            Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
+            Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
@@ -294,7 +297,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('image-upload',array('uses'=>'Admin\AssetManagementController@uploadTempAssetImages'));
         Route::post('display-images',array('uses'=>'Admin\AssetManagementController@displayAssetImages'));
         Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
-        Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkAssetName'));
+        Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkModel'));
         Route::get('change-status/{asset}',array('uses' => 'Admin\AssetManagementController@changeAssetStatus'));
     });
 
@@ -314,5 +317,28 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
             Route::post('listing',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
         });
+        Route::group(['prefix' => 'checkList'],function(){
+            Route::get('manage',array('uses' => 'Checklist\ChecklistController@getManageView'));
+            Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
+        });
     });
+
+    Route::group(['prefix'=>'drawing'],function() {
+        Route::group(['prefix' => 'category-management'], function(){
+            Route::get('manage',array('uses'=> 'Drawing\CategoryManagementController@getManageView'));
+            Route::get('create-main',array('uses'=> 'Drawing\CategoryManagementController@getCreateMainView'));
+            Route::get('create-sub',array('uses'=> 'Drawing\CategoryManagementController@getCreateSubView'));
+            Route::get('edit-main',array('uses'=> 'Drawing\CategoryManagementController@getMainEditView'));
+            Route::get('edit-sub',array('uses'=> 'Drawing\CategoryManagementController@getSubEditView'));
+        });
+        Route::group(['prefix' => 'images'], function(){
+            Route::get('manage',array('uses'=> 'Drawing\ImagesController@getManageView'));
+            Route::get('create',array('uses'=> 'Drawing\ImagesController@getCreateView'));
+            Route::get('edit',array('uses'=> 'Drawing\ImagesController@getEditView'));
+            Route::post('image-upload/{quotationId}',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
+            Route::post('display-images/{quotationId}',array('uses'=>'Drawing\ImagesController@displayDrawingImages'));
+            Route::post('delete-temp-product-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
+        });
+    });
+
 });
