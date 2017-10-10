@@ -256,10 +256,10 @@ function calculateSpecialTax(){
         $(".special-tax-amount").each(function(){
             grossTotal = grossTotal + parseFloat($(this).text());
         });
-        $("#grand_current_bill_total").text(customRound(grossTotal));
+        $("#grand_current_bill_total").text((grossTotal).toFixed());
     }else{
-        var grossTotal = parseInt($("#final_current_bill_total").text());
-        $("#grand_current_bill_total").text(customRound(grossTotal));
+        var grossTotal = parseFloat($("#final_current_bill_total").text());
+        $("#grand_current_bill_total").text((grossTotal).toFixed());
     }
 }
 
