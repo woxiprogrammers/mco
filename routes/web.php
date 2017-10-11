@@ -10,6 +10,7 @@
 |
 */
 Route::group(['domain' => env('DOMAIN_NAME')], function(){
+    Route::get('testing-pdf',array('uses' => 'Purchase\PurchaseRequestController@createVendorQuotationPdf'));
     Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));

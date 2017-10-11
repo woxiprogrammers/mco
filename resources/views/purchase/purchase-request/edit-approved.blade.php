@@ -252,7 +252,7 @@
                                 </div>
                             </div>
                             <div class="modal fade" id="vendorPreviewModal" role="dialog">
-                                <div class="modal-dialog">
+                                <div class="modal-dialog" style="width: 80% !important;">
                                     <!-- Modal content-->
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -263,14 +263,15 @@
                                             </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
-                                            <form role="form" action="/purchase/purchase-order/"
-                                            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                                            <form role="form" action="" method="post">
+                                                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
-                                            </div><!-- panel-group -->
-                                            <a href="#" class="btn btn-set yellow pull-right">
-                                                <i class="fa fa-check" style="font-size: large"></i>
-                                                Send mail to vendors&nbsp; &nbsp; &nbsp; &nbsp;
-                                            </a>
+                                                </div><!-- panel-group -->
+                                                <button class="btn btn-set yellow">
+                                                    <i class="fa fa-check" style="font-size: large"></i>
+                                                    Send mail to vendors&nbsp; &nbsp; &nbsp; &nbsp;
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -305,13 +306,17 @@
                     var vendorId = $(this).find('input').attr('value');
                     var materialId = $(this).closest('tr').find('td:nth-child(1)').text();
                     var materialName = $(this).closest('tr').find('td:nth-child(2)').text();
+                    var materialQuantity = $(this).closest('tr').find('td:nth-child(3)').text();
+                    var materialUnit = $(this).closest('tr').find('td:nth-child(4)').text();
                     if(vendor.length > 0){
                         var found = false;
                         $.each(vendor,function(i,v){
                             if(vendor[i].id == vendorId){
                                 var newVendorMaterial = {
                                     id: materialId,
-                                    name: materialName
+                                    name: materialName,
+                                    quantity: materialQuantity,
+                                    unit: materialUnit
                                 };
                                 vendor[i].material.push(newVendorMaterial);
                                 found = true;
@@ -325,7 +330,9 @@
                                 material:[
                                     {
                                         id: materialId,
-                                        name: materialName
+                                        name: materialName,
+                                        quantity: materialQuantity,
+                                        unit: materialUnit
                                     }
                                 ]
                             };
@@ -338,7 +345,9 @@
                             material:[
                                 {
                                     id: materialId,
-                                    name: materialName
+                                    name: materialName,
+                                    quantity: materialQuantity,
+                                    unit: materialUnit
                                 }
                             ]
                         };
@@ -351,7 +360,7 @@
             '            <div class="panel-heading" role="tab" id="headingOne">\n' +
 '                                                        <h4 class="panel-title">\n' +
 '                                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse_'+i+'" aria-expanded="true" aria-controls="collapseOne">\n' +
-                        '                                                                <span style="font-size: 20px;text-align: left !important;">'+vendor[i].name+'</span>\n' +
+                        '                                                                <span style="font-size: 16px;text-align: left !important;">'+vendor[i].name+'</span>\n' +
                         '                                                                <i class="more-less glyphicon glyphicon-plus"></i>\n' +
 '                                                            </a>\n' +
 '                                                        </h4>\n' +
@@ -363,11 +372,15 @@
 '<tr>\n' +
 '                                                                    <th> Send mail </th>\n' +
 '                                                                    <th> Material \\ Asset Name </th>\n' +
+'                                                                    <th> Quantity </th>\n' +
+'                                                                    <th> Unit </th>\n' +
 '                                                                </tr>';
                     $.each(vendor[i].material,function(j,w){
                         modalBodyString += '<tr>\n' +
                             '                                                                    <td><input type="checkbox" name="vendor_materials['+vendor[i].id+'][]"> </td>\n' +
                             '                                                                    <td> '+vendor[i].material[j].name+' </td>\n' +
+                            '                                                                    <td> '+vendor[i].material[j].quantity+' </td>\n' +
+                            '                                                                    <td> '+vendor[i].material[j].unit+' </td>\n' +
                             '                                                                </tr>';
                     });
                     modalBodyString += '</tbody>\n' +

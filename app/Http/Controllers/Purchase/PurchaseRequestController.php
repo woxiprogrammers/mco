@@ -16,6 +16,7 @@ use App\Vendor;
 use App\VendorMaterialRelation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -337,6 +338,22 @@ class PurchaseRequestController extends Controller
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Vendor Assignment Partial Blade',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function createVendorQuotationPdf(Request $request){
+        try{
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation'));
+            return $pdf->stream();
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create vendor quotation PDF',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
