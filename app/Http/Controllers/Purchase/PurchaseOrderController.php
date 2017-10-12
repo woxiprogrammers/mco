@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Purchase;
 use App\Http\Controllers\CustomTraits\Purchase\PurchaseTrait;
 use App\MaterialRequestComponents;
 use App\PurchaseOrder;
+use App\PurchaseOrderBill;
+use App\PurchaseOrderBillImage;
+use App\PurchaseOrderComponent;
 use App\PurchaseRequest;
+use Carbon\Carbon;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -111,5 +115,76 @@ class PurchaseOrderController extends Controller
             $status = 500;
         }
         return view('purchase/purchase-order/edit')->with(compact('purchaseOrderList','materialList'));
+    }
+    public function getPurchaseOrderComponentDetails(Request $request){
+           $data = $request->all();
+           try{
+               $purchaseOrderComponent = PurchaseOrderComponent::where('id',$data['component_id'])->first();
+               $vendorName = $purchaseOrderComponent->purchaseOrder->vendor->name;
+               $purchaseOrderComponentData['purchase_order_component_id'] = $purchaseOrderComponent['id'];
+               $purchaseOrderComponentData['hsn_code'] = $purchaseOrderComponent['hsn_code'];
+               $purchaseOrderComponentData['rate_per_unit'] = $purchaseOrderComponent['rate_per_unit'];
+               $materialRequestComponent = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent;
+               //$purchaseOrderComponentData['quantity'] = $purchaseOrderComponent['quantity'];
+               $purchaseOrderComponentData['name'] = $materialRequestComponent['name'];
+               $purchaseOrderComponentData['quantity'] = $materialRequestComponent['quantity'];
+               $purchaseOrderComponentData['material_component_id'] = $materialRequestComponent['id'];
+               $purchaseOrderComponentData['unit_name'] = $materialRequestComponent->unit->name;
+               $purchaseOrderComponentData['unit_id'] = $materialRequestComponent['id'];
+               $purchaseOrderComponentData['vendor_name'] = $vendorName;
+               $status = 200;
+               return response()->json($purchaseOrderComponentData,$status);
+           }catch(\Exception $e){
+                $message = $e->getMessage();
+                $status = 500;
+               return response()->json($message,$status);
+           }
+    }
+    public function getPurchaseOrderMaterials(Request $request){
+        try{
+            $materialRequestComponent = MaterialRequestComponents::where('id',$request['material_request_component_id'])->first();
+            return response()->json($materialRequestComponent);
+        }catch (\Exception $e){
+
+        }
+    }
+    public function createTransaction(Request $request){
+        try{
+            $purchaseOrderBill = $request->except('type','material','unit_name','vendor_name');
+            switch($request['type']){
+                case 'upload_bill' :
+                    $purchaseOrderBill['is_amendment'] = false;
+                    break;
+
+                case 'create-amendment' :
+                    $purchaseOrderBill['is_amendment'] = true;
+                    break;
+            }
+            $purchaseOrderBill['is_paid'] = false;
+            $currentTimeStamp = Carbon::now();
+            $serialNoCount = PurchaseOrderBill::whereMonth('created_at',date_format($currentTimeStamp,'m'))->whereYear('created_at',date_format($currentTimeStamp,'Y'))->count();
+            $purchaseOrderBill['grn'] = "GRN".date_format($currentTimeStamp,'Y').date_format($currentTimeStamp,'m').($serialNoCount + 1);
+            $purchaseOrderBill['created_at'] = $currentTimeStamp;
+            $purchaseOrderBill['updated_at'] = $currentTimeStamp;
+            $purchaseOrderBillId = PurchaseOrderBill::insertGetId($purchaseOrderBill);
+            $purchaseOrderBillData = PurchaseOrderBill::where('id',$purchaseOrderBillId)->first();
+            $purchaseOrderId = $purchaseOrderBillData->purchaseOrderComponent->purchaseOrder['id'];
+            $message = "Success";
+            $status = 200;
+        }catch(\Exception $e){
+            $message = "Fail";
+            $status = 500;
+            $data = [
+                'action' => 'Create Purchase Order Bill Transaction',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            dd($e->getMessage());
+            Log::critical(json_encode($data));
+        }
+        $response = [
+            'message' => $message
+        ];
+        return response()->json($response,$status);
     }
 }

@@ -30,6 +30,7 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <input type="hidden" id="po_id" value="{{$purchaseOrderList['purchase_order_id']}}">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <!-- BEGIN VALIDATION STATES-->
@@ -102,7 +103,11 @@
                                                                     <td> {{$materialData['material_component_name']}} </td>
                                                                     <td>  {{$materialData['material_component_quantity']}} </td>
                                                                     <td> {{$materialData['material_component_unit_name']}} </td>
-                                                                    <td> <button id="image">View</button>  </td>
+                                                                    <td><button class="image" value="{{$materialData['purchase_order_component_id']}}">View</button> <button class="transaction" value="{{$materialData['purchase_order_component_id']}}">
+                                                                            <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                                                            Transaction
+                                                                        </button>
+                                                                    </td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
@@ -123,11 +128,11 @@
                                                                     <div class="form-body">
                                                                         <div class="form-group row">
                                                                             <div class="col-md-12" style="text-align: right">
-                                                                                <input type="text" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter material name" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;">
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Quantity" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;">
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Unit" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;">
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Rate" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;">
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter HSNCODE" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;">
+                                                                                <input type="text" class="form-control empty typeahead tt-input" id="material_name" placeholder="Enter material name" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
+                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="qty" placeholder="Enter Quantity" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
+                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="unit" placeholder="Enter Unit" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
+                                                                                <br><input type="hidden" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Rate" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
+                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="hsn_code" placeholder="Enter HSNCODE" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" >
                                                                                <br>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-12">
@@ -283,6 +288,10 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal fade" id="transactionModal" role="dialog">
+                                                    <form action="/purchase/purchase-order/create-transaction" method="post">
+                                                        <input type="hidden" name="type" value="upload_bill">
+                                                        <input type="hidden" name="purchase_order_component_id" id="po_component_id">
+                                                        <input type="hidden" name="unit_id" id="unit_id">
                                                     <div class="modal-dialog">
                                                         <!-- Modal content-->
                                                         <div class="modal-content">
@@ -296,16 +305,20 @@
                                                             <div class="modal-body" style="padding:40px 50px;">
                                                                 <div class="form-body">
                                                                     <div class="form-group row">
-                                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter Material Name">
+                                                                        <label>Material Name</label>
+                                                                       <input type="text" class="form-control" id="material" name="material" placeholder="Enter material" readonly>
                                                                     </div>
                                                                     <div class="form-group row">
-                                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
+                                                                        <label>Quantity</label>
+                                                                        <input type="text" class="form-control" id="quantity" name="quantity" placeholder="Enter quantity" readonly>
                                                                     </div>
                                                                     <div class="form-group row">
-                                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter Unit">
+                                                                        <label>Unit Name</label>
+                                                                        <input type="text" class="form-control" id="unit_name" name="unit_name" placeholder="Enter Unit" readonly>
                                                                     </div>
                                                                     <div class="form-group row">
-                                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter Vendor Name">
+                                                                        <label>Vendor Name</label>
+                                                                        <input type="text" class="form-control" id="vendor" name="vendor_name" placeholder="Enter Vendor Name" readonly>
                                                                     </div>
                                                                     <div class="form-group row">
                                                                         <table class="table table-bordered table-hover">
@@ -366,21 +379,25 @@
                                                                     </div>
                                                                 </div>
                                                                     <div class="form-group row">
-                                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter Bill Number">
+                                                                        <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number">
                                                                     </div>
                                                                     <div class="form-group row">
-                                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter Vehicle Number">
+                                                                        <input type="text" class="form-control" name="bill_amount" placeholder="Enter Bill Amount">
                                                                     </div>
                                                                     <div class="form-group row">
-                                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter In Time">
+                                                                        <input type="text" class="form-control" name="vehicle_number" placeholder="Enter Vehicle Number">
                                                                     </div>
                                                                     <div class="form-group row">
-                                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter Out Time">
+                                                                        <input type="datetime-local"   class="form-control" name="in_time" placeholder="Enter In Time">
                                                                     </div>
-                                                                <a href="#" class="btn btn-set red pull-right">
+                                                                    <div class="form-group row">
+                                                                        <input type="datetime-local" class="form-control" name="out_time" placeholder="Enter Out Time">
+                                                                    </div>
+                                                                   
+                                                                <button type="submit" class="btn btn-set red pull-right">
                                                                     <i class="fa fa-check" style="font-size: large"></i>
                                                                     Save&nbsp; &nbsp; &nbsp;
-                                                                </a>
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -393,13 +410,7 @@
                                 <div class="container">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <div class="form-group " style="text-align: center">
-                                                <button class="btn yellow pull-right" style="margin: 20px" id="transaction">
-                                                    <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
-                                                    Transaction
-                                                </button>
-                                            </div>
-                                            <!-- BEGIN VALIDATION STATES-->
+                                           <!-- BEGIN VALIDATION STATES-->
                                             <div class="portlet light ">
                                                 <div class="portlet-body form">
                                                     <div class="row">
@@ -481,8 +492,11 @@
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+    <script src="/assets/custom/purchase/purchase-order/purchase-order.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+    <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <style>
         @-webkit-keyframes zoom {
             from {
@@ -507,17 +521,4 @@
             animation: zoom 20s;
         }
     </style>
-    <script>
-        $(document).ready(function(){
-            $("#image").click(function(){
-                $("#ImageUpload").modal();
-            });
-            $("#transaction").click(function(){
-                $("#transactionModal").modal();
-            });
-            $("#payment").click(function(){
-                $("#paymentModal").modal();
-            });
-        });
-    </script>
 @endsection
