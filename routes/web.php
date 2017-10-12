@@ -263,6 +263,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
             Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
             Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
+            Route::get('get-purchase-request-component/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseRequestComponents'));
         });
     });
 
