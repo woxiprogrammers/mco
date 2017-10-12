@@ -393,7 +393,9 @@
                                                                     <div class="form-group row">
                                                                         <input type="datetime-local" class="form-control" name="out_time" placeholder="Enter Out Time">
                                                                     </div>
-                                                                   
+                                                                    <div class="form-group row">
+                                                                        <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
+                                                                    </div>
                                                                 <button type="submit" class="btn btn-set red pull-right">
                                                                     <i class="fa fa-check" style="font-size: large"></i>
                                                                     Save&nbsp; &nbsp; &nbsp;

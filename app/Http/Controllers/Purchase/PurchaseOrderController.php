@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Redirect;
 
 class PurchaseOrderController extends Controller
 {
@@ -130,7 +131,7 @@ class PurchaseOrderController extends Controller
                $purchaseOrderComponentData['quantity'] = $materialRequestComponent['quantity'];
                $purchaseOrderComponentData['material_component_id'] = $materialRequestComponent['id'];
                $purchaseOrderComponentData['unit_name'] = $materialRequestComponent->unit->name;
-               $purchaseOrderComponentData['unit_id'] = $materialRequestComponent['id'];
+               $purchaseOrderComponentData['unit_id'] = $materialRequestComponent['unit_id'];
                $purchaseOrderComponentData['vendor_name'] = $vendorName;
                $status = 200;
                return response()->json($purchaseOrderComponentData,$status);
@@ -169,22 +170,12 @@ class PurchaseOrderController extends Controller
             $purchaseOrderBillId = PurchaseOrderBill::insertGetId($purchaseOrderBill);
             $purchaseOrderBillData = PurchaseOrderBill::where('id',$purchaseOrderBillId)->first();
             $purchaseOrderId = $purchaseOrderBillData->purchaseOrderComponent->purchaseOrder['id'];
-            $message = "Success";
-            $status = 200;
+            $request->session()->flash('success','Transaction added successfully');
+            return Redirect::Back();
         }catch(\Exception $e){
             $message = "Fail";
             $status = 500;
-            $data = [
-                'action' => 'Create Purchase Order Bill Transaction',
-                'exception' => $e->getMessage(),
-                'params' => $request->all()
-            ];
-            dd($e->getMessage());
-            Log::critical(json_encode($data));
+            $request->session()->flash('danger','Something went wrong');
         }
-        $response = [
-            'message' => $message
-        ];
-        return response()->json($response,$status);
     }
 }
