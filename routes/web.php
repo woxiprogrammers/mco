@@ -257,7 +257,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=> 'Purchase\PurchaseRequestController@create'));
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
-            Route::post('get-vendor-assignment-partial',array('uses' => 'Purchase\PurchaseRequestController@getVendorAssignmentPartial'));
+            Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));

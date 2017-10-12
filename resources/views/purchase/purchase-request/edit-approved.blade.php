@@ -119,7 +119,11 @@
                                                                         <div>
                                                                             <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
                                                                                 @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
-                                                                                    <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                    @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedVendorData[$materialRequestComponentDetails[$iterator]['id']]))
+                                                                                        <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                    @else
+                                                                                        <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                    @endif
                                                                                 @endfor
                                                                             </select>
                                                                         </div>
@@ -263,7 +267,9 @@
                                             </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
-                                            <form role="form" action="" method="post">
+                                            <form role="form" action="/purchase/purchase-request/assign-vendors" method="post">
+                                                {!! csrf_field() !!}
+                                                <input type="hidden" name="purchase_request_id" value="{{$purchaseRequest['id']}}">
                                                 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
                                                 </div><!-- panel-group -->
@@ -377,7 +383,7 @@
 '                                                                </tr>';
                     $.each(vendor[i].material,function(j,w){
                         modalBodyString += '<tr>\n' +
-                            '                                                                    <td><input type="checkbox" name="vendor_materials['+vendor[i].id+'][]"> </td>\n' +
+                            '                                                                    <td><input type="checkbox" name="checked_vendor_materials['+vendor[i].id+'][]" value="'+vendor[i].material[j].id+'"><input type="hidden" name="vendor_materials['+vendor[i].id+'][]" value="'+vendor[i].material[j].id+'"> </td>\n' +
                             '                                                                    <td> '+vendor[i].material[j].name+' </td>\n' +
                             '                                                                    <td> '+vendor[i].material[j].quantity+' </td>\n' +
                             '                                                                    <td> '+vendor[i].material[j].unit+' </td>\n' +

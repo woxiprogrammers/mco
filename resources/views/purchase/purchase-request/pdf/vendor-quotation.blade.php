@@ -60,16 +60,16 @@
                     <span><b>Destination</b></span>
                     <div style="margin-left: 2%;">
                         <div>
-                            Project site address
+                            {{$projectSiteInfo['project_site_address']}}
                         </div>
                         <div>
-                            Project site address
+
                         </div>
                         <div>
-                            Project site address
+
                         </div>
                         <div>
-                            Project site address
+
                         </div>
                     </div>
 
@@ -77,22 +77,36 @@
             </tr>
             <tr  style="height: 100px">
                 <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
-                        <span><b>Supplier</b></span>
+                    <span><b>Supplier</b></span>
+                    <div style="margin-left: 2%;">
+                        <div>
+                            {{$vendorInfo['company']}}
+                        </div>
+                        <div>
+                            Contact: {{$vendorInfo['mobile']}}
+                        </div>
+                        <div>
+                            Email: {{$vendorInfo['email']}}
+                        </div>
+                        <div>
+                            GSTIN: {{$vendorInfo['gstin']}}
+                        </div>
+                    </div>
                 </td>
                 <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
                     <span><b>Terms of Delivery</b></span>
                     <div style="margin-left: 2%;">
                         <div>
-                            Project
+                            {{$projectSiteInfo['project_name']}}
                         </div>
                         <div>
-                            Project Site
+                            {{$projectSiteInfo['project_site_name']}}
                         </div>
                         <div>
-                            Project site address
+                            {{$projectSiteInfo['project_site_address']}}
                         </div>
                         <div>
-                            Project site city
+                            {{$projectSiteInfo['project_site_city']}}
                         </div>
                     </div>
                 </td>
@@ -114,91 +128,23 @@
                                 Unit
                             </th>
                         </tr>
-                        <tr style="text-align: center">
-                            <td>
-                                1
-                            </td>
-                            <td>
-                                Product 1
-                            </td>
-                            <td>
-                                1000
-                            </td>
-                            <td>
-                                KG.
-                            </td>
-                        </tr>
-                        <tr style="text-align: center">
-                            <td>
-                                1
-                            </td>
-                            <td>
-                                Product 1
-                            </td>
-                            <td>
-                                1000
-                            </td>
-                            <td>
-                                KG.
-                            </td>
-                        </tr>
-                        <tr style="text-align: center">
-                            <td>
-                                1
-                            </td>
-                            <td>
-                                Product 1
-                            </td>
-                            <td>
-                                1000
-                            </td>
-                            <td>
-                                KG.
-                            </td>
-                        </tr>
-                        <tr style="text-align: center">
-                            <td>
-                                1
-                            </td>
-                            <td>
-                                Product 1
-                            </td>
-                            <td>
-                                1000
-                            </td>
-                            <td>
-                                KG.
-                            </td>
-                        </tr>
-                        <tr style="text-align: center">
-                            <td>
-                                1
-                            </td>
-                            <td>
-                                Product 1
-                            </td>
-                            <td>
-                                1000
-                            </td>
-                            <td>
-                                KG.
-                            </td>
-                        </tr>
-                        <tr style="text-align: center">
-                            <td>
-                                1
-                            </td>
-                            <td>
-                                Product 1
-                            </td>
-                            <td>
-                                1000
-                            </td>
-                            <td>
-                                KG.
-                            </td>
-                        </tr>
-                        @for($i = 0;$i < 5;$i++)
+                        @for($iterator = 0 ; $iterator < count($vendorInfo['materials']); $iterator++)
+                            <tr style="text-align: center">
+                                <td>
+                                    {!! $iterator + 1 !!}
+                                </td>
+                                <td>
+                                    {{$vendorInfo['materials'][$iterator]['item_name']}}
+                                </td>
+                                <td>
+                                    {{$vendorInfo['materials'][$iterator]['quantity']}}
+                                </td>
+                                <td>
+                                    {{$vendorInfo['materials'][$iterator]['unit']}}
+                                </td>
+                            </tr>
+                        @endfor
+                        @for($i = 0;$i < (15-(count($vendorInfo['materials'])));$i++)
                             <tr style="text-align: center">
                                 <td>
 
