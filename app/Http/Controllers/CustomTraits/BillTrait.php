@@ -569,10 +569,10 @@ trait BillTrait{
                         }
                     }
                     $specialTaxes[$j]['current_bill_amount'] = MaterialProductHelper::customRound($specialTaxAmount , 3);
-                    $final['current_bill_gross_total_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $specialTaxAmount));
+                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
                 }
             }else{
-                $final['current_bill_gross_total_amount'] = MaterialProductHelper::customRound($final['current_bill_amount']);
+                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount']);
             }
 
             $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('total')->toArray();

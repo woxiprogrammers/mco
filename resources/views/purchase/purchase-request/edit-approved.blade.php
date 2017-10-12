@@ -24,6 +24,7 @@
                                         <i class="fa fa-check"></i>
                                         Submit
                                     </a>
+                                    {!! csrf_field() !!}
                                 </div>
                             </div>
                         </div>
@@ -97,37 +98,40 @@
                                                     </div>
                                                 </div>
                                                 <div class="portlet-body">
-                                                        <table class="table table-hover table-light" style="overflow-y: scroll">
-                                                            <thead>
-                                                            <tr>
-                                                                <th> ID </th>
-                                                                <th> Name </th>
-                                                                <th> Quantity </th>
-                                                                <th> Unit </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody style="height: 500px">
-                                                                @for($iterator = 0 ; $iterator < count($materialRequestComponentDetails); $iterator++)
-                                                                    <tr>
-                                                                        <td> {{$materialRequestComponentDetails[$iterator]['id']}} </td>
-                                                                        <td> {{$materialRequestComponentDetails[$iterator]['name']}} </td>
-                                                                        <td> {{$materialRequestComponentDetails[$iterator]['quantity']}} </td>
-                                                                        <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
-                                                                        <td>
-                                                                            <div>
-                                                                                <select class="example-getting-started"  multiple="multiple" style="overflow:hidden">
-                                                                                    @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
-                                                                                    <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['name']}}</option>
-                                                                                    @endfor
-                                                                                </select>
-                                                                            </div>
-
-                                                                        </td>
-                                                                    </tr>
-                                                                @endfor
-                                                            </tbody>
-                                                        </table>
+                                                    <table class="table table-hover table-light" style="overflow-y: scroll" id="componentTable">
+                                                        <thead>
+                                                        <tr>
+                                                            <th> ID </th>
+                                                            <th> Name </th>
+                                                            <th> Quantity </th>
+                                                            <th> Unit </th>
+                                                            <th> Action </th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody style="height: 500px">
+                                                            @for($iterator = 0 ; $iterator < count($materialRequestComponentDetails); $iterator++)
+                                                                <tr>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]['id']}} </td>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]['name']}} </td>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]['quantity']}} </td>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
+                                                                    <td>
+                                                                        <div>
+                                                                            <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
+                                                                                @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
+                                                                                    @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedVendorData[$materialRequestComponentDetails[$iterator]['id']]))
+                                                                                        <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                    @else
+                                                                                        <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                    @endif
+                                                                                @endfor
+                                                                            </select>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            @endfor
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
@@ -251,8 +255,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal fade" id="myModal3" role="dialog">
-                                <div class="modal-dialog">
+                            <div class="modal fade" id="vendorPreviewModal" role="dialog">
+                                <div class="modal-dialog" style="width: 80% !important;">
                                     <!-- Modal content-->
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -263,102 +267,17 @@
                                             </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
-                                            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                                                <div class="panel panel-default">
-                                                    <div class="panel-heading" role="tab" id="headingOne">
-                                                        <h4 class="panel-title">
-                                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                                <i class="more-less glyphicon glyphicon-plus"></i>
-                                                                <span style="float: left ;font-size: 20px">Vendor 1</span>
-                                                            </a>
-                                                        </h4>
-                                                    </div>
-                                                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                                                        <div class="panel-body">
-                                                            <table class="table table-hover table-light">
-                                                                <thead>
-                                                                <tr>
-                                                                    <th> Send mail </th>
-                                                                    <th> Material \ Asset Name </th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td><input type="checkbox"> </td>
-                                                                    <td> Jacob </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"> </td>
-                                                                    <td> Larry </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"> </td>
-                                                                    <td> Sandy </td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
+                                            <form role="form" action="/purchase/purchase-request/assign-vendors" method="post">
+                                                {!! csrf_field() !!}
+                                                <input type="hidden" name="purchase_request_id" value="{{$purchaseRequest['id']}}">
+                                                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="panel panel-default">
-                                                    <div class="panel-heading" role="tab" id="headingTwo">
-                                                        <h4 class="panel-title">
-                                                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                                                <i class="more-less glyphicon glyphicon-plus"></i>
-                                                                <span style="float: left;font-size: 20px">Vendor 2</span>
-                                                            </a>
-                                                        </h4>
-                                                    </div>
-                                                    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-                                                        <div class="panel-body">
-                                                            <table class="table table-hover table-light">
-                                                                <thead>
-                                                                <tr>
-                                                                    <th> Send mail </th>
-                                                                    <th> Material Name</th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                <tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                </tr>
-                                                                <tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                </tr>
-                                                                <tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                </tr>
-                                                                <tr>
-                                                                <tr>
-                                                                    <td> <input type="checkbox"></td>
-                                                                    <td> Mark </td>
-                                                                </tr>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div><!-- panel-group -->
-                                            <a href="#" class="btn btn-set yellow pull-right">
-                                                <i class="fa fa-check" style="font-size: large"></i>
-                                                Send mail to vendors&nbsp; &nbsp; &nbsp; &nbsp;
-                                            </a>
+                                                </div><!-- panel-group -->
+                                                <button class="btn btn-set yellow">
+                                                    <i class="fa fa-check" style="font-size: large"></i>
+                                                    Send mail to vendors&nbsp; &nbsp; &nbsp; &nbsp;
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -378,16 +297,108 @@
             <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
     <script>
         $(document).ready(function(){
+            $('.example-getting-started').multiselect();
             $("#myBtn").click(function(){
                 $("#myModal").modal();
             });
             $("#assetBtn").click(function(){
                 $("#myModal1").modal();
             });
+
             $("#previewBtn").click(function(){
-                $("#myModal3").modal();
+                var vendor = [];
+                $(".multiselect-container li.active").each(function(){
+                    var vendorName = $(this).find('label').text();
+                    var vendorId = $(this).find('input').attr('value');
+                    var materialId = $(this).closest('tr').find('td:nth-child(1)').text();
+                    var materialName = $(this).closest('tr').find('td:nth-child(2)').text();
+                    var materialQuantity = $(this).closest('tr').find('td:nth-child(3)').text();
+                    var materialUnit = $(this).closest('tr').find('td:nth-child(4)').text();
+                    if(vendor.length > 0){
+                        var found = false;
+                        $.each(vendor,function(i,v){
+                            if(vendor[i].id == vendorId){
+                                var newVendorMaterial = {
+                                    id: materialId,
+                                    name: materialName,
+                                    quantity: materialQuantity,
+                                    unit: materialUnit
+                                };
+                                vendor[i].material.push(newVendorMaterial);
+                                found = true;
+                                return true;
+                            }
+                        });
+                        if(found == false){
+                            var newVendor = {
+                                id: vendorId,
+                                name: vendorName,
+                                material:[
+                                    {
+                                        id: materialId,
+                                        name: materialName,
+                                        quantity: materialQuantity,
+                                        unit: materialUnit
+                                    }
+                                ]
+                            };
+                            vendor.push(newVendor);
+                        }
+                    }else{
+                        var newVendor = {
+                            id: vendorId,
+                            name: vendorName,
+                            material:[
+                                {
+                                    id: materialId,
+                                    name: materialName,
+                                    quantity: materialQuantity,
+                                    unit: materialUnit
+                                }
+                            ]
+                        };
+                        vendor.push(newVendor);
+                    }
+                });
+                var modalBodyString = '';
+                $.each(vendor, function(i,v){
+                    modalBodyString += '<div class="panel panel-default">\n' +
+            '            <div class="panel-heading" role="tab" id="headingOne">\n' +
+'                                                        <h4 class="panel-title">\n' +
+'                                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse_'+i+'" aria-expanded="true" aria-controls="collapseOne">\n' +
+                        '                                                                <span style="font-size: 16px;text-align: left !important;">'+vendor[i].name+'</span>\n' +
+                        '                                                                <i class="more-less glyphicon glyphicon-plus"></i>\n' +
+'                                                            </a>\n' +
+'                                                        </h4>\n' +
+'                                                    </div>\n' +
+'                                                    <div id="collapse_'+i+'" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">\n' +
+'                                                        <div class="panel-body">\n' +
+'                                                            <table class="table table-hover table-light">\n' +
+'                                                                <tbody>' +
+'<tr>\n' +
+'                                                                    <th> Send mail </th>\n' +
+'                                                                    <th> Material \\ Asset Name </th>\n' +
+'                                                                    <th> Quantity </th>\n' +
+'                                                                    <th> Unit </th>\n' +
+'                                                                </tr>';
+                    $.each(vendor[i].material,function(j,w){
+                        modalBodyString += '<tr>\n' +
+                            '                                                                    <td><input type="checkbox" name="checked_vendor_materials['+vendor[i].id+'][]" value="'+vendor[i].material[j].id+'"><input type="hidden" name="vendor_materials['+vendor[i].id+'][]" value="'+vendor[i].material[j].id+'"> </td>\n' +
+                            '                                                                    <td> '+vendor[i].material[j].name+' </td>\n' +
+                            '                                                                    <td> '+vendor[i].material[j].quantity+' </td>\n' +
+                            '                                                                    <td> '+vendor[i].material[j].unit+' </td>\n' +
+                            '                                                                </tr>';
+                    });
+                    modalBodyString += '</tbody>\n' +
+                        '                                                            </table>\n' +
+                        '\n' +
+                        '                                                        </div>\n' +
+                        '                                                    </div>\n' +
+                        '                                                </div>';
+                });
+                $("#vendorPreviewModal .modal-body .panel-group").html(modalBodyString);
+                $("#vendorPreviewModal").modal('show');
             });
-            $('.example-getting-started').multiselect();
         });
     </script>
 @endsection

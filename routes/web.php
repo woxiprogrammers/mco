@@ -10,6 +10,7 @@
 |
 */
 Route::group(['domain' => env('DOMAIN_NAME')], function(){
+    Route::get('testing-pdf',array('uses' => 'Purchase\PurchaseRequestController@createVendorQuotationPdf'));
     Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
@@ -256,6 +257,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=> 'Purchase\PurchaseRequestController@create'));
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
+            Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
