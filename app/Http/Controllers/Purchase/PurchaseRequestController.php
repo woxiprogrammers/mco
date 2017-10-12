@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Purchase;
 
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
-use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialRequestComponentHistory;
-use App\MaterialRequestComponentImages;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
-use App\MaterialRequests;
+use App\ProjectSite;
 use App\PurchaseRequest;
 use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentStatuses;
+use App\PurchaseRequestComponentVendorMailInfo;
+use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
 use App\Unit;
 use App\Vendor;
@@ -20,9 +20,11 @@ use App\VendorMaterialRelation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class PurchaseRequestController extends Controller
 {
@@ -35,64 +37,78 @@ class PurchaseRequestController extends Controller
         return view('purchase/purchase-request/manage');
     }
     public function getCreateView(Request $request){
-        $user = Auth::user();
-        $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
-        $materialRequestList = array();
-
-        $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
-        $iterator = 0;
-        $materialRequestComponents = MaterialRequestComponents::where('component_status_id',$inIndentStatusId)->get();
-        foreach($materialRequestComponents as $index => $materialRequestComponent){
-            $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
-            $materialRequestList[$iterator]['name'] = $materialRequestComponent->name;
-            $materialRequestList[$iterator]['quantity'] = $materialRequestComponent->quantity;
-            $materialRequestList[$iterator]['unit_id'] = $materialRequestComponent->unit_id;
-            $materialRequestList[$iterator]['unit'] = $materialRequestComponent->unit->name;
-            $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponent->component_type_id;
-            $materialRequestList[$iterator]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
-            $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponent->component_status_id;
-            $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
-            $iterator++;
+        try{
+            $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
+            $materialRequestList = array();
+            $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
+            $iterator = 0;
+            $materialRequestComponents = MaterialRequestComponents::where('component_status_id',$inIndentStatusId)->get();
+            foreach($materialRequestComponents as $index => $materialRequestComponent){
+                $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
+                $materialRequestList[$iterator]['name'] = $materialRequestComponent->name;
+                $materialRequestList[$iterator]['quantity'] = $materialRequestComponent->quantity;
+                $materialRequestList[$iterator]['unit_id'] = $materialRequestComponent->unit_id;
+                $materialRequestList[$iterator]['unit'] = $materialRequestComponent->unit->name;
+                $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponent->component_type_id;
+                $materialRequestList[$iterator]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
+                $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponent->component_status_id;
+                $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
+                $iterator++;
+            }
+            return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Request create view',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
-        return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId'));
     }
 
     public function getEditView(Request $request,$status,$id){
-        $user = Auth::user();
-        $userRole = $user->roles[0]->role->slug;
-        if($status == "p-r-admin-approved"){
-            $purchaseRequest = PurchaseRequest::where('id',$id)->first();
-            $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('material_request_component_id');
-            $materialRequestComponentDetails = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','asc')->get();
-            $materialRequestComponentID = MaterialRequestComponentTypes::where('slug','quotation-material')->pluck('id')->first();
-            $allVendors = Vendor::where('is_active','true')->get();
-            $iterator = $i = 0;
-            $vendors1 = array();
-            foreach($allVendors as $key => $vendor){
-                $vendors1[$i]['id'] = $vendor->id;
-                $vendors1[$i]['name'] = $vendor->name;
-                $i++;
-            }
-            foreach($materialRequestComponentDetails as $key => $materialRequestComponent){
-                if($materialRequestComponentID == $materialRequestComponent->component_type_id){
-                    $material_id = Material::where('name','like',$materialRequestComponent->name)->pluck('id');
-                    $vendorAssignedIds = VendorMaterialRelation::where('material_id',$material_id)->pluck('vendor_id');
-                    $i = 0;
-                    $vendors = array();
-                    foreach ($vendorAssignedIds as $key1 => $vendorId){
-                        $vendors[$i]['id'] = $vendorId;
-                        $vendors[$i]['name'] = Vendor::where('id',$vendorId)->pluck('name')->first();
-                        $i++;
+        try{
+            $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
+            if($status == "p-r-admin-approved"){
+                $purchaseRequest = PurchaseRequest::where('id',$id)->first();
+                $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('material_request_component_id');
+                $materialRequestComponentDetails = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','asc')->get();
+                $materialRequestComponentID = MaterialRequestComponentTypes::where('slug','quotation-material')->pluck('id')->first();
+                $allVendors = Vendor::where('is_active','true')->select('id','company')->get()->toArray();
+                $iterator = 0;
+                $assignedVendorData = array();
+                foreach($materialRequestComponentDetails as $key => $materialRequestComponent){
+                    $assignedVendorData[$materialRequestComponent->id] = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                                                                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                                                                            ->where('material_request_components.id',$materialRequestComponent->id)
+                                                                            ->pluck('purchase_request_component_vendor_relation.vendor_id')->toArray();
+                    if($materialRequestComponentID == $materialRequestComponent->component_type_id){
+                        $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id');
+                        $vendorAssignedIds = VendorMaterialRelation::where('material_id',$material_id)->pluck('vendor_id');
+                        if(count($vendorAssignedIds) > 0){
+                            $materialRequestComponentDetails[$iterator]['vendors'] = Vendor::whereIn('id',$vendorAssignedIds)->select('id','company')->get()->toArray();
+                        }else{
+                            $materialRequestComponentDetails[$iterator]['vendors'] = $allVendors;
+                        }
+                    }else{
+                        $materialRequestComponentDetails[$iterator]['vendors'] = $allVendors;
                     }
-                    $materialRequestComponentDetails[$iterator]['vendors'] = $vendors;
-                }else{
-                    $materialRequestComponentDetails[$iterator]['vendors'] = $vendors1;
+                    $iterator++;
                 }
-                $iterator++;
+                return view('purchase/purchase-request/edit-approved')->with(compact('purchaseRequest','materialRequestComponentDetails','userRole','assignedVendorData'));
+            }else{
+                return view('purchase/purchase-request/edit-draft');
             }
-            return view('purchase/purchase-request/edit-approved')->with(compact('purchaseRequest','materialRequestComponentDetails','userRole'));
-        }else{
-            return view('purchase/purchase-request/edit-draft');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Request Edit View',
+                'params' => $request->all(),
+                'status' => $status,
+                'id' => $id,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
         }
     }
 
@@ -321,6 +337,94 @@ class PurchaseRequestController extends Controller
                 'params' => $request->all(),
                 'newStatus' => $newStatus,
                 'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function assignVendors(Request $request){
+        try{
+            $data = $request->all();
+            foreach($data['vendor_materials'] as $vendorId => $materialRequestComponentIds){
+                $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
+                PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
+                if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
+                    $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
+                    $vendorInfo['materials'] = array();
+                }
+                $purchaseVendorAssignData = array();
+                $purchaseVendorAssignData['vendor_id'] = $vendorId;
+                $iterator = 0;
+                $jIterator = 0;
+                $mailInfoData = array();
+                foreach($materialRequestComponentIds as $materialRequestComponentId){
+                    $materialRequestComponent = MaterialRequestComponents::findOrFail($materialRequestComponentId);
+                    $purchaseVendorAssignData['is_email_sent'] = false;
+                    $purchaseVendorAssignData['purchase_request_component_id'] = $materialRequestComponent->purchaseRequestComponent->id;
+                    // create
+                    $purchaseComponentVendorRelation = PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->where('purchase_request_component_id',$purchaseVendorAssignData['purchase_request_component_id'])->first();
+                    if($purchaseComponentVendorRelation == null){
+                        $purchaseComponentVendorRelation = PurchaseRequestComponentVendorRelation::create($purchaseVendorAssignData);
+                    }
+                    $projectSiteInfo = array();
+                    $projectSiteInfo['project_name'] = $materialRequestComponent->materialRequest->projectSite->project->name;
+                    $projectSiteInfo['project_site_name'] = $materialRequestComponent->materialRequest->projectSite->name;
+                    $projectSiteInfo['project_site_address'] = $materialRequestComponent->materialRequest->projectSite->address;
+                    if($materialRequestComponent->materialRequest->projectSite->city_id == null){
+                        $projectSiteInfo['project_site_city'] = '';
+                    }else{
+                        $projectSiteInfo['project_site_city'] = $materialRequestComponent->materialRequest->projectSite->city->name;
+                    }
+                    if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
+                        $mailInfoData[$jIterator] = [
+                            'user_id' => Auth::user()->id,
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now()
+                        ];
+                        if(in_array($materialRequestComponentId,$data['checked_vendor_materials'][$vendorId])){
+                            $mailInfoData[$jIterator]['purchase_request_component_vendor_relation_id'] = $purchaseComponentVendorRelation->id;
+                            $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
+                            $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
+                            $vendorInfo['materials'][$iterator]['unit'] = $materialRequestComponent->unit->name;
+                            $iterator++;
+                            $jIterator++;
+                        }
+                    }
+                }
+                if(isset($vendorInfo)){
+                    $pdf = App::make('dompdf.wrapper');
+                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo')));
+                    $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
+                    $pdfFileName = sha1($vendorId).'.pdf';
+                    $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
+                    $pdfContent = $pdf->stream();
+                    if(file_exists($pdfUploadPath)){
+                        unlink($pdfUploadPath);
+                    }
+                    if (!file_exists($pdfDirectoryPath)) {
+                        File::makeDirectory(public_path().$pdfDirectoryPath, $mode = 0777, true, true);
+                    }
+                    file_put_contents($pdfUploadPath,$pdfContent);
+                    $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
+                    Mail::send('purchase.purchase-request.email.vendor-quotation', [], function($message) use ($mailData){
+                        $message->subject('Testing with attachment');
+                        $message->to($mailData['toMail']);
+                        $message->from(env('MAIL_USERNAME'));
+                        $message->attach($mailData['path']);
+                    });
+                    PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
+                    PurchaseRequestComponentVendorRelation::whereIn('id',array_column($mailInfoData,'purchase_request_component_vendor_relation_id'))->update(['is_email_sent' => true]);
+                    unlink($pdfUploadPath);
+                }
+            }
+            $request->session()->flash('success','Vendors assigned successfully');
+            return redirect('/purchase/purchase-request/edit/p-r-admin-approved/'.$data['purchase_request_id']);
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Purchase Assign Vendors',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
             ];
             Log::critical(json_encode($data));
             abort(500);
