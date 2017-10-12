@@ -343,20 +343,6 @@ class PurchaseRequestController extends Controller
         }
     }
 
-    public function getVendorAssignmentPartial(Request $request){
-        try{
-            dd($request->all());
-        }catch (\Exception $e){
-            $data = [
-                'action' => 'Get Vendor Assignment Partial Blade',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-    }
-
     public function assignVendors(Request $request){
         try{
             $data = $request->all();
