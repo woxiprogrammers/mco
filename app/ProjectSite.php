@@ -13,7 +13,7 @@ class ProjectSite extends Model
     public function project(){
         return $this->belongsTo('App\Project','project_id','id');
     }
-    public function cities(){
-        return $this->hasOne('App\City','state_id');
+    public function city(){
+        return $this->belongsTo('App\City','city_id');
     }
 }
