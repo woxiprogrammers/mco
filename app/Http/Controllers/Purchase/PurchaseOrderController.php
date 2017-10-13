@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\PurchaseOrder;
 use App\PurchaseOrderComponent;
+use App\PurchaseOrderComponentImage;
 use App\PurchaseRequest;
 use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentStatuses;
@@ -16,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderController extends Controller
@@ -120,7 +122,6 @@ class PurchaseOrderController extends Controller
     public function createPurchaseOrder(Request $request){
         try{
             $today = Carbon::today();
-            dd($request->all());
             foreach($request->purchase as $vendorId => $components){
                 $approvePurchaseOrderData = $disapprovePurchaseOrderData = array('vendor_id' => $vendorId, 'purchase_request_id' => $request->purchase_request_id);
                 $todaysCount = PurchaseOrder::where('created_at','>=',$today)->count();
@@ -132,31 +133,69 @@ class PurchaseOrderController extends Controller
                             $approvePurchaseOrderData['is_approved'] = true;
                             $approvePurchaseOrderData['user_id'] = Auth::user()->id;
                             $approvePurchaseOrderData['serial_no'] = ++$todaysCount;
-                            dd($approvePurchaseOrderData);
                             $approvedPurchaseOrder = PurchaseOrder::create($approvePurchaseOrderData);
                         }
                         $purchaseOrderComponentData['purchase_order_id'] = $approvedPurchaseOrder['id'];
-                        $purchaseOrderComponentData['purchase_request_component_id'] = $purchaseRequestComponentId;
-                        $purchaseOrderComponentData['quantity'] = $component['quantity'];
-                        $purchaseOrderComponentData['rate_per_unit'] = $component['rate'];
-                        $purchaseOrderComponentData['hsn_code'] = $component['hsn_code'];
-
-
                     }elseif($component['status'] == 'disapprove'){
                         if($disapprovePurchaseOrder == null){
                             $disapprovePurchaseOrderData['is_approved'] = false;
                             $disapprovePurchaseOrderData['user_id'] = Auth::user()->id;
                             $disapprovePurchaseOrderData['serial_no'] = ++$todaysCount;
-                            dd($approvePurchaseOrderData);
                             $disapprovePurchaseOrder = PurchaseOrder::create($disapprovePurchaseOrderData);
                         }
                         $purchaseOrderComponentData['purchase_order_id'] = $disapprovePurchaseOrder['id'];
+                    }
+                    if(count($purchaseOrderComponentData) > 0){
                         $purchaseOrderComponentData['purchase_request_component_id'] = $purchaseRequestComponentId;
                         $purchaseOrderComponentData['quantity'] = $component['quantity'];
                         $purchaseOrderComponentData['rate_per_unit'] = $component['rate'];
                         $purchaseOrderComponentData['hsn_code'] = $component['hsn_code'];
+                        $purchaseOrderComponentData['unit_id'] = $component['unit_id'];
+                        $purchaseOrderComponent = PurchaseOrderComponent::create($purchaseOrderComponentData);
+                        if(array_key_exists('vendor_quotation_images',$component) && (count($component['vendor_quotation_images']) > 0)){
+                            /*move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)*/
+                            $mainDirectoryName = sha1($purchaseOrderComponent['purchase_order_id']);
+                            $componentDirectoryName = sha1($purchaseOrderComponent['id']);
+                            $uploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                            if (!file_exists($uploadPath)) {
+                                File::makeDirectory($uploadPath, $mode = 0777, true, true);
+                            }
+                            $iterator = 0;
+                            foreach($component['vendor_quotation_images'] as $key => $image){
+                                $imageData = [
+                                    'purchase_order_component_id' => $purchaseOrderComponent['id'] ,
+                                    'name' => $_FILES['purchase']['name'][$vendorId][$purchaseRequestComponentId]['vendor_quotation_images'][$iterator],
+                                    'caption' => 'No caption added.'
+                                ];
+                                $imageUploadPath = $uploadPath.DIRECTORY_SEPARATOR.$imageData['name'];
+                                move_uploaded_file($_FILES['purchase']['tmp_name'][$vendorId][$purchaseRequestComponentId]['vendor_quotation_images'][$iterator],$imageUploadPath);
+                                PurchaseOrderComponentImage::create($imageData);
+                            }
+                        }
+                        if(array_key_exists('client_approval_images',$component) && (count($component['client_approval_images']) > 0)){
+                            $mainDirectoryName = sha1($purchaseOrderComponent['purchase_order_id']);
+                            $componentDirectoryName = sha1($purchaseOrderComponent['id']);
+                            $uploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                            if (!file_exists($uploadPath)) {
+                                File::makeDirectory($uploadPath, $mode = 0777, true, true);
+                            }
+                            $iterator = 0;
+                            foreach($component['client_approval_images'] as $key => $image){
+                                $imageData = [
+                                    'purchase_order_component_id' => $purchaseOrderComponent['id'] ,
+                                    'name' => $_FILES['purchase']['name'][$vendorId][$purchaseRequestComponentId]['client_approval_images'][$iterator],
+                                    'caption' => 'No caption added',
+                                    'is_vendor_approval' => false
+                                ];
+                                $imageUploadPath = $uploadPath.DIRECTORY_SEPARATOR.$imageData['name'];
+                                move_uploaded_file($_FILES['purchase']['tmp_name'][$vendorId][$purchaseRequestComponentId]['client_approval_images'][$iterator],$imageUploadPath);
+                                PurchaseOrderComponentImage::create($imageData);
+                            }
+                        }
                     }
                 }
+                $request->session()->flash('success','Purchase Order created successfully');
+                return redirect('/purchase/purchase-order/create');
             }
         }catch (\Exception $e){
             $data = [
@@ -165,6 +204,7 @@ class PurchaseOrderController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }

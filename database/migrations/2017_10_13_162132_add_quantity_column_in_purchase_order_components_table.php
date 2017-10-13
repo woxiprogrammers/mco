@@ -15,6 +15,8 @@ class AddQuantityColumnInPurchaseOrderComponentsTable extends Migration
     {
         Schema::table('purchase_order_components', function (Blueprint $table) {
             $table->double('quantity')->nullable();
+            $table->unsignedInteger('unit_id')->nullable();
+            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
@@ -26,7 +28,9 @@ class AddQuantityColumnInPurchaseOrderComponentsTable extends Migration
     public function down()
     {
         Schema::table('purchase_order_components', function (Blueprint $table) {
+            $table->dropForeign('purchase_order_components_unit_id_foreign');
             $table->dropColumn('quantity');
+            $table->dropColumn('unit_id');
         });
     }
 }
