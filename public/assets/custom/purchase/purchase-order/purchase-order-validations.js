@@ -16,7 +16,6 @@ var  AddPayment = function () {
                 },
                 remark: {
                     required: true,
-                    email: true
                 }
             },
 
@@ -74,7 +73,7 @@ var  AddPayment = function () {
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 material: {
-                    requird: true
+                    required: true
                 },
                 quantity: {
                     required: true
@@ -143,6 +142,7 @@ var  AddPayment = function () {
     };
     return {
         init: function () {
+            add_transaction();
         }
     }
 }();

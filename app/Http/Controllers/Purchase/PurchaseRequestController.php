@@ -122,7 +122,11 @@ class PurchaseRequestController extends Controller
                     $request->session()->flash('error', 'Something Went Wrong');
                     return redirect('purchase/purchase-request/create');
                 }else{
-                    $materialRequestComponentIds = array_merge($materialRequestComponentId,$request['material_request_component_ids']);
+                    if($request->has('material_request_component_ids')){
+                        $materialRequestComponentIds = array_merge($materialRequestComponentId,$request['material_request_component_ids']);
+                    }else{
+                        $materialRequestComponentIds = $materialRequestComponentId;
+                    }
                 }
             }else{
                 $materialRequestComponentIds = $request['material_request_component_ids'];
