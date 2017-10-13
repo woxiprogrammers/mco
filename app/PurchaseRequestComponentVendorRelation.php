@@ -13,4 +13,8 @@ class PurchaseRequestComponentVendorRelation extends Model
     public function mailInfo(){
         return $this->hasMany('App\PurchaseRequestComponentVendorMailInfo','purchase_request_component_vendor_relation_id');
     }
+
+    public function vendor(){
+        return $this->belongsTo('App\Vendor','vendor_id');
+    }
 }

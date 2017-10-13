@@ -268,6 +268,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create-transaction',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
             Route::post('add-payment',array('uses'=> 'Purchase\PurchaseOrderController@createPayment'));
             Route::get('get-materials',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderMaterials'));
+            Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createPurchaseOrder'));
+            Route::get('get-purchase-request-component/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseRequestComponents'));
+            Route::get('get-client-project/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getClientProjectName'));
         });
     });
 
