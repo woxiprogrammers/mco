@@ -259,7 +259,7 @@ class PurchaseRequestController extends Controller
                         break;
                 }
                 $records['data'][$iterator] = [
-                    $purchaseRequest->id,
+                    $this->getPurchaseIDFormat('purchase-request',$purchaseRequest->projectSite->id,$purchaseRequest->created_at),
                     $purchaseRequest->projectSite->project->client->company,
                     $purchaseRequest->projectSite->project->name.' - '.$purchaseRequest->projectSite->name,
                     $status,
