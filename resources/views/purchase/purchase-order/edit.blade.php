@@ -19,12 +19,6 @@
                                 <div class="page-title">
                                     <h1>Edit Purchase Order</h1>
                                 </div>
-                                <div class="form-group " style="text-align: center">
-                                    <a href="#" class="btn red pull-right margin-top-15">
-                                        <i class="fa fa-check" style="font-size: large"></i>
-                                        Submit
-                                    </a>
-                                </div>
                             </div>
                         </div>
                         <div class="page-content">
@@ -59,7 +53,7 @@
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label style="color: darkblue;">Purchase Request</label>
+                                                            <label style="color: darkblue;">Purchase Request Id</label>
                                                             <input type="text" class="form-control" name="client_name"  value="{{$purchaseOrderList['purchase_request_format_id']}}" readonly tabindex="-1">
                                                         </div>
                                                     </div>
@@ -87,18 +81,10 @@
                                                                 <th> Unit </th>
                                                                 <th>Action</th>
                                                             </tr>
-                                                            <tr class="filter">
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                <th>
-                                                                    <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                                    <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                                </th>
-                                                            </tr>
                                                         </thead>
                                                         <tbody>
                                                             @foreach($materialList as $key => $materialData)
+
                                                                 <tr>
                                                                     <td> {{$materialData['material_component_name']}} </td>
                                                                     <td>  {{$materialData['material_component_quantity']}} </td>
@@ -223,10 +209,11 @@
 
                                                     </div>
                                                 </div>
-                                                <div class="modal fade" id="paymentModal" role="dialog">
+                                                <div class="modal fade " id="paymentModal"  role="dialog">
                                                     <div class="modal-dialog">
                                                         <!-- Modal content-->
                                                         <div class="modal-content">
+                                                            <form action="/purchase/purchase-order/add-payment" method="post">
                                                             <div class="modal-header">
                                                                 <div class="row">
                                                                     <div class="col-md-4"></div>
@@ -236,13 +223,27 @@
                                                             </div>
                                                             <div class="modal-body" style="padding:40px 50px;">
                                                                 <div class="form-group row">
-                                                                    <input type="number" class="form-control" id="usrname" placeholder="Enter User Name">
+                                                                    <input type="hidden" id="po_bill_id" name="purchase_order_bill_id">
+                                                                    <select class="form-control" name="user_id">
+                                                                       @foreach($systemUsers as $user)
+                                                                       <option value="{{$user['id']}}">{{$user['first_name']}}  {{$user['last_name']}}</option>
+                                                                       @endforeach
+                                                                   </select>
                                                                 </div>
                                                                 <div class="form-group row">
-                                                                    <input type="number" class="form-control" id="usrname" placeholder="Enter Amount">
+                                                                    <select class="form-control" name="payment_slug">                                              @foreach($transaction_types as $type)
+                                                                            <option value="{{$type['slug']}}">{{$type['slug']}}</option>
+                                                                        @endforeach
+                                                                    </select>
                                                                 </div>
                                                                 <div class="form-group row">
-                                                                    <input type="text" class="form-control" id="usrname" placeholder="Enter Transaction details">
+                                                                    <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount" readonly>
+                                                                </div>
+                                                                <div class="form-group row">
+                                                                    <input type="number" class="form-control"  name="reference_number" placeholder="Enter Amount" >
+                                                                </div>
+                                                                <div class="form-group row">
+                                                                    <input type="text" class="form-control" name="remark"  placeholder="Enter Transaction details">
                                                                 </div>
                                                                 <div class="form-group row">Quotation images
                                                                     <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
@@ -279,11 +280,12 @@
                                                                         </a>
                                                                     </div>
                                                                 </div>
-                                                                <a href="#" class="btn btn-set red pull-right">
+                                                                <button class="btn btn-set red pull-right" type="submit">
                                                                     <i class="fa fa-check" style="font-size: large"></i>
                                                                     Add &nbsp; &nbsp; &nbsp;
-                                                                </a>
+                                                                </button>
                                                             </div>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -422,52 +424,27 @@
                                                                 <tr>
                                                                     <th> GRN</th>
                                                                     <th> Material Name </th>
-                                                                    <th> Qty </th>
+                                                                    <th> Quantity </th>
                                                                     <th> Unit </th>
                                                                     <th>Vendor</th>
                                                                     <th>Action</th>
                                                                 </tr>
-                                                                <tr class="filter">
-                                                                    <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                    <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                                    <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                    <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                                    <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                                    <th>
-                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                                    </th>
-                                                                </tr>
                                                                 </thead>
                                                                 <tbody>
+                                                                @foreach($purchaseOrderBillListing as $purchaseOrderTransaction)
                                                                 <tr>
-                                                                    <td> ABC </td>
-                                                                    <td> 5</td>
-                                                                    <td> Kg </td>
-                                                                    <td> Vendor lmn </td>
                                                                     <td>
-                                                                        <select class="table-group-action-input form-control input-inline input-small input-sm">
-                                                                            <option value="">Select...</option>
-                                                                            <option value="Cancel">Approve</option>
-                                                                            <option value="Cancel">Disapprove</option>
-                                                                        </select>
-                                                                    </td>
-                                                                    <td> <button id="image">Upload</button> <button id="payment">Make Payment</button></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td> ABC </td>
-                                                                    <td> 5</td>
-                                                                    <td> Kg </td>
-                                                                    <td> Vendor lmn </td>
+         <input type="hidden" id="{{$purchaseOrderTransaction['purchase_order_bill_id']}}" value="{{$purchaseOrderTransaction['bill_amount']}}">
+                                                                        <input type="hidden"  value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}" name="purchase_order_bill_id">{{$purchaseOrderTransaction['purchase_bill_grn']}} </td>
+                                                                    <td> {{$purchaseOrderTransaction['material_name']}}</td>
+                                                                    <td> {{$purchaseOrderTransaction['material_quantity']}} </td>
+                                                                    <td> {{$purchaseOrderTransaction['unit_name']}} </td>
                                                                     <td>
-                                                                        <select class="table-group-action-input form-control input-inline input-small input-sm">
-                                                                            <option value="">Select...</option>
-                                                                            <option value="Cancel">Approve</option>
-                                                                            <option value="Cancel">Disapprove</option>
-                                                                        </select>
+                                                                        {{$purchaseOrderTransaction['status']}}
                                                                     </td>
-                                                                    <td> <button id="image">Upload</button><button id="image">Make Payment</button> </td>
+                                                                    <td>  <button class="payment" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">Make Payment</button></td>
                                                                 </tr>
+                                                                    @endforeach
                                                                 </tbody>
                                                             </table>
                                                         </div>

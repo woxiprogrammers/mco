@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Purchase;
 
 use App\Http\Controllers\CustomTraits\Purchase\PurchaseTrait;
 use App\MaterialRequestComponents;
+use App\PaymentType;
 use App\PurchaseOrder;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillImage;
+use App\PurchaseOrderBillPayment;
 use App\PurchaseOrderComponent;
 use App\PurchaseRequest;
+use App\User;
 use Carbon\Carbon;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
@@ -111,11 +114,34 @@ class PurchaseOrderController extends Controller
                 $materialList[$iterator]['material_component_images'][0]['image_url'] = '/assets/global/img/logo.jpg';
                 $iterator++;
             }
+            $purchaseOrderComponentIDs = PurchaseOrderComponent::where('purchase_order_id',$id)->pluck('id');
+            $purchaseOrderBillData = PurchaseOrderBill::whereIn('purchase_order_component_id',$purchaseOrderComponentIDs)->get();
+            $purchaseOrderBillListing = array();
+            $iterator = 0;
+            foreach($purchaseOrderBillData as $key => $purchaseOrderBill){
+                $purchaseOrderComponent = $purchaseOrderBill->purchaseOrderComponent;
+                $purchaseRequestComponent = $purchaseOrderComponent->purchaseRequestComponent;
+                $purchaseOrderBillListing[$iterator]['purchase_order_bill_id'] = $purchaseOrderBill['id'];
+                $purchaseOrderBillListing[$iterator]['material_name'] = $purchaseRequestComponent->materialRequestComponent->name;
+                $purchaseOrderBillListing[$iterator]['material_quantity'] = $purchaseOrderBill['quantity'];
+                $purchaseOrderBillListing[$iterator]['unit_id'] = $purchaseOrderBill['unit_id'];
+                $purchaseOrderBillListing[$iterator]['unit_name'] = $purchaseOrderBill->unit->name;
+                $purchaseOrderBillListing[$iterator]['purchase_bill_grn'] = $purchaseOrderBill['grn'];
+                $purchaseOrderBillListing[$iterator]['bill_amount'] = $purchaseOrderBill['bill_amount'];
+                if($purchaseOrderComponent['is_amendment'] == true){
+                    $purchaseOrderBillListing[$iterator]['status'] = 'Amendment Pending';
+                }else{
+                    $purchaseOrderBillListing[$iterator]['status'] = ($purchaseOrderBill['is_paid'] == true) ? 'Bill Paid' : 'Bill Pending';
+                }
+                $iterator++;
+            }
+            $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
+            $transaction_types = PaymentType::select('slug')->get();
         }catch (\Exception $e){
             $message = "Fail";
             $status = 500;
         }
-        return view('purchase/purchase-order/edit')->with(compact('purchaseOrderList','materialList'));
+        return view('purchase/purchase-order/edit')->with(compact('transaction_types','purchaseOrderList','materialList','purchaseOrderBillListing','systemUsers'));
     }
     public function getPurchaseOrderComponentDetails(Request $request){
            $data = $request->all();
@@ -176,6 +202,28 @@ class PurchaseOrderController extends Controller
             $message = "Fail";
             $status = 500;
             $request->session()->flash('danger','Something went wrong');
+        }
+    }
+    public function createPayment(Request $request){
+        try{
+            $purchaseOrderBillPayment['purchase_order_bill_id'] = $request['purchase_order_bill_id'];
+            $purchaseOrderBillPayment['payment_id'] = PaymentType::where('slug',$request['payment_slug'])->pluck('id')->first();
+            $purchaseOrderBillPayment['amount'] = $request['amount'];
+            $purchaseOrderBillPayment['reference_number'] = $request['reference_number'];
+            $purchaseOrderBillPayment['remark'] = $request['remark'];
+            $purchaseOrderBillPayment['created_at'] = $purchaseOrderBillPayment['updated_at'] = Carbon::now();
+            $purchaseOrderBillPaymentId = PurchaseOrderBillPayment::insertGetId($purchaseOrderBillPayment);
+            PurchaseOrderBill::where('id',$request['purchase_order_bill_id'])->update(['is_paid' => true, 'is_amendment' => false]);
+            $request->session()->flash('success','Payment added successfully');
+            return Redirect::Back();
+       }catch (\Exception $e){
+            $data = [
+                'action' => 'Create Bill Payment',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            $request->session()->flash('danger','Something went wrong');
+            return Redirect::Back();
         }
     }
 }

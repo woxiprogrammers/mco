@@ -39,7 +39,11 @@ $(document).ready(function(){
         });
         $("#transactionModal").modal();
     });
-    $("#payment").click(function(){
+    $(".payment").click(function(){
+        var po_id = $(this).val();
+        var bill_amount= $('#'+po_id).val();
         $("#paymentModal").modal();
+        $('#po_bill_id').val(po_id);
+        $('#bilAmount').val(bill_amount);
     });
 });

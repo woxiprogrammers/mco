@@ -266,6 +266,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getListing'));
             Route::post('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderComponentDetails'));
             Route::post('create-transaction',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
+            Route::post('add-payment',array('uses'=> 'Purchase\PurchaseOrderController@createPayment'));
             Route::get('get-materials',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderMaterials'));
         });
     });
