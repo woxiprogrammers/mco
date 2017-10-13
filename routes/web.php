@@ -262,7 +262,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
             Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
+            Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createPurchaseOrder'));
             Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
+            Route::get('get-purchase-request-component/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseRequestComponents'));
+            Route::get('get-client-project/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getClientProjectName'));
         });
     });
 

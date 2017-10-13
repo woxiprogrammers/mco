@@ -20,10 +20,6 @@
                                     <h1>Edit Purchase Request</h1>
                                 </div>
                                 <div class="form-group " style="float: right;margin-top:1%">
-                                    <a href="#" class="btn btn-set red pull-right">
-                                        <i class="fa fa-check"></i>
-                                        Submit
-                                    </a>
                                     {!! csrf_field() !!}
                                 </div>
                             </div>
