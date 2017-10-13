@@ -168,6 +168,7 @@ class PurchaseRequestController extends Controller
 
     public function purchaseRequestListing(Request $request){
         try{
+            dd($request->all());
             $response = array();
             $responseStatus = 200;
             $purchaseRequests = PurchaseRequest::all();

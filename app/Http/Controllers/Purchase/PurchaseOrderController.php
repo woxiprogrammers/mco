@@ -214,7 +214,7 @@ class PurchaseOrderController extends Controller
             $purchaseOrderBillPayment['created_at'] = $purchaseOrderBillPayment['updated_at'] = Carbon::now();
             $purchaseOrderBillPaymentId = PurchaseOrderBillPayment::insertGetId($purchaseOrderBillPayment);
             PurchaseOrderBill::where('id',$request['purchase_order_bill_id'])->update(['is_paid' => true, 'is_amendment' => false]);
-            $request->session()->flash('success','Payment added successfully');
+            $request->session()->flas('success','Payment added successfully');
             return Redirect::Back();
        }catch (\Exception $e){
             $data = [
