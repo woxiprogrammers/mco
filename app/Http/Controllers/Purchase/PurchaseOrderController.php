@@ -32,7 +32,6 @@ use App\Unit;
 
 class PurchaseOrderController extends Controller
 {
-    use PurchaseTrait;
     use MaterialRequestTrait;
 
     public function __construct(){
