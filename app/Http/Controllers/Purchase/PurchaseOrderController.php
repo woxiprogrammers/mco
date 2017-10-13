@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Purchase;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
+use App\PurchaseOrder;
 use App\PurchaseOrderComponent;
 use App\PurchaseRequest;
 use App\PurchaseRequestComponent;
@@ -14,6 +15,7 @@ use App\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderController extends Controller
@@ -63,20 +65,16 @@ class PurchaseOrderController extends Controller
             $purchaseRequestComponents = array();
             $iterator = 0;
             foreach ($purchaseRequestComponentData as $purchaseRequestComponent){
-                Log::info('P.R. component');
-                Log::info($purchaseRequestComponent);
                 $requestComponentVendors = PurchaseRequestComponentVendorRelation::where('purchase_request_component_id',$purchaseRequestComponent->id)->get();
-                Log::info('vendrs');
-                Log::info($requestComponentVendors);
                 foreach($requestComponentVendors as $vendorRelation){
                     $purchaseRequestComponents[$iterator] = array();
-                    $purchaseRequestComponent[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
+                    $purchaseRequestComponents[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
                     $purchaseRequestComponents[$iterator]['name'] = $purchaseRequestComponent->materialRequestComponent->name;
                     $purchaseRequestComponents[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
                     $purchaseRequestComponents[$iterator]['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
                     $purchaseRequestComponents[$iterator]['vendor'] = $vendorRelation->vendor->company;
                     $purchaseRequestComponents[$iterator]['vendor_id'] = $vendorRelation->vendor_id;
-                    $materialInfo = Material::where('name','ilike',$purchaseRequestComponent->materialRequestComponent->name)->first();
+                    $materialInfo = Material::where('name','ilike',trim($purchaseRequestComponent->materialRequestComponent->name))->first();
                     if($materialInfo == null){
                         $purchaseRequestComponents[$iterator]['rate'] = '0';
                         $purchaseRequestComponents[$iterator]['hsn_code'] = '0';
@@ -84,8 +82,6 @@ class PurchaseOrderController extends Controller
                         $purchaseRequestComponents[$iterator]['rate'] = UnitHelper::unitConversion($materialInfo['unit_id'],$purchaseRequestComponent->materialRequestComponent->unit_id,$materialInfo['rate_per_unit']);
                         $purchaseRequestComponents[$iterator]['hsn_code'] = $materialInfo['hsn_code'];
                     }
-                    Log::info('final line');
-                    Log::info($purchaseRequestComponents[$iterator]);
                     $iterator++;
                 }
             }
@@ -95,6 +91,77 @@ class PurchaseOrderController extends Controller
             $data = [
                 'action' => 'Get P.R. component listing in P.O.',
                 'P.R.Id' => $purchaseRequestId,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function getClientProjectName(Request $request ,$purchaseRequestId){
+        try{
+            $status = 200;
+            $response = array();
+            $purchaseRequest = PurchaseRequest::findOrFail($purchaseRequestId);
+            $response['client'] = $purchaseRequest->projectSite->project->client->company;
+            $response['project'] = $purchaseRequest->projectSite->project->name.' - '.$purchaseRequest->projectSite->name;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get P.R. client and project name in P.O.',
+                'P.R.Id' => $purchaseRequestId,
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = null;
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
+    }
+
+    public function createPurchaseOrder(Request $request){
+        try{
+            $today = Carbon::today();
+            dd($request->all());
+            foreach($request->purchase as $vendorId => $components){
+                $approvePurchaseOrderData = $disapprovePurchaseOrderData = array('vendor_id' => $vendorId, 'purchase_request_id' => $request->purchase_request_id);
+                $todaysCount = PurchaseOrder::where('created_at','>=',$today)->count();
+                $approvedPurchaseOrder = $disapprovePurchaseOrder = null;
+                foreach($components as $purchaseRequestComponentId => $component){
+                    $purchaseOrderComponentData = array();
+                    if($component['status'] == 'approve'){
+                        if($approvedPurchaseOrder == null){
+                            $approvePurchaseOrderData['is_approved'] = true;
+                            $approvePurchaseOrderData['user_id'] = Auth::user()->id;
+                            $approvePurchaseOrderData['serial_no'] = ++$todaysCount;
+                            dd($approvePurchaseOrderData);
+                            $approvedPurchaseOrder = PurchaseOrder::create($approvePurchaseOrderData);
+                        }
+                        $purchaseOrderComponentData['purchase_order_id'] = $approvedPurchaseOrder['id'];
+                        $purchaseOrderComponentData['purchase_request_component_id'] = $purchaseRequestComponentId;
+                        $purchaseOrderComponentData['quantity'] = $component['quantity'];
+                        $purchaseOrderComponentData['rate_per_unit'] = $component['rate'];
+                        $purchaseOrderComponentData['hsn_code'] = $component['hsn_code'];
+
+
+                    }elseif($component['status'] == 'disapprove'){
+                        if($disapprovePurchaseOrder == null){
+                            $disapprovePurchaseOrderData['is_approved'] = false;
+                            $disapprovePurchaseOrderData['user_id'] = Auth::user()->id;
+                            $disapprovePurchaseOrderData['serial_no'] = ++$todaysCount;
+                            dd($approvePurchaseOrderData);
+                            $disapprovePurchaseOrder = PurchaseOrder::create($disapprovePurchaseOrderData);
+                        }
+                        $purchaseOrderComponentData['purchase_order_id'] = $disapprovePurchaseOrder['id'];
+                        $purchaseOrderComponentData['purchase_request_component_id'] = $purchaseRequestComponentId;
+                        $purchaseOrderComponentData['quantity'] = $component['quantity'];
+                        $purchaseOrderComponentData['rate_per_unit'] = $component['rate'];
+                        $purchaseOrderComponentData['hsn_code'] = $component['hsn_code'];
+                    }
+                }
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Create Purchase Order',
+                'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));

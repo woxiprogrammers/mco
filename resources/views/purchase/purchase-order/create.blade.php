@@ -13,49 +13,51 @@
                 <div class="page-container">
                     <!-- BEGIN CONTENT -->
                     <div class="page-content-wrapper">
-                        <div class="page-head">
-                            <div class="container">
-                                <!-- BEGIN PAGE TITLE -->
-                                <div class="page-title">
-                                    <h1>Create Purchase Order</h1>
-                                </div>
-                                <div class="form-group " style="text-align: center">
-                                    <a href="#" class="btn red pull-right margin-top-15">
-                                        <i class="fa fa-check" style="font-size: large"></i>
-                                        Submit
-                                    </a>
+                        <form action="/purchase/purchase-order/create" method="POST" role="form" enctype="multipart/form-data">
+                            {!! csrf_field() !!}
+                            <div class="page-head">
+                                <div class="container">
+                                    <!-- BEGIN PAGE TITLE -->
+                                    <div class="page-title">
+                                        <h1>Create Purchase Order</h1>
+                                    </div>
+                                    <div class="form-group " style="text-align: center">
+                                        <button type="submit" class="btn red pull-right margin-top-15">
+                                            <i class="fa fa-check" style="font-size: large"></i>
+                                            Submit
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="page-content">
-                            @include('partials.common.messages')
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <!-- BEGIN VALIDATION STATES-->
-                                        <div class="portlet light ">
-                                            <div class="portlet-body form">
-                                                {!! csrf_field() !!}
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <select class="bs-select form-control" id="purchaseRequestId" name="purchase_request_id">
-                                                                <option value="">--Select Purchase Request--</option>
-                                                                @foreach($purchaseRequests as $purchaseRequestId =>$purchaseRequestFormat)
-                                                                    <option value="{{$purchaseRequestId}}">{{$purchaseRequestFormat}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" value="Client Name" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
+                            <div class="page-content">
+                                @include('partials.common.messages')
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <!-- BEGIN VALIDATION STATES-->
+                                            <div class="portlet light ">
+                                                <div class="portlet-body form">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <input type="text" class="form-control" value="Project-Project Site" readonly>
+                                                                <select class="bs-select form-control" id="purchaseRequestId" name="purchase_request_id">
+                                                                    <option value="">--Select Purchase Request--</option>
+                                                                    @foreach($purchaseRequests as $purchaseRequestId =>$purchaseRequestFormat)
+                                                                        <option value="{{$purchaseRequestId}}">{{$purchaseRequestFormat}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <input type="text" class="form-control" value="Client Name" id="client"readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <div class="form-group">
+                                                                    <input type="text" class="form-control" value="Project-Project Site" id="project" readonly>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -63,38 +65,40 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <!-- BEGIN VALIDATION STATES-->
-                                        <div class="portlet light ">
-                                            <div class="portlet-body">
-                                                <div class="table-container">
-                                                    <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
-                                                        <thead>
-                                                        <tr>
-                                                            <th> Material Name </th>
-                                                            <th style="width: 10%"> Quantity </th>
-                                                            <th style="width: 8%;"> Unit </th>
-                                                            <th style="width: 12%"> Vendor </th>
-                                                            <th> Rate </th>
-                                                            <th> HSN code </th>
-                                                            <th style="width: 10%;"> Vendor quotation images </th>
-                                                            <th style="width: 10%;"> Client Approval images </th>
-                                                            <th style="width: 8%;"> Status </th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <!-- BEGIN VALIDATION STATES-->
+                                            <div class="portlet light ">
+                                                <div class="portlet-body">
+                                                    <div class="table-container">
+                                                        <div class="table-scrollable profit-margin-table">
+                                                            <table class="table table-striped table-bordered table-hover" id="purchaseRequest" style="overflow: scroll">
+                                                                <thead>
+                                                                    <tr>
+                                                                    <th style="width: 15%"> Material Name </th>
+                                                                    <th style="width: 8%"> Quantity </th>
+                                                                    <th style="width: 8%;"> Unit </th>
+                                                                    <th style="width: 12%"> Vendor </th>
+                                                                    <th style="width: 10%"> Rate </th>
+                                                                    <th style="width: 10%"> HSN code </th>
+                                                                    <th style="width: 8%;"> Vendor quotation images </th>
+                                                                    <th style="width: 8%;"> Client Approval images </th>
+                                                                    <th style="width: 8%;"> Status </th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
 
-                                                        </tbody>
-                                                    </table>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -122,6 +126,17 @@
                     $('#project').val('');
                     $('#purchaseRequest').hide();
                 }else{
+                    $.ajax({
+                        url:'/purchase/purchase-order/get-client-project/'+purchaseRequestId+'?_token='+$('input[name="_token"]').val(),
+                        type: 'GET',
+                        success: function(data,textStatus,xhr){
+                            $('#client').val(data.client);
+                            $('#project').val(data.project);
+                        },
+                        error: function(errorData){
+
+                        }
+                    });
                     $.ajax({
                         url: '/purchase/purchase-order/get-purchase-request-component/'+purchaseRequestId+'?_token='+$('input[name="_token"]').val(),
                         type: 'GET',
