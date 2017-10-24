@@ -783,7 +783,7 @@ trait BillTrait{
             }else{
                 $data['hsnCode'] = $bill->quotation->project_site->project->hsn_code->code;
             }
-            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->pluck('id')->toArray();
+            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->orderBy('id')->pluck('id')->toArray();
             $data['company_name'] = $bill->quotation->project_site->project->client->company;
             $data['gstin']= $bill->quotation->project_site->project->client->gstin;
             $data['address']= $bill->quotation->project_site->project->client->address;
@@ -794,7 +794,6 @@ trait BillTrait{
                      $data['currentBillID'] = $key+1;
                  }
              }
-
              if($slug == "performa-invoice"){
                  $data['billDate'] = date('d/m/Y',strtotime($bill['performa_invoice_date']));
              }else{

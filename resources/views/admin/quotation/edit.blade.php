@@ -230,7 +230,7 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input name="product_rate[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="{{round($quotation->quotation_products[$iterator]->rate_per_unit,3)}}" readonly>
+                                                                                            <input name="product_rate[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="<? echo (\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3)); ?>" readonly>
                                                                                         </div>
                                                                                     </td>
 
@@ -241,12 +241,12 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="text" name="product_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="{!!round(($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity),3)!!}" readonly>
+                                                                                            <input type="text" name="product_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="<? echo (\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3) * $quotation->quotation_products[$iterator]->quantity); ?>" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="text" name="product_discount_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-discount-amount" id="productDiscountAmount{{$iterator}}" value="{!!round(($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity)-($quotation->quotation_products[$iterator]->rate_per_unit*$quotation->quotation_products[$iterator]->quantity*($quotation->discount/100)),3)!!}" readonly>
+                                                                                            <input type="text" name="product_discount_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-discount-amount" id="productDiscountAmount{{$iterator}}" value="<? echo ((\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3) * $quotation->quotation_products[$iterator]->quantity)-(\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3)*$quotation->quotation_products[$iterator]->quantity*($quotation->discount/100))); ?>" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>

@@ -91,21 +91,21 @@ function calculateSubTotal(){
         amount = 0;
     }
 
-    $("#subtotal").text(amount.toFixed(3));
+    $("#productViewSubtotal").text(amount.toFixed(3));
     calculateProfitMargin();
 }
 
 function calculateProfitMargin(){
-    var amount = parseFloat($("#subtotal").text());
+    var amount = parseFloat($("#productViewSubtotal").text());
     var total = amount;
     $(".profit-margin").each(function(){
         var profitMarginAmount = parseFloat((amount * ($(this).val() / 100)).toFixed(3));
         total = (total + profitMarginAmount);
+        console.log(profitMarginAmount);
         $(this).parent().next().text(profitMarginAmount);
     });
     total = parseFloat(total);
-    $("#total").text(customRound(total));
-    $("#roundtotal").text(total.toFixed());
+    $("#productViewTotal").text(customRound(total));
 }
 
 function convertUnits(materialId){
@@ -115,18 +115,18 @@ function convertUnits(materialId){
         var materialVersionUnitId = $("input[name='unit_"+materialId+"']").val();
         var materialVersionRate = $("input[name='rate_"+materialId+"']").val();
         var data = {
-                current_unit: materialVersionUnitId,
-                rate: materialVersionRate,
-                new_unit: newUnit,
-                material_id:materialId,
-                _token: $("input[name='_token']").val()
-            };
+            current_unit: materialVersionUnitId,
+            rate: materialVersionRate,
+            new_unit: newUnit,
+            material_id:materialId,
+            _token: $("input[name='_token']").val()
+        };
     }else{
         var data = {
-                new_unit: newUnit,
-                material_id:materialId,
-                _token: $("input[name='_token']").val()
-            };
+            new_unit: newUnit,
+            material_id:materialId,
+            _token: $("input[name='_token']").val()
+        };
     }
     $.ajax({
         url: '/units/convert',
