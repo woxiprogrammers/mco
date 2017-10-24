@@ -10,6 +10,7 @@
 |
 */
 Route::group(['domain' => env('DOMAIN_NAME')], function(){
+    Route::get('testing-pdf',array('uses' => 'Purchase\PurchaseRequestController@createVendorQuotationPdf'));
     Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
@@ -256,11 +257,20 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=> 'Purchase\PurchaseRequestController@create'));
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
+            Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
             Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
-            Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
+            Route::get('edit/{id}',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
+            Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getListing'));
+            Route::post('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderComponentDetails'));
+            Route::post('create-transaction',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
+            Route::post('add-payment',array('uses'=> 'Purchase\PurchaseOrderController@createPayment'));
+            Route::get('get-materials',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderMaterials'));
+            Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createPurchaseOrder'));
+            Route::get('get-purchase-request-component/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseRequestComponents'));
+            Route::get('get-client-project/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getClientProjectName'));
         });
     });
 

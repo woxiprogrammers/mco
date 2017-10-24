@@ -25,4 +25,8 @@ class MaterialRequestComponents extends Model
     public function materialRequest(){
         return $this->belongsTo('App\MaterialRequests','material_request_id');
     }
+
+    public function purchaseRequestComponent(){
+        return $this->hasOne('App\PurchaseRequestComponent','material_request_component_id');
+    }
 }

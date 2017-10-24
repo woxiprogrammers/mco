@@ -47,7 +47,7 @@
                                                             <button class="btn btn-sm green table-group-action-submit">
                                                                 <i class="fa fa-check"></i> Submit</button>
                                                         </div>
-                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrder">
                                                             <thead>
                                                             <tr>
                                                                 <th> Client Name </th>
@@ -70,14 +70,6 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody>
-                                                                   <td>MCO</td>
-                                                                   <td>Mall</td>
-                                                                   <td>154</td>
-                                                                   <td>250</td>
-                                                                   <td><span class="label label-sm label-success"> Enabled </span></td>
-                                                                   <td><div id="sample_editable_1_new" class="btn btn-small blue" ><a href="/purchase/purchase-order/edit" style="color: white">&nbsp; Edit
-                                                                           </a>
-                                                                       </div></td>
 
                                                             </tbody>
                                                         </table>
@@ -130,10 +122,10 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/purchase/purchase-order/manage-datatables.js" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-            $('#purchaseRequest').DataTable();
+            $('#purchaseOrder').DataTable();
         });
     </script>
 @endsection

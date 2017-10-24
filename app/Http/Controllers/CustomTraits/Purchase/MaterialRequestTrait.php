@@ -66,8 +66,37 @@ trait MaterialRequestTrait{
         return $materialRequestComponent;
     }
 
-    public function getMaterialRequestIDFormat($project_site_id,$created_at,$serial_no){
-        $format = "MR".$project_site_id.date_format($created_at,'ymd').$serial_no;
+    public function getPurchaseIDFormat($slug,$project_site_id,$created_at,$serial_no = 1){
+        try{
+            switch ($slug){
+                case 'material-request' :
+                    $format = "MR".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
+                    break;
+
+                case 'material-request-component' :
+                    $format = "M".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
+                    break;
+
+                case 'purchase-request' :
+                    $format = "PR".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
+                    break;
+
+                case 'purchase-order' :
+                    $format = "PO".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
+                    break;
+
+                default :
+                    $format = "";
+                    break;
+            }
+        }catch(\Exception $e){
+            $format = "";
+            $data = [
+                'action' => 'Get Purchase ID Format',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
         return $format;
     }
 }
