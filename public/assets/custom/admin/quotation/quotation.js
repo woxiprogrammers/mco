@@ -16,7 +16,7 @@ $(document).ready(function(){
             return false;
         }
     });
-    $.getScript('/assets/custom/admin/product/product.js');
+    $.getScript('/assets/custom/admin/quotation/product.js');
     $(".quotation-category").change(function(){
         var category_id = $(this).val();
         var categoryIdField = $(this).attr('id');
@@ -167,7 +167,7 @@ $(document).ready(function(){
         var discount = $(this).val();
         $(".product-amount").each(function(){
             var discountAmount = parseFloat($(this).val())*(discount/100);
-            var discountedAmount = parseFloat($(this).val())-discountAmount;
+            var discountedAmount = customRound(parseFloat($(this).val())-discountAmount);
             $(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
         });
         calculateProductSubtotal();
@@ -570,7 +570,7 @@ function submitProductEdit(){
         data: formData,
         success: function(data,textStatus, xhr){
             $("input[name='product_description["+data.product_id+"]']").val(data.product_description);
-            $("input[name='product_rate["+data.product_id+"]']").val(customRound(data.product_amount));
+            $("input[name='product_rate["+data.product_id+"]']").val((data.product_amount));
             var rowId = $("input[name='product_rate["+data.product_id+"]']").closest('tr').attr('id');
             var rowNumber = rowId.match(/\d+/)[0];
             calculateAmount(rowNumber);
