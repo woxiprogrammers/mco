@@ -167,7 +167,7 @@ $(document).ready(function(){
         var discount = $(this).val();
         $(".product-amount").each(function(){
             var discountAmount = parseFloat($(this).val())*(discount/100);
-            var discountedAmount = parseFloat($(this).val())-discountAmount;
+            var discountedAmount = customRound(parseFloat($(this).val())-discountAmount);
             $(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
         });
         calculateProductSubtotal();
