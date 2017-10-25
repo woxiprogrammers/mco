@@ -101,7 +101,6 @@ function calculateProfitMargin(){
     $(".profit-margin").each(function(){
         var profitMarginAmount = parseFloat((amount * ($(this).val() / 100)).toFixed(3));
         total = (total + profitMarginAmount);
-        console.log(profitMarginAmount);
         $(this).parent().next().text(profitMarginAmount);
     });
     total = parseFloat(total);

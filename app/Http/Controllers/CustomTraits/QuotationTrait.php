@@ -1121,8 +1121,6 @@ trait QuotationTrait{
                 $quotationProductData[$iterator]['quantity'] = $quotationProducts->quantity;
                 $quotationProductData[$iterator]['unit'] = $quotationProducts->product->unit->name;
                 $quotationProductData[$iterator]['rate'] = $quotationProducts->rate_per_unit;
-//                $quotationProductData[$iterator]['rate'] = MaterialProductHelper::customRound(($quotationProducts->rate_per_unit - ($quotationProducts->rate_per_unit * ($quotationProducts->quotation->discount / 100))));
-//                $quotationProductData[$iterator]['amount'] = MaterialProductHelper::customRound(($quotationProducts->rate_per_unit - ($quotationProducts->rate_per_unit * ($quotationProducts->quotation->discount / 100))) * $quotationProductData[$iterator]['quantity']);
                 $quotationProductData[$iterator]['amount'] = MaterialProductHelper::customRound(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']));
                 $total = $total + $quotationProductData[$iterator]['amount'];
                 $iterator++;
