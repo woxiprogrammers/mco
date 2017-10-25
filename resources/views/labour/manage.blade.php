@@ -21,14 +21,12 @@
                                 <div class="page-title">
                                     <h1>Manage Labours</h1>
                                 </div>
-                                {{--@if($user->hasPermissionTo('create-manage-sites'))--}}
-                                    <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 78%; margin-top: 1%">
-                                        <a href="/labour/create" style="color: white">
-                                            <i class="fa fa-plus"></i>
-                                            Labour
-                                        </a>
-                                    </div>
-                                {{--@endif--}}
+                                <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 78%; margin-top: 1%">
+                                    <a href="/labour/create" style="color: white">
+                                        <i class="fa fa-plus"></i>
+                                        Labour
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">

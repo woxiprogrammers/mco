@@ -161,7 +161,7 @@
                                                 </a>
                                             </li>
                                             <li aria-haspopup="true">
-                                                <a href="/labour/create" class="nav-link nav-toggle ">
+                                                <a href="/labour/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Manage Labour
                                                 </a>
                                             </li>
