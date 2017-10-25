@@ -217,7 +217,7 @@
                             </a>
                         </li>
                     @endif
-                    <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?>
+                    <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?><!--
                     @if($hasPurchasePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Purchase
@@ -290,7 +290,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
+                    </li>-->
                 </ul>
             </li>
         </div>

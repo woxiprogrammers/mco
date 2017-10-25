@@ -163,12 +163,12 @@ trait RoleTrait{
             $rolePermissionData = array();
             $rolePermissionData['role_id'] = $roleId;
             if($request->mobile_permissions != null ) {
-                $mobilePermissions = $request->mobilePermissions;
+                $mobilePermissions = $request->mobile_permissions;
                 foreach ($request->mobile_permissions as $permissions) {
                     $rolePermissionData['is_mobile'] = true;
                     $check = RoleHasPermission::where('role_id',$roleId)->where('permission_id',$permissions)->first();
                     if ($check != null) {
-                        RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update(['is_mobile', true]);
+                        RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update(['is_mobile'=> true]);
                     } else {
                         $rolePermissionData['permission_id'] = $permissions;
                         RoleHasPermission::create($rolePermissionData);
