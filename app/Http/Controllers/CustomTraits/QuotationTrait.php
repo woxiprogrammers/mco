@@ -1120,7 +1120,9 @@ trait QuotationTrait{
                 $quotationProductData[$iterator]['category_name'] = $quotationProducts->product->category->name;
                 $quotationProductData[$iterator]['quantity'] = $quotationProducts->quantity;
                 $quotationProductData[$iterator]['unit'] = $quotationProducts->product->unit->name;
-                $quotationProductData[$iterator]['rate'] = MaterialProductHelper::customRound(($quotationProducts->rate_per_unit - ($quotationProducts->rate_per_unit * ($quotationProducts->quotation->discount / 100))));
+                $quotationProductData[$iterator]['rate'] = $quotationProducts->rate_per_unit;
+//                $quotationProductData[$iterator]['rate'] = MaterialProductHelper::customRound(($quotationProducts->rate_per_unit - ($quotationProducts->rate_per_unit * ($quotationProducts->quotation->discount / 100))));
+//                $quotationProductData[$iterator]['amount'] = MaterialProductHelper::customRound(($quotationProducts->rate_per_unit - ($quotationProducts->rate_per_unit * ($quotationProducts->quotation->discount / 100))) * $quotationProductData[$iterator]['quantity']);
                 $quotationProductData[$iterator]['amount'] = MaterialProductHelper::customRound(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']));
                 $total = $total + $quotationProductData[$iterator]['amount'];
                 $iterator++;
@@ -1143,7 +1145,8 @@ trait QuotationTrait{
                 $j++;
             }
             $data['summary_data'] = $summary_data;
-            $rounded_amount = $total;
+            $discountedSubTotal = $total - ($total * ($quotation->discount / 100));
+            $rounded_amount = $discountedSubTotal;
             if($data['slug'] == 'with-tax'){
                 $taxData = array();
                 $i = 0;
@@ -1151,14 +1154,16 @@ trait QuotationTrait{
                     $taxData[$i]['id'] = $tax->id;
                     $taxData[$i]['name'] = $tax->tax->name;
                     $taxData[$i]['percentage'] = abs($tax->percentage);
-                    $taxData[$i]['tax_amount'] = MaterialProductHelper::customRound($total * ($tax->percentage / 100));
+                    $taxData[$i]['tax_amount'] = MaterialProductHelper::customRound($discountedSubTotal * ($tax->percentage / 100));
                     $rounded_amount = $rounded_amount + $taxData[$i]['tax_amount'];
                     $i++;
                 }
                 $data['taxData'] = $taxData;
             }
             $data['total'] = $total;
-            $data['rounded_total'] = MaterialProductHelper::customRound($rounded_amount);
+            $data['discount'] = $quotation->discount;
+            $data['discountedSubTotal'] = $discountedSubTotal;
+            $data['rounded_total'] = round($rounded_amount);
             $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($data['rounded_total']));
             $data['quotationProductData'] = $quotationProductData;
             $data['quotation_no'] = "Q-".strtoupper(date('M',strtotime($quotation['created_at'])))."-".$quotation->id."/".date('y',strtotime($quotation['created_at']));

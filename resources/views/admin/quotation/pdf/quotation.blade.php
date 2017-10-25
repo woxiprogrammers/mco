@@ -127,6 +127,11 @@
                         <td style="text-align: right;background-color: #d2d2d2 "><b>{!! $total !!}</b></td>
                         <td style="text-align: right;background-color: #d2d2d2 "> </td>
                     </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: right;background-color: #d2d2d2 "><b>Discounted Sub Total ({{$discount}}%)</b></td>
+                        <td style="text-align: right;background-color: #d2d2d2 "><b>{!! $discountedSubTotal !!}</b></td>
+                        <td style="text-align: right;background-color: #d2d2d2 "> </td>
+                    </tr>
                     @if($slug == 'with-tax')
                         @for($iterator = 0; $iterator < count($taxData) ; $iterator++)
                             <tr>
@@ -137,7 +142,7 @@
                         @endfor
                     @endif
                     <tr>
-                        <td colspan="5" style="text-align: right;background-color: #d2d2d2 "><b>Final Total</b></td>
+                        <td colspan="5" style="text-align: right;background-color: #d2d2d2 "><b>Final Total(Rounded)</b></td>
                         <td style="text-align: right;background-color: #d2d2d2 "><b>{!! $rounded_total !!}</b></td>
                         <td style="text-align: right;background-color: #d2d2d2 "> </td>
                     </tr>
