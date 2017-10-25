@@ -52,7 +52,7 @@
                                                     <tr>
                                                         <th> Labour Id </th>
                                                         <th> Labour Name </th>
-                                                        <th style="width: 30%"> Contact No </th>
+                                                        <th> Contact No </th>
                                                         <th> Per Day wages </th>
                                                         <th> Project Site </th>
                                                         <th> Status </th>
