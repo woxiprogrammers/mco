@@ -1,10 +1,3 @@
-<?php
-    /**
-     * Created by Ameya Joshi.
-     * Date: 14/6/17
-     * Time: 5:54 PM
-     */
-?>
 @extends('layout.master')
 @section('title','Constro | Manage Labour')
 @include('partials.common.navbar')

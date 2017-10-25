@@ -217,7 +217,7 @@
                             </a>
                         </li>
                     @endif
-                    <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?><!--
+                    <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?>
                     @if($hasPurchasePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Purchase
@@ -275,22 +275,22 @@
                         </ul>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> Checklist
+                        <a> Drawing
                             <span class="arrow"></span>
                         </a>
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
-                                <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
+                                <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Category Management
                                 </a>
                             </li>
                             <li aria-haspopup="true">
-                                <a href="/checklist/checkList/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Checklist Structure
+                                <a href="/drawing/images/checkList/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Add Image
                                 </a>
                             </li>
                         </ul>
-                    </li>-->
+                    </li>
                 </ul>
             </li>
         </div>
