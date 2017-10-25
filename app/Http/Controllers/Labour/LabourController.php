@@ -31,7 +31,11 @@ class LabourController extends Controller
 
     public function createLabour(Request $request){
         try{
-            $labourData = $request->except('_token');
+            if($request['project_site_id'] == -1){
+                $labourData = $request->except('_token','project_site_id');
+            }else{
+                $labourData = $request->except('_token');
+            }
             $labourData['is_active'] = (boolean)false;
             Labour::create($labourData);
             $request->session()->flash('success', 'Labour Created successfully.');
@@ -70,19 +74,20 @@ class LabourController extends Controller
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                 if( $listingData[$pagination]['is_active'] == true){
-                    $projectStatus = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                    $labourStatus = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
                 }else{
-                    $projectStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                    $labourStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
+                $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['name'],
                     $listingData[$pagination]['labour_id'],
                     $listingData[$pagination]['mobile'],
                     $listingData[$pagination]['per_day_wages'],
-                    $listingData[$pagination]->name,
-                    $projectStatus,
+                    $projectSiteName,
+                    $labourStatus,
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -151,7 +156,11 @@ class LabourController extends Controller
 
     public function editLabour(Request $request,$labour){
         try{
-            $updateLabourData = $request->except('_token');
+            if($request['project_site_id'] != -1){
+                $updateLabourData = $request->except('_token');
+            }else{
+                $updateLabourData = $request->except('_token','project_site_id');
+            }
             Labour::where('id',$labour['id'])->update($updateLabourData);
             $request->session()->flash('success', 'Labour Edited successfully.');
             return redirect('/labour/edit/'.$labour->id);

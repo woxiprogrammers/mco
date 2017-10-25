@@ -1,10 +1,3 @@
-<?php
-    /**
-     * Created by Ameya Joshi.
-     * Date: 15/6/17
-     * Time: 12:46 PM
-     */
-?>
 @extends('layout.master')
 @section('title','Constro | Edit Labour')
 @include('partials.common.navbar')
@@ -91,6 +84,9 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <select id="project_site" class="form-control" name="project_site_id">
+                                                                @if($labour['project_site_id'] == null)
+                                                                    <option value="-1">Select Project Site</option>
+                                                                @endif
                                                                 @foreach($projectSites as $projectSite)
                                                                     @if($labour['project_site_id'] == $projectSite['id'])
                                                                         <option value = "{!! $projectSite['id'] !!}" selected>{!! $projectSite['name'] !!}</option>
@@ -123,11 +119,10 @@
     </div>
 @endsection
 @section('javascript')
-    <script src="/assets/custom/admin/project/project.js" type="application/javascript"></script>
+    <script src="/assets/custom/labour/labour.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
-            EditProject.init();
-            $("#hsnCode").trigger('change');
+            EditLabour.init();
         });
     </script>
 @endsection

@@ -83,13 +83,14 @@
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Select Project Site</label>
+                                                            <label for="name" class="control-label">Project Site</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <select id="project_site" class="form-control" name="project_site_id">
+                                                                <option value="-1">Select Project Site</option>
                                                                 @foreach($projectSites as $projectSite)
-                                                                    <option value = {!! $projectSite['id'] !!}>{!! $projectSite['name'] !!}</option>
+                                                                    <option value = "{!! $projectSite['id'] !!}">{!! $projectSite['name'] !!}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -113,5 +114,10 @@
     </div>
 @endsection
 @section('javascript')
-    <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/labour/labour.js" type="application/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            CreateLabour.init();
+        });
+    </script>
 @endsection

@@ -16,9 +16,9 @@ class CreateLaboursTable extends Migration
         Schema::create('labours', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name',255);
-            $table->string('mobile');
+            $table->string('mobile')->nullable();
             $table->float('per_day_wages');
-            $table->unsignedInteger('project_site_id');
+            $table->unsignedInteger('project_site_id')->nullable();
             $table->foreign('project_site_id')->references('id')->on('project_sites')->onDelete('cascade')->onUpdate('cascade');
             $table->string('labour_id');
             $table->boolean('is_active');
