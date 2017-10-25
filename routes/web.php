@@ -351,4 +351,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
     });
 
+    Route::group(['prefix'=>'labour'],function (){
+       Route::get('create',array('uses' => 'Labour\LabourController@getCreateView'));
+       Route::post('create',array('uses' => 'Labour\LabourController@createLabour'));
+       Route::get('manage',array('uses' => 'Labour\LabourController@getManageView'));
+       Route::post('listing',array('uses' => 'Labour\LabourController@labourListing'));
+       Route::get('change-status/{labour}', array('uses' => 'Labour\LabourController@changeLabourStatus'));
+       Route::get('edit/{labour}', array('uses' => 'Labour\LabourController@getEditView'));
+       Route::post('edit/{labour}', array('uses' => 'Labour\LabourController@editLabour'));
+    });
 });

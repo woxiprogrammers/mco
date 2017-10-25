@@ -24,7 +24,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Create Category</h1>
+                                <h1>Create Projects</h1>
                             </div>
                         </div>
                     </div>
