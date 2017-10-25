@@ -206,6 +206,11 @@
                                                                                 <th style="text-align: center"> Action </th>
                                                                             </tr>
                                                                             @for($iterator=0; $iterator < count($quotation->quotation_products); $iterator++)
+                                                                                @php
+                                                                                    $rate = \App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit);
+                                                                                    $amount = \App\Helper\MaterialProductHelper::customRound($rate * $quotation->quotation_products[$iterator]->quantity);
+                                                                                    $discountedAmount = \App\Helper\MaterialProductHelper::customRound($amount - ($amount*($quotation->discount/100)));
+                                                                                @endphp
                                                                                 <tr id="Row{{$iterator}}">
                                                                                     <td>
                                                                                         <div class="form-group">
@@ -230,7 +235,7 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input name="product_rate[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="{!!  (\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3))!!}" title="{!!(\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3))!!}" readonly>
+                                                                                            <input name="product_rate[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table" id="productRate{{$iterator}}" type="text" value="{{$rate}}" title="{{$rate}}" readonly>
                                                                                         </div>
                                                                                     </td>
 
@@ -241,12 +246,12 @@
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="text" name="product_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="{!! (\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3) * $quotation->quotation_products[$iterator]->quantity) !!}" title="{!! (\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3) * $quotation->quotation_products[$iterator]->quantity) !!}" readonly>
+                                                                                            <input type="text" name="product_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-amount" id="productAmount{{$iterator}}" value="{{$amount}}" title="{{$amount}}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
                                                                                         <div class="form-group">
-                                                                                            <input type="text" name="product_discount_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-discount-amount" id="productDiscountAmount{{$iterator}}" value="{!! ((\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3) * $quotation->quotation_products[$iterator]->quantity)-(\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3)*$quotation->quotation_products[$iterator]->quantity*($quotation->discount/100))) !!}" title="{!! ((\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3) * $quotation->quotation_products[$iterator]->quantity)-(\App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit,3)*$quotation->quotation_products[$iterator]->quantity*($quotation->discount/100))) !!}" readonly>
+                                                                                            <input type="text" name="product_discount_amount[{{$quotation->quotation_products[$iterator]->product_id}}]" class="form-control quotation-product-table product-discount-amount" id="productDiscountAmount{{$iterator}}" value="{{$discountedAmount}}" title="{{$discountedAmount}}" readonly>
                                                                                         </div>
                                                                                     </td>
                                                                                     <td>
