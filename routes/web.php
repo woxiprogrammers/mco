@@ -275,12 +275,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
 
     Route::group(['prefix' => 'inventory'], function(){
-        Route::group(['prefix' => 'manage-inventory'], function(){
-            Route::get('manage',array('uses'=> 'Inventory\InventoryManageController@getManageView'));
-            Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
-            Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
-        });
-
+        Route::get('manage',array('uses'=> 'Inventory\InventoryManageController@getManageView'));
+        Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@inventoryListing'));
+        Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
+        Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
     });
 
     Route::group(['prefix' => 'vendors'],function(){

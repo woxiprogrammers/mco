@@ -250,7 +250,7 @@
                             </a>
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
-                                    <a href="/inventory/manage-inventory/manage" class="nav-link nav-toggle ">
+                                    <a href="/inventory/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Store Keeper
                                     </a>
                                 </li>
