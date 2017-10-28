@@ -376,5 +376,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashApproval'));
         });
 
+        Route::group(['prefix' => 'peticash-management'], function(){
+            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+        });
+
     });
 });

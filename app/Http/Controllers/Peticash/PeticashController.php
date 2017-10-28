@@ -72,7 +72,21 @@ class PeticashController extends Controller
             return view('peticash.peticash-approval.manage');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get Peticash Sitewise Manage view',
+                'action' => 'Get Peticash Request Approval view',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getManageViewPeticashManagement(Request $request){
+        try{
+            return view('peticash.peticash-management.manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Peticash Management view',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];

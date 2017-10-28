@@ -298,22 +298,22 @@
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/peticash/master-peticash-account/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Master Peticash Account
+                                    <i class="fa fa-money"></i> Master Peticash Account
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/peticash/sitewise-peticash-account/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Sitewise Peticash Account
+                                    <i class="fa fa-sitemap"></i> Sitewise Peticash Account
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/peticash/peticash-approval-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Peticash Request Approval
+                                    <i class="fa fa-check"></i> Peticash Request Approval
                                 </a>
                             </li>
                             <li aria-haspopup="true">
-                                <a href="/drawing/images/checkList/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Peticash Management
+                                <a href="/peticash/peticash-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-database"></i> Peticash Management
                                 </a>
                             </li>
                         </ul>
