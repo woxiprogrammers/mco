@@ -56,7 +56,7 @@
             <!-- BEGIN MEGA MENU -->
             <!-- DOC: Apply "hor-menu-light" class after the "hor-menu" class below to have a horizontal menu with white background -->
             <!-- DOC: Remove data-hover="dropdown" and data-close-others="true" attributes below to disable the dropdown opening on mouse hover -->
-            <div class="hor-menu  ">
+            <div class="hor-menu">
                 <ul class="nav navbar-nav">
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/dashboard"> Dashboard
@@ -297,13 +297,23 @@
                         </a>
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
-                                <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Category Management
+                                <a href="/peticash/master-peticash-account/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Master Peticash Account
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/peticash/sitewise-peticash-account/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Sitewise Peticash Account
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/peticash/peticash-approval-request/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Peticash Request Approval
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/drawing/images/checkList/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Add Image
+                                    <i class="fa fa-bars"></i> Peticash Management
                                 </a>
                             </li>
                         </ul>

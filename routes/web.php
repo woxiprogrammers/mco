@@ -360,4 +360,21 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
        Route::get('edit/{labour}', array('uses' => 'Labour\LabourController@getEditView'));
        Route::post('edit/{labour}', array('uses' => 'Labour\LabourController@editLabour'));
     });
+
+    Route::group(['prefix'=>'peticash'],function (){
+        Route::group(['prefix' => 'master-peticash-account'], function(){
+            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
+            Route::get('create',array('uses' => 'Peticash\PeticashController@getCreateViewForMasterPeticashAccount'));
+        });
+
+        Route::group(['prefix' => 'sitewise-peticash-account'], function(){
+            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForSitewisePeticashAccount'));
+            Route::get('create',array('uses' => 'Peticash\PeticashController@getCreateViewForSitewisePeticashAccount'));
+        });
+
+        Route::group(['prefix' => 'peticash-approval-request'], function(){
+            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashApproval'));
+        });
+
+    });
 });
