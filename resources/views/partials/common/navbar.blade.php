@@ -291,6 +291,23 @@
                             </li>
                         </ul>
                     </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> Peticash
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/drawing/images/checkList/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Add Image
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </li>
         </div>
