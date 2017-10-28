@@ -70,19 +70,19 @@ trait MaterialRequestTrait{
         try{
             switch ($slug){
                 case 'material-request' :
-                    $format = "MR".$project_site_id.date('Ymd',$created_at).$serial_no;
+                    $format = "MR".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
                     break;
 
                 case 'material-request-component' :
-                    $format = "MRM".$project_site_id.date('Ymd',$created_at).$serial_no;
+                    $format = "M".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
                     break;
 
                 case 'purchase-request' :
-                    $format = "PR".$project_site_id.date('Ymd',$created_at).$serial_no;
+                    $format = "PR".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
                     break;
 
                 case 'purchase-order' :
-                    $format = "PO".$project_site_id.date('Ymd',$created_at).$serial_no;
+                    $format = "PO".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
                     break;
 
                 default :

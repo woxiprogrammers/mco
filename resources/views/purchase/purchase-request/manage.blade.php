@@ -41,7 +41,7 @@
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequestTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th> PR Id </th>
+                                                                    <th style="width: 10%;"> PR Id </th>
                                                                     <th> Project Name - Site Name</th>
                                                                     <th> RM Id </th>
                                                                     <th> status  </th>

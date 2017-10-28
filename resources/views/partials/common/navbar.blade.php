@@ -160,6 +160,11 @@
                                                     <i class="fa fa-sitemap"></i> Manage Users
                                                 </a>
                                             </li>
+                                            <li aria-haspopup="true">
+                                                <a href="/labour/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-sitemap"></i> Manage Labour
+                                                </a>
+                                            </li>
                                         </ul>
                                     </li>
                                 @endif
@@ -253,29 +258,6 @@
                         </li>
                     @endif
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> Drawing
-                            <span class="arrow"></span>
-                        </a>
-                        <ul class="dropdown-menu pull-left">
-                            <li aria-haspopup="true">
-                                <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Category Management
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/drawing/images/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Add Image
-                                </a>
-                            </li>
-                            {{--<li aria-haspopup="true">
-                                <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Manage Drawing
-                                </a>
-                            </li>--}}
-                        </ul>
-                    </li>
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                                      <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Checklist
                             <span class="arrow"></span>
                         </a>
@@ -288,6 +270,23 @@
                             <li aria-haspopup="true">
                                 <a href="/checklist/checkList/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Checklist Structure
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> Drawing
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/drawing/images/checkList/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Add Image
                                 </a>
                             </li>
                         </ul>

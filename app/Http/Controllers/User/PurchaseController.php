@@ -62,7 +62,7 @@ class PurchaseController extends Controller
                   $materialRequestList[$iterator]['client_name'] =$pro->client->company;
                   $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
                   $rm_id=2;
-                  $materialRequestList[$iterator]['rm_id'] = $this->getMaterialRequestIDFormat($materialRequest['project_site_id'],$materialRequest['created_at'], $rm_id=2);
+                  $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request-component',$materialRequest['project_site_id'],$materialRequest['created_at']);
                   $iterator++;
               }
           }
@@ -447,7 +447,7 @@ class PurchaseController extends Controller
                   $materialRequestList[$iterator]['client_name'] =$pro->client->company;
                   $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
                   $rm_id=2;
-                  $materialRequestList[$iterator]['rm_id'] = $this->getMaterialRequestIDFormat($materialRequest['project_site_id'],$materialRequest['created_at'], $rm_id=2);
+                  $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at']);
                   $iterator++;
               }
               $iTotalRecords = count($materialRequestList);

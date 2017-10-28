@@ -9,6 +9,7 @@ use App\BillTransaction;
 use App\Category;
 use App\Client;
 use App\ExtraItem;
+use App\Labour;
 use App\Material;
 use App\Product;
 use App\ProfitMargin;
@@ -70,6 +71,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('city',City::class);
         Route::model('bank_info',BankInfo::class);
         Route::model('asset',Asset::class);
+        Route::model('labour',Labour::class);
     }
 
     /**

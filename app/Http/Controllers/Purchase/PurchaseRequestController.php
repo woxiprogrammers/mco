@@ -122,7 +122,11 @@ class PurchaseRequestController extends Controller
                     $request->session()->flash('error', 'Something Went Wrong');
                     return redirect('purchase/purchase-request/create');
                 }else{
-                    $materialRequestComponentIds = array_merge($materialRequestComponentId,$request['material_request_component_ids']);
+                    if($request->has('material_request_component_ids')){
+                        $materialRequestComponentIds = array_merge($materialRequestComponentId,$request['material_request_component_ids']);
+                    }else{
+                        $materialRequestComponentIds = $materialRequestComponentId;
+                    }
                 }
             }else{
                 $materialRequestComponentIds = $request['material_request_component_ids'];
@@ -259,7 +263,7 @@ class PurchaseRequestController extends Controller
                         break;
                 }
                 $records['data'][$iterator] = [
-                    $purchaseRequest->id,
+                    $this->getPurchaseIDFormat('purchase-request',$purchaseRequest->projectSite->id,$purchaseRequest->created_at),
                     $purchaseRequest->projectSite->project->client->company,
                     $purchaseRequest->projectSite->project->name.' - '.$purchaseRequest->projectSite->name,
                     $status,
