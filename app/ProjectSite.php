@@ -16,4 +16,12 @@ class ProjectSite extends Model
     public function city(){
         return $this->belongsTo('App\City','city_id');
     }
+
+    public function peticashSiteTransfer(){
+        return $this->hasMany('App\PeticashSiteTransfer','project_site_id');
+    }
+
+    public function peticashSalaryTransfer(){
+        return $this->hasMany('App\PeticashSalaryTransaction','project_site_id');
+    }
 }
