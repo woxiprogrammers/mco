@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Asset;
 use App\AssetImage;
+use App\AssetType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
@@ -23,7 +24,18 @@ class AssetManagementController extends Controller
         return view('admin.asset.manage');
     }
     public function getCreateView(Request $request){
-        return view('admin.asset.create');
+        try{
+            $asset_types = AssetType::select('id','name')->get()->toArray();
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get asset create view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return view('admin.asset.create')->with(compact('asset_types'));
     }
     public function getEditView(Request $request,$asset){
         try{
@@ -52,12 +64,9 @@ class AssetManagementController extends Controller
             $data['model_number'] = $request->model_number;
             $data['expiry_date'] = $request->expiry_date;
             $data['price'] = $request->price;
-            $data['is_fuel_dependent'] = $request->is_fuel_dependent;
-            if($request->is_fuel_dependent == 'true'){
-                $data['litre_per_unit'] = $request->litre_per_unit;
-            }else{
-                $data['litre_per_unit'] = null;
-            }
+            $data['asset_types_id'] = $request->asset_type;
+            $data['electricity_per_unit'] = $request->electricity_per_unit;
+            $data['litre_per_unit'] = $request->litre_per_unit;
             $data['is_active'] = false;
             $asset = Asset::create($data);
             if($request->work_order_images != null) {
