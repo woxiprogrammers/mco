@@ -26,8 +26,17 @@ class InventoryManageController extends Controller
         }
     }
 
-    public function getCreateView(Request $request){
-        return view('inventory/create');
+    public function getComponentManageView(Request $request,$inventoryComponent){
+        try{
+            return view('inventory/component-manage')->with(compact('inventoryComponent'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory manage',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 
     public function inventoryListing(Request $request){
@@ -60,7 +69,7 @@ class InventoryManageController extends Controller
                     $outQuantity,
                     $availableQuantity,
                     '<div class="btn btn-xs green">
-                        <a href="/inventory/create" style="color: white">
+                        <a href="/inventory/component/manage/'.$inventoryData[$pagination]->id.'" style="color: white">
                              Manage
                         </a>
                     </div>'
@@ -80,5 +89,65 @@ class InventoryManageController extends Controller
             $response = array();
         }
         return response()->json($records,$status);
+    }
+
+    public function inventoryComponentListing(Request $request,$inventoryComponent){
+        try{
+            $inventoryComponentTransfers = ($inventoryComponent->inventoryComponentTransfers->sortByDesc('id'));
+            $status = 200;
+            $iTotalRecords = count($inventoryComponentTransfers);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($inventoryComponentTransfers) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentTransfers); $iterator++,$pagination++ ){
+                if(strcasecmp( 'IN',$inventoryComponentTransfers[$pagination]->transferType->type)){
+                    $transferStatus = 'IN - From '.$inventoryComponentTransfers[$pagination]->transferType->name;
+                }else{
+                    $transferStatus = 'OUT - To '.$inventoryComponentTransfers[$pagination]->transferType->name;
+                }
+                $records['data'][$iterator] = [
+                    $inventoryComponentTransfers[$pagination]['grn'],
+                    $inventoryComponentTransfers[$pagination]['quantity'],
+                    $inventoryComponentTransfers[$pagination]->unit->name,
+                    $transferStatus,
+                    '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
+                        Details
+                    </a>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory Component listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = array();
+        }
+        return response()->json($records,$status);
+    }
+
+    public function editOpeningStock(Request $request){
+        try{
+            InventoryComponent::where('id',$request->inventory_component_id)->update(['opening_stock' => $request->opening_stock]);
+            $status = 200;
+            $response = [
+                'message' => 'Opening stock saved Successfully !!'
+            ];
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory Component listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = array();
+        }
+        return response()->json($response,$status);
     }
 }

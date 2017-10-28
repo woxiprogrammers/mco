@@ -33,4 +33,8 @@ class InventoryComponent extends Model {
     public function quotation(){
         return $this->hasOne('App\Quotation','project_site_id','project_site_id');
     }
+
+    public function inventoryComponentTransfers(){
+        return $this->hasMany('App\InventoryComponentTransfers','inventory_component_id');
+    }
 }

@@ -9,6 +9,7 @@ use App\BillTransaction;
 use App\Category;
 use App\Client;
 use App\ExtraItem;
+use App\InventoryComponent;
 use App\Labour;
 use App\Material;
 use App\Product;
@@ -72,6 +73,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('bank_info',BankInfo::class);
         Route::model('asset',Asset::class);
         Route::model('labour',Labour::class);
+        Route::model('inventoryComponent',InventoryComponent::class);
     }
 
     /**
