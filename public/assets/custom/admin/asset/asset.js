@@ -18,6 +18,10 @@ var  CreateAsset = function () {
                     required: true,
 
                 },
+                electricity_per_unit:{
+                    required: true,
+
+                },
                 price:{
                     required: true
                 },
@@ -34,6 +38,9 @@ var  CreateAsset = function () {
                 },
                 name:{
                     required: "Asset Name is required."
+                },
+                electricity_per_unit:{
+                    required: "Electricity per unit is required."
                 },
                 expiry_date:{
                     required: "Expiry date is required."
