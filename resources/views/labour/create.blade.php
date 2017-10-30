@@ -69,7 +69,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="labour_id" name="labour_id">
+                                                            <input type="text" class="form-control" id="employee_id" name="employee_id">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">

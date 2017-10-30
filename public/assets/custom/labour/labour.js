@@ -11,7 +11,7 @@ var  CreateLabour = function () {
                 name: {
                     required: true
                 },
-                labour_id: {
+                employee_id: {
                     required: true
                 },
                 per_day_wages: {
@@ -23,7 +23,7 @@ var  CreateLabour = function () {
                 name: {
                     required: "Name is required."
                 },
-                labour_id:{
+                employee_id:{
                     required: "Labour ID is required."
                 },
                 per_day_wages:{
@@ -80,7 +80,7 @@ var  EditLabour = function () {
                 name: {
                     required: true,
                 },
-                labour_id: {
+                employee_id: {
                     required: true
                 },
                 per_day_wages: {
@@ -92,7 +92,7 @@ var  EditLabour = function () {
                 name: {
                     required: "Name is required."
                 },
-                labour_id:{
+                employee_id:{
                     required: "Labour ID is required."
                 },
                 per_day_wages:{

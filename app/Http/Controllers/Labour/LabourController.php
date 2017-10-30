@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Labour;
 
+use App\Employee;
+use App\EmployeeType;
 use App\Labour;
 use App\ProjectSite;
 use Illuminate\Http\Request;
@@ -37,7 +39,8 @@ class LabourController extends Controller
                 $labourData = $request->except('_token');
             }
             $labourData['is_active'] = (boolean)false;
-            Labour::create($labourData);
+            $labourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
+            Employee::create($labourData);
             $request->session()->flash('success', 'Labour Created successfully.');
             return redirect('/labour/create');
         }catch(\Exception $e){
@@ -67,7 +70,7 @@ class LabourController extends Controller
 
     public function labourListing(Request $request){
         try{
-            $listingData = Labour::get();
+            $listingData = Employee::get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
@@ -83,7 +86,7 @@ class LabourController extends Controller
                 $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['name'],
-                    $listingData[$pagination]['labour_id'],
+                    $listingData[$pagination]['employee_id'],
                     $listingData[$pagination]['mobile'],
                     $listingData[$pagination]['per_day_wages'],
                     $projectSiteName,
@@ -161,7 +164,8 @@ class LabourController extends Controller
             }else{
                 $updateLabourData = $request->except('_token','project_site_id');
             }
-            Labour::where('id',$labour['id'])->update($updateLabourData);
+            $updateLabourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
+            Employee::where('id',$labour['id'])->update($updateLabourData);
             $request->session()->flash('success', 'Labour Edited successfully.');
             return redirect('/labour/edit/'.$labour->id);
         }catch(\Exception $e){
