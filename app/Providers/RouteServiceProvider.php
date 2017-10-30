@@ -8,6 +8,7 @@ use App\Bill;
 use App\BillTransaction;
 use App\Category;
 use App\Client;
+use App\Employee;
 use App\ExtraItem;
 use App\Labour;
 use App\Material;
@@ -71,7 +72,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('city',City::class);
         Route::model('bank_info',BankInfo::class);
         Route::model('asset',Asset::class);
-        Route::model('labour',Labour::class);
+        Route::model('labour',Employee::class);
     }
 
     /**
