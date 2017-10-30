@@ -53,7 +53,7 @@
                                                     <th> Sitename </th>
                                                     <th> Amount </th>
                                                     <th> Type </th>
-                                                    <th> remarks </th>
+                                                    <th> Remark </th>
                                                     <th> Created On </th>
                                                     <th> Status </th>
                                                 </tr>
