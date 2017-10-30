@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Inventory;
 
 use App\InventoryComponent;
 use App\InventoryComponentTransfers;
+use App\InventoryTransferTypes;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class InventoryManageController extends Controller
@@ -28,7 +30,17 @@ class InventoryManageController extends Controller
 
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
-            return view('inventory/component-manage')->with(compact('inventoryComponent'));
+            $inTransfers = InventoryTransferTypes::where('type','ilike','IN')->get();
+            $inTransferTypes = '<option value=""> -- Select Transfer Type -- </option>';
+            foreach($inTransfers as $transfer){
+                $inTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
+            }
+            $outTransfers = InventoryTransferTypes::where('type','ilike','OUT')->get();
+            $outTransferTypes = '<option value=""> -- Select Transfer Type -- </option>';
+            foreach($outTransfers as $transfer){
+                $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
+            }
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -149,5 +161,74 @@ class InventoryManageController extends Controller
             $response = array();
         }
         return response()->json($response,$status);
+    }
+
+    public function getInventoryComponentTransferDetail(Request $request,$inventoryComponentTransfer){
+        try{
+            return view('partials.inventory.inventory-component-transfer-detail')->with(compact('inventoryComponentTransfer'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get inventory component transfer details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
+        }
+    }
+
+    public function uploadTempWorkOrderImages(Request $request,$inventoryComponentId){
+        try{
+            /*$user = Auth::user();
+            $userDirectoryName = sha1($user->id);
+            $inventoryComponentDirectoryName = sha1($inventoryComponentId);
+            $tempUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
+            /* Create Upload Directory If Not Exists
+            if (!file_exists($tempImageUploadPath)) {
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path
+            ];*/
+        }catch (\Exception $e){
+            $response = [
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => 101,
+                    'message' => 'Failed to open input stream.',
+                ],
+                'id' => 'id'
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function displayWorkOrderImages(Request $request){
+        try{
+            $path = $request->path;
+            $count = $request->count;
+            $random = mt_rand(1,10000000000);
+        }catch (\Exception $e){
+            $path = null;
+            $count = null;
+        }
+        return view('partials.quotation.work-order-images')->with(compact('path','count','random'));
+    }
+
+    public function removeTempImage(Request $request){
+        try{
+            $sellerUploadPath = public_path().$request->path;
+            File::delete($sellerUploadPath);
+            return response(200);
+        }catch(\Exception $e){
+            return response(500);
+        }
     }
 }

@@ -283,6 +283,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentListing'));
             Route::get('manage/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@getComponentManageView'));
             Route::post('edit-opening-stock',['uses' => 'Inventory\InventoryManageController@editOpeningStock']);
+            Route::get('detail/{inventoryComponentTransfer}',['uses' => 'Inventory\InventoryManageController@getInventoryComponentTransferDetail']);
         });
     });
 

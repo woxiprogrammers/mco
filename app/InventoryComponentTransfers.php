@@ -21,4 +21,10 @@ class InventoryComponentTransfers extends Model{
     public function transferType(){
         return $this->belongsTo('App\InventoryTransferTypes','transfer_type_id');
     }
+    public function payment(){
+        return $this->belongsTo('App\PaymentType','payment_type_id');
+    }
+    public function user(){
+        return $this->belongsTo('App\User','user_id');
+    }
 }

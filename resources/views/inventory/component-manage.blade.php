@@ -26,6 +26,10 @@
                             @include('partials.common.messages')
                             <div class="container">
                                 <div class="row">
+                                    <input type="hidden" id="path" name="path" value="">
+                                    <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+                                    <input type="hidden" id="inTransferTypes" value="{{$inTransferTypes}}">
+                                    <input type="hidden" id="outTransferTypes" value="{{$outTransferTypes}}">
                                     <input type="hidden" name="opening_stock" id="openingStock" value="{{$inventoryComponent->opening_stock}}">
                                     <input type="hidden" name="inventory_component_id" id="inventoryComponentId" value="{{$inventoryComponent['id']}}">
                                     {!! csrf_field() !!}
@@ -85,170 +89,115 @@
                                             <div class="modal-body" style="padding:40px 50px;">
                                                 <form role="form">
                                                     <div class="form-group">
-                                                        <div class="bootstrap-switch-container" style="height: 30px;width: 200px; margin-left: 0px;"><span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 88px;">&nbsp;&nbsp;&nbsp;</span><span class="bootstrap-switch-label" style="width: 88px;">&nbsp;</span><span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 88px;">&nbsp;&nbsp;</span><input type="checkbox" class="make-switch" data-on-text="&nbsp;In&nbsp;&nbsp;" data-off-text="&nbsp;Out&nbsp;"></div>
+                                                        <div class="bootstrap-switch-container" style="height: 30px;width: 200px; margin-left: 0px;">
+                                                            <span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 88px;">&nbsp;&nbsp;&nbsp;</span>
+                                                            <span class="bootstrap-switch-label" style="width: 88px;">&nbsp;</span>
+                                                            <span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 88px;">&nbsp;&nbsp;</span>
+                                                            <input type="checkbox" class="make-switch" id="inOutCheckbox" data-on-text="&nbsp;In&nbsp;&nbsp;" data-off-text="&nbsp;Out&nbsp;">
+                                                        </div>
                                                     </div><br>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter material name">
-                                                    </div>
-                                                    <div class="form-group">
                                                         <select class="form-control" id="transfer_type">
-                                                            <option value=""> -- Select Transfer Type -- </option>
-                                                            <option value="client"> Client </option>
-                                                            <option value="hand"> By hand </option>
-                                                            <option value="office"> Office </option>
-                                                            <option value="supplier"> Supplier </option>
+
                                                         </select>
                                                     </div>
+                                                    <div id="dynamicForm">
 
-                                                    <div id="client_form">
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter client name">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <select class="form-control" id="clientId" name="client_id">
-                                                                <option value=""> -- Unit -- </option>
-                                                                <option value="client"> KG </option>
-                                                                <option value="hand"> Ltr </option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="date" class="form-control" id="usrname" placeholder="Enter date">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
-                                                        </div>
                                                     </div>
-                                                    <div id="hand_form">
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter Shop Name">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <select class="form-control" id="clientId" name="client_id">
-                                                                <option value=""> -- Unit -- </option>
-                                                                <option value="client"> KG </option>
-                                                                <option value="hand"> Ltr </option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="date" class="form-control" id="usrname" placeholder="Enter date">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
-                                                        </div>
-                                                    </div>
-                                                    <div id="office_form">
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <select class="form-control" id="clientId" name="client_id">
-                                                                <option value=""> -- Unit -- </option>
-                                                                <option value="client"> KG </option>
-                                                                <option value="hand"> Ltr </option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="date" class="form-control" id="usrname" placeholder="Enter date">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
-                                                        </div>
-                                                    </div>
-                                                    <div id="supplier_form">
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter Supplier Name">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <select class="form-control" id="clientId" name="client_id">
-                                                                <option value=""> -- Unit -- </option>
-                                                                <option value="client"> KG </option>
-                                                                <option value="hand"> Ltr </option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control" id="usrname" placeholder="Enter Bill Number">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <div class="row">
-                                                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                            </div>
-                                                            <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                                    Browse</a>
-                                                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                    <i class="fa fa-share"></i> Upload Files </a>
-                                                            </div>
-                                                            <table class="table table-bordered table-hover" style="width: 200px">
-                                                                <thead>
-                                                                <tr role="row" class="heading">
-                                                                    <th> Image </th>
-                                                                    <th> Action </th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody id="show-product-images">
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="date" class="form-control" id="usrname" placeholder="Enter date">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter Vehicle Number">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter In Time">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter Out Time">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
-                                                        </div>
-                                                    </div>
-                                                    <button type="submit" class="btn red pull-right"> Create</button>
+                                                    <button type="submit" class="btn red pull-right" id="inOutSubmit" hidden> Create</button>
                                                 </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal fade" id="myModal1" role="dialog">
-                                    <div class="modal-dialog">
-                                        <!-- Modal content-->
-                                        <div class="modal-content">
-                                            <div class="modal-header" style="padding-bottom:10px">
-                                                <div class="row">
-                                                    <div class="col-md-4"></div>
-                                                    <div class="col-md-4"> Asset</div>
-                                                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                <div id="client_form" hidden>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter client name">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <select class="form-control" id="clientId" name="client_id">
+                                                            <option value=""> -- Unit -- </option>
+                                                            <option value="client"> KG </option>
+                                                            <option value="hand"> Ltr </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="date" class="form-control" id="usrname" placeholder="Enter date">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="modal-body" style="padding:40px 50px;">
-                                                <form role="form">
+                                                <div id="hand_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter asset name">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Shop Name">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="number" class="form-control" id="psw" placeholder="Enter quantity">
+                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                            <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Unit</span>&nbsp;<span class="caret"></span></button>
-                                                            <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">Kg</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                            <span class="text">Ltr</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
+                                                        <select class="form-control" id="clientId" name="client_id">
+                                                            <option value=""> -- Unit -- </option>
+                                                            <option value="client"> KG </option>
+                                                            <option value="hand"> Ltr </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="date" class="form-control" id="usrname" placeholder="Enter date">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
+                                                    </div>
+                                                </div>
+                                                <div id="office_form" hidden>
+                                                    <div class="form-group">
+                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <select class="form-control" id="clientId" name="client_id">
+                                                            <option value=""> -- Unit -- </option>
+                                                            <option value="client"> KG </option>
+                                                            <option value="hand"> Ltr </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="date" class="form-control" id="usrname" placeholder="Enter date">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
+                                                    </div>
+                                                </div>
+                                                <div id="supplier_form" hidden>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Supplier Name">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <select class="form-control" id="clientId" name="client_id">
+                                                            <option value=""> -- Unit -- </option>
+                                                            <option value="client"> KG </option>
+                                                            <option value="hand"> Ltr </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter Bill Number">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <input type="date" class="form-control" id="usrname" placeholder="Enter date">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Vehicle Number">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter In Time">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Out Time">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
                                                     </div>
                                                     <div class="form-group">
                                                         <div class="row">
@@ -271,12 +220,89 @@
                                                             </tbody>
                                                         </table>
                                                     </div>
-                                                    <button type="submit" class="btn red pull-right"> Create</button>
-                                                </form>
+                                                </div>
+                                                <div id="labour_form" hidden>
+                                                    <div class="form-group">
+                                                        <input type="text" name="reference_name" class="form-control" placeholder="Enter Labour's Name">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" name="quantity" class="form-control" placeholder="Enter Quantity">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <select name="unit_id" class="form-control">
+                                                            <option value="">--Select Unit--</option>
+                                                            <option value="kg">KG</option>
+                                                            <option value="gm">GM</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" name="date" class="form-control" placeholder="Enter Date">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <textarea name="remark" class="form-control" placeholder="Remark"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div id="subcontractor_form" hidden>
+                                                    <div class="form-group">
+                                                        <input type="text" name="reference_name" class="form-control" placeholder="Enter sub-contractor's Name">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" name="quantity" class="form-control" placeholder="Enter Quantity">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <select name="unit_id" class="form-control">
+                                                            <option value="">--Select Unit--</option>
+                                                            <option value="kg">KG</option>
+                                                            <option value="gm">GM</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" name="date" class="form-control" placeholder="Enter Date">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <textarea name="remark" class="form-control" placeholder="Remark"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div id="maintenance_form" hidden>
+                                                    <div class="form-group">
+                                                        <label class="control-label"> Client: Client Name</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="control-label"> Project: Project Name</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="control-label"> Project: Project Site Name</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <textarea class="form-control" placeholder="Remark"></textarea>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="row">
+                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                        </div>
+                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                Browse</a>
+                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                <i class="fa fa-share"></i> Upload Files </a>
+                                                        </div>
+                                                        <table class="table table-bordered table-hover" style="width: 200px">
+                                                            <thead>
+                                                            <tr role="row" class="heading">
+                                                                <th> Image </th>
+                                                                <th> Action </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="show-product-images">
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="modal fade" id="openingStockModel" role="dialog">
                                     <div class="modal-dialog">
                                         <!-- Modal content-->
@@ -314,7 +340,7 @@
                                                     <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                 </div>
                                             </div>
-                                            <div class="modal-body" style="padding:40px 50px;">
+                                            <div class="modal-body" style="padding:40px 50px; font-size: 15px">
 
                                             </div>
                                         </div>
@@ -341,21 +367,13 @@
     <script>
         $(document).ready(function(){
             InventoryComponentListing.init();
+            changeType();
             $("#transaction").click(function(){
                 $("#transactionModal").modal();
             });
-            $("#assetBtn").click(function(){
-                $("#myModal1").modal();
-            });
-            $('#office_form').hide();
-            $('#supplier_form').hide();
-            $('#client_form').hide();
-            $('#hand_form').hide()
-
             $("#stockButton").click(function(){
                $("#openingStockModel").modal('show');
             });
-
             $("#openingStockSubmit").click(function(){
                 $.ajax({
                     url: '/inventory/component/edit-opening-stock',
@@ -375,35 +393,62 @@
                     }
                 });
             });
+
+            $('#inOutCheckbox').on('switchChange.bootstrapSwitch', function(event, state) {
+                changeType();
+            });
         });
 
+        function changeType(){
+            if($("#inOutCheckbox").is(':checked') == true){
+                $("#transfer_type").html($("#inTransferTypes").val());
+            }else{
+                $("#transfer_type").html($("#outTransferTypes").val());
+            }
+            $("#transfer_type").trigger('change');
+        }
         function openDetails(componentTransferId){
-            $("#transferDetailModel").modal('show');
+            $.ajax({
+                url: '/inventory/component/detail/'+componentTransferId+'?_token='+$("input[name='_token']").val(),
+                type: 'GET',
+                async: true,
+                success: function(data,textStatus,xhr){
+                    $("#transferDetailModel .modal-body").html(data);
+                    $("#transferDetailModel").modal('show');
+                },
+                error:function(errorData){
+                    alert('Something went wrong');
+                }
+
+            });
         }
     </script>
     <script>
         $('#transfer_type').change(function(){
             if($(this).val() == "client"){
-                $('#client_form').show(500);
-                $('#office_form').hide();
-                $('#supplier_form').hide();
-                $('#hand_form').hide();
+                $("#dynamicForm").html($('#client_form').clone().show(500));
+                $("#inOutSubmit").show();
             }else if($(this).val() == "supplier"){
-                $('#supplier_form').show(500);
-                $('#office_form').hide();
-                $('#client_form').hide();
-                $('#hand_form').hide();
-
+                $("#dynamicForm").html($('#supplier_form').clone().show(500));
+                $("#inOutSubmit").show();
             }else if($(this).val() == "hand"){
-                $('#hand_form').show(500);
-                $('#office_form').hide();
-                $('#supplier_form').hide();
-                $('#client_form').hide();
+                $("#dynamicForm").html($('#hand_form').clone().show(500));
+                $("#inOutSubmit").show();
+            }else if($(this).val() == 'office'){
+                $("#dynamicForm").html($('#office_form').clone().show(500));
+                $("#inOutSubmit").show();
+            }else if($(this).val() == 'labour'){
+                $("#dynamicForm").html($('#labour_form').clone().show(500));
+                $("#inOutSubmit").show();
+            }else if($(this).val() == 'sub-contractor'){
+                $("#dynamicForm").html($('#subcontractor_form').clone().show(500));
+                $("#inOutSubmit").show();
+            }else if($(this).val() == 'maintenance'){
+                $("#dynamicForm").html($('#maintenance_form').clone().show(500));
+                $("#inOutSubmit").show();
             }else{
-                $('#office_form').show(500);
-                $('#supplier_form').hide();
-                $('#client_form').hide();
-                $('#hand_form').hide();
+                $("#dynamicForm").html('');
+                $("#inOutSubmit").hide();
             }
         })
     </script>
