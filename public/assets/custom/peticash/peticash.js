@@ -369,7 +369,6 @@ var  AddAmtToAccount = function () {
     return {
         init: function () {
             handleCreate();
-            alert("validation will work here : JS Code");
         }
     };
 }();
@@ -442,7 +441,6 @@ var  AddAmtToSitewiseAccount = function () {
     return {
         init: function () {
             handleCreate();
-            alert("validation will work here : JS Code");
         }
     };
 }();

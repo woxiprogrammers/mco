@@ -364,13 +364,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix'=>'peticash'],function (){
         Route::group(['prefix' => 'master-peticash-account'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
-            Route::get('create',array('uses' => 'Peticash\PeticashController@getCreateViewForMasterPeticashAccount'));
+            Route::get('createpage',array('uses' => 'Peticash\PeticashController@getCreateViewForMasterPeticashAccount'));
+            Route::post('create',array('uses' => 'Peticash\PeticashController@createMasterPeticashAccount'));
             Route::post('listing',array('uses' => 'Peticash\PeticashController@masterAccountListing'));
         });
 
         Route::group(['prefix' => 'sitewise-peticash-account'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForSitewisePeticashAccount'));
-            Route::get('create',array('uses' => 'Peticash\PeticashController@getCreateViewForSitewisePeticashAccount'));
+            Route::get('createpage',array('uses' => 'Peticash\PeticashController@getCreateViewForSitewisePeticashAccount'));
+            Route::post('create',array('uses' => 'Peticash\PeticashController@createSitewisePeticashAccount'));
             Route::post('listing',array('uses' => 'Peticash\PeticashController@sitewiseAccountListing'));
         });
 

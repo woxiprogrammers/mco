@@ -35,7 +35,7 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="create" style="color: white"> ADD
+                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ADD
                                                                     <!-- here we need to handle create transaction for master account-->
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>
@@ -52,7 +52,7 @@
                                                     <th> To </th>
                                                     <th> Amount </th>
                                                     <th> Type </th>
-                                                    <th> Remark </th>
+                                                    <th style="width: 30%"> Remark </th>
                                                     <th> Created On </th>
                                                     <th> Status </th>
                                                 </tr>

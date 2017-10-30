@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Peticash;
 use App\PaymentType;
 use App\PeticashSiteTransfer;
 use App\ProjectSite;
+use App\Role;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PeticashController extends Controller
@@ -32,12 +34,76 @@ class PeticashController extends Controller
 
     public function getCreateViewForMasterPeticashAccount(Request $request){
         try{
-            return view('peticash.master-peticash-account.create');
+            $paymenttypes = PaymentType::get(['id','name'])->toArray();
+            $users = array(
+                [
+                    "id" => 1,
+                    "name" => "Bharat Makwana"
+                ],
+                [
+                    "id" => 2,
+                    "name" => "Rackesh Patel"
+                ]
+
+            );
+            return view('peticash.master-peticash-account.create')->with(compact('paymenttypes','users'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get Peticash Add Amount View",
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function createMasterPeticashAccount(Request $request) {
+        try{
+            $accountData = array();
+            $user = Auth::user();
+            $fromuserid = $user->id;
+            $accountData['user_id'] = $request->to_userid;
+            $accountData['amount'] = $request->amount;
+            $accountData['payment_id'] = $request->payment_type;
+            $accountData['date'] = $request->date;
+            $accountData['received_from_user_id'] = $fromuserid;
+            $accountData['remark'] = $request->remark;
+            $accountData['project_site_id'] = 0; // VALUE 0 FOR MASTER ACCOUNT
+            $category = PeticashSiteTransfer::create($accountData);
+            $request->session()->flash('success', 'Amount Added successfully.');
+            return redirect('peticash/master-peticash-account/createpage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Master Peticash Account',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function createSitewisePeticashAccount(Request $request) {
+        try{
+            $accountData = array();
+            $user = Auth::user();
+            $fromuserid = $user->id;
+            $accountData['user_id'] = $request->to_userid;
+            $accountData['amount'] = $request->amount;
+            $accountData['payment_id'] = $request->payment_type;
+            $accountData['date'] = $request->date;
+            $accountData['received_from_user_id'] = $fromuserid;
+            $accountData['remark'] = $request->remark;
+            $accountData['project_site_id'] = 4; // VALUE 0 FOR MASTER ACCOUNT
+            $category = PeticashSiteTransfer::create($accountData);
+            $request->session()->flash('success', 'Amount Added successfully.');
+            return redirect('peticash/sitewise-peticash-account/createpage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Sitewise Peticash Account',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
@@ -60,7 +126,20 @@ class PeticashController extends Controller
 
     public function getCreateViewForSitewisePeticashAccount(Request $request){
         try{
-            return view('peticash.sitewise-peticash-account.create');
+            $paymenttypes = PaymentType::get(['id','name'])->toArray();
+            $users = array(
+                [
+                    "id" => 1,
+                    "name" => "Bharat Makwana"
+                ],
+                [
+                    "id" => 2,
+                    "name" => "Rackesh Patel"
+                ]
+
+            );
+            $sites = ProjectSite::get(['id','name','address'])->toArray();
+            return view('peticash.sitewise-peticash-account.create')->with(compact('paymenttypes','users','sites'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get Peticash Add Amount Sitewise View",
@@ -102,7 +181,7 @@ class PeticashController extends Controller
 
     public function masterAccountListing(Request $request){
         try{
-            $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','asc')->get()->toArray();;
+            $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get()->toArray();;
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
             $iTotalRecords = count($masterAccountData);
             $records = array();

@@ -38,7 +38,76 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <h1>Master Peticash Account Form Data here</h1>
+                                        <form role="form" id="create-role" class="form-horizontal" method="post" action="/peticash/master-peticash-account/create">
+                                            {!! csrf_field() !!}
+                                            <div class="form-body">
+                                                <fieldset>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="type" class="control-label">Assign To</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <select class="form-control" id="to_userid" name="to_userid">
+                                                                @foreach($users as $user)
+                                                                <option value="{{$user['id']}}">{{$user['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+
+                                                            <label for="name" class="control-label">Amount</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="amount" name="amount" required="required">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="type" class="control-label">Payment Type</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <select class="form-control" id="payment_type" name="payment_type">
+                                                                @foreach($paymenttypes as $type)
+                                                                    <option value="{{$type['id']}}">{{$type['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+
+                                                            <label for="name" class="control-label">Remark</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="remark" name="remark" required="required">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+
+                                                            <label for="name" class="control-label">Transaction Date</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-3 date date-picker" data-date-end-date="0d">
+                                                            <input aria-describedby="date-error" aria-invalid="false" aria-required="true"  name="date" placeholder="Select Bill Date" id="date" type="text">
+                                                            <i>mm/dd/yyyy</i>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-md-offset-8">
+                                                    <button type="submit" class="btn btn-success"> Submit </button>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -57,6 +126,8 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
     $(document).ready(function() {
+        var date=new Date();
+        $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
         AddAmtToAccount.init();
     });
 </script>

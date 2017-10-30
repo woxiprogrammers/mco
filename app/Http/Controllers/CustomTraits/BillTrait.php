@@ -1048,6 +1048,7 @@ trait BillTrait{
     public function editBill(Request $request, $bill){
         try{
             $billData = array();
+            dd($request->date);
             $billData['date'] = $request->date;
             $billData['performa_invoice_date'] = $request->performa_invoice_date;
             $billData['discount_amount'] = $request->discount_amount;
