@@ -365,11 +365,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'master-peticash-account'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
             Route::get('create',array('uses' => 'Peticash\PeticashController@getCreateViewForMasterPeticashAccount'));
+            Route::post('listing',array('uses' => 'Peticash\PeticashController@masterAccountListing'));
         });
 
         Route::group(['prefix' => 'sitewise-peticash-account'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForSitewisePeticashAccount'));
             Route::get('create',array('uses' => 'Peticash\PeticashController@getCreateViewForSitewisePeticashAccount'));
+            Route::post('listing',array('uses' => 'Peticash\PeticashController@sitewiseAccountListing'));
         });
 
         Route::group(['prefix' => 'peticash-approval-request'], function(){

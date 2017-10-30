@@ -24,7 +24,7 @@ var masterAccountListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/role/listing", // ajax source
+                    "url": "/peticash/master-peticash-account/listing", // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -100,7 +100,7 @@ var sitewiseAccountListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/role/listing", // ajax source
+                    "url": "/peticash/sitewise-peticash-account/listing", // ajax source
                 },
                 "order": [
                     [1, "asc"]

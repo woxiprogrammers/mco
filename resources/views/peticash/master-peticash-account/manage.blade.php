@@ -47,11 +47,16 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="masterPeticashTable">
                                                 <thead>
                                                 <tr>
-                                                    <th style="width: 30%"> Name </th>
+                                                    <th> Transaction Id </th>
+                                                    <th> From </th>
+                                                    <th> To </th>
+                                                    <th> Amount </th>
                                                     <th> Type </th>
+                                                    <th> remarks </th>
                                                     <th> Created On </th>
+                                                    <th> Status </th>
                                                 </tr>
-                                                <tr class="filter">
+                                         <!--       <tr class="filter">
                                                     <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
@@ -59,7 +64,7 @@
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                     </th>
-                                                </tr>
+                                                </tr>-->
                                                 </thead>
                                                 <tbody>
 
