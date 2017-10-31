@@ -1,3 +1,12 @@
+$.validator.addMethod(
+    "customDate",
+    function(value, element) {
+        // put your own logic here, this is just a (crappy) example
+        return value.match(/^\d\d?\/\d\d?\/\d\d\d\d$/);
+    },
+    "Please enter a date in the format dd/mm/yyyy."
+);
+
 var masterAccountListing = function () {
     var handleOrders = function () {
 
@@ -319,6 +328,9 @@ var  AddAmtToAccount = function () {
                 },
                 remark: {
                     required: true
+                },
+                date : {
+                    customDate : true
                 }
             },
             messages: {
@@ -445,6 +457,9 @@ var  AddAmtToSitewiseAccount = function () {
                 },
                 to_userid : {
                     required: true
+                },
+                date : {
+                    customDate : true
                 }
             },
             messages: {

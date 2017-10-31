@@ -94,9 +94,8 @@
                                                             <label for="name" class="control-label">Transaction Date</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-3 date date-picker" data-date-end-date="0d">
-                                                            <input aria-describedby="date-error" aria-invalid="false" aria-required="true"  name="date" placeholder="Select Bill Date" id="date" type="text">
-                                                            <i>mm/dd/yyyy</i>
+                                                        <div class="col-md-6">
+                                                            <input name="date" class="form-control" id="date" type="text">
                                                         </div>
                                                     </div>
                                                 </fieldset>
