@@ -231,3 +231,21 @@
     </div>
 </div>
 @endif
+@if(count($inventoryComponentTransferImages) > 0)
+    <div class="row">
+        <div class="col-md-3 col-md-offset-2">
+            <label class="control-label pull-right">
+                <b>Images:</b>
+            </label>
+        </div>
+    </div>
+    @foreach($inventoryComponentTransferImages as $imagePath)
+        <div class="row">
+            <div class="col-md-3 col-md-offset-4">
+                <span class="pull-right">
+                    <img src="{{$imagePath}}" alt="Inventory Component Transfer Images">
+                </span>
+            </div>
+        </div>
+    @endforeach
+@endif

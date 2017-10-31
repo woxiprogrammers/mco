@@ -8,7 +8,7 @@ $hello.on("change", function(event, path,count){
     if (typeof path !== "undefined") {
         var componentId = $("#inventoryComponentId").val();
         $.ajax({
-            url: "/inventory/component/display-images/"+componentId,
+            url: "/inventory/component/display-images/"+componentId+'?_token='+$("input[name='_token']").val(),
             data: {'path':path,'count':count},
             async:false,
             error: function(data) {
@@ -28,7 +28,7 @@ function removeProductImages(imageId,path,originalId){
     maxCount = maxCount +  1;
     $('#max_files_count').val(maxCount);
     $.ajax({
-        url: "/inventory/component/delete-temp-product-image",
+        url: "/inventory/component/delete-temp-inventory-image?_token="+$("input[name='_token']").val(),
         data: {'path':path,'id':originalId},
         async:false,
         error: function(data) {

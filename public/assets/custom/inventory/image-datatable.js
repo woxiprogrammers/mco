@@ -2,7 +2,7 @@
  * Created by Ameya Joshi on 30/10/17.
  */
 
-var QuotationImageUpload = function() {
+var InventoryComponentImageUpload = function() {
     var e = function() {
             var componentId = $("#inventoryComponentId").val();
             var e = new plupload.Uploader({
@@ -84,5 +84,5 @@ var QuotationImageUpload = function() {
     }
 }();
 jQuery(document).ready(function() {
-    QuotationImageUpload.init()
+    InventoryComponentImageUpload.init();
 });

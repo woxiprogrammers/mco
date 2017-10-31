@@ -3,6 +3,12 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link href="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/clockface/css/clockface.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -26,13 +32,12 @@
                             @include('partials.common.messages')
                             <div class="container">
                                 <div class="row">
+                                    <input type="hidden" name="inventory_component_id" id="inventoryComponentId" value="{{$inventoryComponent['id']}}">
                                     <input type="hidden" id="path" name="path" value="">
                                     <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                                     <input type="hidden" id="inTransferTypes" value="{{$inTransferTypes}}">
                                     <input type="hidden" id="outTransferTypes" value="{{$outTransferTypes}}">
                                     <input type="hidden" name="opening_stock" id="openingStock" value="{{$inventoryComponent->opening_stock}}">
-                                    <input type="hidden" name="inventory_component_id" id="inventoryComponentId" value="{{$inventoryComponent['id']}}">
-                                    {!! csrf_field() !!}
                                     <div class="col-md-12">
                                         <!-- BEGIN VALIDATION STATES-->
                                         <div class="row">
@@ -87,17 +92,18 @@
                                                 </div>
                                             </div>
                                             <div class="modal-body" style="padding:40px 50px;">
-                                                <form role="form">
+                                                <form role="form" action="/inventory/component/add-transfer/{{$inventoryComponent['id']}}" method="POST">
+                                                    {!! csrf_field() !!}
                                                     <div class="form-group">
                                                         <div class="bootstrap-switch-container" style="height: 30px;width: 200px; margin-left: 0px;">
                                                             <span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 88px;">&nbsp;&nbsp;&nbsp;</span>
                                                             <span class="bootstrap-switch-label" style="width: 88px;">&nbsp;</span>
                                                             <span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 88px;">&nbsp;&nbsp;</span>
-                                                            <input type="checkbox" class="make-switch" id="inOutCheckbox" data-on-text="&nbsp;In&nbsp;&nbsp;" data-off-text="&nbsp;Out&nbsp;">
+                                                            <input type="checkbox" class="make-switch" id="inOutCheckbox" name="in_or_out" data-on-text="&nbsp;In&nbsp;&nbsp;" data-off-text="&nbsp;Out&nbsp;">
                                                         </div>
                                                     </div><br>
                                                     <div class="form-group">
-                                                        <select class="form-control" id="transfer_type">
+                                                        <select class="form-control" id="transfer_type" name="transfer_type">
 
                                                         </select>
                                                     </div>
@@ -108,108 +114,129 @@
                                                 </form>
                                                 <div id="client_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter client name">
+                                                        <input type="text" class="form-control" id="sourceName" name="source_name" placeholder="Enter client name">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
+                                                        <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Enter quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select class="form-control" id="clientId" name="client_id">
+                                                        <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
-                                                            <option value="client"> KG </option>
-                                                            <option value="hand"> Ltr </option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="date" class="form-control" id="usrname" placeholder="Enter date">
+                                                        <input type="date" class="form-control" id="date" name="date" placeholder="Enter date">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
+                                                        <input type="text" class="form-control" id="remark" name="remark" placeholder="Enter Remark">
                                                     </div>
                                                 </div>
                                                 <div id="hand_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Shop Name">
+                                                        <input type="text" class="form-control" id="sourceName" name="source_name" placeholder="Enter Shop Name">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
+                                                        <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Enter quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select class="form-control" id="clientId" name="client_id">
+                                                        <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
-                                                            <option value="client"> KG </option>
-                                                            <option value="hand"> Ltr </option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="date" class="form-control" id="usrname" placeholder="Enter date">
+                                                        <input type="date" class="form-control" id="date" name="date" placeholder="Enter date">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
+                                                        <input type="text" class="form-control" id="remark" name="remark" placeholder="Enter Remark">
                                                     </div>
                                                 </div>
                                                 <div id="office_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
+                                                        <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Enter quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select class="form-control" id="clientId" name="client_id">
+                                                        <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
-                                                            <option value="client"> KG </option>
-                                                            <option value="hand"> Ltr </option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="date" class="form-control" id="usrname" placeholder="Enter date">
+                                                        <input type="date" class="form-control" id="date" name="date" placeholder="Enter date">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
+                                                        <input type="text" class="form-control" id="remark" name="remark" placeholder="Enter Remark">
                                                     </div>
                                                 </div>
                                                 <div id="supplier_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Supplier Name">
+                                                        <input type="text" class="form-control" id="sourceName" name="source_name" placeholder="Enter Supplier Name">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter quantity">
+                                                        <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Enter quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select class="form-control" id="clientId" name="client_id">
+                                                        <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
-                                                            <option value="client"> KG </option>
-                                                            <option value="hand"> Ltr </option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="number" class="form-control" id="usrname" placeholder="Enter Bill Number">
+                                                        <input type="number" class="form-control" id="billNumber" name="bill_number" placeholder="Enter Bill Number">
                                                     </div>
 
                                                     <div class="form-group">
-                                                        <input type="date" class="form-control" id="usrname" placeholder="Enter date">
+                                                        <input type="date" class="form-control" id="date" name="date" placeholder="Enter date">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Vehicle Number">
+                                                        <input type="text" class="form-control" id="vehicleNumber" name="vehicle_number" placeholder="Enter Vehicle Number">
+                                                    </div>
+                                                    <div class="in-out-time-div">
+
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter In Time">
+                                                        <div class="input-group date form_datetime form_datetime bs-datetime">
+                                                            <input type="text" size="16" class="form-control" name="in_time" placeholder="Enter In Time">
+                                                            <span class="input-group-addon">
+                                                                <button class="btn default date-set" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Out Time">
+                                                        <div class="input-group date form_datetime form_datetime bs-datetime">
+                                                            <input type="text" size="16" class="form-control" name="out_time" placeholder="Enter Out Time">
+                                                            <span class="input-group-addon">
+                                                                <button class="btn default date-set" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" id="usrname" placeholder="Enter Remark">
+                                                        <input type="text" class="form-control" id="remark" name="remark" placeholder="Enter Remark">
                                                     </div>
                                                     <div class="form-group">
                                                         <div class="row">
-                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                            <div class="col-md-12 col-sm-12 custom-file-list"> </div>
                                                         </div>
-                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                        <div class="col-md-offset-5 custom-file-container">
+                                                            <a href="javascript:;" class="btn green-meadow custom-file-browse">
                                                                 Browse</a>
-                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                            <a href="javascript:;" class="btn btn-primary custom-upload-file">
                                                                 <i class="fa fa-share"></i> Upload Files </a>
                                                         </div>
-                                                        <table class="table table-bordered table-hover" style="width: 200px">
+                                                        <table class="table table-bordered table-hover">
                                                             <thead>
                                                             <tr role="row" class="heading">
                                                                 <th> Image </th>
@@ -223,44 +250,46 @@
                                                 </div>
                                                 <div id="labour_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="text" name="reference_name" class="form-control" placeholder="Enter Labour's Name">
+                                                        <input type="text" name="source_name" id="sourceName" class="form-control" placeholder="Enter Labour's Name">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" name="quantity" class="form-control" placeholder="Enter Quantity">
+                                                        <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Enter Quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select name="unit_id" class="form-control">
+                                                        <select name="unit_id" class="form-control" id="unit">
                                                             <option value="">--Select Unit--</option>
-                                                            <option value="kg">KG</option>
-                                                            <option value="gm">GM</option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" name="date" class="form-control" placeholder="Enter Date">
+                                                        <input type="text" name="date" class="form-control" id="date" placeholder="Enter Date">
                                                     </div>
                                                     <div class="form-group">
-                                                        <textarea name="remark" class="form-control" placeholder="Remark"></textarea>
+                                                        <textarea name="remark" class="form-control" id="remark" placeholder="Remark"></textarea>
                                                     </div>
                                                 </div>
                                                 <div id="subcontractor_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="text" name="reference_name" class="form-control" placeholder="Enter sub-contractor's Name">
+                                                        <input type="text" name="source_name" id="sourceName" class="form-control" placeholder="Enter sub-contractor's Name">
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" name="quantity" class="form-control" placeholder="Enter Quantity">
+                                                        <input type="text" name="quantity" class="form-control" id="quantity" placeholder="Enter Quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select name="unit_id" class="form-control">
+                                                        <select name="unit_id" class="form-control" id="unit">
                                                             <option value="">--Select Unit--</option>
-                                                            <option value="kg">KG</option>
-                                                            <option value="gm">GM</option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="text" name="date" class="form-control" placeholder="Enter Date">
+                                                        <input type="text" name="date" class="form-control" id="date" placeholder="Enter Date">
                                                     </div>
                                                     <div class="form-group">
-                                                        <textarea name="remark" class="form-control" placeholder="Remark"></textarea>
+                                                        <textarea name="remark" class="form-control" id="remark" placeholder="Remark"></textarea>
                                                     </div>
                                                 </div>
                                                 <div id="maintenance_form" hidden>
@@ -274,19 +303,19 @@
                                                         <label class="control-label"> Project: Project Site Name</label>
                                                     </div>
                                                     <div class="form-group">
-                                                        <textarea class="form-control" placeholder="Remark"></textarea>
+                                                        <textarea class="form-control" placeholder="Remark" name="remark" id="remark"></textarea>
                                                     </div>
                                                     <div class="form-group">
                                                         <div class="row">
-                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                            <div class="col-md-12 col-sm-12 custom-file-list"> </div>
                                                         </div>
-                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                        <div class="col-md-offset-5 custom-file-container">
+                                                            <a href="javascript:;" class="btn green-meadow custom-file-browse">
                                                                 Browse</a>
-                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                            <a href="javascript:;" class="btn btn-primary custom-upload-file">
                                                                 <i class="fa fa-share"></i> Upload Files </a>
                                                         </div>
-                                                        <table class="table table-bordered table-hover" style="width: 200px">
+                                                        <table class="table table-bordered table-hover">
                                                             <thead>
                                                             <tr role="row" class="heading">
                                                                 <th> Image </th>
@@ -296,6 +325,45 @@
                                                             <tbody id="show-product-images">
                                                             </tbody>
                                                         </table>
+                                                    </div>
+                                                </div>
+                                                <div id="site_form" hidden>
+                                                    <div class="form-group">
+                                                        <select id="clientSelect" class="form-control">
+                                                            <option value="">--Select Client Name--</option>
+                                                            @foreach($clients as $client)
+                                                                <option value="{{$client['id']}}">{{$client['name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <select id="projectSelect" class="form-control">
+                                                            <option value="">--Select Project Name--</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <select id="projectSiteSelect" name="project_site_id" class="form-control">
+                                                            <option value="">--Select Project Site Name--</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="text" name="quantity" class="form-control" placeholder="Enter Quantity">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <select class="form-control" id="unit" name="unit_id">
+                                                            <option value=""> -- Unit -- </option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="date" name="date" id="date" class="form-control" placeholder="Enter Date">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <textarea name="remark" class="form-control" id="remark" placeholder="Remark...">
+
+                                                        </textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -361,9 +429,18 @@
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/moment.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/clockface/js/clockface.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/component-manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/inventory/image-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/inventory/image-upload.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
             InventoryComponentListing.init();
@@ -397,7 +474,66 @@
             $('#inOutCheckbox').on('switchChange.bootstrapSwitch', function(event, state) {
                 changeType();
             });
+
+            $("#clientSelect").on('change', function(){
+                var clientId = $(this).val();
+                if(clientId == ""){
+                    $('#projectId').prop('disabled', false);
+                    $('#projectId').html('');
+                    $('#projectSiteId').prop('disabled', false);
+                    $('#projectSiteId').html('');
+                }else{
+                    $.ajax({
+                        url: '/quotation/get-projects',
+                        type: 'POST',
+                        async: true,
+                        data: {
+                            _token: $("input[name='_token']").val(),
+                            client_id: clientId
+                        },
+                        success: function(data,textStatus,xhr){
+                            $('#projectSelect').html(data);
+                            $('#projectSelect').prop('disabled', false);
+                            var projectId = $("#projectId").val();
+                            getProjectSites(projectId);
+                        },
+                        error: function(){
+
+                        }
+                    });
+                }
+
+            });
+
+            $("#projectSelect").on('change', function(){
+                var projectId = $(this).val();
+                getProjectSites(projectId);
+            });
         });
+
+        function getProjectSites(projectId){
+            $.ajax({
+                url: '/inventory/get-project-sites',
+                type: 'POST',
+                async: true,
+                data: {
+                    _token: $("input[name='_token']").val(),
+                    project_id: projectId
+                },
+                success: function(data,textStatus,xhr){
+                    if(data.length > 0){
+                        $('#projectSiteSelect').html(data);
+                        $('#projectSiteSelect').prop('disabled', false);
+                    }else{
+                        $('#projectSiteSelect').html("");
+                        $('#projectSiteSelect').prop('disabled', false);
+                    }
+                },
+                error: function(){
+
+                }
+            });
+        }
 
         function changeType(){
             if($("#inOutCheckbox").is(':checked') == true){
@@ -430,7 +566,18 @@
                 $("#inOutSubmit").show();
             }else if($(this).val() == "supplier"){
                 $("#dynamicForm").html($('#supplier_form').clone().show(500));
+                $("#dynamicForm .custom-file-list").attr('id','tab_images_uploader_filelist');
+                $("#dynamicForm .custom-file-container").attr('id','tab_images_uploader_container');
+                $("#dynamicForm .custom-file-browse").attr('id','tab_images_uploader_pickfiles');
+                $("#dynamicForm .custom-upload-file").attr('id','tab_images_uploader_uploadfiles');
+                $("#dynamicForm .date").each(function(){
+                    $(this).datetimepicker();
+                });
+
+
+
                 $("#inOutSubmit").show();
+                InventoryComponentImageUpload.init();
             }else if($(this).val() == "hand"){
                 $("#dynamicForm").html($('#hand_form').clone().show(500));
                 $("#inOutSubmit").show();
@@ -443,9 +590,17 @@
             }else if($(this).val() == 'sub-contractor'){
                 $("#dynamicForm").html($('#subcontractor_form').clone().show(500));
                 $("#inOutSubmit").show();
+            }else if($(this).val() == 'site'){
+                $("#dynamicForm").html($('#site_form').clone().show(500));
+                $("#inOutSubmit").show();
             }else if($(this).val() == 'maintenance'){
                 $("#dynamicForm").html($('#maintenance_form').clone().show(500));
+                $("#dynamicForm .custom-file-list").attr('id','tab_images_uploader_filelist');
+                $("#dynamicForm .custom-file-container").attr('id','tab_images_uploader_container');
+                $("#dynamicForm .custom-file-browse").attr('id','tab_images_uploader_pickfiles');
+                $("#dynamicForm .custom-upload-file").attr('id','tab_images_uploader_uploadfiles');
                 $("#inOutSubmit").show();
+                InventoryComponentImageUpload.init();
             }else{
                 $("#dynamicForm").html('');
                 $("#inOutSubmit").hide();

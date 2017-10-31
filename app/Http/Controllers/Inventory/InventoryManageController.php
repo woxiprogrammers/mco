@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers\Inventory;
 
+use App\Client;
 use App\InventoryComponent;
+use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
 use App\InventoryTransferTypes;
+use App\Material;
+use App\ProjectSite;
+use App\Quotation;
+use App\Unit;
+use App\UnitConversion;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 class InventoryManageController extends Controller
@@ -30,6 +38,23 @@ class InventoryManageController extends Controller
 
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
+            $clients = Client::join('projects','projects.client_id','=','clients.id')
+                            ->join('project_sites','project_sites.project_id','=','projects.id')
+                            ->join('quotations','quotations.project_site_id','=','project_sites.id')
+                            ->select('clients.company as name','clients.id as id')
+                            ->get();
+            if($inventoryComponent->is_material == true){
+                $materialInfo = Material::where('name','ilike',$inventoryComponent->name)->first();
+                if($materialInfo != null){
+                    $unit1Ids = UnitConversion::where('unit_1_id',$materialInfo->unit_id)->pluck('unit_2_id')->toArray();
+                    $unit2Ids = UnitConversion::where('unit_2_id',$materialInfo->unit_id)->whereNotIn('unit_1_id',$unit1Ids)->pluck('unit_1_id')->toArray();
+                    $units = Unit::whereIn('id',$unit1Ids)->whereIn('id',$unit2Ids)->select('id','name')->orderBy('name')->get();
+                }else{
+                    $units = Unit::where('is_active', true)->select('id','name')->get();
+                }
+            }else{
+                $units = Unit::where('slug','nos')->select('id','name')->get();
+            }
             $inTransfers = InventoryTransferTypes::where('type','ilike','IN')->get();
             $inTransferTypes = '<option value=""> -- Select Transfer Type -- </option>';
             foreach($inTransfers as $transfer){
@@ -40,7 +65,7 @@ class InventoryManageController extends Controller
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes'));
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -165,7 +190,12 @@ class InventoryManageController extends Controller
 
     public function getInventoryComponentTransferDetail(Request $request,$inventoryComponentTransfer){
         try{
-            return view('partials.inventory.inventory-component-transfer-detail')->with(compact('inventoryComponentTransfer'));
+            if(count($inventoryComponentTransfer->images) > 0){
+                $inventoryComponentTransferImages = $this->getTransferImages($inventoryComponentTransfer);
+            }else{
+                $inventoryComponentTransferImages = array();
+            }
+            return view('partials.inventory.inventory-component-transfer-detail')->with(compact('inventoryComponentTransfer','inventoryComponentTransferImages'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get inventory component transfer details',
@@ -177,26 +207,26 @@ class InventoryManageController extends Controller
         }
     }
 
-    public function uploadTempWorkOrderImages(Request $request,$inventoryComponentId){
+    public function uploadTempImages(Request $request,$inventoryComponent){
         try{
-            /*$user = Auth::user();
+            $user = Auth::user();
             $userDirectoryName = sha1($user->id);
-            $inventoryComponentDirectoryName = sha1($inventoryComponentId);
-            $tempUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
-            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
-            /* Create Upload Directory If Not Exists
+            $inventoryComponentDirectoryName = sha1($inventoryComponent->id);
+            $tempUploadPath = public_path().env('INVENTORY_COMPONENT_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$inventoryComponentDirectoryName.DIRECTORY_SEPARATOR.$userDirectoryName;
+            /* Create Upload Directory If Not Exists*/
             if (!file_exists($tempImageUploadPath)) {
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
             }
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
-            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $path = env('INVENTORY_COMPONENT_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$inventoryComponentDirectoryName.DIRECTORY_SEPARATOR.$userDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
                 'path' => $path
-            ];*/
+            ];
         }catch (\Exception $e){
             $response = [
                 'jsonrpc' => '2.0',
@@ -210,7 +240,7 @@ class InventoryManageController extends Controller
         return response()->json($response);
     }
 
-    public function displayWorkOrderImages(Request $request){
+    public function displayTempImages(Request $request){
         try{
             $path = $request->path;
             $count = $request->count;
@@ -230,5 +260,103 @@ class InventoryManageController extends Controller
         }catch(\Exception $e){
             return response(500);
         }
+    }
+
+    public function addComponentTransfer(Request $request,$inventoryComponent){
+        try{
+            $data = $request->except(['_token','work_order_images','transfer_type','in_or_out']);
+            $data['inventory_component_id'] = $inventoryComponent->id;
+            if($request->has('in_or_out')){
+                $data['transfer_type_id'] = InventoryTransferTypes::where('type','ilike','IN')->where('slug',$request->transfer_type)->pluck('id')->first();
+            }else{
+                $data['transfer_type_id'] = InventoryTransferTypes::where('type','ilike','OUT')->where('slug',$request->transfer_type)->pluck('id')->first();
+            }
+            $currentYearMonthStartFormat = date('Y-m').'-01 00:00:00';
+            $currentYearMonthEndFormat = date('Y-m-t',strtotime($currentYearMonthStartFormat)).' 23:59:59';
+            $count = InventoryComponentTransfers::where('created_at','>=',$currentYearMonthStartFormat)
+                                    ->where('created_at','<=',$currentYearMonthEndFormat)
+                                    ->count();
+            $data['grn'] = "GRN".date('Ym').($count+1);
+            $inventoryComponentTransfer = InventoryComponentTransfers::create($data);
+            if($request->has('work_order_images')){
+                $imageUploadPath = public_path().env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
+                $inventoryComponentDirectoryName = sha1($inventoryComponent->id);
+                $inventoryComponentTransferDirectoryName = sha1($inventoryComponentTransfer->id);
+                $newImageUploadDirectoryPath = $imageUploadPath.DIRECTORY_SEPARATOR.$inventoryComponentDirectoryName.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$inventoryComponentTransferDirectoryName;
+                if(!file_exists($newImageUploadDirectoryPath)){
+                    File::makeDirectory($newImageUploadDirectoryPath,$mode = 0777, true, true);
+                }
+                foreach ($request->work_order_images as $imagePath){
+                    $imagePathChunks = explode('/',$imagePath['image_name']);
+                    $fileName = end($imagePathChunks);
+                    $inventoryComponentTransferImageData = [
+                        'inventory_component_transfer_id' => $inventoryComponentTransfer->id,
+                        'name' => $fileName
+                    ];
+                    File::move(public_path().$imagePath['image_name'],$newImageUploadDirectoryPath.DIRECTORY_SEPARATOR.$fileName);
+                    InventoryComponentTransferImage::create($inventoryComponentTransferImageData);
+                }
+            }
+            $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
+            return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add Inventory Component Transfer',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getTransferImages($inventoryComponentTransfer){
+        try{
+            $paths = array();
+            $imageUploadPath = env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
+            $inventoryComponentDirectoryName = sha1($inventoryComponentTransfer->inventoryComponent->id);
+            $inventoryComponentTransferDirectoryName = sha1($inventoryComponentTransfer->id);
+            $imageUploadDirectoryPath = $imageUploadPath.DIRECTORY_SEPARATOR.$inventoryComponentDirectoryName.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$inventoryComponentTransferDirectoryName;
+            foreach($inventoryComponentTransfer->images as $image){
+                $paths[] = $imageUploadDirectoryPath.DIRECTORY_SEPARATOR.$image->name;
+            }
+            return $paths;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Inventory Component Transfer Images',
+                'component' => $inventoryComponentTransfer,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getProjectSites(Request $request){
+        try{
+            $projectId = $request->project_id;
+            $quotationProjectSiteIds = Quotation::whereNotNull('quotation_status_id')->pluck('project_site_id')->toArray();
+            $projectSites = ProjectSite::where('project_id',$projectId)->whereIn('id',$quotationProjectSiteIds)->select('id','name')->get();
+            $response = array();
+            if(count($projectSites) <= 0)
+            {
+                $response[] = '<option value=" " style="text-color:red">Project Site Not Available</option>';
+            }else{
+                foreach ($projectSites as $projectSite) {
+                    $response[] = '<option value="' . $projectSite->id . '">' . $projectSite->name . '</option> ';
+                }
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Projects',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
     }
 }
