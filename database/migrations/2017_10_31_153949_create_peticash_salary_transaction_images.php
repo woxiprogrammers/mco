@@ -15,8 +15,8 @@ class CreatePeticashSalaryTransactionImages extends Migration
     {
         Schema::create('peticash_salary_transaction_images', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('peticash_salary_transactions_id');
-            $table->foreign('peticash_salary_transactions_id')->references('id')->on('peticash_salary_transactions')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedInteger('peticash_salary_transaction_id');
+            $table->foreign('peticash_salary_transaction_id')->references('id')->on('peticash_salary_transactions')->onDelete('cascade')->onUpdate('cascade');
             $table->string('name');
             $table->timestamps();
         });
