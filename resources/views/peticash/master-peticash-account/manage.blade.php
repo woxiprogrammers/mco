@@ -32,10 +32,19 @@
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
                                             <div class="table-toolbar">
-                                                <div class="row" style="text-align: right">
-                                                    <div class="col-md-12">
+                                                <div class="row" style="text-align: center">
+                                                    <div class="col-md-4" style="background-color: #c2c2c2">
+                                                        Total Peticash Amount : {{$masteraccountAmount}}
+                                                    </div>
+                                                    <div class="col-md-3" style="background-color: #e2e2e2">
+                                                        Allocated Peticash : {{$sitewiseaccountAmount}}
+                                                    </div>
+                                                    <div class="col-md-3" style="background-color: #c2c2c2">
+                                                        Balance : {{$balance}}
+                                                    </div>
+                                                    <div class="col-md-2">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="create" style="color: white"> ADD
+                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ADD
                                                                     <!-- here we need to handle create transaction for master account-->
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>
@@ -47,19 +56,14 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="masterPeticashTable">
                                                 <thead>
                                                 <tr>
-                                                    <th style="width: 30%"> Name </th>
+                                                    <th> Transaction Id </th>
+                                                    <th> From </th>
+                                                    <th> To </th>
+                                                    <th> Amount </th>
                                                     <th> Type </th>
+                                                    <th style="width: 30%"> Remark </th>
                                                     <th> Created On </th>
-                                                </tr>
-                                                <tr class="filter">
-                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
-                                                    <th>
-                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                    </th>
-                                                </tr>
+                                                    <th> Status </th>
                                                 </thead>
                                                 <tbody>
 
