@@ -18,7 +18,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Add Amount to Master Peticash Account</h1>
+                                <h1>Edit Amount to Master Peticash Account</h1>
                             </div>
                         </div>
                     </div>
@@ -31,80 +31,87 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                                 <li>
-                                    <a href="javascript:void(0);">Add Amount to Master Peticash Account</a>
+                                    <a href="javascript:void(0);">Edit Amount to Master Peticash Account</a>
                                 </li>
                             </ul>
                             <div class="col-md-12">
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <form role="form" id="create-master-account" class="form-horizontal" method="post" action="/peticash/master-peticash-account/create">
+                                        <form role="form" id="edit-master-account" class="form-horizontal" method="post" action="/peticash/master-peticash-account/edit">
                                             {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <fieldset>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="type" class="control-label">Assign To</label>
-                                                            <span>*</span>
+                                                            <label for="type" class="control-label">Allocate From</label>
+                                                            <span>:</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="to_userid" name="to_userid">
-                                                                @foreach($users as $user)
-                                                                <option value="{{$user['id']}}">{{$user['name']}}</option>
-                                                                @endforeach
-                                                            </select>
+                                                            <label for="type" class="control-label">{{$from_id}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-
-                                                            <label for="name" class="control-label">Amount</label>
-                                                            <span>*</span>
+                                                            <label for="type" class="control-label">Allocate To</label>
+                                                            <span>:</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="amount" name="amount" required="required">
+                                                            <label for="type" class="control-label">{{$to_id}}</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="type" class="control-label">On Date</label>
+                                                            <span>:</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="type" class="control-label">{{$date}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="type" class="control-label">Payment Type</label>
-                                                            <span>*</span>
+                                                            <span>:</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="payment_type" name="payment_type">
-                                                                @foreach($paymenttypes as $type)
-                                                                    <option value="{{$type['id']}}">{{$type['name']}}</option>
-                                                                @endforeach
-                                                            </select>
+                                                            <label for="type" class="control-label">{{$payment_id}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-
-                                                            <label for="name" class="control-label">Remark</label>
-                                                            <span>*</span>
+                                                            <label for="type" class="control-label">Remark</label>
+                                                            <span>:</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="remark" name="remark" required="required">
+                                                            <label for="type" class="control-label">{{$remark}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-
-                                                            <label for="name" class="control-label">Transaction Date</label>
-                                                            <span>*</span>
+                                                            <label for="type" class="control-label">Amount</label>
+                                                            <span>:</span>
                                                         </div>
-                                                        <div class="col-md-3 date date-picker" data-date-end-date="0d">
-                                                            <input aria-describedby="date-error" aria-invalid="false" aria-required="true"  name="date" placeholder="Select Bill Date" id="date" type="text">
-                                                            <i>mm/dd/yyyy</i>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="amount" name="amount" value="{{$amount}}" required="required">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="type" class="control-label">Created On</label>
+                                                            <span>:</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="type" class="control-label">{{$created_on}}</label>
                                                         </div>
                                                     </div>
                                                 </fieldset>
                                             </div>
 
                                             <div class="form-group">
-                                                <div class="col-md-offset-8">
-                                                    <button type="submit" class="btn btn-success"> Submit </button>
+                                                <div class="col-md-offset-2">
+                                                    <input type="hidden" name="txn_id" id="txn_id" value="{{$txn_id}}">
+                                                    <button type="submit" class="btn btn-success"> Update </button>
                                                 </div>
                                             </div>
                                         </form>
@@ -126,9 +133,7 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
     $(document).ready(function() {
-        var date=new Date();
-        $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
-        AddAmtToAccount.init();
+        EditAmtToAccount.init();
     });
 </script>
 @endsection

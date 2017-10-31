@@ -366,6 +366,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
             Route::get('createpage',array('uses' => 'Peticash\PeticashController@getCreateViewForMasterPeticashAccount'));
             Route::post('create',array('uses' => 'Peticash\PeticashController@createMasterPeticashAccount'));
+            Route::get('editpage/{txnid}',array('uses' => 'Peticash\PeticashController@editViewMasterPeticashAccount'));
+            Route::post('edit',array('uses' => 'Peticash\PeticashController@editMasterPeticashAccount'));
             Route::post('listing',array('uses' => 'Peticash\PeticashController@masterAccountListing'));
         });
 
@@ -375,6 +377,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses' => 'Peticash\PeticashController@createSitewisePeticashAccount'));
             Route::post('listing',array('uses' => 'Peticash\PeticashController@sitewiseAccountListing'));
             Route::get('getuserlistbysite/{siteid}',array('uses' => 'Peticash\PeticashController@getUserBySites'));
+            Route::get('editpage/{txnid}',array('uses' => 'Peticash\PeticashController@editViewSitewisePeticashAccount'));
+            Route::post('edit',array('uses' => 'Peticash\PeticashController@editSitewisePeticashAccount'));
         });
 
         Route::group(['prefix' => 'peticash-approval-request'], function(){

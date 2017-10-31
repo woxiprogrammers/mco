@@ -108,6 +108,93 @@ class PeticashController extends Controller
         }
     }
 
+    public function editViewMasterPeticashAccount(Request $request, $txnid) {
+        try{
+            $accountData = array();
+            $txndetail = PeticashSiteTransfer::where('id','=',$txnid)->get()->toArray();
+            $data = array();
+            foreach ($txndetail as $txn) {
+                $data['from_id'] = User::findOrFail($txn['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($txn['received_from_user_id'])->toArray()['last_name'];
+                $data['to_id'] = User::findOrFail($txn['user_id'])->toArray()['first_name']." ".User::findOrFail($txn['user_id'])->toArray()['last_name'];
+                $data['amount'] = $txn['amount'];
+                $data['payment_id'] = PaymentType::findOrFail($txn['payment_id'])->toArray()['name'];
+                $data['date'] = $txn['date'];
+                $data['remark'] = $txn['remark'];
+                $data['created_on'] = $txn['created_at'];
+                $data['txn_id'] = $txn['id'];
+            }
+            return view('peticash/master-peticash-account/edit', $data);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Master Peticash Account',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editMasterPeticashAccount(Request $request) {
+        try{
+            PeticashSiteTransfer::where('id','=',$request->txn_id)->update(['amount' => $request->amount]);
+            $request->session()->flash('success', 'Amount Edited successfully.');
+            return redirect('peticash/master-peticash-account/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Master Peticash Account',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editViewSitewisePeticashAccount(Request $request, $txnid) {
+        try{
+            $accountData = array();
+            $txndetail = PeticashSiteTransfer::where('id','=',$txnid)->get()->toArray();
+            $data = array();
+            foreach ($txndetail as $txn) {
+                $data['from_id'] = User::findOrFail($txn['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($txn['received_from_user_id'])->toArray()['last_name'];
+                $data['to_id'] = User::findOrFail($txn['user_id'])->toArray()['first_name']." ".User::findOrFail($txn['user_id'])->toArray()['last_name'];
+                $data['amount'] = $txn['amount'];
+                $data['payment_id'] = PaymentType::findOrFail($txn['payment_id'])->toArray()['name'];
+                $data['date'] = $txn['date'];
+                $data['remark'] = $txn['remark'];
+                $data['created_on'] = $txn['created_at'];
+                $data['txn_id'] = $txn['id'];
+                $data['sitename'] = ProjectSite::findOrFail($txn['project_site_id'])->toArray()['name'];
+            }
+            return view('peticash/sitewise-peticash-account/edit', $data);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Master Peticash Account',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editSitewisePeticashAccount(Request $request) {
+        try{
+            PeticashSiteTransfer::where('id','=',$request->txn_id)->update(['amount' => $request->amount]);
+            $request->session()->flash('success', 'Amount Edited successfully.');
+            return redirect('peticash/sitewise-peticash-account/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Master Peticash Account',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function createSitewisePeticashAccount(Request $request) {
         try{
             $accountData = array();
@@ -217,7 +304,7 @@ class PeticashController extends Controller
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/peticash/master-peticash-account/edit/'.$masterAccountData[$pagination]['id'].'">
+                                <a href="/peticash/master-peticash-account/editpage/'.$masterAccountData[$pagination]['id'].'">
                                 <i class="icon-docs"></i> Edit </a>
                             </li>
                         </ul>
@@ -271,7 +358,7 @@ class PeticashController extends Controller
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/peticash/sitewise-peticash-account/edit/'.$sitewiseAccountData[$pagination]['id'].'">
+                                <a href="/peticash/sitewise-peticash-account/editpage/'.$sitewiseAccountData[$pagination]['id'].'">
                                 <i class="icon-docs"></i> Edit </a>
                             </li>
                         </ul>

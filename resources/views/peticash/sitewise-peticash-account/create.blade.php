@@ -38,7 +38,7 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
-                                        <form role="form" id="create-role" class="form-horizontal" method="post" action="/peticash/sitewise-peticash-account/create">
+                                        <form role="form" id="create-sitewise-account" class="form-horizontal" method="post" action="/peticash/sitewise-peticash-account/create">
                                             {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <fieldset>
@@ -139,6 +139,7 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
     $(document).ready(function() {
+        AddAmtToSitewiseAccount.init();
         var date=new Date();
         $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
 
