@@ -141,7 +141,26 @@
     $(document).ready(function() {
         var date=new Date();
         $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
-        AddAmtToSitewiseAccount.init();
+
+        $("#project_site_id").on('change', function(){
+            getProjects($('#project_site_id').val());
+        });
+
+        function getProjects(client_id){
+            $.ajax({
+                url: '/peticash/sitewise-peticash-account/getuserlistbysite/'+client_id,
+                type: 'GET',
+                async : false,
+                success: function(data,textStatus,xhr){
+                    if(xhr.status == 200){
+                        $('#to_userid').html(data);
+                    }
+                },
+                error: function(errorStatus,xhr){
+
+                }
+            });
+        }
     });
 </script>
 @endsection

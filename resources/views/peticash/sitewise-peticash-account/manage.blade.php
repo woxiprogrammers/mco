@@ -36,7 +36,6 @@
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
                                                             <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ALLOCATE
-                                                                    <!-- here we need to handle create transaction for master account-->
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>
                                                             </div>
@@ -61,7 +60,7 @@
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
-                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -72,15 +71,6 @@
                                                     </th>
 
                                                 </tr>
-                                                <!--<tr class="filter">
-                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
-                                                    <th>
-                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                    </th>
-                                                </tr>-->
                                                 </thead>
                                                 <tbody>
 
@@ -110,6 +100,9 @@
     $(document).ready(function() {
         sitewiseAccountListing.init();
         $('#sitewisePeticashTable').DataTable();
+        $("input[name='search_name']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
+        });
     });
 </script>
 @endsection

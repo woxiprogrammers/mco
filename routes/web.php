@@ -374,6 +374,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('createpage',array('uses' => 'Peticash\PeticashController@getCreateViewForSitewisePeticashAccount'));
             Route::post('create',array('uses' => 'Peticash\PeticashController@createSitewisePeticashAccount'));
             Route::post('listing',array('uses' => 'Peticash\PeticashController@sitewiseAccountListing'));
+            Route::get('getuserlistbysite/{siteid}',array('uses' => 'Peticash\PeticashController@getUserBySites'));
         });
 
         Route::group(['prefix' => 'peticash-approval-request'], function(){
