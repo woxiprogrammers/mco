@@ -35,8 +35,7 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="create" style="color: white"> ALLOCATE
-                                                                    <!-- here we need to handle create transaction for master account-->
+                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ALLOCATE
                                                                     <i class="fa fa-plus"></i>
                                                                 </a>
                                                             </div>
@@ -47,18 +46,30 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="sitewisePeticashTable">
                                                 <thead>
                                                 <tr>
-                                                    <th style="width: 30%"> Name </th>
+                                                    <th> Transaction Id </th>
+                                                    <th> From </th>
+                                                    <th> To </th>
+                                                    <th> Sitename </th>
+                                                    <th> Amount </th>
                                                     <th> Type </th>
+                                                    <th> Remark </th>
                                                     <th> Created On </th>
+                                                    <th> Status </th>
                                                 </tr>
                                                 <tr class="filter">
-                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
                                                     <th>
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                     </th>
+
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -89,6 +100,9 @@
     $(document).ready(function() {
         sitewiseAccountListing.init();
         $('#sitewisePeticashTable').DataTable();
+        $("input[name='search_name']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
+        });
     });
 </script>
 @endsection
