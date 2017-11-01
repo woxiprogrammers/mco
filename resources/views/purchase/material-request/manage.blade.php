@@ -188,6 +188,7 @@
             }
         });
     });
+
     function openApproveModal(componentId){
         $("#remarkModal #componentId").val(componentId);
         $("#remarkModal").modal('show');
@@ -199,7 +200,5 @@
         $(element).next('input[name="_token"]').val(token);
         $(element).closest('form').submit();
     }
-</script>
-<script>
 </script>
 @endsection

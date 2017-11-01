@@ -61,7 +61,7 @@ class PeticashController extends Controller
             $projectSiteUser = UserProjectSiteRelation::join('users','user_project_site_relation.user_id','=','users.id')
                 ->join('user_has_permissions','users.id','=','user_has_permissions.user_id')
                 ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
-                ->where('permissions.name','=','create-sitewise-account')
+                ->where('permissions.name','=','create-peticash-management')
                 ->where('user_project_site_relation.project_site_id',$siteid)
                 ->select('users.id','users.first_name as name')->get()->toArray();
             $projectOptions = array();
@@ -252,18 +252,86 @@ class PeticashController extends Controller
         }
     }
 
-    public function getManageViewPeticashApproval(Request $request){
+    public function getManageViewPeticashPurchaseApproval(Request $request){
         try{
-            return view('peticash.peticash-approval.manage');
+            return view('peticash.peticash-approval.manage-purchase');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get Peticash Request Approval view',
+                'action' => 'Get Peticash Request Purchase Approval view',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getManageViewPeticashSalaryApproval(Request $request){
+        try{
+            return view('peticash.peticash-approval.manage-salary');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Peticash Request Salary Approval view',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function purchaseApprovalListing(Request $request){
+        try{
+            $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get()->toArray();;
+            // Here We are considering (project_site_id = 0) => It's Master Peticash Account
+            $iTotalRecords = count($masterAccountData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($masterAccountData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($masterAccountData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $masterAccountData[$pagination]['id'],
+                    User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
+                    User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['last_name'],
+                    $masterAccountData[$pagination]['amount'],
+                    PaymentType::findOrFail($masterAccountData[$pagination]['payment_id'])->toArray()['name'],
+                    $masterAccountData[$pagination]['remark'],
+                    $masterAccountData[$pagination]['amount'],
+                    date('d M Y',strtotime($masterAccountData[$pagination]['date'])),
+                    '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a onclick="openEditRequestApprovalModal('.$masterAccountData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <i class="icon-docs"></i> Edit
+                                </a>
+                            </li>
+                            <li>
+                                <a onclick="openApproveModal('.$masterAccountData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <i class="icon-tag"></i> Approve / Disapprove
+                                </a>
+                            </li>
+                        </ul>
+                    </div>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Master Account Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records);
     }
 
     public function getManageViewPeticashManagement(Request $request){

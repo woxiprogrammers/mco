@@ -306,10 +306,22 @@
                                     <i class="fa fa-sitemap"></i> Sitewise Peticash Account
                                 </a>
                             </li>
-                            <li aria-haspopup="true">
-                                <a href="/peticash/peticash-approval-request/manage" class="nav-link nav-toggle ">
+                            <li aria-haspopup="true"  class="dropdown-submenu">
+                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
                                     <i class="fa fa-check"></i> Peticash Request Approval
                                 </a>
+                                <ul class="dropdown-menu pull-left">
+                                    <li aria-haspopup="true">
+                                        <a href="/peticash/peticash-approval-request/manage-purchase-list" class="nav-link nav-toggle ">
+                                            <i class="fa fa-sitemap"></i> Purchase Request
+                                        </a>
+                                    </li>
+                                    <li aria-haspopup="true">
+                                        <a href="/peticash/peticash-approval-request/manage-salary-list" class="nav-link nav-toggle ">
+                                            <i class="fa fa-bars"></i> Salary Request
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/peticash/peticash-management/manage" class="nav-link nav-toggle ">

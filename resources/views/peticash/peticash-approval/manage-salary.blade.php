@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Peticash Request Approval')
+@section('title','Constro | Peticash Request Salary Approval')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -19,7 +19,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Peticash Request Approval</h1>
+                                <h1>Peticash Request Salary Approval</h1>
                             </div>
                         </div>
                     </div>

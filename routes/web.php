@@ -382,7 +382,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
 
         Route::group(['prefix' => 'peticash-approval-request'], function(){
-            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashApproval'));
+            Route::get('manage-purchase-list',array('uses' => 'Peticash\PeticashController@getManageViewPeticashPurchaseApproval'));
+            Route::get('manage-salary-list',array('uses' => 'Peticash\PeticashController@getManageViewPeticashSalaryApproval'));
+            Route::post('manage-purchase-list-ajax',array('uses' => 'Peticash\PeticashController@purchaseApprovalListing'));
         });
 
         Route::group(['prefix' => 'peticash-management'], function(){

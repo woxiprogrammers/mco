@@ -159,7 +159,7 @@ var sitewiseAccountListing = function () {
 
 }();
 
-var peticashApprovalListing = function () {
+var peticashPurchaseApprovalListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
@@ -185,7 +185,7 @@ var peticashApprovalListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/role/listing", // ajax source
+                    "url": "/peticash/peticash-approval-request/manage-purchase-list-ajax" // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -261,7 +261,7 @@ var peticashManagementListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/role/listing", // ajax source
+                    "url": "/role/listing" // ajax source
                 },
                 "order": [
                     [1, "asc"]
