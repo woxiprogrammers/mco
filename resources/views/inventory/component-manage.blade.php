@@ -1,8 +1,12 @@
 @extends('layout.master')
 @section('title','Constro | Manage Materials')
-@include('partials.common.navbar')
+@section('nav-bar')
+    @include('partials.common.navbar')
+@endsection
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
@@ -42,36 +46,82 @@
                                         <!-- BEGIN VALIDATION STATES-->
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <div class="pull-right">
-                                                    <div class="form-group " style="text-align: center">
-                                                        <a href="javascript:void(0);" class="btn yellow" id="stockButton" >
-                                                            Opening Stock
-                                                        </a>
-                                                        <a href="javascript:void(0);" class="btn yellow" style="margin: 20px" id="transaction">
-                                                            <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
-                                                            Transaction
-                                                        </a>
-                                                    </div>
-                                                </div>
                                                 <div class="portlet light ">
                                                     <div class="portlet-body form">
                                                         <div class="portlet light ">
-                                                            <div class="portlet-body">
-                                                                <div class="table-scrollable">
-                                                                    <table class="table table-striped table-bordered table-hover order-column" id="inventoryComponentListingTable">
-                                                                        <thead>
-                                                                        <tr>
-                                                                            <th> GRN </th>
-                                                                            <th> Quantity </th>
-                                                                            <th> Unit </th>
-                                                                            <th> Status </th>
-                                                                            <th> Action </th>
-                                                                        </tr>
-                                                                        </thead>
-                                                                        <tbody>
+                                                            <ul class="nav nav-tabs nav-tabs-lg">
+                                                                <li class="active">
+                                                                    <a href="#transferTab" data-toggle="tab"> Transfers </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="#readingTab" data-toggle="tab"> Readings </a>
+                                                                </li>
+                                                            </ul>
+                                                            <div class="tab-content">
+                                                                <div id="transferTab" class="tab-pane fade in active">
+                                                                    <div class="pull-right">
+                                                                        <div class="form-group " style="text-align: center">
+                                                                            <a href="javascript:void(0);" class="btn yellow" id="stockButton" >
+                                                                                Opening Stock
+                                                                            </a>
+                                                                            <a href="javascript:void(0);" class="btn yellow" style="margin: 20px" id="transaction">
+                                                                                <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                                                                Transaction
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="portlet-body">
+                                                                        <div class="table-scrollable">
+                                                                            <table class="table table-striped table-bordered table-hover order-column" id="inventoryComponentListingTable">
+                                                                                <thead>
+                                                                                <tr>
+                                                                                    <th> GRN </th>
+                                                                                    <th> Quantity </th>
+                                                                                    <th> Unit </th>
+                                                                                    <th> Status </th>
+                                                                                    <th> Action </th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody>
 
-                                                                        </tbody>
-                                                                    </table>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div id="readingTab" class="tab-pane fade">
+                                                                    <div class="pull-right">
+                                                                        <div class="form-group " style="text-align: center">
+                                                                            <a href="javascript:void(0);" class="btn yellow" id="readingButton" >
+                                                                                <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                                                                Reading
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="portlet-body">
+                                                                        <div class="table-scrollable">
+                                                                            <table class="table table-striped table-bordered table-hover order-column" id="inventoryFuelReadingListings">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th> Start Reading </th>
+                                                                                        <th> End Reading </th>
+                                                                                        <th> Start Time </th>
+                                                                                        <th> End Time </th>
+                                                                                        <th> Units Used </th>
+                                                                                        <th> Litre Per Unit </th>
+                                                                                        <th> Electricity Per Unit </th>
+                                                                                        <th> Fuel Consumed </th>
+                                                                                        <th> Electricity Consumed </th>
+                                                                                        <th> Top Up </th>
+                                                                                        <th> Top Time </th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -80,6 +130,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
                                 <div class="modal fade" id="transactionModal" role="dialog">
                                     <div class="modal-dialog">
                                         <!-- Modal content-->
@@ -368,7 +419,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="modal fade" id="openingStockModel" role="dialog">
                                     <div class="modal-dialog">
                                         <!-- Modal content-->
@@ -439,6 +489,7 @@
     <script src="/assets/custom/inventory/component-manage-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/image-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/image-upload.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
             InventoryComponentListing.init();
