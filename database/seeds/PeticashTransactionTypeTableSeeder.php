@@ -50,7 +50,7 @@ class PeticashTransactionTypeTableSeeder extends Seeder
             ],
             [
                 'name' => 'Advance',
-                'slug' => 'Advance',
+                'slug' => 'advance',
                 'type' => 'PAYMENT',
                 'created_at' => $now,
                 'updated_at' => $now,

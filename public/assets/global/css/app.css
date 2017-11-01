@@ -1,9 +1,3 @@
-body {
-  background-color: red;
-  text-align: center;
-  font-size: 10px;
-  font-weight: bolder;
-}
 .modal-header, h4, .close {
   background-color: #affff7;
   color:black !important;
@@ -53,7 +47,7 @@ body {
 }
 body{
   margin-top: 100px;
-  font-family: 'Trebuchet MS', serif;
+  /*font-family: 'Trebuchet MS', serif;*/
   line-height: 1.6
 }
 .container{
