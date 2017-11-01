@@ -1,3 +1,12 @@
+$.validator.addMethod(
+    "customDate",
+    function(value, element) {
+        // put your own logic here, this is just a (crappy) example
+        return value.match(/^\d\d?\/\d\d?\/\d\d\d\d$/);
+    },
+    "Please enter a date in the format dd/mm/yyyy."
+);
+
 var masterAccountListing = function () {
     var handleOrders = function () {
 
@@ -24,7 +33,7 @@ var masterAccountListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/role/listing", // ajax source
+                    "url": "/peticash/master-peticash-account/listing", // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -100,7 +109,7 @@ var sitewiseAccountListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/role/listing", // ajax source
+                    "url": "/peticash/sitewise-peticash-account/listing", // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -305,7 +314,7 @@ var peticashManagementListing = function () {
 
 var  AddAmtToAccount = function () {
     var handleCreate = function() {
-        var form = $('#create-role');
+        var form = $('#create-master-account');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -313,27 +322,24 @@ var  AddAmtToAccount = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                name: {
+                amount: {
                     required: true,
-                    remote: {
-                        url: "#",
-                        type: "POST",
-                        data: {
-                            _token: function(){
-                                return $("input[name='_token']").val();
-                            },
-                            name: function() {
-                                return $( "#name" ).val();
-                            }
-                        }
-                    }
+                    number:true
+                },
+                remark: {
+                    required: true
+                },
+                date : {
+                    customDate : true
                 }
             },
-
             messages: {
-                name: {
-                    required: "Name is required.",
-                    remote: "Name already exists."
+                amount: {
+                    required: "Please enter valid amount.",
+                    number: "Please enter valid amount."
+                },
+                remark: {
+                    required: "Remark field should not be empty."
                 }
             },
 
@@ -369,16 +375,72 @@ var  AddAmtToAccount = function () {
     return {
         init: function () {
             handleCreate();
-            alert("validation will work here : JS Code");
+        }
+    };
+}();
+
+var  EditAmtToAccount = function () {
+    var handleCreate = function() {
+        var form = $('#edit-master-account');
+        var error = $('.alert-danger', form);
+        var success = $('.alert-success', form);
+        form.validate({
+            errorElement: 'span', //default input error message container
+            errorClass: 'help-block', // default input error message class
+            focusInvalid: false, // do not focus the last invalid input
+            rules: {
+                amount: {
+                    required: true,
+                    number:true
+                }
+            },
+            messages: {
+                amount: {
+                    required: "Please enter valid amount.",
+                    number: "Please enter valid amount."
+                }
+            },
+
+            invalidHandler: function (event, validator) { //display error alert on form submit
+                success.hide();
+                error.show();
+            },
+
+            highlight: function (element) { // hightlight error inputs
+                $(element)
+                    .closest('.form-group').addClass('has-error'); // set error class to the control group
+            },
+
+            unhighlight: function (element) { // revert the change done by hightlight
+                $(element)
+                    .closest('.form-group').removeClass('has-error'); // set error class to the control group
+            },
+
+            success: function (label) {
+                label
+                    .closest('.form-group').addClass('has-success');
+            },
+
+            submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
+                success.show();
+                error.hide();
+                form.submit();
+            }
+        });
+    }
+
+    return {
+        init: function () {
+            handleCreate();
         }
     };
 }();
 
 
-
 var  AddAmtToSitewiseAccount = function () {
     var handleCreate = function() {
-        var form = $('#create-role');
+        var form = $('#create-sitewise-account');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -386,27 +448,27 @@ var  AddAmtToSitewiseAccount = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                name: {
+                amount: {
                     required: true,
-                    remote: {
-                        url: "#",
-                        type: "POST",
-                        data: {
-                            _token: function(){
-                                return $("input[name='_token']").val();
-                            },
-                            name: function() {
-                                return $( "#name" ).val();
-                            }
-                        }
-                    }
+                    number:true
+                },
+                remark: {
+                    required: true
+                },
+                to_userid : {
+                    required: true
+                },
+                date : {
+                    customDate : true
                 }
             },
-
             messages: {
-                name: {
-                    required: "Name is required.",
-                    remote: "Name already exists."
+                amount: {
+                    required: "Please enter valid amount.",
+                    number: "Please enter valid amount."
+                },
+                remark: {
+                    required: "Remark field should not be empty."
                 }
             },
 
@@ -442,7 +504,64 @@ var  AddAmtToSitewiseAccount = function () {
     return {
         init: function () {
             handleCreate();
-            alert("validation will work here : JS Code");
+        }
+    };
+}();
+
+var  EditAmtSitewiseToAccount = function () {
+    var handleCreate = function() {
+        var form = $('#edit-sitewise-account');
+        var error = $('.alert-danger', form);
+        var success = $('.alert-success', form);
+        form.validate({
+            errorElement: 'span', //default input error message container
+            errorClass: 'help-block', // default input error message class
+            focusInvalid: false, // do not focus the last invalid input
+            rules: {
+                amount: {
+                    required: true,
+                    number:true
+                }
+            },
+            messages: {
+                amount: {
+                    required: "Please enter valid amount.",
+                    number: "Please enter valid amount."
+                }
+            },
+
+            invalidHandler: function (event, validator) { //display error alert on form submit
+                success.hide();
+                error.show();
+            },
+
+            highlight: function (element) { // hightlight error inputs
+                $(element)
+                    .closest('.form-group').addClass('has-error'); // set error class to the control group
+            },
+
+            unhighlight: function (element) { // revert the change done by hightlight
+                $(element)
+                    .closest('.form-group').removeClass('has-error'); // set error class to the control group
+            },
+
+            success: function (label) {
+                label
+                    .closest('.form-group').addClass('has-success');
+            },
+
+            submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
+                success.show();
+                error.hide();
+                form.submit();
+            }
+        });
+    }
+
+    return {
+        init: function () {
+            handleCreate();
         }
     };
 }();
