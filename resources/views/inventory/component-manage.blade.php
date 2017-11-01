@@ -329,7 +329,7 @@
                                                 </div>
                                                 <div id="site_form" hidden>
                                                     <div class="form-group">
-                                                        <select id="clientSelect" class="form-control">
+                                                        <select class="form-control clientSelect" onchange="clientChange(this)">
                                                             <option value="">--Select Client Name--</option>
                                                             @foreach($clients as $client)
                                                                 <option value="{{$client['id']}}">{{$client['name']}}</option>
@@ -337,12 +337,12 @@
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <select id="projectSelect" class="form-control">
+                                                        <select class="form-control projectSelect" onchange="projectChange(this)">
                                                             <option value="">--Select Project Name--</option>
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <select id="projectSiteSelect" name="project_site_id" class="form-control">
+                                                        <select name="project_site_id" class="form-control projectSiteSelect">
                                                             <option value="">--Select Project Site Name--</option>
                                                         </select>
                                                     </div>
@@ -361,9 +361,7 @@
                                                         <input type="date" name="date" id="date" class="form-control" placeholder="Enter Date">
                                                     </div>
                                                     <div class="form-group">
-                                                        <textarea name="remark" class="form-control" id="remark" placeholder="Remark...">
-
-                                                        </textarea>
+                                                        <textarea name="remark" class="form-control" id="remark" placeholder="Remark..."></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -475,42 +473,42 @@
                 changeType();
             });
 
-            $("#clientSelect").on('change', function(){
-                var clientId = $(this).val();
-                if(clientId == ""){
-                    $('#projectId').prop('disabled', false);
-                    $('#projectId').html('');
-                    $('#projectSiteId').prop('disabled', false);
-                    $('#projectSiteId').html('');
-                }else{
-                    $.ajax({
-                        url: '/quotation/get-projects',
-                        type: 'POST',
-                        async: true,
-                        data: {
-                            _token: $("input[name='_token']").val(),
-                            client_id: clientId
-                        },
-                        success: function(data,textStatus,xhr){
-                            $('#projectSelect').html(data);
-                            $('#projectSelect').prop('disabled', false);
-                            var projectId = $("#projectId").val();
-                            getProjectSites(projectId);
-                        },
-                        error: function(){
 
-                        }
-                    });
-                }
-
-            });
-
-            $("#projectSelect").on('change', function(){
-                var projectId = $(this).val();
-                getProjectSites(projectId);
-            });
         });
+        function clientChange(element){
+            var clientId = $(element).val();
+            if(clientId == ""){
+                $('#dynamicForm .projectSelect').prop('disabled', false);
+                $('#dynamicForm .projectSelect').html('');
+                $('#dynamicForm .projectSiteSelect').prop('disabled', false);
+                $('#dynamicForm .projectSiteSelect').html('');
+            }else{
+                $.ajax({
+                    url: '/quotation/get-projects',
+                    type: 'POST',
+                    async: true,
+                    data: {
+                        _token: $("input[name='_token']").val(),
+                        client_id: clientId
+                    },
+                    success: function(data,textStatus,xhr){
+                        $('#dynamicForm .projectSelect').html(data);
+                        $('#dynamicForm .projectSelect').prop('disabled', false);
+                        var projectId = $("#dynamicForm .projectId").val();
+                        getProjectSites(projectId);
+                    },
+                    error: function(){
 
+                    }
+                });
+            }
+
+        };
+
+        function projectChange(element){
+            var projectId = $(element).val();
+            getProjectSites(projectId);
+        };
         function getProjectSites(projectId){
             $.ajax({
                 url: '/inventory/get-project-sites',
@@ -522,11 +520,11 @@
                 },
                 success: function(data,textStatus,xhr){
                     if(data.length > 0){
-                        $('#projectSiteSelect').html(data);
-                        $('#projectSiteSelect').prop('disabled', false);
+                        $('#dynamicForm .projectSiteSelect').html(data);
+                        $('#dynamicForm .projectSiteSelect').prop('disabled', false);
                     }else{
-                        $('#projectSiteSelect').html("");
-                        $('#projectSiteSelect').prop('disabled', false);
+                        $('#dynamicForm .projectSiteSelect').html("");
+                        $('#dynamicForm .projectSiteSelect').prop('disabled', false);
                     }
                 },
                 error: function(){
@@ -588,10 +586,10 @@
                 $("#dynamicForm").html($('#labour_form').clone().show(500));
                 $("#inOutSubmit").show();
             }else if($(this).val() == 'sub-contractor'){
-                $("#dynamicForm").html($('#subcontractor_form').clone().show(500));
+                $("#dynamicForm").html($('#subcontractor_form').clone().removeAttr('hidden').show(500));
                 $("#inOutSubmit").show();
             }else if($(this).val() == 'site'){
-                $("#dynamicForm").html($('#site_form').clone().show(500));
+                $("#dynamicForm").html($('#site_form').clone().removeAttr('hidden').show(500));
                 $("#inOutSubmit").show();
             }else if($(this).val() == 'maintenance'){
                 $("#dynamicForm").html($('#maintenance_form').clone().show(500));

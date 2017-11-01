@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Client;
+use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
@@ -38,11 +39,25 @@ class InventoryManageController extends Controller
 
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
-            $clients = Client::join('projects','projects.client_id','=','clients.id')
-                            ->join('project_sites','project_sites.project_id','=','projects.id')
-                            ->join('quotations','quotations.project_site_id','=','project_sites.id')
-                            ->select('clients.company as name','clients.id as id')
-                            ->get();
+            $user = Auth::user();
+            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
+                $clients = Client::join('projects','projects.client_id','=','clients.id')
+                    ->join('project_sites','project_sites.project_id','=','projects.id')
+                    ->join('quotations','quotations.project_site_id','=','project_sites.id')
+                    ->select('clients.company as name','clients.id as id')
+                    ->distinct('name')
+                    ->get();
+            }else{
+                $clients = Client::join('projects','projects.client_id','=','clients.id')
+                    ->join('project_sites','project_sites.project_id','=','projects.id')
+                    ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','project_sites.id')
+                    ->join('quotations','quotations.project_site_id','=','project_sites.id')
+                    ->where('user_project_site_relation.user_id',$user->id)
+                    ->select('clients.company as name','clients.id as id')
+                    ->distinct('name')
+                    ->get();
+            }
+
             if($inventoryComponent->is_material == true){
                 $materialInfo = Material::where('name','ilike',$inventoryComponent->name)->first();
                 if($materialInfo != null){
@@ -137,7 +152,7 @@ class InventoryManageController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryComponentTransfers) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentTransfers); $iterator++,$pagination++ ){
-                if(strcasecmp( 'IN',$inventoryComponentTransfers[$pagination]->transferType->type)){
+                if($inventoryComponentTransfers[$pagination]->transferType->type == 'IN'){
                     $transferStatus = 'IN - From '.$inventoryComponentTransfers[$pagination]->transferType->name;
                 }else{
                     $transferStatus = 'OUT - To '.$inventoryComponentTransfers[$pagination]->transferType->name;
@@ -262,39 +277,32 @@ class InventoryManageController extends Controller
         }
     }
 
+    use InventoryTrait;
     public function addComponentTransfer(Request $request,$inventoryComponent){
         try{
-            $data = $request->except(['_token','work_order_images','transfer_type','in_or_out']);
+            $data = $request->except(['_token','work_order_images','project_site_id']);
             $data['inventory_component_id'] = $inventoryComponent->id;
-            if($request->has('in_or_out')){
-                $data['transfer_type_id'] = InventoryTransferTypes::where('type','ilike','IN')->where('slug',$request->transfer_type)->pluck('id')->first();
-            }else{
-                $data['transfer_type_id'] = InventoryTransferTypes::where('type','ilike','OUT')->where('slug',$request->transfer_type)->pluck('id')->first();
-            }
-            $currentYearMonthStartFormat = date('Y-m').'-01 00:00:00';
-            $currentYearMonthEndFormat = date('Y-m-t',strtotime($currentYearMonthStartFormat)).' 23:59:59';
-            $count = InventoryComponentTransfers::where('created_at','>=',$currentYearMonthStartFormat)
-                                    ->where('created_at','<=',$currentYearMonthEndFormat)
-                                    ->count();
-            $data['grn'] = "GRN".date('Ym').($count+1);
-            $inventoryComponentTransfer = InventoryComponentTransfers::create($data);
+            $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
             if($request->has('work_order_images')){
-                $imageUploadPath = public_path().env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
-                $inventoryComponentDirectoryName = sha1($inventoryComponent->id);
-                $inventoryComponentTransferDirectoryName = sha1($inventoryComponentTransfer->id);
-                $newImageUploadDirectoryPath = $imageUploadPath.DIRECTORY_SEPARATOR.$inventoryComponentDirectoryName.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$inventoryComponentTransferDirectoryName;
-                if(!file_exists($newImageUploadDirectoryPath)){
-                    File::makeDirectory($newImageUploadDirectoryPath,$mode = 0777, true, true);
-                }
-                foreach ($request->work_order_images as $imagePath){
-                    $imagePathChunks = explode('/',$imagePath['image_name']);
-                    $fileName = end($imagePathChunks);
-                    $inventoryComponentTransferImageData = [
-                        'inventory_component_transfer_id' => $inventoryComponentTransfer->id,
-                        'name' => $fileName
+                $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
+            }
+            if($request->has('project_site_id') && $request->transfer_type =='site'){
+                $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($inventoryComponent->name))->first();
+                if($newInventoryComponent == null){
+                    $inventoryComponentData = [
+                        'name' => $inventoryComponent->name,
+                        'project_site_id' => $request->project_site_id,
+                        'is_material' => $inventoryComponent->is_material,
+                        'reference_id' => $inventoryComponent->reference_id,
+                        'opening_stock' => 0
                     ];
-                    File::move(public_path().$imagePath['image_name'],$newImageUploadDirectoryPath.DIRECTORY_SEPARATOR.$fileName);
-                    InventoryComponentTransferImage::create($inventoryComponentTransferImageData);
+                    $newInventoryComponent = InventoryComponent::create($inventoryComponentData);
+                }
+                $data['inventory_component_id'] = $newInventoryComponent->id;
+                $data['transfer_type_id'] = InventoryTransferTypes::where('type','ilike','IN')->where('name','ilike','office')->pluck('id')->first();
+                $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
+                if($request->has('work_order_images')){
+                    $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
                 }
             }
             $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
