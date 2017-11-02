@@ -109,7 +109,6 @@ class AssetManagementController extends Controller
     public function editAsset(Request $request,$asset){
         try{
             $data = $request->all();
-            dd($data);
             $assetData['name'] = ucwords(trim($data['name']));
             $assetData['model_number'] = $data['model_number'];
             $assetData['expiry_date'] = $data['expiry_date'];
