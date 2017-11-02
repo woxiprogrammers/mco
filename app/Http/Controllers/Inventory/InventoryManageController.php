@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Client;
+use App\FuelAssetReading;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
@@ -13,6 +14,7 @@ use App\ProjectSite;
 use App\Quotation;
 use App\Unit;
 use App\UnitConversion;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -366,5 +368,67 @@ class InventoryManageController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($response,$status);
+    }
+
+    public function inventoryComponentReadingListing(Request $request,$inventoryComponent){
+        try{
+            $status = 200;
+            $inventoryComponentFuelReadingData = FuelAssetReading::where('inventory_component_id',$inventoryComponent->id)->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($inventoryComponentFuelReadingData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($inventoryComponentFuelReadingData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentFuelReadingData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $inventoryComponentFuelReadingData[$pagination]->start_reading,
+                    $inventoryComponentFuelReadingData[$pagination]->stop_reading,
+                    $inventoryComponentFuelReadingData[$pagination]->start_time,
+                    $inventoryComponentFuelReadingData[$pagination]->stop_time,
+                    '',
+                    $inventoryComponentFuelReadingData[$pagination]->fuel_per_unit,
+                    $inventoryComponentFuelReadingData[$pagination]->electricity_per_unit,
+                    '',
+                    '',
+                    $inventoryComponentFuelReadingData[$pagination]->top_up,
+                    $inventoryComponentFuelReadingData[$pagination]->top_up_time,
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory component Fuel reading listing',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $records = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($records,$status);
+    }
+
+    public function addInventoryComponentReading(Request $request,$inventoryComponent){
+        try{
+            $data = $request->except(['_token']);
+            dd($data);
+            $startTime = Carbon::parse($data['start_time']);
+            dd($startTime);
+            $user = Auth::user();
+            $data['inventory_component_id'] = $inventoryComponent->id;
+            $data['user_id'] = $user->id;
+            $inventoryComponentReading = FuelAssetReading::create($data);
+            $request->session()->flash('success','Asset Reading saved successfully.');
+            return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add Inventory component asset Reading',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }

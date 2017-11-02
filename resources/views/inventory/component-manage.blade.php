@@ -92,7 +92,7 @@
                                                                 <div id="readingTab" class="tab-pane fade">
                                                                     <div class="pull-right">
                                                                         <div class="form-group " style="text-align: center">
-                                                                            <a href="javascript:void(0);" class="btn yellow" id="readingButton" >
+                                                                            <a href="#readingFormModel" class="btn yellow" id="readingButton" data-toggle="modal">
                                                                                 <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
                                                                                 Reading
                                                                             </a>
@@ -462,6 +462,148 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="modal fade" id="readingFormModel" role="dialog">
+                                    <div class="modal-dialog">
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header" style="padding-bottom:10px">
+                                                <div class="row">
+                                                    <div class="col-md-7 col-md-offset-2"> Readings </div>
+                                                    <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                </div>
+                                            </div>
+                                            <form action="/inventory/component/readings/add/{{$inventoryComponent->id}}" method="POST">
+                                                {!! csrf_field() !!}
+                                                <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <label class="control-label pull-right">
+                                                                    Start Time :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="input-group date form_datetime form_datetime bs-datetime" data-date-format="yyyy-mm-dd hh:ii">
+                                                                    <input type="text" size="16" class="form-control" name="start_time" id="startTime">
+                                                                    <span class="input-group-addon">
+                                                                <button class="btn default date-set" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+                                                            </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <label class="control-label pull-right">
+                                                                    Start Reading :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" name="start_reading" id="startReading">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <label class="control-label pull-right">
+                                                                    Stop Time :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="input-group date form_datetime form_datetime bs-datetime"  data-date-format="yyyy-mm-dd hh:ii">
+                                                                    <input type="text" size="16" class="form-control" name="stop_time" id="stopTime">
+                                                                    <span class="input-group-addon">
+                                                                <button class="btn default date-set" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+                                                            </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <label class="control-label pull-right">
+                                                                    Stop Reading :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" name="stop_reading" id="stopReading">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <label class="control-label pull-right">
+                                                                    Top-up :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" name="top_up" id="topUp">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <label class="control-label pull-right">
+                                                                    Top-up Time :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="input-group date form_datetime form_datetime bs-datetime">
+                                                                    <input type="text" size="16" class="form-control" name="top_up_time" id="topUpTime">
+                                                                    <span class="input-group-addon">
+                                                                <button class="btn default date-set" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+                                                            </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <label class="control-label pull-right">
+                                                                    Electricity Per Unit :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" name="electricity_per_unit" id="electricityPerUnit">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <label class="control-label pull-right">
+                                                                    Fuel Per Unit :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" name="fuel_per_unit" id="fuelPerUnit">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" style="margin-top: 2%;">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3 col-md-offset-4">
+                                                                <button type="submit" class="btn red"> Submit </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -487,6 +629,7 @@
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/component-manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/inventory/component-reading-manage-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/image-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/image-upload.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
