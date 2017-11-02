@@ -275,12 +275,21 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
 
     Route::group(['prefix' => 'inventory'], function(){
-        Route::group(['prefix' => 'manage-inventory'], function(){
-            Route::get('manage',array('uses'=> 'Inventory\InventoryManageController@getManageView'));
-            Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
-            Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
+        Route::get('manage',array('uses'=> 'Inventory\InventoryManageController@getManageView'));
+        Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@inventoryListing'));
+        Route::post('get-project-sites',array('uses'=> 'Inventory\InventoryManageController@getProjectSites'));
+       /* Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
+        Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));*/
+        Route::group(['prefix' => 'component'], function(){
+            Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentListing'));
+            Route::get('manage/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@getComponentManageView'));
+            Route::post('add-transfer/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@addComponentTransfer'));
+            Route::post('image-upload/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@uploadTempImages'));
+            Route::post('display-images/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@displayTempImages'));
+            Route::post('delete-temp-inventory-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
+            Route::post('edit-opening-stock',['uses' => 'Inventory\InventoryManageController@editOpeningStock']);
+            Route::get('detail/{inventoryComponentTransfer}',['uses' => 'Inventory\InventoryManageController@getInventoryComponentTransferDetail']);
         });
-
     });
 
     Route::group(['prefix' => 'vendors'],function(){
@@ -359,5 +368,35 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
        Route::get('change-status/{labour}', array('uses' => 'Labour\LabourController@changeLabourStatus'));
        Route::get('edit/{labour}', array('uses' => 'Labour\LabourController@getEditView'));
        Route::post('edit/{labour}', array('uses' => 'Labour\LabourController@editLabour'));
+    });
+
+    Route::group(['prefix'=>'peticash'],function (){
+        Route::group(['prefix' => 'master-peticash-account'], function(){
+            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
+            Route::get('createpage',array('uses' => 'Peticash\PeticashController@getCreateViewForMasterPeticashAccount'));
+            Route::post('create',array('uses' => 'Peticash\PeticashController@createMasterPeticashAccount'));
+            Route::get('editpage/{txnid}',array('uses' => 'Peticash\PeticashController@editViewMasterPeticashAccount'));
+            Route::post('edit',array('uses' => 'Peticash\PeticashController@editMasterPeticashAccount'));
+            Route::post('listing',array('uses' => 'Peticash\PeticashController@masterAccountListing'));
+        });
+
+        Route::group(['prefix' => 'sitewise-peticash-account'], function(){
+            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForSitewisePeticashAccount'));
+            Route::get('createpage',array('uses' => 'Peticash\PeticashController@getCreateViewForSitewisePeticashAccount'));
+            Route::post('create',array('uses' => 'Peticash\PeticashController@createSitewisePeticashAccount'));
+            Route::post('listing',array('uses' => 'Peticash\PeticashController@sitewiseAccountListing'));
+            Route::get('getuserlistbysite/{siteid}',array('uses' => 'Peticash\PeticashController@getUserBySites'));
+            Route::get('editpage/{txnid}',array('uses' => 'Peticash\PeticashController@editViewSitewisePeticashAccount'));
+            Route::post('edit',array('uses' => 'Peticash\PeticashController@editSitewisePeticashAccount'));
+        });
+
+        Route::group(['prefix' => 'peticash-approval-request'], function(){
+            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashApproval'));
+        });
+
+        Route::group(['prefix' => 'peticash-management'], function(){
+            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+        });
+
     });
 });
