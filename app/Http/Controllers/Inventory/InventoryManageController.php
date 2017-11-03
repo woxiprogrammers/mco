@@ -42,6 +42,15 @@ class InventoryManageController extends Controller
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
             $user = Auth::user();
+            if($inventoryComponent->is_material == true){
+                $isReadingApplicable = false;
+            }else{
+                if($inventoryComponent->asset->assetTypes->slug != 'other'){
+                    $isReadingApplicable = true;
+                }else{
+                    $isReadingApplicable = false;
+                }
+            }
             if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
                 $clients = Client::join('projects','projects.client_id','=','clients.id')
                     ->join('project_sites','project_sites.project_id','=','projects.id')
@@ -59,7 +68,6 @@ class InventoryManageController extends Controller
                     ->distinct('name')
                     ->get();
             }
-
             if($inventoryComponent->is_material == true){
                 $materialInfo = Material::where('name','ilike',$inventoryComponent->name)->first();
                 if($materialInfo != null){
@@ -82,7 +90,7 @@ class InventoryManageController extends Controller
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients'));
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -412,9 +420,11 @@ class InventoryManageController extends Controller
     public function addInventoryComponentReading(Request $request,$inventoryComponent){
         try{
             $data = $request->except(['_token']);
-            dd($data);
-            $startTime = Carbon::parse($data['start_time']);
-            dd($startTime);
+            $data['start_time'] = Carbon::createFromFormat('d F Y - H:i',$data['start_time']);
+            $data['stop_time'] = Carbon::createFromFormat('d F Y - H:i',$data['stop_time']);
+            if(array_key_exists('top_up_time',$data)){
+                $data['top_up_time'] = Carbon::createFromFormat('d F Y - H:i',$data['top_up_time']);
+            }
             $user = Auth::user();
             $data['inventory_component_id'] = $inventoryComponent->id;
             $data['user_id'] = $user->id;
