@@ -23,11 +23,11 @@
                             </div>
                             <div class="btn-group" style="float: right;margin-top:1%">
                                 <div id="sample_editable_1_new" class="btn yellow" >
-                                    <a id="changeStatusButton" style="color: white"> Bulk Approve</a>
+                                    <a id="statusBtn" style="color: white"> Bulk Approve/Disapprove</a>
                                 </div>
-                                <div id="sample_editable_1_new" class="btn red" >
+                                <!--<div id="sample_editable_1_new" class="btn red" >
                                     <a id="changeStatusButtonDisapprove" style="color: white"> Bulk Disapprove</a>
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
@@ -109,9 +109,11 @@
                                                 <tr>
                                                     <th></th>
                                                     <th> Txn ID </th>
-                                                    <th> Employee Id </th>
+                                                    <th style="width: 10%;"> Employee Id </th>
                                                     <th> Name </th>
                                                     <th> Type </th>
+                                                    <th> Amount</th>
+                                                    <th> Payable Amount</th>
                                                     <th> Requested By </th>
                                                     <th> Date </th>
                                                     <th> Site Details </th>
@@ -126,6 +128,8 @@
                                                     <th> <input type="text" class="form-control form-filter" name="emp_id" id="emp_id"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                    <th></th>
+                                                    <th></th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -166,14 +170,20 @@
                                                                     <label for="company" class="control-label">Remark</label>
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <input type="text" class="form-control" id="remark" name="remark">
+                                                                    <input type="text" class="form-control" id="remark" name="remark" required="required">
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <a class="btn blue approve-modal-footer-buttons">Approve</a>
-                                                        <a class="btn blue approve-modal-footer-buttons">Disapprove</a>
+                                                        <div class="btn-group" style="float: right;margin-top:1%">
+                                                            <div id="sample_editable_1_new" class="btn yellow" >
+                                                                <a id="changeStatusButton" style="color: white"> Bulk Approve</a>
+                                                            </div>
+                                                            <div id="sample_editable_1_new" class="btn red" >
+                                                                <a id="changeStatusButtonDisapprove" style="color: white"> Bulk Disapprove</a>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </form>
                                             </div>
@@ -198,7 +208,7 @@
                                                                     <label for="company" class="control-label">Remark</label>
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <input type="text" class="form-control" id="remark" name="remark">
+                                                                    <input type="text" class="form-control" id="remark1" name="remark1">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -246,11 +256,34 @@
             $(this).closest('form').attr('action',action);
             $(this).closest('form').submit();
         });
+
+        $("#statusBtn").on('click',function(e) {
+            e.stopPropagation();
+            var txnIds = [];
+            $("input:checkbox:checked").each(function(i){
+                txnIds[i] = $(this).val();
+            });
+            if (txnIds.length > 0) {
+                $("#remarkApproveModal #componentId").val(componentId);
+                $("#remarkApproveModal").modal('show');
+            } else {
+                alert("Please Select atleast one transaction.")
+            }
+        });
     });
 
     function openApproveModal(componentId){
-        $("#remarkApproveModal #componentId").val(componentId);
-        $("#remarkApproveModal").modal('show');
+        var remark = $("#remark").val();
+        var txnIds = [];
+        $("input:checkbox:checked").each(function(i){
+            txnIds[i] = $(this).val();
+        });
+        if (txnIds.length > 0) {
+            $("#remarkApproveModal").modal('show');
+        } else {
+            alert("Please Select at least one transaction.");
+        }
+
     }
 
     function openEditRequestApprovalModal(componentId){
@@ -332,61 +365,72 @@
         $("#changeStatusButtonDisapprove").on('click',function(e){
             e.stopPropagation();
             var txnIds = [];
+            var remark = $("#remark").val();
             $("input:checkbox:checked").each(function(i){
                 txnIds[i] = $(this).val();
             });
             if (txnIds.length > 0) {
-                $.ajax({
-                    url:'/peticash/change-status',
-                    type: "POST",
-                    data: {
-                        _token: $("input[name='_token']").val(),
-                        txn_ids: txnIds,
-                        status : "disapproved"
-                    },
-                    success: function(data, textStatus, xhr){
-                        alert(data);
-                        $(".filter-submit").trigger('click');
+                if (remark != "") {
+                    $.ajax({
+                        url:'/peticash/change-status',
+                        type: "POST",
+                        data: {
+                            _token: $("input[name='_token']").val(),
+                            txn_ids: txnIds,
+                            status : "disapproved",
+                            remark : remark
+                        },
+                        success: function(data, textStatus, xhr){
+                            $("#remarkApproveModal").modal('hide');
+                            alert(data);
+                            $(".filter-submit").trigger('click');
 
-                    },
-                    error: function(data){
-
-                    }
-                });
+                        },
+                        error: function(data){
+                        }
+                    });
+                } else {
+                    alert("Remark should not be empty.");
+                }
             } else {
-                alert("Please Select atleast one transaction.")
+                alert("Please Select at least one transaction.");
             }
-
         });
 
         $("#changeStatusButton").on('click',function(e){
             e.stopPropagation();
             var txnIds = [];
+            var remark = $("#remark").val();
             $("input:checkbox:checked").each(function(i){
                 txnIds[i] = $(this).val();
             });
             if (txnIds.length > 0) {
-                $.ajax({
-                    url:'/peticash/change-status',
-                    type: "POST",
-                    data: {
-                        _token: $("input[name='_token']").val(),
-                        txn_ids: txnIds,
-                        status : "approved"
-                    },
-                    success: function(data, textStatus, xhr){
-                        alert(data);
-                        $(".filter-submit").trigger('click');
+                if (remark != "") {
+                    $.ajax({
+                        url:'/peticash/change-status',
+                        type: "POST",
+                        data: {
+                            _token: $("input[name='_token']").val(),
+                            txn_ids: txnIds,
+                            status : "approved",
+                            remark : remark
+                        },
+                        success: function(data, textStatus, xhr){
+                            $("#remarkApproveModal").modal('hide');
+                            alert(data);
+                            $(".filter-submit").trigger('click');
 
-                    },
-                    error: function(data){
+                        },
+                        error: function(data){
 
-                    }
-                });
+                        }
+                    });
+                } else {
+                    alert("Remark should not be empty.");
+                }
             } else {
-                alert("Please Select atleast one transaction.")
+                alert("Please Select at least one transaction.");
             }
-
         });
 
         $("#client_id").on('change', function(){

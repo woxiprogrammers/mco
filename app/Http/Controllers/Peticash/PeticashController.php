@@ -386,42 +386,42 @@ class PeticashController extends Controller
             }
             if($request->has('postdata') || $request->has('status') ||  $request->has('search_name') || $request->has('emp_id') ) {
                 if ($site_id == 0 && $month == 0 && $year == 0 && $status == 0 && $emp_id == "") {
-                    $salaryTransactionData = PeticashSalaryTransaction::orderBy('date','desc')->get()->toArray();
+                    $salaryTransactionData = PeticashSalaryTransaction::orderBy('id','desc')->get()->toArray();
                 } elseif ($site_id == 0 && $month == 0 && $year == 0 && $status == 0) {
                     if ($emp_id != "") {
-                        $salaryTransactionData = PeticashSalaryTransaction::where('employee_id',$emp_id)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::where('employee_id',$emp_id)->orderBy('id','desc')->get()->toArray();
                     } else {
-                        $salaryTransactionData = PeticashSalaryTransaction::orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::orderBy('id','desc')->get()->toArray();
                     }
                 } elseif ($site_id == 0 && $month == 0 && $year == 0) {
                     if ($emp_id != "") {
-                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('id','desc')->get()->toArray();
                     } else {
-                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->orderBy('id','desc')->get()->toArray();
                     }
                 } elseif ($site_id == 0 && $month == 0) {
                     if ($emp_id != "") {
-                        $salaryTransactionData = PeticashSalaryTransaction::whereYear('date', $year)->where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::whereYear('date', $year)->where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('id','desc')->get()->toArray();
                     } else {
-                        $salaryTransactionData = PeticashSalaryTransaction::whereYear('date', $year)->where('peticash_status_id', $status)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::whereYear('date', $year)->where('peticash_status_id', $status)->orderBy('id','desc')->get()->toArray();
                     }
 
                 } elseif ($site_id == 0) {
                     if ($emp_id != "") {
-                        $salaryTransactionData = PeticashSalaryTransaction::whereMonth('date', $month)->whereYear('date', $year)->where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::whereMonth('date', $month)->whereYear('date', $year)->where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('id','desc')->get()->toArray();
                     } else {
-                        $salaryTransactionData = PeticashSalaryTransaction::whereMonth('date', $month)->whereYear('date', $year)->where('peticash_status_id', $status)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::whereMonth('date', $month)->whereYear('date', $year)->where('peticash_status_id', $status)->orderBy('id','desc')->get()->toArray();
                     }
 
                 } else {
                     if ($emp_id != "") {
-                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('employee_id',$emp_id)->where('project_site_id', $site_id)->whereMonth('date', $month)->whereYear('date', $year)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('employee_id',$emp_id)->where('project_site_id', $site_id)->whereMonth('date', $month)->whereYear('date', $year)->orderBy('id','desc')->get()->toArray();
                     } else {
-                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('project_site_id', $site_id)->whereMonth('date', $month)->whereYear('date', $year)->orderBy('date','desc')->get()->toArray();
+                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('project_site_id', $site_id)->whereMonth('date', $month)->whereYear('date', $year)->orderBy('id','desc')->get()->toArray();
                     }
                 }
             } else {
-                $salaryTransactionData = PeticashSalaryTransaction::orderBy('date','desc')->get()->toArray();
+                $salaryTransactionData = PeticashSalaryTransaction::orderBy('id','desc')->get()->toArray();
             }
             $iTotalRecords = count($salaryTransactionData);
             $records = array();
@@ -440,15 +440,15 @@ class PeticashController extends Controller
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
-                                <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                    <i class="icon-docs"></i> Edit
-                                </a>
-                            </li>
-                            <li>
-                                <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                    <i class="icon-tag"></i> Approve / Disapprove
-                                </a>
-                            </li>
+                                    <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Details
+                                    </a>
+                                </li>
+                                <li>
+                                    <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                        <i class="icon-tag"></i> Approve / Disapprove
+                                    </a>
+                                </li>
                             </ul>
                         </div>';
                         break;
@@ -463,9 +463,9 @@ class PeticashController extends Controller
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
                                 <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                    <i class="icon-docs"></i> Edit
+                                    <i class="icon-docs"></i> Details
                                 </a>
-                            </li>
+                                </li>
                             <!--<li>
                                 <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                     <i class="icon-tag"></i> Approve / Disapprove
@@ -485,7 +485,7 @@ class PeticashController extends Controller
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
                                 <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                    <i class="icon-docs"></i> Edit
+                                    <i class="icon-docs"></i> Details
                                 </a>
                             </li>
                             <!--<li>
@@ -503,6 +503,8 @@ class PeticashController extends Controller
                     $salaryTransactionData[$pagination]['employee_id'],
                     Employee::findOrFail($salaryTransactionData[$pagination]['employee_id'])->toArray()['name'],
                     PeticashTransactionType::findOrFail($salaryTransactionData[$pagination]['peticash_transaction_type_id'])->toArray()['name'],
+                    $salaryTransactionData[$pagination]['amount'],
+                    ($salaryTransactionData[$pagination]['payable_amount'] == null) ? "-" : $salaryTransactionData[$pagination]['payable_amount'],
                     User::findOrFail($salaryTransactionData[$pagination]['reference_user_id'])->toArray()['first_name']." ".User::findOrFail($salaryTransactionData[$pagination]['reference_user_id'])->toArray()['last_name'],
                     date('d M Y',strtotime($salaryTransactionData[$pagination]['date'])),
                     ProjectSite::findOrFail($salaryTransactionData[$pagination]['project_site_id'])->toArray()['name'],
@@ -531,8 +533,9 @@ class PeticashController extends Controller
             $status = 200;
             foreach($request->txn_ids as $txnId){
                 $salaryTxn = PeticashSalaryTransaction::findOrFail($txnId);
-                $newStatus = PeticashStatus::where('slug',$request->status)->pluck('id')->first()   ;
-                $salaryTxn->update(['peticash_status_id' => $newStatus]);
+                $newStatus = PeticashStatus::where('slug',$request->status)->pluck('id')->first();
+                $remark = $request->remark;
+                $salaryTxn->update(['peticash_status_id' => $newStatus,'admin_remark' => $remark]);
             }
             $message = 'Peticash Salary Txn Status changed successfully.';
         }catch(\Exception $e){
