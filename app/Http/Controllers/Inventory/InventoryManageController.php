@@ -387,16 +387,25 @@ class InventoryManageController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryComponentFuelReadingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentFuelReadingData); $iterator++,$pagination++ ){
+                $unitsUsed = $inventoryComponentFuelReadingData[$pagination]->stop_reading - $inventoryComponentFuelReadingData[$pagination]->start_reading;
+                $fuelConsumed = '-';
+                $electricityConsumed = '-';
+                if($inventoryComponentFuelReadingData[$pagination]->fuel_per_unit != null){
+                    $fuelConsumed = $unitsUsed * $inventoryComponentFuelReadingData[$pagination]->fuel_per_unit;
+                }
+                if($inventoryComponentFuelReadingData[$pagination]->electricity_per_unit != null){
+                    $electricityConsumed = $unitsUsed * $inventoryComponentFuelReadingData[$pagination]->electricity_per_unit;
+                }
                 $records['data'][$iterator] = [
                     $inventoryComponentFuelReadingData[$pagination]->start_reading,
                     $inventoryComponentFuelReadingData[$pagination]->stop_reading,
                     $inventoryComponentFuelReadingData[$pagination]->start_time,
                     $inventoryComponentFuelReadingData[$pagination]->stop_time,
-                    '',
+                    $unitsUsed,
                     $inventoryComponentFuelReadingData[$pagination]->fuel_per_unit,
                     $inventoryComponentFuelReadingData[$pagination]->electricity_per_unit,
-                    '',
-                    '',
+                    $fuelConsumed,
+                    $electricityConsumed,
                     $inventoryComponentFuelReadingData[$pagination]->top_up,
                     $inventoryComponentFuelReadingData[$pagination]->top_up_time,
                 ];
