@@ -178,10 +178,10 @@
                                                     <div class="modal-footer">
                                                         <div class="btn-group" style="float: right;margin-top:1%">
                                                             <div id="sample_editable_1_new" class="btn yellow" >
-                                                                <a id="changeStatusButton" style="color: white"> Bulk Approve</a>
+                                                                <a id="changeStatusButton" style="color: white">Approve</a>
                                                             </div>
                                                             <div id="sample_editable_1_new" class="btn red" >
-                                                                <a id="changeStatusButtonDisapprove" style="color: white"> Bulk Disapprove</a>
+                                                                <a id="changeStatusButtonDisapprove" style="color: white">Disapprove</a>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -270,28 +270,7 @@
                 alert("Please Select atleast one transaction.")
             }
         });
-    });
 
-    function openApproveModal(componentId){
-        var remark = $("#remark").val();
-        var txnIds = [];
-        $("input:checkbox:checked").each(function(i){
-            txnIds[i] = $(this).val();
-        });
-        if (txnIds.length > 0) {
-            $("#remarkApproveModal").modal('show');
-        } else {
-            alert("Please Select at least one transaction.");
-        }
-
-    }
-
-    function openEditRequestApprovalModal(componentId){
-        $("#editRequestApprovalForm #componentId").val(componentId);
-        $("#editRequestApprovalForm").modal('show');
-    }
-
-    jQuery(document).ready(function() {
         $("input[name='emp_id']").on('click',function(){
             var client_id = $('#client_id').val();
             var project_id = $('#project_id').val();
@@ -304,10 +283,10 @@
 
             var postData =
                 'client_id=>'+client_id+','+
-                'project_id=>'+project_id+','+
-                'site_id=>'+site_id+','+
-                'year=>'+year+','+
-                'month=>'+month;
+                    'project_id=>'+project_id+','+
+                    'site_id=>'+site_id+','+
+                    'year=>'+year+','+
+                    'month=>'+month;
 
             $("input[name='postdata']").val(postData);
             $("input[name='search_name']").val(search_name);
@@ -440,6 +419,25 @@
             getProjectSites($('#project_id').val());
         });
     });
+
+    function openApproveModal(componentId){
+        var remark = $("#remark").val();
+        var txnIds = [];
+        $("input:checkbox:checked").each(function(i){
+            txnIds[i] = $(this).val();
+        });
+        if (txnIds.length > 0) {
+            $("#remarkApproveModal").modal('show');
+        } else {
+            alert("Please Select at least one transaction.");
+        }
+
+    }
+
+    function openEditRequestApprovalModal(componentId){
+        $("#editRequestApprovalForm #componentId").val(componentId);
+        $("#editRequestApprovalForm").modal('show');
+    }
 
     function getProjects(client_id){
         $.ajax({
