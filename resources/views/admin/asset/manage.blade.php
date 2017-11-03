@@ -43,12 +43,16 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="assetTable">
                                                             <thead>
                                                             <tr>
+                                                                <th>Asset Name</th>
                                                                 <th> Asset ID </th>
                                                                 <th> Model Number</th>
                                                                 <th> Status </th>
+                                                                <th> Asset Type </th>
                                                                 <th> Actions </th>
                                                             </tr>
                                                             <tr class="filter">
+                                                                <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_model_number" > </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>

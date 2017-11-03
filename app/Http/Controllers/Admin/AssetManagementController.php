@@ -39,13 +39,13 @@ class AssetManagementController extends Controller
     }
     public function getEditView(Request $request,$asset){
         try{
+            $asset_types = AssetType::select('id','name')->get()->toArray();
             $asset = $asset->toArray();
             $assetId = $asset['id'];
             $assetImages = AssetImage::where('asset_id',$assetId)->select('id','name')->get();
             if($assetImages != null){
                 $assetImage = $this->getImagePath($assetId,$assetImages);
             }
-            return view('admin.asset.edit')->with(compact('asset','assetImage'));
         }catch (\Exception $e){
             $data = [
                 'action' => "Get asset edit view",
@@ -55,6 +55,7 @@ class AssetManagementController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types'));
     }
 
     public function createAsset(Request $request){
@@ -68,6 +69,7 @@ class AssetManagementController extends Controller
             $data['electricity_per_unit'] = $request->electricity_per_unit;
             $data['litre_per_unit'] = $request->litre_per_unit;
             $data['is_active'] = false;
+            $data['quantity'] = $request->qty;
             $asset = Asset::create($data);
             if($request->work_order_images != null) {
                 $assetId = $asset['id'];
@@ -110,13 +112,10 @@ class AssetManagementController extends Controller
             $assetData['name'] = ucwords(trim($data['name']));
             $assetData['model_number'] = $data['model_number'];
             $assetData['expiry_date'] = $data['expiry_date'];
+            $assetData['litre_per_unit'] = $data['litre_per_unit'];
+            $assetData['electricity_per_unit'] = $data['electricity_per_unit'];
+            $assetData['asset_types_id'] = $data['asset_type'];
             $assetData['price'] = $data['price'];
-            $assetData['is_fuel_dependent'] = $data['is_fuel_dependent'];
-            if($assetData['is_fuel_dependent'] == "true"){
-                $assetData['litre_per_unit'] = $data['litre_per_unit'];
-            }else{
-                $assetData['litre_per_unit'] = null;
-            }
             $asset->update($assetData);
             $work_order_images = $request->work_order_images;
             $assetImages = $request->asset_images;
@@ -216,9 +215,9 @@ class AssetManagementController extends Controller
     public function assetListing(Request $request){
                     try{
                         if($request->has('search_model_number')){
-                            $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get()->toArray();
+                            $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get();
                         }else{
-                            $assetData = Asset::orderBy('model_number','asc')->get()->toArray();
+                            $assetData = Asset::orderBy('model_number','asc')->get();
                         }
                         $iTotalRecords = count($assetData);
                         $records = array();
@@ -233,10 +232,11 @@ class AssetManagementController extends Controller
                                 $status = 'Enable';
                             }
                             $records['data'][$iterator] = [
+                                $assetData[$pagination]['name'],
                                 $assetData[$pagination]['id'],
                                 $assetData[$pagination]['model_number'],
                                 $asset_status,
-
+                                $assetData[$pagination]->assetTypes->name,
                                 '<div class="btn-group">
                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                            Actions
@@ -255,7 +255,6 @@ class AssetManagementController extends Controller
                </div>'
                             ];
                         }
-
                         $records["draw"] = intval($request->draw);
                         $records["recordsTotal"] = $iTotalRecords;
                         $records["recordsFiltered"] = $iTotalRecords;

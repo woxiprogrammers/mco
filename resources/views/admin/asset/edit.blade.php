@@ -61,6 +61,51 @@
                                                             <input type="text" class="form-control" id="name" name="name" value="{{$asset['name']}}">
                                                         </div>
                                                     </div>
+                                                    <div class="form-group row" >
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="diesel" class="control-label">Asset type</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <select class="form-control" name="asset_type" id="select-type">
+                                                                <option value="">Select Option</option>
+                                                                @foreach($asset_types as $asset_type)
+                                                                    @if(in_array($asset['asset_types_id'],$asset_type))
+                                                                    <option value="{{$asset_type['id']}}" selected>{{$asset_type['name']}}</option>
+                                                                     @else
+                                                                        <option value="{{$asset_type['id']}}">{{$asset_type['name']}}</option>
+                                                                    @endif
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row" id="espu">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="espu" class="control-label">Electricity per unit</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="number" class="form-control" id="electricity_per_unit" name="electricity_per_unit"  value="{{$asset['electricity_per_unit']}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row"  id="lpu">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="lpu" class="control-label">Litre per unit</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="number" class="form-control" id="litre_per_unit" name="litre_per_unit" value="{{$asset['litre_per_unit']}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row" >
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="qty" class="control-label">Quantity</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" name="qty" id="qty" value="{{$asset['quantity']}}">
+                                                        </div>
+                                                    </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="expiry_date" class="control-label ">Expiry Date</label>
@@ -82,45 +127,6 @@
                                                             <input type="number" class="form-control" id="price" name="price" value="{{$asset['price']}}">
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="diesel" class="control-label">Is It a Diesel</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" name="is_fuel_dependent" id="select-litre">
-                                                                @if(isset($asset['is_fuel_dependent']) && $asset['is_fuel_dependent'] == 'true')
-                                                                    <option value="true" selected >Yes</option>
-                                                                    <option value="false">No</option>
-                                                                @else
-                                                                    <option value="true">Yes</option>
-                                                                    <option value="false" selected>No</option>
-                                                                @endif
-
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    @if($asset['is_fuel_dependent'] == 'true')
-                                                    <div class="form-group row" id="Litre">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="liter_per_unit" class="control-label">Litre Per Unit</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="number" name="litre_per_unit" value="{{$asset['litre_per_unit']}}">
-                                                        </div>
-                                                    </div>
-                                                    @else
-                                                        <div class="form-group row" id="Litre" hidden>
-                                                            <div class="col-md-3" style="text-align: right">
-                                                                <label for="liter_per_unit" class="control-label">Litre Per Unit</label>
-                                                                <span>*</span>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <input type="number" class="form-control" id="number" name="litre_per_unit" value=" ">
-                                                            </div>
-                                                        </div>
-                                                    @endif
                                                     <div class="form-group">
                                                         <div class="row">
                                                             <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
@@ -188,6 +194,16 @@
     <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
     <script>
         $(document).ready(function(){
+            if($('#litre_per_unit').val() != ""){
+                $('#lpu').show();
+            }else{
+                $('#lpu').hide();
+            }
+            if($('#electricity_per_unit').val() != ""){
+                $('#espu').show();
+            }else{
+                $('#espu').hide();
+            }
             EditAsset.init();
             $('#select-litre').change(function(){
                 var selected = $(this).val();
@@ -197,10 +213,68 @@
                     $('#Litre').hide();
                 }
             });
+            $('#electricity_per_unit').rules('remove');
+            $('#litre_per_unit').rules('remove');
         });
     </script>
     <script>
         var date=new Date();
         $('#expiry_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+    </script>
+    <script>
+        $('#select-type').change(function(){
+            var asset_type = $(this).val();
+            if(asset_type == 1){
+                $('#lpu').show();
+                $('#espu').hide();
+                $('#litre_per_unit').rules('add', {
+                    required: true   // set a new rule
+                });
+                $('#electricity_per_unit').rules('remove');
+                $('#qty').val(1);
+                $('#exp_date').show();
+                $('#exp_date').rules('add', {
+                    required: true   // set a new rule
+                });
+            }else if(asset_type == 2){
+                $('#espu').show();
+                $('#lpu').hide();
+                $('#electricity_per_unit').rules('add', {
+                    required: true   // set a new rule
+                });
+                $('#litre_per_unit').rules('remove');
+                $('#qty').val(1);
+                $('#exp_date').show();
+                $('#exp_date').rules('add', {
+                    required: true   // set a new rule
+                });
+            }else if(asset_type == 3){
+                $('#espu').show();
+                $('#electricity_per_unit').rules('add', {
+                    required: true   // set a new rule
+                });
+                $('#litre_per_unit').rules('add', {
+                    required: true   // set a new rule
+                });
+                $('#lpu').show();
+                $('#exp_date').show();
+                $('#qty').val(1);
+            }else if(asset_type == 4){
+                $('#espu').hide();
+                $('#electricity_per_unit').rules('remove');
+                $('#litre_per_unit').rules('remove');
+                $('#lpu').hide();
+                $('#exp_date').hide();
+                $('#exp_date').rules('remove');
+                $('#qty').val('');
+            }else{
+                $('#electricity_per_unit').rules('remove');
+                $('#litre_per_unit').rules('remove');
+                $('#espu').hide();
+                $('#lpu').hide();
+                $('#exp_date').hide();
+                $('#exp_date').rules('remove');
+            }
+        })
     </script>
 @endsection
