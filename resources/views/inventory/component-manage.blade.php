@@ -769,15 +769,11 @@
                         break;
                 }
                 $('input[name="is_fuel"]').on('change', function(){
-                    console.log(typeof $(this).val());
                     if($(this).val() == 'true'){
-                        console.log('123');
                         $("#formBody").html($("#fuelForm").clone().show());
                     }else if($(this).val() == 'false'){
-                        console.log('456');
                         $("#formBody").html($("#electricityForm").clone().show());
                     }else{
-                        console.log(' in else')
                         $("#formBody").html();
                     }
                 });
