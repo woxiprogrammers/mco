@@ -379,6 +379,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('projects/{client_id}',array('uses' => 'Peticash\PeticashController@getProjects'));
         Route::get('project-sites/{project_id}',array('uses' => 'Peticash\PeticashController@getProjectSites'));
         Route::post('change-status',array('uses' => 'Peticash\PeticashController@changeSalaryStatus'));
+        Route::post('change-status-purchase-disapproved',array('uses' => 'Peticash\PeticashController@changePurchaseStatus'));
 
         Route::group(['prefix' => 'master-peticash-account'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
