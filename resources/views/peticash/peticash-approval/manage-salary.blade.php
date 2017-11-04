@@ -244,19 +244,6 @@
         peticashSalaryApprovalListing.init();
         $('#approvalSalaryPeticashTable').DataTable();
 
-        $(".approve-modal-footer-buttons").on('click',function(){
-            var buttonType = $(this).text();
-            if(buttonType == 'Approve'){
-                var action = "/purchase/material-request/change-status/admin-approved";
-            }else{
-                if(buttonType == 'Disapprove'){
-                    var action = "/purchase/material-request/change-status/admin-disapproved"
-                }
-            }
-            $(this).closest('form').attr('action',action);
-            $(this).closest('form').submit();
-        });
-
         $("#statusBtn").on('click',function(e) {
             e.stopPropagation();
             var txnIds = [];
