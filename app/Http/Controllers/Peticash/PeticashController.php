@@ -2,15 +2,24 @@
 
 namespace App\Http\Controllers\Peticash;
 
+use App\Client;
+use App\Employee;
 use App\PaymentType;
+use App\PeticashSalaryTransaction;
 use App\PeticashSiteTransfer;
+use App\PeticashStatus;
+use App\PeticashTransactionType;
+use App\Project;
 use App\ProjectSite;
+use App\Quotation;
+use App\QuotationStatus;
 use App\Role;
 use App\User;
 use App\UserProjectSiteRelation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PeticashController extends Controller
@@ -61,7 +70,7 @@ class PeticashController extends Controller
             $projectSiteUser = UserProjectSiteRelation::join('users','user_project_site_relation.user_id','=','users.id')
                 ->join('user_has_permissions','users.id','=','user_has_permissions.user_id')
                 ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
-                ->where('permissions.name','=','create-sitewise-account')
+                ->where('permissions.name','=','create-peticash-management')
                 ->where('user_project_site_relation.project_site_id',$siteid)
                 ->select('users.id','users.first_name as name')->get()->toArray();
             $projectOptions = array();
@@ -252,18 +261,293 @@ class PeticashController extends Controller
         }
     }
 
-    public function getManageViewPeticashApproval(Request $request){
+    public function getManageViewPeticashPurchaseApproval(Request $request){
         try{
-            return view('peticash.peticash-approval.manage');
+            return view('peticash.peticash-approval.manage-purchase');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get Peticash Request Approval view',
+                'action' => 'Get Peticash Request Purchase Approval view',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getManageViewPeticashSalaryApproval(Request $request){
+        try{
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
+            $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+            $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
+            $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
+            return view('peticash.peticash-approval.manage-salary')->with(compact('clients'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Peticash Request Salary Approval view',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function purchaseApprovalListing(Request $request){
+        try{
+            $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get()->toArray();;
+            // Here We are considering (project_site_id = 0) => It's Master Peticash Account
+            $iTotalRecords = count($masterAccountData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($masterAccountData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($masterAccountData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $masterAccountData[$pagination]['id'],
+                    User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
+                    User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['last_name'],
+                    $masterAccountData[$pagination]['amount'],
+                    PaymentType::findOrFail($masterAccountData[$pagination]['payment_id'])->toArray()['name'],
+                    $masterAccountData[$pagination]['remark'],
+                    $masterAccountData[$pagination]['amount'],
+                    date('d M Y',strtotime($masterAccountData[$pagination]['date'])),
+                    '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a onclick="openEditRequestApprovalModal('.$masterAccountData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <i class="icon-docs"></i> Edit
+                                </a>
+                            </li>
+                            <li>
+                                <a onclick="openApproveModal('.$masterAccountData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <i class="icon-tag"></i> Approve / Disapprove
+                                </a>
+                            </li>
+                        </ul>
+                    </div>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Master Account Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records);
+    }
+    public function salaryApprovalListing(Request $request){
+        try{
+            $postdata = null;
+            $emp_id = "";
+            $emp_name = null;
+            $status = 0;
+            $site_id = 0;
+            $month = 0;
+            $year = 0;
+            $postDataArray = array();
+            if ($request->has('emp_id')) {
+                if ($request['emp_id'] != "") {
+                    $emp_id = $request['emp_id'];
+                }
+            }
+            if ($request->has('search_name')) {
+                $emp_name = $request['search_name'];
+            }
+            if ($request->has('status')) {
+                $status = $request['status'];
+            }
+            if($request->has('postdata')) {
+                $postdata = $request['postdata'];
+                if($postdata != null) {
+                    $mstr = explode(",",$request['postdata']);
+                    foreach($mstr as $nstr)
+                    {
+                        $narr = explode("=>",$nstr);
+                        $narr[0] = str_replace("\x98","",$narr[0]);
+                        $ytr[1] = $narr[1];
+                        $postDataArray[$narr[0]] = $ytr[1];
+                    }
+                }
+                $site_id = $postDataArray['site_id'];
+                $month = $postDataArray['month'];
+                $year = $postDataArray['year'];
+            }
+            if($request->has('postdata') || $request->has('status') ||  $request->has('search_name') || $request->has('emp_id') ) {
+                if ($site_id == 0 && $month == 0 && $year == 0 && $status == 0 && $emp_id == "") {
+                    $salaryTransactionData = PeticashSalaryTransaction::orderBy('id','desc')->get()->toArray();
+                } elseif ($site_id == 0 && $month == 0 && $year == 0 && $status == 0) {
+                    if ($emp_id != "") {
+                        $salaryTransactionData = PeticashSalaryTransaction::where('employee_id',$emp_id)->orderBy('id','desc')->get()->toArray();
+                    } else {
+                        $salaryTransactionData = PeticashSalaryTransaction::orderBy('id','desc')->get()->toArray();
+                    }
+                } elseif ($site_id == 0 && $month == 0 && $year == 0) {
+                    if ($emp_id != "") {
+                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('id','desc')->get()->toArray();
+                    } else {
+                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->orderBy('id','desc')->get()->toArray();
+                    }
+                } elseif ($site_id == 0 && $month == 0) {
+                    if ($emp_id != "") {
+                        $salaryTransactionData = PeticashSalaryTransaction::whereYear('date', $year)->where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('id','desc')->get()->toArray();
+                    } else {
+                        $salaryTransactionData = PeticashSalaryTransaction::whereYear('date', $year)->where('peticash_status_id', $status)->orderBy('id','desc')->get()->toArray();
+                    }
+
+                } elseif ($site_id == 0) {
+                    if ($emp_id != "") {
+                        $salaryTransactionData = PeticashSalaryTransaction::whereMonth('date', $month)->whereYear('date', $year)->where('peticash_status_id', $status)->where('employee_id',$emp_id)->orderBy('id','desc')->get()->toArray();
+                    } else {
+                        $salaryTransactionData = PeticashSalaryTransaction::whereMonth('date', $month)->whereYear('date', $year)->where('peticash_status_id', $status)->orderBy('id','desc')->get()->toArray();
+                    }
+
+                } else {
+                    if ($emp_id != "") {
+                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('employee_id',$emp_id)->where('project_site_id', $site_id)->whereMonth('date', $month)->whereYear('date', $year)->orderBy('id','desc')->get()->toArray();
+                    } else {
+                        $salaryTransactionData = PeticashSalaryTransaction::where('peticash_status_id', $status)->where('project_site_id', $site_id)->whereMonth('date', $month)->whereYear('date', $year)->orderBy('id','desc')->get()->toArray();
+                    }
+                }
+            } else {
+                $salaryTransactionData = PeticashSalaryTransaction::orderBy('id','desc')->get()->toArray();
+            }
+            $iTotalRecords = count($salaryTransactionData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
+                $txnStatus = PeticashStatus::findOrFail($salaryTransactionData[$pagination]['peticash_status_id'])->toArray()['slug'];
+                switch(strtolower($txnStatus)){
+                    case 'pending':
+                        $checkbox_enable = '<input type="checkbox" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
+                        $user_status = '<td><span class="label label-sm label-warning">'.$txnStatus.' </span></td>';
+                        $actionDropDown = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Details
+                                    </a>
+                                </li>
+                                <li>
+                                    <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                        <i class="icon-tag"></i> Approve / Disapprove
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>';
+                        break;
+                    case 'approved':
+                        $checkbox_enable = '<input  disabled type="checkbox" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
+                        $user_status = '<td><span class="label label-sm label-success">'.$txnStatus.' </span></td>';
+                        $actionDropDown = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <i class="icon-docs"></i> Details
+                                </a>
+                                </li>
+                            <!--<li>
+                                <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <i class="icon-tag"></i> Approve / Disapprove
+                                </a>
+                            </li>-->
+                            </ul>
+                        </div>';
+                        break;
+                    default:
+                        $checkbox_enable = '<input  disabled type="checkbox" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
+                        $user_status = '<td><span class="label label-sm label-danger">'.$txnStatus.' </span></td>';
+                        $actionDropDown = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <i class="icon-docs"></i> Details
+                                </a>
+                            </li>
+                            <!--<li>
+                                <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <i class="icon-tag"></i> Approve / Disapprove
+                                </a>
+                            </li>-->
+                            </ul>
+                        </div>';
+                        break;
+                }
+                $records['data'][$iterator] = [
+                    $checkbox_enable,
+                    $salaryTransactionData[$pagination]['id'],
+                    $salaryTransactionData[$pagination]['employee_id'],
+                    Employee::findOrFail($salaryTransactionData[$pagination]['employee_id'])->toArray()['name'],
+                    PeticashTransactionType::findOrFail($salaryTransactionData[$pagination]['peticash_transaction_type_id'])->toArray()['name'],
+                    $salaryTransactionData[$pagination]['amount'],
+                    ($salaryTransactionData[$pagination]['payable_amount'] == null) ? "-" : $salaryTransactionData[$pagination]['payable_amount'],
+                    User::findOrFail($salaryTransactionData[$pagination]['reference_user_id'])->toArray()['first_name']." ".User::findOrFail($salaryTransactionData[$pagination]['reference_user_id'])->toArray()['last_name'],
+                    date('d M Y',strtotime($salaryTransactionData[$pagination]['date'])),
+                    ProjectSite::findOrFail($salaryTransactionData[$pagination]['project_site_id'])->toArray()['name'],
+                    $user_status,
+                    $actionDropDown
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Master Account Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records);
+    }
+
+      public function changeSalaryStatus(Request $request){
+        try{
+            $status = 200;
+            foreach($request->txn_ids as $txnId){
+                $salaryTxn = PeticashSalaryTransaction::findOrFail($txnId);
+                $newStatus = PeticashStatus::where('slug',$request->status)->pluck('id')->first();
+                $remark = $request->remark;
+                $salaryTxn->update(['peticash_status_id' => $newStatus,'admin_remark' => $remark]);
+            }
+            $message = 'Peticash Salary Txn Status changed successfully.';
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Change Salary status',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+          return response()->json($message,$status);
     }
 
     public function getManageViewPeticashManagement(Request $request){
@@ -379,6 +663,61 @@ class PeticashController extends Controller
             abort(500);
         }
         return response()->json($records);
+    }
+
+    public function getProjects(Request $request, $client){
+        try{
+            $status = 200;
+            if ($client == 0) {
+                $projectOptions[] = '<option value="0">ALL</option>';
+            } else {
+                $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+                $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
+                $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+                $projects = Project::where('client_id',$client)->whereIn('id',$projectIds)->get()->toArray();
+                $projectOptions = array();
+                for($i = 0 ; $i < count($projects); $i++){
+                    $projectOptions[] = '<option value="'.$projects[$i]['id'].'"> '.$projects[$i]['name'].' </option>';
+                }
+            }
+        }catch (\Exception $e){
+            $projectOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Create New Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectOptions,$status);
+    }
+
+    public function getProjectSites(Request $request,$project){
+        try{
+            $status = 200;
+            if ($project == 0) {
+                $projectSitesOptions[] = '<option value="0">ALL</option>';
+            } else {
+                $projectSites = ProjectSite::where('project_id', $project)->get()->toArray();
+                $projectSitesOptions = array();
+                for($i = 0 ; $i < count($projectSites); $i++){
+                    $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';
+                }
+            }
+        }catch (\Exception $e){
+            $projectSitesOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Create New Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectSitesOptions,$status);
     }
 
 }

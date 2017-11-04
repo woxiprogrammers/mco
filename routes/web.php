@@ -375,6 +375,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
 
     Route::group(['prefix'=>'peticash'],function (){
+
+        Route::get('projects/{client_id}',array('uses' => 'Peticash\PeticashController@getProjects'));
+        Route::get('project-sites/{project_id}',array('uses' => 'Peticash\PeticashController@getProjectSites'));
+        Route::post('change-status',array('uses' => 'Peticash\PeticashController@changeSalaryStatus'));
+
         Route::group(['prefix' => 'master-peticash-account'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
             Route::get('createpage',array('uses' => 'Peticash\PeticashController@getCreateViewForMasterPeticashAccount'));
@@ -395,7 +400,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
 
         Route::group(['prefix' => 'peticash-approval-request'], function(){
-            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashApproval'));
+            Route::get('manage-purchase-list',array('uses' => 'Peticash\PeticashController@getManageViewPeticashPurchaseApproval'));
+            Route::get('manage-salary-list',array('uses' => 'Peticash\PeticashController@getManageViewPeticashSalaryApproval'));
+            Route::post('manage-purchase-list-ajax',array('uses' => 'Peticash\PeticashController@purchaseApprovalListing'));
+            Route::post('manage-salary-list-ajax',array('uses' => 'Peticash\PeticashController@salaryApprovalListing'));
         });
 
         Route::group(['prefix' => 'peticash-management'], function(){
