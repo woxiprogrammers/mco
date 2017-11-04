@@ -213,62 +213,68 @@ class AssetManagementController extends Controller
     }
 
     public function assetListing(Request $request){
-                    try{
-                        if($request->has('search_model_number')){
-                            $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get();
-                        }else{
-                            $assetData = Asset::orderBy('model_number','asc')->get();
-                        }
-                        $iTotalRecords = count($assetData);
-                        $records = array();
-                        $records['data'] = array();
-                        $end = $request->length < 0 ? count($assetData) : $request->length;
-                        for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
-                            if($assetData[$pagination]['is_active'] == true){
-                                $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
-                                $status = 'Disable';
-                            }else{
-                                $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
-                                $status = 'Enable';
-                            }
-                            $records['data'][$iterator] = [
-                                $assetData[$pagination]['name'],
-                                $assetData[$pagination]['id'],
-                                $assetData[$pagination]['model_number'],
-                                $asset_status,
-                                $assetData[$pagination]->assetTypes->name,
-                                '<div class="btn-group">
-                       <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                           Actions
-                           <i class="fa fa-angle-down"></i>
-                       </button>
-                       <ul class="dropdown-menu pull-left" role="menu">
-                           <li>
-                               <a href="/asset/edit/'.$assetData[$pagination]['id'].'">
-                               <i class="icon-docs"></i> Edit </a>
-                       </li>
-                       <li>
-                           <a href="/asset/change-status/'.$assetData[$pagination]['id'].'">
-                               <i class="icon-tag"></i> '.$status.' </a>
-                       </li>
-                   </ul>
-               </div>'
-                            ];
-                        }
-                        $records["draw"] = intval($request->draw);
-                        $records["recordsTotal"] = $iTotalRecords;
-                        $records["recordsFiltered"] = $iTotalRecords;
-                    }catch (Exception $e){
-                        $records = array();
-                        $data = [
-                            'action' => 'Get Asset Listing',
-                            'params' => $request->all(),
-                            'exception'=> $e->getMessage()
-                        ];
-                        Log::critical(json_encode($data));
-                        abort(500);
-                    }
-                    return response()->json($records);
+        try{
+            if($request->has('search_model_number')){
+                $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get();
+            }else{
+                $assetData = Asset::orderBy('model_number','asc')->get();
+            }
+            $iTotalRecords = count($assetData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($assetData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
+                if($assetData[$pagination]['is_active'] == true){
+                    $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                    $status = 'Disable';
+                }else{
+                    $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                    $status = 'Enable';
+                }
+                if($assetData[$pagination]->assetTypes == null){
+                    $assetType = '';
+                }else{
+                    $assetType = $assetData[$pagination]->assetTypes->name;
+
+                }
+                $records['data'][$iterator] = [
+                    $assetData[$pagination]['name'],
+                    $assetData[$pagination]['id'],
+                    $assetData[$pagination]['model_number'],
+                    $asset_status,
+                    $assetType,
+                    '<div class="btn-group">
+           <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+               Actions
+               <i class="fa fa-angle-down"></i>
+           </button>
+           <ul class="dropdown-menu pull-left" role="menu">
+               <li>
+                   <a href="/asset/edit/'.$assetData[$pagination]['id'].'">
+                   <i class="icon-docs"></i> Edit </a>
+           </li>
+           <li>
+               <a href="/asset/change-status/'.$assetData[$pagination]['id'].'">
+                   <i class="icon-tag"></i> '.$status.' </a>
+           </li>
+       </ul>
+    </div>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch (Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Asset Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records);
     }
 
     public function displayAssetImages(Request $request){

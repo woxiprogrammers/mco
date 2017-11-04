@@ -4,6 +4,12 @@
 $(document).ready(function(){
     var site_name = '';
     var search_in = '';
+    $(window).keydown(function(event){
+        if(event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
     $( "#assetBtn" ).hide();
     $( "#myBtn" ).hide();
     var iterator = parseInt(0);
@@ -60,7 +66,7 @@ $(document).ready(function(){
         if($(this).val().length > 0){
             $.ajax({
                 type: "POST",
-                url: "/purchase/material-request/get-clients",
+                url: "/purchase/material-request/get-clients?_token="+$('input[name="_token"]').val(),
                 data:'keyword='+$(this).val(),
                 beforeSend: function(){
                     $.LoadingOverlay("hide");
@@ -79,10 +85,11 @@ $(document).ready(function(){
 
     $("#projectSearchbox").keyup(function(){
         if($(this).val().length > 0){
+            var clientName = $("#clientSearchbox").val();
             $.ajax({
                 type: "POST",
-                url: "/purchase/material-request/get-projects",
-                data:'keyword='+$(this).val(),
+                url: "/purchase/material-request/get-projects?_token="+$('input[name="_token"]').val(),
+                data:'keyword='+$(this).val()+'&client_name='+clientName,
                 beforeSend: function(){
                     $.LoadingOverlay("hide");
                     $("#project-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
@@ -102,8 +109,8 @@ $(document).ready(function(){
         if($(this).val().length > 0){
             $.ajax({
                 type: "POST",
-                url: "/purchase/material-request/get-users",
-                data:'keyword='+$(this).val(),
+                url: "/purchase/material-request/get-users?_token="+$('input[name="_token"]').val(),
+                data:'keyword='+$(this).val()+'&project_site_name='+$("#projectSearchbox").val(),
                 beforeSend: function(){
                     $.LoadingOverlay("hide");
                     $("#user-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});

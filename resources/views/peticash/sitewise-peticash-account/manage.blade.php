@@ -17,10 +17,16 @@
                 <div class="page-content-wrapper">
                     <div class="page-head">
                         <div class="container">
-                            <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
                                 <h1>Manage Sitewise Peticash Account</h1>
                             </div>
+                            <div class="btn-group" style="float: right;margin-top:1%">
+                                <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ALLOCATE
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- BEGIN PAGE TITLE -->
                         </div>
                     </div>
                     <div class="page-content">
@@ -31,18 +37,6 @@
                                     <div class="portlet light ">
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
-                                            <div class="table-toolbar">
-                                                <div class="row" style="text-align: right">
-                                                    <div class="col-md-12">
-                                                        <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ALLOCATE
-                                                                    <i class="fa fa-plus"></i>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="sitewisePeticashTable">
                                                 <thead>
                                                 <tr>
@@ -53,8 +47,8 @@
                                                     <th> Amount </th>
                                                     <th> Type </th>
                                                     <th> Remark </th>
-                                                    <th> Created On </th>
-                                                    <th> Status </th>
+                                                    <th> Txn Date </th>
+                                                    <th> Action </th>
                                                 </tr>
                                                 <tr class="filter">
                                                     <th></th>

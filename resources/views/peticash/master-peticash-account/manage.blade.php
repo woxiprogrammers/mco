@@ -21,6 +21,13 @@
                             <div class="page-title">
                                 <h1>Manage Master Peticash Account</h1>
                             </div>
+                            <div class="btn-group" style="float: right;margin-top:1%">
+                                <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ADD
+                                        <!-- here we need to handle create transaction for master account-->
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="page-content">
@@ -36,20 +43,11 @@
                                                     <div class="col-md-4" style="background-color: #c2c2c2">
                                                         Total Peticash Amount : {{$masteraccountAmount}}
                                                     </div>
-                                                    <div class="col-md-3" style="background-color: #e2e2e2">
+                                                    <div class="col-md-4" style="background-color: #e2e2e2">
                                                         Allocated Peticash : {{$sitewiseaccountAmount}}
                                                     </div>
-                                                    <div class="col-md-3" style="background-color: #c2c2c2">
+                                                    <div class="col-md-4" style="background-color: #c2c2c2">
                                                         Balance : {{$balance}}
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ADD
-                                                                    <!-- here we need to handle create transaction for master account-->
-                                                                    <i class="fa fa-plus"></i>
-                                                                </a>
-                                                            </div>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -62,8 +60,8 @@
                                                     <th> Amount </th>
                                                     <th> Type </th>
                                                     <th style="width: 30%"> Remark </th>
-                                                    <th> Created On </th>
-                                                    <th> Status </th>
+                                                    <th> Txn Date </th>
+                                                    <th> Action </th>
                                                 </thead>
                                                 <tbody>
 
