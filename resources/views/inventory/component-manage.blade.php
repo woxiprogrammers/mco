@@ -728,11 +728,7 @@
             $("#stockButton").click(function(){
                $("#openingStockModel").modal('show');
             });
-            $("#readingFormModel .date").each(function(){
-                $(this).datetimepicker({
-                    format: 'yyyy-mm-dd hh:ii'
-                });
-            });
+
             $("#openingStockSubmit").click(function(){
                 $.ajax({
                     url: '/inventory/component/edit-opening-stock',
@@ -762,17 +758,21 @@
                 switch(assetType){
                     case 'fuel_dependent':
                         $("#readingFormModel .modal-body").html($("#fuelForm").clone().show());
+                        initializeDateTimePicker();
                         break;
 
                     case 'electricity_dependent':
                         $("#readingFormModel .modal-body").html($("#electricityForm").clone().show());
+                        initializeDateTimePicker();
                         break;
                 }
                 $('input[name="is_fuel"]').on('change', function(){
                     if($(this).val() == 'true'){
                         $("#formBody").html($("#fuelForm").clone().show());
+                        initializeDateTimePicker();
                     }else if($(this).val() == 'false'){
                         $("#formBody").html($("#electricityForm").clone().show());
+                        initializeDateTimePicker();
                     }else{
                         $("#formBody").html();
                     }
@@ -807,9 +807,15 @@
                     }
                 });
             }
-
         };
 
+        function initializeDateTimePicker(){
+            $("#readingFormModel form .date").each(function(){
+                $(this).datetimepicker({
+                    format: 'yyyy-mm-dd hh:ii'
+                });
+            });
+        }
         function projectChange(element){
             var projectId = $(element).val();
             getProjectSites(projectId);

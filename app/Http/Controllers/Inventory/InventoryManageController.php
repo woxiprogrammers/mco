@@ -429,11 +429,6 @@ class InventoryManageController extends Controller
     public function addInventoryComponentReading(Request $request,$inventoryComponent){
         try{
             $data = $request->except(['_token']);
-            $data['start_time'] = Carbon::createFromFormat('d F Y - H:i',$data['start_time']);
-            $data['stop_time'] = Carbon::createFromFormat('d F Y - H:i',$data['stop_time']);
-            if(array_key_exists('top_up_time',$data)){
-                $data['top_up_time'] = Carbon::createFromFormat('d F Y - H:i',$data['top_up_time']);
-            }
             $user = Auth::user();
             $data['inventory_component_id'] = $inventoryComponent->id;
             $data['user_id'] = $user->id;
