@@ -21,6 +21,11 @@
                             <div class="page-title">
                                 <h1>Peticash Purchase Request Approval</h1>
                             </div>
+                            <div class="btn-group" style="float: right;margin-top:1%">
+                                <div id="sample_editable_1_new" class="btn red" >
+                                    <a id="statsBtn" style="color: white">Statistics</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="page-content">
@@ -134,15 +139,6 @@
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                     </th>
                                                 </tr>
-                                                <!--<tr class="filter">
-                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
-                                                    <th>
-                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                    </th>
-                                                </tr>-->
                                                 </thead>
                                                 <tbody>
 
@@ -176,6 +172,69 @@
                                                         <div class="btn-group" style="float: right;margin-top:1%">
                                                             <div id="sample_editable_1_new" class="btn red" >
                                                                 <a id="changeStatusButtonDisapprove" style="color: white">Disapprove</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="modal fade" id="statsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <form class="modal-content" method="post">
+                                                    {!! csrf_field() !!}
+                                                    <div class="modal-header">
+                                                        <div class="row">
+                                                            <div class="col-md-8"><center><h4 class="modal-title" id="exampleModalLongTitle">
+                                                                        STATS For - <input type="text" id="site_name" name="site_name" readonly>
+                                                                    </h4></center></div>
+                                                            <div class="col-md-4"><button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-body">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-12" style="text-align: right;">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Allocated Peticash Amount : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="allocated_amt" name="allocated_amt" value="0" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Peticash Salary Amount : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="salary_amt" name="salary_amt" value="0" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Peticash Advance Amount : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="advance_amt" name="advance_amt" value="0" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Peticash Purchase Amount : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="purchase_amt" name="purchase_amt" value="0" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Peticash Available Amount : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="pending_amt" name="pending_amt" value="0" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -244,6 +303,32 @@
 
         $("#project_id").on('change', function(){
             getProjectSites($('#project_id').val());
+        });
+
+        $("#statsBtn").on('click',function(e){
+            e.stopPropagation();
+            var siteId = $("#site_id").val();
+            $.ajax({
+                url:'/peticash/stats-salary',
+                type: "POST",
+                data: {
+                    _token : $("input[name='_token']").val(),
+                    site_id : siteId
+                },
+                success: function(data, textStatus, xhr){
+                    $("#allocated_amt").val(data.allocated_amt);
+                    $("#salary_amt").val(data.salary_amt);
+                    $("#advance_amt").val(data.advance_amt);
+                    $("#purchase_amt").val(data.purchase_amt);
+                    $("#pending_amt").val(data.pending_amt);
+                    $("#site_name").val(data.site_name);
+                    $("#statsModal").modal('show');
+                },
+                error: function(data){
+
+                }
+            });
+
         });
 
         $("input[name='material_name']").on('click',function(){
