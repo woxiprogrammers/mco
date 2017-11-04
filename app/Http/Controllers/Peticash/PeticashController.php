@@ -866,7 +866,7 @@ class PeticashController extends Controller
             $projectOptions = array();
             $status = 500;
             $data = [
-                'actions' => 'Create New Bill',
+                'actions' => 'Get Project from client',
                 'params' => $request->all(),
                 'exception' => $e->getMessage(),
             ];
@@ -892,7 +892,7 @@ class PeticashController extends Controller
             $projectSitesOptions = array();
             $status = 500;
             $data = [
-                'actions' => 'Create New Bill',
+                'actions' => 'Get Project Site',
                 'params' => $request->all(),
                 'exception' => $e->getMessage(),
             ];
@@ -900,6 +900,40 @@ class PeticashController extends Controller
             abort(500);
         }
         return response()->json($projectSitesOptions,$status);
+    }
+
+    public function getSalaryStats(Request $request){
+        try{
+            $status = 200;
+            $stats = array();
+            $sitesLbl = "All Sites";
+            if($request->site_id == 0) {
+                $stats['allocated_amt']  = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
+                $stats['salary_amt'] = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id'))->where('project_site_id','!=',0)->sum('payable_amount');
+                $stats['advance_amt'] = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id'))->where('project_site_id','!=',0)->sum('amount');
+                $stats['purchase_amt'] = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','=','PURCHASE')->pluck('id'))->where('project_site_id','!=',0)->sum('bill_amount');
+                $stats['pending_amt'] = $stats['allocated_amt'] - ($stats['salary_amt'] + $stats['advance_amt'] + $stats['purchase_amt'] );
+                $stats['site_name'] = $sitesLbl;
+            } else {
+                $stats['allocated_amt']  = PeticashSiteTransfer::where('project_site_id','=',$request->site_id)->sum('amount');
+                $stats['salary_amt'] = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id'))->where('project_site_id','=',$request->site_id)->sum('payable_amount');
+                $stats['advance_amt'] = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id'))->where('project_site_id','=',$request->site_id)->sum('amount');
+                $stats['purchase_amt'] = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','=','PURCHASE')->pluck('id'))->where('project_site_id','=',$request->site_id)->sum('bill_amount');
+                $stats['pending_amt'] = $stats['allocated_amt'] - ($stats['salary_amt'] + $stats['advance_amt'] + $stats['purchase_amt'] );
+                $stats['site_name'] = ProjectSite::findorfail($request->site_id)['name'];
+            }
+        } catch (\Exception $e) {
+            $stats = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Get Peticash Salary Stats',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($stats,$status);
     }
 
 }
