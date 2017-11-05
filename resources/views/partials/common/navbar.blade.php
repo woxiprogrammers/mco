@@ -291,21 +291,28 @@
                             </li>
                         </ul>
                     </li>
+                    <?php $hasPeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('peticash');?>
+                    @if($hasPeticashPermission  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Peticash
                             <span class="arrow"></span>
                         </a>
                         <ul class="dropdown-menu pull-left">
+                            @if($user->hasPermissionTo('view-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                             <li aria-haspopup="true">
                                 <a href="/peticash/master-peticash-account/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-money"></i> Master Peticash Account
                                 </a>
                             </li>
+                            @endif
+                            @if($user->hasPermissionTo('view-sitewise-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                             <li aria-haspopup="true">
                                 <a href="/peticash/sitewise-peticash-account/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Sitewise Peticash Account
                                 </a>
                             </li>
+                            @endif
+                            @if($user->hasPermissionTo('approve-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                             <li aria-haspopup="true"  class="dropdown-submenu">
                                 <a href="javascript:void(0);" class="nav-link nav-toggle ">
                                     <i class="fa fa-check"></i> Peticash Request Approval
@@ -323,13 +330,20 @@
                                     </li>
                                 </ul>
                             </li>
+                            @endif
+                            @if($user->hasPermissionTo('view-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                             <li aria-haspopup="true">
-                                <a href="/peticash/peticash-management/manage" class="nav-link nav-toggle ">
+                               <!-- <a href="/peticash/peticash-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-database"></i> Peticash Management
+                                </a>-->
+                                <a href="#" class="nav-link nav-toggle ">
                                     <i class="fa fa-database"></i> Peticash Management
                                 </a>
                             </li>
+                            @endif
                         </ul>
                     </li>
+                    @endif
                 </ul>
             </li>
         </div>

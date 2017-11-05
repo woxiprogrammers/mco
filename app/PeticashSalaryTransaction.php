@@ -31,4 +31,7 @@ class PeticashSalaryTransaction extends Model
     public function paymentType(){
         return $this->belongsTo('App\PaymentType','payment_type_id');
     }
+    public function employee(){
+        return $this->belongsTo('App\Employee','employee_id');
+    }
 }

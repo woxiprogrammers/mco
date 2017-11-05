@@ -6,12 +6,14 @@ use App\Client;
 use App\Employee;
 use App\PaymentType;
 use App\PeticashSalaryTransaction;
+use App\PeticashSalaryTransactionImages;
 use App\PeticashSiteTransfer;
 use App\PeticashStatus;
 use App\PeticashTransactionType;
 use App\Project;
 use App\ProjectSite;
 use App\PurcahsePeticashTransaction;
+use App\PurchasePeticashTransactionImage;
 use App\PurchaseOrderBillPayment;
 use App\Quotation;
 use App\QuotationStatus;
@@ -398,7 +400,7 @@ class PeticashController extends Controller
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
-                                    <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <a onclick="detailsPurchaseModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                         <i class="icon-docs"></i> Details
                                     </a>
                                 </li>
@@ -418,6 +420,11 @@ class PeticashController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a onclick="detailsPurchaseModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Details
+                                    </a>
+                                </li>
                                 <li>
                                     <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                         <i class="icon-docs"></i> Edit With Approve
@@ -440,7 +447,7 @@ class PeticashController extends Controller
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
-                                <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                <a onclick="detailsPurchaseModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                     <i class="icon-docs"></i> Details
                                 </a>
                                 </li>
@@ -461,7 +468,7 @@ class PeticashController extends Controller
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
-                                <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                <a onclick="detailsPurchaseModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                     <i class="icon-docs"></i> Details
                                 </a>
                             </li>
@@ -600,7 +607,7 @@ class PeticashController extends Controller
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
-                                    <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                         <i class="icon-docs"></i> Details
                                     </a>
                                 </li>
@@ -622,7 +629,7 @@ class PeticashController extends Controller
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
-                                <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                     <i class="icon-docs"></i> Details
                                 </a>
                                 </li>
@@ -644,7 +651,7 @@ class PeticashController extends Controller
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>
-                                <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                     <i class="icon-docs"></i> Details
                                 </a>
                             </li>
@@ -748,6 +755,7 @@ class PeticashController extends Controller
 
     public function masterAccountListing(Request $request){
         try{
+            $user = Auth::user();
             $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get()->toArray();;
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
             $iTotalRecords = count($masterAccountData);
@@ -755,6 +763,13 @@ class PeticashController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($masterAccountData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($masterAccountData); $iterator++,$pagination++ ){
+                $editdata = '';
+                if($user->hasPermissionTo('edit-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin')){
+                    $editdata =  '<li>
+                                <a href="/peticash/master-peticash-account/editpage/'.$masterAccountData[$pagination]['id'].'">
+                                <i class="icon-docs"></i> Edit </a>
+                            </li>';
+                }
                 $records['data'][$iterator] = [
                     $masterAccountData[$pagination]['id'],
                     User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
@@ -769,10 +784,7 @@ class PeticashController extends Controller
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/peticash/master-peticash-account/editpage/'.$masterAccountData[$pagination]['id'].'">
-                                <i class="icon-docs"></i> Edit </a>
-                            </li>
+                           '.$editdata.'
                         </ul>
                     </div>'
                 ];
@@ -795,7 +807,7 @@ class PeticashController extends Controller
 
     public function sitewiseAccountListing(Request $request){
         try{
-
+            $user = Auth::user();
             if($request->has('search_name')){
                 $projectSites = ProjectSite::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->pluck('id');
                 $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->whereIn('project_site_id',$projectSites)->orderBy('created_at','desc')->get()->toArray();;
@@ -808,6 +820,13 @@ class PeticashController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($sitewiseAccountData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($sitewiseAccountData); $iterator++,$pagination++ ){
+                $editdata = '';
+                if($user->hasPermissionTo('edit-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin')){
+                    $editdata = '<li>
+                                <a href="/peticash/sitewise-peticash-account/editpage/'.$sitewiseAccountData[$pagination]['id'].'">
+                                <i class="icon-docs"></i> Edit </a>
+                            </li>';
+                }
                 $records['data'][$iterator] = [
                     $sitewiseAccountData[$pagination]['id'],
                     User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
@@ -823,10 +842,7 @@ class PeticashController extends Controller
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/peticash/sitewise-peticash-account/editpage/'.$sitewiseAccountData[$pagination]['id'].'">
-                                <i class="icon-docs"></i> Edit </a>
-                            </li>
+                            '.$editdata.'
                         </ul>
                     </div>'
                 ];
@@ -934,6 +950,97 @@ class PeticashController extends Controller
             abort(500);
         }
         return response()->json($stats,$status);
+    }
+
+    public function getSalaryTransactionDetails(Request $request){
+        try{
+            $salaryTransactionData = PeticashSalaryTransaction::where('id',$request['txn_id'])->first();
+            $data['peticash_transaction_id'] = $salaryTransactionData->id;
+            $data['employee_name'] = $salaryTransactionData->employee->name;
+            $data['project_site_name'] = $salaryTransactionData->projectSite->name;
+            $data['amount'] = $salaryTransactionData->amount;
+            $data['payable_amount'] = $salaryTransactionData->payable_amount;
+            $data['reference_user_name'] = $salaryTransactionData->referenceUser->first_name.' '.$salaryTransactionData->referenceUser->last_name;
+            $data['date'] = date('l, d F Y',strtotime($salaryTransactionData->date));
+            $data['days'] = $salaryTransactionData->days;
+            $data['remark'] = $salaryTransactionData->remark;
+            $data['admin_remark'] = ($salaryTransactionData->admin_remark == null) ? '' : $salaryTransactionData->admin_remark;
+            $data['peticash_transaction_type'] = $salaryTransactionData->peticashTransactionType->name;
+            $data['peticash_status_name'] = $salaryTransactionData->peticashStatus->name;
+            $data['payment_type'] = $salaryTransactionData->paymentType->name;
+            $transactionImages = PeticashSalaryTransactionImages::where('peticash_salary_transaction_id',$request['txn_id'])->get();
+            if(count($transactionImages) > 0){
+                $data['list_of_images'] = $this->getUploadedImages($transactionImages,$request['txn_id']);
+            }else{
+                $data['list_of_images'][0]['image_url'] = null;
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $message = $e->getMessage();
+            $status = 500;
+            $data = [
+                'action' => 'Get Salary Transaction Listing',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+        }
+
+        return response()->json($data,$status);
+    }
+
+    public function getUploadedImages($transactionImages,$transactionId){
+        $iterator = 0;
+        $images = array();
+        $sha1SalaryTransactionId = sha1($transactionId);
+        $imageUploadPath = env('PETICASH_SALARY_TRANSACTION_IMAGE_UPLOAD').$sha1SalaryTransactionId;
+        foreach($transactionImages as $index => $image){
+            $images[$iterator]['image_url'] = $imageUploadPath.DIRECTORY_SEPARATOR.$image->name;
+            $iterator++;
+        }
+        return $images;
+    }
+
+    public function getPurchaseTransactionDetails(Request $request){
+        try{
+            $purchaseTransactionData = PurcahsePeticashTransaction::where('id',$request['txn_id'])->first();
+            $data['peticash_transaction_id'] = $purchaseTransactionData->id;
+            $data['name'] = $purchaseTransactionData->name;
+            $data['project_site_name'] = $purchaseTransactionData->projectSite->name;
+            $data['grn'] = $purchaseTransactionData->grn;
+            $data['date'] = date('l, d F Y',strtotime($purchaseTransactionData->date));
+            $data['source_name'] = $purchaseTransactionData->source_name;
+            $data['peticash_transaction_type'] = $purchaseTransactionData->peticashTransactionType->name;
+            $data['component_type'] = $purchaseTransactionData->componentType->name;
+            $data['quantity'] = $purchaseTransactionData->quantity;
+            $data['unit_name'] = $purchaseTransactionData->unit->name;
+            $data['bill_number'] = ($purchaseTransactionData->bill_number != null) ? $purchaseTransactionData->bill_number : '';
+            $data['bill_amount'] = ($purchaseTransactionData->bill_amount != null) ? $purchaseTransactionData->bill_amount : '';
+            $data['vehicle_number'] = ($purchaseTransactionData->vehicle_number != null) ? $purchaseTransactionData->vehicle_number : '';
+            $data['in_time'] = ($purchaseTransactionData->in_time != null) ? $purchaseTransactionData->in_time : '';
+            $data['out_time'] = ($purchaseTransactionData->out_time) ? $purchaseTransactionData->out_time : '';
+            $data['reference_number'] = ($purchaseTransactionData->reference_number != null) ? $purchaseTransactionData->reference_number : '';
+            $data['payment_type'] = $purchaseTransactionData->paymentType->name;
+            $data['peticash_status_name'] = $purchaseTransactionData->peticashStatus->name;
+            $data['remark'] = ($purchaseTransactionData->remark != null) ? $purchaseTransactionData->remark : '' ;
+            $data['admin_remark'] = ($purchaseTransactionData->admin_remark == null) ? '' : $purchaseTransactionData->admin_remark;
+            $transactionImages = PurchasePeticashTransactionImage::where('purchase_peticash_transaction_id',$purchaseTransactionData->id)->get();
+            if(count($transactionImages) > 0){
+                $data['list_of_images'] = $this->getUploadedImages($transactionImages,$purchaseTransactionData->id);
+            }else{
+                $data['list_of_images'][0]['image_url'] = null;
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => 'Get Purchase Transaction Detail',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+        }
+        return response()->json($data,$status);
     }
 
 }
