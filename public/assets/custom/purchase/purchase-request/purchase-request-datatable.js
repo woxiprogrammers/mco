@@ -160,7 +160,9 @@ function selectProject(nameProject,id) {
         }
     });
     $('#Assetsearchbox').addClass('assetTypeahead');
+    $('#component_id').val(6);
     assetList.initialize();
+    var unitName = "Nos";
     $('.assetTypeahead').typeahead(null, {
         displayKey: 'name',
         engine: Handlebars,
@@ -181,7 +183,7 @@ function selectProject(nameProject,id) {
         var options = '';
         $.each( POData, function( key, value ) {
             var unitId = value.unit_id;
-            var unitName = value.unit_name;
+            unitName = value.unit_name;
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
         $('#unitDrpdn').html('');
@@ -213,6 +215,7 @@ function selectProject(nameProject,id) {
         }
     });
     $('#searchbox').addClass('typeahead');
+    $('#component_id').val(4);
     materialList.initialize();
     $('.typeahead').typeahead(null, {
         displayKey: 'name',

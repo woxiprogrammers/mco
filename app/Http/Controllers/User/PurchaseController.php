@@ -37,7 +37,8 @@ class PurchaseController extends Controller
     }
     public function getCreateView(Request $request){
         $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
-        return view('purchase/material-request/create')->with(compact('nosUnitId'));
+        $units = Unit::select('id','name')->get()->toArray();
+        return view('purchase/material-request/create')->with(compact('nosUnitId','units'));
     }
     public function getMaterialRequestListing(Request $request){
       try{

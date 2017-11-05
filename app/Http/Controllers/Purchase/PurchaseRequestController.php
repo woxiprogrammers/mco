@@ -159,7 +159,6 @@ class PurchaseRequestController extends Controller
                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
             }
             $request->session()->flash('success', 'Purchase Request created successfully.');
-            return redirect('purchase/purchase-request/create');
         }catch (\Exception $e){
             $data = [
                 'action' => 'Create Purchase Request',
@@ -168,6 +167,7 @@ class PurchaseRequestController extends Controller
             ];
             Log::critical(json_encode($data));
         }
+        return redirect('purchase/purchase-request/create');
     }
 
     public function purchaseRequestListing(Request $request){

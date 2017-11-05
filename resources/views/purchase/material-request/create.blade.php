@@ -153,14 +153,15 @@
                                     <div class="modal-body" style="padding:40px 50px;">
                                             <div class="form-group">
                                                 <input type="text" class="form-control empty" id="searchbox"  placeholder="Enter material name" >
-
                                             </div>
                                             <div class="form-group">
                                                 <input type="number" class="form-control empty" id="qty"  placeholder="Enter quantity">
                                             </div>
                                             <div class="form-group" id="unitDrpdn">
                                                 <select id="materialUnit" style="width: 80%;height: 20px;text-align: center">
-
+                                                    @foreach($units as $unit)
+                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                        @endforeach
                                                 </select>
                                             </div>
                                             <div class="form-group">
