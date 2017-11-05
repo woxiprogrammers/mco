@@ -141,6 +141,9 @@ class PurchaseRequestController extends Controller
             $purchaseRequestData['behalf_of_user_id'] = $requestData['user_id'];
             $purchaseRequestedStatus = PurchaseRequestComponentStatuses::where('slug','purchase-requested')->first();
             $purchaseRequestData['purchase_component_status_id'] = $purchaseRequestedStatus->id;
+            $today = date('Y-m-d');
+            $purchaseRequestCount = PurchaseRequest::whereDate('created_at',$today)->count();
+            $purchaseRequestData['serial_no'] = ($purchaseRequestCount+1);
             $purchaseRequest = PurchaseRequest::create($purchaseRequestData);
             foreach($materialRequestComponentIds as $materialRequestComponentId){
                 PurchaseRequestComponent::create([

@@ -42,7 +42,7 @@ class PurchaseController extends Controller
     }
     public function getMaterialRequestListing(Request $request){
       try{
-          $materialRequests = MaterialRequests::get();
+          $materialRequests = MaterialRequests::orderBy('id','desc')->get();
           $materialRequestList = array();
           $iterator = 0;
           foreach($materialRequests as $key => $materialRequest){
@@ -62,8 +62,8 @@ class PurchaseController extends Controller
                   $materialRequestList[$iterator]['project_name'] =$pro->name;
                   $materialRequestList[$iterator]['client_name'] =$pro->client->company;
                   $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
-                  $rm_id=2;
-                  $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request-component',$materialRequest['project_site_id'],$materialRequest['created_at']);
+
+                  $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request-component',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequestComponents->serial_no);
                   $iterator++;
               }
           }
@@ -528,7 +528,7 @@ class PurchaseController extends Controller
 
     public function getMaterialRequestWiseListing(Request $request){
           try{
-              $materialRequests = MaterialRequests::get();
+              $materialRequests = MaterialRequests::orderBy('id','desc')->get();
               $materialRequestList = array();
               $iterator = 0;
               foreach($materialRequests as $key => $materialRequest){
@@ -537,8 +537,7 @@ class PurchaseController extends Controller
                   $materialRequestList[$iterator]['project_name'] =$pro->name;
                   $materialRequestList[$iterator]['client_name'] =$pro->client->company;
                   $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
-                  $rm_id=2;
-                  $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at']);
+                  $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequest->serial_no);
                   $iterator++;
               }
               $iTotalRecords = count($materialRequestList);
@@ -557,13 +556,10 @@ class PurchaseController extends Controller
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
-                        <li>
-                                <a href="/purchase/material-request/edit/">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
                             <li>
-                                <a data-toggle="modal" data-target="#remarkModal">
-                                    <i class="icon-tag"></i> Approve / Disapprove </a>
+                                <a href="/purchase/material-request/edit/">
+                                    <i class="icon-docs"></i> Edit 
+                                </a>
                             </li>
                         </ul>
                     </div>'

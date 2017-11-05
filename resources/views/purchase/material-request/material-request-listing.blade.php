@@ -44,16 +44,6 @@
                                                 </label>
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        <div class="table-actions-wrapper right">
-                                                            <span> </span>
-                                                            <select class="table-group-action-input form-control input-inline input-small input-sm">
-                                                                <option value="">Select...</option>
-                                                                <option value="Cancel">Approve</option>
-                                                                <option value="Cancel">Disapprove</option>
-                                                            </select>
-                                                            <button class="btn btn-sm green table-group-action-submit">
-                                                                <i class="fa fa-check"></i> Submit</button>
-                                                        </div>
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="materialRequestWise">
                                                             <thead>
                                                             <tr>

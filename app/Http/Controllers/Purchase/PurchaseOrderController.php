@@ -366,10 +366,10 @@ class PurchaseOrderController extends Controller
 
     public function createPurchaseOrder(Request $request){
         try{
-            $today = Carbon::today();
+            $today = date('Y-m-d');
             foreach($request->purchase as $vendorId => $components){
                 $approvePurchaseOrderData = $disapprovePurchaseOrderData = array('vendor_id' => $vendorId, 'purchase_request_id' => $request->purchase_request_id);
-                $todaysCount = PurchaseOrder::where('created_at','>=',$today)->count();
+                $todaysCount = PurchaseOrder::whereDate('created_at',$today)->count();
                 $approvedPurchaseOrder = $disapprovePurchaseOrder = null;
                 foreach($components as $purchaseRequestComponentId => $component){
                     $purchaseOrderComponentData = array();
