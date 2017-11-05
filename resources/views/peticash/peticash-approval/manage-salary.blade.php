@@ -154,7 +154,7 @@
                                             <div class="modal-dialog">
                                                 <form class="modal-content" method="post">
                                                     {!! csrf_field() !!}
-                                                    <input type="hidden" name="component_id[]" id="componentId">
+                                                    <input type="hidden" name="componentId" id="componentId" value="0">
                                                     <div class="modal-header">
                                                         <div class="row">
                                                             <div class="col-md-4"></div>
@@ -251,11 +251,113 @@
                                             </div>
                                         </div>
 
+                                        <div class="modal fade" id="detailsSalaryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <form class="modal-content" method="post">
+                                                    {!! csrf_field() !!}
+                                                    <div class="modal-header">
+                                                        <div class="row">
+                                                            <div class="col-md-8"><center><h4 class="modal-title" id="exampleModalLongTitle">Salary Transaction Details : </h4></center></div>
+                                                            <div class="col-md-4"><button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-body">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-12" style="text-align: right;">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Employee Name : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="employee_name" name="employee_name" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Project Site Name : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="project_site_name" name="project_site_name" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Transaction Type  : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="txn_type" name="txn_type" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Amount : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="txn_amount" name="txn_amount" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Payable Amount : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="payable_amount" name="payable_amount" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Requested By : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="reference_user_name" name="reference_user_name" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Date  : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="txn_date" name="txn_date" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Working Days  : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="working_days" name="working_days" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Remark  : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="txn_remark" name="txn_remark" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Admin Remark  : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="admin_remark" name="admin_remark" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                  </form>
+                                            </div>
+                                        </div>
+
                                         <div class="modal fade" id="editRequestApprovalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <form class="modal-content" method="post">
                                                     {!! csrf_field() !!}
-                                                    <input type="hidden" name="component_id[]" id="componentId">
+                                                    <input type="hidden" name="edit_component_id" id="edit_component_id">
                                                     <div class="modal-header">
                                                         <div class="row">
                                                             <div class="col-md-4"></div>
@@ -313,14 +415,13 @@
                 txnIds[i] = $(this).val();
             });
             if (txnIds.length > 0) {
-                $("#remarkApproveModal #componentId").val(componentId);
                 $("#remarkApproveModal").modal('show');
             } else {
-                alert("Please Select atleast one transaction.")
+                alert("Please Select at least one transaction.")
             }
         });
 
-        $("input[name='emp_id']").on('click',function(){
+        $("input[name='emp_id']").on('keyup',function(){
             var client_id = $('#client_id').val();
             var project_id = $('#project_id').val();
             var site_id = $('#site_id').val();
@@ -341,6 +442,7 @@
             $("input[name='search_name']").val(search_name);
             $("input[name='emp_id']").val(emp_id);
             $("input[name='status']").val(status_id);
+            $(".filter-submit").trigger('click');
         });
 
         $("#status_id").on('change',function(){
@@ -364,6 +466,7 @@
             $("input[name='search_name']").val(search_name);
             $("input[name='emp_id']").val(emp_id);
             $("input[name='status']").val(status_id);
+            $(".filter-submit").trigger('click');
         });
 
         $("#search-withfilter").on('click',function(){
@@ -397,8 +500,37 @@
             $("input:checkbox:checked").each(function(i){
                 txnIds[i] = $(this).val();
             });
-            if (txnIds.length > 0) {
+            var txnValue = $("#componentId").val();
+            if (txnValue == 0) {
+                if (txnIds.length > 0) {
+                    if (remark != "") {
+                        $.ajax({
+                            url:'/peticash/change-status',
+                            type: "POST",
+                            data: {
+                                _token: $("input[name='_token']").val(),
+                                txn_ids: txnIds,
+                                status : "disapproved",
+                                remark : remark
+                            },
+                            success: function(data, textStatus, xhr){
+                                $("#remarkApproveModal").modal('hide');
+                                $("#componentId").val(0);
+                                alert(data);
+                                $(".filter-submit").trigger('click');
+                            },
+                            error: function(data){
+                            }
+                        });
+                    } else {
+                        alert("Remark should not be empty.");
+                    }
+                } else {
+                    alert("Please Select at least one transaction.");
+                }
+            } else {
                 if (remark != "") {
+                    txnIds[0] = txnValue;
                     $.ajax({
                         url:'/peticash/change-status',
                         type: "POST",
@@ -410,9 +542,9 @@
                         },
                         success: function(data, textStatus, xhr){
                             $("#remarkApproveModal").modal('hide');
+                            $("#componentId").val(0);
                             alert(data);
                             $(".filter-submit").trigger('click');
-
                         },
                         error: function(data){
                         }
@@ -420,8 +552,6 @@
                 } else {
                     alert("Remark should not be empty.");
                 }
-            } else {
-                alert("Please Select at least one transaction.");
             }
         });
 
@@ -432,8 +562,37 @@
             $("input:checkbox:checked").each(function(i){
                 txnIds[i] = $(this).val();
             });
-            if (txnIds.length > 0) {
+            var txnValue = $("#componentId").val();
+            if (txnValue == 0) {
+                if (txnIds.length > 0) {
+                    if (remark != "") {
+                        $.ajax({
+                            url:'/peticash/change-status',
+                            type: "POST",
+                            data: {
+                                _token: $("input[name='_token']").val(),
+                                txn_ids: txnIds,
+                                status : "approved",
+                                remark : remark
+                            },
+                            success: function(data, textStatus, xhr){
+                                $("#remarkApproveModal").modal('hide');
+                                $("#componentId").val(0);
+                                alert(data);
+                                $(".filter-submit").trigger('click');
+                            },
+                            error: function(data){
+                            }
+                        });
+                    } else {
+                        alert("Remark should not be empty.");
+                    }
+                } else {
+                    alert("Please Select at least one transaction.");
+                }
+            } else {
                 if (remark != "") {
+                    txnIds[0] = txnValue;
                     $.ajax({
                         url:'/peticash/change-status',
                         type: "POST",
@@ -445,19 +604,16 @@
                         },
                         success: function(data, textStatus, xhr){
                             $("#remarkApproveModal").modal('hide');
+                            $("#componentId").val(0);
                             alert(data);
                             $(".filter-submit").trigger('click');
-
                         },
                         error: function(data){
-
                         }
                     });
                 } else {
                     alert("Remark should not be empty.");
                 }
-            } else {
-                alert("Please Select at least one transaction.");
             }
         });
 
@@ -496,22 +652,40 @@
     });
 
     function openApproveModal(componentId){
-        var remark = $("#remark").val();
-        var txnIds = [];
-        $("input:checkbox:checked").each(function(i){
-            txnIds[i] = $(this).val();
-        });
-        if (txnIds.length > 0) {
-            $("#remarkApproveModal").modal('show');
-        } else {
-            alert("Please Select at least one transaction.");
-        }
-
+        $("#componentId").val(componentId);
+        $("#remarkApproveModal").modal('show');
     }
 
-    function openEditRequestApprovalModal(componentId){
-        $("#editRequestApprovalForm #componentId").val(componentId);
+    function openEditRequestApprovalModal(editcomponentId){
+        $("#editRequestApprovalForm #edit_component_id").val(editcomponentId);
         $("#editRequestApprovalForm").modal('show');
+    }
+
+    function detailsSalaryModal(txnId) {
+        $.ajax({
+            url:'/peticash/peticash-approval-request/manage-salary-details-ajax',
+            type: "POST",
+            data: {
+                _token : $("input[name='_token']").val(),
+                txn_id : txnId
+            },
+            success: function(data, textStatus, xhr){
+                $("#employee_name").val(data.employee_name);
+                $("#project_site_name").val(data.project_site_name);
+                $("#txn_amount").val(data.amount);
+                $("#payable_amount").val(data.payable_amount);
+                $("#reference_user_name").val(data.reference_user_name);
+                $("#txn_date").val(data.date);
+                $("#working_days").val(data.days);
+                $("#txn_remark").val(data.remark);
+                $("#admin_remark").val(data.admin_remark);
+                $("#txn_type").val(data.peticash_transaction_type);
+                $("#detailsSalaryModal").modal('show');
+            },
+            error: function(data){
+
+            }
+        });
     }
 
     function getProjects(client_id){
