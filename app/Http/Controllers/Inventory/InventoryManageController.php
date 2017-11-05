@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Client;
+use App\FuelAssetReading;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
@@ -13,6 +14,7 @@ use App\ProjectSite;
 use App\Quotation;
 use App\Unit;
 use App\UnitConversion;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +42,15 @@ class InventoryManageController extends Controller
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
             $user = Auth::user();
+            if($inventoryComponent->is_material == true){
+                $isReadingApplicable = false;
+            }else{
+                if($inventoryComponent->asset->assetTypes->slug != 'other'){
+                    $isReadingApplicable = true;
+                }else{
+                    $isReadingApplicable = false;
+                }
+            }
             if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
                 $clients = Client::join('projects','projects.client_id','=','clients.id')
                     ->join('project_sites','project_sites.project_id','=','projects.id')
@@ -57,7 +68,6 @@ class InventoryManageController extends Controller
                     ->distinct('name')
                     ->get();
             }
-
             if($inventoryComponent->is_material == true){
                 $materialInfo = Material::where('name','ilike',$inventoryComponent->name)->first();
                 if($materialInfo != null){
@@ -80,7 +90,7 @@ class InventoryManageController extends Controller
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients'));
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -366,5 +376,73 @@ class InventoryManageController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($response,$status);
+    }
+
+    public function inventoryComponentReadingListing(Request $request,$inventoryComponent){
+        try{
+            $status = 200;
+            $inventoryComponentFuelReadingData = FuelAssetReading::where('inventory_component_id',$inventoryComponent->id)->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($inventoryComponentFuelReadingData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($inventoryComponentFuelReadingData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentFuelReadingData); $iterator++,$pagination++ ){
+                $unitsUsed = $inventoryComponentFuelReadingData[$pagination]->stop_reading - $inventoryComponentFuelReadingData[$pagination]->start_reading;
+                $fuelConsumed = '-';
+                $electricityConsumed = '-';
+                if($inventoryComponentFuelReadingData[$pagination]->fuel_per_unit != null){
+                    $fuelConsumed = $unitsUsed * $inventoryComponentFuelReadingData[$pagination]->fuel_per_unit;
+                }
+                if($inventoryComponentFuelReadingData[$pagination]->electricity_per_unit != null){
+                    $electricityConsumed = $unitsUsed * $inventoryComponentFuelReadingData[$pagination]->electricity_per_unit;
+                }
+                $records['data'][$iterator] = [
+                    $inventoryComponentFuelReadingData[$pagination]->start_reading,
+                    $inventoryComponentFuelReadingData[$pagination]->stop_reading,
+                    $inventoryComponentFuelReadingData[$pagination]->start_time,
+                    $inventoryComponentFuelReadingData[$pagination]->stop_time,
+                    $unitsUsed,
+                    $inventoryComponentFuelReadingData[$pagination]->fuel_per_unit,
+                    $inventoryComponentFuelReadingData[$pagination]->electricity_per_unit,
+                    $fuelConsumed,
+                    $electricityConsumed,
+                    $inventoryComponentFuelReadingData[$pagination]->top_up,
+                    $inventoryComponentFuelReadingData[$pagination]->top_up_time,
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory component Fuel reading listing',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $records = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($records,$status);
+    }
+
+    public function addInventoryComponentReading(Request $request,$inventoryComponent){
+        try{
+            $data = $request->except(['_token']);
+            $user = Auth::user();
+            $data['inventory_component_id'] = $inventoryComponent->id;
+            $data['user_id'] = $user->id;
+            $inventoryComponentReading = FuelAssetReading::create($data);
+            $request->session()->flash('success','Asset Reading saved successfully.');
+            return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add Inventory component asset Reading',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }

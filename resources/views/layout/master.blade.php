@@ -32,6 +32,7 @@
     <link rel="shortcut icon" href="favicon.ico" /> </head>
 <!-- END HEAD -->
 <body class="page-container-bg-solid page-md">
+        @yield('nav-bar')
         @yield('content')
         <!-- <div class="page-wrapper-row">
             <div class="page-wrapper-bottom">
