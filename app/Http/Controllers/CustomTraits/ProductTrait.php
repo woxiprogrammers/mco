@@ -34,7 +34,8 @@ trait ProductTrait{
 
     public function getCreateView(Request $request) {
         try{
-            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $miscellaneousCategoryIds = Category::where('is_miscellaneous',true)->pluck('id');
+            $categories = Category::where('is_active', true)->whereNotIn('id',$miscellaneousCategoryIds)->select('id','name')->orderBy('name','asc')->get()->toArray();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
             $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             return view('admin.product.create')->with(compact('categories','profitMargins','units'));
