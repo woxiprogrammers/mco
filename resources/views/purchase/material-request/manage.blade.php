@@ -201,7 +201,6 @@
                 $(".multiple-select-checkbox:checkbox:checked").each(function(){
                     $('#multipleStatusChangeSubmit').closest('form').append('<input type="hidden" name="component_id[]" value="'+$(this).val()+'">');
                 });
-                console.log(selectComponentIds);
                 $('#multipleStatusChangeSubmit').closest('form').submit();
             }else{
                 alert(' Please select atleast one material request component.!')
@@ -210,9 +209,6 @@
     });
 
     function openApproveModal(componentId,unitId,quantity,unitEditable){
-        console.log(componentId);
-        console.log(unitId);
-        console.log(quantity);
         $("#remarkModal #componentId").val(componentId);
         $("#remarkModal #quantity").val(quantity);
         $("#remarkModal #unitId option[value="+unitId+"]").prop('selected', true);
