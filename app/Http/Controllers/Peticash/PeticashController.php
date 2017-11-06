@@ -481,11 +481,15 @@ class PeticashController extends Controller
                         </div>';
                         break;
                 }
+                $unit = '-';
+                if ($salaryTransactionData[$pagination]['unit_id'] != null) {
+                    $unit = Unit::findOrFail($salaryTransactionData[$pagination]['unit_id'])->toArray()['name'];
+                }
                 $records['data'][$iterator] = [
                     $salaryTransactionData[$pagination]['id'],
                     $salaryTransactionData[$pagination]['name'],
                     $salaryTransactionData[$pagination]['quantity'],
-                    Unit::findOrFail($salaryTransactionData[$pagination]['unit_id'])->toArray()['name'],
+                    $unit,
                     $salaryTransactionData[$pagination]['bill_amount'],
                     User::findOrFail($salaryTransactionData[$pagination]['reference_user_id'])->toArray()['first_name']." ".User::findOrFail($salaryTransactionData[$pagination]['reference_user_id'])->toArray()['last_name'],
                     date('d M Y',strtotime($salaryTransactionData[$pagination]['date'])),
@@ -1037,7 +1041,11 @@ class PeticashController extends Controller
             $data['peticash_transaction_type'] = $purchaseTransactionData->peticashTransactionType->name;
             $data['component_type'] = $purchaseTransactionData->componentType->name;
             $data['quantity'] = $purchaseTransactionData->quantity;
-            $data['unit_name'] = $purchaseTransactionData->unit->name;
+            $unit = "-";
+            if($purchaseTransactionData->unit) {
+                $unit =  $purchaseTransactionData->unit->name;
+            }
+            $data['unit_name'] = $unit;
             $data['bill_number'] = ($purchaseTransactionData->bill_number != null) ? $purchaseTransactionData->bill_number : '';
             $data['bill_amount'] = ($purchaseTransactionData->bill_amount != null) ? $purchaseTransactionData->bill_amount : '';
             $data['vehicle_number'] = ($purchaseTransactionData->vehicle_number != null) ? $purchaseTransactionData->vehicle_number : '';
