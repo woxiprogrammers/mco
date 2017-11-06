@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Purchase;
 
 use App\Category;
 use App\CategoryMaterialRelation;
-use App\Http\Controllers\CustomTraits\Purchase\PurchaseTrait;
 use App\MaterialRequestComponents;
 use App\MaterialVersion;
 use App\PaymentType;
@@ -13,19 +12,16 @@ use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\PurchaseOrderBill;
-use App\PurchaseOrderBillImage;
 use App\PurchaseOrderBillPayment;
 use App\PurchaseOrderComponent;
 use App\PurchaseRequest;
 use App\User;
 use Carbon\Carbon;
-use Dompdf\Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redirect;
 use App\PurchaseOrderComponentImage;
 use App\PurchaseRequestComponent;
-use App\PurchaseRequestComponentStatuses;
 use App\PurchaseRequestComponentVendorRelation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -53,7 +49,8 @@ class PurchaseOrderController extends Controller
             $categories = Category::select('id','name')->get()->toArray();
             $purchaseRequests = array();
             foreach($adminApprovePurchaseRequestInfo as $purchaseRequest){
-                $purchaseRequests[$purchaseRequest['id']] = $this->getPurchaseIDFormat('purchase-request',$purchaseRequest['project_site_id'],strtotime($purchaseRequest['created_at']));
+
+                $purchaseRequests[$purchaseRequest['id']] = $this->getPurchaseIDFormat('purchase-request',$purchaseRequest['project_site_id'],($purchaseRequest['created_at']),$purchaseRequest['serial_no']);
             }
             return view('purchase/purchase-order/create')->with(compact('purchaseRequests','categories'));
         }catch(\Exception $e){
