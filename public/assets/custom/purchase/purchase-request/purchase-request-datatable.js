@@ -69,7 +69,7 @@ $("#clientSearchbox").keyup(function(){
     if($(this).val().length > 0){
         $.ajax({
             type: "POST",
-            url: "/purchase/material-request/get-clients",
+            url: "/purchase/material-request/get-clients?_token="+$("input[name='_token']").val(),
             data:'keyword='+$(this).val(),
             beforeSend: function(){
                 $.LoadingOverlay("hide");
@@ -87,10 +87,11 @@ $("#clientSearchbox").keyup(function(){
 });
 $("#projectSearchbox").keyup(function(){
     if($(this).val().length > 0){
+        var clientName = $("#clientSearchbox").val();
         $.ajax({
             type: "POST",
-            url: "/purchase/material-request/get-projects",
-            data:'keyword='+$(this).val(),
+            url: "/purchase/material-request/get-projects?_token="+$('input[name="_token"]').val(),
+            data:'keyword='+$(this).val()+'&client_name='+clientName,
             beforeSend: function(){
                 $.LoadingOverlay("hide");
                 $("#project-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
@@ -110,8 +111,8 @@ $("#userSearchbox").keyup(function(){
     if($(this).val().length > 0){
         $.ajax({
             type: "POST",
-            url: "/purchase/material-request/get-users",
-            data:'keyword='+$(this).val(),
+            url: "/purchase/material-request/get-users?_token="+$('input[name="_token"]').val(),
+            data:'keyword='+$(this).val()+'&project_site_name='+$("#projectSearchbox").val(),
             beforeSend: function(){
                 $.LoadingOverlay("hide");
                 $("#user-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
@@ -160,7 +161,9 @@ function selectProject(nameProject,id) {
         }
     });
     $('#Assetsearchbox').addClass('assetTypeahead');
+    $('#component_id').val(6);
     assetList.initialize();
+    var unitName = "Nos";
     $('.assetTypeahead').typeahead(null, {
         displayKey: 'name',
         engine: Handlebars,
@@ -181,7 +184,7 @@ function selectProject(nameProject,id) {
         var options = '';
         $.each( POData, function( key, value ) {
             var unitId = value.unit_id;
-            var unitName = value.unit_name;
+            unitName = value.unit_name;
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
         $('#unitDrpdn').html('');
@@ -213,6 +216,7 @@ function selectProject(nameProject,id) {
         }
     });
     $('#searchbox').addClass('typeahead');
+    $('#component_id').val(4);
     materialList.initialize();
     $('.typeahead').typeahead(null, {
         displayKey: 'name',

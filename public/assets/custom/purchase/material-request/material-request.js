@@ -208,7 +208,9 @@ function selectProject(nameProject,id) {
         }
     });
     $('#Assetsearchbox').addClass('assetTypeahead');
+    $('#component_id').val(6);
     assetList.initialize();
+    var unitName = "Nos";
     $('.assetTypeahead').typeahead(null, {
         displayKey: 'name',
         engine: Handlebars,
@@ -220,7 +222,7 @@ function selectProject(nameProject,id) {
                 'Unable to find any Result that match the current query',
                 '</div>'
             ].join('\n'),
-            suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+            suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
         },
     }).on('typeahead:selected', function (obj, datum) {
         var POData = datum.unit;
@@ -259,6 +261,7 @@ function selectProject(nameProject,id) {
         }
     });
     $('#searchbox').addClass('typeahead');
+    $('#component_id').val(4);
     materialList.initialize();
     $('.typeahead').typeahead(null, {
         displayKey: 'name',
@@ -295,3 +298,4 @@ function selectUser(id,id1) {
 
     $("#user-suggesstion-box").hide();
 }
+

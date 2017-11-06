@@ -65,6 +65,7 @@
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="row">
                                         <div class="col-md-12">
                                             <!-- BEGIN VALIDATION STATES-->
@@ -75,6 +76,7 @@
                                                             <table class="table table-striped table-bordered table-hover" id="purchaseRequest" style="overflow: scroll">
                                                                 <thead>
                                                                     <tr>
+                                                                    <th></th>
                                                                     <th style="width: 15%"> Material Name </th>
                                                                     <th style="width: 8%"> Quantity </th>
                                                                     <th style="width: 8%;"> Unit </th>
@@ -99,6 +101,38 @@
                                 </div>
                             </div>
                         </form>
+                        <div class="modal fade" id="myModal1" role="dialog">
+                            <div class="modal-dialog">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header" style="padding-bottom:10px">
+                                        <div class="row">
+                                            <div class="col-md-4"></div>
+                                            <div class="col-md-4"> Assign Category</div>
+                                            <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-body" style="padding:40px 50px;">
+                                        <form action="/purchase/purchase-order/create-material" method="post">
+                                            {!! csrf_field() !!}
+                                            <input type="hidden" id="vendor_id" name="vendor_id">
+                                            <input type="hidden" id="name" name="name">
+                                            <input type="hidden" id="rate_per_unit" name="rate_per_unit">
+                                            <input type="hidden" id="unit_id" name="unit_id">
+                                            <input type="hidden" id="hsn_code" name="hsn_code">
+                                            <select class="form-control" id="select_material_type" name="category" required>
+                                                <option>Select Category</option>
+                                                @foreach($categories as $category)
+                                                    <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                                @endforeach
+                                            </select>
+                                            <br>
+                                            <input type="submit" class="btn red pull-right">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -116,9 +150,6 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
-            /*$("#image").click(function(){
-                $("#ImageUpload").modal();
-            })*/
             $("#purchaseRequestId").on('click',function(){
                 var purchaseRequestId = $(this).val();
                 if(typeof purchaseRequestId == 'undefined' || purchaseRequestId == ''){
@@ -152,5 +183,6 @@
                 }
             });
         });
+
     </script>
 @endsection

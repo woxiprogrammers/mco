@@ -2,27 +2,26 @@
 
 namespace App\Http\Controllers\Purchase;
 
-use App\Http\Controllers\CustomTraits\Purchase\PurchaseTrait;
+use App\Category;
+use App\CategoryMaterialRelation;
 use App\MaterialRequestComponents;
+use App\MaterialVersion;
 use App\PaymentType;
 use App\PurchaseOrder;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\PurchaseOrderBill;
-use App\PurchaseOrderBillImage;
 use App\PurchaseOrderBillPayment;
 use App\PurchaseOrderComponent;
 use App\PurchaseRequest;
 use App\User;
 use Carbon\Carbon;
-use Dompdf\Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redirect;
 use App\PurchaseOrderComponentImage;
 use App\PurchaseRequestComponent;
-use App\PurchaseRequestComponentStatuses;
 use App\PurchaseRequestComponentVendorRelation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -47,11 +46,13 @@ class PurchaseOrderController extends Controller
                                             ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
                                             ->get()
                                             ->toArray();
+            $categories = Category::select('id','name')->get()->toArray();
             $purchaseRequests = array();
             foreach($adminApprovePurchaseRequestInfo as $purchaseRequest){
-                $purchaseRequests[$purchaseRequest['id']] = $this->getPurchaseIDFormat('purchase-request',$purchaseRequest['project_site_id'],strtotime($purchaseRequest['created_at']));
+
+                $purchaseRequests[$purchaseRequest['id']] = $this->getPurchaseIDFormat('purchase-request',$purchaseRequest['project_site_id'],($purchaseRequest['created_at']),$purchaseRequest['serial_no']);
             }
-            return view('purchase/purchase-order/create')->with(compact('purchaseRequests'));
+            return view('purchase/purchase-order/create')->with(compact('purchaseRequests','categories'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase order create view',
@@ -113,6 +114,42 @@ class PurchaseOrderController extends Controller
             Log::critical(json_encode($data));
             $responseStatus = 500;
             $records = array();
+        }
+    }
+    public function createMaterial(Request $request){
+        try{
+            $now = Carbon::now();
+            $is_present = Material::where('name','ilike',$request->name)->pluck('id')->toArray();
+            if($is_present != null){
+                     $categoryMaterialData['category_id'] = $request->category;
+                    $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
+            }else{
+                $materialData['name'] = ucwords(trim($request->name));
+                $categoryMaterialData['category_id'] = $request->category;
+                $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialData['unit_id'] = $request->unit_id;
+                $materialData['is_active'] = (boolean)0;
+                $materialData['created_at'] = $now;
+                $materialData['updated_at'] = $now;
+                $materialData['hsn_code'] = $request->hsn_code;
+                $material = Material::create($materialData);
+                $categoryMaterialData['material_id'] = $material['id'];
+                $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
+                $materialVersionData['material_id'] = $material->id;
+                $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialVersionData['unit_id'] = $request->unit_id;
+                $materialVersion = MaterialVersion::create($materialVersionData);
+            }
+            $request->session()->flash('success','Material created successfully.');
+            return redirect('/material/create');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'create material',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
     public function getEditView(Request $request,$id)
@@ -272,12 +309,15 @@ class PurchaseOrderController extends Controller
                 $requestComponentVendors = PurchaseRequestComponentVendorRelation::where('purchase_request_component_id',$purchaseRequestComponent->id)->get();
                 foreach($requestComponentVendors as $vendorRelation){
                     $purchaseRequestComponents[$iterator] = array();
+                    $materialRequest = $purchaseRequestComponent->materialRequestComponent;
+                    $materialRequestComponentSlug = $materialRequest->materialRequestComponentTypes->slug;
                     $purchaseRequestComponents[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
-                    $purchaseRequestComponents[$iterator]['name'] = $purchaseRequestComponent->materialRequestComponent->name;
+                    $purchaseRequestComponents[$iterator]['name'] = $materialRequest->name;
                     $purchaseRequestComponents[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
                     $purchaseRequestComponents[$iterator]['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
                     $purchaseRequestComponents[$iterator]['vendor'] = $vendorRelation->vendor->company;
                     $purchaseRequestComponents[$iterator]['vendor_id'] = $vendorRelation->vendor_id;
+                    $purchaseRequestComponents[$iterator]['material_request_component_slug'] = $materialRequestComponentSlug;
                     $materialInfo = Material::where('name','ilike',trim($purchaseRequestComponent->materialRequestComponent->name))->first();
                     if($materialInfo == null){
                         $purchaseRequestComponents[$iterator]['rate'] = '0';
@@ -323,10 +363,10 @@ class PurchaseOrderController extends Controller
 
     public function createPurchaseOrder(Request $request){
         try{
-            $today = Carbon::today();
+            $today = date('Y-m-d');
             foreach($request->purchase as $vendorId => $components){
                 $approvePurchaseOrderData = $disapprovePurchaseOrderData = array('vendor_id' => $vendorId, 'purchase_request_id' => $request->purchase_request_id);
-                $todaysCount = PurchaseOrder::where('created_at','>=',$today)->count();
+                $todaysCount = PurchaseOrder::whereDate('created_at',$today)->count();
                 $approvedPurchaseOrder = $disapprovePurchaseOrder = null;
                 foreach($components as $purchaseRequestComponentId => $component){
                     $purchaseOrderComponentData = array();

@@ -41,6 +41,7 @@
                                 <div class="portlet-body form">
                                     <form role="form" id="create-category" class="form-horizontal" method="post" action="/category/create">
                                         {!! csrf_field() !!}
+                                        <input type="hidden" value="false" name="is_miscellaneous" id="is_miscellaneous" >
                                         <div class="form-body">
                                             <div class="form-group row">
                                                 <div class="col-md-3" style="text-align: right">
@@ -51,6 +52,22 @@
                                                     <input type="text" class="form-control" id="name" name="name">
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div class="form-body">
+                                            <div class="form-group row">
+                                                <div class="col-md-3" style="text-align: right">
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="md-checkbox">
+                                                        <input type="checkbox" value="false" id="checkbox1" class="md-check">
+                                                        <label for="checkbox1">
+                                                            <span class="inc"></span>
+                                                            <span class="check"></span>
+                                                            <span class="box"></span> Is Miscellaneous </label>
+                                                     </div>
+                                                </div>
+                                        </div>
                                         </div>
                                         <div class="form-actions noborder row">
                                             <div class="col-md-offset-3" style="margin-left: 26%">
@@ -74,6 +91,13 @@
 <script>
     $(document).ready(function() {
         CreateCategory.init();
+    });
+    $('#checkbox1').change(function(){
+        if($('#checkbox1').is(':checked')){
+            $('#is_miscellaneous').val('true');
+        }else{
+            $('#is_miscellaneous').val('false');
+        }
     });
 </script>
 @endsection

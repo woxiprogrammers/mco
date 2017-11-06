@@ -25,6 +25,9 @@ trait MaterialRequestTrait{
             $materialRequestData['quotation_id'] = $quotationId != null ? $quotationId : null;
             $materialRequestData['assigned_to'] = $user['id'];
             $materialRequestData['on_behalf_of'] = $data['user_id'];
+            $today = date('Y-m-d');
+            $count = MaterialRequests::whereDate('created_at',$today)->count();
+            $materialRequestData['serial_no'] = ($count+1);
             $materialRequest = MaterialRequests::create($materialRequestData);
             $pendingStatusId = PurchaseRequestComponentStatuses::where('slug','pending')->pluck('id')->first();
             $prAssignedStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-assigned')->pluck('id')->first();
@@ -49,6 +52,8 @@ trait MaterialRequestTrait{
                 $materialRequestComponentData['component_status_id'] = $pendingStatusId;
                 $materialRequestComponentData['created_at'] = Carbon::now();
                 $materialRequestComponentData['updated_at'] = Carbon::now();
+                $materialRequestComponentCount = MaterialRequestComponents::whereDate('created_at',$today)->count();
+                $materialRequestComponentData['serial_no'] = ($materialRequestComponentCount+1);
                 $materialRequestComponent[$iterator] = MaterialRequestComponents::insertGetId($materialRequestComponentData);
                 $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponent[$iterator];
                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
@@ -68,6 +73,9 @@ trait MaterialRequestTrait{
 
     public function getPurchaseIDFormat($slug,$project_site_id,$created_at,$serial_no = 1){
         try{
+            if($serial_no == null){
+                $serial_no = 0;
+            }
             switch ($slug){
                 case 'material-request' :
                     $format = "MR".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;

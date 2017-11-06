@@ -141,6 +141,9 @@ class PurchaseRequestController extends Controller
             $purchaseRequestData['behalf_of_user_id'] = $requestData['user_id'];
             $purchaseRequestedStatus = PurchaseRequestComponentStatuses::where('slug','purchase-requested')->first();
             $purchaseRequestData['purchase_component_status_id'] = $purchaseRequestedStatus->id;
+            $today = date('Y-m-d');
+            $purchaseRequestCount = PurchaseRequest::whereDate('created_at',$today)->count();
+            $purchaseRequestData['serial_no'] = ($purchaseRequestCount+1);
             $purchaseRequest = PurchaseRequest::create($purchaseRequestData);
             foreach($materialRequestComponentIds as $materialRequestComponentId){
                 PurchaseRequestComponent::create([
@@ -159,7 +162,6 @@ class PurchaseRequestController extends Controller
                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
             }
             $request->session()->flash('success', 'Purchase Request created successfully.');
-            return redirect('purchase/purchase-request/create');
         }catch (\Exception $e){
             $data = [
                 'action' => 'Create Purchase Request',
@@ -168,6 +170,7 @@ class PurchaseRequestController extends Controller
             ];
             Log::critical(json_encode($data));
         }
+        return redirect('purchase/purchase-request/create');
     }
 
     public function purchaseRequestListing(Request $request){
@@ -263,7 +266,7 @@ class PurchaseRequestController extends Controller
                         break;
                 }
                 $records['data'][$iterator] = [
-                    $this->getPurchaseIDFormat('purchase-request',$purchaseRequest->projectSite->id,$purchaseRequest->created_at),
+                    $this->getPurchaseIDFormat('purchase-request',$purchaseRequest->projectSite->id,$purchaseRequest->created_at,$purchaseRequest->serial_no),
                     $purchaseRequest->projectSite->project->client->company,
                     $purchaseRequest->projectSite->project->name.' - '.$purchaseRequest->projectSite->name,
                     $status,

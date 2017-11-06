@@ -1,8 +1,10 @@
 @foreach($purchaseRequestComponents as $purchaseRequestComponent)
-    <tr>
-        <td style="text-align: center; width: 15%">
+    <tr id="{{$purchaseRequestComponent['material_request_component_slug']}}">
+        <td style="text-align: center; width: 15%" style="display: none">
             <input type="hidden" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][id]" value="{{$purchaseRequestComponent['purchase_request_component_id']}}">
-            {{$purchaseRequestComponent['name']}}
+        </td>
+        <td>
+            <input type="text" value="{{$purchaseRequestComponent['name']}}" readonly>
         </td>
         <td style="text-align: center">
             <input type="text" style="width: 90%;" class="form-control" value="{{$purchaseRequestComponent['quantity']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][quantity]">
@@ -18,6 +20,7 @@
                 @endforeach
             </select>
         </td>
+        <input type="hidden" id="material_request_component_slug" value="{{$purchaseRequestComponent['material_request_component_slug']}}">
         <td style="text-align: center">
             {{$purchaseRequestComponent['vendor']}}
         </td>
@@ -34,11 +37,31 @@
             <input type="file" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][client_approval_images][]" multiple>
         </td>
         <td style="text-align: center">
-            <select class="table-group-action-input form-control input-inline input-small input-sm" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][status]">
+            <select class="table-group-action-input form-control input-inline input-small input-sm" id="is_approve" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][status]">
                 <option value="">Select...</option>
                 <option value="approve">Approve</option>
                 <option value="disapprove">Disapprove</option>
             </select>
         </td>
     </tr>
+
 @endforeach
+<script>
+    $('#is_approve').change(function () {
+        var type = $('#is_approve').closest('tr').attr('id');
+        var $row = jQuery(this).closest('tr');
+        var $columns = $row.find('td');
+        if(($(this).val() == "approve") && (type == "new-material")) {
+                $('#myModal1').modal('show');
+            var values = [];
+            jQuery.each($columns, function (i, item) {
+                values.push($(item.innerHTML).val());
+            });
+            $('#vendor_id').val(values[0]);
+            $('#name').val(values[1]);
+            $('#rate_per_unit').val(values[5]);
+            $('#unit_id').val(values[3]);
+            $('#hsn_code').val(values[6]);
+        }
+        })
+</script>

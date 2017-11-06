@@ -9,7 +9,7 @@ class Category extends Model
 {
     protected $table = 'categories';
 
-    protected $fillable = ['name','slug','is_active'];
+    protected $fillable = ['name','slug','is_active','is_miscellaneous'];
 
     use Sluggable;
     public function sluggable()

@@ -42,9 +42,10 @@
                                 <div class="portlet light ">
 
                                     <div class="portlet-body form">
-                                        <input type="hidden" id="category_id" value="{{$category['id']}}">
                                         <form role="form" id="edit-category" class="form-horizontal" method="post" action="/category/edit/{{$category['id']}}">
                                             {!! csrf_field() !!}
+                                            <input type="hidden" id="category_id" name="id" value="{{$category['id']}}">
+                                            <input type="hidden" value="{{$category['is_miscellaneous']}}" name="is_miscellaneous" id="is_miscellaneous" >
                                             <div class="form-body">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
@@ -56,6 +57,21 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="form-body">
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox"  id="checkbox1" class="md-check">
+                                                            <label for="checkbox1">
+                                                                <span class="inc"></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span> Is Miscellaneous </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3" style="margin-left: 26%">
                                                     <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
@@ -64,8 +80,6 @@
                                         </form>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -82,6 +96,20 @@
     $(document).ready(function() {
         EditCategory.init();
             $('#submit').css("padding-left",'6px');
+            if($('#is_miscellaneous').val() == "1"){
+                $('#checkbox1').attr('checked',true);
+                $('#is_miscellaneous').val('true')
+            }else{
+                $('#checkbox1').attr('checked',false)
+                $('#is_miscellaneous').val('false')
+            }
+    });
+    $('#checkbox1').change(function(){
+        if($('#checkbox1').is(':checked')){
+            $('#is_miscellaneous').val('true');
+        }else{
+            $('#is_miscellaneous').val('false');
+        }
     });
 </script>
 @endsection
