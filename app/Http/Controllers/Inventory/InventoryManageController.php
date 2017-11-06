@@ -432,7 +432,39 @@ class InventoryManageController extends Controller
             $user = Auth::user();
             $data['inventory_component_id'] = $inventoryComponent->id;
             $data['user_id'] = $user->id;
+            if(array_key_exists('top_up',$data)){
+                $inTransferIds = InventoryTransferTypes::where('type','ilike','IN')->pluck('id')->toArray();
+                $outTransferIds = InventoryTransferTypes::where('type','ilike','OUT')->pluck('id')->toArray();
+                $dieselcomponentId = InventoryComponent::join('materials','materials.id','=','inventory_components.reference_id')
+                                                    ->where('inventory_components.project_site_id',$inventoryComponent->project_site_id)
+                                                    ->where('materials.slug','diesel')
+                                                    ->pluck('inventory_components.id')
+                                                    ->first();
+                if($dieselcomponentId == null){
+                    $request->session()->flash('error','Diesel is not assigned to this site. Please add diesel in inventory first.');
+                    return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+                }
+
+                $inQuantity = InventoryComponentTransfers::where('inventory_component_id',$dieselcomponentId)->whereIn('transfer_type_id',$inTransferIds)->sum('quantity');
+                $outQuantity = InventoryComponentTransfers::where('inventory_component_id',$dieselcomponentId)->whereIn('transfer_type_id',$outTransferIds)->sum('quantity');
+                $availableQuantity = $inQuantity - $outQuantity;
+                if($availableQuantity < $data['top_up']){
+                    $request->session()->flash('error','Diesel top-up\'s required quantity is not available on site');
+                    return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+                }
+            }
             $inventoryComponentReading = FuelAssetReading::create($data);
+            if(array_key_exists('top_up',$data)){
+                $inventoryTransferData = [
+                    'inventory_component_id' => $dieselcomponentId,
+                    'transfer_type_id' => InventoryTransferTypes::where('slug','labour')->where('type','ilike','OUT')->pluck('id')->first(),
+                    'quantity' => $data['top_up'],
+                    'unit_id' => Unit::where('slug','litre')->pluck('id')->first(),
+                    'source_name' => $user->first_name.' '.$user->last_name,
+                    'user_id' => $user->id
+                ];
+                $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryTransferData);
+            }
             $request->session()->flash('success','Asset Reading saved successfully.');
             return redirect('/inventory/component/manage/'.$inventoryComponent->id);
         }catch(\Exception $e){

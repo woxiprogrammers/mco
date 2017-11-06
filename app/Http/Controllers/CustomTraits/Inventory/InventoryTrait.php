@@ -7,9 +7,11 @@
 
 namespace App\Http\Controllers\CustomTraits\Inventory;
 
+use App\GRNCount;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
 use App\InventoryTransferTypes;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
@@ -25,12 +27,7 @@ trait InventoryTrait{
                 }
                 unset($data['transfer_type']);
             }
-            $currentYearMonthStartFormat = date('Y-m').'-01 00:00:00';
-            $currentYearMonthEndFormat = date('Y-m-t',strtotime($currentYearMonthStartFormat)).' 23:59:59';
-            $count = InventoryComponentTransfers::where('created_at','>=',$currentYearMonthStartFormat)
-                ->where('created_at','<=',$currentYearMonthEndFormat)
-                ->count();
-            $data['grn'] = "GRN".date('Ym').($count+1);
+            $data['grn'] = $this->generateGRN();
             $inventoryComponentTransfer = InventoryComponentTransfers::create($data);
             return $inventoryComponentTransfer;
         }catch(\Exception $e){
@@ -72,6 +69,27 @@ trait InventoryTrait{
             ];
             Log::critical(json_encode($logData));
             return false;
+        }
+    }
+
+    public function generateGRN(){
+        try{
+            $currentDate = Carbon::now();
+            $monthlyGrnGeneratedCount = GRNCount::where('month',$currentDate->month)->where('year',$currentDate->year)->pluck('count')->first();
+            if ($monthlyGrnGeneratedCount != null) {
+                GRNCount::where('month', $currentDate->month)->where('year', $currentDate->year)->update(['count' => (++$monthlyGrnGeneratedCount)]);
+            } else {
+                $monthlyGrnGeneratedCount = 1;
+                GRNCount::create(['month' => $currentDate->month, 'year' => $currentDate->year, 'count' => 1]);
+            }
+            return "GRN".date('Ym').$monthlyGrnGeneratedCount;
+        }catch(\Exception $e){
+            $logData = [
+                'action' => 'Generate GRN',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($logData));
+            return null;
         }
     }
 }
