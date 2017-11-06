@@ -925,16 +925,40 @@ class PeticashController extends Controller
             $sitesLbl = "All Sites";
             if($request->site_id == 0) {
                 $stats['allocated_amt']  = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
-                $stats['salary_amt'] = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id'))->where('project_site_id','!=',0)->sum('payable_amount');
-                $stats['advance_amt'] = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id'))->where('project_site_id','!=',0)->sum('amount');
-                $stats['purchase_amt'] = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','=','PURCHASE')->pluck('id'))->where('project_site_id','!=',0)->sum('bill_amount');
+                $stats['salary_amt'] = PeticashSalaryTransaction::
+                    where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id'))
+                    ->where('project_site_id','!=',0)
+                    ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id'))
+                    ->sum('payable_amount');
+                $stats['advance_amt'] = PeticashSalaryTransaction::
+                    where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id'))
+                    ->where('project_site_id','!=',0)
+                    ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id'))
+                    ->sum('amount');
+                $stats['purchase_amt'] = PurcahsePeticashTransaction::
+                    whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','=','PURCHASE')->pluck('id'))
+                    ->where('project_site_id','!=',0)
+                    ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id'))
+                    ->sum('bill_amount');
                 $stats['pending_amt'] = $stats['allocated_amt'] - ($stats['salary_amt'] + $stats['advance_amt'] + $stats['purchase_amt'] );
                 $stats['site_name'] = $sitesLbl;
             } else {
                 $stats['allocated_amt']  = PeticashSiteTransfer::where('project_site_id','=',$request->site_id)->sum('amount');
-                $stats['salary_amt'] = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id'))->where('project_site_id','=',$request->site_id)->sum('payable_amount');
-                $stats['advance_amt'] = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id'))->where('project_site_id','=',$request->site_id)->sum('amount');
-                $stats['purchase_amt'] = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','=','PURCHASE')->pluck('id'))->where('project_site_id','=',$request->site_id)->sum('bill_amount');
+                $stats['salary_amt'] = PeticashSalaryTransaction::
+                    where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id'))
+                    ->where('project_site_id','=',$request->site_id)
+                    ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id'))
+                    ->sum('payable_amount');
+                $stats['advance_amt'] = PeticashSalaryTransaction::
+                    where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id'))
+                    ->where('project_site_id','=',$request->site_id)
+                    ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id'))
+                    ->sum('amount');
+                $stats['purchase_amt'] = PurcahsePeticashTransaction::
+                    whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','=','PURCHASE')->pluck('id'))
+                    ->where('project_site_id','=',$request->site_id)
+                    ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id'))
+                    ->sum('bill_amount');
                 $stats['pending_amt'] = $stats['allocated_amt'] - ($stats['salary_amt'] + $stats['advance_amt'] + $stats['purchase_amt'] );
                 $stats['site_name'] = ProjectSite::findorfail($request->site_id)['name'];
             }
