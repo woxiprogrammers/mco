@@ -106,10 +106,8 @@
     });
     $('#checkbox1').change(function(){
         if($('#checkbox1').is(':checked')){
-            alert("W");
             $('#is_miscellaneous').val('true');
         }else{
-            alert("s");
             $('#is_miscellaneous').val('false');
         }
     });

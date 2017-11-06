@@ -51,14 +51,12 @@
         var type = $('#is_approve').closest('tr').attr('id');
         var $row = jQuery(this).closest('tr');
         var $columns = $row.find('td');
-        alert(type);
         if(($(this).val() == "approve") && (type == "new-material")) {
                 $('#myModal1').modal('show');
             var values = [];
             jQuery.each($columns, function (i, item) {
                 values.push($(item.innerHTML).val());
             });
-            console.log(values);
             $('#vendor_id').val(values[0]);
             $('#name').val(values[1]);
             $('#rate_per_unit').val(values[5]);
