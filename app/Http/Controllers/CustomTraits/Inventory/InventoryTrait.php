@@ -27,7 +27,9 @@ trait InventoryTrait{
                 }
                 unset($data['transfer_type']);
             }
-            $data['grn'] = $this->generateGRN();
+            if(!array_key_exists('grn',$data)){
+                $data['grn'] = $this->generateGRN();
+            }
             $inventoryComponentTransfer = InventoryComponentTransfers::create($data);
             return $inventoryComponentTransfer;
         }catch(\Exception $e){
