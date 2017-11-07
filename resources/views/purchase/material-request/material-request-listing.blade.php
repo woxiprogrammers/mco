@@ -20,7 +20,8 @@
                                     <h1>Manage Material</h1>
                                 </div>
                                 <div class="btn-group"  style="float: right;margin-top:1%">
-                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
+                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">
+                                            <i class="fa fa-plus"></i>
                                             Material Request
                                         </a>
                                     </div>
