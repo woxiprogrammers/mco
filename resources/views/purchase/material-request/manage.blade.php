@@ -116,7 +116,7 @@
                                                                   <label for="company" class="control-label">Unit</label>
                                                               </div>
                                                               <div class="col-md-6">
-                                                                  <select class="form-group" name="unit_id" id="unitId">
+                                                                  <select class="form-control" name="unit_id" id="unitId">
                                                                       @foreach($units as $unit)
                                                                           <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                                       @endforeach
@@ -208,15 +208,18 @@
         });
     });
 
-    function openApproveModal(componentId,unitId,quantity,unitEditable){
-        $("#remarkModal #componentId").val(componentId);
-        $("#remarkModal #quantity").val(quantity);
-        $("#remarkModal #unitId option[value="+unitId+"]").prop('selected', true);
-        if(unitEditable == 'false' || unitEditable == false){
-            $("#remarkModal #unitId").prop('disabled', true);
-        }else{
-            $("#remarkModal #unitId").prop('disabled', false);
-        }
+    function openApproveModal(componentId){
+        $.ajax({
+            url: '/purchase/material-request/get-material-request-component-details/'+componentId+'?_token='+$("input[name='_token']").val(),
+            type: 'GET',
+            success: function(data,textStatus,xhr){
+                $("#remarkModal #unitId").html(data.units);
+                $("#remarkModal #quantity").val(data.quantity);
+            },
+            error: function(errorData){
+
+            }
+        })
         $("#remarkModal").modal('show');
     }
 

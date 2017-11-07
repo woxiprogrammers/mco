@@ -101,7 +101,7 @@ class PurchaseController extends Controller
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="javascript:void(0);" onclick="openApproveModal('.$materialRequestList[$pagination]['material_request_component_id'].','.$materialRequestList[$pagination]['unit_id'].','.$materialRequestList[$pagination]['quantity'].','.$unitEditable.')">
+                                    <a href="javascript:void(0);" onclick="openApproveModal('.$materialRequestList[$pagination]['material_request_component_id'].')">
                                         <i class="icon-tag"></i> Approve / Disapprove 
                                     </a>
                                 </li>
@@ -368,6 +368,7 @@ class PurchaseController extends Controller
         return $data;
     }
     public function getUnitsList(Request $request){
+        try{
             $data = $request->all();
             $units = Unit::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
             $opt= '';
@@ -378,6 +379,17 @@ class PurchaseController extends Controller
             $str3 = '<ul id="material-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
             $units = $str3;
             return ($units);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'M.R. Get Unit List',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $units = null;
+        }
+        return response()->json($units,$status);
     }
     public function getAssetUnitsList(Request $request){
         $data = $request->all();
@@ -699,5 +711,56 @@ class PurchaseController extends Controller
             ];
             Log::critical(json_encode($data));
         }
+    }
+
+    public function getMaterialRequestComponentDetail(Request $request,$materialRequestComponent){
+        try{
+            $assetComponentTypes = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
+            if(in_array($materialRequestComponent->component_type_id,$assetComponentTypes)){
+                $nosUnit = Unit::where('slug','nos')->select('id','name')->first();
+                $units = "<option value='$nosUnit->id'>$nosUnit->name</option>";
+            }else{
+                $newMaterialTypeId = MaterialRequestComponentTypes::where('slug','new-material')->pluck('id')->first();
+                if($newMaterialTypeId == $materialRequestComponent->component_type_id){
+                    $unitData = Unit::where('is_active',true)->select('id','name')->orderBy('name')->get()->toArray();
+                }else{
+                    $material = Material::where('name','ilike',$materialRequestComponent->name)->first();
+                    $unit1Array = UnitConversion::join('units','units.id','=','unit_conversions.unit_2_id')
+                                                ->where('unit_conversions.unit_1_id',$material->unit_id)
+                                                ->select('units.id as id','units.name as name')
+                                                ->get()
+                                                ->toArray();
+                    $units2Array = UnitConversion::join('units','units.id','=','unit_conversions.unit_1_id')
+                                                ->where('unit_conversions.unit_2_id',$material->unit_id)
+                                                ->whereNotIn('unit_conversions.unit_1_id',array_column($unit1Array,'id'))
+                                                ->select('units.id as id','units.name as name')
+                                                ->get()
+                                                ->toArray();
+                    $unitData = array_merge($unit1Array,$units2Array);
+                }
+                for($iterator = 0,$units='';$iterator < count($unitData); $iterator++){
+                    if($unitData[$iterator]['id'] == $materialRequestComponent->unit_id){
+                        $units .= "<option value='".$unitData[$iterator]['id']."' selected>".$unitData[$iterator]['name']."</option>";
+                    }else{
+                        $units .= "<option value='".$unitData[$iterator]['id']."'>".$unitData[$iterator]['name']."</option>";
+                    }
+                }
+            }
+            $response = [
+                'units' => $units,
+                'quantity' => $materialRequestComponent->quantity
+            ];
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Material Component Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = null;
+        }
+        return response()->json($response,$status);
     }
 }
