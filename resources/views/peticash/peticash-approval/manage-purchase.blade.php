@@ -406,7 +406,7 @@
                                                 </form>
                                             </div>
                                         </div>
-                                        <div class="modal fade" id="editRequestApprovalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                        <div class="modal fade" id="editPurchaseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <form class="modal-content" method="post">
                                                     {!! csrf_field() !!}
@@ -421,18 +421,70 @@
                                                     <div class="modal-body">
                                                         <div class="form-body">
                                                             <div class="form-group row">
-                                                                <div class="col-md-3" style="text-align: right">
-                                                                    <label for="company" class="control-label">Remark</label>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <input type="text" class="form-control" id="remark" name="remark">
+                                                                <div class="col-md-12" style="text-align: right;">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Material/Asset Name : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="edit_mat_name" name="edit_mat_name" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Rate : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="edit_rate" name="edit_rate" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Quantity : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="edit_purchase_qty" name="edit_purchase_qty" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Unit Name : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="edit_unit_name" name="edit_unit_name" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label>Bill Amount : </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="edit_bill_amt" name="edit_bill_amt" value="" readonly>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row" id="selCategory" style="display: none;">
+                                                                    </div>
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-6">
+                                                                            <label for="company" class="control-label">Admin Remark</label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" id="edit_remark" name="edit_remark" required="required">
+                                                                        </div>
+                                                                    </div>
+                                                                    <input type="hidden" id="component_type_slug" name="component_type_slug" value="0">
+                                                                    <input type="hidden" id="edit_unit_id" name="edit_unit_id" value="0">
+                                                                    <input type="hidden" id="editTxnId" name="editTxnId" value="0">
+                                                                    <div class="modal-footer">
+                                                                        <div class="btn-group" style="float: right;margin-top:1%">
+                                                                            <div id="sample_editable_1_new" class="btn red" >
+                                                                                <a id="editPurchaseSubmit" style="color: white">Approve</a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <a class="btn blue approve-modal-footer-buttons">Approve</a>
-                                                        <a class="btn blue approve-modal-footer-buttons">Disapprove</a>
                                                     </div>
                                                 </form>
                                             </div>
@@ -586,7 +638,6 @@
                         $("#remarkApproveModal").modal('hide');
                         alert(data);
                         $(".filter-submit").trigger('click');
-
                     },
                     error: function(data){
                     }
@@ -596,12 +647,58 @@
             }
         });
 
-    });
+        $("#editPurchaseSubmit").on('click',function(e){
+            e.stopPropagation();
+            if ($("#edit_remark").val() != "") {
+                var con = confirm("Are you Sure?");
+                if (con) {
+                    var mat_name = $("#edit_mat_name").val();
+                    var qty = $("#edit_purchase_qty").val();
+                    var unit_name = $("#edit_unit_name").val();
+                    var unit_id = $("#edit_unit_id").val();
+                    var amount = $("#edit_bill_amt").val();
+                    var rate = $("#edit_rate").val();
+                    var comp_type = $("#component_type_slug").val();
+                    var edit_category_id = $("#edit_category").val();
+                    var admin_remark = $("#edit_remark").val();
+                    var txn_id = $("#editTxnId").val();
+                    $.ajax({
+                        url :'/peticash/peticash-approval-request/approve-purchase-ajax',
+                        type: "POST",
+                        data: {
+                            _token: $("input[name='_token']").val(),
+                            mat_name : mat_name,
+                            qty : qty,
+                            unit_name : unit_name,
+                            amount : amount,
+                            rate_per_unit : rate,
+                            comp_type : comp_type,
+                            category_id : edit_category_id,
+                            unit_id : unit_id,
+                            admin_remark : admin_remark,
+                            txn_id : txn_id,
+                            status : 'approved'
+                        },
+                        success: function(data, textStatus, xhr) {
+                            $("#selCategory").empty();
+                            $("#editPurchaseModal").modal('hide');
+                            alert(data);
+                            $(".filter-submit").trigger('click');
+                        },
+                        error: function(data) {
+                        }
+                    });
+                } else {
+                    $("#selCategory").empty();
+                    $("#editPurchaseModal").modal('hide');
+                }
 
-    function openEditRequestApprovalModal(componentId){
-        $("#editRequestApprovalForm #componentId").val(componentId);
-        $("#editRequestApprovalForm").modal('show');
-    }
+            } else {
+                alert("Remark should not be empty.");
+            }
+        });
+
+    });
 
     function openApproveModal(componentId){
         $("#remarkApproveModal #componentId").val(componentId);
@@ -671,6 +768,41 @@
                 $("#txn_remark").val(data.remark);
                 $("#admin_remark").val(data.admin_remark);
                 $("#detailsPurchaseModal").modal('show');
+            },
+            error: function(data){
+
+            }
+        });
+    }
+
+    function editPurchaseModal(txnId) {
+        $.ajax({
+            url:'/peticash/peticash-approval-request/manage-purchase-details-ajax',
+            type: "POST",
+            data: {
+                _token : $("input[name='_token']").val(),
+                txn_id : txnId
+            },
+            success: function(data, textStatus, xhr){
+                $("#selCategory").empty();
+                var strdata = '';
+                $("#edit_mat_name").val(data.name);
+                $("#edit_purchase_qty").val(data.quantity);
+                $("#edit_unit_name").val(data.unit_name);
+                $("#edit_unit_id").val(data.unit_id);
+                $("#edit_bill_amt").val(data.bill_amount);
+                $("#edit_rate").val(data.bill_amount/data.quantity);
+                $("#component_type_slug").val(data.component_type_slug);
+                $("#editTxnId").val(data.peticash_transaction_id);
+                if (data.categorydata != "") {
+                    strdata = '<div class="col-md-6"><label>Select Category : </label></div>'
+                        + '<div class="col-md-6">'+data.categorydata+'</div>';
+                    $("#selCategory").append(strdata);
+                } else {
+                    $("#selCategory").empty();
+                }
+                $("#selCategory").show();
+                $("#editPurchaseModal").modal('show');
             },
             error: function(data){
 
