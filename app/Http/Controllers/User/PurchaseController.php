@@ -10,11 +10,13 @@ use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
 use App\MaterialRequests;
 use App\MaterialVersion;
+use App\Project;
 use App\ProjectSite;
 use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use App\QuotationMaterial;
 use App\QuotationProduct;
+use App\QuotationStatus;
 use App\Unit;
 use App\UnitConversion;
 use App\User;
@@ -699,5 +701,61 @@ class PurchaseController extends Controller
             ];
             Log::critical(json_encode($data));
         }
+    }
+
+
+    public function getProjects(Request $request, $client){
+        try{
+            $status = 200;
+            if ($client == 0) {
+                $projectOptions[] = '<option value="0">ALL</option>';
+            } else {
+                $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+                $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
+                $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+                $projects = Project::where('client_id',$client)->whereIn('id',$projectIds)->get()->toArray();
+                $projectOptions = array();
+                for($i = 0 ; $i < count($projects); $i++){
+                    $projectOptions[] = '<option value="'.$projects[$i]['id'].'"> '.$projects[$i]['name'].' </option>';
+                }
+            }
+        }catch (\Exception $e){
+            $projectOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Get Project from client',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectOptions,$status);
+    }
+
+    public function getProjectSites(Request $request,$project){
+        try{
+            $status = 200;
+            if ($project == 0) {
+                $projectSitesOptions[] = '<option value="0">ALL</option>';
+            } else {
+                $projectSites = ProjectSite::where('project_id', $project)->get()->toArray();
+                $projectSitesOptions = array();
+                for($i = 0 ; $i < count($projectSites); $i++){
+                    $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';
+                }
+            }
+        }catch (\Exception $e){
+            $projectSitesOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Get Project Site',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectSitesOptions,$status);
     }
 }
