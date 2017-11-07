@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers\Peticash;
 
+use App\Asset;
+use App\AssetType;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
 use App\Employee;
+use App\InventoryComponent;
+use App\InventoryComponentTransferImage;
+use App\InventoryComponentTransfers;
+use App\InventoryTransferTypes;
 use App\Material;
 use App\MaterialRequestComponentTypes;
 use App\PaymentType;
@@ -1097,9 +1103,11 @@ class PeticashController extends Controller
     }
 
     public function approvePurchaseAjaxRequest(Request $request) {
-        try{
+        try {
+
             $now = Carbon::now();
-            /*if($request->comp_type == MaterialRequestComponentTypes::where('slug','new-material')->pluck('slug')->first()) {
+            $user = Auth::user();
+            if($request->comp_type == MaterialRequestComponentTypes::where('slug','new-material')->pluck('slug')->first()) {
                 $materialData['name'] = ucwords(trim($request->mat_name));
                 $categoryMaterialData['category_id'] = $request->category_id;
                 $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
@@ -1107,8 +1115,6 @@ class PeticashController extends Controller
                 $materialData['is_active'] = (boolean)1;
                 $materialData['created_at'] = $now;
                 $materialData['updated_at'] = $now;
-                $materialData['gst'] = "";
-                $materialData['hsn_code'] = "";
                 $material = Material::create($materialData);
                 $categoryMaterialData['material_id'] = $material['id'];
                 CategoryMaterialRelation::create($categoryMaterialData);
@@ -1118,43 +1124,76 @@ class PeticashController extends Controller
                     $quotMaterialData['material_id'] = $material['id'];
                     $quotMaterialData['rate_per_unit'] = round($request->rate_per_unit,3);
                     $quotMaterialData['unit_id'] = $request->unit_id;
-                    //$quotMaterialData['qty'] = $request->qty;
+                    $quotMaterialData['quantity'] = $request->qty;
                     $quotMaterialData['is_client_supplied'] = (boolean)0;
                     $quotMaterialData['created_at'] = $now;
                     $quotMaterialData['updated_at'] = $now;
                     $quotMaterialData['quotation_id'] = $quotationId;
                     QuotationMaterial::create($quotMaterialData);
                 }
-
-            //also create component in inventory for that site
             } elseif ($request->comp_type == MaterialRequestComponentTypes::where('slug','new-asset')->pluck('slug')->first()) {
+                $assetData['name'] = ucwords(trim($request->mat_name));
+                $assetData['is_active'] = (boolean)1;
+                $assetData['created_at'] = $now;
+                $assetData['updated_at'] = $now;
+                $assetData['asset_types_id'] = AssetType::where('slug','other')->pluck('id')->first();
+                Asset::create($assetData);
+            }
+            $purchaseTxnData = PurcahsePeticashTransaction::findOrFail($request->txn_id)->toArray();
+            $project_site_id = $purchaseTxnData['project_site_id'];
+            $materialComponentSlug = MaterialRequestComponentTypes::where('id',$purchaseTxnData['component_type_id'])->pluck('slug')->first();
+            $alreadyPresent = InventoryComponent::where('name',$purchaseTxnData['name'])->where('project_site_id',$project_site_id)->first();
+            if($alreadyPresent != null){
+                $inventoryComponentId = $alreadyPresent['id'];
+            } else {
+                if($materialComponentSlug == 'quotation-material' || $materialComponentSlug == 'new-material' || $materialComponentSlug == 'structure-material'){
+                    $inventoryData['is_material'] = true;
+                    $inventoryData['reference_id']  = Material::where('name',$purchaseTxnData['name'])->pluck('id')->first();
+                }else{
+                    $inventoryData['is_material'] = false;
+                    $inventoryData['reference_id']  =  Asset::where('name',$purchaseTxnData['name'])->pluck('id')->first();
+                }
+                $inventoryData['name'] = $purchaseTxnData['name'];
+                $inventoryData['project_site_id'] = $project_site_id;
+                $inventoryData['opening_stock'] = 0;
+                $inventoryData['created_at'] = $now;
+                $inventoryData['updated_at'] = $now;
+                $inventoryComponentId = InventoryComponent::insertGetId($inventoryData);
+            }
 
-            } elseif ($request->comp_type == MaterialRequestComponentTypes::where('slug','structure-material')->pluck('slug')->first()) {
-            //also create component in inventory for that site and also chk already present
+            $transferData['inventory_component_id'] = $inventoryComponentId;
+            $name = InventoryTransferTypes::where('slug', PeticashTransactionType::where('id',$purchaseTxnData['peticash_transaction_type_id'])->pluck('slug')->first())->pluck('slug')->first();
+            $type = 'IN';
+            $transferData['quantity'] = $purchaseTxnData['quantity'];
+            $transferData['unit_id'] = $purchaseTxnData['unit_id'];
+            $transferData['date'] = $purchaseTxnData['created_at'];
+            $transferData['in_time'] = $purchaseTxnData['in_time'];
+            $transferData['out_time'] = $purchaseTxnData['out_time'];
+            $transferData['vehicle_number'] = $purchaseTxnData['vehicle_number'];
+            $transferData['bill_number'] = $purchaseTxnData['bill_number'];
+            $transferData['bill_amount'] = $purchaseTxnData['bill_amount'];
+            $transferData['remark'] = $purchaseTxnData['remark'];
+            $transferData['source_name'] = $purchaseTxnData['source_name'];
+            $transferData['grn'] = $purchaseTxnData['grn'];
+            $transferData['user_id'] = $user['id'];
+            $createdTransferId = $this->createInventoryTransferComponent($transferData, $name, $type);
+            $transferData['images'] = array();
+            $purchaseOrderBillImages = PurchasePeticashTransactionImage::where('purchase_peticash_transaction_id',$request->txn_id)->get();
+            $sha1InventoryComponentId = sha1($inventoryComponentId);
+            $sha1InventoryTransferId = sha1($createdTransferId);
+            $sha1PurchaseOrderId = sha1($request->txn_id);
+            foreach ($purchaseOrderBillImages as $key => $image){
+                $tempUploadFile = env('WEB_PUBLIC_PATH').env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseOrderId.DIRECTORY_SEPARATOR.$image['name'];
+                $imageUploadNewPath = env('WEB_PUBLIC_PATH').env('INVENTORY_TRANSFER_IMAGE_UPLOAD').$sha1InventoryComponentId.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$sha1InventoryTransferId;
+                if(!file_exists($imageUploadNewPath)) {
+                    File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
+                }
+                $imageUploadNewPath .= DIRECTORY_SEPARATOR.$image['name'];
+                File::copy($tempUploadFile,$imageUploadNewPath);
+                InventoryComponentTransferImage::create(['name' => $image['name'],'inventory_component_transfer_id' => $createdTransferId]);
+            }
 
-            } elseif ($request->comp_type == MaterialRequestComponentTypes::where('slug','system-asset')->pluck('slug')->first()) {
-
-            }*/
-
-            /*
-             if (new-material)
-                1. Dump into master material
-                2. Dump into quotation_master
-                3. Check inventory if exist if yes add into current qty
-                4. Do inventory transaction
-             if (quotation-material)
-                1. Check inventory if exist if yes add into current qty
-                2. Do inventory transfer
-             if (new-asset)
-                1. Dump into asset table
-                2. Check component if exist
-                3. Check inventory if exist
-                4. Do inventory transaction
-             if (system-asset)
-                1. Check component if exist
-                2. Do inventory transaction
-             */
-
+            //Purchase Transaction Approval
             $purchaseTxn = PurcahsePeticashTransaction::findOrFail($request->txn_id);
             $newStatus = PeticashStatus::where('slug',$request->status)->pluck('id')->first();
             $remark = $request->admin_remark;
@@ -1174,4 +1213,22 @@ class PeticashController extends Controller
         return response()->json($message, $status);
     }
 
+    public function createInventoryTransferComponent($request,$name,$type){
+        try{
+            $inventoryComponentTransferData = $request;
+            $selectedTransferType = InventoryTransferTypes::where('slug',$name)->where('type','ilike',$type)->first();
+            $inventoryComponentTransferData['transfer_type_id'] = $selectedTransferType->id;
+            $inventoryComponentTransferData['created_at'] = $inventoryComponentTransferData['updated_at'] = Carbon::now();
+            $inventoryComponentTransferDataId = InventoryComponentTransfers::insertGetId($inventoryComponentTransferData);
+        }catch (\Exception $e){
+            $message = "Fail";
+            $status = 500;
+            $data = [
+                'action' => 'Create Inventory Transfer Component',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $inventoryComponentTransferDataId;
+    }
 }
