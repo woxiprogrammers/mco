@@ -27,11 +27,11 @@
     </div>
     <div class="col-md-6">
         <label class="control-label pull-left">
-            @if(strcasecmp( 'IN',$inventoryComponentTransfer->transferType->type))
+            <?php if ($inventoryComponentTransfer->transferType->type == 'IN') { ?>
                 IN - From {{$inventoryComponentTransfer->transferType->name}}
-            @else
+            <?php  } else {  ?>
                 OUT - To {{$inventoryComponentTransfer->transferType->name}}
-            @endif
+            <?php } ?>
         </label>
     </div>
 </div>
