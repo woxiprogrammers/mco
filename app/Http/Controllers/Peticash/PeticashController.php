@@ -1136,13 +1136,32 @@ class PeticashController extends Controller
 
             }*/
 
+            /*
+             if (new-material)
+                1. Dump into master material
+                2. Dump into quotation_master
+                3. Check inventory if exist if yes add into current qty
+                4. Do inventory transaction
+             if (quotation-material)
+                1. Check inventory if exist if yes add into current qty
+                2. Do inventory transfer
+             if (new-asset)
+                1. Dump into asset table
+                2. Check component if exist
+                3. Check inventory if exist
+                4. Do inventory transaction
+             if (system-asset)
+                1. Check component if exist
+                2. Do inventory transaction
+             */
+
             $purchaseTxn = PurcahsePeticashTransaction::findOrFail($request->txn_id);
             $newStatus = PeticashStatus::where('slug',$request->status)->pluck('id')->first();
             $remark = $request->admin_remark;
             $purchaseTxn->update(['peticash_status_id' => $newStatus,'admin_remark' => $remark]);
             $status = 200;
             $message = 'Purchase request approved successfully.';
-        }catch(\Exception $e){
+        } catch(\Exception $e) {
             $message = "Purchase request not approved successfully.";
             $data = [
                 'action' => 'Approve Purchase Request',
@@ -1152,7 +1171,7 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
-        return response()->json($message,$status);
+        return response()->json($message, $status);
     }
 
 }
