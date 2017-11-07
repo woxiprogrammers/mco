@@ -8,7 +8,7 @@ class QuotationMaterial extends Model
 {
     protected $table = 'quotation_materials';
 
-    protected $fillable = ['material_id','rate_per_unit','unit_id','is_client_supplied','quotation_id'];
+    protected $fillable = ['material_id','rate_per_unit','unit_id','is_client_supplied','quotation_id','quantity'];
 
     public function quotation(){
         return $this->belongsTo('App\Quotation','quotation_id');
