@@ -30,6 +30,7 @@
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
+                                        <input type="hidden" id="purchaseRequestId" value="{{$purchaseRequest->id}}">
                                         <div class="portlet-body form">
                                             <div class="row">
                                                 <div class="col-md-4">
@@ -265,6 +266,7 @@
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <form role="form" action="/purchase/purchase-request/assign-vendors" method="post">
                                                 {!! csrf_field() !!}
+                                                <input type="hidden" name="is_mail" id="is_mail" value="1">
                                                 <input type="hidden" name="purchase_request_id" value="{{$purchaseRequest['id']}}">
                                                 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
@@ -363,6 +365,7 @@
 '                                                        <h4 class="panel-title">\n' +
 '                                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse_'+i+'" aria-expanded="true" aria-controls="collapseOne">\n' +
                         '                                                                <span style="font-size: 16px;text-align: left !important;">'+vendor[i].name+'</span>\n' +
+                            '&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp<button class="btn btn-dark" onclick="downloadPdf(this,'+vendor[i].id+')">Download PDF</button>' +
                         '                                                                <i class="more-less glyphicon glyphicon-plus"></i>\n' +
 '                                                            </a>\n' +
 '                                                        </h4>\n' +
@@ -396,5 +399,17 @@
                 $("#vendorPreviewModal").modal('show');
             });
         });
+    </script>
+    <script>
+        function downloadPdf(element,vendorId){
+            $('#is_mail').val(0);
+            var divId = $(element).closest(".panel-heading").next('.panel-collapse').attr('id');
+            console.log(divId);
+            $("#vendorPreviewModal form .panel-collapse[id!="+divId+"]").each(function(){
+                console.log(this);
+                $(this).remove();
+            });
+            $("#vendorPreviewModal form").submit();
+        }
     </script>
 @endsection

@@ -120,12 +120,46 @@
                                             <input type="hidden" id="rate_per_unit" name="rate_per_unit">
                                             <input type="hidden" id="unit_id" name="unit_id">
                                             <input type="hidden" id="hsn_code" name="hsn_code">
+                                            <br>
                                             <select class="form-control" id="select_material_type" name="category" required>
                                                 <option>Select Category</option>
                                                 @foreach($categories as $category)
                                                     <option value="{{$category['id']}}">{{$category['name']}}</option>
                                                 @endforeach
                                             </select>
+                                            <input type="submit" class="btn red pull-right">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade" id="myModal2" role="dialog">
+                            <div class="modal-dialog">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header" style="padding-bottom:10px">
+                                        <div class="row">
+                                            <div class="col-md-4"></div>
+                                            <div class="col-md-4"> Assign Category</div>
+                                            <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-body" style="padding:40px 50px;">
+                                        <form action="/purchase/purchase-order/create-asset" method="post">
+                                            {!! csrf_field() !!}
+                                            <div class="row">
+                                                <div class="col-md-12 form-group">
+                                                    <input type="text" id="assetName" name="name" readonly tabindex="-1">
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12 form-group">
+                                                    <input type="text" id="asset_rate_per_unit" name="rate_per_unit" readonly tabindex="-1">
+                                                </div>
+                                            </div>
+                                            <input class="form-control" type="hidden" id="asset_vendor_id" name="vendor_id">
+                                            <input type="hidden" id="asset_unit_id" name="unit_id">
+                                            <input type="hidden" id="asset_hsn_code" name="hsn_code">
                                             <br>
                                             <input type="submit" class="btn red pull-right">
                                         </form>
@@ -165,7 +199,6 @@
                             $('#project').val(data.project);
                         },
                         error: function(errorData){
-
                         }
                     });
                     $.ajax({
