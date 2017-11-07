@@ -62,6 +62,17 @@
             $('#rate_per_unit').val(values[5]);
             $('#unit_id').val(values[3]);
             $('#hsn_code').val(values[6]);
+        }else if(($(this).val() == "approve") && (type == "new-asset")){
+            $('#myModal2').modal('show');
+            var values = [];
+            jQuery.each($columns, function (i, item) {
+                values.push($(item.innerHTML).val());
+            });
+            $('#asset_vendor_id').val(values[0]);
+            $('#assetName').val(values[1]);
+            $('#asset_rate_per_unit').val(values[5]);
+            $('#asset_unit_id').val(values[3]);
+            $('#asset_hsn_code').val(values[6]);
         }
         })
 </script>

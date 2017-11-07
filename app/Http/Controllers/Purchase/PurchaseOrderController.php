@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Purchase;
 
 use App\Asset;
+use App\AssetType;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
@@ -51,7 +52,7 @@ class PurchaseOrderController extends Controller
                                             ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
                                             ->get()
                                             ->toArray();
-            $categories = Category::select('id','name')->get()->toArray();
+            $categories = Category::where('is_miscellaneous',true)->select('id','name')->get()->toArray();
             $purchaseRequests = array();
             foreach($adminApprovePurchaseRequestInfo as $purchaseRequest){
 
@@ -69,6 +70,7 @@ class PurchaseOrderController extends Controller
         }
 
     }
+
     public function getListing(Request $request){
         try{
              $purchaseOrderDetail = PurchaseOrder::get();
@@ -476,6 +478,29 @@ class PurchaseOrderController extends Controller
                 'action' => 'Create Purchase Order',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+    public function createAsset(Request $request){
+        try{
+            $is_present = Asset::where('name','ilike',$request->name)->pluck('id')->toArray();
+            if($is_present == null){
+                $asset_type = AssetType::where('slug','other')->pluck('id')->first();
+                $categoryAssetData['asset_types_id'] = $asset_type;
+                $categoryAssetData['name'] = $request->name;
+                $categoryAssetData['quantity'] = 1;
+                $query = Asset::create($categoryAssetData);
+            }
+            $request->session()->flash('success','New asset created successfully');
+            return redirect('/purchase/purchase-order/create');
+
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase order create view',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
             ];
             Log::critical(json_encode($data));
             abort(500);

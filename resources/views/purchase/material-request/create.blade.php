@@ -164,27 +164,11 @@
                                                         @endforeach
                                                 </select>
                                             </div>
-                                            <div class="form-group">
-                                                <div class="row">
-                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                </div>
-                                                <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                        Browse</a>
-                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                        <i class="fa fa-share"></i> Upload Files </a>
-                                                </div>
-                                                <table class="table table-bordered table-hover" style="width: 200px">
-                                                    <thead>
-                                                    <tr role="row" class="heading">
-                                                        <th> Image </th>
-                                                        <th> Action </th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody id="show-product-images">
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                        <article>
+                                            <label for="files">Select multiple files:</label>
+                                            <input id="files" type="file" multiple="multiple" />
+                                            <output id="result" />
+                                        </article>
                                            <div class="btn red pull-right" id="createMaterial"> Create</div>
                                     </div>
                                 </div>
@@ -253,5 +237,35 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
 <link rel="stylesheet"  href="/assets/global/css/app.css"/>
+<link rel="stylesheet"  href="/assets/custom/purchase/material-request/material-request.css"/>
 <script src="/assets/custom/purchase/material-request/material-request.js" type="text/javascript"></script>
+    <script>
+        function handleFileSelect() {
+            //Check File API support
+            if (window.File && window.FileList && window.FileReader) {
+
+                var files = event.target.files; //FileList object
+                var output = document.getElementById("result");
+
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    //Only pics
+                    if (!file.type.match('image')) continue;
+
+                    var picReader = new FileReader();
+                    picReader.addEventListener("load", function (event) {
+                        var picFile = event.target;
+                        var div = document.createElement("div");
+                        div.innerHTML = "<img class='thumbnail img' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
+                        output.insertBefore(div, null);
+                    });
+                    //Read the image
+                    picReader.readAsDataURL(file);
+                }
+            } else {
+                console.log("Your browser does not support File API");
+            }
+        }
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    </script>
 @endsection

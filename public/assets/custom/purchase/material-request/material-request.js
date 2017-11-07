@@ -15,9 +15,11 @@ $(document).ready(function(){
     var iterator = parseInt(0);
     $('#iterator').val(iterator);
     $("#myBtn").click(function(){
+        $('#component_id').val(4);
         $("#myModal").modal();
     });
     $("#assetBtn").click(function(){
+        $('#component_id').val(6);
         $("#myModal1").modal();
     });
     $("#Unitsearchbox").keyup(function(){
@@ -142,6 +144,10 @@ $(document).ready(function(){
         var iterator = parseInt(iterator) + 1;
         $('#iterator').val(iterator);
         $('#component_id').val(null);
+        var images = [];
+        $('.img').each(function(i, el) {
+            images[i] = [$(el).attr('src')]
+        });
     });
 
     $('#createAsset').click(function(){
@@ -295,7 +301,6 @@ function selectProject(nameProject,id) {
 function selectUser(id,id1) {
     $('#user_id_').val(id1);
     $("#userSearchbox").val(id);
-
     $("#user-suggesstion-box").hide();
 }
 

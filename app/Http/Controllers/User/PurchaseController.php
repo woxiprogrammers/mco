@@ -72,7 +72,6 @@ class PurchaseController extends Controller
                   $materialRequestList[$iterator]['project_name'] =$pro->name;
                   $materialRequestList[$iterator]['client_name'] =$pro->client->company;
                   $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
-
                   $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request-component',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequestComponents->serial_no);
                   $iterator++;
               }
