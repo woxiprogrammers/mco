@@ -187,6 +187,7 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['client_name'] = $project->client->company;
                      $purchaseOrderList[$iterator]['site_name'] = $projectSite->name;
                      $purchaseOrderList[$iterator]['project'] = $project->name;
+                     $purchaseOrderList[$iterator]['chk_status'] = $purchaseOrder['is_approved'];
                      $purchaseOrderList[$iterator]['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
                      $purchaseOrderList[$iterator]['created_at'] = $purchaseOrder['created_at'];
                      $iterator++;
@@ -196,6 +197,13 @@ class PurchaseOrderController extends Controller
             $records = array();
             $records['data'] = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
+                $actionData = "";
+                if ($purchaseOrderList[$pagination]['chk_status'] == true) {
+                    $actionData =  '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                    <a href="/purchase/purchase-order/edit/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white"> Edit
+                    </a> &nbsp; | &nbsp; <a href="/purchase/purchase-order/download-po-pdf/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white"> <i class="fa fa-download" aria-hidden="true"></i>
+                    </a></div>';
+                }
                 $records['data'][$iterator] = [
                     $purchaseOrderList[$pagination]['purchase_order_format_id'],
                     $purchaseOrderList[$pagination]['purchase_request_format_id'],
@@ -203,8 +211,7 @@ class PurchaseOrderController extends Controller
                     $purchaseOrderList[$pagination]['project']." - ".$purchaseOrderList[$pagination]['site_name'],
                     date('d M Y',strtotime($purchaseOrderList[$pagination]['created_at'])),
                     $purchaseOrderList[$pagination]['status'],
-                    '<div id="sample_editable_1_new" class="btn btn-small blue" ><a href="/purchase/purchase-order/edit/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white">&nbsp; Edit
-                </a></div>'
+                    $actionData
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -532,7 +539,7 @@ class PurchaseOrderController extends Controller
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
             foreach($request->purchase as $vendorId => $components){
                 $approvePurchaseOrderData = $disapprovePurchaseOrderData = array('vendor_id' => $vendorId, 'purchase_request_id' => $request->purchase_request_id);
-                $todaysCount = PurchaseOrder::whereDate('created_at',$today)->count();
+                $todaysCount = PurchaseOrder::whereDate('created_at', $today)->count();
                 $approvedPurchaseOrder = $disapprovePurchaseOrder = null;
                 $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
                 $vendorInfo['materials'] = array();
@@ -671,6 +678,22 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
+    public function downloadPoPDF(Request $request, $po_id) {
+        try {
+            //download pdf code here
+            echo "<h1>Download PDF Code</h1>";
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Download Pdf',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function createAsset(Request $request){
         try{
             $is_present = Asset::where('name','ilike',$request->name)->pluck('id')->toArray();
