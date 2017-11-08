@@ -69,14 +69,26 @@ class InventoryManageController extends Controller
                     ->get();
             }
             if($inventoryComponent->is_material == true){
-                $materialInfo = Material::where('name','ilike',$inventoryComponent->name)->first();
+                $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
+                    ->where('unit_conversions.unit_1_id', $inventoryComponent->material->unit_id)
+                    ->select('units.id as id', 'units.name as name')
+                    ->get()
+                    ->toArray();
+                $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
+                    ->where('unit_conversions.unit_2_id', $inventoryComponent->material->unit_id)
+                    ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
+                    ->select('units.id as id', 'units.name as name')
+                    ->get()
+                    ->toArray();
+                $units = array_merge($unit1Array, $units2Array);
+                /*$materialInfo = Material::where('name','ilike',$inventoryComponent->name)->first();
                 if($materialInfo != null){
                     $unit1Ids = UnitConversion::where('unit_1_id',$materialInfo->unit_id)->pluck('unit_2_id')->toArray();
                     $unit2Ids = UnitConversion::where('unit_2_id',$materialInfo->unit_id)->whereNotIn('unit_1_id',$unit1Ids)->pluck('unit_1_id')->toArray();
                     $units = Unit::whereIn('id',$unit1Ids)->whereIn('id',$unit2Ids)->select('id','name')->orderBy('name')->get();
                 }else{
                     $units = Unit::where('is_active', true)->select('id','name')->get();
-                }
+                }*/
             }else{
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
@@ -162,6 +174,7 @@ class InventoryManageController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryComponentTransfers) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentTransfers); $iterator++,$pagination++ ){
+
                 if($inventoryComponentTransfers[$pagination]->transferType->type == 'IN'){
                     $transferStatus = 'IN - From '.$inventoryComponentTransfers[$pagination]->transferType->name;
                 }else{
