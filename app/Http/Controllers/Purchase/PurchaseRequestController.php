@@ -477,7 +477,6 @@ class PurchaseRequestController extends Controller
                         $vendorInfo['materials'] = array();
                     }
                 }
-
                 $purchaseVendorAssignData = array();
                 $purchaseVendorAssignData['vendor_id'] = $vendorId;
                 $iterator = 0;
