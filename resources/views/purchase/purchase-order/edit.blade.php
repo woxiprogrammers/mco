@@ -426,7 +426,7 @@
                                                                     <th> Material Name </th>
                                                                     <th> Quantity </th>
                                                                     <th> Unit </th>
-                                                                    <th>Vendor</th>
+                                                                    <th>Status</th>
                                                                     <th>Action</th>
                                                                 </tr>
                                                                 </thead>

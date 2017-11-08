@@ -1422,7 +1422,7 @@ trait QuotationTrait{
                     $quotationBankInfoData['bank_info_id'] = $bankID;
                     $quotationBankInfoData['quotation_id'] = $request->quotation_id;
                     $quotationBankInfo = QuotationBankInfo::where('quotation_id',$request->quotation_id)->where('bank_info_id',$bankID)->first();
-                    if($quotationBankInfoData != null){
+                    if($quotationBankInfo != null){
                         $quotationBankInfo->update($quotationBankInfoData);
                     }else{
                         QuotationBankInfo::create($quotationBankInfoData);
