@@ -6,6 +6,9 @@ use App\Asset;
 use App\AssetType;
 use App\Category;
 use App\CategoryMaterialRelation;
+use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
+use App\InventoryComponent;
+use App\InventoryTransferTypes;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
 use App\MaterialVersion;
@@ -35,7 +38,7 @@ use App\Unit;
 class PurchaseOrderController extends Controller
 {
     use MaterialRequestTrait;
-
+    use InventoryTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -251,7 +254,9 @@ class PurchaseOrderController extends Controller
     }
     public function createTransaction(Request $request){
         try{
+
             $purchaseOrderBill = $request->except('type','material','unit_name','vendor_name');
+            $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($request->purchase_order_component_id);
             switch($request['type']){
                 case 'upload_bill' :
                     $purchaseOrderBill['is_amendment'] = false;
@@ -263,13 +268,38 @@ class PurchaseOrderController extends Controller
             }
             $purchaseOrderBill['is_paid'] = false;
             $currentTimeStamp = Carbon::now();
-            $serialNoCount = PurchaseOrderBill::whereMonth('created_at',date_format($currentTimeStamp,'m'))->whereYear('created_at',date_format($currentTimeStamp,'Y'))->count();
-            $purchaseOrderBill['grn'] = "GRN".date_format($currentTimeStamp,'Y').date_format($currentTimeStamp,'m').($serialNoCount + 1);
+            $purchaseOrderBill['grn'] = $this->generateGRN();
             $purchaseOrderBill['created_at'] = $currentTimeStamp;
             $purchaseOrderBill['updated_at'] = $currentTimeStamp;
             $purchaseOrderBillId = PurchaseOrderBill::insertGetId($purchaseOrderBill);
             $purchaseOrderBillData = PurchaseOrderBill::where('id',$purchaseOrderBillId)->first();
             $purchaseOrderId = $purchaseOrderBillData->purchaseOrderComponent->purchaseOrder['id'];
+            $inventoryComponent = InventoryComponent::where('purchase_order_component_id',$request->purchase_order_component_id)->first();
+            if($inventoryComponent == null){
+                $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
+                $inventoryComponentData = [
+                    'name' => $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name,
+                    'purchase_order_component_id' => $purchaseOrderComponent->id,
+                    'opening_stock' => 0,
+                    'project_site_id' => $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id
+                ];
+                if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                    $inventoryComponentData['is_material'] = false;
+                    $inventoryComponentData['reference_id'] = Asset::where('name','ilike',$inventoryComponentData['name'])->pluck('id')->first();
+                }else{
+                    $inventoryComponentData['is_material'] = true;
+                    $inventoryComponentData['reference_id'] = Material::where('name','ilike',$inventoryComponentData['name'])->pluck('id')->first();
+                }
+                $inventoryComponent = InventoryComponent::create($inventoryComponentData);
+            }
+            $transferTypeId = InventoryTransferTypes::where('slug','supplier')->where('type','ilike','IN')->pluck('id')->first();
+            $inventoryComponentTransferData = [
+                'inventory_component_id' => $inventoryComponent->id,
+                'transfer_type_id' => $transferTypeId,
+            ];
+            $inventoryComponentTransferData = array_merge($inventoryComponentTransferData,$request->except('type','material','unit_name','vendor_name','purchase_order_component_id'));
+            $inventoryComponentTransferData['source_name'] = $request->vendor_name;
+            $this->createInventoryComponentTransfer($inventoryComponentTransferData);
             $request->session()->flash('success','Transaction added successfully');
             return Redirect::Back();
         }catch(\Exception $e){

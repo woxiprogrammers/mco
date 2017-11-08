@@ -33,7 +33,17 @@ class PurchaseController extends Controller
         $this->middleware('custom.auth');
     }
     public function getManageView(Request $request){
-        return view('purchase/material-request/manage');
+        try{
+            $units = Unit::where('is_active', true)->select('id','name')->get();
+            return view('purchase/material-request/manage')->with(compact('units'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Material Request manage page',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
     public function getCreateView(Request $request){
         $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
@@ -41,7 +51,7 @@ class PurchaseController extends Controller
         return view('purchase/material-request/create')->with(compact('nosUnitId','units'));
     }
     public function getMaterialRequestListing(Request $request){
-      try{
+        try{
           $materialRequests = MaterialRequests::orderBy('id','desc')->get();
           $materialRequestList = array();
           $iterator = 0;
@@ -69,9 +79,15 @@ class PurchaseController extends Controller
           $iTotalRecords = count($materialRequestList);
           $records = array();
           $records['data'] = array();
+          $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
           for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
               switch(strtolower($materialRequestList[$pagination]['component_status'])){
                   case 'pending':
+                      if(in_array($materialRequestList[$pagination]['component_type_id'],$assetComponentTypeIds)){
+                          $unitEditable = 'false';
+                      }else{
+                            $unitEditable = 'true';
+                      }
                       $user_status = '<td><span class="label label-sm label-danger">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                       $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -85,7 +101,7 @@ class PurchaseController extends Controller
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="javascript:void(0);" onclick="openApproveModal('.$materialRequestList[$pagination]['material_request_component_id'].')">
+                                    <a href="javascript:void(0);" onclick="openApproveModal('.$materialRequestList[$pagination]['material_request_component_id'].','.$materialRequestList[$pagination]['unit_id'].','.$materialRequestList[$pagination]['quantity'].','.$unitEditable.')">
                                         <i class="icon-tag"></i> Approve / Disapprove 
                                     </a>
                                 </li>
@@ -183,15 +199,15 @@ class PurchaseController extends Controller
           $records["draw"] = intval($request->draw);
           $records["recordsTotal"] = $iTotalRecords;
           $records["recordsFiltered"] = $iTotalRecords;
-      }catch(\Exception $e){
+        }catch(\Exception $e){
           $records = array();
           $data = [
               'action' => 'Material Request listing',
               'params' => $request->all(),
               'exception'=> $e->getMessage()
           ];
-      }
-      return response()->json($records,200);
+        }
+        return response()->json($records,200);
     }
     public function editMaterialRequest(Request $request){
         return view('purchase/material-request/edit');
@@ -594,6 +610,12 @@ class PurchaseController extends Controller
                     foreach($componentIds as $componentId){
                         $materialRequestComponent = MaterialRequestComponents::where('id',$componentId)->first();
                         if($materialRequestComponent->purchaseRequestComponentStatuses->slug == 'pending'){
+                            if($request->has('quantity')){
+                                $materialRequestComponent->update(['quantity' => $request->quantity]);
+                            }
+                            if($request->has('unit_id')){
+                                $materialRequestComponent->update(['unit_id' => $request->unit_id]);
+                            }
                             $quotationMaterialType = MaterialRequestComponentTypes::where('slug','quotation-material')->first();
                             $projectSiteId = $materialRequestComponent->materialRequest->project_site_id;
                             $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();

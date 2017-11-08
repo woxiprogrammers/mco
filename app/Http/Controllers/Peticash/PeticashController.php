@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Peticash;
 
+use App\Category;
+use App\CategoryMaterialRelation;
 use App\Client;
 use App\Employee;
+use App\Material;
+use App\MaterialRequestComponentTypes;
 use App\PaymentType;
 use App\PeticashSalaryTransaction;
 use App\PeticashSalaryTransactionImages;
@@ -16,11 +20,13 @@ use App\PurcahsePeticashTransaction;
 use App\PurchasePeticashTransactionImage;
 use App\PurchaseOrderBillPayment;
 use App\Quotation;
+use App\QuotationMaterial;
 use App\QuotationStatus;
 use App\Role;
 use App\Unit;
 use App\User;
 use App\UserProjectSiteRelation;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -404,11 +410,11 @@ class PeticashController extends Controller
                                         <i class="icon-docs"></i> Details
                                     </a>
                                 </li>
-                                <li>
+                               <!-- <li>
                                     <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                         <i class="icon-tag"></i> Approve / Disapprove
                                     </a>
-                                </li>
+                                </li>-->
                             </ul>
                         </div>';
                         break;
@@ -426,7 +432,7 @@ class PeticashController extends Controller
                                     </a>
                                 </li>
                                 <li>
-                                    <a onclick="openEditRequestApprovalModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                    <a onclick="editPurchaseModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                         <i class="icon-docs"></i> Edit With Approve
                                     </a>
                                 </li>
@@ -481,11 +487,15 @@ class PeticashController extends Controller
                         </div>';
                         break;
                 }
+                $unit = '-';
+                if ($salaryTransactionData[$pagination]['unit_id'] != null) {
+                    $unit = Unit::findOrFail($salaryTransactionData[$pagination]['unit_id'])->toArray()['name'];
+                }
                 $records['data'][$iterator] = [
                     $salaryTransactionData[$pagination]['id'],
                     $salaryTransactionData[$pagination]['name'],
                     $salaryTransactionData[$pagination]['quantity'],
-                    Unit::findOrFail($salaryTransactionData[$pagination]['unit_id'])->toArray()['name'],
+                    $unit,
                     $salaryTransactionData[$pagination]['bill_amount'],
                     User::findOrFail($salaryTransactionData[$pagination]['reference_user_id'])->toArray()['first_name']." ".User::findOrFail($salaryTransactionData[$pagination]['reference_user_id'])->toArray()['last_name'],
                     date('d M Y',strtotime($salaryTransactionData[$pagination]['date'])),
@@ -1036,8 +1046,27 @@ class PeticashController extends Controller
             $data['source_name'] = $purchaseTransactionData->source_name;
             $data['peticash_transaction_type'] = $purchaseTransactionData->peticashTransactionType->name;
             $data['component_type'] = $purchaseTransactionData->componentType->name;
+            $component_type_slug = $purchaseTransactionData->componentType->slug;
+            $catdata = "";
+            if($component_type_slug == "new-material") {
+                $categories = Category::where('is_miscellaneous',true)->get(['id','name'])->toArray();
+                $catdata = "<select class='form-control' id='edit_category' name='edit_category'>";
+                foreach ($categories as $cat) {
+                    $catdata = $catdata."<option value='".$cat['id']."'>".$cat['name']."</option>";
+                }
+                $catdata = $catdata."<select>";
+            }
+            $data['categorydata'] = $catdata;
             $data['quantity'] = $purchaseTransactionData->quantity;
-            $data['unit_name'] = $purchaseTransactionData->unit->name;
+            $unit = "-";
+            $unit_id = "";
+            if($purchaseTransactionData->unit) {
+                $unit = $purchaseTransactionData->unit->name;
+                $unit_id = $purchaseTransactionData->unit->id;
+            }
+            $data['unit_id'] = $unit_id;
+            $data['component_type_slug'] = $component_type_slug;
+            $data['unit_name'] = $unit;
             $data['bill_number'] = ($purchaseTransactionData->bill_number != null) ? $purchaseTransactionData->bill_number : '';
             $data['bill_amount'] = ($purchaseTransactionData->bill_amount != null) ? $purchaseTransactionData->bill_amount : '';
             $data['vehicle_number'] = ($purchaseTransactionData->vehicle_number != null) ? $purchaseTransactionData->vehicle_number : '';
@@ -1065,6 +1094,65 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($data,$status);
+    }
+
+    public function approvePurchaseAjaxRequest(Request $request) {
+        try{
+            $now = Carbon::now();
+            /*if($request->comp_type == MaterialRequestComponentTypes::where('slug','new-material')->pluck('slug')->first()) {
+                $materialData['name'] = ucwords(trim($request->mat_name));
+                $categoryMaterialData['category_id'] = $request->category_id;
+                $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialData['unit_id'] = $request->unit_id;
+                $materialData['is_active'] = (boolean)1;
+                $materialData['created_at'] = $now;
+                $materialData['updated_at'] = $now;
+                $materialData['gst'] = "";
+                $materialData['hsn_code'] = "";
+                $material = Material::create($materialData);
+                $categoryMaterialData['material_id'] = $material['id'];
+                CategoryMaterialRelation::create($categoryMaterialData);
+                $approvedQuotationId = Quotation::where('quotation_status_id', QuotationStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
+                foreach ($approvedQuotationId as $quotationId) {
+                    $quotMaterialData = array();
+                    $quotMaterialData['material_id'] = $material['id'];
+                    $quotMaterialData['rate_per_unit'] = round($request->rate_per_unit,3);
+                    $quotMaterialData['unit_id'] = $request->unit_id;
+                    //$quotMaterialData['qty'] = $request->qty;
+                    $quotMaterialData['is_client_supplied'] = (boolean)0;
+                    $quotMaterialData['created_at'] = $now;
+                    $quotMaterialData['updated_at'] = $now;
+                    $quotMaterialData['quotation_id'] = $quotationId;
+                    QuotationMaterial::create($quotMaterialData);
+                }
+
+            //also create component in inventory for that site
+            } elseif ($request->comp_type == MaterialRequestComponentTypes::where('slug','new-asset')->pluck('slug')->first()) {
+
+            } elseif ($request->comp_type == MaterialRequestComponentTypes::where('slug','structure-material')->pluck('slug')->first()) {
+            //also create component in inventory for that site and also chk already present
+
+            } elseif ($request->comp_type == MaterialRequestComponentTypes::where('slug','system-asset')->pluck('slug')->first()) {
+
+            }*/
+
+            $purchaseTxn = PurcahsePeticashTransaction::findOrFail($request->txn_id);
+            $newStatus = PeticashStatus::where('slug',$request->status)->pluck('id')->first();
+            $remark = $request->admin_remark;
+            $purchaseTxn->update(['peticash_status_id' => $newStatus,'admin_remark' => $remark]);
+            $status = 200;
+            $message = 'Purchase request approved successfully.';
+        }catch(\Exception $e){
+            $message = "Purchase request not approved successfully.";
+            $data = [
+                'action' => 'Approve Purchase Request',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($message,$status);
     }
 
 }

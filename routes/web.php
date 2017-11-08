@@ -410,6 +410,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('manage-salary-list-ajax',array('uses' => 'Peticash\PeticashController@salaryApprovalListing'));
             Route::post('manage-salary-details-ajax',array('uses' => 'Peticash\PeticashController@getSalaryTransactionDetails'));
             Route::post('manage-purchase-details-ajax',array('uses' => 'Peticash\PeticashController@getPurchaseTransactionDetails'));
+            Route::post('approve-purchase-ajax',array('uses' => 'Peticash\PeticashController@approvePurchaseAjaxRequest'));
+
         });
 
         Route::group(['prefix' => 'peticash-management'], function(){

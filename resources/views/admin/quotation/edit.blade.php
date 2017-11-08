@@ -387,6 +387,9 @@
                                                         <li>
                                                             <a href="#bankassignFormTab" data-toggle="tab"> Assign Bank </a>
                                                         </li>
+                                                        <li>
+                                                            <a href="#miscellaneousFormTab" data-toggle="tab"> Miscellaneous Category </a>
+                                                        </li>
                                                         @if($quotation->quotation_status->slug == 'approved'&& $userRole == 'superadmin')
                                                             <li>
                                                                 <a href="#openingExpensesFormTab" data-toggle="tab"> Opening Expenses </a>
@@ -621,6 +624,44 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                    <div class="tab-pane fade in" id="miscellaneousFormTab">
+                                                        <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
+                                                            <tr>
+                                                                <th  style="text-align: center"> Category name </th>
+                                                                <th style="text-align: center"> Material name </th>
+                                                                <th  style="text-align: center"> Rate per unit </th>
+                                                                <th  style="text-align: center"> Unit </th>
+                                                                <th  style="text-align: center"> Quantity </th>
+                                                            </tr>
+                                                            @foreach($quotationMiscellaneousMaterials as $key => $miscellaneousMaterial)
+                                                                <tr id = "id_{{$miscellaneousMaterial['material_id']}}">
+                                                                    <td>
+                                                                        <span>{{$miscellaneousMaterial['category_name']}}</span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span>{{$miscellaneousMaterial['material_name']}}</span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input class="form-control" type="text" id="rate_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][rate_per_unit]" value="{{$miscellaneousMaterial['rate_per_unit']}}">
+                                                                    </td>
+                                                                    <td>
+                                                                        <span>{{$miscellaneousMaterial['unit_name']}}</span>
+                                                                        <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][unit_id]" value="{{$miscellaneousMaterial['unit_id']}}">
+                                                                    </td>
+                                                                    @if(array_key_exists('quantity',$miscellaneousMaterial))
+                                                                        <td class="form-group">
+                                                                            <input class="form-control current_quantity" type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="{{$miscellaneousMaterial['quantity']}}">
+                                                                            <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quotation_material_id]" value="{{$miscellaneousMaterial['quotation_material_id']}}">
+                                                                        </td>
+                                                                    @else
+                                                                        <td class="form-group">
+                                                                            <input class="form-control current_quantity" type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="0">
+                                                                        </td>
+                                                                    @endif
+                                                                </tr>
+                                                            @endforeach
+                                                        </table>
                                                     </div>
                                                     <div class="tab-pane fade in" id="openingExpensesFormTab">
                                                         <div class="form-group">
