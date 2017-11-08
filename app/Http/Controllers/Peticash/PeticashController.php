@@ -1183,8 +1183,8 @@ class PeticashController extends Controller
             $sha1InventoryTransferId = sha1($createdTransferId);
             $sha1PurchaseOrderId = sha1($request->txn_id);
             foreach ($purchaseOrderBillImages as $key => $image){
-                $tempUploadFile = env('WEB_PUBLIC_PATH').env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseOrderId.DIRECTORY_SEPARATOR.$image['name'];
-                $imageUploadNewPath = env('WEB_PUBLIC_PATH').env('INVENTORY_TRANSFER_IMAGE_UPLOAD').$sha1InventoryComponentId.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$sha1InventoryTransferId;
+                $tempUploadFile = public_path().env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseOrderId.DIRECTORY_SEPARATOR.$image['name'];
+                $imageUploadNewPath = public_path().env('INVENTORY_TRANSFER_IMAGE_UPLOAD').$sha1InventoryComponentId.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$sha1InventoryTransferId;
                 if(!file_exists($imageUploadNewPath)) {
                     File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
                 }
