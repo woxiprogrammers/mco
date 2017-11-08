@@ -17,6 +17,7 @@ use App\PurchaseRequestComponentVendorMailInfo;
 use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
 use App\QuotationStatus;
+use App\Role;
 use App\Unit;
 use App\Vendor;
 use App\VendorMaterialRelation;
@@ -148,11 +149,16 @@ class PurchaseRequestController extends Controller
             $purchaseRequestData['project_site_id'] = $request['project_site_id'];
             $purchaseRequestData['user_id'] = $user['id'];
             $purchaseRequestData['behalf_of_user_id'] = $requestData['user_id'];
+            $purchaseRequestData['assigned_to'] = Role::join('user_has_roles','roles.id','=','user_has_roles.role_id')
+                ->join('users','users.id','=','user_has_roles.user_id')
+                ->where('roles.slug','superadmin')
+                ->pluck('users.id')->first();
             $purchaseRequestedStatus = PurchaseRequestComponentStatuses::where('slug','purchase-requested')->first();
             $purchaseRequestData['purchase_component_status_id'] = $purchaseRequestedStatus->id;
             $today = date('Y-m-d');
             $purchaseRequestCount = PurchaseRequest::whereDate('created_at',$today)->count();
             $purchaseRequestData['serial_no'] = ($purchaseRequestCount+1);
+            $purchaseRequestData['format_id'] = $this->getPurchaseIDFormat('purchase-request',$requestData['project_site_id'],Carbon::now(),$purchaseRequestData['serial_no']);
             $purchaseRequest = PurchaseRequest::create($purchaseRequestData);
             foreach($materialRequestComponentIds as $materialRequestComponentId){
                 PurchaseRequestComponent::create([
