@@ -24,10 +24,7 @@ var MaterialRequestWiseListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/purchase/material-request/material-requestWise-listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
+                    "url": "/purchase/material-request/material-requestWise-listing?_token="+$("input[name='_token']").val()
                 },
                 "order": [
                     [1, "asc"]
