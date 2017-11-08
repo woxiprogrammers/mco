@@ -235,6 +235,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
     });
     Route::group(['prefix' => 'purchase'], function(){
+        Route::get('projects/{client_id}',array('uses' => 'User\PurchaseController@getProjects'));
+        Route::get('project-sites/{project_id}',array('uses' => 'User\PurchaseController@getProjectSites'));
+
         Route::group(['prefix' => 'material-request'], function(){
             Route::get('manage',array('uses'=> 'User\PurchaseController@getManageView'));
             Route::get('create',array('uses'=> 'User\PurchaseController@getCreateView'));

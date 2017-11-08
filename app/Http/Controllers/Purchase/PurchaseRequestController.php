@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Purchase;
 
+use App\Client;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
+use App\Project;
 use App\ProjectSite;
 use App\PurchaseRequest;
 use App\PurchaseRequestComponent;
@@ -14,6 +16,7 @@ use App\PurchaseRequestComponentStatuses;
 use App\PurchaseRequestComponentVendorMailInfo;
 use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
+use App\QuotationStatus;
 use App\Unit;
 use App\Vendor;
 use App\VendorMaterialRelation;
@@ -34,7 +37,13 @@ class PurchaseRequestController extends Controller
         $this->middleware('custom.auth');
     }
     public function getManageView(Request $request){
-        return view('purchase/purchase-request/manage');
+        $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+        $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
+        $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+        $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
+        $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
+        $purchaseStatus = PurchaseRequestComponentStatuses::whereIn('slug',['purchase-requested','p-r-manager-approved','p-r-manager-disapproved','p-r-admin-approved','p-r-admin-disapproved'])->get()->toArray();
+        return view('purchase/purchase-request/manage')->with(compact('clients','purchaseStatus'));
     }
     public function getCreateView(Request $request){
         try{
@@ -175,46 +184,124 @@ class PurchaseRequestController extends Controller
 
     public function purchaseRequestListing(Request $request){
         try{
+            $postdata = null;
+            $pr_name = "";
+            $status = 0;
+            $site_id = 0;
+            $month = 0;
+            $year = 0;
+            $pr_count = 0;
+            $client_id = 0;
+            $project_id = 0;
+            $postDataArray = array();
+            if ($request->has('pr_name')) {
+                if ($request['pr_name'] != "") {
+                    $pr_name = $request['pr_name'];
+                }
+            }
+
+            if ($request->has('status')) {
+                $status = $request['status'];
+            }
+            if($request->has('postdata')) {
+                $postdata = $request['postdata'];
+                if($postdata != null) {
+                    $mstr = explode(",",$request['postdata']);
+                    foreach($mstr as $nstr)
+                    {
+                        $narr = explode("=>",$nstr);
+                        $narr[0] = str_replace("\x98","",$narr[0]);
+                        $ytr[1] = $narr[1];
+                        $postDataArray[$narr[0]] = $ytr[1];
+                    }
+                }
+                $client_id = $postDataArray['client_id'];
+                $project_id = $postDataArray['project_id'];
+                $site_id = $postDataArray['site_id'];
+                $month = $postDataArray['month'];
+                $year = $postDataArray['year'];
+                $pr_count = $postDataArray['pr_count'];
+            }
+
+
             $response = array();
             $responseStatus = 200;
-            $purchaseRequests = PurchaseRequest::all();
-            $start = $request->start;
-            $end = ($start + $request->length) > count($purchaseRequests) ? count($purchaseRequests) : ($start + $request->length);
+            $purchaseRequests = array();
+
+            $ids = PurchaseRequest::all()->pluck('id');
+            $filterFlag = true;
+
+            if ($site_id != 0 && $filterFlag == true) {
+                $ids = PurchaseRequest::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($year != 0 && $filterFlag == true) {
+                $ids = PurchaseRequest::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($month != 0 && $filterFlag == true) {
+                $ids = PurchaseRequest::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+
+            if ($status != 0 && $filterFlag == true) {
+                $ids = PurchaseRequest::whereIn('id',$ids)->where('purchase_component_status_id', $status)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($pr_count != 0 && $filterFlag == true) {
+                $ids = PurchaseRequest::whereIn('id',$ids)->where('serial_no', $pr_count)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($filterFlag) {
+                $purchaseRequests = PurchaseRequest::whereIn('id',$ids)->orderBy('created_at','desc')->get()->toArray();
+            }
+
             $iTotalRecords = count($purchaseRequests);
             $records = array();
             $records['data'] = array();
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
-            $purchaseRequestsData = $purchaseRequests->slice($start,$request->length);
-            $iterator = 0;
-            foreach($purchaseRequestsData as $purchaseRequest){
-                switch ($purchaseRequest->status->slug){
+            $end = $request->length < 0 ? count($purchaseRequests) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseRequests); $iterator++,$pagination++ ){
+                $txnStatusSlug = PurchaseRequestComponentStatuses::findOrFail($purchaseRequests[$pagination]['purchase_component_status_id'])->toArray()['slug'];
+                $txnStatusName = PurchaseRequestComponentStatuses::findOrFail($purchaseRequests[$pagination]['purchase_component_status_id'])->toArray()['name'];
+                switch ($txnStatusSlug){
                     case 'purchase-requested':
-                        $status = "<span class=\"btn btn-xs btn-warning\"> ".$purchaseRequest->status->name." </span>";
+                        $status = "<span class=\"btn btn-xs btn-warning\"> ".$txnStatusName." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>.'
-                                    .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                <!--<li>'
+                                    .'<a href="/purchase/purchase-request/edit/'.$txnStatusSlug.'/'.$purchaseRequests[$pagination]['id'].'">'.
                                         '<i class="icon-docs"></i> Edit 
                                     </a>
-                                </li>
+                                </li>-->
                                 <li>
-                                    <a href="javascript:void(0);" onclick="openApproveModal('.$purchaseRequest->id.')">
+                                    <a href="javascript:void(0);" onclick="openApproveModal('.$purchaseRequests[$pagination]['id'].')">
                                         <i class="icon-tag"></i> Approve / Disapprove 
                                     </a>
                                 </li>
                             </ul>
                         </div>';
                         break;
-
                     case 'p-r-admin-approved':
-                    case 'p-r-manager-approved':
-                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$purchaseRequest->status->name." </span>";
+                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$txnStatusSlug." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -222,7 +309,23 @@ class PurchaseRequestController extends Controller
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
                                 <li>'
-                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'/'.$purchaseRequest->id.'">'.
+                                    .'<a href="/purchase/purchase-request/edit/'.$txnStatusSlug.'/'.$purchaseRequests[$pagination]['id'].'">'.
+                                    '<i class="icon-docs"></i> Edit
+                                    </a>
+                                    </li>
+                            </ul>
+                            </div>';
+                        break;
+                    case 'p-r-manager-approved':
+                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$txnStatusSlug." </span>";
+                        $action = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>'
+                            .'<a href="/purchase/purchase-request/edit/p-r-admin-approved/'.$purchaseRequests[$pagination]['id'].'">'.
                                         '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>
@@ -232,48 +335,55 @@ class PurchaseRequestController extends Controller
 
                     case 'p-r-manager-disapproved':
                     case 'p-r-admin-disapproved':
-                        $status = "<span class=\"btn btn-xs btn-danger\"> ".$purchaseRequest->status->name." </span>";
+                        $status = "<span class=\"btn btn-xs btn-danger\"> ".$txnStatusName." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>'
-                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                <!--<li>'
+                            .'<a href="/purchase/purchase-request/edit/'.$txnStatusSlug.'">'.
                                         '<i class="icon-docs"></i> Edit 
                                     </a>
-                                </li>
+                                </li>-->
                             </ul>
                         </div>';
                         break;
 
                     default:
-                        $status = "<span class=\"btn btn-xs btn-success\"> ".$purchaseRequest->status->name." </span>";
+                        $status = "<span class=\"btn btn-xs btn-success\"> ".$txnStatusName." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                <li>'
-                            .'<a href="/purchase/purchase-request/edit/'.$purchaseRequest->status->slug.'">'.
+                                <!--<li>'
+                            .'<a href="/purchase/purchase-request/edit/'.$txnStatusSlug.'">'.
                                         '<i class="icon-docs"></i> Edit 
                                     </a>
-                                </li>
+                                </li>-->
                             </ul>
                         </div>';
                         break;
                 }
+                $projectdata = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                    ->join('clients','clients.id','=','projects.client_id')
+                    ->where('project_sites.id','=',$purchaseRequests[$pagination]['project_site_id'])
+                    ->select('project_sites.name as site_name','projects.name as proj_name', 'clients.company as company')->first()->toArray();
                 $records['data'][$iterator] = [
-                    $this->getPurchaseIDFormat('purchase-request',$purchaseRequest->projectSite->id,$purchaseRequest->created_at,$purchaseRequest->serial_no),
-                    $purchaseRequest->projectSite->project->client->company,
-                    $purchaseRequest->projectSite->project->name.' - '.$purchaseRequest->projectSite->name,
+                    $this->getPurchaseIDFormat('purchase-request',$purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'],$purchaseRequests[$pagination]['serial_no']),
+                    $projectdata['company'],
+                    $projectdata['proj_name']." - ".$projectdata['site_name'],
+                    date('d M Y',strtotime($purchaseRequests[$pagination]['created_at'])),
                     $status,
                     $action
                 ];
-                $iterator++;
             }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
         }catch (\Exception $e){
             $data = [
                 'action' => 'Purchase Requests listing',
