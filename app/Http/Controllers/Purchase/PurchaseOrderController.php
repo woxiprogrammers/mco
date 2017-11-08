@@ -86,7 +86,6 @@ class PurchaseOrderController extends Controller
 
     public function getListing(Request $request){
         try{
-
             $postdata = null;
             $po_name = "";
             $status = 0;
