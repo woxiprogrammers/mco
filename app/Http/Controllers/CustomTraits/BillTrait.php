@@ -286,9 +286,9 @@ trait BillTrait{
                                         ->toArray();
                 $otherSpecialTaxes = array_values(array_diff($specialTaxesAppliedToBills,$thisBillSpecialTax));
                 if($thisBillSpecialTax != null){
-                    $currentSpecialTaxes = Tax::whereIn('id',$otherSpecialTaxes)->where('is_active',true)->where('is_special', true)->select('id as tax_id','name')->get();
+                    $currentSpecialTaxes = Tax::whereIn('id',$otherSpecialTaxes)->where('is_active',true)->where('is_special', true)->select('id as tax_id','name','base_percentage as percentage')->get();
                 }else{
-                    $currentSpecialTaxes = Tax::where('is_active',true)->where('is_special', true)->select('id as tax_id','name')->get();
+                    $currentSpecialTaxes = Tax::where('is_active',true)->where('is_special', true)->select('id as tax_id','name','base_percentage as percentage')->get();
 
                 }
                 if($currentSpecialTaxes != null){
@@ -306,18 +306,23 @@ trait BillTrait{
                         return $a['tax_id'] > $b['tax_id'];
                     });
                 }else{
-                    $currentSpecialTaxes = Tax::where('is_active',true)->where('is_special', true)->select('id as tax_id')->get();
+                    $currentSpecialTaxes = Tax::where('is_active',true)->where('is_special', true)->select('id as tax_id','base_percentage as percentage')->get();
                 }
                 foreach($currentSpecialTaxes as $key2 => $tax){
-                    $appliedOnTaxes = json_decode($tax['applied_on']);
                     $taxAmount = 0;
-                    foreach($appliedOnTaxes as $appliedTaxId){
-                        if($appliedTaxId == 0){                 // On Subtotal
-                            $taxAmount += $total_amount * ($tax['percentage'] / 100);
-                        }else{
-                            $taxAmount += $listingData[$iterator]['tax'][$appliedTaxId] * ($tax['percentage'] / 100);
+                    if(array_key_exists('applied_on',$tax)){
+                        $appliedOnTaxes = json_decode($tax['applied_on']);
+                        foreach($appliedOnTaxes as $appliedTaxId){
+                            if($appliedTaxId == 0){                 // On Subtotal
+                                $taxAmount += $total_amount * ($tax['percentage'] / 100);
+                            }else{
+                                $taxAmount += $listingData[$iterator]['tax'][$appliedTaxId] * ($tax['percentage'] / 100);
+                            }
                         }
+                    }else{
+                        $taxAmount += $total_amount * ($tax['percentage'] / 100);
                     }
+
                     $listingData[$iterator]['tax'][$tax['tax_id']] = $taxAmount;
                     $listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
                 }
