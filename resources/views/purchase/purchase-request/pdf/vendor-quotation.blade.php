@@ -121,12 +121,28 @@
                             <th style="width: 450px">
                                 Item Name - Description
                             </th>
+                            @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                <th>
+                                    GST
+                                </th>
+                                <th>
+                                    HSN Code
+                                </th>
+                                <th>
+                                    Rate
+                                </th>
+                            @endif
                             <th>
                                 Quantity
                             </th>
                             <th>
                                 Unit
                             </th>
+                            @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                <th>
+                                    Amount
+                                </th>
+                            @endif
                         </tr>
                         @for($iterator = 0 ; $iterator < count($vendorInfo['materials']); $iterator++)
                             <tr style="text-align: center">
@@ -136,12 +152,28 @@
                                 <td>
                                     {{$vendorInfo['materials'][$iterator]['item_name']}}
                                 </td>
+                                @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['gst']}}
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['hsn_code']}}
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['rate']}}
+                                    </td>
+                                @endif
                                 <td>
                                     {{$vendorInfo['materials'][$iterator]['quantity']}}
                                 </td>
                                 <td>
                                     {{$vendorInfo['materials'][$iterator]['unit']}}
                                 </td>
+                                @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                    <td>
+                                        {!! $vendorInfo['materials'][$iterator]['rate']*$vendorInfo['materials'][$iterator]['quantity'] !!}
+                                    </td>
+                                @endif
                             </tr>
                         @endfor
                         @for($i = 0;$i < (15-(count($vendorInfo['materials'])));$i++)
@@ -152,12 +184,28 @@
                                 <td>
 
                                 </td>
+                                @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                    <td>
+
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                @endif
                                 <td>
 
                                 </td>
                                 <td>
 
                                 </td>
+                                @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                    <td>
+
+                                    </td>
+                                @endif
                             </tr>
                         @endfor
                     </table>

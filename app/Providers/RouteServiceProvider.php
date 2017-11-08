@@ -14,6 +14,7 @@ use App\InventoryComponent;
 use App\InventoryComponentTransfers;
 use App\Labour;
 use App\Material;
+use App\MaterialRequestComponents;
 use App\Product;
 use App\ProfitMargin;
 use App\Project;
@@ -77,6 +78,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('inventoryComponent',InventoryComponent::class);
         Route::model('inventoryComponentTransfer',InventoryComponentTransfers::class);
         Route::model('labour',Employee::class);
+        Route::model('materialRequestComponent',MaterialRequestComponents::class);
     }
 
     /**

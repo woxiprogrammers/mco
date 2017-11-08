@@ -291,8 +291,8 @@
     <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
     <link rel="stylesheet"  href="/assets/global/css/app.css"/>
     <link rel="stylesheet" href="/assets/global/plugins/bootstrap/css/bootstrap.min.css" type="text/css"/>
-            <script type="text/javascript" src="/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
-            <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
+    <script type="text/javascript" src="/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
+    <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
     <script>
         $(document).ready(function(){
             $('.example-getting-started').multiselect();
@@ -404,9 +404,7 @@
         function downloadPdf(element,vendorId){
             $('#is_mail').val(0);
             var divId = $(element).closest(".panel-heading").next('.panel-collapse').attr('id');
-            console.log(divId);
             $("#vendorPreviewModal form .panel-collapse[id!="+divId+"]").each(function(){
-                console.log(this);
                 $(this).remove();
             });
             $("#vendorPreviewModal form").submit();
