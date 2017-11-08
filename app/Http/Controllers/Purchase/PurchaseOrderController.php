@@ -86,7 +86,6 @@ class PurchaseOrderController extends Controller
 
     public function getListing(Request $request){
         try{
-
             $postdata = null;
             $po_name = "";
             $status = 0;
@@ -519,6 +518,7 @@ class PurchaseOrderController extends Controller
                     $projectSiteInfo['project_site_name'] = $materialRequestComponent->materialRequest->projectSite->name;
                     $projectSiteInfo['project_site_address'] = $materialRequestComponent->materialRequest->projectSite->address;
                     $pdfFlag = 'after-purchase-order-create';
+                    $project_site_id = $materialRequestComponent->materialRequest->projectSite->id;
                     if($materialRequestComponent->materialRequest->projectSite->city_id == null){
                         $projectSiteInfo['project_site_city'] = '';
                     }else{
@@ -530,6 +530,7 @@ class PurchaseOrderController extends Controller
                             $approvePurchaseOrderData['is_approved'] = true;
                             $approvePurchaseOrderData['user_id'] = Auth::user()->id;
                             $approvePurchaseOrderData['serial_no'] = ++$todaysCount;
+                            $approvePurchaseOrderData['format_id'] = $this->getPurchaseIDFormat('purchase-order',$project_site_id,Carbon::now(),$approvePurchaseOrderData['serial_no']);
                             $approvedPurchaseOrder = PurchaseOrder::create($approvePurchaseOrderData);
                         }
                         $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
@@ -552,6 +553,7 @@ class PurchaseOrderController extends Controller
                             $disapprovePurchaseOrderData['is_approved'] = false;
                             $disapprovePurchaseOrderData['user_id'] = Auth::user()->id;
                             $disapprovePurchaseOrderData['serial_no'] = ++$todaysCount;
+                            $disapprovePurchaseOrderData['format_id'] = $this->getPurchaseIDFormat('purchase-order',$project_site_id,Carbon::now(),$disapprovePurchaseOrderData['serial_no']);
                             $disapprovePurchaseOrder = PurchaseOrder::create($disapprovePurchaseOrderData);
                         }
                         $purchaseOrderComponentData['purchase_order_id'] = $disapprovePurchaseOrder['id'];
