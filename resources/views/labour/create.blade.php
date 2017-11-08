@@ -21,7 +21,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Create Labour</h1>
+                                    <h1>Create Employee</h1>
                                 </div>
                             </div>
                         </div>
@@ -30,11 +30,11 @@
                             <div class="container" style="width: 100%">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/labour/manage">Manage Labour</a>
+                                        <a href="/labour/manage">Manage Employee</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);">Create Labour</a>
+                                        <a href="javascript:void(0);">Create Employee</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
@@ -61,6 +61,23 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <input type="text" class="form-control" id="contact_no" name="mobile">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Gender :</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        &nbsp;&nbsp;&nbsp;
+                                                        <div class="col-md-6 mt-radio-inline">
+                                                            <label class="mt-radio" style="margin-left: 13px">
+                                                                <input type="radio" name="gender" id="female" value="f"> Female
+                                                                <span></span>
+                                                            </label>
+                                                            <label class="mt-radio">
+                                                                <input type="radio" name="gender" id="male" value="m"> Male
+                                                                <span></span>
+                                                            </label>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -93,6 +110,123 @@
                                                                     <option value = "{!! $projectSite['id'] !!}">{!! $projectSite['name'] !!}</option>
                                                                 @endforeach
                                                             </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Address:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="address" name="address">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Pan Card:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="pan_card" name="pan_card">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Aadhaar Card:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="aadhaar_card" name="aadhaar_card">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Designation:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="designation" name="designation">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Joining Date:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="date" class="form-control" id="joining_date" name="joining_date">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Termination Date:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="date" class="form-control" id="termination_date" name="termination_date">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Email:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="email" name="email">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Bank Account Number:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="bank_account_number" name="bank_account_number">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Bank Name:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="bank_name" name="bank_name">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Branch Id:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="branch_id" name="branch_id">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Account Holder Name:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="account_holder_name" name="account_holder_name">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Branch Name:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="branch_name" name="branch_name">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">IFS Code:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="ifs_code" name="ifs_code">
                                                         </div>
                                                     </div>
                                                 </div>

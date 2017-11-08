@@ -16,6 +16,9 @@ var  CreateLabour = function () {
                 },
                 per_day_wages: {
                     required: true
+                },
+                email: {
+                    email: true
                 }
             },
 
@@ -85,6 +88,9 @@ var  EditLabour = function () {
                 },
                 per_day_wages: {
                     required: true
+                },
+                email: {
+                    email: true
                 }
             },
 

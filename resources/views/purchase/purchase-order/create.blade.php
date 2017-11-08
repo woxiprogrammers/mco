@@ -184,7 +184,7 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
-            $("#purchaseRequestId").on('click',function(){
+            $("#purchaseRequestId").on('change',function(){
                 var purchaseRequestId = $(this).val();
                 if(typeof purchaseRequestId == 'undefined' || purchaseRequestId == ''){
                     $('#client').val('');
@@ -206,8 +206,13 @@
                         type: 'GET',
                         async: true,
                         success: function(data,textStatus,xhr){
-                            $("#purchaseRequest tbody").html(data);
-                            $('#purchaseRequest').show();
+                            if(xhr.status == 203){
+                                alert(data.message);
+                            }else{
+                                $("#purchaseRequest tbody").html(data);
+                                $('#purchaseRequest').show();
+                            }
+
                         },
                         error: function(errorData){
                             alert('Something went wrong');

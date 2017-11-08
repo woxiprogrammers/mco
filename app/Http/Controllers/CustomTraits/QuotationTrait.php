@@ -1421,7 +1421,12 @@ trait QuotationTrait{
                 foreach($request->bank as $key => $bankID){
                     $quotationBankInfoData['bank_info_id'] = $bankID;
                     $quotationBankInfoData['quotation_id'] = $request->quotation_id;
+                    $quotationBankInfo = QuotationBankInfo::where('quotation_id',$request->quotation_id)->where('bank_info_id',$bankID)->first();
+                    if($quotationBankInfoData != null){
+                        $quotationBankInfo->update($quotationBankInfoData);
+                    }else{
                         QuotationBankInfo::create($quotationBankInfoData);
+                    }
                 }
             }
             if($request->has('miscellaneous_material_id')){
