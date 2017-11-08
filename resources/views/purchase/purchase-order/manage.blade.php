@@ -36,33 +36,101 @@
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
-                                                    <div class="table-container">
-                                                        <div class="table-actions-wrapper right">
-                                                            <span> </span>
-                                                            <select class="table-group-action-input form-control input-inline input-small input-sm">
-                                                                <option value="">Select...</option>
-                                                                <option value="Cancel">Approve</option>
-                                                                <option value="Cancel">Disapprove</option>
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <label>Select Client :</label>
+                                                            <select class="form-control" id="client_id" name="client_id">
+                                                                <option value="0">ALL</option>
+                                                                @foreach($clients as $client)
+                                                                <option value="{{$client['id']}}">{{$client['company']}}</option>
+                                                                @endforeach
                                                             </select>
-                                                            <button class="btn btn-sm green table-group-action-submit">
-                                                                <i class="fa fa-check"></i> Submit</button>
                                                         </div>
+                                                        <div class="col-md-2">
+                                                            <label>Select Project :</label>
+                                                            <select class="form-control" id="project_id" name="project_id">
+                                                                <option value="0">ALL</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <label>Select Site :</label>
+                                                            <select class="form-control" id="site_id" name="site_id">
+                                                                <option value="0">ALL</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <label>Select Year :</label>
+                                                            <select class="form-control" id="year" name="year">
+                                                                <option value="0">ALL</option>
+                                                                <option value="2017">2017</option>
+                                                                <option value="2018">2018</option>
+                                                                <option value="2019">2019</option>
+                                                                <option value="2020">2020</option>
+                                                                <option value="2021">2021</option>
+                                                                <option value="2022">2022</option>
+                                                                <option value="2023">2023</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <label>Select Month :</label>
+                                                            <select class="form-control" id="month" name="month">
+                                                                <option value="0">ALL</option>
+                                                                <option value="01">Jan</option>
+                                                                <option value="02">Feb</option>
+                                                                <option value="03">Mar</option>
+                                                                <option value="04">Apr</option>
+                                                                <option value="05">May</option>
+                                                                <option value="06">Jun</option>
+                                                                <option value="07">Jul</option>
+                                                                <option value="08">Aug</option>
+                                                                <option value="09">Sep</option>
+                                                                <option value="10">Oct</option>
+                                                                <option value="11">Nov</option>
+                                                                <option value="12">Dec</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <label>PO Id :</label>
+                                                            <input  class="form-control" type="number" id="po_count" name="po_count"/>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <label>&nbsp;</label>
+                                                            <div class="btn-group">
+                                                                <div id="search-withfilter" class="btn blue" >
+                                                                    <a href="#" style="color: white"> Submit
+                                                                        <i class="fa fa-plus"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr/>
+                                                    <div class="table-container">
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrder">
                                                             <thead>
                                                             <tr>
-                                                                <th> Client Name </th>
-                                                                <th> Project Name</th>
-                                                                <th> PR Id </th>
                                                                 <th> PO Id </th>
+                                                                <th> PR Id </th>
+                                                                <th> Client Name </th>
+                                                                <th> Project Name - Site Name</th>
+                                                                <th> Created At</th>
                                                                 <th> Status </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
-                                                                <th><input type="text" class="form-control form-filter" name="search_name" > </th>
+                                                                <th><input type="text" class="form-control form-filter" name="po_name" readonly></th>
+                                                                <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                <th></th>
+                                                                <th></th>
+                                                                <th></th>
+                                                                <th>
+                                                                    <select class="form-control" id="status_id" name="status_id">
+                                                                        <option value="0">ALL</option>
+                                                                        <option value="1">Approve</option>
+                                                                        <option value="2">Disapprove</option>
+                                                                    </select>
+                                                                    <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                                </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -73,32 +141,6 @@
 
                                                             </tbody>
                                                         </table>
-                                                    </div>
-                                                    <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <form class="modal-content">
-                                                                <div class="modal-header" style="background-color:#00844d">
-                                                                    <center><h4 class="modal-title" id="exampleModalLongTitle">ADD REMARK</h4></center>
-                                                                    <button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <form role="form" class="form-horizontal" method="post">
-                                                                        <div class="form-body">
-                                                                            <div class="form-group row">
-                                                                                <div class="col-md-3" style="text-align: right">
-                                                                                    <label for="company" class="control-label">Remark</label>
-                                                                                </div>
-                                                                                <div class="col-md-6">
-                                                                                    <input type="text" class="form-control" id="remark" name="remark">
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                </div>
-                                                                <div class="modal-footer" style="background-color:#00844d">
-                                                                    <button type="submit" class="btn blue">Approve</button>
-                                                                    <button type="submit" class="btn blue">disapprove</button>
-                                                                </div>
-                                                        </div>
                                                     </div>
                                                     </form>
                                                 </div>
@@ -126,6 +168,96 @@
     <script>
         $(document).ready(function() {
             $('#purchaseOrder').DataTable();
+
+            $("#client_id").on('change', function(){
+                getProjects($('#client_id').val());
+            });
+            $("#project_id").on('change', function(){
+                getProjectSites($('#project_id').val());
+            });
+
+            $("#status_id").on('change',function(){
+                var client_id = $('#client_id').val();
+                var project_id = $('#project_id').val();
+                var site_id = $('#site_id').val();
+                var year = $('#year').val();
+                var month = $('#month').val();
+                var status_id = $('#status_id').val();
+                var po_name = $('#po_name').val();
+                var po_count = $('#po_count').val();
+
+                var postData =
+                    'client_id=>'+client_id+','+
+                        'project_id=>'+project_id+','+
+                        'site_id=>'+site_id+','+
+                        'year=>'+year+','+
+                        'month=>'+month+','+
+                        'po_count=>'+po_count;
+
+                $("input[name='postdata']").val(postData);
+                $("input[name='po_name']").val(po_name);
+                $("input[name='status']").val(status_id);
+                $(".filter-submit").trigger('click');
+            });
+
+            $("#search-withfilter").on('click',function(){
+                var client_id = $('#client_id').val();
+                var project_id = $('#project_id').val();
+                var site_id = $('#site_id').val();
+                var year = $('#year').val();
+                var month = $('#month').val();
+                var status_id = $('#status_id').val();
+                var po_name = $('#po_name').val();
+                var po_count = $('#po_count').val();
+
+                var postData =
+                    'client_id=>'+client_id+','+
+                        'project_id=>'+project_id+','+
+                        'site_id=>'+site_id+','+
+                        'year=>'+year+','+
+                        'month=>'+month+','+
+                        'po_count=>'+po_count;
+
+                $("input[name='postdata']").val(postData);
+                $("input[name='po_name']").val(po_name);
+                $("input[name='status']").val(status_id);
+                $(".filter-submit").trigger('click');
+            });
         });
+
+        function getProjects(client_id){
+            $.ajax({
+                url: '/purchase/projects/'+client_id,
+                type: 'GET',
+                async : false,
+                success: function(data,textStatus,xhr){
+                    if(xhr.status == 200){
+                        $('#project_id').html(data);
+                        $('#project_id').prop('disabled',false);
+                        getProjectSites($('#project_id').val());
+                    }
+                },
+                error: function(errorStatus,xhr){
+
+                }
+            });
+        }
+
+        function getProjectSites(project_id){
+            $.ajax({
+                url: '/purchase/project-sites/'+project_id,
+                type: 'GET',
+                async : false,
+                success: function(data,textStatus,xhr){
+                    if(xhr.status == 200){
+                        $('#site_id').html(data);
+                        $('#site_id').prop('disabled',false);
+                    }
+                },
+                error: function(errorStatus,xhr){
+
+                }
+            });
+        }
     </script>
 @endsection

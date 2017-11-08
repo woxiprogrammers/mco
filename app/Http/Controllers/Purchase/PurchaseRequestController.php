@@ -252,7 +252,6 @@ class PurchaseRequestController extends Controller
                 }
             }
 
-
             if ($status != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->where('purchase_component_status_id', $status)->pluck('id');
                 if(count($ids) <= 0) {
@@ -373,10 +372,10 @@ class PurchaseRequestController extends Controller
                     ->where('project_sites.id','=',$purchaseRequests[$pagination]['project_site_id'])
                     ->select('project_sites.name as site_name','projects.name as proj_name', 'clients.company as company')->first()->toArray();
                 $records['data'][$iterator] = [
-                    $this->getPurchaseIDFormat('purchase-request',$purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'],$purchaseRequests[$pagination]['serial_no']),
+                    $this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']),
                     $projectdata['company'],
                     $projectdata['proj_name']." - ".$projectdata['site_name'],
-                    date('d M Y',strtotime($purchaseRequests[$pagination]['created_at'])),
+                    date('d M Y', strtotime($purchaseRequests[$pagination]['created_at'])),
                     $status,
                     $action
                 ];
