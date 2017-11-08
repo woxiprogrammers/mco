@@ -81,14 +81,6 @@ class InventoryManageController extends Controller
                     ->get()
                     ->toArray();
                 $units = array_merge($unit1Array, $units2Array);
-                /*$materialInfo = Material::where('name','ilike',$inventoryComponent->name)->first();
-                if($materialInfo != null){
-                    $unit1Ids = UnitConversion::where('unit_1_id',$materialInfo->unit_id)->pluck('unit_2_id')->toArray();
-                    $unit2Ids = UnitConversion::where('unit_2_id',$materialInfo->unit_id)->whereNotIn('unit_1_id',$unit1Ids)->pluck('unit_1_id')->toArray();
-                    $units = Unit::whereIn('id',$unit1Ids)->whereIn('id',$unit2Ids)->select('id','name')->orderBy('name')->get();
-                }else{
-                    $units = Unit::where('is_active', true)->select('id','name')->get();
-                }*/
             }else{
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
