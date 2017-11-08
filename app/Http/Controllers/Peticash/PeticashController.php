@@ -1148,10 +1148,10 @@ class PeticashController extends Controller
             } else {
                 if($materialComponentSlug == 'quotation-material' || $materialComponentSlug == 'new-material' || $materialComponentSlug == 'structure-material'){
                     $inventoryData['is_material'] = true;
-                    $inventoryData['reference_id']  = Material::where('name',$purchaseTxnData['name'])->pluck('id')->first();
+                    $inventoryData['reference_id']  = Material::where('name','ilike',$purchaseTxnData['name'])->pluck('id')->first();
                 }else{
                     $inventoryData['is_material'] = false;
-                    $inventoryData['reference_id']  =  Asset::where('name',$purchaseTxnData['name'])->pluck('id')->first();
+                    $inventoryData['reference_id']  =  Asset::where('name','ilike',$purchaseTxnData['name'])->pluck('id')->first();
                 }
                 $inventoryData['name'] = $purchaseTxnData['name'];
                 $inventoryData['project_site_id'] = $project_site_id;

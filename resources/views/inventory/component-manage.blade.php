@@ -147,7 +147,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-body" style="padding:40px 50px;">
-                                                <form role="form" action="/inventory/component/add-transfer/{{$inventoryComponent['id']}}" method="POST">
+                                                <form role="form" action="/inventory/component/add-transfer/{{$inventoryComponent['id']}}" method="POST" id="addTransferForm">
                                                     {!! csrf_field() !!}
                                                     <div class="form-group">
                                                         <div class="bootstrap-switch-container" style="height: 30px;width: 200px; margin-left: 0px;">
@@ -178,7 +178,7 @@
                                                         <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
                                                             @foreach($units as $unit)
-                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -200,7 +200,7 @@
                                                         <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
                                                             @foreach($units as $unit)
-                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -219,7 +219,7 @@
                                                         <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
                                                             @foreach($units as $unit)
-                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -241,7 +241,7 @@
                                                         <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
                                                             @foreach($units as $unit)
-                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -314,7 +314,7 @@
                                                         <select name="unit_id" class="form-control" id="unit">
                                                             <option value="">--Select Unit--</option>
                                                             @foreach($units as $unit)
-                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -336,7 +336,7 @@
                                                         <select name="unit_id" class="form-control" id="unit">
                                                             <option value="">--Select Unit--</option>
                                                             @foreach($units as $unit)
-                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -408,7 +408,7 @@
                                                         <select class="form-control" id="unit" name="unit_id">
                                                             <option value=""> -- Unit -- </option>
                                                             @foreach($units as $unit)
-                                                                <option value="{{$unit->id}}">{{$unit->name}}</option>
+                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -867,6 +867,61 @@
 
             });
         }
+        var  CreateInventoryComponentTransfer = function () {
+            var handleCreate = function() {
+                var form = $('#addTransferForm');
+                var error = $('.alert-danger', form);
+                var success = $('.alert-success', form);
+                form.validate({
+                    errorElement: 'span', //default input error message container
+                    errorClass: 'help-block', // default input error message class
+                    focusInvalid: false, // do not focus the last invalid input
+                    rules: {
+                        quantity: {
+                            required: true
+                        },
+                        unit_id:{
+                            required: true
+                        }
+                    },
+                    messages: {
+                        quantity: {
+                            required: "Quantity is required."
+                        },
+                        unit_id:{
+                            required: "Unit is required."
+                        }
+                    },
+                    invalidHandler: function (event, validator) { //display error alert on form submit
+                        success.hide();
+                        error.show();
+                    },
+                    highlight: function (element) { // hightlight error inputs
+                        $(element)
+                            .closest('.form-group').addClass('has-error'); // set error class to the control group
+                    },
+                    unhighlight: function (element) { // revert the change done by hightlight
+                        $(element)
+                            .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                    },
+                    success: function (label) {
+                        label
+                            .closest('.form-group').addClass('has-success');
+                    },
+                    submitHandler: function (form) {
+                        $("button[type='submit']").prop('disabled', true);
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }
+                });
+            }
+            return {
+                init: function () {
+                    handleCreate();
+                }
+            };
+        }();
     </script>
     <script>
         $('#transfer_type').change(function(){
@@ -882,9 +937,6 @@
                 $("#dynamicForm .date").each(function(){
                     $(this).datetimepicker();
                 });
-
-
-
                 $("#inOutSubmit").show();
                 InventoryComponentImageUpload.init();
             }else if($(this).val() == "hand"){
@@ -914,6 +966,9 @@
                 $("#dynamicForm").html('');
                 $("#inOutSubmit").hide();
             }
+            CreateInventoryComponentTransfer.init();
         })
+
+
     </script>
 @endsection
