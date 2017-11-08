@@ -10,11 +10,13 @@ use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
 use App\MaterialRequests;
 use App\MaterialVersion;
+use App\Project;
 use App\ProjectSite;
 use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use App\QuotationMaterial;
 use App\QuotationProduct;
+use App\QuotationStatus;
 use App\Unit;
 use App\UnitConversion;
 use App\User;
@@ -713,36 +715,37 @@ class PurchaseController extends Controller
         }
     }
 
-    public function getMaterialRequestComponentDetail(Request $request,$materialRequestComponent){
-        try{
-            $assetComponentTypes = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
-            if(in_array($materialRequestComponent->component_type_id,$assetComponentTypes)){
-                $nosUnit = Unit::where('slug','nos')->select('id','name')->first();
+    public function getMaterialRequestComponentDetail(Request $request,$materialRequestComponent)
+    {
+        try {
+            $assetComponentTypes = MaterialRequestComponentTypes::whereIn('slug', ['system-asset', 'new-asset'])->pluck('id')->toArray();
+            if (in_array($materialRequestComponent->component_type_id, $assetComponentTypes)) {
+                $nosUnit = Unit::where('slug', 'nos')->select('id', 'name')->first();
                 $units = "<option value='$nosUnit->id'>$nosUnit->name</option>";
-            }else{
-                $newMaterialTypeId = MaterialRequestComponentTypes::where('slug','new-material')->pluck('id')->first();
-                if($newMaterialTypeId == $materialRequestComponent->component_type_id){
-                    $unitData = Unit::where('is_active',true)->select('id','name')->orderBy('name')->get()->toArray();
-                }else{
-                    $material = Material::where('name','ilike',$materialRequestComponent->name)->first();
-                    $unit1Array = UnitConversion::join('units','units.id','=','unit_conversions.unit_2_id')
-                                                ->where('unit_conversions.unit_1_id',$material->unit_id)
-                                                ->select('units.id as id','units.name as name')
-                                                ->get()
-                                                ->toArray();
-                    $units2Array = UnitConversion::join('units','units.id','=','unit_conversions.unit_1_id')
-                                                ->where('unit_conversions.unit_2_id',$material->unit_id)
-                                                ->whereNotIn('unit_conversions.unit_1_id',array_column($unit1Array,'id'))
-                                                ->select('units.id as id','units.name as name')
-                                                ->get()
-                                                ->toArray();
-                    $unitData = array_merge($unit1Array,$units2Array);
+            } else {
+                $newMaterialTypeId = MaterialRequestComponentTypes::where('slug', 'new-material')->pluck('id')->first();
+                if ($newMaterialTypeId == $materialRequestComponent->component_type_id) {
+                    $unitData = Unit::where('is_active', true)->select('id', 'name')->orderBy('name')->get()->toArray();
+                } else {
+                    $material = Material::where('name', 'ilike', $materialRequestComponent->name)->first();
+                    $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
+                        ->where('unit_conversions.unit_1_id', $material->unit_id)
+                        ->select('units.id as id', 'units.name as name')
+                        ->get()
+                        ->toArray();
+                    $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
+                        ->where('unit_conversions.unit_2_id', $material->unit_id)
+                        ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
+                        ->select('units.id as id', 'units.name as name')
+                        ->get()
+                        ->toArray();
+                    $unitData = array_merge($unit1Array, $units2Array);
                 }
-                for($iterator = 0,$units='';$iterator < count($unitData); $iterator++){
-                    if($unitData[$iterator]['id'] == $materialRequestComponent->unit_id){
-                        $units .= "<option value='".$unitData[$iterator]['id']."' selected>".$unitData[$iterator]['name']."</option>";
-                    }else{
-                        $units .= "<option value='".$unitData[$iterator]['id']."'>".$unitData[$iterator]['name']."</option>";
+                for ($iterator = 0, $units = ''; $iterator < count($unitData); $iterator++) {
+                    if ($unitData[$iterator]['id'] == $materialRequestComponent->unit_id) {
+                        $units .= "<option value='" . $unitData[$iterator]['id'] . "' selected>" . $unitData[$iterator]['name'] . "</option>";
+                    } else {
+                        $units .= "<option value='" . $unitData[$iterator]['id'] . "'>" . $unitData[$iterator]['name'] . "</option>";
                     }
                 }
             }
@@ -751,7 +754,7 @@ class PurchaseController extends Controller
                 'quantity' => $materialRequestComponent->quantity
             ];
             $status = 200;
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Get Material Component Details',
                 'params' => $request->all(),
@@ -761,6 +764,61 @@ class PurchaseController extends Controller
             $status = 500;
             $response = null;
         }
-        return response()->json($response,$status);
+        return response()->json($response, $status);
+    }
+
+    public function getProjects(Request $request, $client){
+        try{
+            $status = 200;
+            if ($client == 0) {
+                $projectOptions[] = '<option value="0">ALL</option>';
+            } else {
+                $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+                $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
+                $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+                $projects = Project::where('client_id',$client)->whereIn('id',$projectIds)->get()->toArray();
+                $projectOptions = array();
+                for($i = 0 ; $i < count($projects); $i++){
+                    $projectOptions[] = '<option value="'.$projects[$i]['id'].'"> '.$projects[$i]['name'].' </option>';
+                }
+            }
+        }catch (\Exception $e){
+            $projectOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Get Project from client',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectOptions,$status);
+    }
+
+    public function getProjectSites(Request $request,$project){
+        try{
+            $status = 200;
+            if ($project == 0) {
+                $projectSitesOptions[] = '<option value="0">ALL</option>';
+            } else {
+                $projectSites = ProjectSite::where('project_id', $project)->get()->toArray();
+                $projectSitesOptions = array();
+                for($i = 0 ; $i < count($projectSites); $i++){
+                    $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';
+                }
+            }
+        }catch (\Exception $e){
+            $projectSitesOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Get Project Site',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectSitesOptions,$status);
     }
 }

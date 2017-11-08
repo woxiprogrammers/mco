@@ -70,6 +70,8 @@
                                                         <option value="2019">2019</option>
                                                         <option value="2020">2020</option>
                                                         <option value="2021">2021</option>
+                                                        <option value="2022">2022</option>
+                                                        <option value="2023">2023</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2">
@@ -133,13 +135,15 @@
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
-                                                    <th>  <select class="form-control" id="status_id" name="status_id">
+                                                    <th>
+                                                        <select class="form-control" id="status_id" name="status_id">
                                                             <option value="0">ALL</option>
                                                             <option value="2">Approved</option>
                                                             <option value="3">Disapproved</option>
                                                             <option value="4">Pending</option>
                                                         </select>
-                                                        <input type="hidden" class="form-control form-filter" name="status" id="status"></th>
+                                                        <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                    </th>
                                                     <th>
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
