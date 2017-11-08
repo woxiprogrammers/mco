@@ -46,5 +46,29 @@ $(document).ready(function(){
         $('#po_bill_id').val(po_id);
         $('#bilAmount').val(bill_amount);
     });
+    $(".amendment_status_change").click(function(){
+        var po_id = $(this).val();
+        $("#amendmentModal").modal();
+        $('#purchase_order_bill_id').val(po_id);
+    });
+    $(".view_details").click(function(){
+        var po_id = $(this).val();
+        $.ajax({
+            type: "POST",
+            url: "/purchase/purchase-order/get-bill-details",
+            data:{po_id : po_id},
+            beforeSend: function(){
+                $.LoadingOverlay("hide");
+            },
+            success: function(data){
+                $('#grn').val(data.grn);
+                $('#amount').val(data.bill_amount);
+                $('#quantity').val(data.quantity);
+                $('#unit').val(data.unit_id);
+                $('#remark').val(data.remark);
+            }
+        });
+        $("#viewDetailModal").modal();
+    });
 
 });

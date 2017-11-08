@@ -306,7 +306,7 @@ class PurchaseOrderController extends Controller
                 $purchaseOrderBillListing[$iterator]['unit_name'] = $purchaseOrderBill->unit->name;
                 $purchaseOrderBillListing[$iterator]['purchase_bill_grn'] = $purchaseOrderBill['grn'];
                 $purchaseOrderBillListing[$iterator]['bill_amount'] = $purchaseOrderBill['bill_amount'];
-                if($purchaseOrderComponent['is_amendment'] == true){
+                if($purchaseOrderBill['is_amendment'] == true){
                     $purchaseOrderBillListing[$iterator]['status'] = 'Amendment Pending';
                 }else{
                     $purchaseOrderBillListing[$iterator]['status'] = ($purchaseOrderBill['is_paid'] == true) ? 'Bill Paid' : 'Bill Pending';
@@ -344,6 +344,17 @@ class PurchaseOrderController extends Controller
                 $status = 500;
                return response()->json($message,$status);
            }
+    }
+    public function getPurchaseOrderBillDetails(Request $request){
+        try{
+                $purchaseOrderBillData = PurchaseOrderBill::where('id',$request['po_id'])->first();
+            $status = 200;
+            return response()->json($purchaseOrderBillData,$status);
+        }catch(\Exception $e){
+            $message = $e->getMessage();
+            $status = 500;
+            return response()->json($message,$status);
+        }
     }
     public function getPurchaseOrderMaterials(Request $request){
         try{
@@ -424,6 +435,22 @@ class PurchaseOrderController extends Controller
        }catch (\Exception $e){
             $data = [
                 'action' => 'Create Bill Payment',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            $request->session()->flash('danger','Something went wrong');
+            return Redirect::Back();
+        }
+    }
+
+    public function changeStatus(Request $request){
+        try{
+            PurchaseOrderBill::where('id',$request['purchase_order_bill_id'])->update(['is_paid' => false, 'is_amendment' => false,'remark' => $request['remark']]);
+            $request->session()->flash('success','Approved successfully');
+            return Redirect::Back();
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Change Status',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];
