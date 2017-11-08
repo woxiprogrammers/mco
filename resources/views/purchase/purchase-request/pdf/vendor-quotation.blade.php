@@ -118,10 +118,10 @@
                             <th style="width: 8px">
                                 Sr.no.
                             </th>
-                            <th style="width: 450px">
-                                Item Name - Description
-                            </th>
                             @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                <th style="width: 250px">
+                                    Item Name - Description
+                                </th>
                                 <th>
                                     GST
                                 </th>
@@ -130,6 +130,10 @@
                                 </th>
                                 <th>
                                     Rate
+                                </th>
+                            @else
+                                <th style="width: 450px">
+                                    Item Name - Description
                                 </th>
                             @endif
                             <th>

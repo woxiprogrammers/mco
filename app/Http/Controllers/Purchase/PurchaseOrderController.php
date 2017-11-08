@@ -534,9 +534,9 @@ class PurchaseOrderController extends Controller
                             $approvedPurchaseOrder = PurchaseOrder::create($approvePurchaseOrderData);
                         }
                         $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
-                        $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
-                        $vendorInfo['materials'][$iterator]['unit'] = $materialRequestComponent->unit->name;
-                        if(is_array($materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                        $vendorInfo['materials'][$iterator]['quantity'] = $component['quantity'];
+                        $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$component['unit_id'])->pluck('name')->first();
+                        if(in_array($materialRequestComponent->component_type_id,$assetComponentTypeIds)){
                             $vendorInfo['materials'][$iterator]['gst'] = '-';
                         }else{
                             $vendorInfo['materials'][$iterator]['gst'] = Material::where('name','ilike',$materialRequestComponent->name)->pluck('gst')->first();
@@ -544,8 +544,8 @@ class PurchaseOrderController extends Controller
                                 $vendorInfo['materials'][$iterator]['gst'] = '-';
                             }
                         }
-                        $vendorInfo['materials'][$iterator]['hsn_code'] = $component->hsn_code;
-                        $vendorInfo['materials'][$iterator]['rate'] = $component->rate;
+                        $vendorInfo['materials'][$iterator]['hsn_code'] = $component['hsn_code'];
+                        $vendorInfo['materials'][$iterator]['rate'] = $component['rate'];
                         $iterator++;
                         $purchaseOrderComponentData['purchase_order_id'] = $approvedPurchaseOrder['id'];
                     }elseif($component['status'] == 'disapprove'){
