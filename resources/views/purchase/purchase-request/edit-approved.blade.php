@@ -405,7 +405,6 @@
             $('#is_mail').val(0);
             var divId = $(element).closest(".panel-heading").next('.panel-collapse').attr('id');
             $("#vendorPreviewModal form .panel-collapse[id!="+divId+"]").each(function(){
-                console.log(this);
                 $(this).remove();
             });
             $("#vendorPreviewModal form").submit();
