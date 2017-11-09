@@ -358,7 +358,8 @@ class PurchaseOrderController extends Controller
     public function getPurchaseOrderBillDetails(Request $request){
         try{
                 $purchaseOrderBillData = PurchaseOrderBill::where('id',$request['po_id'])->first();
-            $status = 200;
+                $purchaseOrderBillData['unit'] = Unit::where('id',$purchaseOrderBillData['unit_id'])->pluck('name')->first();
+                $status = 200;
             return response()->json($purchaseOrderBillData,$status);
         }catch(\Exception $e){
             $message = $e->getMessage();
