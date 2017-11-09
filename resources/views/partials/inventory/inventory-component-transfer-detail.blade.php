@@ -232,20 +232,24 @@
 </div>
 @endif
 @if(count($inventoryComponentTransferImages) > 0)
-    <div class="row">
-        <div class="col-md-3 col-md-offset-2">
-            <label class="control-label pull-right">
-                <b>Images:</b>
-            </label>
-        </div>
-    </div>
-    @foreach($inventoryComponentTransferImages as $imagePath)
-        <div class="row">
-            <div class="col-md-3 col-md-offset-4">
-                <span class="pull-right">
-                    <img src="{{$imagePath}}" alt="Inventory Component Transfer Images">
-                </span>
-            </div>
-        </div>
-    @endforeach
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr role="row" class="heading">
+                <th> Image </th>
+
+            </tr>
+        </thead>
+        <tbody id="show-product-images">
+            @foreach($inventoryComponentTransferImages as $imagePath)
+                <tr id="image">
+                    <td>
+                        <a href="{{$imagePath}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                            <img class="img-responsive" src="{{$imagePath}}" alt="" style="width:400px; height:200px;"> </a>
+                        <input type="hidden" class="product-image-name" name="work_order_images[{{$imagePath}}][image_name]" id="product-image-name" value="{{$imagePath}}"/>
+                    </td>
+
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 @endif

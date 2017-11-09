@@ -918,6 +918,10 @@ class PurchaseController extends Controller
                         ->get()
                         ->toArray();
                     $unitData = array_merge($unit1Array, $units2Array);
+                    $unitData[] = [
+                        'id' => $material->unit->id,
+                        'name' => $material->unit->name,
+                    ];
                 }
                 for ($iterator = 0, $units = ''; $iterator < count($unitData); $iterator++) {
                     if ($unitData[$iterator]['id'] == $materialRequestComponent->unit_id) {
