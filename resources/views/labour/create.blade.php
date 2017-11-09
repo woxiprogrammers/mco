@@ -4,8 +4,8 @@
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+    <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/fancybox/source/jquery.fancybox.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
@@ -144,6 +144,7 @@
                                                             <label for="name" class="control-label">Designation:</label>
                                                             <span>*</span>
                                                         </div>
+
                                                         <div class="col-md-6">
                                                             <input type="text" class="form-control" id="designation" name="designation">
                                                         </div>
@@ -153,8 +154,11 @@
                                                             <label for="name" class="control-label">Joining Date:</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <input type="date" class="form-control" id="joining_date" name="joining_date">
+                                                        <div class="col-md-6 date date-picker">
+                                                            <input type="text" style="width: 30%" name="joining_date"  id="joining_date"/>
+                                                            <button class="btn btn-sm default" type="button">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -162,8 +166,12 @@
                                                             <label for="name" class="control-label">Termination Date:</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <input type="date" class="form-control" id="termination_date" name="termination_date">
+                                                        <div class="col-md-6 date date-picker">
+                                                            <input type="text" style="width: 30%" name="termination_date"  id="termination_date"/>
+                                                            <button class="btn btn-sm default" type="button">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </button>
+                                                            {{--<input type="date" class="form-control" id="termination_date" name="termination_date">--}}
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -249,6 +257,10 @@
 @endsection
 @section('javascript')
     <script src="/assets/custom/labour/labour.js" type="application/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+
     <script>
         $(document).ready(function() {
             CreateLabour.init();

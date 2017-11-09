@@ -40,7 +40,6 @@ class AssetManagementController extends Controller
     public function getEditView(Request $request,$asset){
         try{
             $asset_types = AssetType::select('id','name')->get()->toArray();
-            $asset = $asset->toArray();
             $assetId = $asset['id'];
             $assetImages = AssetImage::where('asset_id',$assetId)->select('id','name')->get();
             if($assetImages != null){

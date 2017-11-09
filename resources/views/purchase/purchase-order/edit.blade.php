@@ -408,6 +408,33 @@
                                                 </div>
                                                 </form>
                                             </div>
+
+                                                <div class="modal fade " id="amendmentModal"  role="dialog">
+                                                    <div class="modal-dialog">
+                                                        <!-- Modal content-->
+                                                        <div class="modal-content">
+                                                            <form id="approve_bill" action="/purchase/purchase-order/change-status" method="post">
+                                                                <div class="modal-header">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4"></div>
+                                                                        <div class="col-md-4" style="font-size: 18px"> Approve</div>
+                                                                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-body" style="padding:40px 50px;">
+                                                                    <div class="form-group row">
+                                                                        <input type="text" class="form-control" name="remark">
+                                                                        <input type="hidden" class="form-control" name="purchase_order_bill_id" id="purchase_order_bill_id">
+                                                                    </div>
+                                                                    <button class="btn btn-set red pull-right" type="submit">
+                                                                        <i class="fa fa-check" style="font-size: large"></i>
+                                                                        Approve &nbsp; &nbsp; &nbsp;
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                         </div>
                                     </div>
                                 </div>
@@ -426,7 +453,7 @@
                                                                     <th> Material Name </th>
                                                                     <th> Quantity </th>
                                                                     <th> Unit </th>
-                                                                    <th>Vendor</th>
+                                                                    <th>Status</th>
                                                                     <th>Action</th>
                                                                 </tr>
                                                                 </thead>
@@ -435,14 +462,22 @@
                                                                 <tr>
                                                                     <td>
          <input type="hidden" id="{{$purchaseOrderTransaction['purchase_order_bill_id']}}" value="{{$purchaseOrderTransaction['bill_amount']}}">
-                                                                        <input type="hidden"  value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}" name="purchase_order_bill_id">{{$purchaseOrderTransaction['purchase_bill_grn']}} </td>
+                                                                        <input type="hidden"  value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}" name="purchase_order_bill_id">{{$purchaseOrderTransaction['purchase_bill_grn']}}
+                                                                    </td>
                                                                     <td> {{$purchaseOrderTransaction['material_name']}}</td>
                                                                     <td> {{$purchaseOrderTransaction['material_quantity']}} </td>
                                                                     <td> {{$purchaseOrderTransaction['unit_name']}} </td>
                                                                     <td>
                                                                         {{$purchaseOrderTransaction['status']}}
                                                                     </td>
+                                                                    @if($purchaseOrderTransaction['status'] == 'Bill Pending')
                                                                     <td>  <button class="payment" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">Make Payment</button></td>
+                                                                    @elseif($purchaseOrderTransaction['status'] == 'Amendment Pending')
+                                                                        <td>  <button class="amendment_status_change" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">Approve</button></td>
+                                                                    @else
+                                                                        <td> <button value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}"> - </button> </td>
+                                                                        {{--<td> <button class="view_details" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">View</button> </td>--}}
+                                                                    @endif
                                                                 </tr>
                                                                     @endforeach
                                                                 </tbody>
