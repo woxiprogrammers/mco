@@ -76,4 +76,7 @@ var ProfitMarginListing = function () {
 
 jQuery(document).ready(function() {
     ProfitMarginListing.init();
+    $("input[name='search_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });

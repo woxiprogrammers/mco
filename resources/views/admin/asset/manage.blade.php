@@ -50,7 +50,7 @@
                                                                 <th> Asset Type </th>
                                                                 <th> Actions </th>
                                                             </tr>
-                                                            <tr class="filter">
+                                                            {{--<tr class="filter">
                                                                 <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
@@ -60,7 +60,7 @@
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                 </th>
-                                                            </tr>
+                                                            </tr>--}}
                                                             </thead>
                                                             <tbody>
 

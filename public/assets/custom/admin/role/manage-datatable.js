@@ -76,4 +76,7 @@ var RoleListing = function () {
 
 jQuery(document).ready(function() {
     RoleListing.init();
+    $("input[name='search_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });
