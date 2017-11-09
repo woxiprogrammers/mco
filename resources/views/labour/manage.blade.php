@@ -19,14 +19,14 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Labours</h1>
+                                    <h1>Manage Employee</h1>
                                 </div>
-                                <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 78%; margin-top: 1%">
-                                    <a href="/labour/create" style="color: white">
-                                        <i class="fa fa-plus"></i>
-                                        Labour
-                                    </a>
-                                </div>
+                                    <div class="btn-group" style="float: right;margin-top:1%">
+                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/labour/create" style="color: white"> Employee
+                                                <i class="fa fa-plus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
                             </div>
                         </div>
                         <div class="page-content">
@@ -50,8 +50,8 @@
                                                 <table class="table table-striped table-bordered table-hover" id="labourTable">
                                                     <thead>
                                                     <tr>
-                                                        <th> Labour Id </th>
-                                                        <th> Labour Name </th>
+                                                        <th> Employee Id </th>
+                                                        <th> Employee Name </th>
                                                         <th> Contact No </th>
                                                         <th> Per Day wages </th>
                                                         <th> Project Site </th>

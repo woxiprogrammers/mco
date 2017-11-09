@@ -76,4 +76,7 @@ var ProductListing = function () {
 
 jQuery(document).ready(function() {
     ProductListing.init();
+    $("input[name='search_product_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });

@@ -60,7 +60,7 @@
                                                 </div>
                                             </div>
                                         @if($userRole == 'superadmin')
-                                            <div class="row">
+                                            {{--<div class="row">
                                                 <div class="col-md-6">
                                                     <a href="#" class="btn btn-set yellow pull-right"  id="assetBtn">
                                                         <i class="fa fa-plus" style="font-size: large"></i>
@@ -75,7 +75,7 @@
                                                         </a>&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div>--}}
                                         @endif
                                         </div>
                                     </div>

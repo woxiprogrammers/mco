@@ -152,5 +152,14 @@ var UnitConversionListing = function () {
 
 jQuery(document).ready(function() {
     UnitsListing.init();
+    $("input[name='search_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
     UnitConversionListing.init();
+    $("input[name='search_unit_1_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
+    $("input[name='search_unit_2_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });

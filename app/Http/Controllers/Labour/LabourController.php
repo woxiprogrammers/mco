@@ -85,8 +85,8 @@ class LabourController extends Controller
                 }
                 $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
                 $records['data'][$iterator] = [
-                    $listingData[$pagination]['name'],
                     $listingData[$pagination]['employee_id'],
+                    $listingData[$pagination]['name'],
                     $listingData[$pagination]['mobile'],
                     $listingData[$pagination]['per_day_wages'],
                     $projectSiteName,

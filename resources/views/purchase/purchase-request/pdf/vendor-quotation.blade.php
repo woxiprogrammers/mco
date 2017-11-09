@@ -32,13 +32,13 @@
                 <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
                     <span><b>Invoice To :</b></span>
                     <div style="margin-left: 2%;">
-                        <table id="innerTable" border="0" style="border: 0px solid black !important;">
+                        <table id="innerTable" border="0" style="border: 0px solid black !important;font-size: 12px;">
                             <tr style="border: 0px solid black !important;">
                                 <td style="border: 0px solid black !important;">
-                                    <img height="50" width="100" src="http://mconstruction.co.in/assets/global/img/logo.jpg">
+                                    <img height="50px" width="100px" src="http://mconstruction.co.in/assets/global/img/logo.jpg">
                                 </td>
                                 <td style="border: 0px solid black !important;">
-                                    <div>
+                                    <div style="font-weight: bold;font-size: 14px;">
                                         {!! env('COMPANY_NAME') !!}
                                     </div>
                                     <div>
@@ -56,9 +56,9 @@
                         
                     </div>
                 </td>
-                <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
-                    <span><b>Destination</b></span>
-                    <div style="margin-left: 2%;">
+                <td style="width: 50%;padding-top: 0px;" >
+                    <span><b>Destination : </b></span>
+                    <div style="margin-left: 2%;font-size: 12px;">
                         <div>
                             {{$projectSiteInfo['project_site_address']}}
                         </div>
@@ -77,9 +77,9 @@
             </tr>
             <tr  style="height: 100px">
                 <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
-                    <span><b>Supplier</b></span>
-                    <div style="margin-left: 2%;">
-                        <div>
+                    <span><b>Supplier : </b></span>
+                    <div style="margin-left: 2%;font-size: 12px;">
+                        <div style="font-weight: bold;font-size: 14px;">
                             {{$vendorInfo['company']}}
                         </div>
                         <div>
@@ -94,8 +94,8 @@
                     </div>
                 </td>
                 <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
-                    <span><b>Terms of Delivery</b></span>
-                    <div style="margin-left: 2%;">
+                    <span><b>Terms of Delivery :</b></span>
+                    <div style="margin-left: 2%;font-size: 12px;">
                         <div>
                             {{$projectSiteInfo['project_name']}}
                         </div>
@@ -113,7 +113,7 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <table id="itemTable">
+                    <table id="itemTable" style="font-size: 12px;">
                         <tr style="text-align: center">
                             <th style="width: 8px">
                                 Sr.no.
@@ -180,7 +180,7 @@
                                 @endif
                             </tr>
                         @endfor
-                        @for($i = 0;$i < (15-(count($vendorInfo['materials'])));$i++)
+                        @for($i = 0;$i < (12-(count($vendorInfo['materials'])));$i++)
                             <tr style="text-align: center">
                                 <td>
 

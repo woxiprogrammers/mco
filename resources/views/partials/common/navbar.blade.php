@@ -162,7 +162,7 @@
                                             </li>
                                             <li aria-haspopup="true">
                                                 <a href="/labour/manage" class="nav-link nav-toggle ">
-                                                    <i class="fa fa-sitemap"></i> Manage Labour
+                                                    <i class="fa fa-sitemap"></i> Manage Employee
                                                 </a>
                                             </li>
                                         </ul>

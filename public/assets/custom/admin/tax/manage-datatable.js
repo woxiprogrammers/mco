@@ -76,4 +76,7 @@ var TaxListing = function () {
 
 jQuery(document).ready(function() {
     TaxListing.init();
+    $("input[name='search_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });

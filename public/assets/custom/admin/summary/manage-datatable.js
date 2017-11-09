@@ -76,4 +76,7 @@ var SummaryListing = function () {
 
 jQuery(document).ready(function() {
     SummaryListing.init();
+    $("input[name='search_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });
