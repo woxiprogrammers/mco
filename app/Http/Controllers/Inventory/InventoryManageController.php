@@ -81,6 +81,10 @@ class InventoryManageController extends Controller
                     ->get()
                     ->toArray();
                 $units = array_merge($unit1Array, $units2Array);
+                $units[] = [
+                    'id' => $inventoryComponent->material->unit->id,
+                    'name' => $inventoryComponent->material->unit->name,
+                ];
             }else{
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
@@ -358,8 +362,7 @@ class InventoryManageController extends Controller
     public function getProjectSites(Request $request){
         try{
             $projectId = $request->project_id;
-            $quotationProjectSiteIds = Quotation::whereNotNull('quotation_status_id')->pluck('project_site_id')->toArray();
-            $projectSites = ProjectSite::where('project_id',$projectId)->whereIn('id',$quotationProjectSiteIds)->select('id','name')->get();
+            $projectSites = ProjectSite::where('project_id',$projectId)->select('id','name')->get();
             $response = array();
             if(count($projectSites) <= 0)
             {

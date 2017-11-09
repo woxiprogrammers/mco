@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 trait InventoryTrait{
     public function createInventoryComponentTransfer($data){
         try{
+
             if(!array_key_exists('transfer_type_id',$data)){
                 if(array_key_exists('in_or_out',$data)){
                     $data['transfer_type_id'] = InventoryTransferTypes::where('type','ilike','IN')->where('slug',$data['transfer_type'])->pluck('id')->first();
