@@ -36,7 +36,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 class PeticashController extends Controller
@@ -1148,10 +1148,10 @@ class PeticashController extends Controller
             } else {
                 if($materialComponentSlug == 'quotation-material' || $materialComponentSlug == 'new-material' || $materialComponentSlug == 'structure-material'){
                     $inventoryData['is_material'] = true;
-                    $inventoryData['reference_id']  = Material::where('name',$purchaseTxnData['name'])->pluck('id')->first();
+                    $inventoryData['reference_id']  = Material::where('name','ilike',$purchaseTxnData['name'])->pluck('id')->first();
                 }else{
                     $inventoryData['is_material'] = false;
-                    $inventoryData['reference_id']  =  Asset::where('name',$purchaseTxnData['name'])->pluck('id')->first();
+                    $inventoryData['reference_id']  =  Asset::where('name','ilike',$purchaseTxnData['name'])->pluck('id')->first();
                 }
                 $inventoryData['name'] = $purchaseTxnData['name'];
                 $inventoryData['project_site_id'] = $project_site_id;
@@ -1183,8 +1183,8 @@ class PeticashController extends Controller
             $sha1InventoryTransferId = sha1($createdTransferId);
             $sha1PurchaseOrderId = sha1($request->txn_id);
             foreach ($purchaseOrderBillImages as $key => $image){
-                $tempUploadFile = env('WEB_PUBLIC_PATH').env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseOrderId.DIRECTORY_SEPARATOR.$image['name'];
-                $imageUploadNewPath = env('WEB_PUBLIC_PATH').env('INVENTORY_TRANSFER_IMAGE_UPLOAD').$sha1InventoryComponentId.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$sha1InventoryTransferId;
+                $tempUploadFile = public_path().env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseOrderId.DIRECTORY_SEPARATOR.$image['name'];
+                $imageUploadNewPath = public_path().env('INVENTORY_TRANSFER_IMAGE_UPLOAD').$sha1InventoryComponentId.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$sha1InventoryTransferId;
                 if(!file_exists($imageUploadNewPath)) {
                     File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
                 }

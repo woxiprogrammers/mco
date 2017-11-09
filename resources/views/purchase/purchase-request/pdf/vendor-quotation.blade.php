@@ -118,10 +118,10 @@
                             <th style="width: 8px">
                                 Sr.no.
                             </th>
-                            <th style="width: 450px">
-                                Item Name - Description
-                            </th>
-                            @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                            @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
+                                <th style="width: 250px">
+                                    Item Name - Description
+                                </th>
                                 <th>
                                     GST
                                 </th>
@@ -131,6 +131,10 @@
                                 <th>
                                     Rate
                                 </th>
+                            @else
+                                <th style="width: 450px">
+                                    Item Name - Description
+                                </th>
                             @endif
                             <th>
                                 Quantity
@@ -138,7 +142,7 @@
                             <th>
                                 Unit
                             </th>
-                            @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                            @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                                 <th>
                                     Amount
                                 </th>
@@ -152,7 +156,7 @@
                                 <td>
                                     {{$vendorInfo['materials'][$iterator]['item_name']}}
                                 </td>
-                                @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                                     <td>
                                         {{$vendorInfo['materials'][$iterator]['gst']}}
                                     </td>
@@ -169,7 +173,7 @@
                                 <td>
                                     {{$vendorInfo['materials'][$iterator]['unit']}}
                                 </td>
-                                @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                                     <td>
                                         {!! $vendorInfo['materials'][$iterator]['rate']*$vendorInfo['materials'][$iterator]['quantity'] !!}
                                     </td>
@@ -184,7 +188,7 @@
                                 <td>
 
                                 </td>
-                                @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                                     <td>
 
                                     </td>
@@ -201,7 +205,7 @@
                                 <td>
 
                                 </td>
-                                @if(isset($pdfFlag) && $pdfFlag == 'after-purchase-order-create')
+                                @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                                     <td>
 
                                     </td>

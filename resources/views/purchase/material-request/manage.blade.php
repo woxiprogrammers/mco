@@ -16,13 +16,36 @@
                     <div class="page-head">
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
-                            <div class="page-title">
-                                <h1>Manage Material</h1>
-                            </div>
-                            <div class="btn-group"  style="float: right;margin-top:1%">
-                                <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                        Material Request
-                                    </a>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="page-title">
+                                        <h1>Manage Material</h1>
+                                    </div>
+                                </div>
+                                <div class="col-md-4" style="text-align: right">
+                                    <div class="table-actions-wrapper" style="margin-top: 12px;">
+                                        <span> </span>
+                                        <form role="form" method="POST">
+                                            {!! csrf_field() !!}
+                                            <label>For Bulk Approval : </label>
+                                            <select class="form-control input-inline" id="statusChangeDropdown">
+                                                <option value="">Select...</option>
+                                                <option value="approve">Approve</option>
+                                                <option value="disapprove">Disapprove</option>
+                                            </select>
+                                            <a href="javascript:void(0);" class="btn btn-sm green" id="multipleStatusChangeSubmit">
+                                                <i class="fa fa-check"></i> Submit
+                                            </a>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="margin-top: 12px;">
+                                    <div class="btn-group"  style="float: right;margin-top:1%">
+                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
+                                                Material Request
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -42,42 +65,108 @@
                                           <label class="checkbox-inline">
                                               <input type="checkbox" id="materialRequestWiseListing" value=""><span style="color: salmon">Material Requestwise Listing</span>
                                           </label>
+                                          <hr/>
                                           <div class="portlet-body">
+                                              <div class="row">
+                                                  <div class="col-md-2">
+                                                      <label>Select Client :</label>
+                                                      <select class="form-control" id="client_id" name="client_id">
+                                                          <option value="0">ALL</option>
+                                                          @foreach($clients as $client)
+                                                          <option value="{{$client['id']}}">{{$client['company']}}</option>
+                                                          @endforeach
+                                                      </select>
+                                                  </div>
+                                                  <div class="col-md-2">
+                                                      <label>Select Project :</label>
+                                                      <select class="form-control" id="project_id" name="project_id">
+                                                          <option value="0">ALL</option>
+                                                      </select>
+                                                  </div>
+                                                  <div class="col-md-2">
+                                                      <label>Select Site :</label>
+                                                      <select class="form-control" id="site_id" name="site_id">
+                                                          <option value="0">ALL</option>
+                                                      </select>
+                                                  </div>
+                                                  <div class="col-md-2">
+                                                      <label>Select Year :</label>
+                                                      <select class="form-control" id="year" name="year">
+                                                          <option value="0">ALL</option>
+                                                          <option value="2017">2017</option>
+                                                          <option value="2018">2018</option>
+                                                          <option value="2019">2019</option>
+                                                          <option value="2020">2020</option>
+                                                          <option value="2021">2021</option>
+                                                          <option value="2022">2022</option>
+                                                          <option value="2023">2023</option>
+                                                      </select>
+                                                  </div>
+                                                  <div class="col-md-2">
+                                                      <label>Select Month :</label>
+                                                      <select class="form-control" id="month" name="month">
+                                                          <option value="0">ALL</option>
+                                                          <option value="01">Jan</option>
+                                                          <option value="02">Feb</option>
+                                                          <option value="03">Mar</option>
+                                                          <option value="04">Apr</option>
+                                                          <option value="05">May</option>
+                                                          <option value="06">Jun</option>
+                                                          <option value="07">Jul</option>
+                                                          <option value="08">Aug</option>
+                                                          <option value="09">Sep</option>
+                                                          <option value="10">Oct</option>
+                                                          <option value="11">Nov</option>
+                                                          <option value="12">Dec</option>
+                                                      </select>
+                                                  </div>
+                                                  <div class="col-md-1">
+                                                      <label>MR Id :</label>
+                                                      <input  class="form-control" type="number" id="m_count" name="m_count"/>
+                                                  </div>
+                                                  <div class="col-md-1">
+                                                      <label>&nbsp;</label>
+                                                      <div class="btn-group">
+                                                          <div id="search-withfilter" class="btn blue" >
+                                                              <a href="#" style="color: white"> Submit
+                                                                  <i class="fa fa-plus"></i>
+                                                              </a>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                              <hr/>
                                           <div class="table-container">
-                                          <div class="table-actions-wrapper right">
-                                            <span> </span>
-                                            <form role="form" method="POST">
-                                                {!! csrf_field() !!}
-                                                <select class="table-group-action-input form-control input-inline input-small input-sm" id="statusChangeDropdown">
-                                                    <option value="">Select...</option>
-                                                    <option value="approve">Approve</option>
-                                                    <option value="disapprove">Disapprove</option>
-                                                </select>
-                                                <a href="javascript:void(0);" class="btn btn-sm green" id="multipleStatusChangeSubmit">
-                                                    <i class="fa fa-check"></i> Submit
-                                                </a>
-                                            </form>
-                                          </div>
                                           <table class="table table-striped table-bordered table-hover table-checkable order-column" id="materialRequest">
                                               <thead>
                                               <tr>
-                                                  <th><input type="checkbox"></th>
+                                                  <th></th>
                                                   <th> M Id </th>
                                                   <th> Material Name </th>
                                                   <th> Client Name </th>
                                                   <th> Project Name  </th>
-                                                  <th> RM Id </th>
+                                                  <th> MR Id </th>
+                                                  <th> Created At</th>
                                                   <th> Status </th>
                                                   <th> Action </th>
                                               </tr>
                                               <tr class="filter">
-                                                  <th><input type="checkbox"></th>
-                                                  <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                  <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                  <th> <input type="text" class="form-control form-filter" name="search_status" > </th>
-                                                  <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
-                                                  <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
-                                                  <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
+                                                  <th></th>
+                                                  <th></th>
+                                                  <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                  <th> </th>
+                                                  <th> </th>
+                                                  <th> <input type="text" class="form-control form-filter" name="m_name" id="m_name" readonly></th>
+                                                  <th> </th>
+                                                  <th>
+                                                      <select class="form-control" id="status_id" name="status_id">
+                                                          <option value="0">ALL</option>
+                                                          @foreach($purchaseStatus as $status)
+                                                          <option value="{{$status['id']}}">{{$status['name']}}</option>
+                                                          @endforeach
+                                                      </select>
+                                                      <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                  </th>
                                                   <th>
                                                       <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                       <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -206,7 +295,97 @@
                 alert(' Please select atleast one material request component.!')
             }
         });
+
+        $("#client_id").on('change', function(){
+            getProjects($('#client_id').val());
+        });
+        $("#project_id").on('change', function(){
+            getProjectSites($('#project_id').val());
+        });
+
+        $("#status_id").on('change',function(){
+            var client_id = $('#client_id').val();
+            var project_id = $('#project_id').val();
+            var site_id = $('#site_id').val();
+            var year = $('#year').val();
+            var month = $('#month').val();
+            var status_id = $('#status_id').val();
+            var m_name = $('#m_name').val();
+            var m_count = $('#m_count').val();
+
+            var postData =
+                'client_id=>'+client_id+','+
+                    'project_id=>'+project_id+','+
+                    'site_id=>'+site_id+','+
+                    'year=>'+year+','+
+                    'month=>'+month+','+
+                    'm_count=>'+m_count;
+
+            $("input[name='postdata']").val(postData);
+            $("input[name='m_name']").val(m_name);
+            $("input[name='status']").val(status_id);
+            $(".filter-submit").trigger('click');
+        });
+
+        $("#search-withfilter").on('click',function(){
+            var client_id = $('#client_id').val();
+            var project_id = $('#project_id').val();
+            var site_id = $('#site_id').val();
+            var year = $('#year').val();
+            var month = $('#month').val();
+            var status_id = $('#status_id').val();
+            var m_name = $('#m_name').val();
+            var m_count = $('#m_count').val();
+
+            var postData =
+                'client_id=>'+client_id+','+
+                    'project_id=>'+project_id+','+
+                    'site_id=>'+site_id+','+
+                    'year=>'+year+','+
+                    'month=>'+month+','+
+                    'm_count=>'+m_count;
+
+            $("input[name='postdata']").val(postData);
+            $("input[name='m_name']").val(m_name);
+            $("input[name='status']").val(status_id);
+            $(".filter-submit").trigger('click');
+        });
     });
+
+    function getProjects(client_id){
+        $.ajax({
+            url: '/purchase/projects/'+client_id,
+            type: 'GET',
+            async : false,
+            success: function(data,textStatus,xhr){
+                if(xhr.status == 200){
+                    $('#project_id').html(data);
+                    $('#project_id').prop('disabled',false);
+                    getProjectSites($('#project_id').val());
+                }
+            },
+            error: function(errorStatus,xhr){
+
+            }
+        });
+    }
+
+    function getProjectSites(project_id){
+        $.ajax({
+            url: '/purchase/project-sites/'+project_id,
+            type: 'GET',
+            async : false,
+            success: function(data,textStatus,xhr){
+                if(xhr.status == 200){
+                    $('#site_id').html(data);
+                    $('#site_id').prop('disabled',false);
+                }
+            },
+            error: function(errorStatus,xhr){
+
+            }
+        });
+    }
 
     function openApproveModal(componentId){
         $.ajax({

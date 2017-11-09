@@ -17,6 +17,7 @@ use App\PurchaseRequestComponentVendorMailInfo;
 use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
 use App\QuotationStatus;
+use App\Role;
 use App\Unit;
 use App\Vendor;
 use App\VendorMaterialRelation;
@@ -149,11 +150,16 @@ class PurchaseRequestController extends Controller
             $purchaseRequestData['project_site_id'] = $request['project_site_id'];
             $purchaseRequestData['user_id'] = $user['id'];
             $purchaseRequestData['behalf_of_user_id'] = $requestData['user_id'];
+            $purchaseRequestData['assigned_to'] = Role::join('user_has_roles','roles.id','=','user_has_roles.role_id')
+                ->join('users','users.id','=','user_has_roles.user_id')
+                ->where('roles.slug','superadmin')
+                ->pluck('users.id')->first();
             $purchaseRequestedStatus = PurchaseRequestComponentStatuses::where('slug','purchase-requested')->first();
             $purchaseRequestData['purchase_component_status_id'] = $purchaseRequestedStatus->id;
             $today = date('Y-m-d');
             $purchaseRequestCount = PurchaseRequest::whereDate('created_at',$today)->count();
             $purchaseRequestData['serial_no'] = ($purchaseRequestCount+1);
+            $purchaseRequestData['format_id'] = $this->getPurchaseIDFormat('purchase-request',$requestData['project_site_id'],Carbon::now(),$purchaseRequestData['serial_no']);
             $purchaseRequest = PurchaseRequest::create($purchaseRequestData);
             if($request->has('material_request_component_ids')) {
                 foreach ($materialRequestComponentIds as $materialRequestComponentId) {
@@ -258,7 +264,6 @@ class PurchaseRequestController extends Controller
                     $filterFlag = false;
                 }
             }
-
 
             if ($status != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->where('purchase_component_status_id', $status)->pluck('id');
@@ -380,10 +385,10 @@ class PurchaseRequestController extends Controller
                     ->where('project_sites.id','=',$purchaseRequests[$pagination]['project_site_id'])
                     ->select('project_sites.name as site_name','projects.name as proj_name', 'clients.company as company')->first()->toArray();
                 $records['data'][$iterator] = [
-                    $this->getPurchaseIDFormat('purchase-request',$purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'],$purchaseRequests[$pagination]['serial_no']),
+                    $this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']),
                     $projectdata['company'],
                     $projectdata['proj_name']." - ".$projectdata['site_name'],
-                    date('d M Y',strtotime($purchaseRequests[$pagination]['created_at'])),
+                    date('d M Y', strtotime($purchaseRequests[$pagination]['created_at'])),
                     $status,
                     $action
                 ];
@@ -479,7 +484,6 @@ class PurchaseRequestController extends Controller
                         $vendorInfo['materials'] = array();
                     }
                 }
-
                 $purchaseVendorAssignData = array();
                 $purchaseVendorAssignData['vendor_id'] = $vendorId;
                 $iterator = 0;

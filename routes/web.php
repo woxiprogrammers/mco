@@ -269,14 +269,17 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('edit/{id}',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
             Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getListing'));
             Route::post('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderComponentDetails'));
+            Route::post('get-bill-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderBillDetails'));
             Route::post('create-transaction',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
             Route::post('add-payment',array('uses'=> 'Purchase\PurchaseOrderController@createPayment'));
+            Route::post('change-status',array('uses'=> 'Purchase\PurchaseOrderController@changeStatus'));
             Route::post('create-material',array('uses'=> 'Purchase\PurchaseOrderController@createMaterial'));
             Route::post('create-asset',array('uses'=> 'Purchase\PurchaseOrderController@createAsset'));
             Route::get('get-materials',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderMaterials'));
             Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createPurchaseOrder'));
             Route::get('get-purchase-request-component/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseRequestComponents'));
             Route::get('get-client-project/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getClientProjectName'));
+            Route::get('download-po-pdf/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@downloadPoPDF'));
         });
     });
 

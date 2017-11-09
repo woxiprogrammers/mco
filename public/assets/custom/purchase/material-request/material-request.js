@@ -249,6 +249,7 @@ function selectProject(nameProject,id) {
         $('#unitDrpdn').append(str1);
     })
         .on('typeahead:open', function (obj, datum) {
+            $('#component_id').val(6);
         });
     var search_in = 'material';
     var materialList = new Bloodhound({
@@ -272,7 +273,6 @@ function selectProject(nameProject,id) {
         }
     });
     $('#searchbox').addClass('typeahead');
-    $('#component_id').val(4);
     materialList.initialize();
     $('.typeahead').typeahead(null, {
         displayKey: 'name',
@@ -300,6 +300,7 @@ function selectProject(nameProject,id) {
         $('#materialUnit').html(options);
     })
         .on('typeahead:open', function (obj, datum) {
+            $('#component_id').val(4);
         });
 }
 

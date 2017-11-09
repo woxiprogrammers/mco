@@ -106,18 +106,20 @@
                                                             <input type="text" class="form-control" name="qty" id="qty" value="{{$asset['quantity']}}">
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="expiry_date" class="control-label ">Expiry Date</label>
-                                                            <span>*</span>
+                                                    @if($asset->assetTypes->slug != 'other')
+                                                        <div class="form-group row">
+                                                            <div class="col-md-3" style="text-align: right">
+                                                                <label for="expiry_date" class="control-label ">Expiry Date</label>
+                                                                <span>*</span>
+                                                            </div>
+                                                            <div class="col-md-6 date date-picker">
+                                                                <input type="text"  style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date" value="{{$asset['expiry_date']}}">
+                                                                <button class="btn btn-sm default" type="button">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                        <div class="col-md-6 date date-picker">
-                                                            <input type="text"  style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date" value="{{$asset['expiry_date']}}">
-                                                            <button class="btn btn-sm default" type="button">
-                                                                <i class="fa fa-calendar"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
+                                                    @endif
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="price" class="control-label">Price</label>
