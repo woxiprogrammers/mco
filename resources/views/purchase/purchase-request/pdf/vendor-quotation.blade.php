@@ -180,7 +180,7 @@
                                 @endif
                             </tr>
                         @endfor
-                        @for($i = 0;$i < (15-(count($vendorInfo['materials'])));$i++)
+                        @for($i = 0;$i < (10-(count($vendorInfo['materials'])));$i++)
                             <tr style="text-align: center">
                                 <td>
 

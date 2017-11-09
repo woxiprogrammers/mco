@@ -62,7 +62,7 @@ class PurchaseOrderController extends Controller
     public function getCreateView(Request $request){
         try{
             $adminApprovePurchaseRequestInfo = PurchaseRequest::join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
-                                            ->where('purchase_request_component_statuses.slug','p-r-admin-approved')
+                                            ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
                                             ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
                                             ->get()
                                             ->toArray();
@@ -322,7 +322,7 @@ class PurchaseOrderController extends Controller
                 $iterator++;
             }
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
-            $transaction_types = PaymentType::select('slug')->get();
+            $transaction_types = PaymentType::select('slug')->where('slug','!=','peticash')->get();
         }catch (\Exception $e){
             $message = "Fail";
             $status = 500;
