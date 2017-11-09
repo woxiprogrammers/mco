@@ -236,9 +236,11 @@ class PurchaseOrderController extends Controller
         try{
             $now = Carbon::now();
             $is_present = Material::where('name','ilike',$request->name)->pluck('id')->toArray();
+            $id = Material::where('name','ilike',$request->name)->pluck('id')->first();
             if($is_present != null){
-                     $categoryMaterialData['category_id'] = $request->category;
-                    $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
+                $categoryMaterialData['category_id'] = $request->category;
+                $categoryMaterialData['material_id'] = $id;
+                $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
             }else{
                 $materialData['name'] = ucwords(trim($request->name));
                 $categoryMaterialData['category_id'] = $request->category;
@@ -257,7 +259,7 @@ class PurchaseOrderController extends Controller
                 $materialVersion = MaterialVersion::create($materialVersionData);
             }
             $request->session()->flash('success','Material created successfully.');
-            return redirect('/material/create');
+            return redirect('/purchase/purchase-order/create');
         }catch(\Exception $e){
             $data = [
                 'action' => 'create material',

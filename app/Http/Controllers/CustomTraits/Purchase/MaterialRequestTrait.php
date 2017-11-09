@@ -7,11 +7,13 @@
 namespace App\Http\Controllers\CustomTraits\Purchase;
 
 use App\MaterialRequestComponentHistory;
+use App\MaterialRequestComponentImages;
 use App\MaterialRequestComponents;
 use App\MaterialRequests;
 use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 trait MaterialRequestTrait{
@@ -59,6 +61,20 @@ trait MaterialRequestTrait{
                 $materialRequestComponent[$iterator] = MaterialRequestComponents::insertGetId($materialRequestComponentData);
                 $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponent[$iterator];
                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                if(array_has($itemData,'images')){
+                    $sha1MaterialRequestId = sha1($materialRequest['id']);
+                    foreach($itemData['images'] as $key1 => $imageName){
+                        $imageUploadNewPath = public_path().env('MATERIAL_REQUEST_IMAGE_UPLOAD').$sha1MaterialRequestId;
+                        if(!file_exists($imageUploadNewPath)) {
+                            File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
+                        }
+                        $filename = mt_rand(1,10000000000).sha1(time()).".jpg";
+                        $imageUploadNewPath .= DIRECTORY_SEPARATOR.$filename;
+                        $image_name = explode(",",$imageName);
+                        file_put_contents($imageUploadNewPath,base64_decode($image_name[1]));
+                        MaterialRequestComponentImages::create(['name' => $filename,'material_request_component_id' => $materialRequestComponent[$iterator]]);
+                    }
+                }
                 $iterator++;
             }
         }catch(\Exception $e){

@@ -37,7 +37,7 @@
             <input type="file" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][client_approval_images][]" multiple>
         </td>
         <td style="text-align: center">
-            <select class="table-group-action-input form-control input-inline input-small input-sm" id="is_approve" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][status]">
+            <select class="table-group-action-input form-control input-inline input-small input-sm status-select" id="is_approve_{{$purchaseRequestComponent['purchase_request_component_id']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][status]">
                 <option value="">Select...</option>
                 <option value="approve">Approve</option>
                 <option value="disapprove">Disapprove</option>
@@ -47,11 +47,15 @@
 
 @endforeach
 <script>
-    $('#is_approve').change(function () {
-        var type = $('#is_approve').closest('tr').attr('id');
+    $('.status-select').change(function () {
+        var type = $(this).closest('tr').attr('id');
         var $row = jQuery(this).closest('tr');
         var $columns = $row.find('td');
+        var elementId = $(this).attr('id');
+        var componentId = elementId.match(/\d+/)[0];
         if(($(this).val() == "approve") && (type == "new-material")) {
+
+                $('#myModal1 #purchaseRequestComponentId').val(componentId);
                 $('#myModal1').modal('show');
             var values = [];
             jQuery.each($columns, function (i, item) {
@@ -63,6 +67,7 @@
             $('#unit_id').val(values[3]);
             $('#hsn_code').val(values[6]);
         }else if(($(this).val() == "approve") && (type == "new-asset")){
+            $('#myModal2 #purchaseRequestComponentId').val(componentId);
             $('#myModal2').modal('show');
             var values = [];
             jQuery.each($columns, function (i, item) {
