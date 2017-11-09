@@ -30,6 +30,7 @@ use App\User;
 use App\Vendor;
 use Barryvdh\DomPDF\PDF;
 use Carbon\Carbon;
+use http\Url;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\App;
@@ -298,8 +299,17 @@ class PurchaseOrderController extends Controller
                 $materialList[$iterator]['material_component_unit_id'] = $materialRequestComponent['unit_id'];
                 $materialList[$iterator]['material_component_unit_name'] = $materialRequestComponent->unit->name;
                 $materialList[$iterator]['material_component_quantity'] = $materialRequestComponent->quantity;
-                $materialList[$iterator]['material_component_images'][0]['image_id'] = 1;
-                $materialList[$iterator]['material_component_images'][0]['image_url'] = '/assets/global/img/logo.jpg';
+                $mainDirectoryName = sha1($id);
+                $componentDirectoryName = sha1($purchaseOrderComponent['id']);
+                $uploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
+                $j = 0;
+                $materialComponentImages = array();
+                foreach ($images as $image){
+                    $materialComponentImages[$j] = $uploadPath.'/'.$image;
+                    $j++;
+                }
+                $materialList[$iterator]['material_component_images'] = $materialComponentImages;
                 $iterator++;
             }
             $purchaseOrderComponentIDs = PurchaseOrderComponent::where('purchase_order_id',$id)->pluck('id');
