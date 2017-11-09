@@ -101,7 +101,6 @@
                                                                 <th> Name </th>
                                                                 <th> Quantity </th>
                                                                 <th> Unit </th>
-                                                                <th> Action </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody id="Materialrows">
@@ -124,7 +123,6 @@
                                                                 <th> Name </th>
                                                                 <th> Quantity </th>
                                                                 <th> Unit </th>
-                                                                <th> Action </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody id="Assetrows">
