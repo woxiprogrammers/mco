@@ -68,4 +68,7 @@ var BankListing = function () {
 }();
 jQuery(document).ready(function() {
     BankListing.init();
+    $("input[name='search_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });

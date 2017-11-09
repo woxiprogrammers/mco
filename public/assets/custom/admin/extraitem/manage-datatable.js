@@ -76,4 +76,7 @@ var ExtraItemListing = function () {
 
 jQuery(document).ready(function() {
     ExtraItemListing.init();
+    $("input[name='search_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });
