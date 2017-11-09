@@ -28,6 +28,7 @@ use App\Quotation;
 use App\QuotationStatus;
 use App\User;
 use App\Vendor;
+use Barryvdh\DomPDF\PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -568,9 +569,9 @@ class PurchaseOrderController extends Controller
                             $approvedPurchaseOrder = PurchaseOrder::create($approvePurchaseOrderData);
                         }
                         $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
-                        $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
-                        $vendorInfo['materials'][$iterator]['unit'] = $materialRequestComponent->unit->name;
-                        if(is_array($materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                        $vendorInfo['materials'][$iterator]['quantity'] = $component['quantity'];
+                        $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$component['unit_id'])->pluck('name')->first();
+                        if(in_array($materialRequestComponent->component_type_id,$assetComponentTypeIds)){
                             $vendorInfo['materials'][$iterator]['gst'] = '-';
                         }else{
                             $vendorInfo['materials'][$iterator]['gst'] = Material::where('name','ilike',$materialRequestComponent->name)->pluck('gst')->first();
@@ -578,8 +579,8 @@ class PurchaseOrderController extends Controller
                                 $vendorInfo['materials'][$iterator]['gst'] = '-';
                             }
                         }
-                        $vendorInfo['materials'][$iterator]['hsn_code'] = $component->hsn_code;
-                        $vendorInfo['materials'][$iterator]['rate'] = $component->rate;
+                        $vendorInfo['materials'][$iterator]['hsn_code'] = $component['hsn_code'];
+                        $vendorInfo['materials'][$iterator]['rate'] = $component['rate'];
                         $iterator++;
                         $purchaseOrderComponentData['purchase_order_id'] = $approvedPurchaseOrder['id'];
                     }elseif($component['status'] == 'disapprove'){
@@ -679,13 +680,50 @@ class PurchaseOrderController extends Controller
         }
     }
 
-    public function downloadPoPDF(Request $request, $po_id) {
+    public function downloadPoPDF(Request $request, $purchaseOrder) {
         try {
-            //download pdf code here
-            echo "<h1>Download PDF Code</h1>";
+            $vendorInfo = $purchaseOrder->vendor->toArray();
+            $vendorInfo['materials'] = array();
+            $iterator = 0;
+            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
+            $projectSiteInfo = array();
+            foreach($purchaseOrder->purchaseOrderComponent as $purchaseOrderComponent){
+                $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
+                $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
+                $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                    $vendorInfo['materials'][$iterator]['gst'] = '-';
+                }else{
+                    $vendorInfo['materials'][$iterator]['gst'] = Material::where('name','ilike',$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->pluck('gst')->first();
+                    if($vendorInfo['materials'][$iterator]['gst'] == null){
+                        $vendorInfo['materials'][$iterator]['gst'] = '-';
+                    }
+                }
+                $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
+                $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
+                $iterator++;
+                if(count($projectSiteInfo) <= 0){
+                    $projectSiteInfo['project_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->project->name;
+                    $projectSiteInfo['project_site_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->name;
+                    $projectSiteInfo['project_site_address'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->address;
+                    if($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->city_id == null){
+                        $projectSiteInfo['project_site_city'] = '';
+                    }else{
+                        $projectSiteInfo['project_site_city'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->city->name;
+                    }
+                }
+            }
+            $pdf = App::make('dompdf.wrapper');
+            $pdfFlag = "purchase-order-listing-download";
+            $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
+            if($purchaseOrder['format_id'] == null){
+                return $pdf->download('PO.pdf');
+            }else{
+                return $pdf->download($purchaseOrder['format_id'].'.pdf');
+            }
         }catch (\Exception $e){
             $data = [
-                'action' => 'Download Pdf',
+                'action' => 'Download P.O. Pdf from Listing',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];

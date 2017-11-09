@@ -279,7 +279,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createPurchaseOrder'));
             Route::get('get-purchase-request-component/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseRequestComponents'));
             Route::get('get-client-project/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getClientProjectName'));
-            Route::get('download-po-pdf/{po_id}',array('uses'=> 'Purchase\PurchaseOrderController@downloadPoPDF'));
+            Route::get('download-po-pdf/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@downloadPoPDF'));
         });
     });
 
