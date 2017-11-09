@@ -175,20 +175,23 @@ function selectProject(nameProject,id) {
                 'Unable to find any Result that match the current query',
                 '</div>'
             ].join('\n'),
-            suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+            suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
         },
     }).on('typeahead:selected', function (obj, datum) {
+        console.log(datum);
         var POData = datum.unit;
         var componentTypeId = datum.component_type_id;
         $('#component_id').val(componentTypeId);
-        var options = '';
-        $.each( POData, function( key, value ) {
+        var options = ''
+        console.log(POData);
+        /*$.each( POData, function( key, value ) {
             var unitId = value.unit_id;
             unitName = value.unit_name;
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
-        });
-        $('#unitDrpdn').html('');
+        });*/
+     //   $('#unitDrpdn').html('');
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
+        console.log("r");
         $('#unitDrpdn').append(str1);
         $('#component_type_id').val();
     })
@@ -242,7 +245,7 @@ function selectProject(nameProject,id) {
 
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
-        $('#unitDrpdn').html('');
+        //$('#unitDrpdn').html('');
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center"><option>Select Unit</option>'+options+ '</select>';
         $('#unitDrpdn').append(str1);
         $('#component_type_id').val();
@@ -262,7 +265,13 @@ $('#createMaterial').click(function(){
     var unitId = $('#materialUnit').val();
     var componentTypeId = $('#component_id').val();
     var iterator = $('#iterator').val();
-    var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
+    var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+
+    $('.img').each(function(i, el) {
+        var imageSrc = $(el).attr('src');
+        materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+    });
+    materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
     var rows = '<tr>'+materials+'</tr>';
     $('#myModal').modal('hide');
     $('#Materialrows').append(rows);
@@ -272,25 +281,30 @@ $('#createMaterial').click(function(){
     $('#component_id').val(null);
     $('#searchbox').html('');
     $('#qty').html('');
-    $('#unitDrpdn').html('');
+   // $('#unitDrpdn').html('');
 })
 $('#createAsset').click(function(){
     $('#searchbox').html('');
     $('#qty').html('');
-    $('#unitDrpdn').html('');
+   // $('#unitDrpdn').html('');
     var asset_name = $('#Assetsearchbox').val();
     var quantity = $('#Assetqty').val();
     var unit = $('#AssetUnitsearchbox').val();
     var unitId = $('#AssetUnitId').val();
     var componentTypeId = $('#component_id').val();
     var iterator = $('#iterator').val();
-    var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
+    var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+    $('.img').each(function(i, el) {
+        var imageSrc = $(el).attr('src');
+        assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+    })
+    assets += asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
     var rows = '<tr>'+assets+'</tr>';
     $('#myModal1').modal('hide');
     $('#Assetrows').append(rows);
     var iterator = parseInt(iterator) + 1;
-    $('#deleteAssetRowButton').click(DeleteRow);
     $('#iterator').val(iterator);
+    $('#deleteAssetRowButton').click(DeleteRow);
     $('#component_id').val(null);
 });
 

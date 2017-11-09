@@ -123,11 +123,9 @@
                                                                         @endforeach
                                                                     </tbody>
                                                                 </table>
-
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                     <div class="panel panel-default">
                                                         <div class="panel-heading" role="tab" id="headingTwo">
                                                             <h4 class="panel-title" style="padding-bottom: 20px">
@@ -155,7 +153,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                     <div class="panel panel-default">
                                                         <div class="panel-heading" role="tab" id="headingThree">
                                                             <h4 class="panel-title" style="padding-bottom: 20px">
@@ -183,10 +180,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                 </div><!-- panel-group -->
-
-
                                             </div><!-- container -->
                                         </div>
                                     </div>
@@ -206,35 +200,22 @@
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <div class="form-group">
                                                 <input type="text" class="form-control empty typeahead" id="searchbox"  placeholder="Enter material name" >
-
                                             </div>
                                             <div class="form-group">
                                                 <input type="number" class="form-control empty" id="qty"  placeholder="Enter quantity">
                                             </div>
                                             <div class="form-group" id="unitDrpdn">
-
+                                                <select id="materialUnit" style="width: 80%;height: 20px;text-align: center">
+                                                    @foreach($units as $unit)
+                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
-                                            <div class="form-group">
-                                                <div class="row">
-                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                </div>
-                                                <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                        Browse</a>
-                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                        <i class="fa fa-share"></i> Upload Files </a>
-                                                </div>
-                                                <table class="table table-bordered table-hover" style="width: 200px">
-                                                    <thead>
-                                                    <tr role="row" class="heading">
-                                                        <th> Image </th>
-                                                        <th> Action </th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody id="show-product-images">
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            <article>
+                                                <label for="files">Select multiple files:</label>
+                                                <input id="files" type="file" multiple="multiple" />
+                                                <output id="result" />
+                                            </article>
                                             <div class="btn red pull-right" id="createMaterial"> Create</div>
                                         </div>
                                     </div>
@@ -264,27 +245,11 @@
                                                 <input type="text" class="form-control empty" id="AssetUnitsearchbox"  value="Nos" readonly >
                                                 <div id="asset_unit-suggesstion-box"></div>
                                             </div>
-                                            <div class="form-group">
-                                                <div class="row">
-                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                </div>
-                                                <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                        Browse</a>
-                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                        <i class="fa fa-share"></i> Upload Files </a>
-                                                </div>
-                                                <table class="table table-bordered table-hover" style="width: 200px">
-                                                    <thead>
-                                                    <tr role="row" class="heading">
-                                                        <th> Image </th>
-                                                        <th> Action </th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody id="show-product-images">
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            <article>
+                                                <label for="filesAsset">Select multiple files:</label>
+                                                <input id="filesAsset" type="file" multiple="multiple" />
+                                                <output id="resultAsset" />
+                                            </article>
                                             <div class="btn red pull-right" id="createAsset"> Create</div>
                                         </div>
                                     </div>
@@ -307,5 +272,63 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <link rel="stylesheet"  href="/assets/custom/purchase/material-request/material-request.css"/>
     <script src="/assets/custom/purchase/purchase-request/purchase-request-datatable.js" type="text/javascript"></script>
+            <script>
+                function handleFileSelect() {
+                    //Check File API support
+                    if (window.File && window.FileList && window.FileReader) {
+
+                        var files = event.target.files; //FileList object
+                        var output = document.getElementById("result");
+
+                        for (var i = 0; i < files.length; i++) {
+                            var file = files[i];
+                            //Only pics
+                            if (!file.type.match('image')) continue;
+
+                            var picReader = new FileReader();
+                            picReader.addEventListener("load", function (event) {
+                                var picFile = event.target;
+                                console.log(picFile);
+                                var div = document.createElement("div");
+                                div.innerHTML = "<img class='thumbnail img' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
+                                output.insertBefore(div, null);
+                            });
+                            //Read the image
+                            picReader.readAsDataURL(file);
+                        }
+                    } else {
+                        console.log("Your browser does not support File API");
+                    }
+                }
+                document.getElementById('files').addEventListener('change', handleFileSelect, false);
+            </script>
+            <script>
+                function handleFileSelectForAsset() {
+                    //Check File API support
+                    if (window.File && window.FileList && window.FileReader) {
+                        var files = event.target.files; //FileList object
+                        var output = document.getElementById("resultAsset");
+                        for (var i = 0; i < files.length; i++) {
+                            var file = files[i];
+                            //Only pics
+                            if (!file.type.match('image')) continue;
+                            var picReader = new FileReader();
+                            picReader.addEventListener("load", function (event) {
+                                var picFiles = event.target;
+                                console.log(picFiles);
+                                var div = document.createElement("div");
+                                div.innerHTML = "<img class='thumbnail assetImg' src='" + picFiles.result + "'" + "title='" + picFiles.name + "'/>";
+                                output.insertBefore(div, null);
+                            });
+                            //Read the image
+                            picReader.readAsDataURL(file);
+                        }
+                    } else {
+                        console.log("Your browser does not support File API");
+                    }
+                }
+                document.getElementById('filesAsset').addEventListener('change', handleFileSelectForAsset, false);
+            </script>
 @endsection

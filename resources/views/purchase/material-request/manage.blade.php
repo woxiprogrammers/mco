@@ -215,6 +215,7 @@
             success: function(data,textStatus,xhr){
                 $("#remarkModal #unitId").html(data.units);
                 $("#remarkModal #quantity").val(data.quantity);
+                $("#componentId").val(componentId);
             },
             error: function(errorData){
 

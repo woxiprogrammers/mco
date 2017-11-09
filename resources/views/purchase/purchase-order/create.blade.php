@@ -140,12 +140,12 @@
                                     <div class="modal-header" style="padding-bottom:10px">
                                         <div class="row">
                                             <div class="col-md-4"></div>
-                                            <div class="col-md-4"> Assign Category</div>
+                                            <div class="col-md-4"> Assign Categoryww</div>
                                             <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                         </div>
                                     </div>
                                     <div class="modal-body" style="padding:40px 50px;">
-                                        <form action="/purchase/purchase-order/create-asset" method="post">
+                                        <form  id="materialCreateForm" method="post">
                                             {!! csrf_field() !!}
                                             <div class="row">
                                                 <div class="col-md-12 form-group">
@@ -222,5 +222,19 @@
             });
         });
 
+    </script>
+    <script>
+        $("#materialCreateForm").submit(function(e) {
+            var url = "/purchase/purchase-order/create-asset"; // the script where you handle the form input.
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: $("#materialCreateForm").serialize(), // serializes the form's elements.
+                success: function(data)
+                {
+                    alert(data); // show response from the php script.
+                }
+            });
+        });
     </script>
 @endsection
