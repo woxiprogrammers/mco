@@ -52,6 +52,7 @@ class PurchaseRequestController extends Controller
             $materialRequestList = array();
             $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
             $iterator = 0;
+            $units = Unit::select('id','name')->get()->toArray();
             $materialRequestComponents = MaterialRequestComponents::where('component_status_id',$inIndentStatusId)->get();
             foreach($materialRequestComponents as $index => $materialRequestComponent){
                 $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
@@ -65,7 +66,7 @@ class PurchaseRequestController extends Controller
                 $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
                 $iterator++;
             }
-            return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId'));
+            return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId','units'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Request create view',
@@ -160,21 +161,27 @@ class PurchaseRequestController extends Controller
             $purchaseRequestData['serial_no'] = ($purchaseRequestCount+1);
             $purchaseRequestData['format_id'] = $this->getPurchaseIDFormat('purchase-request',$requestData['project_site_id'],Carbon::now(),$purchaseRequestData['serial_no']);
             $purchaseRequest = PurchaseRequest::create($purchaseRequestData);
-            foreach($materialRequestComponentIds as $materialRequestComponentId){
-                PurchaseRequestComponent::create([
-                    'purchase_request_id' => $purchaseRequest['id'],
-                    'material_request_component_id' => $materialRequestComponentId
-                ]);
+            if($request->has('material_request_component_ids')) {
+                foreach ($materialRequestComponentIds as $materialRequestComponentId) {
+                    PurchaseRequestComponent::create([
+                        'purchase_request_id' => $purchaseRequest['id'],
+                        'material_request_component_id' => $materialRequestComponentId
+                    ]);
+                }
             }
             $PRAssignedStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-assigned')->pluck('id')->first();
-            MaterialRequestComponents::whereIn('id',$request['material_request_component_ids'])->update(['component_status_id' => $PRAssignedStatusId]);
+            if($request->has('material_request_component_ids')) {
+                MaterialRequestComponents::whereIn('id', $request['material_request_component_ids'])->update(['component_status_id' => $PRAssignedStatusId]);
+            }
             $materialComponentHistoryData = array();
             $materialComponentHistoryData['remark'] = '';
             $materialComponentHistoryData['user_id'] = $user['id'];
             $materialComponentHistoryData['component_status_id'] = $PRAssignedStatusId;
-            foreach($request['material_request_component_ids'] as $materialRequestComponentId){
-                $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentId;
-                MaterialRequestComponentHistory::create($materialComponentHistoryData);
+            if($request->has('material_request_component_ids')) {
+                foreach ($request['material_request_component_ids'] as $materialRequestComponentId) {
+                    $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentId;
+                    MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                }
             }
             $request->session()->flash('success', 'Purchase Request created successfully.');
         }catch (\Exception $e){

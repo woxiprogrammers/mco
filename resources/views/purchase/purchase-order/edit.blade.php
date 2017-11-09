@@ -120,7 +120,7 @@
                                                                                 <br><input type="hidden" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Rate" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="hsn_code" placeholder="Enter HSNCODE" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" >
                                                                                <br>
-                                                                                <div class="form-group row">
+                                                                                {{--<div class="form-group row">
                                                                                     <div class="col-md-12">
                                                                                         Vendor Quotation Image
                                                                                         <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
@@ -157,9 +157,9 @@
                                                                                             </a>
                                                                                         </div>
                                                                                     </div>
-                                                                                </div>
+                                                                                </div>--}}
                                                                                 <br>
-                                                                                <div class="form-group row">
+                                                                                {{--<div class="form-group row">
                                                                                     <div class="col-md-12">
                                                                                         Client Approval Note Image
                                                                                         <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
@@ -196,7 +196,7 @@
                                                                                             </a>
                                                                                         </div>
                                                                                     </div>
-                                                                                </div>
+                                                                                </div>--}}
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -323,7 +323,7 @@
                                                                         <input type="text" class="form-control" id="vendor" name="vendor_name" placeholder="Enter Vendor Name" readonly>
                                                                     </div>
                                                                     <div class="form-group row">
-                                                                        <table class="table table-bordered table-hover">
+                                                                        {{--<table class="table table-bordered table-hover">
                                                                             <thead>
                                                                             <tr role="row" class="heading">
                                                                                 <th>Bill Image </th>
@@ -343,9 +343,10 @@
                                                                                 </td>
                                                                             </tr>
                                                                             </tbody>
-                                                                        </table>
+                                                                        </table>--}}
+
                                                                     </div>
-                                                                    <div class="form-group row">Quotation images
+                                                                    {{--<div class="form-group row">Quotation images
                                                                         <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
                                                                             <!-- Indicators -->
                                                                             <ol class="carousel-indicators">
@@ -379,7 +380,7 @@
                                                                                 <span class="sr-only">Next</span>
                                                                             </a>
                                                                     </div>
-                                                                </div>
+                                                                </div>--}}
                                                                     <div class="form-group row">
                                                                         <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number">
                                                                     </div>

@@ -1,6 +1,3 @@
-/**
- * Created by Ameya Joshi on 27/9/17.
- */
 $(document).ready(function(){
     var site_name = '';
     var search_in = '';
@@ -136,18 +133,21 @@ $(document).ready(function(){
         var unitId = $('#materialUnit').val();
         var unitName = $('#materialUnit option[value="'+unitId+'"]').text();
         var componentTypeId = $('#component_id').val();
+        var images = [];
         var iterator = $('#iterator').val();
-        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
+        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+
+        $('.img').each(function(i, el) {
+            var imageSrc = $(el).attr('src');
+            materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+        });
+        materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
         var rows = '<tr>'+materials+'</tr>';
         $('#myModal').modal('hide');
         $('#Materialrows').append(rows);
         var iterator = parseInt(iterator) + 1;
         $('#iterator').val(iterator);
         $('#component_id').val(null);
-        var images = [];
-        $('.img').each(function(i, el) {
-            images[i] = [$(el).attr('src')]
-        });
     });
 
     $('#createAsset').click(function(){
@@ -159,7 +159,12 @@ $(document).ready(function(){
         var unitId = $('#nosUnitId').val();
         var componentTypeId = $('#component_id').val();
         var iterator = $('#iterator').val();
-        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">'+asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
+        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+        $('.img').each(function(i, el) {
+            var imageSrc = $(el).attr('src');
+            assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+        })
+        assets += asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
         var rows = '<tr>'+assets+'</tr>';
         $('#myModal1').modal('hide');
         $('#Assetrows').append(rows);
@@ -304,4 +309,3 @@ function selectUser(id,id1) {
     $("#userSearchbox").val(id);
     $("#user-suggesstion-box").hide();
 }
-
