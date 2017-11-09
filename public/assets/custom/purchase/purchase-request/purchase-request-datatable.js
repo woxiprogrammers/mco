@@ -161,7 +161,6 @@ function selectProject(nameProject,id) {
         }
     });
     $('#Assetsearchbox').addClass('assetTypeahead');
-    $('#component_id').val(6);
     assetList.initialize();
     var unitName = "Nos";
     $('.assetTypeahead').typeahead(null, {
@@ -178,24 +177,16 @@ function selectProject(nameProject,id) {
             suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
         },
     }).on('typeahead:selected', function (obj, datum) {
-        console.log(datum);
         var POData = datum.unit;
         var componentTypeId = datum.component_type_id;
         $('#component_id').val(componentTypeId);
         var options = ''
-        console.log(POData);
-        /*$.each( POData, function( key, value ) {
-            var unitId = value.unit_id;
-            unitName = value.unit_name;
-            options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
-        });*/
-     //   $('#unitDrpdn').html('');
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
-        console.log("r");
         $('#unitDrpdn').append(str1);
         $('#component_type_id').val();
     })
         .on('typeahead:open', function (obj, datum) {
+            $('#component_id').val(6);
         });
     var search_in = 'material';
     var materialList = new Bloodhound({
@@ -219,7 +210,6 @@ function selectProject(nameProject,id) {
         }
     });
     $('#searchbox').addClass('typeahead');
-    $('#component_id').val(4);
     materialList.initialize();
     $('.typeahead').typeahead(null, {
         displayKey: 'name',
@@ -245,12 +235,12 @@ function selectProject(nameProject,id) {
 
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
-        //$('#unitDrpdn').html('');
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center"><option>Select Unit</option>'+options+ '</select>';
         $('#unitDrpdn').append(str1);
         $('#component_type_id').val();
     })
         .on('typeahead:open', function (obj, datum) {
+            $('#component_id').val(4);
         });
 }
 function selectUser(id,id1) {
@@ -281,12 +271,10 @@ $('#createMaterial').click(function(){
     $('#component_id').val(null);
     $('#searchbox').html('');
     $('#qty').html('');
-   // $('#unitDrpdn').html('');
 })
 $('#createAsset').click(function(){
     $('#searchbox').html('');
     $('#qty').html('');
-   // $('#unitDrpdn').html('');
     var asset_name = $('#Assetsearchbox').val();
     var quantity = $('#Assetqty').val();
     var unit = $('#AssetUnitsearchbox').val();

@@ -113,7 +113,8 @@
                                         </div>
                                     </div>
                                     <div class="modal-body" style="padding:40px 50px;">
-                                        <form action="/purchase/purchase-order/create-material" method="post">
+                                        <form id="materialCreateForm" method="post">
+                                            <input type="hidden" id="purchaseRequestComponentId">
                                             {!! csrf_field() !!}
                                             <input type="hidden" id="vendor_id" name="vendor_id">
                                             <input type="hidden" id="name" name="name">
@@ -127,7 +128,11 @@
                                                     <option value="{{$category['id']}}">{{$category['name']}}</option>
                                                 @endforeach
                                             </select>
-                                            <input type="submit" class="btn red pull-right">
+                                            <div class="row">
+                                                <div class="col-md-3 col-md-offset-4">
+                                                    <a class="btn red " id="materialCreateSubmit"> Submit </a>
+                                                </div>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>
@@ -140,28 +145,33 @@
                                     <div class="modal-header" style="padding-bottom:10px">
                                         <div class="row">
                                             <div class="col-md-4"></div>
-                                            <div class="col-md-4"> Assign Categoryww</div>
+                                            <div class="col-md-4"> Assign Category</div>
                                             <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                         </div>
                                     </div>
                                     <div class="modal-body" style="padding:40px 50px;">
-                                        <form  id="materialCreateForm" method="post">
+                                        <form  id="assetCreateForm" method="post">
+                                            <input type="hidden" id="purchaseRequestComponentId">
                                             {!! csrf_field() !!}
                                             <div class="row">
                                                 <div class="col-md-12 form-group">
-                                                    <input type="text" id="assetName" name="name" readonly tabindex="-1">
+                                                    <input type="text" id="assetName" name="name" class="form-control" readonly tabindex="-1">
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-12 form-group">
-                                                    <input type="text" id="asset_rate_per_unit" name="rate_per_unit" readonly tabindex="-1">
+                                                    <input type="text" id="asset_rate_per_unit" name="rate_per_unit" class="form-control" readonly tabindex="-1">
                                                 </div>
                                             </div>
                                             <input class="form-control" type="hidden" id="asset_vendor_id" name="vendor_id">
                                             <input type="hidden" id="asset_unit_id" name="unit_id">
                                             <input type="hidden" id="asset_hsn_code" name="hsn_code">
                                             <br>
-                                            <input type="submit" class="btn red pull-right">
+                                            <div class="row">
+                                                <div class="col-md-3 col-md-offset-4">
+                                                    <a class="btn red" id="assetCreateSubmit"> Submit </a>
+                                                </div>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>
@@ -224,15 +234,39 @@
 
     </script>
     <script>
-        $("#materialCreateForm").submit(function(e) {
-            var url = "/purchase/purchase-order/create-asset"; // the script where you handle the form input.
+        $("#materialCreateSubmit").on('click',function(e) {
+            e.stopPropagation();
+            var purchaseRequestComponentId = $("#materialCreateForm #purchaseRequestComponentId").val();
+            var url = "/purchase/purchase-order/create-material"; // the script where you handle the form input.
             $.ajax({
                 type: "POST",
                 url: url,
                 data: $("#materialCreateForm").serialize(), // serializes the form's elements.
                 success: function(data)
                 {
-                    alert(data); // show response from the php script.
+                    //alert(data); // show response from the php script.
+                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+" option:selected").val();
+                    $("#is_approve_"+purchaseRequestComponentId+" option:not([value='"+selectedFlag+"'])").each(function(){
+                       $(this).prop('disabled', true);
+                    });
+                }
+            });
+        });
+        $("#assetCreateSubmit").on('click',function(e) {
+            e.stopPropagation();
+            var purchaseRequestComponentId = $("#assetCreateForm #purchaseRequestComponentId").val();
+            var url = "/purchase/purchase-order/create-asset"; // the script where you handle the form input.
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: $("#assetCreateForm").serialize(), // serializes the form's elements.
+                success: function(data)
+                {
+//                    alert(data); // show response from the php script.
+                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+" option:selected").val();
+                    $("#is_approve_"+purchaseRequestComponentId+" option:not([value='"+selectedFlag+"'])").each(function(){
+                        $(this).prop('disabled', true);
+                    });
                 }
             });
         });
