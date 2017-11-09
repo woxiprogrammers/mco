@@ -475,7 +475,8 @@
                                                                     @elseif($purchaseOrderTransaction['status'] == 'Amendment Pending')
                                                                         <td>  <button class="amendment_status_change" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">Approve</button></td>
                                                                     @else
-                                                                        <td> <button class="view_details" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">View</button> </td>
+                                                                        <td> <button value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}"> - </button> </td>
+                                                                        {{--<td> <button class="view_details" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">View</button> </td>--}}
                                                                     @endif
                                                                 </tr>
                                                                     @endforeach
