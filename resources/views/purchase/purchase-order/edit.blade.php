@@ -133,17 +133,10 @@
 
                                                                                             <!-- Wrapper for slides -->
                                                                                             <div class="carousel-inner">
-                                                                                                <div class="item active">
-                                                                                                    <img src="" style="width:100%;;height: 170px">
+                                                                                                <div id ="imagecorousel">
+
                                                                                                 </div>
 
-                                                                                                <div class="item">
-                                                                                                    <img src="" alt="Chicago" style="width:100%;height: 170px">
-                                                                                                </div>
-
-                                                                                                <div class="item">
-                                                                                                    <img src="" alt="New york" style="width:100%;height: 170px">
-                                                                                                </div>
                                                                                             </div>
 
 
@@ -172,17 +165,10 @@
 
                                                                                             <!-- Wrapper for slides -->
                                                                                             <div class="carousel-inner">
-                                                                                                <div class="item active">
-                                                                                                    <img src="" alt="Los Angeles" style="width:100%;;height: 170px">
-                                                                                                </div>
-
-                                                                                                <div class="item">
-                                                                                                    <img src="" alt="Chicago" style="width:100%;height: 170px">
-                                                                                                </div>
-
-                                                                                                <div class="item">
+                                                                                                <div id ="imagecorouselForClientApproval">
 
                                                                                                 </div>
+
                                                                                             </div>
 
                                                                                             <!-- Left and right controls -->

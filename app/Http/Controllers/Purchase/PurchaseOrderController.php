@@ -301,15 +301,17 @@ class PurchaseOrderController extends Controller
                 $materialList[$iterator]['material_component_quantity'] = $materialRequestComponent->quantity;
                 $mainDirectoryName = sha1($id);
                 $componentDirectoryName = sha1($purchaseOrderComponent['id']);
-                $uploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                $uploadPath = url('/').public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
                 $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
                 $j = 0;
                 $materialComponentImages = array();
-                foreach ($images as $image){
-                    $materialComponentImages[$j] = $uploadPath.'/'.$image;
-                    $j++;
+                if(count($images) > 0){
+                    foreach ($images as $image){
+                        $materialComponentImages[$j]['name'] = $uploadPath.'/'.$image['name'];
+                        $j++;
+                    }
+                    $materialList[$iterator]['material_component_images'] = $materialComponentImages;
                 }
-                $materialList[$iterator]['material_component_images'] = $materialComponentImages;
                 $iterator++;
             }
             $purchaseOrderComponentIDs = PurchaseOrderComponent::where('purchase_order_id',$id)->pluck('id');
@@ -357,6 +359,29 @@ class PurchaseOrderController extends Controller
                $purchaseOrderComponentData['unit_name'] = $materialRequestComponent->unit->name;
                $purchaseOrderComponentData['unit_id'] = $materialRequestComponent['unit_id'];
                $purchaseOrderComponentData['vendor_name'] = $vendorName;
+               $mainDirectoryName = sha1($purchaseOrderComponent->purchaseOrder->id);
+               $componentDirectoryName = sha1($purchaseOrderComponent['id']);
+               $uploadPath = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+               $uploadPathForClientImages = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;;
+               $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
+               $imagesOfClient = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',false)->select('name')->get();
+               $j = 0;
+               $materialComponentImages = array();
+               if(count($images) > 0){
+                   foreach ($images as $image){
+                       $materialComponentImages[$j]['name'] = $uploadPath.'/'.$image['name'];
+                       $j++;
+                   }
+                   $purchaseOrderComponentData['material_component_images'] = $materialComponentImages;
+               }
+               $materialComponentImagesOfClientApproval = array();
+               if(count($imagesOfClient) > 0){
+                   foreach ($imagesOfClient as $image){
+                       $materialComponentImagesOfClientApproval[$j]['name'] = $uploadPathForClientImages.'/'.$image['name'];
+                       $j++;
+                   }
+                   $purchaseOrderComponentData['client_approval_images'] = $materialComponentImagesOfClientApproval;
+               }
                $status = 200;
                return response()->json($purchaseOrderComponentData,$status);
            }catch(\Exception $e){

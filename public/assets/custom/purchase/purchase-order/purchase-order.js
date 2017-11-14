@@ -14,6 +14,21 @@ $(document).ready(function(){
                $('#qty').val(data.quantity);
                $('#unit').val(data.unit_name);
                $('#hsn_code').val(data.hsn_code);
+               var abc = [];
+               $.each(data.material_component_images ,function(key,value){
+                console.log(key);
+                console.log(value);
+                 abc += '<div class="item"><img src="'+ value.name + '"alt="New york" style="width:100%;height: 170px"></div>';
+                });
+               console.log(abc)
+                $('#imagecorousel').html(abc);
+                $.each(data.client_approval_images ,function(key,value){
+                    console.log(key);
+                    console.log(value);
+                    abc += '<div class="item"><img id="image" src="'+ value.name + '"alt="New york" style="width:100%;height: 170px"></div>';
+                });
+                $('#imagecorouselForClientApproval').html(abc);
+
             }
         });
         $("#ImageUpload").modal();
