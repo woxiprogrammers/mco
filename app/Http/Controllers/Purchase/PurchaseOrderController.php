@@ -703,7 +703,7 @@ class PurchaseOrderController extends Controller
                     }
                 }
                 $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
-                $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
+                $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate_per_unit'];
                 $iterator++;
                 if(count($projectSiteInfo) <= 0){
                     $projectSiteInfo['project_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->project->name;
