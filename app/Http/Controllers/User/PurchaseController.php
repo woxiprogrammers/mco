@@ -368,8 +368,8 @@ class PurchaseController extends Controller
                             $materialList[$iterator]['material_request_component_type_id'] = $quotationMaterialSlug->id;
                             $iterator++;
                         }
-                        $structureMaterials = Material::whereNotIn('id',$quotationMaterialId)->where('name','ilike','%'.$request->keyword.'%')->get();
-                    }else{
+                        //$structureMaterials = Material::whereNotIn('id',$quotationMaterialId)->where('name','ilike','%'.$request->keyword.'%')->get();
+                    }/*else{
                         $structureMaterials = Material::where('name','ilike','%'.$request->keyword.'%')->get();
                     }
                     $structureMaterialSlug = MaterialRequestComponentTypes::where('slug','structure-material')->first();
@@ -392,7 +392,7 @@ class PurchaseController extends Controller
                         $materialList[$iterator]['material_request_component_type_slug'] = $structureMaterialSlug->slug;
                         $materialList[$iterator]['material_request_component_type_id'] = $structureMaterialSlug->id;
                         $iterator++;
-                    }
+                    }*/
                     if(count($materialList) == 0){
                         $materialList[$iterator]['material_name'] = null;
                         $systemUnits = Unit::where('is_active',true)->get();
@@ -918,6 +918,10 @@ class PurchaseController extends Controller
                         ->get()
                         ->toArray();
                     $unitData = array_merge($unit1Array, $units2Array);
+                    $unitData[] = [
+                        'id' => $material->unit->id,
+                        'name' => $material->unit->name,
+                    ];
                 }
                 for ($iterator = 0, $units = ''; $iterator < count($unitData); $iterator++) {
                     if ($unitData[$iterator]['id'] == $materialRequestComponent->unit_id) {

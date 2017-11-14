@@ -78,8 +78,8 @@ $(document).ready(function(){
             success: function(data){
                 $('#grn').val(data.grn);
                 $('#amount').val(data.bill_amount);
-                $('#quantity').val(data.quantity);
-                $('#unit').val(data.unit_id);
+                $('#bill_quantity').val(data.quantity);
+                $('#bill_unit').val(data.unit);
                 $('#remark').val(data.remark);
             }
         });

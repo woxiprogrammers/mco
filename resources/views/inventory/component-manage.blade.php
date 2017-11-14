@@ -799,7 +799,7 @@
                     success: function(data,textStatus,xhr){
                         $('#dynamicForm .projectSelect').html(data);
                         $('#dynamicForm .projectSelect').prop('disabled', false);
-                        var projectId = $("#dynamicForm .projectId").val();
+                        var projectId = $("#dynamicForm .projectSelect").val();
                         getProjectSites(projectId);
                     },
                     error: function(){

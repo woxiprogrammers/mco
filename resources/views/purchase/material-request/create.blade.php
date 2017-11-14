@@ -162,11 +162,11 @@
                                                         @endforeach
                                                 </select>
                                             </div>
-                                        <article>
+                                        {{--<article>
                                             <label for="files">Select multiple files:</label>
                                             <input id="files" type="file" multiple="multiple" />
                                             <output id="result" />
-                                        </article>
+                                        </article>--}}
                                            <div class="btn red pull-right" id="createMaterial"> Create</div>
                                     </div>
                                 </div>
@@ -195,11 +195,11 @@
                                             <input type="text" class="form-control empty" id="AssetUnitsearchbox"  value="Nos" readonly >
                                             <div id="asset_unit-suggesstion-box"></div>
                                         </div>
-                                        <article>
+                                        {{--<article>
                                             <label for="filesAsset">Select multiple files:</label>
                                             <input id="filesAsset" type="file" multiple="multiple" />
                                             <output id="resultAsset" />
-                                        </article>
+                                        </article>--}}
                                         <div class="btn red pull-right" id="createAsset"> Create</div>
                                     </div>
                                 </div>
