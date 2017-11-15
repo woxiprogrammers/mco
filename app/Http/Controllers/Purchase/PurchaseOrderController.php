@@ -30,7 +30,6 @@ use App\User;
 use App\Vendor;
 use Barryvdh\DomPDF\PDF;
 use Carbon\Carbon;
-use http\Url;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\App;
