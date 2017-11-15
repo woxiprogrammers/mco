@@ -298,8 +298,19 @@ class PurchaseOrderController extends Controller
                 $materialList[$iterator]['material_component_unit_id'] = $materialRequestComponent['unit_id'];
                 $materialList[$iterator]['material_component_unit_name'] = $materialRequestComponent->unit->name;
                 $materialList[$iterator]['material_component_quantity'] = $materialRequestComponent->quantity;
-                $materialList[$iterator]['material_component_images'][0]['image_id'] = 1;
-                $materialList[$iterator]['material_component_images'][0]['image_url'] = '/assets/global/img/logo.jpg';
+                $mainDirectoryName = sha1($id);
+                $componentDirectoryName = sha1($purchaseOrderComponent['id']);
+                $uploadPath = url('/').public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
+                $j = 0;
+                $materialComponentImages = array();
+                if(count($images) > 0){
+                    foreach ($images as $image){
+                        $materialComponentImages[$j]['name'] = $uploadPath.'/'.$image['name'];
+                        $j++;
+                    }
+                    $materialList[$iterator]['material_component_images'] = $materialComponentImages;
+                }
                 $iterator++;
             }
             $purchaseOrderComponentIDs = PurchaseOrderComponent::where('purchase_order_id',$id)->pluck('id');
@@ -347,6 +358,29 @@ class PurchaseOrderController extends Controller
                $purchaseOrderComponentData['unit_name'] = $materialRequestComponent->unit->name;
                $purchaseOrderComponentData['unit_id'] = $materialRequestComponent['unit_id'];
                $purchaseOrderComponentData['vendor_name'] = $vendorName;
+               $mainDirectoryName = sha1($purchaseOrderComponent->purchaseOrder->id);
+               $componentDirectoryName = sha1($purchaseOrderComponent['id']);
+               $uploadPath = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+               $uploadPathForClientImages = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;;
+               $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
+               $imagesOfClient = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',false)->select('name')->get();
+               $j = 0;
+               $materialComponentImages = array();
+               if(count($images) > 0){
+                   foreach ($images as $image){
+                       $materialComponentImages[$j]['name'] = $uploadPath.'/'.$image['name'];
+                       $j++;
+                   }
+                   $purchaseOrderComponentData['material_component_images'] = $materialComponentImages;
+               }
+               $materialComponentImagesOfClientApproval = array();
+               if(count($imagesOfClient) > 0){
+                   foreach ($imagesOfClient as $image){
+                       $materialComponentImagesOfClientApproval[$j]['name'] = $uploadPathForClientImages.'/'.$image['name'];
+                       $j++;
+                   }
+                   $purchaseOrderComponentData['client_approval_images'] = $materialComponentImagesOfClientApproval;
+               }
                $status = 200;
                return response()->json($purchaseOrderComponentData,$status);
            }catch(\Exception $e){
@@ -486,6 +520,15 @@ class PurchaseOrderController extends Controller
                     $materialRequestComponentSlug = $materialRequest->materialRequestComponentTypes->slug;
                     $purchaseRequestComponents[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
                     $purchaseRequestComponents[$iterator]['name'] = $materialRequest->name;
+                    $last_three_rates = PurchaseOrderComponent::join('purchase_request_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
+                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                        ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                        ->where('purchase_orders.is_approved',true)
+                        ->where('material_request_components.name','ilike',$materialRequest->name)
+                        ->orderBy('purchase_order_components.created_at','desc')
+                        ->select('purchase_order_components.rate_per_unit','purchase_request_components.id')
+                        ->take(3)->get()->toArray();
+                    $purchaseRequestComponents[$iterator]['last_three_rates'] = $last_three_rates;
                     $purchaseRequestComponents[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
                     $purchaseRequestComponents[$iterator]['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
                     $purchaseRequestComponents[$iterator]['vendor'] = $vendorRelation->vendor->company;
@@ -703,7 +746,7 @@ class PurchaseOrderController extends Controller
                     }
                 }
                 $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
-                $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
+                $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate_per_unit'];
                 $iterator++;
                 if(count($projectSiteInfo) <= 0){
                     $projectSiteInfo['project_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->project->name;

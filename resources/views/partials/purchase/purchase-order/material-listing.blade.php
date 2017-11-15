@@ -25,7 +25,9 @@
             {{$purchaseRequestComponent['vendor']}}
         </td>
         <td style="text-align: center">
-            <input type="text" style="width: 90%" class="form-control" value="{{$purchaseRequestComponent['rate']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][rate]">
+            <input data-toggle="tooltip" title="@foreach($purchaseRequestComponent['last_three_rates'] as $rate)
+                    {{$rate['rate_per_unit']}},
+                @endforeach" type="text" id="rate" style="width: 90%" class="form-control" value="{{$purchaseRequestComponent['rate']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][rate]">
         </td>
         <td style="text-align: center">
             <input type="text" style="width: 90%" class="form-control"  value="{{$purchaseRequestComponent['hsn_code']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][hsn_code]">
@@ -79,5 +81,7 @@
             $('#asset_unit_id').val(values[3]);
             $('#asset_hsn_code').val(values[6]);
         }
-        })
-</script>
+
+    })
+    $('[data-toggle="tooltip"]').tooltip();
+    </script>
