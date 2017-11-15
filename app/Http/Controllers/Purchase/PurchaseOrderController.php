@@ -521,6 +521,15 @@ class PurchaseOrderController extends Controller
                     $materialRequestComponentSlug = $materialRequest->materialRequestComponentTypes->slug;
                     $purchaseRequestComponents[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
                     $purchaseRequestComponents[$iterator]['name'] = $materialRequest->name;
+                    $last_three_rates = PurchaseOrderComponent::join('purchase_request_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
+                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                        ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                        ->where('purchase_orders.is_approved',true)
+                        ->where('material_request_components.name','ilike',$materialRequest->name)
+                        ->orderBy('purchase_order_components.created_at','desc')
+                        ->select('purchase_order_components.rate_per_unit','purchase_request_components.id')
+                        ->take(3)->get()->toArray();
+                    $purchaseRequestComponents[$iterator]['last_three_rates'] = $last_three_rates;
                     $purchaseRequestComponents[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
                     $purchaseRequestComponents[$iterator]['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
                     $purchaseRequestComponents[$iterator]['vendor'] = $vendorRelation->vendor->company;

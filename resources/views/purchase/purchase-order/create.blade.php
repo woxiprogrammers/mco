@@ -65,7 +65,6 @@
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="row">
                                         <div class="col-md-12">
                                             <!-- BEGIN VALIDATION STATES-->
@@ -89,7 +88,6 @@
                                                                 </tr>
                                                                 </thead>
                                                                 <tbody>
-
                                                                 </tbody>
                                                             </table>
                                                         </div>
