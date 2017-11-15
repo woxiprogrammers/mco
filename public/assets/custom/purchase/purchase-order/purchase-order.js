@@ -85,5 +85,18 @@ $(document).ready(function(){
         });
         $("#viewDetailModal").modal();
     });
-
+    $('#poCloseBtn').click(function (){
+        var po_id = $('#po_id').val();
+        var vendor_id = $('#vendor_id').val();
+        $.ajax({
+            type: "POST",
+            url: "/purchase/purchase-order/close-purchase-order",
+            data:{po_id : po_id , vendor_id:vendor_id},
+            beforeSend: function(){
+            },
+            success: function(data){
+              alert(data);
+            }
+        });
+    })
 });
