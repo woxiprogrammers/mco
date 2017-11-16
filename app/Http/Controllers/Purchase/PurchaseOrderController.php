@@ -270,6 +270,30 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+    public function closePurchaseOrder(Request $request){
+        try{
+            $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();
+            $purchase_order_data['is_closed'] = 'false';
+            PurchaseOrder::where('id',$request['po_id'])->update($purchase_order_data);
+            $mailData = ['toMail' => $mail_id];
+            Mail::send('purchase.purchase-order.email.purchase-order-close', [], function($message) use ($mailData){
+                $message->subject('Disapproval of the quotation');
+                $message->to($mailData['toMail']);
+                $message->from(env('MAIL_USERNAME'));
+            });
+            $message="Purchase order closed successfully !";
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'create material',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $message = "Something went wrong" .$e->getMessage();
+        }
+        return response()->json($message);
+
+
+    }
     public function getEditView(Request $request,$id)
     {
         try{
@@ -285,8 +309,9 @@ class PurchaseOrderController extends Controller
                     $purchaseOrderList['purchase_request_format_id'] = $this->getPurchaseIDFormat('purchase-request',$projectSite['id'],$purchaseRequest['created_at'],$purchaseRequest['serial_no']);
                     $project = $projectSite->project;
                     $purchaseOrderList['client_name'] = $project->client->company;
-                    $purchaseOrderList['project'] = $project->name;
+                    $purchaseOrderList['project'] = $project->name.'  '.'-'.'  '.$projectSite->name;
                     $purchaseOrderList['vendor_name'] = $purchaseOrder->vendor->name;
+                    $purchaseOrderList['vendor_id'] = $purchaseOrder->vendor->id;
                     $purchaseOrderList['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
             }
             $materialList = array();

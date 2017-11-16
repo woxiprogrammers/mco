@@ -19,12 +19,19 @@
                                 <div class="page-title">
                                     <h1>Edit Purchase Order</h1>
                                 </div>
+                                <div class="form-group " style="text-align: center">
+                                    <button id="poCloseBtn" type="submit" class="btn red pull-right margin-top-15">
+                                        <i class="fa fa-close" style="font-size: large"></i>
+                                        Close this purchase order.
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
                                 <input type="hidden" id="po_id" value="{{$purchaseOrderList['purchase_order_id']}}">
+                                <input type="hidden" id="vendor_id" value="{{$purchaseOrderList['vendor_id']}}">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <!-- BEGIN VALIDATION STATES-->
@@ -101,7 +108,7 @@
                                                     </div>
                                                     <div class="modal fade" id="ImageUpload" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                                         <div class="modal-dialog">
-                                                            <form class="modal-content">
+                                                            <div class="modal-content">
                                                                 <div class="modal-header" >
                                                                     <div class="row">
                                                                         <div class="col-md-4"></div>
@@ -186,10 +193,9 @@
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                        <div style="padding-bottom: 5px;padding-left: 3px">
-                                                                        </div>
                                                                     </form>
                                                                 </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="modal fade " id="paymentModal"  role="dialog">
@@ -562,7 +568,6 @@
                 transform: scale(1.7, 1.7);
             }
         }
-
         .carousel-inner .item > img {
             -webkit-animation: zoom 20s;
             animation: zoom 20s;
