@@ -384,6 +384,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
        Route::post('edit/{labour}', array('uses' => 'Labour\LabourController@editLabour'));
     });
 
+    Route::group(['prefix'=>'subcontractor'],function (){
+        Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getCreateView'));
+        Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createLabour'));
+        Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageView'));
+        Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorListing'));
+        Route::get('change-status/{labour}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
+        Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
+        Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
+    });
+
     Route::group(['prefix'=>'peticash'],function (){
 
         Route::get('projects/{client_id}',array('uses' => 'Peticash\PeticashController@getProjects'));

@@ -165,6 +165,11 @@
                                                     <i class="fa fa-sitemap"></i> Manage Employee
                                                 </a>
                                             </li>
+                                            <li aria-haspopup="true">
+                                                <a href="/subcontractor/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-sitemap"></i> Manage Subcontractor
+                                                </a>
+                                            </li>
                                         </ul>
                                     </li>
                                 @endif
