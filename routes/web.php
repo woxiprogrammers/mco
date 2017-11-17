@@ -386,12 +386,25 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix'=>'subcontractor'],function (){
         Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getCreateView'));
-        Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createLabour'));
+        Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
         Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageView'));
         Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorListing'));
         Route::get('change-status/{labour}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
         Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
         Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
+
+        Route::group(['prefix' => 'subcontractor-structure'], function(){
+            Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
+            Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
+            Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureView'));
+            Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorStructureListing'));
+            Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
+            Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
+        });
+
+        Route::group(['prefix' => 'subcontractor-bills'], function(){
+            Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageBillsView'));
+        });
     });
 
     Route::group(['prefix'=>'peticash'],function (){
