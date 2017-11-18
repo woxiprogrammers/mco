@@ -83,7 +83,7 @@ class PurchaseRequestController extends Controller
             $userRole = $user->roles[0]->role->slug;
             if($status == "p-r-admin-approved"){
                 $purchaseRequest = PurchaseRequest::where('id',$id)->first();
-                $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('material_request_component_id');
+                $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('id');
                 $materialRequestComponentDetails = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','asc')->get();
                 $materialRequestComponentID = MaterialRequestComponentTypes::where('slug','quotation-material')->pluck('id')->first();
                 $allVendors = Vendor::where('is_active','true')->select('id','company')->get()->toArray();
