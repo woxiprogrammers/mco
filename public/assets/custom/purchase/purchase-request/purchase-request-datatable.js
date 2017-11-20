@@ -182,7 +182,7 @@ function selectProject(nameProject,id) {
         $('#component_id').val(componentTypeId);
         var options = ''
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
-        $('#unitDrpdn').append(str1);
+        $('#unitDrpdn').html(str1);
         $('#component_type_id').val();
     })
         .on('typeahead:open', function (obj, datum) {
@@ -236,7 +236,7 @@ function selectProject(nameProject,id) {
             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
         });
         var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center"><option>Select Unit</option>'+options+ '</select>';
-        $('#unitDrpdn').append(str1);
+        $('#unitDrpdn').html(str1);
         $('#component_type_id').val();
     })
         .on('typeahead:open', function (obj, datum) {
