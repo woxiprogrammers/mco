@@ -313,7 +313,7 @@
                                                                                 <a class="pull-right btn blue" href="javascript:void(0);" id="componentSelectButton"> Select </a>
                                                                             </div>
                                                                         </div>
-                                                                        <div id="componentDetailsDiv" hidden>
+                                                                        <div id="componentDetailsDiv" hidden style="margin-top: 5%;">
 
                                                                         </div>
                                                                         <div id="transactionCommonFieldDiv" hidden>
@@ -539,6 +539,7 @@
                     },
                     success:function (data,textStatus,xhr) {
                         $("#componentDetailsDiv").html(data);
+                        $(".transaction-modal").css('overflow','scroll');
                         $("#componentDetailsDiv").show();
                         $("#transactionCommonFieldDiv").show();
                     },
