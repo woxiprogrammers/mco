@@ -19,12 +19,14 @@
                                 <div class="page-title">
                                     <h1>Edit Purchase Order</h1>
                                 </div>
-                                <div class="form-group " style="text-align: center">
-                                    <button id="poCloseBtn" type="submit" class="btn red pull-right margin-top-15">
-                                        <i class="fa fa-close" style="font-size: large"></i>
-                                        Close this purchase order.
-                                    </button>
-                                </div>
+                                @if($isClosed != true)
+                                    <div class="form-group " style="text-align: center">
+                                        <button id="poCloseBtn" type="submit" class="btn red pull-right margin-top-15">
+                                            <i class="fa fa-close" style="font-size: large"></i>
+                                            Close this purchase order.
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
@@ -80,15 +82,16 @@
                                             <div class="portlet light ">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        <div class="row">
-                                                            <div class="col-md-offset-9 col-md-3 ">
-                                                                <a class="btn red pull-right" href="#transactionModal" data-toggle="modal" >
-                                                                    <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
-                                                                    Transaction
-                                                                </a>
+                                                        @if($isClosed != true)
+                                                            <div class="row">
+                                                                <div class="col-md-offset-9 col-md-3 ">
+                                                                    <a class="btn red pull-right" href="#transactionModal" data-toggle="modal" >
+                                                                        <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                                                        Transaction
+                                                                    </a>
+                                                                </div>
                                                             </div>
-                                                        </div>
-
+                                                        @endif
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest" style="margin-top: 1%;">
                                                             <thead>
                                                                 <tr>
