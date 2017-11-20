@@ -274,7 +274,7 @@ class PurchaseOrderController extends Controller
     public function closePurchaseOrder(Request $request){
         try{
             $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();
-            $purchase_order_data['is_closed'] = 'false';
+            $purchase_order_data['is_closed'] = true;
             PurchaseOrder::where('id',$request['po_id'])->update($purchase_order_data);
             $mailData = ['toMail' => $mail_id];
             Mail::send('purchase.purchase-order.email.purchase-order-close', [], function($message) use ($mailData){
@@ -363,7 +363,8 @@ class PurchaseOrderController extends Controller
             }
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
             $transaction_types = PaymentType::select('slug')->where('slug','!=','peticash')->get();
-            return view('purchase/purchase-order/edit')->with(compact('transaction_types','purchaseOrderList','materialList','purchaseOrderBillListing','systemUsers','vendorName'));
+            $isClosed = $purchaseOrder->is_closed;
+            return view('purchase/purchase-order/edit')->with(compact('isClosed','transaction_types','purchaseOrderList','materialList','purchaseOrderBillListing','systemUsers','vendorName'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Purchase Order Edit View',
