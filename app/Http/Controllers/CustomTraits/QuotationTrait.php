@@ -1224,7 +1224,7 @@ trait QuotationTrait{
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
-            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$subDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
