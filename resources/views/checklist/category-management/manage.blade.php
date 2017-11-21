@@ -21,13 +21,14 @@
                                 <div class="page-title">
                                     <h1>Category Management</h1>
                                 </div>
-                                <button id="mainCat" class="btn yellow" style="margin-top: 1%; margin-left: 50%"><a href="#" style="color: white"><i class="fa fa-plus"></i> Main Category</a>
-                                </button>
-                                <button id="subCat" class="btn yellow" style="margin-top: 1%; margin-left: 2%"><a href="#" style="color: white"><i class="fa fa-plus"></i> Sub Category</a>
-                                </button>
+                                <div class="col-md-offset-8" style="margin-top: 1%">
+                                    <a href="#" style="color: white" data-toggle="modal" data-target="#categoryModal" class="btn red"><i class="fa fa-plus"></i> Main Category</a>
+                                    <a href="#" style="color: white" class="btn red" data-toggle="modal" data-target="#subcategoryModal"><i class="fa fa-plus"></i> Sub Category</a>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">
+                            @include('partials.common.messages')
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md-12">
@@ -48,7 +49,7 @@
                                                     </div>
 
                                         <div class="tab-content">
-                                            <div class="tab-pane fade in" id="categorytab">
+                                            <div class="tab-pane fade in active" id="categorytab">
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="CategoryManagementTable">
                                                     <thead>
                                                     <tr>
@@ -99,7 +100,7 @@
                                             </div>
                                         </div>
                                             </div>
-                                            <div class="modal fade" id="modal1" tabindex="-1" role="dialog" >
+                                            <div class="modal fade" id="subcategoryModal" tabindex="-1" role="dialog" >
                                                 <div class="modal-dialog">
                                                     <div class="modal-content" style="height: 50%">
                                                         <div class="modal-header">
@@ -110,29 +111,26 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form role="form" id="SubCategoryCreate">
+                                                            <form role="form" id="SubCategoryCreate" action="/checklist/category-management/create/sub-category" method="post">
+                                                                {!! csrf_field() !!}
                                                              <div class="form-group">
-                                                                 <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                                     <button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Afghanistan" aria-expanded="false"><span class="filter-option pull-left">Select Main Category</span>&nbsp;<span class="caret"></span></button>
-                                                                     <div class="dropdown-menu open" style="max-height: 314px; overflow: hidden;"><div class="bs-searchbox"><input type="text" class="form-control" autocomplete="off"></div>
-                                                                         <ul class="dropdown-menu inner" role="menu" style="max-height: 272px; overflow-y: auto;"><li data-original-index="0" class="selected active"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                                     <span class="text">Category 1</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" style="" data-tokens="null">
-                                                                                     <span class="text">Category 2</span><span class="fa fa-check check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" style="" data-tokens="null"></a></li>
-                                                                         </ul>
-                                                                     </div>
-                                                                 </div>
+                                                                 <select class="form-control" id="mainCategorySelect" name="category_id">
+                                                                     @foreach($categories as $category)
+                                                                         <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                                                     @endforeach
+                                                                 </select>
                                                              </div>
-                                                                <div class="form-group">
-                                                                    <input type="text" class="form-control" id="sub_category" name="name_sub" placeholder="Enter Sub Category">
-                                                                    </div>
-                                                                <button type="submit" id="createSubCategory" class="btn red pull-right"><i class="fa fa-check"></i> Create </button>
+                                                            <div class="form-group">
+                                                                <input type="text" class="form-control" id="sub_category" name="name" placeholder="Enter Sub Category">
+                                                            </div>
+                                                            <button type="submit" id="createSubCategory" class="btn red pull-right"><i class="fa fa-check"></i> Create </button>
                                                             </form>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                            <div class="modal fade" id="modal2" role="dialog">
+                                            <div class="modal fade" id="categoryModal" role="dialog">
                                                 <div class="modal-dialog">
                                                     <!-- Modal content-->
                                                     <div class="modal-content" style="height: 50%">
@@ -144,9 +142,10 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-body" style="padding:40px 50px;">
-                                                            <form role="form" id="MainCategoryCreate">
+                                                            <form role="form" id="MainCategoryCreate" action="/checklist/category-management/create/main-category" method="post">
+                                                                {!! csrf_field() !!}
                                                                 <div class="form-group">
-                                                                    <input type="text" name="name_main" class="form-control" id="main_category" placeholder="Enter Main Category">
+                                                                    <input type="text" name="name" class="form-control" id="main_category" placeholder="Enter Main Category" required>
                                                                 </div>
                                                                 <button type="submit"  id="createMainCategory" class="btn btn-set red pull-right"><i class="fa fa-check"></i> Create </button>
                                                             </form>
@@ -179,12 +178,12 @@
     <script src="/assets/custom/checklist/categoryManagement-datatable.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
-            $("#subCat").click(function(){
-                $("#modal1").modal();
-            });
-            $("#mainCat").click(function(){
-                $("#modal2").modal();
-            });
+//            $("#subCat").click(function(){
+//                $("#modal1").modal();
+//            });
+//            $("#mainCat").click(function(){
+//                $("#modal2").modal();
+//            });
         });
         $(document).ready(function() {
             $('#categoryManagementTable').DataTable();
