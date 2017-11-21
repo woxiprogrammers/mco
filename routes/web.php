@@ -386,6 +386,29 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
        Route::post('edit/{labour}', array('uses' => 'Labour\LabourController@editLabour'));
     });
 
+    Route::group(['prefix'=>'subcontractor'],function (){
+        Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getCreateView'));
+        Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
+        Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageView'));
+        Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorListing'));
+        Route::get('change-status/{labour}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
+        Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
+        Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
+
+        Route::group(['prefix' => 'subcontractor-structure'], function(){
+            Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
+            Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
+            Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureView'));
+            Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorStructureListing'));
+            Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
+            Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
+        });
+
+        Route::group(['prefix' => 'subcontractor-bills'], function(){
+            Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageBillsView'));
+        });
+    });
+
     Route::group(['prefix'=>'peticash'],function (){
 
         Route::get('projects/{client_id}',array('uses' => 'Peticash\PeticashController@getProjects'));
@@ -426,6 +449,28 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
         Route::group(['prefix' => 'peticash-management'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+        });
+    });
+
+    Route::group(['prefix' => 'awareness'], function(){
+
+          Route::group(['prefix' => 'category-management'], function(){
+                Route::get('main-category-manage',array('uses' => 'Awareness\CategoryManagementController@getManageView'));
+                Route::get('main-category-create',array('uses' => 'Awareness\CategoryManagementController@getCategoryCreateView'));
+                Route::post('main-category-create',array('uses' => 'Awareness\CategoryManagementController@createMainCategory'));
+                Route::post('sub-category-create',array('uses' => 'Awareness\CategoryManagementController@createSubCategory'));
+                Route::post('main-category-listing',array('uses' => 'Awareness\CategoryManagementController@mainCategoryListing'));
+                Route::post('sub-category-listing',array('uses' => 'Awareness\CategoryManagementController@subCategoryListing'));
+                Route::get('sub-category-manage',array('uses' => 'Awareness\CategoryManagementController@getSubManageView'));
+                Route::get('sub-category-create',array('uses' => 'Awareness\CategoryManagementController@getSubCategoryCreateView'));
+          });
+        Route::group(['prefix' => 'file-management'], function(){
+            Route::get('manage',array('uses' => 'Awareness\FileManagementController@getManageView'));
+            Route::get('create',array('uses' => 'Awareness\FileManagementController@getCategoryCreateView'));
+            Route::get('get-sub-categories/{id}',array('uses' => 'Awareness\FileManagementController@getMainCategories'));
+            Route::post('file-upload',array('uses'=>'Awareness\FileManagementController@uploadFiles'));
+            Route::post('get-files',array('uses'=>'Awareness\FileManagementController@displayFiles'));
+            Route::post('create-awareness',array('uses'=>'Awareness\FileManagementController@create'));
         });
 
     });

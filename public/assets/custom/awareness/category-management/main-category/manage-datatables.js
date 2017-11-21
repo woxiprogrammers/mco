@@ -1,10 +1,8 @@
-var LabourListing = function () {
+var CategoryListing = function () {
     var handleOrders = function () {
-
         var grid = new Datatable();
-
         grid.init({
-            src: $("#labourTable"),
+            src: $("#mainCategoryTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -24,14 +22,13 @@ var LabourListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/labour/listing" // ajax source
+                    "url": "/awareness/category-management/main-category-listing?_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]
                 ] // set first column as a default sort by asc
             }
         });
-
         // handle group actionsubmit button click
         grid.getTableWrapper().on('click', '.table-group-action-submit', function (e) {
             e.preventDefault();
@@ -60,20 +57,15 @@ var LabourListing = function () {
                 });
             }
         });
-
     }
-
     return {
 
         //main function to initiate the module
         init: function () {
             handleOrders();
         }
-
     };
-
 }();
-
 jQuery(document).ready(function() {
-    LabourListing.init();
+    CategoryListing.init();
 });
