@@ -202,8 +202,13 @@ class SubcontractorController extends Controller
 
     public function getSubcontractorStructureView(Request $request) {
         try{
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
+            $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+            $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
+            $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
             $projectSites = ProjectSite::select('id','name')->get()->toArray();
-            return view('subcontractor.structure.create')->with(compact('projectSites'));
+            return view('subcontractor.structure.create')->with(compact('projectSites','clients'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Structure Create View',
@@ -274,8 +279,13 @@ class SubcontractorController extends Controller
 
     public function getSubcontractorStructureEditView(Request $request,$labour){
         try{
+            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
+            $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+            $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
+            $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
             $projectSites = ProjectSite::select('id','name')->get()->toArray();
-            return view('subcontractor.structure.edit')->with(compact('labour','projectSites'));
+            return view('subcontractor.structure.edit')->with(compact('labour','projectSites','clients'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",

@@ -42,251 +42,197 @@
 <div class="portlet light ">
 <div class="portlet-body form">
 <form role="form" id="editSubcontractor" class="form-horizontal" method="post" action="/subcontractor/subcontractor-structure/edit/{{$labour['id']}}">
-{!! csrf_field() !!}
-<div class="form-body">
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Name</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="name" name="name" value="{{$labour['name']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Contact number:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="contact_no" name="mobile" value="{{$labour['mobile']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Gender :</label>
-        <span>*</span>
-    </div>
-    &nbsp;&nbsp;&nbsp;
-    <div class="col-md-6 mt-radio-inline">
-        @if($labour['gender'] != null)
-        @if($labour['gender'] == 'f')
-        <label class="mt-radio" style="margin-left: 13px">
-            <input type="radio" name="gender" id="female" value="f" checked=""> Female
-            <span></span>
-        </label>
-        <label class="mt-radio">
-            <input type="radio" name="gender" id="male" value="m"> Male
-            <span></span>
-        </label>
-        @else
-        <label class="mt-radio" style="margin-left: 13px">
-            <input type="radio" name="gender" id="female" value="f" > Female
-            <span></span>
-        </label>
-        <label class="mt-radio">
-            <input type="radio" name="gender" id="male" value="m" checked=""> Male
-            <span></span>
-        </label>
-        @endif
-        @else
-        <label class="mt-radio" style="margin-left: 13px">
-            <input type="radio" name="gender" id="female" value="f"> Female
-            <span></span>
-        </label>
-        <label class="mt-radio">
-            <input type="radio" name="gender" id="male" value="m"> Male
-            <span></span>
-        </label>
-        @endif
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Labour ID:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="employee_id" name="employee_id" value="{{$labour['employee_id']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Per day Wages</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="per_day_wage" name="per_day_wages" value="{{$labour['per_day_wages']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Select Project Site</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <select id="project_site" class="form-control" name="project_site_id">
-            @if($labour['project_site_id'] == null)
-            <option value="-1">Select Project Site</option>
-            @endif
-            @foreach($projectSites as $projectSite)
-            @if($labour['project_site_id'] == $projectSite['id'])
-            <option value = "{!! $projectSite['id'] !!}" selected>{!! $projectSite['name'] !!}</option>
-            @else
-            <option value = "{!! $projectSite['id'] !!}">{!! $projectSite['name'] !!}</option>
-            @endif
-            @endforeach
-        </select>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Address:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="address" name="address" value="{{$labour['address']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Pan Card:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="pan_card" name="pan_card" value="{{$labour['pan_card']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Aadhaar Card:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="aadhaar_card" name="aadhaar_card" value="{{$labour['aadhaar_card']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Designation:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="designation" name="designation" value="{{$labour['designation']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Joining Date:</label>
-        <span>*</span>
-    </div>
-    @if($labour['joining_date'] != null)
-    <div class="col-md-6 date date-picker">
-        <input type="text"  name="joining_date" value="{{date('m/d/Y',strtotime($labour['joining_date']))}}" id="joining_date" readonly>
-        <button class="btn btn-sm default" type="button">
-            <i class="fa fa-calendar"></i>
-        </button>
-    </div>
-    @else
-    <div class="col-md-4 date date-picker">
-        <input type="text" name="joining_date" id="joining_date">
-        <button class="btn btn-sm default" type="button">
-            <i class="fa fa-calendar"></i>
-        </button>
-    </div>
-    @endif
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Termination Date:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6 date date-picker">
-        @if($labour['termination_date'] != null)
-        <input type="text"  name="termination_date" value="{{date('m/d/Y',strtotime($labour['termination_date']))}}" id="termination_date" readonly>
-        <button class="btn btn-sm default" type="button">
-            <i class="fa fa-calendar"></i>
-        </button>
-        @else
-        <input type="text" name="termination_date" id="termination_date">
-        <button class="btn btn-sm default" type="button">
-            <i class="fa fa-calendar"></i>
-        </button>
-        @endif
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Email:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="email" name="email" value="{{$labour['email']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Bank Account Number:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" value="{{$labour['bank_account_number']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Bank Name:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{$labour['bank_name']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Branch Id:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="branch_id" name="branch_id" value="{{$labour['branch_id']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Account Holder Name:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="account_holder_name" name="account_holder_name" value="{{$labour['account_holder_name']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Branch Name:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="branch_name" name="branch_name" value="{{$labour['branch_name']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">IFS Code:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="ifs_code" name="ifs_code" value="{{$labour['ifs_code']}}">
-    </div>
-</div>
-</div>
-<div class="form-body">
+    {!! csrf_field() !!}
+    <div class="form-body">
+        <div class="row form-group">
+            <div class="col-md-3">
+                &nbsp;
+            </div>
+            <div class="col-md-2">
+                <label>Select Client :</label>
+                <select class="form-control" id="client_id" name="client_id">
+                    @foreach($clients as $client)
+                    <option value="{{$client['id']}}">{{$client['company']}}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Select Project :</label>
+                <select class="form-control" id="project_id" name="project_id">
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Select Site :</label>
+                <select class="form-control" id="site_id" name="site_id">
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Select Subcontractor :</label>
+                <select class="form-control" id="year" name="subcontractor">
+                    <option value="2017">SC1</option>
+                    <option value="2018">SC2</option>
+                    <option value="2019">SC3</option>
+                    <option value="2020">SC4</option>
+                    <option value="2021">Sc5</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <label for="description" class="control-label">Description</label>
+                <span>*</span>
+            </div>
+            <div class="col-md-6">
+                <textarea class="form-control" id="description" name="description"></textarea>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <label for="summary" class="control-label">Select Summary:</label>
+                <span>*</span>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="year" name="summary">
+                    <option value="2017">Summary 1</option>
+                    <option value="2018">Summary 2</option>
+                    <option value="2019">Summary 3</option>
+                    <option value="2020">Summary 4</option>
+                    <option value="2021">Summary 5</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <label for="rate" class="control-label">Rate :</label>
+                <span>*</span>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="rate" name="rate">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <label for="total_work_area" class="control-label">Total Work Area :</label>
+                <span>*</span>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="total_work_area" name="total_work_area">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <label for="amount" class="control-label">Total Amount : </label>
+                <span>*</span>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="total_amount" name="total_amount">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <label for="structure_type" class="control-label">Structure Type :</label>
+                <span>*</span>
+            </div>
+            &nbsp;&nbsp;&nbsp;
+            <div class="col-md-6 mt-radio-inline">
+                <label class="mt-radio" style="margin-left: 13px">
+                    <input type="radio" name="structure_type" id="amountwise" value="1"> Amountwise
+                    <span></span>
+                </label>
+                <label class="mt-radio">
+                    <input type="radio" name="structure_type" id="areawise" value="2"> Areawise
+                    <span></span>
+                </label>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <label for="no_of_floors" class="control-label">No of Floors : </label>
+                <span>*</span>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="no_of_floors" name="no_of_floors">
+            </div>
+            <div class="col-md-2">
+                <a id="next_btn" class="btn blue">Next</a>
+            </div>
+        </div>
+        <hr/>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: center">
+                <label>Bill No :</label>
+            </div>
+            <div class="col-md-3">
+                <label>Description :</label>
+            </div>
+            <div class="col-md-2">
+                <label>Quantity :</label>
+            </div>
+            <div class="col-md-2">
+                <label>Rate :</label>
+            </div>
+            <div class="col-md-2">
+                <label>Amount :</label>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <input type="text" id="struct_bill_no" name="struct_bill_no" value="R.A 1" disabled>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="struct_desc" name="struct_desc">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_qty" name="struct_qty">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_rate" name="struct_rate">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_amount" name="struct_amount">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <input type="text" id="struct_bill_no" name="struct_bill_no" value="R.A 2" disabled>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="struct_desc" name="struct_desc">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_qty" name="struct_qty">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_rate" name="struct_rate">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_amount" name="struct_amount">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3" style="text-align: right">
+                <input type="text" id="struct_bill_no" name="struct_bill_no" value="R.A 3" disabled>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="struct_desc" name="struct_desc">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_qty" name="struct_qty">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_rate" name="struct_rate">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="struct_amount" name="struct_amount">
+            </div>
+        </div>
 
+    </div>
     <div class="form-actions noborder row">
         <div class="col-md-offset-3" style="margin-left: 26%">
-            <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+            <button type="submit" class="btn red" id="labour_submit"><i class="fa fa-check"></i> Create Structure</button>
         </div>
     </div>
-</div>
 </form>
 </div>
 </div>
