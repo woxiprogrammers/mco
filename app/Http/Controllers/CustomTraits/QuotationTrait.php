@@ -1212,12 +1212,11 @@ trait QuotationTrait{
         }
     }
 
-    public function uploadTempWorkOrderImages(Request $request,$main_category_id,$sub_category_id){
+    public function uploadTempWorkOrderImages(Request $request,$quotationId){
         try{
-            $mainDirectoryName = sha1($main_category_id);
-            $subDirectoryName = sha1($sub_category_id);
+            $quotationDirectoryName = sha1($quotationId);
             $tempUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
-            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$mainDirectoryName.$subDirectoryName;
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
             /* Create Upload Directory If Not Exists */
             if (!file_exists($tempImageUploadPath)) {
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
@@ -1225,7 +1224,7 @@ trait QuotationTrait{
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
-            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.$subDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$subDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
