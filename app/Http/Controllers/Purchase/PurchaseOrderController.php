@@ -485,8 +485,10 @@ class PurchaseOrderController extends Controller
                         $inventoryComponentTransferData = [
                             'inventory_component_id' => $inventoryComponent->id,
                             'transfer_type_id' => $transferTypeId,
+                            'unit_id' => $purchaseOrderComponentData['unit_id'],
+                            'quantity' =>  $purchaseOrderComponentData['quantity']
                         ];
-                        $inventoryComponentTransferData = array_merge($inventoryComponentTransferData,$request->except('type','material','unit_name','vendor_name','purchase_order_component_id'));
+                        $inventoryComponentTransferData = array_merge($inventoryComponentTransferData,$request->except('type','component_data','material','unit_name','vendor_name','purchase_order_component_id'));
                         $inventoryComponentTransferData['source_name'] = $request->vendor_name;
                         $this->createInventoryComponentTransfer($inventoryComponentTransferData);
                     }
