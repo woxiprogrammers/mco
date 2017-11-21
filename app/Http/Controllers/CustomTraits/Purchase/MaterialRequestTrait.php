@@ -58,11 +58,7 @@ trait MaterialRequestTrait{
                 $materialRequestComponentCount = MaterialRequestComponents::whereDate('created_at',$today)->count();
                 $materialRequestComponentData['serial_no'] = ($materialRequestComponentCount+1);
                 $materialRequestComponentData['format_id'] =  $this->getPurchaseIDFormat('material-request-component',$data['project_site_id'],$materialRequestComponentData['created_at'],$materialRequestComponentData['serial_no']);
-                Log::info('material request component data');
-                Log::info($materialRequestComponentData);
                 $materialRequestComponent[$iterator] = MaterialRequestComponents::insertGetId($materialRequestComponentData);
-                Log::info('material request component id');
-                Log::info($materialRequestComponent[$iterator]);
                 $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponent[$iterator];
                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
                 if(array_has($itemData,'images')){
@@ -90,8 +86,6 @@ trait MaterialRequestTrait{
             ];
             Log::critical(json_encode($errorData));
         }
-        Log::info('before exit');
-        Log::info($materialRequestComponent);
         return $materialRequestComponent;
     }
 
