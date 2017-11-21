@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Category Management')
+@section('title','Constro | Checklist Category Management')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -19,7 +19,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Category Management</h1>
+                                    <h1>Checklist Category Management</h1>
                                 </div>
                                 <div class="col-md-offset-8" style="margin-top: 1%">
                                     <a href="#" style="color: white" data-toggle="modal" data-target="#categoryModal" class="btn red"><i class="fa fa-plus"></i> Main Category</a>
@@ -50,16 +50,19 @@
 
                                         <div class="tab-content">
                                             <div class="tab-pane fade in active" id="categorytab">
-                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="CategoryManagementTable">
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="MainCategoryManagementTable">
                                                     <thead>
                                                     <tr>
                                                         <th style="width: 30%"> ID </th>
                                                         <th> Category Name </th>
+                                                        <th> Status </th>
+                                                        <th> Created On </th>
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
                                                         <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_id" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_category" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
@@ -75,17 +78,21 @@
                                             </div>
 
                                             <div class="tab-pane fade in" id="subcategorytab">
-                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="categoryManagementTable">
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="SubCategoryManagementTable">
                                                     <thead>
                                                     <tr>
                                                         <th style="width: 30%"> ID </th>
                                                         <th> Category Name </th>
                                                         <th> Sub-Category Name </th>
+                                                        <th> Status </th>
+                                                        <th> Created On </th>
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
                                                         <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_id" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_category" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
@@ -175,19 +182,9 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/checklist/categoryManagement.js"></script>
-    <script src="/assets/custom/checklist/categoryManagement-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/checklist/main-category-management-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/checklist/sub-category-management-datatable.js" type="text/javascript"></script>
     <script>
-        $(document).ready(function(){
-//            $("#subCat").click(function(){
-//                $("#modal1").modal();
-//            });
-//            $("#mainCat").click(function(){
-//                $("#modal2").modal();
-//            });
-        });
-        $(document).ready(function() {
-            $('#categoryManagementTable').DataTable();
-        });
         $(document).ready(function() {
             CreateMainCategory.init();
         });
