@@ -7,3 +7,4 @@ Homestead.yaml
 npm-debug.log
 .env
 /public/uploads
+/public/temp_uploads
