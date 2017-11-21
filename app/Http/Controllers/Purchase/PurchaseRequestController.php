@@ -83,7 +83,7 @@ class PurchaseRequestController extends Controller
             $userRole = $user->roles[0]->role->slug;
             if($status == "p-r-admin-approved"){
                 $purchaseRequest = PurchaseRequest::where('id',$id)->first();
-                $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('id');
+                $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('material_request_component_id');
                 $materialRequestComponentDetails = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','asc')->get();
                 $materialRequestComponentID = MaterialRequestComponentTypes::where('slug','quotation-material')->pluck('id')->first();
                 $allVendors = Vendor::where('is_active','true')->select('id','company')->get()->toArray();
@@ -161,13 +161,11 @@ class PurchaseRequestController extends Controller
             $purchaseRequestData['serial_no'] = ($purchaseRequestCount+1);
             $purchaseRequestData['format_id'] = $this->getPurchaseIDFormat('purchase-request',$requestData['project_site_id'],Carbon::now(),$purchaseRequestData['serial_no']);
             $purchaseRequest = PurchaseRequest::create($purchaseRequestData);
-            if($request->has('material_request_component_ids')) {
-                foreach ($materialRequestComponentIds as $materialRequestComponentId) {
-                    PurchaseRequestComponent::create([
-                        'purchase_request_id' => $purchaseRequest['id'],
-                        'material_request_component_id' => $materialRequestComponentId
-                    ]);
-                }
+            foreach ($materialRequestComponentIds as $materialRequestComponentId) {
+                PurchaseRequestComponent::create([
+                    'purchase_request_id' => $purchaseRequest['id'],
+                    'material_request_component_id' => $materialRequestComponentId
+                ]);
             }
             $PRAssignedStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-assigned')->pluck('id')->first();
             if($request->has('material_request_component_ids')) {
