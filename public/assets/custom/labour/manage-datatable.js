@@ -24,7 +24,7 @@ var LabourListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/labour/listing", // ajax source
+                    "url": "/labour/listing" // ajax source
                 },
                 "order": [
                     [1, "asc"]
