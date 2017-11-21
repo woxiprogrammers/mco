@@ -62,15 +62,17 @@ class PurchaseOrderController extends Controller
     }
     public function getCreateView(Request $request){
         try{
-            $adminApprovePurchaseRequestInfo = PurchaseRequest::join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
-                                            ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
-                                            ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
-                                            ->get()
-                                            ->toArray();
+            $purchaseOrderComponentPRIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
+            $adminApprovePurchaseRequestInfo = PurchaseRequestComponent::join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                                                ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
+                                                ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
+                                                ->whereNotIn('purchase_request_components.id',$purchaseOrderComponentPRIds)
+                                                ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
+                                                ->get()
+                                                ->toArray();
             $categories = Category::where('is_miscellaneous',true)->select('id','name')->get()->toArray();
             $purchaseRequests = array();
             foreach($adminApprovePurchaseRequestInfo as $purchaseRequest){
-
                 $purchaseRequests[$purchaseRequest['id']] = $this->getPurchaseIDFormat('purchase-request',$purchaseRequest['project_site_id'],($purchaseRequest['created_at']),$purchaseRequest['serial_no']);
             }
             return view('purchase/purchase-order/create')->with(compact('purchaseRequests','categories'));
@@ -241,7 +243,7 @@ class PurchaseOrderController extends Controller
             if($is_present != null){
                 $categoryMaterialData['category_id'] = $request->category;
                 $categoryMaterialData['material_id'] = $id;
-                $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
+                CategoryMaterialRelation::create($categoryMaterialData);
             }else{
                 $materialData['name'] = ucwords(trim($request->name));
                 $categoryMaterialData['category_id'] = $request->category;
@@ -253,14 +255,13 @@ class PurchaseOrderController extends Controller
                 $materialData['hsn_code'] = $request->hsn_code;
                 $material = Material::create($materialData);
                 $categoryMaterialData['material_id'] = $material['id'];
-                $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
+                CategoryMaterialRelation::create($categoryMaterialData);
                 $materialVersionData['material_id'] = $material->id;
                 $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
                 $materialVersionData['unit_id'] = $request->unit_id;
-                $materialVersion = MaterialVersion::create($materialVersionData);
+                MaterialVersion::create($materialVersionData);
             }
-            $request->session()->flash('success','Material created successfully.');
-            return redirect('/purchase/purchase-order/create');
+            return response()->json(['message' => 'Material Created Successfully.!'], 200);
         }catch(\Exception $e){
             $data = [
                 'action' => 'create material',
@@ -434,6 +435,7 @@ class PurchaseOrderController extends Controller
             return response()->json($message,$status);
         }
     }
+
     public function getPurchaseOrderMaterials(Request $request){
         try{
             $materialRequestComponent = MaterialRequestComponents::where('id',$request['material_request_component_id'])->first();
@@ -442,6 +444,7 @@ class PurchaseOrderController extends Controller
 
         }
     }
+
     public function createTransaction(Request $request){
         try{
             $purchaseOrderBill = $request->except('type','Unit','purchase_order_component_id','purchase_order_component_ids','component_data','unit','material','unit_name','vendor_name');
@@ -539,6 +542,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function createPayment(Request $request){
         try{
             $purchaseOrderBillPayment['purchase_order_bill_id'] = $request['purchase_order_bill_id'];
@@ -659,7 +663,7 @@ class PurchaseOrderController extends Controller
             $today = date('Y-m-d');
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
             foreach($request->purchase as $vendorId => $components){
-                $approvePurchaseOrderData = $disapprovePurchaseOrderData = array('vendor_id' => $vendorId, 'purchase_request_id' => $request->purchase_request_id);
+                $approvePurchaseOrderData = $disapprovePurchaseOrderData = array('vendor_id' => (int)$vendorId, 'purchase_request_id' => (int)$request->purchase_request_id);
                 $todaysCount = PurchaseOrder::whereDate('created_at', $today)->count();
                 $approvedPurchaseOrder = $disapprovePurchaseOrder = null;
                 $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
@@ -860,11 +864,10 @@ class PurchaseOrderController extends Controller
                 $categoryAssetData['asset_types_id'] = $asset_type;
                 $categoryAssetData['name'] = $request->name;
                 $categoryAssetData['quantity'] = 1;
-                $query = Asset::create($categoryAssetData);
+                Asset::create($categoryAssetData);
             }
             $request->session()->flash('success','New asset created successfully');
-            return redirect('/purchase/purchase-order/create');
-
+            return response()->json(['message' => 'Asset Created Successfully.'],200);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase order create view',
