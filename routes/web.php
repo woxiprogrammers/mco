@@ -350,9 +350,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
             Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
-            Route::post('listing',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
+            Route::post('listing/{slug}',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
+            Route::post('create/{slug}',array('uses'=> 'Checklist\CategoryManagementController@createCategories'));
+            Route::get('change-status/{checklistCategory}',array('uses'=> 'Checklist\CategoryManagementController@changeStatus'));
         });
-        Route::group(['prefix' => 'checkList'],function(){
+
+        Route::group(['prefix' => 'structure'],function(){
             Route::get('manage',array('uses' => 'Checklist\ChecklistController@getManageView'));
             Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
         });
