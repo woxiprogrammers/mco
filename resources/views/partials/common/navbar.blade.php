@@ -344,6 +344,23 @@
                         </ul>
                     </li>
                     @endif
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> General Awareness
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/awareness/category-management/main-category-manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/awareness/file-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-file" aria-hidden="true"></i> File Management
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </li>
         </div>
