@@ -24,9 +24,10 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6" style="margin-top: 12px;float: right">
-                                        <div class="btn-group"  style="float: right;margin-top:1%">
-                                            <input id="sample_editable_1_new" type="submit" class="btn yellow" ><i class="fa fa-check"></i>
-                                        </div>
+                                        <button type="submit" class="btn btn-set red pull-right">
+                                            <i class="fa fa-check"></i>
+                                            Submit
+                                        </button>
                                     </div>
                                 </div>
                             </div>

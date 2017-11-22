@@ -76,9 +76,9 @@ class FileManagementController extends Controller
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
             }
             $extension = $request->file('file')->getClientOriginalExtension();
-            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $filename = explode(".",$request->name)[0].'#'.sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
-            $path = env('AWARENESS_TEMP_FILE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user_id['id']).DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.$filename;
+            $path = env('AWARENESS_TEMP_FILE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user_id['id']).DIRECTORY_SEPARATOR.urlencode($filename);
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
