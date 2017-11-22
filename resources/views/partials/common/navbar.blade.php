@@ -262,7 +262,7 @@
                             </ul>
                         </li>
                     @endif
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                    {{--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Checklist
                             <span class="arrow"></span>
                         </a>
@@ -295,7 +295,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
+                    </li>--}}
                     <?php $hasPeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('peticash');?>
                     @if($hasPeticashPermission  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -349,7 +349,7 @@
                         </ul>
                     </li>
                     @endif
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                    {{--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Subcontractor
                             <span class="arrow"></span>
                         </a>
@@ -382,7 +382,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
+                    </li>--}}
                 </ul>
             </li>
         </div>
