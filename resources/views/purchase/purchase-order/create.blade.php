@@ -75,7 +75,6 @@
                                                             <table class="table table-striped table-bordered table-hover" id="purchaseRequest" style="overflow: scroll">
                                                                 <thead>
                                                                     <tr>
-                                                                    <th></th>
                                                                     <th style="width: 15%"> Material Name </th>
                                                                     <th style="width: 8%"> Quantity </th>
                                                                     <th style="width: 8%;"> Unit </th>
@@ -235,6 +234,7 @@
         $("#materialCreateSubmit").on('click',function(e) {
             e.stopPropagation();
             var purchaseRequestComponentId = $("#materialCreateForm #purchaseRequestComponentId").val();
+            var vendorId = $("#materialCreateForm #vendor_id").val();
             var url = "/purchase/purchase-order/create-material"; // the script where you handle the form input.
             $.ajax({
                 type: "POST",
@@ -242,17 +242,19 @@
                 data: $("#materialCreateForm").serialize(), // serializes the form's elements.
                 success: function(data)
                 {
-                    //alert(data); // show response from the php script.
-                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+" option:selected").val();
-                    $("#is_approve_"+purchaseRequestComponentId+" option:not([value='"+selectedFlag+"'])").each(function(){
+                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:selected").val();
+                    $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:not([value='"+selectedFlag+"'])").each(function(){
                        $(this).prop('disabled', true);
                     });
+                    $('#myModal1').modal('toggle');
+                    alert('New Material Created Successfully');
                 }
             });
         });
         $("#assetCreateSubmit").on('click',function(e) {
             e.stopPropagation();
             var purchaseRequestComponentId = $("#assetCreateForm #purchaseRequestComponentId").val();
+            var vendorId = $("#assetCreateForm #asset_vendor_id").val();
             var url = "/purchase/purchase-order/create-asset"; // the script where you handle the form input.
             $.ajax({
                 type: "POST",
@@ -260,11 +262,12 @@
                 data: $("#assetCreateForm").serialize(), // serializes the form's elements.
                 success: function(data)
                 {
-//                    alert(data); // show response from the php script.
-                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+" option:selected").val();
-                    $("#is_approve_"+purchaseRequestComponentId+" option:not([value='"+selectedFlag+"'])").each(function(){
+                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:selected").val();
+                    $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:not([value='"+selectedFlag+"'])").each(function(){
                         $(this).prop('disabled', true);
                     });
+                    $('#myModal2').modal('toggle');
+                    alert('New Asset Created Successfully');
                 }
             });
         });

@@ -1,10 +1,14 @@
-var CategoryListing = function () {
+/**
+ * Created by Ameya Joshi on 21/11/17.
+ */
+
+var SubCategoryListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
 
         grid.init({
-            src: $("#categoryManagementTable"),
+            src: $("#SubCategoryManagementTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -24,7 +28,7 @@ var CategoryListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/checklist/category-management/listing", // ajax source
+                    "url": "/checklist/category-management/listing/sub-category?_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -75,5 +79,5 @@ var CategoryListing = function () {
 }();
 
 jQuery(document).ready(function() {
-    CategoryListing.init();
+    SubCategoryListing.init();
 });

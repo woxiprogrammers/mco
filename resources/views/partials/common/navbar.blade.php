@@ -165,6 +165,11 @@
                                                     <i class="fa fa-sitemap"></i> Manage Employee
                                                 </a>
                                             </li>
+                                            <li aria-haspopup="true">
+                                                <a href="/subcontractor/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-sitemap"></i> Manage Subcontractor
+                                                </a>
+                                            </li>
                                         </ul>
                                     </li>
                                 @endif
@@ -257,7 +262,7 @@
                             </ul>
                         </li>
                     @endif
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                    {{--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Checklist
                             <span class="arrow"></span>
                         </a>
@@ -268,7 +273,7 @@
                                 </a>
                             </li>
                             <li aria-haspopup="true">
-                                <a href="/checklist/checkList/manage" class="nav-link nav-toggle ">
+                                <a href="/checklist/structure/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Checklist Structure
                                 </a>
                             </li>
@@ -290,7 +295,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
+                    </li>--}}
                     <?php $hasPeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('peticash');?>
                     @if($hasPeticashPermission  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -344,6 +349,23 @@
                         </ul>
                     </li>
                     @endif
+                    {{--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> Subcontractor
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/subcontractor/subcontractor-structure/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Manage Structure
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/subcontractor/subcontractor-bills/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Subcontrator Bills
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> General Awareness
                             <span class="arrow"></span>
@@ -360,7 +382,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
+                    </li>--}}
                 </ul>
             </li>
         </div>

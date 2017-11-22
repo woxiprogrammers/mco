@@ -1,10 +1,10 @@
-var LabourListing = function () {
+var CategoryListing = function () {
     var handleOrders = function () {
 
         var grid = new Datatable();
 
         grid.init({
-            src: $("#labourTable"),
+            src: $("#MainCategoryManagementTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -24,7 +24,7 @@ var LabourListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/labour/listing" // ajax source
+                    "url": "/checklist/category-management/listing/main-category?_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -75,5 +75,5 @@ var LabourListing = function () {
 }();
 
 jQuery(document).ready(function() {
-    LabourListing.init();
+    CategoryListing.init();
 });

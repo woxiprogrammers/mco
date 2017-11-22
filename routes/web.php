@@ -350,9 +350,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
             Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
-            Route::post('listing',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
+            Route::post('listing/{slug}',array('uses'=> 'Checklist\CategoryManagementController@getCategoryManagementListing'));
+            Route::post('create/{slug}',array('uses'=> 'Checklist\CategoryManagementController@createCategories'));
+            Route::get('change-status/{checklistCategory}',array('uses'=> 'Checklist\CategoryManagementController@changeStatus'));
         });
-        Route::group(['prefix' => 'checkList'],function(){
+
+        Route::group(['prefix' => 'structure'],function(){
             Route::get('manage',array('uses' => 'Checklist\ChecklistController@getManageView'));
             Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
         });
@@ -384,6 +387,29 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
        Route::get('change-status/{labour}', array('uses' => 'Labour\LabourController@changeLabourStatus'));
        Route::get('edit/{labour}', array('uses' => 'Labour\LabourController@getEditView'));
        Route::post('edit/{labour}', array('uses' => 'Labour\LabourController@editLabour'));
+    });
+
+    Route::group(['prefix'=>'subcontractor'],function (){
+        Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getCreateView'));
+        Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
+        Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageView'));
+        Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorListing'));
+        Route::get('change-status/{labour}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
+        Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
+        Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
+
+        Route::group(['prefix' => 'subcontractor-structure'], function(){
+            Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
+            Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
+            Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureView'));
+            Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorStructureListing'));
+            Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
+            Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
+        });
+
+        Route::group(['prefix' => 'subcontractor-bills'], function(){
+            Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageBillsView'));
+        });
     });
 
     Route::group(['prefix'=>'peticash'],function (){
