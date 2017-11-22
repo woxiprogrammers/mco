@@ -7,6 +7,7 @@ use App\BankInfo;
 use App\Bill;
 use App\BillTransaction;
 use App\Category;
+use App\ChecklistCategory;
 use App\Client;
 use App\Employee;
 use App\ExtraItem;
@@ -80,6 +81,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('labour',Employee::class);
         Route::model('materialRequestComponent',MaterialRequestComponents::class);
         Route::model('purchaseOrder',PurchaseOrder::class);
+        Route::model('checklistCategory',ChecklistCategory::class);
     }
 
     /**
