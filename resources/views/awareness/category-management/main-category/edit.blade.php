@@ -28,7 +28,7 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-category" class="form-horizontal" method="post" action="/category/create">
+                                            <form role="form" id="edit-category" class="form-horizontal" method="post" action="/awareness/category-management/main-category-edit">
                                                 {!! csrf_field() !!}
                                                 <input type="hidden" value="false" name="is_miscellaneous" id="is_miscellaneous" >
                                                 <div class="form-body">
@@ -38,7 +38,10 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="name" name="name">
+                                                            @foreach($categories as $category)
+                                                            <input type="text" class="form-control" id="name" name="name" value="{{$category['name']}}">
+                                                            <input type="hidden" class="form-control" id="name" name="id" value="{{$category['id']}}">
+                                                                @endforeach
                                                         </div>
                                                     </div>
                                                 </div>
