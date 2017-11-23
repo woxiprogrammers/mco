@@ -478,6 +478,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('file-upload',array('uses'=>'Awareness\FileManagementController@uploadFiles'));
             Route::post('get-files',array('uses'=>'Awareness\FileManagementController@displayFiles'));
             Route::post('create-awareness',array('uses'=>'Awareness\FileManagementController@create'));
+            Route::post('edit-awareness',array('uses'=>'Awareness\FileManagementController@edit'));
+            Route::post('get-subcategories',array('uses'=>'Awareness\FileManagementController@getSubCategories'));
+            Route::post('get-subcategories-details',array('uses'=>'Awareness\FileManagementController@getSubCategoriesDetails'));
         });
 
     });
