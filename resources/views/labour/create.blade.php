@@ -82,6 +82,20 @@
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Employee Type</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <select id="employee_type" class="form-control" name="employee_type">
+                                                                <option value="-1">Select Employee Type</option>
+                                                                @foreach($projectSites as $projectSite)
+                                                                    <option value = "{!! $projectSite['id'] !!}">{!! $projectSite['name'] !!}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
                                                             <label for="name" class="control-label">Labour ID:</label>
                                                             <span>*</span>
                                                         </div>
@@ -264,6 +278,28 @@
     <script>
         $(document).ready(function() {
             CreateLabour.init();
+
+            $('#employee_type').on('change',function(){
+                getEmployeeId($('#employee_type').val());
+            });
         });
+
+        function getEmployeeId(employee_type){
+            $.ajax({
+               url : '/labour/employee-id/'+employee_type,
+               type : 'GET',
+               async : false,
+                success : function(data,textStatus,xhr){
+                    if(xhr.status == 200){
+                        alert(data);
+                        $('#employee_id').html();
+                    }
+                },
+                error : function(data,textStatus,xhr){
+
+                }
+
+            });
+        }
     </script>
 @endsection

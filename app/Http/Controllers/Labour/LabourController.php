@@ -178,4 +178,18 @@ class LabourController extends Controller
             abort(500);
         }
     }
+
+    public function getEmployeeId(Request $request,$employeeType){
+        try{
+
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Employee ID',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 }
