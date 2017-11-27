@@ -88,8 +88,8 @@
                                                         <div class="col-md-6">
                                                             <select id="employee_type" class="form-control" name="employee_type">
                                                                 <option value="-1">Select Employee Type</option>
-                                                                @foreach($projectSites as $projectSite)
-                                                                    <option value = "{!! $projectSite['id'] !!}">{!! $projectSite['name'] !!}</option>
+                                                                @foreach($labourTypes as $key => $labourType)
+                                                                    <option value = "{!! $labourType['slug'] !!}">{!! $labourType['name'] !!}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -291,8 +291,7 @@
                async : false,
                 success : function(data,textStatus,xhr){
                     if(xhr.status == 200){
-                        alert(data);
-                        $('#employee_id').html();
+                        $('#employee_id').val(data);
                     }
                 },
                 error : function(data,textStatus,xhr){
