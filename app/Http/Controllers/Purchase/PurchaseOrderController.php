@@ -16,6 +16,7 @@ use App\MaterialVersion;
 use App\PaymentType;
 use App\Project;
 use App\ProjectSite;
+use App\PurcahsePeticashTransaction;
 use App\PurchaseOrder;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
@@ -23,6 +24,8 @@ use App\Material;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillPayment;
 use App\PurchaseOrderComponent;
+use App\PurchaseOrderTransaction;
+use App\PurchaseOrderTransactionStatus;
 use App\PurchaseRequest;
 use App\Quotation;
 use App\QuotationStatus;
@@ -303,7 +306,7 @@ class PurchaseOrderController extends Controller
             $purchaseOrderList = array();
             $iterator = 0;
             $vendorName = $purchaseOrder->vendor->company;
-            if(count($purchaseOrder) > 0){
+            if(($purchaseOrder) != null){
                     $purchaseOrderList['purchase_order_id'] = $purchaseOrder['id'];
                     $projectSite = $purchaseOrder->purchaseRequest->projectSite;
                     $purchaseRequest = PurchaseRequest::where('id',$purchaseOrder['purchase_request_id'])->first();
@@ -341,7 +344,7 @@ class PurchaseOrderController extends Controller
                 }
                 $iterator++;
             }
-            $purchaseOrderComponentIDs = PurchaseOrderComponent::where('purchase_order_id',$id)->pluck('id');
+            /*$purchaseOrderComponentIDs = PurchaseOrderComponent::where('purchase_order_id',$id)->pluck('id');
             $purchaseOrderBillData = PurchaseOrderBill::whereIn('purchase_order_component_id',$purchaseOrderComponentIDs)->get();
             $purchaseOrderBillListing = array();
             $iterator = 0;
@@ -361,7 +364,7 @@ class PurchaseOrderController extends Controller
                     $purchaseOrderBillListing[$iterator]['status'] = ($purchaseOrderBill['is_paid'] == true) ? 'Bill Paid' : 'Bill Pending';
                 }
                 $iterator++;
-            }
+            }*/
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
             $transaction_types = PaymentType::select('slug')->where('slug','!=','peticash')->get();
             $isClosed = $purchaseOrder->is_closed;
@@ -941,5 +944,69 @@ class PurchaseOrderController extends Controller
             $response = null;
             return response()->json($response,$status);
         }
+    }
+
+    public function preGrnImageUpload(Request $request, $purchaseOrder, $purchaseOrderTransactionId){
+        try{
+            $generatedGrn = $this->generateGRN();
+            $grnGeneratedStatusId = PurchaseOrderTransactionStatus::where('slug','grn-generated')->pluck('id')->first();
+            if($purchaseOrderTransactionId == null || $purchaseOrderTransactionId == '-' || $purchaseOrderTransactionId == ''){
+                $purchaseOrderTransactionData = [
+                    'purchase_order_id' => $purchaseOrder->id,
+                    'purchase_order_transaction_status_id' => $grnGeneratedStatusId,
+                    'grn' => $generatedGrn
+                ];
+                $purchaseOrderTransaction = PurchaseOrderTransaction::create($purchaseOrderTransactionData);
+            }else{
+                $purchaseOrderTransaction = PurchaseOrderTransaction::findOrFail($purchaseOrderTransactionId);
+            }
+            $purchaseOrderDirectoryName = sha1($purchaseOrder->id);
+            $purchaseTransactionDirectoryName = sha1($purchaseOrderTransaction->id);
+            $imageUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'transactions'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
+            if (!file_exists($imageUploadPath)) {
+                File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($imageUploadPath,$filename);
+            $path = env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'transactions'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path,
+                'purchaseOrderTransactionId' => $purchaseOrderTransaction->id
+            ];
+            /*$tempUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
+            /* Create Upload Directory If Not Exists */
+            /*if (!file_exists($tempImageUploadPath)) {
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path
+            ];*/
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Upload Pre GRN images',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $response = [
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => 101,
+                    'message' => 'Failed to open input stream.',
+                ],
+                'id' => 'id'
+            ];
+        }
+        return response()->json($response);
     }
 }

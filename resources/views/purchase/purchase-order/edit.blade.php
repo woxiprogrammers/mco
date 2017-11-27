@@ -29,6 +29,7 @@
                                 @endif
                             </div>
                         </div>
+                        <input type="hidden" id="purchaseOrderTransactionId">
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
@@ -298,54 +299,33 @@
                                                                 <div class="modal-header">
                                                                     <div class="row">
                                                                         <div class="col-md-4"></div>
-                                                                        <div class="col-md-4" style="font-size: 18px"> Purchase Bill Upload</div>
+                                                                        <div class="col-md-4" style="font-size: 18px"> Purchase Order Transaction</div>
                                                                         <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-body" style="padding:40px 50px;">
                                                                     <div class="form-body">
-                                                                        <div id="componentSelectDiv">
-                                                                            <div class="form-control product-material-select" style="font-size: 14px; height: 200px !important;" >
-                                                                                <ul id="material_id" class="list-group">
-                                                                                    @foreach($materialList as $key => $materialData)
-                                                                                        <li><input type="checkbox" class="component-select" name="purchase_order_component_ids" value="{{$materialData['purchase_order_component_id']}}"><label class="control-label">{{$materialData['material_component_name']}} </label></li>
-                                                                                    @endforeach
-                                                                                </ul>
+                                                                        <div class="form-group">
+                                                                            <div class="row">
+                                                                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
                                                                             </div>
-                                                                            <div class="col-md-3 col-md-offset-3" style="margin-top: 1%">
-                                                                                <a class="pull-right btn blue" href="javascript:void(0);" id="componentSelectButton"> Select </a>
+                                                                            <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                                    Browse</a>
+                                                                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                                    <i class="fa fa-share"></i> Upload Files </a>
                                                                             </div>
-                                                                        </div>
-                                                                        <div id="componentDetailsDiv" hidden style="margin-top: 5%;">
+                                                                            <table class="table table-bordered table-hover" style="width: 700px">
+                                                                                <thead>
+                                                                                <tr role="row" class="heading">
+                                                                                    <th> Image </th>
+                                                                                    <th> Action </th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody id="show-product-images">
 
-                                                                        </div>
-                                                                        <div id="transactionCommonFieldDiv" hidden>
-                                                                            <div class="form-group row">
-                                                                                <label>Vendor Name</label>
-                                                                                <input type="text" class="form-control" id="vendor" name="vendor_name" placeholder="Enter Vendor Name" value="{{$vendorName}}" readonly>
-                                                                            </div>
-                                                                            <div class="form-group row">
-                                                                                <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number">
-                                                                            </div>
-                                                                            <div class="form-group row">
-                                                                                <input type="text" class="form-control" name="bill_amount" placeholder="Enter Bill Amount">
-                                                                            </div>
-                                                                            <div class="form-group row">
-                                                                                <input type="text" class="form-control" name="vehicle_number" placeholder="Enter Vehicle Number">
-                                                                            </div>
-                                                                            <div class="form-group row">
-                                                                                <input type="datetime-local"   class="form-control" name="in_time" placeholder="Enter In Time">
-                                                                            </div>
-                                                                            <div class="form-group row">
-                                                                                <input type="datetime-local" class="form-control" name="out_time" placeholder="Enter Out Time">
-                                                                            </div>
-                                                                            <div class="form-group row">
-                                                                                <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
-                                                                            </div>
-                                                                            <button type="submit" class="btn btn-set red pull-right">
-                                                                                <i class="fa fa-check" style="font-size: large"></i>
-                                                                                Save&nbsp; &nbsp; &nbsp;
-                                                                            </button>
+                                                                                </tbody>
+                                                                            </table>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -380,7 +360,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="modal fade " id="viewDetailModal"  role="dialog">
+                                                    {{--<div class="modal fade " id="viewDetailModal"  role="dialog">
                                                         <div class="modal-dialog">
                                                             <!-- Modal content-->
                                                             <div class="modal-content">
@@ -426,12 +406,12 @@
                                                                     </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </div>--}}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                <div class="container">
+                                    {{--<div class="container">
                                     <div class="row">
                                         <div class="col-md-12">
                                            <!-- BEGIN VALIDATION STATES-->
@@ -480,8 +460,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                                </div>--}}
                                 </div>
                             </div>
                         </div>
@@ -490,6 +469,7 @@
             </div>
         </div>
     </div>
+</div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
@@ -504,6 +484,11 @@
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script src="/assets/custom/purchase/purchase-order/purchase-order-validations.js"></script>
+    <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+    <script src="/assets/custom/purchase/purchase-order/image-datatable.js"></script>
+    <script src="/assets/custom/purchase/purchase-order/image-upload.js"></script>
     <style>
         @-webkit-keyframes zoom {
             from {
