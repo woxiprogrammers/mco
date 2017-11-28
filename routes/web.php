@@ -387,6 +387,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
        Route::get('change-status/{labour}', array('uses' => 'Labour\LabourController@changeLabourStatus'));
        Route::get('edit/{labour}', array('uses' => 'Labour\LabourController@getEditView'));
        Route::post('edit/{labour}', array('uses' => 'Labour\LabourController@editLabour'));
+       Route::get('employee-id/{employee_type}', array('uses' => 'Labour\LabourController@getEmployeeId'));
     });
 
     Route::group(['prefix'=>'subcontractor'],function (){
