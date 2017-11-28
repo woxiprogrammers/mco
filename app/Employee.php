@@ -16,4 +16,8 @@ class Employee extends Model
     public function projectSite(){
         return $this->belongsTo('App\ProjectSite','project_site_id');
     }
+
+    public function employeeType(){
+        return $this->belongsTo('App\EmployeeType','employee_type_id');
+    }
 }
