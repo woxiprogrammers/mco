@@ -269,8 +269,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('edit/{id}',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
             Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getListing'));
             Route::post('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderComponentDetails'));
-            Route::post('get-bill-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderBillDetails'));
-            Route::post('create-transaction',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
+            //Route::post('get-bill-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderBillDetails'));
             Route::post('add-payment',array('uses'=> 'Purchase\PurchaseOrderController@createPayment'));
             Route::post('change-status',array('uses'=> 'Purchase\PurchaseOrderController@changeStatus'));
             Route::post('create-material',array('uses'=> 'Purchase\PurchaseOrderController@createMaterial'));
@@ -283,8 +282,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('close-purchase-order',array('uses'=> 'Purchase\PurchaseOrderController@closePurchaseOrder'));
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
             Route::group(['prefix' => 'transaction'], function(){
-               Route::post('upload-pre-grn-images/{purchaseOrder}/{purchase_order_transaction}',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
+               Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
+               Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
+               Route::get('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionDetails'));
             });
+        });
+
+        Route::group(['prefix' => 'purchase-order-bill'],function(){
+            Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
+            Route::get('create',array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
         });
     });
 

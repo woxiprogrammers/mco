@@ -25,6 +25,8 @@ use App\PurchaseOrderBill;
 use App\PurchaseOrderBillPayment;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderTransaction;
+use App\PurchaseOrderTransactionComponent;
+use App\PurchaseOrderTransactionImage;
 use App\PurchaseOrderTransactionStatus;
 use App\PurchaseRequest;
 use App\Quotation;
@@ -344,31 +346,37 @@ class PurchaseOrderController extends Controller
                 }
                 $iterator++;
             }
-            /*$purchaseOrderComponentIDs = PurchaseOrderComponent::where('purchase_order_id',$id)->pluck('id');
-            $purchaseOrderBillData = PurchaseOrderBill::whereIn('purchase_order_component_id',$purchaseOrderComponentIDs)->get();
-            $purchaseOrderBillListing = array();
+            $purchaseOrderTransactionListingData = PurchaseOrderTransaction::where('purchase_order_id',$purchaseOrder->id)->orderBy('created_at','desc')->select('id','grn','purchase_order_transaction_status_id')->get();
+//            dd($purchaseOrderTransactionListingData);
+            $purchaseOrderTransactionListing = array();
             $iterator = 0;
-            foreach($purchaseOrderBillData as $key => $purchaseOrderBill){
-                $purchaseOrderComponent = $purchaseOrderBill->purchaseOrderComponent;
-                $purchaseRequestComponent = $purchaseOrderComponent->purchaseRequestComponent;
-                $purchaseOrderBillListing[$iterator]['purchase_order_bill_id'] = $purchaseOrderBill['id'];
-                $purchaseOrderBillListing[$iterator]['material_name'] = $purchaseRequestComponent->materialRequestComponent->name;
-                $purchaseOrderBillListing[$iterator]['material_quantity'] = $purchaseOrderBill['quantity'];
-                $purchaseOrderBillListing[$iterator]['unit_id'] = $purchaseOrderBill['unit_id'];
-                $purchaseOrderBillListing[$iterator]['unit_name'] = $purchaseOrderBill->unit->name;
-                $purchaseOrderBillListing[$iterator]['purchase_bill_grn'] = $purchaseOrderBill['grn'];
-                $purchaseOrderBillListing[$iterator]['bill_amount'] = $purchaseOrderBill['bill_amount'];
-                if($purchaseOrderBill['is_amendment'] == true){
-                    $purchaseOrderBillListing[$iterator]['status'] = 'Amendment Pending';
-                }else{
-                    $purchaseOrderBillListing[$iterator]['status'] = ($purchaseOrderBill['is_paid'] == true) ? 'Bill Paid' : 'Bill Pending';
+            foreach($purchaseOrderTransactionListingData as $listing){
+                $statusInfo = PurchaseOrderTransactionStatus::where('id',$listing['purchase_order_transaction_status_id'])->select('slug','name')->first();
+                switch ($statusInfo['slug']){
+                    case 'grn-generated':
+                        $status = "<span class=\"btn btn-xs btn-warning\"> ".$statusInfo['name']." </span>";
+                        break;
+
+                    case 'bill-generated':
+                        $status = "<span class=\"btn btn-xs btn-success\"> ".$statusInfo['name']." </span>";
+                        break;
+
+                    case 'bill-pending':
+                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$statusInfo['name']." </span>";
+                        break;
                 }
+                $purchaseOrderTransactionListing[$iterator] = [
+                    'grn' => $listing['grn'],
+                    'status' => $status,
+                    'purchase_order_transaction_id' => $listing['id']
+                ];
                 $iterator++;
-            }*/
+            }
+
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
             $transaction_types = PaymentType::select('slug')->where('slug','!=','peticash')->get();
             $isClosed = $purchaseOrder->is_closed;
-            return view('purchase/purchase-order/edit')->with(compact('isClosed','transaction_types','purchaseOrderList','materialList','purchaseOrderBillListing','systemUsers','vendorName'));
+            return view('purchase/purchase-order/edit')->with(compact('isClosed','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Purchase Order Edit View',
@@ -450,93 +458,71 @@ class PurchaseOrderController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            $purchaseOrderBill = $request->except('type','Unit','purchase_order_component_id','purchase_order_component_ids','component_data','unit','material','unit_name','vendor_name');
-            switch($request['type']){
-                case 'upload_bill' :
-                    $purchaseOrderBill['is_amendment'] = false;
-                    $purchaseOrderBill['is_paid'] = false;
-                    $currentTimeStamp = Carbon::now();
-                    $purchaseOrderBill['grn'] = $this->generateGRN();
-                    $purchaseOrderBill['created_at'] = $currentTimeStamp;
-                    $purchaseOrderBill['updated_at'] = $currentTimeStamp;
-                    foreach($request->component_data as $purchaseOrderComponentId => $purchaseOrderComponentData){
-                        $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($purchaseOrderComponentId);
-                        $purchaseOrderBill['purchase_order_component_id'] = $purchaseOrderComponentId;
-                        $purchaseOrderBill['quantity'] = $purchaseOrderComponentData['quantity'];
-                        $purchaseOrderBill['unit_id'] = $purchaseOrderComponentData['unit_id'];
-                        $purchaseOrderBillData = PurchaseOrderBill::create($purchaseOrderBill);
-                        $projectSiteId = $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id;
-                        $inventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',$purchaseOrderComponentData['name'])->first();
-                        if($inventoryComponent == null){
-                            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
-                            $inventoryComponentData = [
-                                'name' => $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name,
-                                'purchase_order_component_id' => $purchaseOrderComponent->id,
-                                'opening_stock' => 0,
-                                'project_site_id' => $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id
-                            ];
-                            if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
-                                $inventoryComponentData['is_material'] = false;
-                                $inventoryComponentData['reference_id'] = Asset::where('name','ilike',$inventoryComponentData['name'])->pluck('id')->first();
-                            }else{
-                                $inventoryComponentData['is_material'] = true;
-                                $inventoryComponentData['reference_id'] = Material::where('name','ilike',$inventoryComponentData['name'])->pluck('id')->first();
-                            }
-                            $inventoryComponent = InventoryComponent::create($inventoryComponentData);
-                        }
-                        $transferTypeId = InventoryTransferTypes::where('slug','supplier')->where('type','ilike','IN')->pluck('id')->first();
-                        $inventoryComponentTransferData = [
-                            'inventory_component_id' => $inventoryComponent->id,
-                            'transfer_type_id' => $transferTypeId,
-                            'unit_id' => $purchaseOrderComponentData['unit_id'],
-                            'quantity' =>  $purchaseOrderComponentData['quantity']
-                        ];
-                        $inventoryComponentTransferData = array_merge($inventoryComponentTransferData,$request->except('type','component_data','material','unit_name','vendor_name','purchase_order_component_id'));
-                        $inventoryComponentTransferData['source_name'] = $request->vendor_name;
-                        $this->createInventoryComponentTransfer($inventoryComponentTransferData);
-                    }
-
-                    break;
-
-                case 'create-amendment' :
-                    $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($request->purchase_order_component_id);        $purchaseOrderBill['is_amendment'] = true;
-                    $purchaseOrderBill['is_paid'] = false;
-                    $currentTimeStamp = Carbon::now();
-                    $purchaseOrderBill['grn'] = $this->generateGRN();
-                    $purchaseOrderBill['created_at'] = $currentTimeStamp;
-                    $purchaseOrderBill['updated_at'] = $currentTimeStamp;
-                    $purchaseOrderBillData = PurchaseOrderBill::create($purchaseOrderBill);
-                    $projectSiteId = $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id;
-                    $inventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
-                    if($inventoryComponent == null){
-                        $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
-                        $inventoryComponentData = [
-                            'name' => $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name,
-                            'purchase_order_component_id' => $purchaseOrderComponent->id,
-                            'opening_stock' => 0,
-                            'project_site_id' => $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id
-                        ];
-                        if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
-                            $inventoryComponentData['is_material'] = false;
-                            $inventoryComponentData['reference_id'] = Asset::where('name','ilike',$inventoryComponentData['name'])->pluck('id')->first();
-                        }else{
-                            $inventoryComponentData['is_material'] = true;
-                            $inventoryComponentData['reference_id'] = Material::where('name','ilike',$inventoryComponentData['name'])->pluck('id')->first();
-                        }
-                        $inventoryComponent = InventoryComponent::create($inventoryComponentData);
-                    }
-                    $transferTypeId = InventoryTransferTypes::where('slug','supplier')->where('type','ilike','IN')->pluck('id')->first();
-                    $inventoryComponentTransferData = [
-                        'inventory_component_id' => $inventoryComponent->id,
-                        'transfer_type_id' => $transferTypeId,
+            $purchaseOrderTransactionData = $request->except('_token','pre_grn_image','post_grn_image','component_data','vendor_name','purchase_order_id','purchase_order_transaction_id');
+            $purchaseOrderTransaction = PurchaseOrderTransaction::findOrFail($request->purchase_order_transaction_id);
+            $purchaseOrderTransactionData['purchase_order_transaction_status_id'] = PurchaseOrderTransactionStatus::where('slug','bill-pending')->pluck('id')->first();
+            $purchaseOrderTransaction->update($purchaseOrderTransactionData);
+            $purchaseOrderDirectoryName = sha1($request->purchase_order_id);
+            $purchaseTransactionDirectoryName = sha1($purchaseOrderTransaction->id);
+            $imageUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
+            if (!file_exists($imageUploadPath)) {
+                File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            }
+            foreach($request->post_grn_image as $postGrnImage){
+                $pos  = strpos($postGrnImage, ';');
+                $type = explode(':', substr($postGrnImage, 0, $pos))[1];
+                $extension = explode('/',$type)[1];
+                $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                $transactionImageData = [
+                    'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
+                    'name' => $filename,
+                    'is_pre_grn' => false
+                ];
+                file_put_contents($fileFullPath,base64_decode($postGrnImage));
+                PurchaseOrderTransactionImage::create($transactionImageData);
+            }
+            foreach($request->component_data as $purchaseOrderComponentId => $purchaseOrderComponentData){
+                $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($purchaseOrderComponentId);
+                $purchaseOrderTransactionComponentData = [
+                    'purchase_order_component_id' => $purchaseOrderComponentId,
+                    'quantity' => $purchaseOrderComponentData['quantity'],
+                    'unit_id' => $purchaseOrderComponentData['unit_id'],
+                    'purchase_order_transaction_id' => $purchaseOrderTransaction->id
+                ];
+                PurchaseOrderTransactionComponent::create($purchaseOrderTransactionComponentData);
+                $projectSiteId = $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id;
+                $inventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',$purchaseOrderComponentData['name'])->first();
+                if($inventoryComponent == null){
+                    $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
+                    $inventoryComponentData = [
+                        'name' => $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name,
+                        'purchase_order_component_id' => $purchaseOrderComponent->id,
+                        'opening_stock' => 0,
+                        'project_site_id' => $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id
                     ];
-                    $inventoryComponentTransferData = array_merge($inventoryComponentTransferData,$request->except('type','material','unit_name','vendor_name','purchase_order_component_id'));
-                    $inventoryComponentTransferData['source_name'] = $request->vendor_name;
-                    $this->createInventoryComponentTransfer($inventoryComponentTransferData);
-                    break;
+                    if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                        $inventoryComponentData['is_material'] = false;
+                        $inventoryComponentData['reference_id'] = Asset::where('name','ilike',$inventoryComponentData['name'])->pluck('id')->first();
+                    }else{
+                        $inventoryComponentData['is_material'] = true;
+                        $inventoryComponentData['reference_id'] = Material::where('name','ilike',$inventoryComponentData['name'])->pluck('id')->first();
+                    }
+                    $inventoryComponent = InventoryComponent::create($inventoryComponentData);
+                }
+                $transferTypeId = InventoryTransferTypes::where('slug','supplier')->where('type','ilike','IN')->pluck('id')->first();
+                $inventoryComponentTransferData = [
+                    'inventory_component_id' => $inventoryComponent->id,
+                    'transfer_type_id' => $transferTypeId,
+                    'unit_id' => $purchaseOrderComponentData['unit_id'],
+                    'quantity' =>  $purchaseOrderComponentData['quantity']
+                ];
+                $inventoryComponentTransferData = array_merge($inventoryComponentTransferData,$request->except('type','component_data','material','unit_name','vendor_name','purchase_order_component_id'));
+                $inventoryComponentTransferData['source_name'] = $request->vendor_name;
+                $this->createInventoryComponentTransfer($inventoryComponentTransferData);
             }
             $request->session()->flash('success','Transaction added successfully');
-            return Redirect::Back();
+            return redirect('/purchase/purchase-order/edit/'.$request->purchase_order_id);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create P.O. Transaction',
@@ -946,51 +932,42 @@ class PurchaseOrderController extends Controller
         }
     }
 
-    public function preGrnImageUpload(Request $request, $purchaseOrder, $purchaseOrderTransactionId){
+    public function preGrnImageUpload(Request $request){
         try{
             $generatedGrn = $this->generateGRN();
+            $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
             $grnGeneratedStatusId = PurchaseOrderTransactionStatus::where('slug','grn-generated')->pluck('id')->first();
-            if($purchaseOrderTransactionId == null || $purchaseOrderTransactionId == '-' || $purchaseOrderTransactionId == ''){
-                $purchaseOrderTransactionData = [
-                    'purchase_order_id' => $purchaseOrder->id,
-                    'purchase_order_transaction_status_id' => $grnGeneratedStatusId,
-                    'grn' => $generatedGrn
-                ];
-                $purchaseOrderTransaction = PurchaseOrderTransaction::create($purchaseOrderTransactionData);
-            }else{
-                $purchaseOrderTransaction = PurchaseOrderTransaction::findOrFail($purchaseOrderTransactionId);
-            }
+            $purchaseOrderTransactionData = [
+                'purchase_order_id' => $purchaseOrder->id,
+                'purchase_order_transaction_status_id' => $grnGeneratedStatusId,
+                'grn' => $generatedGrn
+            ];
+            $purchaseOrderTransaction = PurchaseOrderTransaction::create($purchaseOrderTransactionData);
             $purchaseOrderDirectoryName = sha1($purchaseOrder->id);
             $purchaseTransactionDirectoryName = sha1($purchaseOrderTransaction->id);
-            $imageUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'transactions'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
+            $imageUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
             if (!file_exists($imageUploadPath)) {
                 File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
             }
-            $extension = $request->file('file')->getClientOriginalExtension();
-            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-            $request->file('file')->move($imageUploadPath,$filename);
-            $path = env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'transactions'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
-            $response = [
-                'jsonrpc' => '2.0',
-                'result' => 'OK',
-                'path' => $path,
-                'purchaseOrderTransactionId' => $purchaseOrderTransaction->id
-            ];
-            /*$tempUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
-            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
-            /* Create Upload Directory If Not Exists */
-            /*if (!file_exists($tempImageUploadPath)) {
-                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            foreach($request->pre_grn_image as $preGrnImage){
+                $pos  = strpos($preGrnImage, ';');
+                $type = explode(':', substr($preGrnImage, 0, $pos))[1];
+                $extension = explode('/',$type)[1];
+                $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                $transactionImageData = [
+                    'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
+                    'name' => $filename,
+                    'is_pre_grn' => true
+                ];
+                file_put_contents($fileFullPath,base64_decode($preGrnImage));
+                PurchaseOrderTransactionImage::create($transactionImageData);
             }
-            $extension = $request->file('file')->getClientOriginalExtension();
-            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-            $request->file('file')->move($tempImageUploadPath,$filename);
-            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
-                'jsonrpc' => '2.0',
-                'result' => 'OK',
-                'path' => $path
-            ];*/
+                'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
+                'grn' => $generatedGrn
+            ];
+            $status = 200;
         }catch (\Exception $e){
             $data = [
                 'action' => 'Upload Pre GRN images',
@@ -998,15 +975,25 @@ class PurchaseOrderController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            $response = [
-                'jsonrpc' => '2.0',
-                'error' => [
-                    'code' => 101,
-                    'message' => 'Failed to open input stream.',
-                ],
-                'id' => 'id'
-            ];
+            $response = array();
+            $status = 500;
         }
-        return response()->json($response);
+        return response()->json($response,$status);
+    }
+
+    public function getTransactionDetails(Request $request,$purchaseOrderTransaction){
+        try{
+            // Get Details
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Order Transaction Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $response = array();
+            $status = 500;
+            return response()->json($response,$status);
+        }
     }
 }

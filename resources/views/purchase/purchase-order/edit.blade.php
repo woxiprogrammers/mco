@@ -3,6 +3,15 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <style>
+        .thumbimage {
+            float:left;
+            width:100%;
+            height: 200px;
+            position:relative;
+            padding:5px;
+        }
+    </style>
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -29,7 +38,7 @@
                                 @endif
                             </div>
                         </div>
-                        <input type="hidden" id="purchaseOrderTransactionId">
+
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
@@ -290,12 +299,9 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal fade" id="transactionModal" role="dialog">
-                                                        <form id="add_transaction_form" action="/purchase/purchase-order/create-transaction" method="post">
-                                                            <input type="hidden" name="type" value="upload_bill">
-                                                            <input type="hidden" name="purchase_order_component_id" id="po_component_id">
-                                                            <div class="modal-dialog transaction-modal" style="width: 90%">
+                                                        <div class="modal-dialog transaction-modal" style="width: 90%; ">
                                                             <!-- Modal content-->
-                                                            <div class="modal-content">
+                                                            <div class="modal-content" style="overflow: scroll !important;">
                                                                 <div class="modal-header">
                                                                     <div class="row">
                                                                         <div class="col-md-4"></div>
@@ -304,34 +310,97 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-body" style="padding:40px 50px;">
-                                                                    <div class="form-body">
-                                                                        <div class="form-group">
-                                                                            <div class="row">
-                                                                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                                            </div>
-                                                                            <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                                                    Browse</a>
-                                                                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                                    <i class="fa fa-share"></i> Upload Files </a>
-                                                                            </div>
-                                                                            <table class="table table-bordered table-hover" style="width: 700px">
-                                                                                <thead>
-                                                                                <tr role="row" class="heading">
-                                                                                    <th> Image </th>
-                                                                                    <th> Action </th>
-                                                                                </tr>
-                                                                                </thead>
-                                                                                <tbody id="show-product-images">
+                                                                    <form id="transactionForm" action="/purchase/purchase-order/transaction/create" method="POST">
+                                                                        {!! csrf_field() !!}
+                                                                        <input type="hidden" name="purchase_order_id" value="{{$purchaseOrderList['purchase_order_id']}}">
+                                                                        <input type="hidden" id="purchaseOrderTransactionId" name="purchase_order_transaction_id">
+                                                                        <input type="hidden" id="type" value="upload_bill">
+                                                                        <div class="form-body">
+                                                                            <div class="form-group">
+                                                                                <label class="control-label">Select Images For Generating GRN :</label>
+                                                                                <input id="imageupload" type="file" class="btn blue" multiple />
+                                                                                <br />
+                                                                                <div class="row">
+                                                                                    <div id="preview-image" class="row">
 
-                                                                                </tbody>
-                                                                            </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class="col-md-3" id="grnImageUplaodButton" style="margin-top: 1%;" hidden>
+                                                                                        <a href="javascript:void(0);" class="btn blue" > Upload Images</a>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div id="afterImageUploadDiv" hidden>
+
+                                                                                <div class="form-group">
+                                                                                    <div class="col-md-3">
+                                                                                        <label class="control-label pull-right"> GRN :</label>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <input class="form-control" name="grn" readonly>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div id="componentSelectDiv" style="margin-top: 5%;">
+                                                                                    <div class="form-control product-material-select" style="font-size: 14px; height: 200px !important;" >
+                                                                                        <ul id="material_id" class="list-group">
+                                                                                            @foreach($materialList as $key => $materialData)
+                                                                                                <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}"><label class="control-label">{{$materialData['material_component_name']}} </label></li>
+                                                                                            @endforeach
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                    <div class="col-md-3 col-md-offset-3" style="margin-top: 1%">
+                                                                                        <a class="pull-right btn blue" href="javascript:void(0);" id="componentSelectButton"> Select </a>
+                                                                                    </div>
+
+                                                                                </div>
+                                                                                <div id="componentDetailsDiv" hidden style="margin-top: 5%;">
+
+                                                                                </div>
+                                                                                <div id="transactionCommonFieldDiv" hidden>
+                                                                                    <div class="form-group row">
+                                                                                        <label>Vendor Name</label>
+                                                                                        <input type="text" class="form-control" id="vendor" name="vendor_name" placeholder="Enter Vendor Name" value="{{$vendorName}}" readonly>
+                                                                                    </div>
+                                                                                    <div class="form-group row">
+                                                                                        <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number">
+                                                                                    </div>
+                                                                                    <div class="form-group row">
+                                                                                        <input type="text" class="form-control" name="bill_amount" placeholder="Enter Bill Amount">
+                                                                                    </div>
+                                                                                    <div class="form-group row">
+                                                                                        <input type="text" class="form-control" name="vehicle_number" placeholder="Enter Vehicle Number">
+                                                                                    </div>
+                                                                                    <div class="form-group row">
+                                                                                        <input type="datetime-local"   class="form-control" name="in_time" placeholder="Enter In Time">
+                                                                                    </div>
+                                                                                    <div class="form-group row">
+                                                                                        <input type="datetime-local" class="form-control" name="out_time" placeholder="Enter Out Time">
+                                                                                    </div>
+                                                                                    <div class="form-group row">
+                                                                                        <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
+                                                                                    </div>
+                                                                                    <div class="form-group">
+                                                                                        <label class="control-label">Select Images :</label>
+                                                                                        <input id="postImageUpload" type="file" class="btn blue" multiple />
+                                                                                        <br />
+                                                                                        <div class="row">
+                                                                                            <div id="postPreviewImage" class="row">
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <button type="submit" class="btn btn-set red pull-right">
+                                                                                        <i class="fa fa-check" style="font-size: large"></i>
+                                                                                        Save&nbsp; &nbsp; &nbsp;
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
+                                                                    </form>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        </form>
                                                     </div>
                                                     <div class="modal fade " id="amendmentModal"  role="dialog">
                                                         <div class="modal-dialog">
@@ -359,108 +428,52 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
-                                                    {{--<div class="modal fade " id="viewDetailModal"  role="dialog">
-                                                        <div class="modal-dialog">
-                                                            <!-- Modal content-->
-                                                            <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <div class="row">
-                                                                            <div class="col-md-4"></div>
-                                                                            <div class="col-md-4" style="font-size: 18px"> Bill View</div>
-                                                                            <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="modal-body" style="padding:40px 50px;">
-                                                                        <div class="form-group row">
-                                                                            <label class="col-sm-4 control-label">GRN</label>
-                                                                            <div class="col-sm-6">
-                                                                                <input type="text" class="form-control" id="grn" readonly>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="form-group row">
-                                                                            <label class="col-sm-4 control-label">Amount</label>
-                                                                            <div class="col-sm-6">
-                                                                                <input type="text" class="form-control" id="amount" readonly>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="form-group row">
-                                                                            <label class="col-sm-4 control-label">Quantity</label>
-                                                                            <div class="col-sm-6">
-                                                                                <input type="text" class="form-control" id="bill_quantity" readonly>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="form-group row">
-                                                                            <label class="col-sm-4 control-label">Unit</label>
-                                                                            <div class="col-sm-6">
-                                                                                <input type="text" class="form-control" id="bill_unit" readonly>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="form-group row">
-                                                                            <label class="col-sm-4 control-label">Remark</label>
-                                                                            <div class="col-sm-6">
-                                                                                <input type="text" class="form-control" id="remark" readonly>
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>--}}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    {{--<div class="container">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                           <!-- BEGIN VALIDATION STATES-->
-                                            <div class="portlet light ">
-                                                <div class="portlet-body form">
-                                                    <div class="row">
-                                                        <div class="col-md-12">
-                                                            <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
-                                                                <thead>
-                                                                <tr>
-                                                                    <th> GRN</th>
-                                                                    <th> Material Name </th>
-                                                                    <th> Quantity </th>
-                                                                    <th> Unit </th>
-                                                                    <th>Status</th>
-                                                                    <th>Action</th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                @foreach($purchaseOrderBillListing as $purchaseOrderTransaction)
-                                                                <tr>
-                                                                    <td>
-         <input type="hidden" id="{{$purchaseOrderTransaction['purchase_order_bill_id']}}" value="{{$purchaseOrderTransaction['bill_amount']}}">
-                                                                        <input type="hidden"  value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}" name="purchase_order_bill_id">{{$purchaseOrderTransaction['purchase_bill_grn']}}
-                                                                    </td>
-                                                                    <td> {{$purchaseOrderTransaction['material_name']}}</td>
-                                                                    <td> {{$purchaseOrderTransaction['material_quantity']}} </td>
-                                                                    <td> {{$purchaseOrderTransaction['unit_name']}} </td>
-                                                                    <td>
-                                                                        {{$purchaseOrderTransaction['status']}}
-                                                                    </td>
-                                                                    @if($purchaseOrderTransaction['status'] == 'Bill Pending')
-                                                                    <td>  <button class="payment" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">Make Payment</button></td>
-                                                                    @elseif($purchaseOrderTransaction['status'] == 'Amendment Pending')
-                                                                        <td>  <button class="amendment_status_change" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">Approve</button></td>
-                                                                    @else
-                                                                        <td> <button class="view_details" value="{{$purchaseOrderTransaction['purchase_order_bill_id']}}">View Details</button> </td>
-                                                                    @endif
-                                                                </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                               <!-- BEGIN VALIDATION STATES-->
+                                                <div class="portlet light ">
+                                                    <div class="portlet-body form">
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th style="width: 40%"> GRN</th>
+                                                                        <th>Status</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach($purchaseOrderTransactionListing as $purchaseOrderTransaction)
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <input type="hidden" value="{{$purchaseOrderTransaction['purchase_order_transaction_id']}}">
+                                                                                    {{$purchaseOrderTransaction['grn']}}
+                                                                                </td>
+                                                                                <td>
+                                                                                    {!! $purchaseOrderTransaction['status'] !!}
+                                                                                </td>
+                                                                                <td>
+                                                                                    <a href="javascript:void(0);" class="btn blue transaction-edit-btn">
+                                                                                        Edit
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>--}}
                                 </div>
                             </div>
                         </div>
@@ -484,11 +497,6 @@
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script src="/assets/custom/purchase/purchase-order/purchase-order-validations.js"></script>
-    <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/purchase-order/image-datatable.js"></script>
-    <script src="/assets/custom/purchase/purchase-order/image-upload.js"></script>
     <style>
         @-webkit-keyframes zoom {
             from {
@@ -513,29 +521,103 @@
         }
     </style>
     <script>
-        $("#componentSelectButton").on('click',function(){
-            if($(".component-select:checkbox:checked").length > 0){
-                var componentIds = [];
-                $(".component-select:checkbox:checked").each(function(){
-                    componentIds.push($(this).val());
-                });
-                $.ajax({
-                    url:'/purchase/purchase-order/get-component-details?_token='+$("input[name='_token']").val(),
-                    type: "POST",
-                    data:{
-                        purchase_order_component_id: componentIds
-                    },
-                    success:function (data,textStatus,xhr) {
-                        $("#componentDetailsDiv").html(data);
-                        $(".transaction-modal").css('overflow','scroll');
-                        $("#componentDetailsDiv").show();
-                        $("#transactionCommonFieldDiv").show();
-                    },
-                    error:function(errorData){
-                        alert('Something went wrong.');
+        $(document).ready(function(){
+            $("#componentSelectButton").on('click',function(){
+                if($(".component-select:checkbox:checked").length > 0){
+                    var componentIds = [];
+                    $(".component-select:checkbox:checked").each(function(){
+                        componentIds.push($(this).val());
+                    });
+                    $.ajax({
+                        url:'/purchase/purchase-order/get-component-details?_token='+$("input[name='_token']").val(),
+                        type: "POST",
+                        data:{
+                            purchase_order_component_id: componentIds
+                        },
+                        success:function (data,textStatus,xhr) {
+                            $("#componentDetailsDiv").html(data);
+                            $("#componentDetailsDiv").show();
+                            $("#transactionCommonFieldDiv").show();
+                        },
+                        error:function(errorData){
+                            alert('Something went wrong.');
+                        }
+                    })
+                }
+            });
+            $("#imageupload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#preview-image");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-2"><input type="hidden" name="pre_grn_image[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                            $("#grnImageUplaodButton").show();
+                        }
+                    } else {
+                        alert("It doesn't supports");
                     }
-                })
-            }
+                } else {
+                    alert("Select Only images");
+                }
+            });
+
+            $("#postImageUpload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#postPreviewImage");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-2"><input type="hidden" name="post_grn_image[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
+            });
+
+            $("#grnImageUplaodButton a").on('click',function(){
+                var imageArray = $("#transactionForm").serializeArray();
+                $.ajax({
+                    url: '/purchase/purchase-order/transaction/upload-pre-grn-images',
+                    type: 'POST',
+                    data: imageArray,
+                    success: function(data, textStatus, xhr){
+                        $("#imageupload").hide();
+                        $("#grnImageUplaodButton").hide();
+                        $("#purchaseOrderTransactionId").val(data.purchase_order_transaction_id);
+                        $("#transactionForm input[name='grn']").val(data.grn);
+                        $("#afterImageUploadDiv").show();
+                    },
+                    error: function(errorData){
+
+                    }
+                });
+            });
+
+            $(".transaction-edit-btn").on('click', function(){
+               var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
+            });
         });
     </script>
 @endsection
