@@ -37,10 +37,52 @@
                                             <!-- BEGIN VALIDATION STATES-->
                                             <div class="portlet light ">
                                                 <div class="portlet-body">
-                                                    <div class="form-group">
+                                                    <fieldset>
+                                                        <legend>Project</legend>
+                                                        <div class="row">
+                                                            <div class="col-md-3 col-md-offset-0">
+                                                                Client Name
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                Project Name
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                Project Site Name
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                Purchase Order
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3 form-group">
+                                                                <select class="form-control" id="clientId" name="client_id" style="width: 80%;">
+                                                                    <option value=""> -- Select Client -- </option>
+                                                                    @foreach($clients as $client)
+                                                                        <option value="{{$client['id']}}"> {{$client['company']}} </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-3 form-group">
+                                                                <select name="project_id" id="projectId" class="form-control" style="width: 80%;">
+                                                                    <option value=""> -- Select Project -- </option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-3 form-group">
+                                                                <select name="project_site_id" id="projectSiteId" class="form-control" style="width: 80%;">
+                                                                    <option value=""> -- Select Project site -- </option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-3 form-group">
+                                                                <select name="purchase_order_id" id="purchaseOrderId" class="form-control" style="width: 80%;">
+                                                                    <option value=""> -- Select Purchase Order -- </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </fieldset>
+                                                    <div class="form-group" id="grnSelectionDiv" hidden>
                                                         <label class="control-label" style="font-size: 18px"> Select GRN for Creating Bill </label>
                                                         <div class="form-control product-material-select" style="font-size: 14px; margin-left: 1%; height: 200px !important;" >
-                                                            <ul id="material_id" class="list-group">
+                                                            <ul class="list-group">
                                                                 @foreach($purchaseOrderTransactionDetails as $key => $purchaseOrderTransaction)
                                                                     <li><input type="checkbox" class="transaction-select" value="{{$purchaseOrderTransaction['id']}}"><label class="control-label" style="margin-left: 0.5%;"> {{$purchaseOrderTransaction['grn']}} </label></li>
                                                                 @endforeach
@@ -78,85 +120,88 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
-            $("#purchaseRequestId").on('change',function(){
-                var purchaseRequestId = $(this).val();
-                if(typeof purchaseRequestId == 'undefined' || purchaseRequestId == ''){
-                    $('#client').val('');
-                    $('#project').val('');
-                    $('#purchaseRequest').hide();
+            $("#clientId").on('change', function(){
+                var clientId = $(this).val();
+                if(clientId == ""){
+                    $('#projectId').prop('disabled', false);
+                    $('#projectId').html('');
+                    $('#projectSiteId').prop('disabled', false);
+                    $('#projectSiteId').html('');
                 }else{
                     $.ajax({
-                        url:'/purchase/purchase-order/get-client-project/'+purchaseRequestId+'?_token='+$('input[name="_token"]').val(),
-                        type: 'GET',
-                        success: function(data,textStatus,xhr){
-                            $('#client').val(data.client);
-                            $('#project').val(data.project);
-                        },
-                        error: function(errorData){
-                        }
-                    });
-                    $.ajax({
-                        url: '/purchase/purchase-order/get-purchase-request-component/'+purchaseRequestId+'?_token='+$('input[name="_token"]').val(),
-                        type: 'GET',
+                        url: '/quotation/get-projects',
+                        type: 'POST',
                         async: true,
-                        success: function(data,textStatus,xhr){
-                            if(xhr.status == 203){
-                                alert(data.message);
-                            }else{
-                                $("#purchaseRequest tbody").html(data);
-                                $('#purchaseRequest').show();
-                            }
-
+                        data: {
+                            _token: $("input[name='_token']").val(),
+                            client_id: clientId
                         },
-                        error: function(errorData){
-                            alert('Something went wrong');
+                        success: function(data,textStatus,xhr){
+                            $('#projectId').html(data);
+                            $('#projectId').prop('disabled', false);
+                            var projectId = $("#projectId").val();
+                            getProjectSites(projectId);
+                        },
+                        error: function(){
+
                         }
                     });
                 }
-            });
-        });
 
-    </script>
-    <script>
-        $("#materialCreateSubmit").on('click',function(e) {
-            e.stopPropagation();
-            var purchaseRequestComponentId = $("#materialCreateForm #purchaseRequestComponentId").val();
-            var vendorId = $("#materialCreateForm #vendor_id").val();
-            var url = "/purchase/purchase-order/create-material"; // the script where you handle the form input.
+            });
+
+            $("#projectId").on('change', function(){
+                var projectId = $(this).val();
+                getProjectSites(projectId);
+            });
+
+        });
+        function getProjectSites(projectId){
             $.ajax({
-                type: "POST",
-                url: url,
-                data: $("#materialCreateForm").serialize(), // serializes the form's elements.
-                success: function(data)
-                {
-                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:selected").val();
-                    $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:not([value='"+selectedFlag+"'])").each(function(){
-                       $(this).prop('disabled', true);
-                    });
-                    $('#myModal1').modal('toggle');
-                    alert('New Material Created Successfully');
+                url: '/purchase/purchase-order-bill/get-project-sites',
+                type: 'POST',
+                async: true,
+                data: {
+                    _token: $("input[name='_token']").val(),
+                    project_id: projectId
+                },
+                success: function(data,textStatus,xhr){
+                    if(data.length > 0){
+                        $('#projectSiteId').html(data);
+                        $('#projectSiteId').prop('disabled', false);
+                    }else{
+                        $('#projectSiteId').html("");
+                        $('#projectSiteId').prop('disabled', false);
+                    }
+                },
+                error: function(){
+
                 }
             });
-        });
-        $("#assetCreateSubmit").on('click',function(e) {
-            e.stopPropagation();
-            var purchaseRequestComponentId = $("#assetCreateForm #purchaseRequestComponentId").val();
-            var vendorId = $("#assetCreateForm #asset_vendor_id").val();
-            var url = "/purchase/purchase-order/create-asset"; // the script where you handle the form input.
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: $("#assetCreateForm").serialize(), // serializes the form's elements.
-                success: function(data)
-                {
-                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:selected").val();
-                    $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:not([value='"+selectedFlag+"'])").each(function(){
-                        $(this).prop('disabled', true);
-                    });
-                    $('#myModal2').modal('toggle');
-                    alert('New Asset Created Successfully');
-                }
+
+            $("#projectSiteId").on('change', function(){
+                var projectSiteId = $(this).val();
+                $.ajax({
+                    url: '/purchase/purchase-order-bill/get-bill-pending-transaction',
+                    type: "POST",
+                    data : {
+                        _token: $('input[name="_token"]').val(),
+                        project_site_id: projectSiteId
+                    },
+                    success: function(data,textStatus, xhr){
+                        $("#purchaseOrderId").html(data);
+//                        $("#grnSelectionDiv").show();
+                    },
+                    error: function(errorStatus){
+
+                    }
+                });
             });
-        });
+
+            $("#purchaseOrderId").on('change',function(){
+
+            });
+        }
+
     </script>
 @endsection

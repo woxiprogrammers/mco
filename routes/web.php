@@ -292,6 +292,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'purchase-order-bill'],function(){
             Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
             Route::get('create',array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
+            Route::post('get-project-sites',array('uses' => 'Purchase\PurchaseOrderBillingController@getProjectSites'));
         });
     });
 
