@@ -347,7 +347,6 @@ class PurchaseOrderController extends Controller
                 $iterator++;
             }
             $purchaseOrderTransactionListingData = PurchaseOrderTransaction::where('purchase_order_id',$purchaseOrder->id)->orderBy('created_at','desc')->select('id','grn','purchase_order_transaction_status_id')->get();
-//            dd($purchaseOrderTransactionListingData);
             $purchaseOrderTransactionListing = array();
             $iterator = 0;
             foreach($purchaseOrderTransactionListingData as $listing){
