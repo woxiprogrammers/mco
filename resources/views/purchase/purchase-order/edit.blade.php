@@ -95,7 +95,7 @@
                                                         @if($isClosed != true)
                                                             <div class="row">
                                                                 <div class="col-md-offset-9 col-md-3 ">
-                                                                    <a class="btn red pull-right" href="#transactionModal" data-toggle="modal" >
+                                                                    <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
                                                                         <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
                                                                         Transaction
                                                                     </a>
@@ -617,6 +617,32 @@
 
             $(".transaction-edit-btn").on('click', function(){
                var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
+            });
+
+            $("#transactionButton").on('click',function(){
+                var purchaseOrderId = $("#po_id").val();
+                $.ajax({
+                    url:'/purchase/purchase-order/transaction/check-generated-grn/'+purchaseOrderId+'?_token='+$("input[name='_token']").val(),
+                    type: 'GET',
+                    success: function(data,textStatus,xhr){
+                        console.log(data);
+                        if(xhr.status == 200){
+                            $.each(data.images, function(k ,v){
+                                var imagePreview = '<div class="col-md-2"><img src="'+v+'" class="thumbimage" /></div>';
+                                $("#preview-image").append(imagePreview);
+                            });
+                            $("#imageupload").hide();
+                            $("#grnImageUplaodButton").hide();
+                            $("#purchaseOrderTransactionId").val(data.purchase_order_transaction_id);
+                            $("#transactionForm input[name='grn']").val(data.grn);
+                            $("#afterImageUploadDiv").show();
+                        }
+                        $("#transactionModal").modal('show');
+                    },
+                    error: function(errorData){
+
+                    }
+                });
             });
         });
     </script>
