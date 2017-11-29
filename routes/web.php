@@ -365,7 +365,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Drawing\CategoryManagementController@getManageView'));
             Route::get('create-main',array('uses'=> 'Drawing\CategoryManagementController@getCreateMainView'));
+            Route::post('create-main-category',array('uses'=> 'Drawing\CategoryManagementController@getCreateMainCategory'));
+            Route::post('main-category-listing',array('uses'=> 'Drawing\CategoryManagementController@MainCategoryListing'));
+            Route::post('sub-category-listing',array('uses'=> 'Drawing\CategoryManagementController@SubCategoryListing'));
+            Route::post('create-sub-category',array('uses'=> 'Drawing\CategoryManagementController@createSubCategory'));
             Route::get('create-sub',array('uses'=> 'Drawing\CategoryManagementController@getCreateSubView'));
+            Route::get('change-status/{id}/{status}',array('uses'=> 'Drawing\CategoryManagementController@changeStatus'));
             Route::get('edit-main',array('uses'=> 'Drawing\CategoryManagementController@getMainEditView'));
             Route::get('edit-sub',array('uses'=> 'Drawing\CategoryManagementController@getSubEditView'));
         });
@@ -374,8 +379,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses'=> 'Drawing\ImagesController@getCreateView'));
             Route::get('edit',array('uses'=> 'Drawing\ImagesController@getEditView'));
             Route::post('image-upload/{quotationId}',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
+            Route::post('get-projects',array('uses'=>'Drawing\ImagesController@getProjects'));
+            Route::post('get-project-sites',array('uses'=>'Drawing\ImagesController@getProjectSites'));
+            Route::post('get-sub-categories',array('uses'=>'Drawing\ImagesController@getSubCategories'));
             Route::post('display-images/{quotationId}',array('uses'=>'Drawing\ImagesController@displayDrawingImages'));
             Route::post('delete-temp-product-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
+            Route::post('create',array('uses'=>'Drawing\ImagesController@create'));
+            Route::post('listing',array('uses'=>'Drawing\ImagesController@listing'));
         });
     });
 
