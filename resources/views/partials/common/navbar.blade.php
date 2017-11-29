@@ -244,6 +244,11 @@
                                     <i class="fa fa-bars"></i> Purchase Order
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Purchase Order Billing
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endif
