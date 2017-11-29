@@ -19,7 +19,8 @@ class LabourController extends Controller
     public function getCreateView(Request $request){
         try{
             $projectSites = ProjectSite::select('id','name')->get()->toArray();
-            return view('labour.create')->with(compact('projectSites'));
+            $labourTypes = EmployeeType::get()->toArray();
+            return view('labour.create')->with(compact('projectSites','labourTypes'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Labour Create View',
@@ -39,7 +40,7 @@ class LabourController extends Controller
                 $labourData = $request->except('_token');
             }
             $labourData['is_active'] = (boolean)false;
-            $labourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
+            $labourData['employee_type_id'] = EmployeeType::where('slug',$request['employee_type'])->pluck('id')->first();
             Employee::create($labourData);
             $request->session()->flash('success', 'Labour Created successfully.');
             return redirect('/labour/create');
@@ -177,5 +178,41 @@ class LabourController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getEmployeeId(Request $request,$employeeType){
+        try{
+            $employeeTypeId = EmployeeType::where('slug',$employeeType)->pluck('id')->first();
+            switch($employeeType){
+                case 'labour' :
+                    $labourCount = Employee::where('employee_type_id',$employeeTypeId)->count();
+                    $employeeID = ' L'.($labourCount + 1);
+                    break;
+
+                case 'staff' :
+                    $labourCount = Employee::where('employee_type_id',$employeeTypeId)->count();
+                    $employeeID = ' S'.($labourCount + 1);
+                    break;
+
+                case 'partner' :
+                    $labourCount = Employee::where('employee_type_id',$employeeTypeId)->count();
+                    $employeeID = ' P'.($labourCount + 1);
+                    break;
+
+                case 'contractor-labour' :
+                    $labourCount = Employee::where('employee_type_id',$employeeTypeId)->count();
+                    $employeeID = 'CL'.($labourCount + 1);
+                    break;
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Employee ID',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return $employeeID;
     }
 }

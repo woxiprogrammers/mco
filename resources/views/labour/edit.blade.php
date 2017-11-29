@@ -103,11 +103,20 @@
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Employee Type:</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="employee_type" name="employee_type" value="{{$labour->employeeType->name}}" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
                                                             <label for="name" class="control-label">Labour ID:</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="employee_id" name="employee_id" value="{{$labour['employee_id']}}">
+                                                            <input type="text" class="form-control" id="employee_id" name="employee_id" value="{{$labour['employee_id']}}" disabled>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
