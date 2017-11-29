@@ -134,7 +134,7 @@ class PermissionTableTwoSeeder extends Seeder
             ],
             [
                 'name' => 'approve-checklist-management',
-                'module_id' => DB::table('modules')->where('slug','category')->pluck('id')->first(),
+                'module_id' => DB::table('modules')->where('slug','checklist-management')->pluck('id')->first(),
                 'is_mobile' => true,
                 'is_web' => true,
                 'type_id' => DB::table('permission_types')->where('slug','approve')->pluck('id')->first(),
