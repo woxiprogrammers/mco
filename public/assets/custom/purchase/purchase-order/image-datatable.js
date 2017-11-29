@@ -1,16 +1,21 @@
 /**
  * Created by Ameya Joshi on 28/6/17.
  */
-
-var QuotationImageUpload = function() {
-    var quotationId = $("#quotationId").val();
+// url = '';
+var TransactionImageUpload = function() {
+    var purchaseOrderTransactionId = $("#purchaseOrderTransactionId").val();
+    if(typeof purchaseOrderTransactionId == 'undefined' || purchaseOrderTransactionId == '' || purchaseOrderTransactionId == null){
+        purchaseOrderTransactionId = '-';
+    }
+    var purchaseOrderId = $("#po_id").val();
+    var url = '/purchase/purchase-order/transaction/upload-pre-grn-images/'+purchaseOrderId+'/'+purchaseOrderTransactionId+'?_token='+$('input[name="_token"]').val();
     var e = function() {
             var e = new plupload.Uploader({
                 max_files : 20,
                 runtimes: "html5,html4",
                 browse_button: document.getElementById("tab_images_uploader_pickfiles"),
                 container: document.getElementById("tab_images_uploader_container"),
-                url: "/drawing/images/image-upload/"+quotationId,
+                url: url,
                 async:false,
                 multi_selection : true,
                 filters: {
@@ -48,10 +53,12 @@ var QuotationImageUpload = function() {
                     FileUploaded: function(e, a, t) {
                         var t = $.parseJSON(t.response);
                         if (t.result && "OK" == t.result) {
+                            $("#purchaseOrderTransactionId").val(t.purchaseOrderTransactionId);
                             $('#path').val(t.path,e.files.length);
                             $("#path").triggerHandler("change", [t.path,e.files.length]);
                             $("#uploaded_file_" + a.id + " > .status").removeClass("label-info").addClass("label-success").html('<i class="fa fa-check"></i> Done')
                             closeInSeconds: 10
+                            TransactionImageUpload.init();
                         } else $("#uploaded_file_" + a.id + " > .status").removeClass("label-info").addClass("label-danger").html('<i class="fa fa-warning"></i> Failed'), App.alert({
                             type: "danger",
                             message: "One of uploads failed. Please retry.",
@@ -84,5 +91,5 @@ var QuotationImageUpload = function() {
     }
 }();
 jQuery(document).ready(function() {
-    QuotationImageUpload.init()
+    TransactionImageUpload.init()
 });

@@ -40,33 +40,6 @@
                                                         </li>
                                                     </ul>
                                                     <div class="tab-content">
-                                                        <div class="tab-pane fade in active" id="mainCategoryFormTab">
-                                                            <div id="sample_editable_1_new" class="btn yellow" style="margin-bottom: 1%; margin-left: 89%">
-                                                                <a href="/drawing/category-management/create-main" style="color: white">
-                                                                    <i class="fa fa-plus"></i> Main category
-                                                                </a>
-                                                            </div>
-                                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="mainCategoryTable">
-                                                                <thead>
-                                                                <tr>
-                                                                    <th style="width: 30%"> Sr. No. </th>
-                                                                    <th> Name of Main Category </th>
-                                                                    <th> Actions </th>
-                                                                </tr>
-                                                                <tr class="filter">
-                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_sr"> </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
-                                                                    <th>
-                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                                    </th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody>
-
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
                                                         <div class="tab-pane fade" id="subCategoryFormTab">
                                                             <div id="sample_editable_1_new" class="btn yellow" style="margin-bottom: 1%; margin-left: 89%">
                                                                 <a href="/drawing/category-management/create-sub" style="color: white">
@@ -114,10 +87,10 @@
             <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
             <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
             <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-            <script src="/assets/custom/Drawing/main-category/manage-datatable.js" type="text/javascript"></script>
+            <script src="/assets/custom/Drawing/sub-category/manage-datatable.js" type="text/javascript"></script>
             <script>
                 $(document).ready(function() {
-                    $('#mainCategoryTable').DataTable();
+                    $('#subCategoryTable').DataTable();
                 });
             </script>
 @endsection

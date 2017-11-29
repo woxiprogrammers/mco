@@ -269,8 +269,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('edit/{id}',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
             Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getListing'));
             Route::post('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderComponentDetails'));
-            Route::post('get-bill-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderBillDetails'));
-            Route::post('create-transaction',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
+            //Route::post('get-bill-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderBillDetails'));
             Route::post('add-payment',array('uses'=> 'Purchase\PurchaseOrderController@createPayment'));
             Route::post('change-status',array('uses'=> 'Purchase\PurchaseOrderController@changeStatus'));
             Route::post('create-material',array('uses'=> 'Purchase\PurchaseOrderController@createMaterial'));
@@ -282,7 +281,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('download-po-pdf/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@downloadPoPDF'));
             Route::post('close-purchase-order',array('uses'=> 'Purchase\PurchaseOrderController@closePurchaseOrder'));
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
+            Route::group(['prefix' => 'transaction'], function(){
+               Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
+               Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
+               Route::get('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionDetails'));
+            });
+        });
 
+        Route::group(['prefix' => 'purchase-order-bill'],function(){
+            Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
+            Route::get('create',array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
         });
     });
 
@@ -365,7 +373,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Drawing\CategoryManagementController@getManageView'));
             Route::get('create-main',array('uses'=> 'Drawing\CategoryManagementController@getCreateMainView'));
+            Route::post('create-main-category',array('uses'=> 'Drawing\CategoryManagementController@getCreateMainCategory'));
+            Route::post('main-category-listing',array('uses'=> 'Drawing\CategoryManagementController@MainCategoryListing'));
+            Route::post('sub-category-listing',array('uses'=> 'Drawing\CategoryManagementController@SubCategoryListing'));
+            Route::post('create-sub-category',array('uses'=> 'Drawing\CategoryManagementController@createSubCategory'));
             Route::get('create-sub',array('uses'=> 'Drawing\CategoryManagementController@getCreateSubView'));
+            Route::get('change-status/{id}/{status}',array('uses'=> 'Drawing\CategoryManagementController@changeStatus'));
             Route::get('edit-main',array('uses'=> 'Drawing\CategoryManagementController@getMainEditView'));
             Route::get('edit-sub',array('uses'=> 'Drawing\CategoryManagementController@getSubEditView'));
         });
@@ -374,8 +387,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses'=> 'Drawing\ImagesController@getCreateView'));
             Route::get('edit',array('uses'=> 'Drawing\ImagesController@getEditView'));
             Route::post('image-upload/{quotationId}',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
+            Route::post('get-projects',array('uses'=>'Drawing\ImagesController@getProjects'));
+            Route::post('get-project-sites',array('uses'=>'Drawing\ImagesController@getProjectSites'));
+            Route::post('get-sub-categories',array('uses'=>'Drawing\ImagesController@getSubCategories'));
             Route::post('display-images/{quotationId}',array('uses'=>'Drawing\ImagesController@displayDrawingImages'));
             Route::post('delete-temp-product-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
+            Route::post('create',array('uses'=>'Drawing\ImagesController@create'));
+            Route::post('listing',array('uses'=>'Drawing\ImagesController@listing'));
         });
     });
 
