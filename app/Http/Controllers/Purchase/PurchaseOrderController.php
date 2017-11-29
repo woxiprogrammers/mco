@@ -467,19 +467,23 @@ class PurchaseOrderController extends Controller
             if (!file_exists($imageUploadPath)) {
                 File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
             }
-            foreach($request->post_grn_image as $postGrnImage){
-                $pos  = strpos($postGrnImage, ';');
-                $type = explode(':', substr($postGrnImage, 0, $pos))[1];
-                $extension = explode('/',$type)[1];
-                $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-                $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
-                $transactionImageData = [
-                    'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
-                    'name' => $filename,
-                    'is_pre_grn' => false
-                ];
-                file_put_contents($fileFullPath,base64_decode($postGrnImage));
-                PurchaseOrderTransactionImage::create($transactionImageData);
+            if($request->has('post_grn_image') && count($request->post_grn_image) > 0){
+                foreach($request->post_grn_image as $postGrnImage){
+                    $imageArray = explode(';',$postGrnImage);
+                    $image = explode(',',$imageArray[1])[1];
+                    $pos  = strpos($postGrnImage, ';');
+                    $type = explode(':', substr($postGrnImage, 0, $pos))[1];
+                    $extension = explode('/',$type)[1];
+                    $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                    $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                    $transactionImageData = [
+                        'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
+                        'name' => $filename,
+                        'is_pre_grn' => false
+                    ];
+                    file_put_contents($fileFullPath,base64_decode($image));
+                    PurchaseOrderTransactionImage::create($transactionImageData);
+                }
             }
             foreach($request->component_data as $purchaseOrderComponentId => $purchaseOrderComponentData){
                 $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($purchaseOrderComponentId);
@@ -949,6 +953,8 @@ class PurchaseOrderController extends Controller
                 File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
             }
             foreach($request->pre_grn_image as $preGrnImage){
+                $imageArray = explode(';',$preGrnImage);
+                $image = explode(',',$imageArray[1])[1];
                 $pos  = strpos($preGrnImage, ';');
                 $type = explode(':', substr($preGrnImage, 0, $pos))[1];
                 $extension = explode('/',$type)[1];
@@ -959,7 +965,7 @@ class PurchaseOrderController extends Controller
                     'name' => $filename,
                     'is_pre_grn' => true
                 ];
-                file_put_contents($fileFullPath,base64_decode($preGrnImage));
+                file_put_contents($fileFullPath,base64_decode($image));
                 PurchaseOrderTransactionImage::create($transactionImageData);
             }
             $response = [
@@ -994,5 +1000,38 @@ class PurchaseOrderController extends Controller
             $status = 500;
             return response()->json($response,$status);
         }
+    }
+
+    public function checkGeneratedGRN(Request $request,$purchaseOrder){
+        try{
+            $response = array();
+            $grnGeneratedId = PurchaseOrderTransactionStatus::where('slug','grn-generated')->pluck('id')->first();
+            $grnGeneratedTransaction = PurchaseOrderTransaction::where('purchase_order_transaction_status_id',$grnGeneratedId)->where('purchase_order_id',$purchaseOrder->id)->orderBy('created_at','desc')->first();
+            if($grnGeneratedTransaction != null){
+                $response['grn'] = $grnGeneratedTransaction->grn;
+                $response['purchase_order_transaction_id'] = $grnGeneratedTransaction->id;
+                $transactionImages = PurchaseOrderTransactionImage::where('purchase_order_transaction_id',$grnGeneratedTransaction->id)->where('is_pre_grn', true)->get();
+                $response['images'] = array();
+                $purchaseOrderDirectoryName = sha1($purchaseOrder->id);
+                $purchaseTransactionDirectoryName = sha1($grnGeneratedTransaction->id);
+                $imagePath = env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
+                foreach ($transactionImages as $image){
+                    $response['images'][] = $imagePath.DIRECTORY_SEPARATOR.$image['name'];
+                }
+                $status = 200;
+            }else{
+                $status = 204;
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check GRN Generated transaction',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $response = array();
+            $status = 500;
+        }
+        return response()->json($response,$status);
     }
 }

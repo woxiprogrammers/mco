@@ -282,9 +282,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('close-purchase-order',array('uses'=> 'Purchase\PurchaseOrderController@closePurchaseOrder'));
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
             Route::group(['prefix' => 'transaction'], function(){
-               Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
-               Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
-               Route::get('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionDetails'));
+                Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
+                Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
+                Route::get('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionDetails'));
+                Route::get('check-generated-grn/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@checkGeneratedGRN'));
             });
         });
 
