@@ -25,7 +25,7 @@ class ImagesController extends Controller
     }
     public function getCreateView(Request $request){
         try{
-            $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
+             $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
              $clients = Client::select('id','company')->get();
             return view('drawing/images/create')->with(compact('clients','categories'));
         }catch(\Exception $e){
@@ -38,8 +38,33 @@ class ImagesController extends Controller
             abort(500);
         }
     }
-    public function getEditView(Request $request){
-        return view('drawing/images/edit');
+    public function getEditView(Request $request,$id,$site_id){
+        try{
+               $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
+               $clients = Client::select('id','company')->get();
+               $main_category_id = DrawingCategory::where('id',$id)->pluck('drawing_category_id')->first();
+               $drawing_category_site_relation_id = DrawingCategorySiteRelation::where('drawing_category_id',$id)
+                                                    ->where('project_site_id',$site_id)
+                                                    ->pluck('id')->toArray();
+               $drawing_images_id = DrawingImage::whereIn('drawing_category_site_relation_id',$drawing_category_site_relation_id)->pluck('id')->toArray();
+               $iterator = 0;
+               $drawing_image_latest_version = array();
+               $path = env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.sha1($site_id).DIRECTORY_SEPARATOR.sha1($id);
+               foreach ($drawing_images_id as $value){
+                   $drawing_image_latest_version[$iterator] =DrawingImageVersion:: where('drawing_image_id',$value)->orderBy('id','desc')->select('id','title','name')->first()->toArray();
+                   $drawing_image_latest_version[$iterator]['encoded_name'] = $path.DIRECTORY_SEPARATOR.urlencode($drawing_image_latest_version[$iterator]['name']);
+                   $iterator++;
+               }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return view('drawing/images/edit')->with(compact('project_site','path','drawing_image_latest_version','categories','clients'));
     }
 
     public function uploadTempDrawingImages(Request $request){
@@ -179,7 +204,7 @@ class ImagesController extends Controller
                 rmdir($tempImageUploadPath);
             }
             $request->session()->flash('success','Data Saved successfully.');
-            return redirect('/awareness/file-management/create');
+            return redirect('/drawing/images/create');
 
         }catch(\Exception $e){
             $data = [
@@ -193,8 +218,8 @@ class ImagesController extends Controller
     }
     public function listing(Request $request){
         try{
-            $list = DrawingCategorySiteRelation::pluck('drawing_category_id')->toArray();
-            $subCategories = DrawingCategory::whereIn('id',$list)->select('name','id','drawing_category_id')->get();
+            $subCategories = DrawingCategorySiteRelation::join('drawing_categories','drawing_categories.id','=','drawing_category_site_relations.drawing_category_id')
+                ->select('drawing_categories.name','drawing_categories.id','drawing_categories.drawing_category_id','drawing_category_site_relations.project_site_id')->get();
             $iTotalRecords = count($subCategories);
             $records = array();
             $records['data'] = array();
@@ -206,21 +231,9 @@ class ImagesController extends Controller
                     DrawingCategory::where('id',$subCategories[$pagination]['drawing_category_id'])->pluck('name')->first(),
                     $subCategories[$pagination]['name'],
                     '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/TRUE">'
-                    .'<i class="icon-docs"></i> Enable </a>'
-                    .'</li>'
-                    .'<li>'
-                    .'<a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/FALSE">'
-                    .'    <i class="icon-tag"></i> Disable </a>'
-                    .'</li>'
-                    .'</ul>'
-                    .'</div>'
+                            <a href="/drawing/images/edit/'.$subCategories[$pagination]['id'].DIRECTORY_SEPARATOR.$subCategories[$pagination]['project_site_id'].'"  >'
+                               .'Edit
+                            </a></div>'
                 ];
             }
             $records["draw"] = intval($request->draw);
