@@ -292,7 +292,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'purchase-order-bill'],function(){
             Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
             Route::get('create',array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
+            Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createBill'));
             Route::post('get-project-sites',array('uses' => 'Purchase\PurchaseOrderBillingController@getProjectSites'));
+            Route::post('get-purchase-orders',array('uses' => 'Purchase\PurchaseOrderBillingController@getPurchaseOrders'));
+            Route::post('get-bill-pending-transactions',array('uses' => 'Purchase\PurchaseOrderBillingController@getBillPendingTransactions'));
+            Route::post('get-transaction-subtotal',array('uses' => 'Purchase\PurchaseOrderBillingController@getTransactionSubtotal'));
         });
     });
 
