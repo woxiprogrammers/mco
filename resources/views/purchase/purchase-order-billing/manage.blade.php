@@ -44,9 +44,14 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrder">
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrderBillTable">
                                                             <thead>
-
+                                                                <tr>
+                                                                    <th>Bill Number</th>
+                                                                    <th>Purchase Order Id</th>
+                                                                    <th>Amount</th>
+                                                                    <th>Action</th>
+                                                                </tr>
                                                             </thead>
                                                             <tbody>
 
@@ -75,7 +80,7 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    {{--<script src="/assets/custom/purchase/purchase-order/manage-datatables.js" type="text/javascript"></script>--}}
+    <script src="/assets/custom/purchase/purchase-order-billing/manage-datatables.js" type="text/javascript"></script>
     <script>
 
     </script>

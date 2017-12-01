@@ -72,7 +72,7 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-md-3 form-group">
-                                                                <select id="projectSiteId" class="form-control" style="width: 80%;">
+                                                                <select name="project_site_id" id="projectSiteId" class="form-control" style="width: 80%;">
                                                                     <option value=""> -- Select Project site -- </option>
                                                                 </select>
                                                             </div>
