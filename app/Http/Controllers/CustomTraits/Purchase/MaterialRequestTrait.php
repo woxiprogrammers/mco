@@ -111,6 +111,10 @@ trait MaterialRequestTrait{
                     $format = "PO".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
                     break;
 
+                case 'purchase-order-bill':
+                    $format = "BI".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
+                    break;
+
                 default :
                     $format = "";
                     break;
