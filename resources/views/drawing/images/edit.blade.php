@@ -137,6 +137,8 @@
                                                                 <td>
                                                                     <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$file['id']}}","{{$file['encoded_name']}}",0);'>
                                                                         <i class="fa fa-times"></i> Remove </a>
+                                                                    <button  class="btn btn-default btn-sm myBtn"  value="{{$file['original_id']}}">
+                                                                        <i class="fa fa-plus-square"></i> Add Version </button>
                                                                 </td>
                                                             </tr>
                                                         @endforeach
@@ -146,6 +148,47 @@
                                             </div>
                                             <input type="hidden" id="path" name="path" value="">
                                             <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+                                            <div class="modal fade" id="myModal" role="dialog">
+                                                <div class="modal-dialog">
+                                                    <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <div class="row">
+                                                                <div class="col-md-4"></div>
+                                                                <div class="col-md-4"> Material</div>
+                                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-body" style="padding:40px 50px;">
+                                                            <form action="/drawing/images/add-version" method="POST" enctype="multipart/form-data">
+                                                                {!! csrf_field() !!}
+                                                                <input type="hidden" id="drawing-images-id" name="drawing_images_id">
+                                                                <input type="hidden"  name="site_id" value="{{$site_id}}">
+                                                                <input type="hidden"  name="sub_category_id" value="{{$id}}">
+                                                                <div class="form-group row">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="name" class="control-label">Browse File</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <input type="file" name="file" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group row">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="name" class="control-label">Title</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <input type="text" name="title" required>
+                                                                    </div>
+                                                                </div>
+                                                                <input type="submit" class="btn red pull-right" >
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -169,8 +212,12 @@
     <script src="/assets/custom/admin/drawing/image/validation.js" type="application/javascript"></script>
     <script>
         $(document).ready(function(){
-
             EditImage.init();
+            $(".myBtn").click(function(){
+                var id = $(this).val();
+                $('#drawing-images-id').val(id);
+                $("#myModal").modal();
+            });
         });
     </script>
 

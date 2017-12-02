@@ -29,6 +29,6 @@ class CreateTableDrawingImagesComments extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('drawing_image_versions');
+        Schema::dropIfExists('drawing_image_comments');
     }
 }

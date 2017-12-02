@@ -373,6 +373,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix'=>'drawing'],function() {
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Drawing\CategoryManagementController@getManageView'));
+            Route::get('sub-category-manage',array('uses'=> 'Drawing\CategoryManagementController@getSubCategoryManageView'));
             Route::get('create-main',array('uses'=> 'Drawing\CategoryManagementController@getCreateMainView'));
             Route::post('create-main-category',array('uses'=> 'Drawing\CategoryManagementController@getCreateMainCategory'));
             Route::post('main-category-listing',array('uses'=> 'Drawing\CategoryManagementController@MainCategoryListing'));
@@ -381,11 +382,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create-sub',array('uses'=> 'Drawing\CategoryManagementController@getCreateSubView'));
             Route::get('change-status/{id}/{status}',array('uses'=> 'Drawing\CategoryManagementController@changeStatus'));
             Route::get('edit-main',array('uses'=> 'Drawing\CategoryManagementController@getMainEditView'));
-            Route::get('edit-sub',array('uses'=> 'Drawing\CategoryManagementController@getSubEditView'));
+            Route::get('edit-sub/{id}',array('uses'=> 'Drawing\CategoryManagementController@getSubEditView'));
+            Route::get('edit-sub-category',array('uses'=> 'Drawing\CategoryManagementController@editSubCategory'));
         });
         Route::group(['prefix' => 'images'], function(){
             Route::get('manage',array('uses'=> 'Drawing\ImagesController@getManageView'));
             Route::get('create',array('uses'=> 'Drawing\ImagesController@getCreateView'));
+            Route::get('manage-drawings',array('uses'=> 'Drawing\ImagesController@getManageDrawingsView'));
             Route::get('edit/{id}/{site_id}',array('uses'=> 'Drawing\ImagesController@getEditView'));
             Route::post('image-upload/{quotationId}',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
             Route::post('get-projects',array('uses'=>'Drawing\ImagesController@getProjects'));
@@ -395,6 +398,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('delete-temp-product-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
             Route::post('create',array('uses'=>'Drawing\ImagesController@create'));
             Route::post('listing',array('uses'=>'Drawing\ImagesController@listing'));
+            Route::post('add-version',array('uses'=>'Drawing\ImagesController@createVersion'));
+            Route::post('get-data',array('uses'=>'Drawing\ImagesController@getData'));
         });
     });
 
