@@ -1231,4 +1231,36 @@ class PeticashController extends Controller
         }
         return $inventoryComponentTransferDataId;
     }
+
+    public function getSalaryRequestCreateView(Request $request){
+        try{
+            $projectSites = ProjectSite::select('id','name')->get();
+            return view('peticash.salary-request.create')->with(compact('projectSites'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Labour Create View',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getLabours(Request $request){
+        try{
+            $labours = Employee::where('project_site_id',$request['project_site_id'])->get();
+            dd($labours);
+            dd($request->all());
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Labour Create View',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
 }
