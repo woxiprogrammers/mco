@@ -127,6 +127,28 @@
                                                             <input type="text" class="form-control" id="mobile" name="mobile" value="{{$userEdit['mobile']}}">
                                                         </div>
                                                     </div>
+                                                    @if($purchaseOrderCreatePermission > 0)
+                                                        <div class="form-group row">
+                                                            <div class="col-md-3" style="text-align: right">
+                                                                <label for="purchase_order_amount_limit" class="control-label">Purchase Order Amount Limit</label>
+                                                                <span>*</span>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" id="purchase_order_amount_limit" name="purchase_order_amount_limit" value="{{$userEdit['purchase_order_amount_limit']}}">
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                    @if($peticashManagementPermission > 0)
+                                                        <div class="form-group row">
+                                                            <div class="col-md-3" style="text-align: right">
+                                                                <label for="purchase_order_amount_limit" class="control-label">Peticash Purchase Amount Limit</label>
+                                                                <span>*</span>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" id="purchase_peticash_amount_limit" name="purchase_peticash_amount_limit" value="{{$userEdit['purchase_peticash_amount_limit']}}">
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                     <div class="form-group">
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="aclTable">
                                                             <tr>

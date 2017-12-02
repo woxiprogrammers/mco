@@ -19,6 +19,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'user'],function (){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
         Route::post('create',array('uses' => 'User\UserController@createUser'));
+        Route::post('get-permission',array('uses' => 'User\UserController@getPermission'));
         Route::get('edit/{user}',array('uses' => 'User\UserController@getEditView'));
         Route::put('edit/{user}',array('uses' => 'User\UserController@editUser'));
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
