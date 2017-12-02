@@ -36,7 +36,7 @@
                                                             <a href="#mainCategoryFormTab" data-toggle="tab"> Main Category </a>
                                                         </li>
                                                         <li>
-                                                            <a href="#subCategoryFormTab" data-toggle="tab"> Sub Category </a>
+                                                            <a href="/drawing/category-management/sub-category-manage" > Sub Category </a>
                                                         </li>
                                                     </ul>
                                                     <div class="tab-content">
@@ -67,33 +67,6 @@
                                                                 </tbody>
                                                             </table>
                                                         </div>
-                                                        <div class="tab-pane fade" id="subCategoryFormTab">
-                                                            <div id="sample_editable_1_new" class="btn yellow" style="margin-bottom: 1%; margin-left: 89%">
-                                                                <a href="/drawing/category-management/create-sub" style="color: white">
-                                                                    <i class="fa fa-plus"></i> Sub category
-                                                                </a>
-                                                            </div>
-                                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="subCategoryTable">
-                                                                <thead>
-                                                                <tr>
-                                                                    <th style="width: 30%"> Sr. No. </th>
-                                                                    <th> Name of Sub Category </th>
-                                                                    <th> Actions </th>
-                                                                </tr>
-                                                                <tr class="filter">
-                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                                    <th>
-                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                                    </th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody>
-
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -106,6 +79,7 @@
                 </div>
             </div>
         </div>
+    </div>
         @endsection
         @section('javascript')
             <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
@@ -120,4 +94,4 @@
                     $('#mainCategoryTable').DataTable();
                 });
             </script>
-@endsection
+        @endsection

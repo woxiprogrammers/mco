@@ -299,6 +299,11 @@
                                     <i class="fa fa-bars"></i> Add Image
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Manage Drawings
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <?php $hasPeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('peticash');?>
