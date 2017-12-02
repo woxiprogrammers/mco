@@ -292,6 +292,17 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'purchase-order-bill'],function(){
             Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
             Route::get('create',array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
+            Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createBill'));
+            Route::post('get-project-sites',array('uses' => 'Purchase\PurchaseOrderBillingController@getProjectSites'));
+            Route::post('get-purchase-orders',array('uses' => 'Purchase\PurchaseOrderBillingController@getPurchaseOrders'));
+            Route::post('get-bill-pending-transactions',array('uses' => 'Purchase\PurchaseOrderBillingController@getBillPendingTransactions'));
+            Route::post('get-transaction-subtotal',array('uses' => 'Purchase\PurchaseOrderBillingController@getTransactionSubtotal'));
+            Route::post('listing',array('uses' => 'Purchase\PurchaseOrderBillingController@listing'));
+            Route::get('edit/{purchaseOrderBill}',array('uses' => 'Purchase\PurchaseOrderBillingController@getEditView'));
+            Route::group(['prefix' => 'payment'], function(){
+                Route::post('listing/{purchaseOrderBillId}',array('uses' => 'Purchase\PurchaseOrderBillingController@paymentListing'));
+                Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createPayment'));
+            });
         });
     });
 
