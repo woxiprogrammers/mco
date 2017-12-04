@@ -7,6 +7,7 @@ use App\Project;
 use App\ProjectSite;
 use App\Quotation;
 use App\QuotationStatus;
+use App\Subcontractor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -20,8 +21,7 @@ class SubcontractorController extends Controller
 
     public function getCreateView(Request $request){
         try{
-            $projectSites = ProjectSite::select('id','name')->get()->toArray();
-            return view('subcontractor.create')->with(compact('projectSites'));
+            return view('subcontractor.create');
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Create View',
@@ -35,14 +35,9 @@ class SubcontractorController extends Controller
 
     public function createSubcontractor(Request $request){
         try{
-            if($request['project_site_id'] == -1){
-                $labourData = $request->except('_token','project_site_id');
-            }else{
-                $labourData = $request->except('_token');
-            }
-            $labourData['is_active'] = (boolean)false;
-            $labourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
-            Employee::create($labourData);
+            $scData = $request->except('_token');
+            $scData['is_active'] = (boolean)false;
+            Subcontractor::create($scData);
             $request->session()->flash('success', 'Subcontractor Created successfully.');
             return redirect('/subcontractor/create');
         }catch(\Exception $e){
@@ -72,7 +67,7 @@ class SubcontractorController extends Controller
 
     public function subcontractorListing(Request $request){
         try{
-            $listingData = Employee::get();
+            $listingData = Subcontractor::get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
@@ -85,13 +80,13 @@ class SubcontractorController extends Controller
                     $labourStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
                 $records['data'][$iterator] = [
-                    $listingData[$pagination]['employee_id'],
-                    $listingData[$pagination]['name'],
-                    $listingData[$pagination]['mobile'],
-                    $listingData[$pagination]['per_day_wages'],
-                    $projectSiteName,
+                    $listingData[$pagination]['subcontractor_name'],
+                    $listingData[$pagination]['company_name'],
+                    $listingData[$pagination]['primary_cont_person_name'],
+                    $listingData[$pagination]['primary_cont_person_mob_number'],
+                    $listingData[$pagination]['escalation_cont_person_name'],
+                    $listingData[$pagination]['escalation_cont_person_mob_number'],
                     $labourStatus,
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -144,10 +139,9 @@ class SubcontractorController extends Controller
         }
     }
 
-    public function getEditView(Request $request,$labour){
+    public function getEditView(Request $request, $subcontractor){
         try{
-            $projectSites = ProjectSite::select('id','name')->get()->toArray();
-            return view('subcontractor.edit')->with(compact('labour','projectSites'));
+            return view('subcontractor.edit')->with(compact('subcontractor'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -159,17 +153,12 @@ class SubcontractorController extends Controller
         }
     }
 
-    public function editSubcontractor(Request $request,$labour){
+    public function editSubcontractor(Request $request,$subcontractor){
         try{
-            if($request['project_site_id'] != -1){
-                $updateLabourData = $request->except('_token');
-            }else{
-                $updateLabourData = $request->except('_token','project_site_id');
-            }
-            $updateLabourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
-            Employee::where('id',$labour['id'])->update($updateLabourData);
+            $updateLabourData = $request->except('_token');
+            Subcontractor::where('id',$subcontractor['id'])->update($updateLabourData);
             $request->session()->flash('success', 'Subcontractor Edited successfully.');
-            return redirect('/subcontractor/edit/'.$labour->id);
+            return redirect('/subcontractor/edit/'.$subcontractor->id);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Subcontractor',

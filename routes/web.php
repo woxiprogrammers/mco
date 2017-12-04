@@ -19,6 +19,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'user'],function (){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
         Route::post('create',array('uses' => 'User\UserController@createUser'));
+        Route::post('get-permission',array('uses' => 'User\UserController@getPermission'));
         Route::get('edit/{user}',array('uses' => 'User\UserController@getEditView'));
         Route::put('edit/{user}',array('uses' => 'User\UserController@editUser'));
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
@@ -274,7 +275,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('change-status',array('uses'=> 'Purchase\PurchaseOrderController@changeStatus'));
             Route::post('create-material',array('uses'=> 'Purchase\PurchaseOrderController@createMaterial'));
             Route::post('create-asset',array('uses'=> 'Purchase\PurchaseOrderController@createAsset'));
-            Route::get('get-materials',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderMaterials'));
             Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createPurchaseOrder'));
             Route::get('get-purchase-request-component/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseRequestComponents'));
             Route::get('get-client-project/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getClientProjectName'));
@@ -435,8 +435,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageView'));
         Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorListing'));
         Route::get('change-status/{labour}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
-        Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
-        Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
+        Route::get('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
+        Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
 
         Route::group(['prefix' => 'subcontractor-structure'], function(){
             Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
@@ -487,8 +487,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('manage-salary-details-ajax',array('uses' => 'Peticash\PeticashController@getSalaryTransactionDetails'));
             Route::post('manage-purchase-details-ajax',array('uses' => 'Peticash\PeticashController@getPurchaseTransactionDetails'));
             Route::post('approve-purchase-ajax',array('uses' => 'Peticash\PeticashController@approvePurchaseAjaxRequest'));
-
         });
+        Route::group(['prefix' => 'salary-request'], function(){
+            Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryRequestCreateView'));
+            Route::post('get-labours',array('uses' => 'Peticash\PeticashController@getLabours'));
+        });
+
 
         Route::group(['prefix' => 'peticash-management'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
