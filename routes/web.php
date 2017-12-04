@@ -19,6 +19,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'user'],function (){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
         Route::post('create',array('uses' => 'User\UserController@createUser'));
+        Route::post('get-permission',array('uses' => 'User\UserController@getPermission'));
         Route::get('edit/{user}',array('uses' => 'User\UserController@getEditView'));
         Route::put('edit/{user}',array('uses' => 'User\UserController@editUser'));
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
@@ -483,8 +484,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('manage-salary-details-ajax',array('uses' => 'Peticash\PeticashController@getSalaryTransactionDetails'));
             Route::post('manage-purchase-details-ajax',array('uses' => 'Peticash\PeticashController@getPurchaseTransactionDetails'));
             Route::post('approve-purchase-ajax',array('uses' => 'Peticash\PeticashController@approvePurchaseAjaxRequest'));
-
         });
+        Route::group(['prefix' => 'salary-request'], function(){
+            Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryRequestCreateView'));
+            Route::post('get-labours',array('uses' => 'Peticash\PeticashController@getLabours'));
+        });
+
 
         Route::group(['prefix' => 'peticash-management'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));

@@ -22,7 +22,7 @@ class VerifyCsrfToken extends BaseVerifier
         'labour/listing','/peticash/master-peticash-account/listing','/peticash/sitewise-peticash-account/listing', '/peticash/peticash-approval-request/manage-purchase-list-ajax','/peticash/peticash-approval-request/manage-salary-list-ajax',
         '/purchase/purchase-order/change-status','/purchase/purchase-order/get-bill-details','/purchase/purchase-order/close-purchase-order','/subcontractor/listing',
         '/subcontractor/subcontractor-structure/listing','/awareness/file-management/file-upload','/awareness/file-management/get-files','/awareness/category-management/main-category-listing','/awareness/file-management/get-subcategories',
-        '/awareness/file-management/get-subcategories-details','/checklist/category-management/change-status/*','/drawing/images/get-projects/','/drawing/images/get-project-sites/','/drawing/images/get-sub-categories/','/drawing/images/image-upload/*','/drawing/images/display-images/*','/drawing/images/delete-temp-product-image/'
-        ,'/drawing/images/get-data/'
+        '/awareness/file-management/get-subcategories-details','/checklist/category-management/change-status/*','/drawing/images/get-projects/','/drawing/images/get-project-sites/','/drawing/images/get-sub-categories/','/drawing/images/image-upload/*',
+        '/drawing/images/display-images/*','/drawing/images/delete-temp-product-image/','/drawing/images/get-data/','/user/get-permission','/peticash/salary-request/get-labours'
     ];
 }
