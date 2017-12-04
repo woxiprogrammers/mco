@@ -365,28 +365,7 @@
             $("#totalAmount").val(total);
         }
         function getProjectSites(projectId){
-            $.ajax({
-                url: '/purchase/purchase-order-bill/get-project-sites',
-                type: 'POST',
-                async: true,
-                data: {
-                    _token: $("input[name='_token']").val(),
-                    project_id: projectId
-                },
-                success: function(data,textStatus,xhr){
-                    if(data.length > 0){
-                        $('#projectSiteId').html(data);
-                        $('#projectSiteId').prop('disabled', false);
-                        $("#projectSiteId").trigger('change');
-                    }else{
-                        $('#projectSiteId').html("");
-                        $('#projectSiteId').prop('disabled', false);
-                    }
-                },
-                error: function(){
 
-                }
-            });
         }
 
     </script>

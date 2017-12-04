@@ -1235,7 +1235,8 @@ class PeticashController extends Controller
     public function getSalaryRequestCreateView(Request $request){
         try{
             $projectSites = ProjectSite::select('id','name')->get();
-            return view('peticash.salary-request.create')->with(compact('projectSites'));
+            $clients = Client::where('is_active', true)->get();
+            return view('peticash.salary-request.create')->with(compact('projectSites','clients'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Labour Create View',
@@ -1249,7 +1250,9 @@ class PeticashController extends Controller
 
     public function getLabours(Request $request){
         try{
-            $labours = Employee::where('project_site_id',$request['project_site_id'])->get();
+            $employees = Employee::where('project_site_id',$request['project_site_id'])->get();
+            $transactionTypes = PeticashTransactionType::where('type','ilike','PAYMENT')->select('id','name')->get();
+            return view('partials.peticash.salary-request.employee-listing')->with(compact('employees','transactionTypes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Labour Create View',
@@ -1257,7 +1260,27 @@ class PeticashController extends Controller
                 'request' => $request->all()
             ];
             Log::critical(json_encode($data));
-            abort(500);
+            return response()->json(['message' => 'Something went wrong'], 500);
+        }
+    }
+
+    public function createSalaryRequestCreate(Request $request){
+        try{
+            dd($request->all());
+            foreach($request->employee_ids as $employeeId){
+                $peticashSalaryTransactionData = [
+                    'project_site_id' => $request->project_site_id,
+                    'employee_id' => $employeeId,
+                    'refe'
+                ];
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Salary Request',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
         }
     }
 
