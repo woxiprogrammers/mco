@@ -488,6 +488,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryRequestCreateView'));
             Route::post('create',array('uses' => 'Peticash\PeticashController@createSalaryRequestCreate'));
             Route::post('get-labours',array('uses' => 'Peticash\PeticashController@getLabours'));
+            Route::post('change-status',array('uses' => 'Peticash\PeticashController@salaryRequestedChangeStatus'));
         });
 
 
