@@ -36,16 +36,37 @@ class CategoryManagementController extends Controller
         return view('drawing/category-management/create-sub')->with(compact('categories'));
     }
     public function getMainEditView(Request $request,$id)
-    {
-        $main_category = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
-        return view('drawing/category-management/edit-main')->with(compact('main_category'));
+    {   try{
+                $main_category = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
+                return view('drawing/category-management/edit-main')->with(compact('main_category'));
+           }catch(\Exception $e){
+                $data = [
+                    'action' => 'Main category edit view',
+                    'params' => $request->all(),
+                    'exception' => $e->getMessage()
+                ];
+                Log::critical(json_encode($data));
+                abort(500);
+    }
+
     }
     public function getSubEditView(Request $request,$id)
     {
-        $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
-        $drawing_category_id = DrawingCategory::where('id',$id)->pluck('drawing_category_id')->first();
-        $name = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
-        return view('drawing/category-management/edit-sub')->with(compact('name','drawing_category_id','categories'));
+        try{
+            $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
+            $drawing_category_id = DrawingCategory::where('id',$id)->pluck('drawing_category_id')->first();
+            $name = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
+            return view('drawing/category-management/edit-sub')->with(compact('name','drawing_category_id','categories'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit sub category',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
     }
     public function getCreateMainCategory(Request $request){
          try{
