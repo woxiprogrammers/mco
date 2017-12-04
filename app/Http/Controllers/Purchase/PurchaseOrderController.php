@@ -446,15 +446,6 @@ class PurchaseOrderController extends Controller
         }
     }
 
-    public function getPurchaseOrderMaterials(Request $request){
-        try{
-            $materialRequestComponent = MaterialRequestComponents::where('id',$request['material_request_component_id'])->first();
-            return response()->json($materialRequestComponent);
-        }catch (\Exception $e){
-
-        }
-    }
-
     public function createTransaction(Request $request){
         try{
             $purchaseOrderTransactionData = $request->except('_token','pre_grn_image','post_grn_image','component_data','vendor_name','purchase_order_id','purchase_order_transaction_id');
@@ -606,6 +597,27 @@ class PurchaseOrderController extends Controller
                     $purchaseRequestComponents[$iterator]['vendor'] = $vendorRelation->vendor->company;
                     $purchaseRequestComponents[$iterator]['vendor_id'] = $vendorRelation->vendor_id;
                     $purchaseRequestComponents[$iterator]['material_request_component_slug'] = $materialRequestComponentSlug;
+                    if($materialRequestComponentSlug == 'new-material'){
+                        $purchaseRequestComponents[$iterator]['categories'] = Category::where('is_miscellaneous', true)->where('is_active', true)->select('id','name')->get();
+                        if(count($purchaseRequestComponents[$iterator]['categories']) <= 0){
+                            $purchaseRequestComponents[$iterator]['categories'][] = [
+                                'id' => '',
+                                'name' => 'No special categories found'
+                            ];
+                        }
+                    }elseif($materialRequestComponentSlug == 'new-asset' || $materialRequestComponentSlug == 'system-asset'){
+                        $purchaseRequestComponents[$iterator]['categories'][] = [
+                            'id' => '',
+                            'name' => 'Asset'
+                        ];
+                    }else{
+                        $materialId = Material::where('name','ilike',$purchaseRequestComponents[$iterator]['name'])->pluck('id')->first();
+                        $purchaseRequestComponents[$iterator]['categories'] = CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
+                                                                ->where('category_material_relations.material_id', $materialId)
+                                                                ->select('categories.id as id','categories.name as name')
+                                                                ->get()
+                                                                ->toArray();
+                    }
                     $materialInfo = Material::where('name','ilike',trim($purchaseRequestComponent->materialRequestComponent->name))->first();
                     if($materialInfo == null){
                         $purchaseRequestComponents[$iterator]['rate'] = '0';
@@ -717,6 +729,7 @@ class PurchaseOrderController extends Controller
                         $purchaseOrderComponentData['rate_per_unit'] = $component['rate'];
                         $purchaseOrderComponentData['hsn_code'] = $component['hsn_code'];
                         $purchaseOrderComponentData['unit_id'] = $component['unit_id'];
+                        $purchaseOrderComponentData['expected_delivery_date'] = $component['expected_delivery_date'];
                         $purchaseOrderComponent = PurchaseOrderComponent::create($purchaseOrderComponentData);
                         if(array_key_exists('vendor_quotation_images',$component) && (count($component['vendor_quotation_images']) > 0)){
                             /*move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)*/
