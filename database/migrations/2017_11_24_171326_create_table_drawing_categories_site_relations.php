@@ -30,6 +30,6 @@ class CreateTableDrawingCategoriesSiteRelations extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('drawing_categories_site_relations');
+        Schema::dropIfExists('drawing_category_site_relations');
     }
 }

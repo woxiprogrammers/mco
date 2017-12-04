@@ -70,27 +70,27 @@
                                             <!-- BEGIN VALIDATION STATES-->
                                             <div class="portlet light ">
                                                 <div class="portlet-body">
-                                                    <div class="table-container">
-                                                        <div class="table-scrollable profit-margin-table">
-                                                            <table class="table table-striped table-bordered table-hover" id="purchaseRequest" style="overflow: scroll">
+                                                    <div class="table-scrollable" style="overflow: scroll !important;">
+                                                            <table class="table table-striped table-bordered table-hover" id="purchaseRequest" style="overflow: scroll; table-layout: fixed">
                                                                 <thead>
                                                                     <tr>
-                                                                    <th style="width: 15%"> Material Name </th>
-                                                                    <th style="width: 8%"> Quantity </th>
-                                                                    <th style="width: 8%;"> Unit </th>
-                                                                    <th style="width: 12%"> Vendor </th>
-                                                                    <th style="width: 10%"> Rate </th>
-                                                                    <th style="width: 10%"> HSN code </th>
-                                                                    <th style="width: 8%;"> Vendor quotation images </th>
-                                                                    <th style="width: 8%;"> Client Approval images </th>
-                                                                    <th style="width: 8%;"> Status </th>
-                                                                </tr>
+                                                                        <th style="width:15%">Category</th>
+                                                                        <th style="width: 15%"> Material Name </th>
+                                                                        <th style="width: 10%"> Quantity </th>
+                                                                        <th style="width: 10%;"> Unit </th>
+                                                                        <th style="width: 12%"> Vendor </th>
+                                                                        <th style="width: 10%"> Rate </th>
+                                                                        <th style="width: 10%"> HSN code </th>
+                                                                        <th style="width: 18%"> Expected Delivery Date </th>
+                                                                        <th style="width: 18%;"> Vendor quotation images </th>
+                                                                        <th style="width: 18%;"> Client Approval images </th>
+                                                                        <th style="width: 10%;"> Status </th>
+                                                                    </tr>
                                                                 </thead>
                                                                 <tbody>
                                                                 </tbody>
                                                             </table>
                                                         </div>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

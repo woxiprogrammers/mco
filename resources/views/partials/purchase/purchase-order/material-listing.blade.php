@@ -1,6 +1,13 @@
 @foreach($purchaseRequestComponents as $purchaseRequestComponent)
     <tr id="{{$purchaseRequestComponent['material_request_component_slug']}}">
-        <td style="text-align: center; width: 15%" style="display: none">
+        <td style="text-align: center">
+            <select class="form-control component-category">
+                @foreach($purchaseRequestComponent['categories'] as $category)
+                    <option value="{{$category['id']}}">{{$category['name']}}</option>
+                @endforeach
+            </select>
+        </td>
+        <td style="text-align: center; width: 15%">
             <input type="hidden" value="{{$purchaseRequestComponent['vendor_id']}}" class="component-vendor">
             <input type="hidden" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][id]" value="{{$purchaseRequestComponent['purchase_request_component_id']}}">
             <input type="text" class="form-control component-name" value="{{$purchaseRequestComponent['name']}}" readonly>
@@ -31,6 +38,9 @@
         <td style="text-align: center">
             <input type="text" style="width: 90%" class="form-control component-hsn-code"  value="{{$purchaseRequestComponent['hsn_code']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][hsn_code]">
         </td>
+        <td style="text-align: center">
+            <input type="date" style="width: 90%" class="form-control component-delivery-date"  name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][expected_delivery_date]">
+        </td>
         <td style="text-align: center;">
             <input type="file" multiple name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][vendor_quotation_images][]">
         </td>
@@ -55,6 +65,13 @@
         var componentId = elementId.match(/\d+/)[0];
         if(($(this).val() == "approve") && (type == "new-material")) {
             $('#myModal1 #purchaseRequestComponentId').val(componentId);
+            var categoryId = $row.find(".component-category").val();
+            $('#myModal1 option[value="'+categoryId+'"]').prop('selected', true);
+            $('#myModal1 option[value="'+categoryId+'"]').prop('disabled', false);
+            $('#myModal1 option:not([value="'+categoryId+'"])').each(function(){
+                console.log($(this).attr('value'));
+                $(this).prop('disabled', true);
+            });
             $('#myModal1').modal('show');
             $("#vendor_id").val($row.find(".component-vendor").val());
             $('#name').val($row.find(".component-name").val());
