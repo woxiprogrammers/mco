@@ -35,15 +35,17 @@ class CategoryManagementController extends Controller
         }
         return view('drawing/category-management/create-sub')->with(compact('categories'));
     }
-    public function getMainEditView(Request $request)
+    public function getMainEditView(Request $request,$id)
     {
-        return view('drawing/category-management/edit-main');
+        $main_category = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
+        return view('drawing/category-management/edit-main')->with(compact('main_category'));
     }
     public function getSubEditView(Request $request,$id)
     {
+        $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
         $drawing_category_id = DrawingCategory::where('id',$id)->pluck('drawing_category_id')->first();
-        $name = DrawingCategory::where('id',$drawing_category_id)->pluck('name')->first();
-        return view('drawing/category-management/edit-sub')->with(compact('name'));
+        $name = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
+        return view('drawing/category-management/edit-sub')->with(compact('name','drawing_category_id','categories'));
     }
     public function getCreateMainCategory(Request $request){
          try{
@@ -60,6 +62,22 @@ class CategoryManagementController extends Controller
              Log::critical(json_encode($data));
              abort(500);
          }
+    }
+    public function mainCategoryEdit(Request $request){
+        try{
+            $category['name'] = $request->main_category;
+            $query = DrawingCategory::where('id',$request->id)->update($category);
+            $request->session()->flash('success', 'Category edited successfully.');
+            return view('/drawing/category-management/create-main');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'create',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
     public function createSubCategory(Request $request){
         try{
@@ -80,7 +98,7 @@ class CategoryManagementController extends Controller
     }
     public function mainCategoryListing(Request $request){
         try{
-            $subCategories = DrawingCategory::get()->toArray();
+            $subCategories = DrawingCategory::whereNull('drawing_category_id')->get()->toArray();
             $iTotalRecords = count($subCategories);
             $records = array();
             $records['data'] = array();
@@ -104,6 +122,10 @@ class CategoryManagementController extends Controller
                                     .'<a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/FALSE">'
                                     .'    <i class="icon-tag"></i> Disable </a>'
                                 .'</li>'
+                                .'<li>'
+                                     .'<a href="/drawing/category-management/edit/'.$subCategories[$pagination]['id'].'">'
+                                .'    <i class="icon-tag"></i> Edit </a>'
+                                 .'</li>'
                             .'</ul>'
                         .'</div>'
                 ];
@@ -139,12 +161,13 @@ class CategoryManagementController extends Controller
                 abort(500);
         }
     }
-    public function editSubCategory(Request $request,$id){
+    public function editSubCategory(Request $request){
         try {
-           // $categoryData['is_active'] = (bool)$status;
-          //  $query = DrawingCategory::where('id',$id)->update($categoryData);
-            $request->session()->flash('success', 'Status changed successfully.');
-            return redirect('/drawing/category-management/manage');
+            $data['drawing_category_id'] =  $request->main_category_id;
+            $data['name'] =  $request->sub_category;
+            DrawingCategory::where('id',$request->id)->update($data);
+            $request->session()->flash('success', 'Edited successfully.');
+            return redirect('/drawing/category-management/edit-sub/'.$request->id);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Listing',
@@ -183,7 +206,7 @@ class CategoryManagementController extends Controller
                     .'    <i class="icon-tag"></i> Disable </a>'
                     .'</li>'
                     .'<li>'
-                    .'<a href="/drawing/category-management/edit-sub/'.$subCategories[$pagination]['id'].'>'
+                    .'<a href="/drawing/category-management/edit-sub/'.$subCategories[$pagination]['id'].'">'
                     .'    <i class="icon-tag"></i> Edit </a>'
                     .'</li>'
                     .'</ul>'
