@@ -47,11 +47,8 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="clientId">
-                                                            <option value="">Select Client name from here </option>
-                                                            @foreach($clients as $client)
+                                                        <select class="form-control" id="clientId" readonly="true">
                                                                 <option value="{{$client['id']}}">{{$client['company']}} </option>
-                                                            @endforeach
                                                         </select>
                                                     </div>
                                                 </div>
@@ -61,8 +58,8 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" >
-                                                            <option value="">Select Project Name from here</option>
+                                                        <select class="form-control" id="projectId" readonly="true">
+                                                            <option value="{{$project['id']}}">{{$project['name']}} </option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -72,8 +69,8 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectSiteId" name="site_id">
-                                                            <option value="">Select Site Name from here</option>
+                                                        <select class="form-control" id="projectId" readonly="true">
+                                                            <option value="{{$site['id']}}">{{$site['name']}} </option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -83,11 +80,8 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="main_category_id" >
-                                                            <option value="">Select Main Category from here</option>
-                                                            @foreach($categories as $category)
-                                                                <option value="{{$category['id']}}">{{$category['name']}} </option>
-                                                            @endforeach
+                                                        <select class="form-control" id="projectId" readonly="true">
+                                                            <option value="{{$main_category['id']}}">{{$main_category['name']}} </option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -97,8 +91,8 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="sub_category_id" name="drawing_category_id">
-                                                            <option value="">Select Sub Category from here</option>
+                                                        <select class="form-control" id="projectId" readonly="true">
+                                                            <option value="{{$sub_category['id']}}">{{$sub_category['name']}} </option>
                                                         </select>
                                                     </div>
                                                 </div>

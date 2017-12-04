@@ -392,13 +392,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create-sub-category',array('uses'=> 'Drawing\CategoryManagementController@createSubCategory'));
             Route::get('create-sub',array('uses'=> 'Drawing\CategoryManagementController@getCreateSubView'));
             Route::get('change-status/{id}/{status}',array('uses'=> 'Drawing\CategoryManagementController@changeStatus'));
-            Route::get('edit-main',array('uses'=> 'Drawing\CategoryManagementController@getMainEditView'));
+            Route::get('edit/{id}',array('uses'=> 'Drawing\CategoryManagementController@getMainEditView'));
+            Route::post('edit-main-category',array('uses'=> 'Drawing\CategoryManagementController@mainCategoryEdit'));
             Route::get('edit-sub/{id}',array('uses'=> 'Drawing\CategoryManagementController@getSubEditView'));
-            Route::get('edit-sub-category',array('uses'=> 'Drawing\CategoryManagementController@editSubCategory'));
+            Route::post('edit-sub-category',array('uses'=> 'Drawing\CategoryManagementController@editSubCategory'));
         });
         Route::group(['prefix' => 'images'], function(){
             Route::get('manage',array('uses'=> 'Drawing\ImagesController@getManageView'));
             Route::get('create',array('uses'=> 'Drawing\ImagesController@getCreateView'));
+            Route::get('get-details/{id}',array('uses'=> 'Drawing\ImagesController@getDetails'));
             Route::get('manage-drawings',array('uses'=> 'Drawing\ImagesController@getManageDrawingsView'));
             Route::get('edit/{id}/{site_id}',array('uses'=> 'Drawing\ImagesController@getEditView'));
             Route::post('image-upload/{quotationId}',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
@@ -411,6 +413,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=>'Drawing\ImagesController@listing'));
             Route::post('add-version',array('uses'=>'Drawing\ImagesController@createVersion'));
             Route::post('get-data',array('uses'=>'Drawing\ImagesController@getData'));
+            Route::post('get-versions',array('uses'=>'Drawing\ImagesController@getAllVersions'));
+            Route::post('add-comment',array('uses'=>'Drawing\ImagesController@addComment'));
         });
     });
 
