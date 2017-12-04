@@ -41,246 +41,154 @@
 <!-- BEGIN VALIDATION STATES-->
 <div class="portlet light ">
 <div class="portlet-body form">
-<form role="form" id="editSubcontractor" class="form-horizontal" method="post" action="/subcontractor/edit/{{$labour['id']}}">
+<form role="form" id="editSubcontractor" class="form-horizontal" method="post" action="/subcontractor/edit/{{$subcontractor['id']}}">
 {!! csrf_field() !!}
 <div class="form-body">
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Name</label>
-        <span>*</span>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="subcontractor_name" class="control-label">Subcontractor Name</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="subcontractor_name" name="subcontractor_name" required="required" value="{{$subcontractor['subcontractor_name']}}">
+        </div>
     </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="name" name="name" value="{{$labour['name']}}">
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="company_name" class="control-label">Company Name</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="company_name" name="company_name" required="required" value="{{$subcontractor['company_name']}}">
+        </div>
     </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Contact number:</label>
-        <span>*</span>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="category" class="control-label">Category Name</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="category" name="category" value="{{$subcontractor['category']}}">
+        </div>
     </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="contact_no" name="mobile" value="{{$labour['mobile']}}">
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="subcategory" class="control-label">Subcategory Name</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="subcategory" name="subcategory" value="{{$subcontractor['subcategory']}}">
+        </div>
     </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Gender :</label>
-        <span>*</span>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="desc_prod_service" class="control-label">Description of Service</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="desc_prod_service" name="desc_prod_service" value="{{$subcontractor['desc_prod_service']}}">
+        </div>
     </div>
-    &nbsp;&nbsp;&nbsp;
-    <div class="col-md-6 mt-radio-inline">
-        @if($labour['gender'] != null)
-        @if($labour['gender'] == 'f')
-        <label class="mt-radio" style="margin-left: 13px">
-            <input type="radio" name="gender" id="female" value="f" checked=""> Female
-            <span></span>
-        </label>
-        <label class="mt-radio">
-            <input type="radio" name="gender" id="male" value="m"> Male
-            <span></span>
-        </label>
-        @else
-        <label class="mt-radio" style="margin-left: 13px">
-            <input type="radio" name="gender" id="female" value="f" > Female
-            <span></span>
-        </label>
-        <label class="mt-radio">
-            <input type="radio" name="gender" id="male" value="m" checked=""> Male
-            <span></span>
-        </label>
-        @endif
-        @else
-        <label class="mt-radio" style="margin-left: 13px">
-            <input type="radio" name="gender" id="female" value="f"> Female
-            <span></span>
-        </label>
-        <label class="mt-radio">
-            <input type="radio" name="gender" id="male" value="m"> Male
-            <span></span>
-        </label>
-        @endif
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="nature_of_work" class="control-label">Nature Of Work</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="nature_of_work" name="nature_of_work" value="{{$subcontractor['nature_of_work']}}">
+        </div>
     </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Labour ID:</label>
-        <span>*</span>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="sc_turnover_pre_yr" class="control-label">Turnover Per Year</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="sc_turnover_pre_yr" name="sc_turnover_pre_yr" value="{{$subcontractor['sc_turnover_pre_yr']}}">
+        </div>
     </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="employee_id" name="employee_id" value="{{$labour['employee_id']}}">
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="sc_turnover_two_fy_ago" class="control-label">Turnover Two FY Ago</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="sc_turnover_two_fy_ago" name="sc_turnover_two_fy_ago" value="{{$subcontractor['sc_turnover_two_fy_ago']}}">
+        </div>
     </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Per day Wages</label>
-        <span>*</span>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="primary_cont_person_name" class="control-label">Primary Contact Person Name</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="primary_cont_person_name" name="primary_cont_person_name" value="{{$subcontractor['primary_cont_person_name']}}">
+        </div>
     </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="per_day_wage" name="per_day_wages" value="{{$labour['per_day_wages']}}">
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="primary_cont_person_mob_number" class="control-label">Primary Contact Person Mobile No</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="primary_cont_person_mob_number" name="primary_cont_person_mob_number" value="{{$subcontractor['primary_cont_person_mob_number']}}">
+        </div>
     </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Select Project Site</label>
-        <span>*</span>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="primary_cont_person_email" class="control-label">Primary Contact Person Email</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="primary_cont_person_email" name="primary_cont_person_email" value="{{$subcontractor['primary_cont_person_email']}}">
+        </div>
     </div>
-    <div class="col-md-6">
-        <select id="project_site" class="form-control" name="project_site_id">
-            @if($labour['project_site_id'] == null)
-            <option value="-1">Select Project Site</option>
-            @endif
-            @foreach($projectSites as $projectSite)
-            @if($labour['project_site_id'] == $projectSite['id'])
-            <option value = "{!! $projectSite['id'] !!}" selected>{!! $projectSite['name'] !!}</option>
-            @else
-            <option value = "{!! $projectSite['id'] !!}">{!! $projectSite['name'] !!}</option>
-            @endif
-            @endforeach
-        </select>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Address:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="address" name="address" value="{{$labour['address']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Pan Card:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="pan_card" name="pan_card" value="{{$labour['pan_card']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Aadhaar Card:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="aadhaar_card" name="aadhaar_card" value="{{$labour['aadhaar_card']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Designation:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="designation" name="designation" value="{{$labour['designation']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Joining Date:</label>
-        <span>*</span>
-    </div>
-    @if($labour['joining_date'] != null)
-    <div class="col-md-6 date date-picker">
-        <input type="text"  name="joining_date" value="{{date('m/d/Y',strtotime($labour['joining_date']))}}" id="joining_date" readonly>
-        <button class="btn btn-sm default" type="button">
-            <i class="fa fa-calendar"></i>
-        </button>
-    </div>
-    @else
-    <div class="col-md-4 date date-picker">
-        <input type="text" name="joining_date" id="joining_date">
-        <button class="btn btn-sm default" type="button">
-            <i class="fa fa-calendar"></i>
-        </button>
-    </div>
-    @endif
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Termination Date:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6 date date-picker">
-        @if($labour['termination_date'] != null)
-        <input type="text"  name="termination_date" value="{{date('m/d/Y',strtotime($labour['termination_date']))}}" id="termination_date" readonly>
-        <button class="btn btn-sm default" type="button">
-            <i class="fa fa-calendar"></i>
-        </button>
-        @else
-        <input type="text" name="termination_date" id="termination_date">
-        <button class="btn btn-sm default" type="button">
-            <i class="fa fa-calendar"></i>
-        </button>
-        @endif
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Email:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="email" name="email" value="{{$labour['email']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Bank Account Number:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" value="{{$labour['bank_account_number']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Bank Name:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{$labour['bank_name']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Branch Id:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="branch_id" name="branch_id" value="{{$labour['branch_id']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Account Holder Name:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="account_holder_name" name="account_holder_name" value="{{$labour['account_holder_name']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">Branch Name:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="branch_name" name="branch_name" value="{{$labour['branch_name']}}">
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-md-3" style="text-align: right">
-        <label for="name" class="control-label">IFS Code:</label>
-        <span>*</span>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control" id="ifs_code" name="ifs_code" value="{{$labour['ifs_code']}}">
-    </div>
-</div>
-</div>
-<div class="form-body">
 
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="escalation_cont_person_name" class="control-label">Escalation Contact Person Name</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="escalation_cont_person_name" name="escalation_cont_person_name" value="{{$subcontractor['escalation_cont_person_name']}}">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="escalation_cont_person_mob_number" class="control-label">Escalation Contact Person Mobile No</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="escalation_cont_person_mob_number" name="escalation_cont_person_mob_number" value="{{$subcontractor['escalation_cont_person_mob_number']}}">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="sc_pancard_no" class="control-label">PAN Card Number</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="sc_pancard_no" name="sc_pancard_no" value="{{$subcontractor['sc_pancard_no']}}">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="sc_service_no" class="control-label">Service Tax Number</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="sc_service_no" name="sc_service_no" value="{{$subcontractor['sc_service_no']}}">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3" style="text-align: right">
+            <label for="sc_vat_no" class="control-label">VAT Number</label>
+            <span>*</span>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="sc_vat_no" name="sc_vat_no" value="{{$subcontractor['sc_vat_no']}}">
+        </div>
+    </div>
     <div class="form-actions noborder row">
         <div class="col-md-offset-3" style="margin-left: 26%">
             <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>

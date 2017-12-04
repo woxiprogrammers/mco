@@ -39,156 +39,150 @@
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-image" class="form-horizontal" method="post" action="">
-                                                {!! csrf_field() !!}
-                                                <div class="form-body">
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Client Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="client_name" name="client_name">
-                                                                <option value="">Select Client name from here </option>
-                                                            </select>
-                                                        </div>
+                                            {!! csrf_field() !!}
+                                            <div class="form-body">
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Client Name</label>
+                                                        <span>*</span>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Project Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="project_name" name="project_name">
-                                                                <option value="">Select Project Name from here</option>
-                                                            </select>
-                                                        </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-control" id="clientId" readonly="true">
+                                                                <option value="{{$client['id']}}">{{$client['company']}} </option>
+                                                        </select>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Site Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="site_name" name="site_name">
-                                                                <option value="">Select Site Name from here</option>
-                                                            </select>
-                                                        </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Project Name</label>
+                                                        <span>*</span>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Main Category</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="main_category" name="main_category">
-                                                                <option value="">Select Main Category from here</option>
-                                                            </select>
-                                                        </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-control" id="projectId" readonly="true">
+                                                            <option value="{{$project['id']}}">{{$project['name']}} </option>
+                                                        </select>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Sub Category</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="sub_category" name="sub_category">
-                                                                <option value="">Select Sub Category from here</option>
-                                                            </select>
-                                                        </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Site Name</label>
+                                                        <span>*</span>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Add Image :</label>
-                                                        </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-control" id="projectId" readonly="true">
+                                                            <option value="{{$site['id']}}">{{$site['name']}} </option>
+                                                        </select>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Image Title</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="image_title" name="image_title">
-                                                        </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Main Category</label>
+                                                        <span>*</span>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <div class="row">
-                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                        </div>
-                                                        <div id="tab_images_uploader_container" class="col-md-offset-5" style="margin-left: 57%">
-                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                                Browse</a>
-                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                <i class="fa fa-share"></i> Upload Files </a>
-                                                        </div>
-                                                        <table class="table table-bordered table-hover" style="width: 613px; margin-top: 1%; margin-left: 26%">
-                                                            <thead>
-                                                            <tr role="row" class="heading">
-                                                                <th> Image </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody id="show-product-images">
-                                                            {{--<tr id="image-">
+                                                    <div class="col-md-6">
+                                                        <select class="form-control" id="projectId" readonly="true">
+                                                            <option value="{{$main_category['id']}}">{{$main_category['name']}} </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Sub Category</label>
+                                                        <span>*</span>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-control" id="projectId" readonly="true">
+                                                            <option value="{{$sub_category['id']}}">{{$sub_category['name']}} </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label for="name" class="control-label">Add Image :</label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="row">
+                                                        <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                    </div>
+                                                    <div id="tab_images_uploader_container" class="col-md-offset-5" style="margin-left: 57%">
+                                                        <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                            Browse</a>
+                                                        <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                            <i class="fa fa-share"></i> Upload Files </a>
+                                                    </div>
+                                                    <table class="table table-bordered table-hover" style="width: 613px; margin-top: 1%; margin-left: 26%">
+                                                        <thead>
+                                                        <tr role="row" class="heading">
+                                                            <th> Image </th>
+                                                            <th> Action </th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody id="show-product-images">
+                                                        @foreach($drawing_image_latest_version as $file)
+                                                            <tr id="image-{{$file['id']}}">
                                                                 <td>
-                                                                    <a href="" target="_blank" class="fancybox-button" data-rel="fancybox-button">
-                                                                        <img class="img-responsive" src="" alt="" style="width:100px; height:100px;"> </a>
-                                                                    <input type="hidden" class="work-order-image-name" name="work_order_images[$image->id][image_name]" id="work-order-image-" value=""/>
+                                                                    <a href="{{$file['encoded_name']}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                                                                        <img class="img-responsive" src="{{$file['encoded_name']}}" alt="" style="width:100px; height:100px;"> </a>
+
+                                                                    <input type="hidden" class="product-image-name" name="work_order_images[{{$file['id']}}][image_name]" id="product-image-name-{{$file['id']}}" value="{{$file['encoded_name']}}"/>
+                                                                    <input type="text"  name="work_order_images[{{$file['id']}}][title]" value="{{$file['title']}}" required/>
                                                                 </td>
                                                                 <td>
-                                                                    <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image");'>
+                                                                    <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$file['id']}}","{{$file['encoded_name']}}",0);'>
                                                                         <i class="fa fa-times"></i> Remove </a>
+                                                                    <button  class="btn btn-default btn-sm myBtn"  value="{{$file['original_id']}}">
+                                                                        <i class="fa fa-plus-square"></i> Add Version </button>
                                                                 </td>
-                                                            </tr>--}}
-                                                            </tbody>
-                                                        </table>
-                                                         {{--<div class="form-group">
-                                                             <button type="submit" class="btn btn-success" style="margin-left: 40%; margin-top:3%">
-                                                                 Submit
-                                                             </button>
-                                                         </div>--}}
-                                                        <button id="version" style="margin-left: 26%"><a href="#"><i class="fa fa-plus"></i> New Version</a></button>
-                                                    </div>
-                                                    <div class="modal fade" id="modal" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static" data-dismiss="modal" data-toggle="modal" href="#lost">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content" style="height: 35%">
-                                                                <div class="modal-header" style="padding-bottom: 10%">
-                                                                    <div class="row">
-                                                                        <div class="col-md-4"></div>
-                                                                        <div class="col-md-7" style="margin-left:1%"> Add New Version</div>
-                                                                        <div class="col-md-1" style="margin-left:-1%"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button></div>
+                                                            </tr>
+                                                        @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" id="path" name="path" value="">
+                                            <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+                                            <div class="modal fade" id="myModal" role="dialog">
+                                                <div class="modal-dialog">
+                                                    <!-- Modal content-->
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <div class="row">
+                                                                <div class="col-md-4"></div>
+                                                                <div class="col-md-4"> Material</div>
+                                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-body" style="padding:40px 50px;">
+                                                            <form action="/drawing/images/add-version" method="POST" enctype="multipart/form-data">
+                                                                {!! csrf_field() !!}
+                                                                <input type="hidden" id="drawing-images-id" name="drawing_images_id">
+                                                                <input type="hidden"  name="site_id" value="{{$site_id}}">
+                                                                <input type="hidden"  name="sub_category_id" value="{{$id}}">
+                                                                <div class="form-group row">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="name" class="control-label">Browse File</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <input type="file" name="file" required>
                                                                     </div>
                                                                 </div>
-                                                                <div class="modal-body">
-                                                                    <form role="form" id="new_version">
-                                                                        <div class="form-group">
-                                                                            <div class="col-md-3" style="text-align: right">
-                                                                                <label for="name" class="control-label">Image Title</label>
-                                                                                <span>*</span>
-                                                                            </div>
-                                                                            <div class="col-md-6">
-                                                                                <input type="text" class="form-control" id="image_title" name="image_title">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="row">
-                                                                            <div id="tab_new_version_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                                        </div>
-                                                                        <div id="tab_new_version_images_uploader_container" class="col-md-offset-5" style="margin-left: 57%">
-                                                                            <a id="tab_new_version_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: -70%">
-                                                                                Browse</a>
-                                                                            <a id="tab_new_version_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                                <i class="fa fa-share"></i> Upload Files </a>
-                                                                        </div>
-                                                                        <button type="submit" id="createNewVersion" class="btn red pull-right"><i class="fa fa-check"></i> Create </button>
-                                                                    </form>
+                                                                <div class="form-group row">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="name" class="control-label">Title</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <input type="text" name="title" required>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                                <input type="submit" class="btn red pull-right" >
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </form>
-                                            <input type="hidden" id="new_path" name="new_path" value="">
-                                            <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -212,10 +206,12 @@
     <script src="/assets/custom/admin/drawing/image/validation.js" type="application/javascript"></script>
     <script>
         $(document).ready(function(){
-            $("#version").click(function(){
-                $("#modal").modal('toggle');
-            });
             EditImage.init();
+            $(".myBtn").click(function(){
+                var id = $(this).val();
+                $('#drawing-images-id').val(id);
+                $("#myModal").modal();
+            });
         });
     </script>
 

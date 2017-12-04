@@ -10,7 +10,7 @@ var QuotationImageUpload = function() {
                 runtimes: "html5,html4",
                 browse_button: document.getElementById("tab_images_uploader_pickfiles"),
                 container: document.getElementById("tab_images_uploader_container"),
-                url: "/quotation/image-upload/"+quotationId,
+                url: "/drawing/images/image-upload/"+quotationId,
                 async:false,
                 multi_selection : true,
                 filters: {

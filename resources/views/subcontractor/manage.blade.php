@@ -50,17 +50,17 @@
                                             <table class="table table-striped table-bordered table-hover" id="subcontractorTable">
                                                 <thead>
                                                 <tr>
-                                                    <th> Employee Id </th>
-                                                    <th> Employee Name </th>
-                                                    <th> Contact No </th>
-                                                    <th> Per Day wages </th>
-                                                    <th> Project Site </th>
+                                                    <th> Subcontractor Name </th>
+                                                    <th> Company Name </th>
+                                                    <th> Primary Contact Person </th>
+                                                    <th> Primary Contact Number </th>
+                                                    <th> Escalation Contact Person </th>
+                                                    <th> Escalation Contact Number </th>
                                                     <th> Status </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-
                                                 </tbody>
                                             </table>
                                         </div>

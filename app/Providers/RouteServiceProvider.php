@@ -20,9 +20,11 @@ use App\ProfitMargin;
 use App\Project;
 use App\ProjectSite;
 use App\PurchaseOrder;
+use App\PurchaseOrderBill;
 use App\Quotation;
 use App\QuotationWorkOrder;
 use App\Role;
+use App\Subcontractor;
 use App\Summary;
 use App\Unit;
 use App\Tax;
@@ -82,6 +84,8 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('materialRequestComponent',MaterialRequestComponents::class);
         Route::model('purchaseOrder',PurchaseOrder::class);
         Route::model('checklistCategory',ChecklistCategory::class);
+        Route::model('purchaseOrderBill',PurchaseOrderBill::class);
+        Route::model('subcontractor',Subcontractor::class);
     }
 
     /**
