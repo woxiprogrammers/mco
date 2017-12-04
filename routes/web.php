@@ -431,8 +431,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageView'));
         Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorListing'));
         Route::get('change-status/{labour}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
-        Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
-        Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
+        Route::get('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
+        Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
 
         Route::group(['prefix' => 'subcontractor-structure'], function(){
             Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
