@@ -69,48 +69,44 @@
                                                     </div>
                                                     <div class="input_fields_wrap">
                                                         <div class="checkpoint">
-                                                            <div class="form-group">
-                                                                <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
-                                                                    <label for="title" class="control-label">Description</label>
-                                                                    <span>*</span>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <input type="text" class="form-control" name="checkpoints[0][description]"  placeholder="Enter Description">
-                                                                    <div id="sample_editable_1_new" class="btn yellow" style="margin-top: -7%; margin-left: 105%">
-                                                                        <button style="color: white" class="add_field_button" id="add">
+                                                            <fieldset>
+                                                                <legend style="margin-left: 15%">Checkpoint -1</legend>
+                                                                <div class="form-group">
+                                                                    <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
+                                                                        <label for="title" class="control-label">Description</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-7">
+                                                                        <input type="text" class="form-control" name="checkpoints[0][description]"  placeholder="Enter Description" style="width: 85%">
+                                                                        <a class="add_field_button btn blue" id="add" style="margin-left: 87%; margin-top: -4.5%">
                                                                             <i class="fa fa-plus"></i>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div style="margin-top: -6%; margin-left: 118% ; font-size: 14px" >
-                                                                        <input type="reset" value="Reset">
-                                                                    </div>
-                                                                    <div id="removeBtn"  style="margin-top: -5%; margin-left: 118%" >
+                                                                        </a>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
-                                                                    <label for="title" class="control-label">Is Remark Mandatory</label>
-                                                                    <span>*</span>
-                                                                </div>
+                                                                <div class="form-group">
+                                                                    <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
+                                                                        <label for="title" class="control-label">Is Remark Mandatory</label>
+                                                                        <span>*</span>
+                                                                    </div>
 
-                                                                <div class="col-md-2">
-                                                                    <select class="form-control" id="sub_cat" name="sub_cat">
-                                                                        <option value="">Select Option</option>
-                                                                        <option value="True">Yes</option>
-                                                                        <option value="False">No</option>
-                                                                    </select>
+                                                                    <div class="col-md-2">
+                                                                        <select class="form-control" id="sub_cat" name="sub_cat">
+                                                                            <option value="">Select Option</option>
+                                                                            <option value="True">Yes</option>
+                                                                            <option value="False">No</option>
+                                                                        </select>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
-                                                                    <label for="title" class="control-label"> No. of Images </label>
-                                                                    <span>*</span>
+                                                                <div class="form-group">
+                                                                    <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
+                                                                        <label for="title" class="control-label"> No. of Images </label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <input type="text" class="form-control" >
+                                                                    </div>
                                                                 </div>
-                                                                <div class="col-md-2">
-                                                                    <input type="text" class="form-control" >
-                                                                </div>
-                                                            </div>
+                                                            </fieldset>
                                                         </div>
                                                     </div>
                                                 </div>
