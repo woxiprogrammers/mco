@@ -35,8 +35,8 @@
                                         <div class="portlet light ">
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
-                                                <div class="portlet-body">
-                                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="manageImageTable">
+                                                  <div class="portlet-body">
+                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="drawingListing">
                                                                 <thead>
                                                                 <tr>
                                                                     <th style="width: 30%"> Sr. No. </th>
@@ -54,16 +54,11 @@
                                                                     </th>
                                                                 </tr>
                                                                 </thead>
-                                                                <tr>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td><a href="/drawing/images/edit">Edit</a></td>
-                                                                </tr>
                                                                 <tbody>
 
                                                                 </tbody>
-                                                            </table>
+                                                         </table>
+                                                  </div>
                                             </div>
                                         </div>
                                     </div>
@@ -76,10 +71,16 @@
         </div>
         @endsection
         @section('javascript')
-
+            <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+            <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+            <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+            <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+            <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+            <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+            <script src="/assets/custom/Drawing/datatable.js" type="text/javascript"></script>
             <script>
                 $(document).ready(function() {
-
+                    $('#mainCategoryTable').DataTable();
                 });
             </script>
 @endsection

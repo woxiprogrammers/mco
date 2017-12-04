@@ -244,6 +244,11 @@
                                     <i class="fa fa-bars"></i> Purchase Order
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Purchase Order Billing
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endif
@@ -273,7 +278,7 @@
                                 </a>
                             </li>
                             <li aria-haspopup="true">
-                                <a href="/checklist/checkList/manage" class="nav-link nav-toggle ">
+                                <a href="/checklist/structure/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Checklist Structure
                                 </a>
                             </li>
@@ -290,8 +295,13 @@
                                 </a>
                             </li>
                             <li aria-haspopup="true">
-                                <a href="/drawing/images/checkList/manage" class="nav-link nav-toggle ">
+                                <a href="/drawing/images/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Add Image
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Manage Drawings
                                 </a>
                             </li>
                         </ul>
@@ -349,7 +359,7 @@
                         </ul>
                     </li>
                     @endif
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Subcontractor
                             <span class="arrow"></span>
                         </a>

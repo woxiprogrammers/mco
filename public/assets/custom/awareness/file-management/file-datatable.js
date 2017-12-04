@@ -23,7 +23,7 @@ var QuotationImageUpload = function() {
                 },
                     {
                         title: "Files",
-                        extensions: "pdf,mp3"
+                        extensions: "pdf,mp4"
                     }]
             },
             flash_swf_url: "/assets/global/plugins/plupload/js/Moxie.swf",

@@ -5,8 +5,6 @@
  * Time: 12:38 PM
  */
 ?>
-
-
 @extends('layout.master')
 @section('title','Constro | Edit Quotation')
 @include('partials.common.navbar')
@@ -14,7 +12,6 @@
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css" />
 <link href="/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
-
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')

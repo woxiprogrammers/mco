@@ -38,53 +38,44 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md-12">
+                                        <form action="/awareness/file-management/edit-awareness" method="post">
                                         <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                         <div class="portlet light ">
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
-                                                    <div class="table-container">
-                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="materialRequest">
-                                                            <thead>
-                                                            <tr>
-                                                                <th></th>
-                                                                <th> M Id </th>
-                                                                <th> Material Name </th>
-                                                                <th> Client Name </th>
-                                                                <th> Project Name  </th>
-                                                                <th> MR Id </th>
-                                                                <th> Created At</th>
-                                                                <th> Status </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            <tr class="filter">
-                                                                <th></th>
-                                                                <th></th>
-                                                                <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
-                                                                <th> </th>
-                                                                <th> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="m_name" id="m_name" readonly></th>
-                                                                <th> </th>
-                                                                <th>
-                                                                    <select class="form-control" id="status_id" name="status_id">
-                                                                        <option value="0">ALL</option>
-                                                                    </select>
-                                                                    <input type="hidden" class="form-control form-filter" name="status" id="status">
-                                                                </th>
-                                                                <th>
-                                                                    <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                                    <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                                </th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody>
-
-                                                            </tbody>
-                                                        </table>
+                                                    <div class="row">
+                                                         <div class="col-md-6">
+                                                             <select class="bs-select form-control" id="mainCategoryId" name="main_category_id">
+                                                                 <option value="">Select Main Category</option>
+                                                                @foreach($main_categories as $category)
+                                                                 <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                                                @endforeach
+                                                             </select>
+                                                         </div>
+                                                        <div class="col-md-6">
+                                                            <select class="bs-select form-control" id="subCategoryId" name="sub_category_id">
+                                                                <option value="">Select Sub Category</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
+                                                    <br><br>
                                                 </div>
                                             </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12" id="imagesTable">
+
+                                                        </div>
+                                                        <div  style="margin-top: 12px;float: right">
+                                                            <button type="submit" class="btn btn-set red pull-right">
+                                                                <i class="fa fa-check"></i>
+                                                                Edit
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
                                         </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -93,6 +84,7 @@
                 </div>
             </div>
         </div>
+    </div>
         @endsection
         @section('javascript')
             <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
@@ -101,4 +93,10 @@
             <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
             <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
             <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+            <script src="/assets/custom/awareness/edit.js" type="text/javascript"></script>
+            <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+            <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+            <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+            <script src="/assets/custom/awareness/file-management/file-datatable.js"></script>
+            <script src="/assets/custom/awareness/file-management/upload-file.js"></script>
 @endsection

@@ -6,8 +6,11 @@ use App\AwarenessFiles;
 use App\AwarenessMainCategory;
 use App\AwarenessSubCategory;
 use App\User;
+use Dompdf\Exception;
+use function foo\func;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +23,8 @@ class FileManagementController extends Controller
     }
     public function getManageView(Request $request){
         try{
-            return view('awareness.file-management.manage');
+            $main_categories = AwarenessMainCategory::select('id','name')->get();
+            return view('awareness.file-management.manage')->with(compact('main_categories'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'manage view',
@@ -76,9 +80,9 @@ class FileManagementController extends Controller
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
             }
             $extension = $request->file('file')->getClientOriginalExtension();
-            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $filename = explode(".",$request->name)[0].'#'.sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
-            $path = env('AWARENESS_TEMP_FILE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user_id['id']).DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.$filename;
+            $path = env('AWARENESS_TEMP_FILE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user_id['id']).DIRECTORY_SEPARATOR.urlencode($filename);
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
@@ -116,7 +120,7 @@ class FileManagementController extends Controller
             $workOrderImagesData = array();
             $files = $request->awareness_files;
             foreach($files as $image){
-                $imageName = basename($image['image_name']);
+                $imageName = urldecode(basename($image['image_name']));
                 $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
                 $workOrderImagesData['file_name'] = $imageName;
                 $workOrderImagesData['awareness_main_category_id']=$request->main_category_id;
@@ -145,6 +149,86 @@ class FileManagementController extends Controller
             abort(500);
 
         }
+    }
+    public function getSubCategories(Request $request){
+        try{
+            $sub_categories = AwarenessSubCategory::where('awareness_main_category_id',$request->id)->select('id','name')->get();
+            $response = [
+              "categories" => $sub_categories
+            ];
+            return Response()->json($response);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
 
+        }
+    }
+    public function getSubCategoriesDetails(Request $request){
+        try{
+            $main_category_id = AwarenessSubCategory::where('id',$request->id)->pluck('awareness_main_category_id')->first();
+            $path = env('AWARENESS_FILE_UPLOAD').DIRECTORY_SEPARATOR.sha1($main_category_id).DIRECTORY_SEPARATOR.sha1($request->id);
+            $files = AwarenessFiles::where('awareness_main_category_id',$main_category_id)->where('awareness_sub_category_id',$request->id)->select('id','file_name')->get();
+            $awareness_files = array();
+            $iterator = 0;
+            foreach ($files as $file){
+                $awareness_files[$iterator]['id'] = $file['id'];
+                $awareness_files[$iterator]['path'] = $path.DIRECTORY_SEPARATOR.urlencode($file['file_name']);
+                $iterator++;
+            }
+            return view('partials.awareness.awareness-edit')->with(compact('awareness_files'));
+        }catch (Exception $e){
+            $status = 500;
+            $message = "Fail";
+            $data = [
+                'action' => 'Get Main Categories',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+    public function edit(Request $request){
+        try{
+            $user_id = Auth::user();
+            $query1 = AwarenessFiles::where('awareness_main_category_id',$request->main_category_id)->where('awareness_sub_category_id',$request->sub_category_id)->delete();
+            $directoryName = sha1($request->main_category_id).DIRECTORY_SEPARATOR.sha1($request->sub_category_id);
+            $tempImageUploadPath = public_path().env('AWARENESS_TEMP_FILE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user_id['id']);
+            $imageUploadPath = public_path().env('AWARENESS_FILE_UPLOAD').DIRECTORY_SEPARATOR.$directoryName;
+            $workOrderImagesData = array();
+            $files = $request->awareness_files;
+            foreach($files as $image){
+                $imageName = urldecode(basename($image['image_name']));
+                $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
+                $workOrderImagesData['file_name'] = $imageName;
+                $workOrderImagesData['awareness_main_category_id']=$request->main_category_id;
+                $workOrderImagesData['awareness_sub_category_id']=$request->sub_category_id;
+                AwarenessFiles::create($workOrderImagesData);
+                if (!file_exists($imageUploadPath)) {
+                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                }
+                if(File::exists($newTempImageUploadPath)){
+                    $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
+                    File::move($newTempImageUploadPath,$imageUploadNewPath);
+                }
+            }
+            if(count(scandir($tempImageUploadPath)) <= 2){
+                rmdir($tempImageUploadPath);
+            }
+            $request->session()->flash('success','Data Saved successfully.');
+            return redirect('/awareness/file-management/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'create view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }
