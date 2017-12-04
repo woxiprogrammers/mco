@@ -1250,8 +1250,6 @@ class PeticashController extends Controller
     public function getLabours(Request $request){
         try{
             $labours = Employee::where('project_site_id',$request['project_site_id'])->get();
-            dd($labours);
-            dd($request->all());
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Labour Create View',
