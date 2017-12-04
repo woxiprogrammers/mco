@@ -356,6 +356,11 @@
                                 </a>
                             </li>
                             @endif
+                            <li aria-haspopup="true">
+                                <a href="/peticash/salary-request/create" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Peticash Salary Request
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endif
