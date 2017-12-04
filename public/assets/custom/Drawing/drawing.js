@@ -8,8 +8,8 @@ $('#clientId').change(function(){
             'id' : client_id,
         },
         success: function(data,textStatus,xhr){
+            var option = '<option>Select Project</option>'
             $.each(data.projects, function( index, value ) {
-                var option = '<option>Select Project</option>'
                 option += '<option value="'+value.id+'">'+value.name+'</option>';
                 $('#projectId').html(option);
             });
@@ -28,8 +28,8 @@ $('#projectId').change(function(){
             'id' : client_id,
         },
         success: function(data,textStatus,xhr){
+            var option = '<option>Select Project Site</option>'
             $.each(data.projects, function( index, value ) {
-                var option = '<option>Select Project Site</option>'
                 option += '<option value="'+value.id+'">'+value.name+'</option>';
                 $('#projectSiteId').html(option);
             });
@@ -48,11 +48,12 @@ $('#main_category_id').change(function(){
             'id' : client_id,
         },
         success: function(data,textStatus,xhr){
+            var option = '<option>Select Sub Category</option>';
             $.each(data.projects, function( index, value ) {
-                var option = '<option>Select Sub Category</option>'
                 option += '<option value="'+value.id+'">'+value.name+'</option>';
-                $('#sub_category_id').html(option);
+                console.log(option);
             });
+            $('#sub_category_id').html(option);
         },
         error: function(data, textStatus, xhr){
         }
