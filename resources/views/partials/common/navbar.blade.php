@@ -387,6 +387,11 @@
                         </a>
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
+                                <a href="/get-pdf" class="nav-link nav-toggle ">
+                                    <i class="fa fa-file" aria-hidden="true"></i>PDF
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
                                 <a href="/awareness/category-management/main-category-manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Category Management
                                 </a>

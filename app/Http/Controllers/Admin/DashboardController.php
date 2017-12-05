@@ -8,6 +8,8 @@ use App\Helper\MaterialProductHelper;
 use App\Quotation;
 use App\Http\Controllers\Controller;
 use ConsoleTVs\Charts\Facades\Charts;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class DashboardController extends Controller
 {
@@ -79,5 +81,13 @@ class DashboardController extends Controller
 
     function generateRandomString($length = 6) {
         return "#".substr(str_shuffle(str_repeat($x='0123456789abcdefABCDEF', ceil($length/strlen($x)) )),1,$length);
+    }
+
+    public function getpdf(Request $request){
+
+        $pdf = App::make('dompdf.wrapper');
+        $pdf->loadHTML(view('pdf'));
+        /*$pdf->setPaper('A4', 'landscape');*/
+        return $pdf->stream();
     }
 }
