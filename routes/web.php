@@ -378,6 +378,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'structure'],function(){
             Route::get('manage',array('uses' => 'Checklist\ChecklistController@getManageView'));
             Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
+            Route::post('create',array('uses' => 'Checklist\ChecklistController@createStructure'));
+            Route::post('get-sub-category',array('uses' => 'Checklist\ChecklistController@getSubCategories'));
         });
     });
 

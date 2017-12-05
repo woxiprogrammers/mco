@@ -1,6 +1,6 @@
 var  CreateCheckListStructure = function () {
     var handleCreate = function() {
-        var form = $('#create-user');
+        var form = $('#createChecklistStructure');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({

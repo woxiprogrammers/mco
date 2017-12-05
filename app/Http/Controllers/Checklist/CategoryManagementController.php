@@ -37,6 +37,9 @@ class CategoryManagementController extends Controller
 
     public function getCategoryManagementListing(Request $request,$slug){
         try {
+            $records = [
+                'data' => array()
+            ];
             switch($slug){
                 case 'main-category':
                     $categoriesData = ChecklistCategory::whereNull('category_id')->orderBy('created_at','desc')->get();
