@@ -167,10 +167,16 @@ class PurchaseController extends Controller
               }
           }
           $iTotalRecords = count($materialRequestList);
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+
           $records = array();
           $records['data'] = array();
           $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
-          for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+          for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
               switch(strtolower($materialRequestList[$pagination]['component_status'])){
                   case 'pending':
                       if(in_array($materialRequestList[$pagination]['component_type_id'],$assetComponentTypeIds)){
@@ -393,7 +399,7 @@ class PurchaseController extends Controller
                         $materialList[$iterator]['material_request_component_type_id'] = $structureMaterialSlug->id;
                         $iterator++;
                     }*/
-                    if(count($materialList) == 0){
+                    /*if(count($materialList) == 0){
                         $materialList[$iterator]['material_name'] = null;
                         $systemUnits = Unit::where('is_active',true)->get();
                         $j = 0;
@@ -406,7 +412,7 @@ class PurchaseController extends Controller
                         $newMaterialSlug = MaterialRequestComponentTypes::where('slug','new-material')->first();
                         $materialList[$iterator]['material_request_component_type_slug'] = $newMaterialSlug->slug;
                         $materialList[$iterator]['material_request_component_type_id'] = $newMaterialSlug->id;
-                    }
+                    }*/
                     $data= $materialList;
                     break;
                 case "asset" :
@@ -422,14 +428,14 @@ class PurchaseController extends Controller
                         $assetList[$iterator]['material_request_component_type_id'] = $systemAssetStatus->id;
                         $iterator++;
                     }
-                    if(count($assetList) == 0){
+                    /*if(count($assetList) == 0){
                         $assetList[$iterator]['asset_id'] = null;
                         $assetList[$iterator]['asset_name'] = null;
                         $assetList[$iterator]['asset_unit'] = $assetUnit;
                         $newAssetSlug = MaterialRequestComponentTypes::where('slug','new-asset')->first();
                         $assetList[$iterator]['material_request_component_type_slug'] = $newAssetSlug->slug;
                         $assetList[$iterator]['material_request_component_type_id'] = $newAssetSlug->id;
-                    }
+                    }*/
                     $data = $assetList;
                     break;
             }
@@ -747,7 +753,12 @@ class PurchaseController extends Controller
               $records = array();
               $iterator = 0;
               $records['data'] = array();
-              for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+              if($request->length == -1){
+                  $length = $iTotalRecords;
+              }else{
+                  $length = $request->length;
+              }
+              for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
                   $records['data'][$iterator] = [
                       $materialRequestList[$pagination]['rm_id'],
                       $materialRequestList[$pagination]['client_name'],

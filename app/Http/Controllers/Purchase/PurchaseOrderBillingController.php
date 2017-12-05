@@ -176,6 +176,7 @@ class PurchaseOrderBillingController extends Controller
     use MaterialRequestTrait;
     public function createBill(Request $request){
         try{
+            dd(234);
             $purchaseOrderBillData = $request->except('_token','project_site_id','bill_images','transaction_id','sub_total');
             $today = Carbon::now();
             $purchaseOrderBillCount = PurchaseOrderBill::whereDate('created_at', $today)->count();
@@ -232,7 +233,12 @@ class PurchaseOrderBillingController extends Controller
             $records["draw"] = intval($request->draw);
             $purchaseOrderBillData = PurchaseOrderBill::orderBy('created_at','desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
+            if($request->length == -1){
+                $length = $records["recordsTotal"];
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     $purchaseOrderBillData[$pagination]['bill_number'],
                     $purchaseOrderBillData[$pagination]->purchaseOrder->format_id,

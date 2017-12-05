@@ -205,7 +205,12 @@ class PurchaseOrderController extends Controller
             $iTotalRecords = count($purchaseOrderList);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
                 $actionData = "";
                 if ($purchaseOrderList[$pagination]['chk_status'] == true) {
                     $actionData =  '<div id="sample_editable_1_new" class="btn btn-small blue" >

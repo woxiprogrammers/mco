@@ -228,11 +228,11 @@ function selectProject(nameProject,id) {
         source: assetList.ttAdapter(),
         limit: 30,
         templates: {
-            empty: [
+            /*empty: [
                 '<div class="empty-suggest">',
                 'Unable to find any Result that match the current query',
                 '</div>'
-            ].join('\n'),
+            ].join('\n'),*/
             suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
         },
     }).on('typeahead:selected', function (obj, datum) {
@@ -280,11 +280,11 @@ function selectProject(nameProject,id) {
         source: materialList.ttAdapter(),
         limit: 30,
         templates: {
-            empty: [
+            /*empty: [
                 '<div class="empty-suggest">',
                 'Unable to find any Result that match the current query',
                 '</div>'
-            ].join('\n'),
+            ].join('\n'),*/
             suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
         },
     }).on('typeahead:selected', function (obj, datum) {
