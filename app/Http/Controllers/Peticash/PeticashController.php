@@ -1341,7 +1341,8 @@ class PeticashController extends Controller
 
     public function getPurchaseManageView(Request $request){
         try{
-            return view('peticash.peticash-management.purchase.manage');
+            $clients = Client::where('is_active', true)->get();
+            return view('peticash.peticash-management.purchase.manage')->with(compact('clients'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Management View',
@@ -1354,7 +1355,8 @@ class PeticashController extends Controller
     }
     public function getSalaryManageView(Request $request){
         try{
-            return view('peticash.peticash-management.salary.manage');
+            $clients = Client::where('is_active', true)->get();
+            return view('peticash.peticash-management.salary.manage')->with(compact('clients'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Salary Management View',
@@ -1363,5 +1365,198 @@ class PeticashController extends Controller
             ];
             Log::critical(json_encode($data));
         }
+    }
+    public function purchaseTransactionListing(Request $request){
+        try{
+            $status = 200;
+            $postdata = null;
+            $emp_name = null;
+            $site_id = 0;
+            $month = 0;
+            $year = 0;
+            $postDataArray = array();
+            if($request->has('postdata')) {
+                $postdata = $request['postdata'];
+                if($postdata != null) {
+                    $mstr = explode(",",$request['postdata']);
+                    foreach($mstr as $nstr)
+                    {
+                        $narr = explode("=>",$nstr);
+                        $narr[0] = str_replace("\x98","",$narr[0]);
+                        $ytr[1] = $narr[1];
+                        $postDataArray[$narr[0]] = $ytr[1];
+                    }
+                }
+                $site_id = $postDataArray['site_id'];
+                $month = $postDataArray['month'];
+                $year = $postDataArray['year'];
+            }
+            $ids = PurcahsePeticashTransaction::all()->pluck('id');
+            $filterFlag = true;
+
+            if ($site_id != 0 && $filterFlag == true) {
+                $ids = PurcahsePeticashTransaction::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($request->has('search_employee_id') && $filterFlag == true) {
+                $ids = PurcahsePeticashTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
+                    ->whereIn('peticash_salary_transactions.id',$ids)
+                    ->where('employees.employee_id','ilike','%'.$request->search_employee_id.'%')
+                    ->pluck('peticash_salary_transactions.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($year != 0 && $filterFlag == true) {
+                $ids = PurcahsePeticashTransaction::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($month != 0 && $filterFlag == true) {
+                $ids = PurcahsePeticashTransaction::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($filterFlag) {
+                $purchaseTransactionData = PurcahsePeticashTransaction::whereIn('id',$ids)->orderBy('id','desc')->get();
+            }
+            $iTotalRecords = count($purchaseTransactionData);
+            $records = array();
+            $records['data'] = array();
+            $assetTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-asset','system-asset'])->pluck('id')->toArray();
+            $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
+                if($purchaseTransactionData[$pagination]->reference_id != null){
+                    if(in_array($purchaseTransactionData[$pagination]->component_type_id,$assetTypeIds)){
+                        $name = $purchaseTransactionData[$pagination]->asset->name;
+                    }else{
+                        $name = $purchaseTransactionData[$pagination]->material->name;
+                    }
+                }else{
+                    $name = '';
+                }
+                $records['data'][] = [
+                    $purchaseTransactionData[$pagination]->id,
+                    $name,
+                    $purchaseTransactionData[$pagination]->quantity,
+                    $purchaseTransactionData[$pagination]->unit->name,
+                    $purchaseTransactionData[$pagination]->amount,
+                    $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
+                    date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
+                    $purchaseTransactionData[$pagination]->projectSite->project->name.' - '.$purchaseTransactionData[$pagination]->projectSite->name,
+                    '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Transaction Listing',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            $records = array();
+            $status = 500;
+            Log::critical(json_encode($data));
+        }
+        return response()->json($records,$status);
+    }
+    public function salaryTransactionListing(Request $request){
+        try{
+            $status = 200;
+            $postdata = null;
+            $emp_name = null;
+            $site_id = 0;
+            $month = 0;
+            $year = 0;
+            $postDataArray = array();
+            if($request->has('postdata')) {
+                $postdata = $request['postdata'];
+                if($postdata != null) {
+                    $mstr = explode(",",$request['postdata']);
+                    foreach($mstr as $nstr)
+                    {
+                        $narr = explode("=>",$nstr);
+                        $narr[0] = str_replace("\x98","",$narr[0]);
+                        $ytr[1] = $narr[1];
+                        $postDataArray[$narr[0]] = $ytr[1];
+                    }
+                }
+                $site_id = $postDataArray['site_id'];
+                $month = $postDataArray['month'];
+                $year = $postDataArray['year'];
+            }
+            $ids = PeticashSalaryTransaction::all()->pluck('id');
+            $filterFlag = true;
+
+            if ($site_id != 0 && $filterFlag == true) {
+                $ids = PeticashSalaryTransaction::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($request->has('search_employee_id') && $filterFlag == true) {
+                $ids = PeticashSalaryTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
+                                    ->whereIn('peticash_salary_transactions.id',$ids)
+                                    ->where('employees.employee_id','ilike','%'.$request->search_employee_id.'%')
+                                    ->pluck('peticash_salary_transactions.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($year != 0 && $filterFlag == true) {
+                $ids = PeticashSalaryTransaction::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($month != 0 && $filterFlag == true) {
+                $ids = PeticashSalaryTransaction::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($filterFlag) {
+                $salaryTransactionData = PeticashSalaryTransaction::whereIn('id',$ids)->orderBy('id','desc')->get();
+            }
+            $iTotalRecords = count($salaryTransactionData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    $salaryTransactionData[$pagination]->id,
+                    $salaryTransactionData[$pagination]->employee->employee_id,
+                    $salaryTransactionData[$pagination]->employee->name,
+                    $salaryTransactionData[$pagination]->peticashTransactionType->name,
+                    $salaryTransactionData[$pagination]->amount,
+                    $salaryTransactionData[$pagination]->payable_amount,
+                    $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
+                    date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
+                    $salaryTransactionData[$pagination]->projectSite->project->name.' - '.$salaryTransactionData[$pagination]->projectSite->name,
+                    '<a class="btn blue" href="javascript:void(0)" onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]->id.')">Details</a>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => 'Get Salary Transaction Listing',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            $records = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($records,$status);
     }
 }

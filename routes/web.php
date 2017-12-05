@@ -500,9 +500,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 //            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
             Route::group(['prefix' => 'purchase'], function(){
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getPurchaseManageView'));
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@purchaseTransactionListing'));
             });
             Route::group(['prefix' => 'salary'], function(){
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
             });
         });
     });
