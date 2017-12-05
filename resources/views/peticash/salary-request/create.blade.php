@@ -39,26 +39,32 @@
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-client" class="form-horizontal" method="post" action="/salary-request/create">
+                                            <form role="form" id="create-client" class="form-horizontal" method="post" action="/peticash/salary-request/create">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
-                                                    <div class="form-group row">
-                                                        <div class="form-group">
-                                                            <label class="col-md-3 control-label">Project Sites</label>
-                                                            <div class="col-md-6">
-                                                                <select class="form-control" id="project_sites" name="project_site_id">
-                                                                    <option value="">Select Project Site</option>
-                                                                    @foreach($projectSites as $projectSite)
-                                                                        <option value="{{$projectSite['id']}}">{{$projectSite['name']}}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
+                                                    <div class="row" style="margin-left: 5%">
+                                                        <div class="col-md-4 form-group">
+                                                            <select class="form-control" id="clientId" style="width: 80%;">
+                                                                <option value=""> -- Select Client -- </option>
+                                                                @foreach($clients as $client)
+                                                                    <option value="{{$client['id']}}"> {{$client['company']}} </option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
+                                                        <div class="col-md-4 form-group">
+                                                            <select id="projectId" class="form-control" style="width: 80%;">
+                                                                <option value=""> -- Select Project -- </option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4 form-group">
+                                                            <select name="project_site_id" id="projectSiteId" class="form-control" style="width: 80%;">
+                                                                <option value=""> -- Select Project site -- </option>
+                                                            </select>
+                                                        </div>
+
                                                     </div>
-                                                </div>
-                                                <div class="form-actions noborder row">
-                                                    <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
+                                                    <div class="table-scrollable" id="employeeTableDiv" hidden>
+
                                                     </div>
                                                 </div>
                                             </form>
@@ -75,22 +81,69 @@
 @endsection
 @section('javascript')
     <script>
-        $('#project_sites').on('change',function(){
-            $.ajax({
-                url: '/peticash/salary-request/get-labours',
-                type: 'POST',
-                async: false,
-                data :{
-                    'project_site_id' : $('#project_sites').val()
-                },
-                success: function(data,textStatus,xhr){
-                    if(xhr.status == 200){
-                        $('#amount_limit').html(data);
-                    }
-                },
-                error: function(data, textStatus, xhr){
+        $(document).ready(function(){
+            $("#clientId").on('change', function(){
+                var clientId = $(this).val();
+                if(clientId == ""){
+                    $('#projectId').prop('disabled', false);
+                    $('#projectId').html('');
+                    $('#projectSiteId').prop('disabled', false);
+                    $('#projectSiteId').html('');
+                }else{
+                    $.ajax({
+                        url: '/peticash/projects/'+clientId,
+                        type: 'GET',
+                        async: true,
+                        success: function(data,textStatus,xhr){
+                            $('#projectId').html(data);
+                            $('#projectId').prop('disabled', false);
+                            var projectId = $("#projectId").val();
+                            $("#projectId").trigger('change');
+                        },
+                        error: function(){
 
+                        }
+                    });
                 }
+
+            });
+            $("#projectId").on('change', function(){
+                var project_id = $("#projectId").val();
+                $.ajax({
+                    url: '/peticash/project-sites/'+project_id,
+                    type: 'GET',
+                    async: true,
+                    success: function(data,textStatus,xhr){
+                        if(data.length > 0){
+                            $('#projectSiteId').html(data);
+                            $('#projectSiteId').prop('disabled', false);
+                            $("#projectSiteId").trigger('change');
+                        }else{
+                            $('#projectSiteId').html("");
+                            $('#projectSiteId').prop('disabled', false);
+                        }
+                    },
+                    error: function(){
+
+                    }
+                });
+            });
+            $('#projectSiteId').on('change',function(){
+                $.ajax({
+                    url: '/peticash/salary-request/get-labours',
+                    type: 'POST',
+                    async: false,
+                    data :{
+                        'project_site_id' : $('#projectSiteId').val()
+                    },
+                    success: function(data,textStatus,xhr){
+                        $("#employeeTableDiv").html(data);
+                        $("#employeeTableDiv").show();
+                    },
+                    error: function(data, textStatus, xhr){
+
+                    }
+                });
             });
         });
     </script>
