@@ -350,12 +350,12 @@
                                 <ul class="dropdown-menu pull-left">
                                     <li aria-haspopup="true">
                                         <a href="/peticash/peticash-management/purchase/manage" class="nav-link nav-toggle ">
-                                            <i class="fa fa-sitemap"></i> Purchase Request
+                                            <i class="fa fa-sitemap"></i> Purchase
                                         </a>
                                     </li>
                                     <li aria-haspopup="true">
                                         <a href="/peticash/peticash-management/salary/manage" class="nav-link nav-toggle ">
-                                            <i class="fa fa-bars"></i> Salary Request
+                                            <i class="fa fa-bars"></i> Salary
                                         </a>
                                     </li>
                                 </ul>

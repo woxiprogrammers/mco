@@ -59,7 +59,7 @@
                                                                 <th> Available  </th>
                                                                 <th> Action </th>
                                                             </tr>
-                                                            <tr class="filter">
+                                                            {{--<tr class="filter">
                                                                 <th> <input type="text" class="form-control form-filter" name="search_project" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_name" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
@@ -69,7 +69,7 @@
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                 </th>
-                                                            </tr>
+                                                            </tr>--}}
                                                             </thead>
                                                             <tbody>
 
