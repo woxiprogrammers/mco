@@ -106,16 +106,6 @@
                                                         </div>
                                                     </div>
                                                     <div class="table-container">
-                                                        <div class="table-actions-wrapper right">
-                                                            <span> </span>
-                                                            <select class="table-group-action-input form-control input-inline input-small input-sm">
-                                                                <option value="">Select...</option>
-                                                                <option value="Cancel">Approve</option>
-                                                                <option value="Cancel">Disapprove</option>
-                                                            </select>
-                                                            <button class="btn btn-sm green table-group-action-submit">
-                                                                <i class="fa fa-check"></i> Submit</button>
-                                                        </div>
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseManageTable">
                                                             <thead>
                                                             <tr>
@@ -153,6 +143,171 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="detailsPurchaseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <form class="modal-content" method="post">
+                                            {!! csrf_field() !!}
+                                            <div class="modal-header">
+                                                <div class="row">
+                                                    <div class="col-md-8"><center><h4 class="modal-title" id="exampleModalLongTitle">Purchase Transaction Details : </h4></center></div>
+                                                    <div class="col-md-4"><button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-body">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-12" style="text-align: right;">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Material/Asset Name : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="mat_name" name="mat_name" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Project Site Name : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="project_site_name" name="project_site_name" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Transaction Type  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="txn_type" name="txn_type" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>GRN : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="txn_grn" name="txn_grn" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Source Name : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="src_name" name="src_name" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Component Type : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="cmp_type" name="cmp_type" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Quantity : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="purchase_qty" name="purchase_qty" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Unit Name : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="unit_name" name="unit_name" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Bill Amount : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="bill_amt" name="bill_amt" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Bill Number : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="bill_number" name="bill_number" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>vehicle Number : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="veh_number" name="veh_number" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>In Time : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="in_time" name="in_time" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Out Time : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="out_time" name="out_time" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Reference Number : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="reference_number" name="reference_number" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Payment Type : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="pay_type" name="pay_type" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Date  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="txn_date" name="txn_date" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Remark  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="txn_remark" name="txn_remark" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Admin Remark  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="admin_remark" name="admin_remark" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -235,6 +390,41 @@
                     }
                 },
                 error: function(errorStatus,xhr){
+
+                }
+            });
+        }
+
+        function detailsPurchaseModal(txnId) {
+            $.ajax({
+                url:'/peticash/peticash-approval-request/manage-purchase-details-ajax',
+                type: "POST",
+                data: {
+                    _token : $("input[name='_token']").val(),
+                    txn_id : txnId
+                },
+                success: function(data, textStatus, xhr){
+                    $("#mat_name").val(data.name);
+                    $("#project_site_name").val(data.project_site_name);
+                    $("#txn_type").val(data.peticash_transaction_type);
+                    $("#txn_grn").val(data.grn);
+                    $("#src_name").val(data.source_name);
+                    $("#cmp_type").val(data.component_type);
+                    $("#purchase_qty").val(data.quantity);
+                    $("#unit_name").val(data.unit_name);
+                    $("#bill_amt").val(data.bill_amount);
+                    $("#bill_number").val(data.bill_number);
+                    $("#veh_number").val(data.vehicle_number);
+                    $("#in_time").val(data.in_time);
+                    $("#out_time").val(data.out_time);
+                    $("#reference_number").val(data.reference_number);
+                    $("#pay_type").val(data.payment_type);
+                    $("#txn_date").val(data.date);
+                    $("#txn_remark").val(data.remark);
+                    $("#admin_remark").val(data.admin_remark);
+                    $("#detailsPurchaseModal").modal('show');
+                },
+                error: function(data){
 
                 }
             });

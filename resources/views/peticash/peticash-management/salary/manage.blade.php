@@ -106,16 +106,6 @@
                                                         </div>
                                                     </div>
                                                     <div class="table-container">
-                                                        <div class="table-actions-wrapper right">
-                                                            <span> </span>
-                                                            <select class="table-group-action-input form-control input-inline input-small input-sm">
-                                                                <option value="">Select...</option>
-                                                                <option value="Cancel">Approve</option>
-                                                                <option value="Cancel">Disapprove</option>
-                                                            </select>
-                                                            <button class="btn btn-sm green table-group-action-submit">
-                                                                <i class="fa fa-check"></i> Submit</button>
-                                                        </div>
                                                         <table class="table table-striped table-bordered table-hover order-column" id="peticashSalaryManage">
                                                             <thead>
                                                                 <tr>
@@ -155,6 +145,107 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="detailsSalaryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <form class="modal-content" method="post">
+                                            {!! csrf_field() !!}
+                                            <div class="modal-header">
+                                                <div class="row">
+                                                    <div class="col-md-8"><center><h4 class="modal-title" id="exampleModalLongTitle">Salary Transaction Details : </h4></center></div>
+                                                    <div class="col-md-4"><button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-body">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-12" style="text-align: right;">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Employee Name : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="employee_name" name="employee_name" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Project Site Name : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="project_site_name" name="project_site_name" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Transaction Type  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="txn_type" name="txn_type" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Amount : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="txn_amount" name="txn_amount" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Payable Amount : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="payable_amount" name="payable_amount" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Requested By : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="reference_user_name" name="reference_user_name" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Date  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="txn_date" name="txn_date" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Working Days  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="working_days" name="working_days" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Remark  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="txn_remark" name="txn_remark" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label>Admin Remark  : </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="admin_remark" name="admin_remark" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -237,6 +328,33 @@
                     }
                 },
                 error: function(errorStatus,xhr){
+
+                }
+            });
+        }
+
+        function detailsSalaryModal(txnId) {
+            $.ajax({
+                url:'/peticash/peticash-approval-request/manage-salary-details-ajax',
+                type: "POST",
+                data: {
+                    _token : $("input[name='_token']").val(),
+                    txn_id : txnId
+                },
+                success: function(data, textStatus, xhr){
+                    $("#employee_name").val(data.employee_name);
+                    $("#project_site_name").val(data.project_site_name);
+                    $("#txn_amount").val(data.amount);
+                    $("#payable_amount").val(data.payable_amount);
+                    $("#reference_user_name").val(data.reference_user_name);
+                    $("#txn_date").val(data.date);
+                    $("#working_days").val(data.days);
+                    $("#txn_remark").val(data.remark);
+                    $("#admin_remark").val(data.admin_remark);
+                    $("#txn_type").val(data.peticash_transaction_type);
+                    $("#detailsSalaryModal").modal('show');
+                },
+                error: function(data){
 
                 }
             });

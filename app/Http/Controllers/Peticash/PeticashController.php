@@ -1449,7 +1449,7 @@ class PeticashController extends Controller
                     $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
                     date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
                     $purchaseTransactionData[$pagination]->projectSite->project->name.' - '.$purchaseTransactionData[$pagination]->projectSite->name,
-                    ''
+                    '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>'
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -1539,9 +1539,9 @@ class PeticashController extends Controller
                     $salaryTransactionData[$pagination]->amount,
                     $salaryTransactionData[$pagination]->payable_amount,
                     $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
-                    $salaryTransactionData[$pagination]->date,
+                    date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
                     $salaryTransactionData[$pagination]->projectSite->project->name.' - '.$salaryTransactionData[$pagination]->projectSite->name,
-                    ''
+                    '<a class="btn blue" href="javascript:void(0)" onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]->id.')">Details</a>'
                 ];
             }
             $records["draw"] = intval($request->draw);
