@@ -37,7 +37,6 @@
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
-
                                         <div class="portlet-body form">
                                             <form role="form" id="create-main" class="form-horizontal" method="POST" action="/drawing/category-management/create-main-category">
                                                 {!! csrf_field() !!}

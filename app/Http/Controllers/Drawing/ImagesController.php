@@ -6,6 +6,7 @@ use App\Client;
 use App\DrawingCategory;
 use App\DrawingCategorySiteRelation;
 use App\DrawingImage;
+use App\DrawingImageComment;
 use App\DrawingImageVersion;
 use App\Project;
 use App\ProjectSite;
@@ -40,9 +41,12 @@ class ImagesController extends Controller
     }
     public function getEditView(Request $request,$id,$site_id){
         try{
-               $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
-               $clients = Client::select('id','company')->get();
+               $site = ProjectSite::where('id',$site_id)->select('id','project_id','name')->first()->toArray();
+               $project = Project::where('id',$site['project_id'])->select('id','name','client_id')->first()->toArray();
+               $client = Client::where('id',$project['client_id'])->select('id','company')->first()->toArray();
                $main_category_id = DrawingCategory::where('id',$id)->pluck('drawing_category_id')->first();
+               $main_category = DrawingCategory::where('id',$main_category_id)->select('id','name')->first()->toArray();
+               $sub_category = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
                $drawing_category_site_relation_id = DrawingCategorySiteRelation::where('drawing_category_id',$id)
                                                     ->where('project_site_id',$site_id)
                                                     ->pluck('id')->toArray();
@@ -65,7 +69,7 @@ class ImagesController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
-        return view('drawing/images/edit')->with(compact('project_site','path','drawing_image_latest_version','categories','clients','site_id','id'));
+        return view('drawing/images/edit')->with(compact('site','project','client','main_category','sub_category','project_site','path','drawing_image_latest_version','clients','site_id','id'));
     }
 
     public function uploadTempDrawingImages(Request $request){
@@ -265,7 +269,7 @@ class ImagesController extends Controller
             return redirect('/drawing/images/edit/'.$request->sub_category_id.'/'.$request->site_id);
         }catch(\Exception $e){
             $data = [
-                'action' => 'Listing',
+                'action' => 'Version create',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -301,10 +305,61 @@ class ImagesController extends Controller
                 $drawing_image_latest_version[$iterator] =DrawingImageVersion:: where('drawing_image_id',$value)->orderBy('id','desc')->select('id','title','name')->first()->toArray();
                 $drawing_image_latest_version[$iterator]['encoded_name'] = $path.DIRECTORY_SEPARATOR.urlencode($drawing_image_latest_version[$iterator]['name']);
                 $drawing_image_latest_version[$iterator]['iterator'] = $iterator;
-
                 $iterator++;
             }
             return view('partials/drawing/images-table')->with(compact('drawing_image_latest_version'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+    public function getDetails(Request $request,$id){
+        try{
+            $file_name = DrawingImageVersion::where('id',$id)->pluck('name')->first();
+            $comments = DrawingImageComment::where('drawing_image_version_id',$id)->select('comment')->get()->toArray();
+            $images_id = DrawingImageVersion::where('id',$id)->pluck('drawing_image_id')->first();
+            $project = DrawingImage::where('id',$images_id)->pluck('drawing_category_site_relation_id')->first();
+            $project_details = DrawingCategorySiteRelation::where('id',$project)->select('project_site_id','drawing_category_id')->first()->toArray();
+            $path = env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.sha1($project_details['project_site_id']).DIRECTORY_SEPARATOR.sha1($project_details['drawing_category_id']);
+            $image_src = $path.DIRECTORY_SEPARATOR.urlencode($file_name);
+            return view('drawing/images/image-details')->with(compact('comments','image_src','id'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+    public function getAllVersions(Request $request){
+        try{
+            $id = DrawingImageVersion::where('id',$request->id)->pluck('drawing_image_id')->first();
+            $versions = DrawingImageVersion::where('drawing_image_id',$id)->select('id','title','name')->get();
+            return response()->json($versions);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+    public function addComment(Request $request){
+        try{
+            $imageData['comment'] = $request->comment;
+            $imageData['drawing_image_version_id'] = $request->drawing_image_version_id;
+            $query = DrawingImageComment::create($imageData);
+            $request->session()->flash('success','Comment Added Successfully.');
+            return redirect('/drawing/images/get-details/'.$request->drawing_image_version_id);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Listing',

@@ -37,57 +37,24 @@
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
-
                                         <div class="portlet-body form">
-                                            <form role="form" id="edit-main" class="form-horizontal" method="" action="#">
+                                            <form role="form" id="create-main" class="form-horizontal" method="POST" action="/drawing/category-management/edit-main-category">
                                                 {!! csrf_field() !!}
+                                                <input type="hidden" name="id" value="{{$main_category['id']}}">
                                                 <div class="form-body">
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Client Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="client_name" name="client_name">
-                                                                <option value="">Select Client Name from here</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Project Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="project_name" name="project_name">
-                                                                <option value="">Select Project Name from here</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Site Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="site_name" name="site_name">
-                                                                <option value="">Select Site Name from here</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="name" class="control-label">Name of Main Category</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="main_category" name="main_category">
+                                                            <input type="text" class="form-control" id="main_category" name="main_category" value="{{$main_category['name']}}" required>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button type="submit" class="btn red" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                        <button type="submit" class="btn red" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Edit</button>
                                                     </div>
                                                 </div>
                                             </form>
