@@ -490,12 +490,20 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
         Route::group(['prefix' => 'salary-request'], function(){
             Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryRequestCreateView'));
+            Route::post('create',array('uses' => 'Peticash\PeticashController@createSalaryRequestCreate'));
             Route::post('get-labours',array('uses' => 'Peticash\PeticashController@getLabours'));
+            Route::post('change-status',array('uses' => 'Peticash\PeticashController@salaryRequestedChangeStatus'));
         });
 
 
         Route::group(['prefix' => 'peticash-management'], function(){
-            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+//            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+            Route::group(['prefix' => 'purchase'], function(){
+                Route::get('manage',array('uses' => 'Peticash\PeticashController@getPurchaseManageView'));
+            });
+            Route::group(['prefix' => 'salary'], function(){
+                Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
+            });
         });
     });
 
