@@ -328,39 +328,39 @@
                             </li>
                             @endif
                             @if($user->hasPermissionTo('approve-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
-                            <li aria-haspopup="true"  class="dropdown-submenu">
-                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
-                                    <i class="fa fa-check"></i> Peticash Request Approval
-                                </a>
-                                <ul class="dropdown-menu pull-left">
-                                    <li aria-haspopup="true">
-                                        <a href="/peticash/peticash-approval-request/manage-purchase-list" class="nav-link nav-toggle ">
-                                            <i class="fa fa-sitemap"></i> Purchase Request
-                                        </a>
-                                    </li>
-                                    <li aria-haspopup="true">
-                                        <a href="/peticash/peticash-approval-request/manage-salary-list" class="nav-link nav-toggle ">
-                                            <i class="fa fa-bars"></i> Salary Request
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            @endif
-                            @if($user->hasPermissionTo('view-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
-                            <li aria-haspopup="true">
-                               <!-- <a href="/peticash/peticash-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-database"></i> Peticash Management
-                                </a>-->
-                                <a href="#" class="nav-link nav-toggle ">
-                                    <i class="fa fa-database"></i> Peticash Management
-                                </a>
-                            </li>
+                                <li aria-haspopup="true">
+                                    <a href="/peticash/peticash-approval-request/manage-salary-list" class="nav-link nav-toggle ">
+                                        <i class="fa fa-check"></i> Peticash Salary Request Approval
+                                    </a>
+                                </li>
                             @endif
                             <li aria-haspopup="true">
                                 <a href="/peticash/salary-request/create" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Peticash Salary Request
                                 </a>
                             </li>
+                            @if($user->hasPermissionTo('view-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+                                <li aria-haspopup="true" class="dropdown-submenu">
+                               <!-- <a href="/peticash/peticash-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-database"></i> Peticash Management
+                                </a>-->
+                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                    <i class="fa fa-database"></i> Peticash Management
+                                </a>
+                                <ul class="dropdown-menu pull-left">
+                                    <li aria-haspopup="true">
+                                        <a href="/peticash/peticash-management/purchase/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-sitemap"></i> Purchase Request
+                                        </a>
+                                    </li>
+                                    <li aria-haspopup="true">
+                                        <a href="/peticash/peticash-management/salary/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-bars"></i> Salary Request
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            @endif
                         </ul>
                     </li>
                     @endif

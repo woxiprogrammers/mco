@@ -1339,4 +1339,29 @@ class PeticashController extends Controller
         }
     }
 
+    public function getPurchaseManageView(Request $request){
+        try{
+            return view('peticash.peticash-management.purchase.manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Management View',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+    public function getSalaryManageView(Request $request){
+        try{
+            return view('peticash.peticash-management.salary.manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Salary Management View',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
 }
