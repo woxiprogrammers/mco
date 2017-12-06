@@ -144,7 +144,8 @@ class PurchaseController extends Controller
             $materialRequestList = array();
             $iterator = 0;
             foreach($materialRequests as $key => $materialRequest){
-                foreach($materialRequest->materialRequestComponents as $key => $materialRequestComponents){
+                $materialRequestComponentArray = MaterialRequestComponents::where('material_request_id',$materialRequest->id)->orderBy('id','desc')->get();
+                foreach($materialRequestComponentArray as $key => $materialRequestComponents){
                   $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponents->id;
                   $materialRequestList[$iterator]['name'] = $materialRequestComponents->name;
                   $materialRequestList[$iterator]['quantity'] = $materialRequestComponents->quantity;
