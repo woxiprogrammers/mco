@@ -1431,18 +1431,9 @@ class PeticashController extends Controller
             $assetTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-asset','system-asset'])->pluck('id')->toArray();
             $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
-                if($purchaseTransactionData[$pagination]->reference_id != null){
-                    if(in_array($purchaseTransactionData[$pagination]->component_type_id,$assetTypeIds)){
-                        $name = $purchaseTransactionData[$pagination]->asset->name;
-                    }else{
-                        $name = $purchaseTransactionData[$pagination]->material->name;
-                    }
-                }else{
-                    $name = '';
-                }
                 $records['data'][] = [
                     $purchaseTransactionData[$pagination]->id,
-                    $name,
+                    $purchaseTransactionData[$pagination]->name,
                     $purchaseTransactionData[$pagination]->quantity,
                     $purchaseTransactionData[$pagination]->unit->name,
                     $purchaseTransactionData[$pagination]->amount,
@@ -1523,6 +1514,7 @@ class PeticashController extends Controller
                     $filterFlag = false;
                 }
             }
+            $salaryTransactionData = array();
             if ($filterFlag) {
                 $salaryTransactionData = PeticashSalaryTransaction::whereIn('id',$ids)->orderBy('id','desc')->get();
             }

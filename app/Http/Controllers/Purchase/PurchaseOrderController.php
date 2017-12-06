@@ -1053,4 +1053,97 @@ class PurchaseOrderController extends Controller
         }
         return response()->json($response,$status);
     }
+
+    public function getTransactionEditView(Request $request, $purchaseOrderTransaction){
+        try{
+            $purchaseOrder = $purchaseOrderTransaction->purchaseOrder;
+            $vendorName = $purchaseOrder->vendor->name;
+            $materialList = array();
+            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
+            $iterator = 0;
+            if($purchaseOrderTransaction->purchaseOrderTransactionStatus->slug == 'grn-generated'){
+                $purchaseOrderComponents = $purchaseOrder->purchaseOrderComponent;
+            }else{
+                $purchaseOrderComponentIds = PurchaseOrderTransactionComponent::where('purchase_order_transaction_id',$purchaseOrderTransaction->id)->pluck('purchase_order_component_id')->toArray();
+                $purchaseOrderComponents = PurchaseOrderComponent::whereIn('id',$purchaseOrderComponentIds)->get();
+            }
+            foreach($purchaseOrderComponents as $key => $purchaseOrderComponent){
+                $materialRequestComponent = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent;
+                $materialList[$iterator]['purchase_order_component_id'] = $purchaseOrderComponent['id'];
+                $materialList[$iterator]['material_request_component_id'] = $materialRequestComponent['id'];
+                $materialList[$iterator]['name'] = $materialRequestComponent['name'];
+                $materialList[$iterator]['material_component_unit_id'] = $materialRequestComponent['unit_id'];
+                $materialList[$iterator]['material_component_unit_name'] = $materialRequestComponent->unit->name;
+                $materialList[$iterator]['material_component_quantity'] = $materialRequestComponent->quantity;
+                $materialList[$iterator]['unit_id'] = $purchaseOrderComponent->unit_id;
+                $materialList[$iterator]['units'] = array();
+                if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                    $purchaseOrderComponentData[$iterator]['units'] = Unit::where('slug','nos')->select('id','name')->get()->toArray();
+                    $asset = Asset::where('name','ilike',$materialList[$iterator]['name'])->first();
+                    $otherAssetTypeId = AssetType::where('slug','other')->pluck('id')->first();
+                    if($asset != null && $asset->asset_types_id != $otherAssetTypeId){
+                        $quantityIsFixed = true;
+                    }else{
+                        $quantityIsFixed = false;
+                    }
+                }else{
+                    $quantityIsFixed = false;
+                    $newMaterialTypeId = MaterialRequestComponentTypes::where('slug', 'new-material')->pluck('id')->first();
+                    if ($newMaterialTypeId == $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id) {
+                        $materialList[$iterator]['units'] = Unit::where('is_active', true)->select('id', 'name')->orderBy('name')->get()->toArray();
+                    } else {
+                        $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
+                        $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
+                            ->where('unit_conversions.unit_1_id', $material->unit_id)
+                            ->select('units.id as id', 'units.name as name')
+                            ->get()
+                            ->toArray();
+                        $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
+                            ->where('unit_conversions.unit_2_id', $material->unit_id)
+                            ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
+                            ->select('units.id as id', 'units.name as name')
+                            ->get()
+                            ->toArray();
+                        $materialList[$iterator]['units'] = array_merge($unit1Array, $units2Array);
+                        $materialList[$iterator]['units'][] = [
+                            'id' => $material->unit->id,
+                            'name' => $material->unit->name,
+                        ];
+                    }
+                }
+                $iterator++;
+            }
+            $preGrnImages = PurchaseOrderTransactionImage::where('purchase_order_transaction_id',$purchaseOrderTransaction->id)->where('is_pre_grn', true)->get();
+            $postGrnImages = PurchaseOrderTransactionImage::where('purchase_order_transaction_id',$purchaseOrderTransaction->id)->where('is_pre_grn', false)->get();
+            $purchaseOrderDirectoryName = sha1($purchaseOrderTransaction->purchase_order_id);
+            $purchaseTransactionDirectoryName = sha1($purchaseOrderTransaction->id);
+            $imageUploadPath = env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
+            $preGrnImagePaths = array();
+            $postGrnImagePaths = array();
+            $iterator = 0;
+            while($iterator < count($preGrnImages) && $iterator < count($postGrnImages)){
+                $preGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$preGrnImages[$iterator]->name;
+                $postGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$postGrnImages[$iterator]->name;
+                $iterator++;
+            }
+            while($iterator < count($postGrnImages)){
+                $postGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$postGrnImages[$iterator]->name;
+                $iterator++;
+            }
+            while($iterator < count($preGrnImages)){
+                $preGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$preGrnImages[$iterator]->name;
+                $iterator++;
+            }
+            return view('partials.purchase.purchase-order.edit-transaction')->with(compact('purchaseOrderTransaction','preGrnImagePaths','postGrnImagePaths','materialList','vendorName'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Order Transaction Edit View',
+                'params' => $request->all(),
+                'transaction' => $purchaseOrderTransaction,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
+        }
+    }
 }

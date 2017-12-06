@@ -287,6 +287,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
                 Route::get('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionDetails'));
                 Route::get('check-generated-grn/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@checkGeneratedGRN'));
+                Route::get('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionEditView'));
             });
         });
 
