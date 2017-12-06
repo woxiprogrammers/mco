@@ -32,6 +32,7 @@
                         </div>
                     </div>
                     <div class="page-content">
+                        @include('partials.common.messages')
                         <div class="container">
                             <div class="row">
                                 <div class="col-md-12">
@@ -115,7 +116,6 @@
                                                     <th> Name </th>
                                                     <th> Type </th>
                                                     <th> Amount</th>
-                                                    <th> Payable Amount</th>
                                                     <th> Requested By </th>
                                                     <th> Date </th>
                                                     <th> Site Details </th>
@@ -130,7 +130,6 @@
                                                     <th> <input type="number" class="form-filter" name="emp_id" id="emp_id"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
-                                                    <th></th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -509,7 +508,7 @@
                 if (txnIds.length > 0) {
                     if (remark != "") {
                         $.ajax({
-                            url:'/peticash/change-status',
+                            url:'/peticash/salary-request/change-status',
                             type: "POST",
                             data: {
                                 _token: $("input[name='_token']").val(),
@@ -536,7 +535,7 @@
                 if (remark != "") {
                     txnIds[0] = txnValue;
                     $.ajax({
-                        url:'/peticash/change-status',
+                        url:'/peticash/salary-request/change-status',
                         type: "POST",
                         data: {
                             _token: $("input[name='_token']").val(),
@@ -571,7 +570,7 @@
                 if (txnIds.length > 0) {
                     if (remark != "") {
                         $.ajax({
-                            url:'/peticash/change-status',
+                            url:'/peticash/salary-request/change-status',
                             type: "POST",
                             data: {
                                 _token: $("input[name='_token']").val(),
