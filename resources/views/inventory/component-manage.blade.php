@@ -358,6 +358,14 @@
                                                         <label class="control-label"> Project: Project Site Name</label>
                                                     </div>
                                                     <div class="form-group">
+                                                        <input type="hidden" name="unit_id" value="{{$nosUnitId}}">
+                                                        <label class="control-label"> Unit: Nos</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <label class="control-label"> Quantity: 1</label>
+                                                    </div>
+                                                    <div class="form-group">
                                                         <textarea class="form-control" placeholder="Remark" name="remark" id="remark"></textarea>
                                                     </div>
                                                     <div class="form-group">
