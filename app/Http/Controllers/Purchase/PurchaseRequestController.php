@@ -84,7 +84,7 @@ class PurchaseRequestController extends Controller
                                                                             ->where('material_request_components.id',$materialRequestComponent->id)
                                                                             ->pluck('purchase_request_component_vendor_relation.vendor_id')->toArray();
                     if($materialRequestComponentID == $materialRequestComponent->component_type_id){
-                        $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id');
+                        $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id')->first();
                         $vendorAssignedIds = VendorMaterialRelation::where('material_id',$material_id)->pluck('vendor_id');
                         if(count($vendorAssignedIds) > 0){
                             $materialRequestComponentDetails[$iterator]['vendors'] = Vendor::whereIn('id',$vendorAssignedIds)->select('id','company')->get()->toArray();

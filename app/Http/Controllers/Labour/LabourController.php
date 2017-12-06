@@ -196,9 +196,9 @@ class LabourController extends Controller
     public function editLabour(Request $request,$labour){
         try{
             if($request['project_site_id'] != -1){
-                $updateLabourData = $request->except('_token');
+                $updateLabourData = $request->except('_token','profile_image');
             }else{
-                $updateLabourData = $request->except('_token','project_site_id');
+                $updateLabourData = $request->except('_token','project_site_id','profile_image');
             }
             $updateLabourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
             Employee::where('id',$labour['id'])->update($updateLabourData);
@@ -229,7 +229,6 @@ class LabourController extends Controller
                 }else{
                     $employeeProfilePic->update(['name' => $filename]);
                 }
-
             }
             $request->session()->flash('success', 'Labour Edited successfully.');
             return redirect('/labour/edit/'.$labour->id);
