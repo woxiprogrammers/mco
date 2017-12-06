@@ -242,6 +242,21 @@ function selectProject(nameProject,id) {
         .on('typeahead:open', function (obj, datum) {
             $('#component_id').val(4);
         });
+    $.ajax({
+       url:'/purchase/purchase-request/get-in-indent-components',
+       type: 'POST',
+       data:{
+           _token: $("input[name='_token']").val(),
+           project_site_id: project_site_id
+       },
+       success: function(data,textStatus,xhr){
+            $("#collapseOne table tbody").html(data);
+            $("#indentPanel").show();
+       },
+       error: function(errorData){
+
+       }
+    });
 }
 function selectUser(id,id1) {
     $('#user_id_').val(id1);

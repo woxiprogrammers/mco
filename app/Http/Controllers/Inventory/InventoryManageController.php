@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Client;
 use App\FuelAssetReading;
+use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
@@ -12,6 +13,7 @@ use App\InventoryTransferTypes;
 use App\Material;
 use App\ProjectSite;
 use App\Quotation;
+use App\QuotationMaterial;
 use App\Unit;
 use App\UnitConversion;
 use Carbon\Carbon;
@@ -88,6 +90,7 @@ class InventoryManageController extends Controller
             }else{
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
+            $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
             $inTransfers = InventoryTransferTypes::where('type','ilike','IN')->get();
             $inTransferTypes = '<option value=""> -- Select Transfer Type -- </option>';
             foreach($inTransfers as $transfer){
@@ -98,7 +101,7 @@ class InventoryManageController extends Controller
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable'));
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -122,22 +125,56 @@ class InventoryManageController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryData); $iterator++,$pagination++ ){
+                $quotation = Quotation::where('project_site_id',$inventoryData[$pagination]->project_site_id)->first();
+                $quotationMaterialUnit = QuotationMaterial::join('materials','materials.id','=','quotation_materials.material_id')
+                                                ->where('materials.name','ilike',$inventoryData[$pagination]->name)
+                                                ->where('quotation_materials.quotation_id',$quotation->id)
+                                                ->pluck('quotation_materials.unit_id')
+                                                ->first();
+                $unitName = Unit::where('id',$quotationMaterialUnit)->pluck('name')->first();
                 $projectName = $inventoryData[$pagination]->projectSite->project->name.' - '.$inventoryData[$pagination]->projectSite->name.' ('.$inventoryData[$pagination]->projectSite->project->client->company.')';
-                $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
-                                                ->where('inventory_transfer_types.type','ilike','in')
-                                                ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
-                                                ->sum('inventory_component_transfers.quantity');
-                $outQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
-                                                ->where('inventory_transfer_types.type','ilike','out')
-                                                ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
-                                                ->sum('inventory_component_transfers.quantity');
+                if($inventoryData[$pagination]->is_material == true){
+                    $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->where('inventory_transfer_types.type','ilike','in')
+                        ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                        ->get();
+
+                    $outTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->where('inventory_transfer_types.type','ilike','out')
+                        ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                        ->get();
+                    $inQuantity = $outQuantity = 0;
+                    foreach($inTransferQuantities as $inTransferQuantity){
+                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$quotationMaterialUnit,$inTransferQuantity['quantity']);
+                        if(!is_array($unitConversionQuantity)){
+                            $inQuantity += $unitConversionQuantity;
+                        }
+                    }
+                    foreach($outTransferQuantities as $outTransferQuantity){
+                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($outTransferQuantity['unit_id'],$quotationMaterialUnit,$outTransferQuantity['quantity']);
+                        if(!is_array($unitConversionQuantity)){
+                            $outQuantity += $unitConversionQuantity;
+                        }
+                    }
+                }else{
+                    $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->where('inventory_transfer_types.type','ilike','in')
+                        ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->sum('inventory_component_transfers.quantity');
+                    $outQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->where('inventory_transfer_types.type','ilike','out')
+                        ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->sum('inventory_component_transfers.quantity');
+                }
                 $availableQuantity = $inQuantity - $outQuantity;
                 $records['data'][$iterator] = [
                     $projectName,
                     $inventoryData[$pagination]->name,
-                    $inQuantity,
-                    $outQuantity,
-                    $availableQuantity,
+                    $inQuantity.' '.$unitName,
+                    $outQuantity.' '.$unitName,
+                    $availableQuantity.' '.$unitName,
                     '<div class="btn btn-xs green">
                         <a href="/inventory/component/manage/'.$inventoryData[$pagination]->id.'" style="color: white">
                              Manage
