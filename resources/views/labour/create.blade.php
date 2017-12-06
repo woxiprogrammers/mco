@@ -7,6 +7,7 @@
     <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="/assets/global/plugins/fancybox/source/jquery.fancybox.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/css/app.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -78,6 +79,21 @@
                                                                 <input type="radio" name="gender" id="male" value="m"> Male
                                                                 <span></span>
                                                             </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="name" class="control-label">Profile Picture :</label>
+                                                            <span>*</span>
+                                                        </div>                                                        &nbsp;&nbsp;&nbsp;
+                                                        <div class="col-md-6">
+                                                            <input id="imageupload" type="file" class="btn blue" multiple />
+                                                            <br />
+                                                            <div class="row">
+                                                                <div id="preview-image" class="row">
+
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -281,6 +297,32 @@
 
             $('#employee_type').on('change',function(){
                 getEmployeeId($('#employee_type').val());
+            });
+
+            $("#imageupload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#preview-image");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-4"><input type="hidden" name="profile_image" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.html(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                            $("#grnImageUplaodButton").show();
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
             });
         });
 
