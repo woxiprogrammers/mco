@@ -625,6 +625,9 @@
                                                     <div class="tab-pane fade in" id="miscellaneousFormTab">
                                                         <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                             <tr>
+                                                                <th style="width: 13%; text-align: center" >
+                                                                    Is Client supplied?
+                                                                </th>
                                                                 <th  style="text-align: center"> Category name </th>
                                                                 <th style="text-align: center"> Material name </th>
                                                                 <th  style="text-align: center"> Rate per unit </th>
@@ -633,6 +636,13 @@
                                                             </tr>
                                                             @foreach($quotationMiscellaneousMaterials as $key => $miscellaneousMaterial)
                                                                 <tr id = "id_{{$miscellaneousMaterial['material_id']}}">
+                                                                    <td>
+                                                                        @if(array_key_exists('is_client_supplied',$miscellaneousMaterial) && $miscellaneousMaterial['is_client_supplied'] == true)
+                                                                            <input type="checkbox" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][is_client_supplied]" checked>
+                                                                        @else
+                                                                            <input type="checkbox" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][is_client_supplied]">
+                                                                        @endif
+                                                                    </td>
                                                                     <td>
                                                                         <span>{{$miscellaneousMaterial['category_name']}}</span>
                                                                     </td>
