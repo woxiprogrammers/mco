@@ -176,7 +176,6 @@ class PurchaseOrderBillingController extends Controller
     use MaterialRequestTrait;
     public function createBill(Request $request){
         try{
-            dd(234);
             $purchaseOrderBillData = $request->except('_token','project_site_id','bill_images','transaction_id','sub_total');
             $today = Carbon::now();
             $purchaseOrderBillCount = PurchaseOrderBill::whereDate('created_at', $today)->count();
