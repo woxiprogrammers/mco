@@ -1422,13 +1422,13 @@ class PeticashController extends Controller
                     $filterFlag = false;
                 }
             }
+            $purchaseTransactionData = array();
             if ($filterFlag) {
                 $purchaseTransactionData = PurcahsePeticashTransaction::whereIn('id',$ids)->orderBy('id','desc')->get();
             }
             $iTotalRecords = count($purchaseTransactionData);
             $records = array();
             $records['data'] = array();
-            $assetTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-asset','system-asset'])->pluck('id')->toArray();
             $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
                 $records['data'][] = [
