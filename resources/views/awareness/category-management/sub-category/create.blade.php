@@ -38,7 +38,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="bs-select form-control" id="purchaseRequestId" name="awareness_main_category_id">
+                                                            <select class="bs-select form-control" id="purchaseRequestId" name="awareness_main_category_id" required>
                                                               @foreach($main_categories as $main_category)
                                                                   <option value="{{$main_category['id']}}">{{$main_category['name']}}</option>
                                                               @endforeach
@@ -53,7 +53,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="name" name="name">
+                                                            <input type="text" class="form-control" id="name" name="name" required>
                                                         </div>
                                                     </div>
                                                 </div>

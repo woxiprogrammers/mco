@@ -39,13 +39,19 @@
                                                 <div class="portlet-body form">
                                                     <div class="row">
                                                         <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <select class="bs-select form-control" id="purchaseRequestId" name="purchase_request_id">
-                                                                    <option value="">--Select Purchase Request--</option>
+                                                            <div class="btn-group " style="width: 100%;">
+                                                                <button type="button" class="multiselect dropdown-toggle mt-multiselect btn btn-default" data-toggle="dropdown"  aria-expanded="true" style="width: 100%; overflow: hidden; text-overflow: ellipsis;">
+                                                                    Select Purchase Request
+                                                                    <b class="caret"></b>
+                                                                    <div id="purchaseRequestID">
+
+                                                                    </div>
+                                                                </button>
+                                                                <ul class="multiselect-container dropdown-menu" style="height: 1000%;overflow-y: scroll">
                                                                     @foreach($purchaseRequests as $purchaseRequestId =>$purchaseRequestFormat)
-                                                                        <option value="{{$purchaseRequestId}}">{{$purchaseRequestFormat}}</option>
+                                                                        <li style="height: 10%"><a tabindex="0"><label class="checkbox"><button type="button" onclick="getDetails({{$purchaseRequestId}})">View Detail</button>&nbsp;&nbsp;<b onclick="getData({{$purchaseRequestId}})">{{$purchaseRequestFormat}}</b> </label></a></li>
                                                                     @endforeach
-                                                                </select>
+                                                                </ul>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
@@ -60,6 +66,9 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                    <div class="row">
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -174,6 +183,26 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="modal fade" id="mymodal4" role="dialog">
+                            <div class="modal-dialog">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header" style="padding-bottom:10px">
+                                        <div class="row">
+                                            <div class="col-md-4"></div>
+                                            <div class="col-md-4" style="font-size: larger"> Details</div>
+                                            <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-body" >
+                                            <div id="detailsId">
+
+                                            </div>
+                                            <br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -190,44 +219,63 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script>
-        $(document).ready(function(){
-            $("#purchaseRequestId").on('change',function(){
-                var purchaseRequestId = $(this).val();
-                if(typeof purchaseRequestId == 'undefined' || purchaseRequestId == ''){
+             function getDetails(purchaseRequestId){
+                 var data = '<input type="hidden" name="purchase_request_id" value="'+purchaseRequestId+'">';
+                 $('#purchaseRequestID').html(data);
+                 $.ajax({
+                     url: '/purchase/purchase-order/get-purchase-order-details/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
+                     type: 'GET',
+                     async: true,
+                     success: function (data, textStatus, xhr) {
+                         if (xhr.status == 203) {
+                             alert(data.message);
+                         } else {
+                             console.log(data);
+                             $('#mymodal4').modal();
+                             $("#detailsId").html(data);
+                         }
+
+                     },
+                     error: function (errorData) {
+                         alert('Something went wrong');
+                     }
+                 });
+             };
+             function getData (purchaseRequestId) {
+                if (typeof purchaseRequestId == 'undefined' || purchaseRequestId == '') {
                     $('#client').val('');
                     $('#project').val('');
                     $('#purchaseRequest').hide();
-                }else{
+                } else {
                     $.ajax({
-                        url:'/purchase/purchase-order/get-client-project/'+purchaseRequestId+'?_token='+$('input[name="_token"]').val(),
+                        url: '/purchase/purchase-order/get-client-project/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
                         type: 'GET',
-                        success: function(data,textStatus,xhr){
+                        success: function (data, textStatus, xhr) {
                             $('#client').val(data.client);
                             $('#project').val(data.project);
                         },
-                        error: function(errorData){
+                        error: function (errorData) {
                         }
                     });
                     $.ajax({
-                        url: '/purchase/purchase-order/get-purchase-request-component/'+purchaseRequestId+'?_token='+$('input[name="_token"]').val(),
+                        url: '/purchase/purchase-order/get-purchase-request-component/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
                         type: 'GET',
                         async: true,
-                        success: function(data,textStatus,xhr){
-                            if(xhr.status == 203){
+                        success: function (data, textStatus, xhr) {
+                            if (xhr.status == 203) {
                                 alert(data.message);
-                            }else{
+                            } else {
                                 $("#purchaseRequest tbody").html(data);
                                 $('#purchaseRequest').show();
                             }
 
                         },
-                        error: function(errorData){
+                        error: function (errorData) {
                             alert('Something went wrong');
                         }
                     });
                 }
-            });
-        });
+            };
 
     </script>
     <script>
