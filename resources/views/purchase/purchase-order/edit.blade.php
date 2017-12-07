@@ -128,12 +128,12 @@
                                                                         <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                                     </div>
                                                                 </div>
-                                                            <div class="modal-body">
-                                                                <form role="form" class="form-horizontal" method="post">
+                                                                <div class="modal-body">
+                                                                    <form role="form" class="form-horizontal" method="post">
                                                                     {!! csrf_field() !!}
-                                                                    <div class="form-body">
-                                                                        <div class="form-group row">
-                                                                            <div class="col-md-12" style="text-align: right">
+                                                                        <div class="form-body">
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-12" style="text-align: right">
                                                                                 <input type="text" class="form-control empty typeahead tt-input" id="material_name" placeholder="Enter material name" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="qty" placeholder="Enter Quantity" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="unit" placeholder="Enter Unit" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
@@ -158,6 +158,9 @@
 
                                                                                                 </div>
                                                                                     </div>
+                                                                            </div>
+                                                                        </div>
+
                                                                             </div>
                                                                         </div>
                                                                     </form>
