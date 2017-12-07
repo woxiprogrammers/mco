@@ -48,7 +48,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="main_category" name="main_category_id">
+                                                            <select class="form-control" id="main_category" name="main_category_id" required>
                                                                 <option value="">Select Main Category from here</option>
                                                                 @foreach($categories as $category)
                                                                     <option value="{{$category['id']}}">{{$category['name']}}</option>
@@ -62,7 +62,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="sub_category" name="sub_category">
+                                                            <input type="text" class="form-control" id="sub_category" name="sub_category" required>
                                                         </div>
                                                     </div>
                                                 </div>
