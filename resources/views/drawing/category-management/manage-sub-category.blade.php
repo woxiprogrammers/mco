@@ -55,7 +55,7 @@
                                                                     <th> Actions </th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
+                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name" readonly> </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                                     <th>

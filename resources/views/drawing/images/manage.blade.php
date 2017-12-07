@@ -39,13 +39,13 @@
                                                          <table class="table table-striped table-bordered table-hover table-checkable order-column" id="drawingListing">
                                                                 <thead>
                                                                 <tr>
-                                                                    <th style="width: 30%"> Sr. No. </th>
+                                                                    <th style="width: 30%"> Site name </th>
                                                                     <th> Name of Main Category </th>
                                                                     <th> Name of Sub Category </th>
                                                                     <th> Actions </th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_sr"> </th>
+                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_sr" readonly> </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_main" readonly> </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_sub" readonly> </th>
                                                                     <th>
@@ -69,6 +69,7 @@
                 </div>
             </div>
         </div>
+    </div>
         @endsection
         @section('javascript')
             <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
