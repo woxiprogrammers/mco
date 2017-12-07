@@ -806,11 +806,6 @@ class PurchaseController extends Controller
             switch($newStatus){
                 case 'admin-approved':
                     $componentIds = $request->component_id;
-                    if($request->has('request')){
-                        $remark = $request->remark;
-                    }else{
-                        $remark = '';
-                    }
                     foreach($componentIds as $componentId){
                         $materialRequestComponent = MaterialRequestComponents::where('id',$componentId)->first();
                         if($materialRequestComponent->purchaseRequestComponentStatuses->slug == 'pending'){
@@ -825,7 +820,7 @@ class PurchaseController extends Controller
                             $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
                             $materialComponentHistoryData = array();
                             $materialComponentHistoryData['component_status_id'] = $adminApproveComponentStatusId;
-                            $materialComponentHistoryData['remark'] = $remark;
+                            $materialComponentHistoryData['remark'] = $request->remark;
                             $materialComponentHistoryData['user_id'] = Auth::user()->id;
                             $materialComponentHistoryData['material_request_component_id'] = $componentId;
                             if($materialRequestComponent['component_type_id'] == $quotationMaterialType->id){
@@ -848,13 +843,9 @@ class PurchaseController extends Controller
                                     ->whereIn('product_material_relation.material_version_id',$materialVersions)
                                     ->sum(DB::raw('quotation_products.quantity * product_material_relation.material_quantity'));
                                 $allowedQuantity = $material_quantity - $usedQuantity;
-                                if((int)$materialRequestComponent['quantity'] < $allowedQuantity){
-                                    MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
-                                    $message = "Status Updated Successfully";
-                                    MaterialRequestComponentHistory::create($materialComponentHistoryData);
-                                }else{
-                                    $message = "Allowed quantity is ".$allowedQuantity;
-                                }
+                                MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
+                                MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                                $message = "Status Updated Successfully";
                             }else{
                                 MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
                                 $message = "Status Updated Successfully";
@@ -894,6 +885,7 @@ class PurchaseController extends Controller
                     MaterialRequestComponentHistory::create($materialComponentHistoryData);
                     break;
             }
+            $request->session()->flash('success', "Status updated successfully.");
             return redirect('/purchase/material-request/manage');
         }catch(\Exception $e){
             $data = [
