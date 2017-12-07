@@ -41,7 +41,7 @@
                                                         <div class="col-md-4">
                                                             <div class="btn-group " style="width: 100%;">
                                                                 <button type="button" class="multiselect dropdown-toggle mt-multiselect btn btn-default" data-toggle="dropdown"  aria-expanded="true" style="width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                                                                    Select Purchase Request
+                                                                    <div id="po_id_div">Select Purchase Request</div>
                                                                     <b class="caret"></b>
                                                                     <div id="purchaseRequestID">
 
@@ -49,7 +49,7 @@
                                                                 </button>
                                                                 <ul class="multiselect-container dropdown-menu" style="height: 1000%;overflow-y: scroll">
                                                                     @foreach($purchaseRequests as $purchaseRequestId =>$purchaseRequestFormat)
-                                                                        <li style="height: 10%"><a tabindex="0"><label class="checkbox"><button type="button" onclick="getDetails({{$purchaseRequestId}})">View Detail</button>&nbsp;&nbsp;<b onclick="getData({{$purchaseRequestId}})">{{$purchaseRequestFormat}}</b> </label></a></li>
+                                                                        <li style="height: 10%"><a tabindex="0"><label class="checkbox"><button type="button" onclick="getDetails({{$purchaseRequestId}})">View Detail</button>&nbsp;&nbsp;<b onclick="getData('{{$purchaseRequestId}}','{{$purchaseRequestFormat}}')">{{$purchaseRequestFormat}}</b> </label></a></li>
                                                                     @endforeach
                                                                 </ul>
                                                             </div>
@@ -220,6 +220,7 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script>
              function getDetails(purchaseRequestId){
+
                  var data = '<input type="hidden" name="purchase_request_id" value="'+purchaseRequestId+'">';
                  $('#purchaseRequestID').html(data);
                  $.ajax({
@@ -241,7 +242,8 @@
                      }
                  });
              };
-             function getData (purchaseRequestId) {
+             function getData (purchaseRequestId,po_id_div) {
+                 $('#po_id_div').html(po_id_div);
                 if (typeof purchaseRequestId == 'undefined' || purchaseRequestId == '') {
                     $('#client').val('');
                     $('#project').val('');
