@@ -349,6 +349,23 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <div class="modal fade" id="editTransactionModal" role="dialog">
+                                                        <div class="modal-dialog transaction-modal" style="width: 90%; ">
+                                                            <!-- Modal content-->
+                                                            <div class="modal-content" style="overflow: scroll !important;">
+                                                                <div class="modal-header">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4"></div>
+                                                                        <div class="col-md-4" style="font-size: 18px"> Purchase Order Transaction</div>
+                                                                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-body" style="padding:40px 50px;">
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     <div class="modal fade " id="amendmentModal"  role="dialog">
                                                         <div class="modal-dialog">
                                                             <!-- Modal content-->
@@ -397,6 +414,7 @@
                                                                     </thead>
                                                                     <tbody>
                                                                         @foreach($purchaseOrderTransactionListing as $purchaseOrderTransaction)
+                                                                            {{dd($purchaseOrderTransaction)}}
                                                                             <tr>
                                                                                 <td>
                                                                                     <input type="hidden" value="{{$purchaseOrderTransaction['purchase_order_transaction_id']}}">
@@ -564,6 +582,18 @@
 
             $(".transaction-edit-btn").on('click', function(){
                var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
+               console.log(transactionId);
+               $.ajax({
+                    url:'/purchase/purchase-order/transaction/edit/'+transactionId+'?_token='+$('input[name="_token"]').val(),
+                    type: 'GET',
+                    success: function(data,textStatus,xhr){
+                        $("#editTransactionModal .modal-body").html(data);
+                        $("#editTransactionModal").modal('show');
+                    },
+                    error: function(errorStatus){
+
+                    }
+               });
             });
 
             $("#transactionButton").on('click',function(){
