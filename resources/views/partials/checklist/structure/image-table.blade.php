@@ -24,10 +24,10 @@
                 {!! $iterator+1 !!}.
             </td>
             <td>
-                <input type="text" class="form-control" name="checklist[{{$index}}][images][{{$iterator}}][caption]">
+                <input type="text" class="form-control" name="checkpoints[{{$index}}][images][{{$iterator}}][caption]">
             </td>
             <td>
-                <select class="form-control" name="checklist[{{$index}}][images][{{$iterator}}][is_required]">
+                <select class="form-control" name="checkpoints[{{$index}}][images][{{$iterator}}][is_required]">
                     <option value="true">Yes</option>
                     <option value="false">No</option>
                 </select>

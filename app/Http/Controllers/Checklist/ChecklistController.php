@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\CheckList;
 
 use App\ChecklistCategory;
+use App\ChecklistCheckpoint;
+use App\ChecklistCheckpointImages;
 use App\Http\Controllers\CustomTraits\CheckListTrait;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -68,7 +70,26 @@ class ChecklistController extends Controller
 
     public function createStructure(Request $request){
         try {
-            dd($request->all());
+            $checkpointData = [
+                'checklist_category_id' => $request->sub_category_id
+            ];
+            foreach($request->checkpoints as $checkpointInfo){
+                $checkpointData['description'] = $checkpointInfo['description'];
+                $checkpointData['is_remark_required'] = ($checkpointInfo['is_mandatory'] == 'true')? true : false;
+                $checkpoint = ChecklistCheckpoint::create($checkpointData);
+                if(array_key_exists('images',$checkpointInfo)){
+                    $checkpointImageData = [
+                        'checklist_checkpoint_id' => $checkpoint->id
+                    ];
+                    foreach ($checkpointInfo['images'] as $imageData){
+                        $checkpointImageData['caption'] = $imageData['caption'];
+                        $checkpointImageData['is_required'] = ($imageData['is_required'] == 'true')? true : false;;
+                        ChecklistCheckpointImages::create($checkpointImageData);
+                    }
+                }
+            }
+            $request->session()->flash('success','Checkpoints created successfully.');
+            return redirect('/checklist/structure/manage');
         } catch (\Exception $e) {
             $data = [
                 'action' => "Create Checklist Structure",
@@ -107,6 +128,38 @@ class ChecklistController extends Controller
             ];
             Log::critical(json_encode($data));
         }
+    }
+
+    public function structureListing(Request $request){
+        try{
+            $status = 200;
+            $checkpointsData = ChecklistCheckpoint::select('id','checklist_category_id')->distinct('checklist_category_id')->orderBy('id','desc')->get();
+            $records = array();
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $records["recordsFiltered"] = count($checkpointsData);
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($checkpointsData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($checkpointsData); $iterator++,$pagination++ ){
+                $checklistCategory = ChecklistCategory::findOrFail($checkpointsData[$pagination]['checklist_category_id']);
+                $records['data'][] = [
+                    ($iterator+1),
+                    $checklistCategory->mainCategory->name,
+                    $checklistCategory->name,
+                    ChecklistCheckpoint::where('checklist_category_id',$checklistCategory->id)->count(),
+                    ''
+                ];
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get Checklist structure listing",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = array();
+        }
+        return response()->json($records,$status);
     }
 }
 

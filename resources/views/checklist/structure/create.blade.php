@@ -15,27 +15,27 @@
                 <div class="page-container">
                     <!-- BEGIN CONTENT -->
                     <div class="page-content-wrapper">
-                        <div class="page-head">
-                            <div class="container">
-                                <!-- BEGIN PAGE TITLE -->
-                                <div class="page-title">
-                                    <h1>Create CheckList</h1>
-                                </div>
-                                <div class="form-group " style="float: right;margin-top:1%">
-                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
+                        <form role="form" id="createChecklistStructureForm" class="form-horizontal" method="post" action="/checklist/structure/create">
+                            {!! csrf_field() !!}
+                            <div class="page-head">
+                                <div class="container">
+                                    <!-- BEGIN PAGE TITLE -->
+                                    <div class="page-title">
+                                        <h1>Create CheckList</h1>
+                                    </div>
+                                    <div class="form-group " style="float: right;margin-top:1%">
+                                        <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="page-content">
-                            @include('partials.common.messages')
-                            <div class="container">
-                                <div class="col-md-11">
-                                    <!-- BEGIN VALIDATION STATES-->
-                                    <div class="portlet light ">
-                                        <input type="hidden" id="numberOfCheckpoints" value="1">
-                                        <div class="portlet-body form">
-                                            <form role="form" id="createChecklistStructure" class="form-horizontal" method="post" action="/checklist/structure/create">
-                                                {!! csrf_field() !!}
+                            <div class="page-content">
+                                @include('partials.common.messages')
+                                <div class="container">
+                                    <div class="col-md-11">
+                                        <!-- BEGIN VALIDATION STATES-->
+                                        <div class="portlet light ">
+                                            <input type="hidden" id="numberOfCheckpoints" value="1">
+                                            <div class="portlet-body form">
                                                 <div class="form-body">
                                                     <div class="form-group">
                                                         <div class="col-md-5" style="text-align: right; margin-left: -6% ; font-size: 14px">
@@ -72,7 +72,7 @@
                                                                         <span>*</span>
                                                                     </div>
                                                                     <div class="col-md-7">
-                                                                        <textarea class="form-control" name="checkpoints[0][description]"  placeholder="Enter Description" style="width: 85%"></textarea>
+                                                                        <textarea class="form-control checkpoint-description" name="checkpoints[0][description]"  placeholder="Enter Description" style="width: 85%"></textarea>
                                                                         <a class="add_field_button btn blue" id="add" style="margin-left: 87%; margin-top: -4.5%">
                                                                             <i class="fa fa-plus"></i>
                                                                         </a>
@@ -105,45 +105,19 @@
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <div class="col-md-7 col-md-offset-3 image-table-section">
-                                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column">
-                                                                            <tr>
-                                                                                <th>
-                                                                                    No.
-                                                                                </th>
-                                                                                <th>
-                                                                                    Caption
-                                                                                </th>
-                                                                                <th>
-                                                                                    Is Required
-                                                                                </th>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>
-                                                                                    1.
-                                                                                </td>
-                                                                                <td>
-                                                                                    <input type="text" class="form-control" name="checklist[0][images][0][caption]">
-                                                                                </td>
-                                                                                <td>
-                                                                                    <select class="form-control" name="checklist[0][images][0][is_required]">
-                                                                                        <option value="true">Yes</option>
-                                                                                        <option value="false">No</option>
-                                                                                    </select>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </table>
+
                                                                     </div>
                                                                 </div>
                                                             </fieldset>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -166,7 +140,141 @@
 
     <script>
         $(document).ready(function() {
+            /*var  CreateCheckListStructure = function () {
+                var handleCreate = function() {
+                    var form = $('#createChecklistStructure');
+                    var error = $('.alert-danger', form);
+                    var success = $('.alert-success', form);
+                    form.validate({
+                        errorElement: 'span', //default input error message container
+                        errorClass: 'help-block', // default input error message class
+                        focusInvalid: false, // do not focus the last invalid input
+                        rules: {
+                            main_category_id: {
+                                required: true
+                            },
+                            sub_category_id:{
+                                required: true
+                            },
+                            /!*title_name:{
+                                required: true
+                            },
+                            nochapter:{
+                                required: true,
+                                email: true
+                            },
+                            description:{
+                                required: true
+                            }*!/
+                        },
+                        messages: {
+                            main_category_id: {
+                                required: "Main Category Name is required."
+                            },
+                            sub_category_id:{
+                                required: "Sub Category Name is required."
+                            },
+                            /!*title_name:{
+                                required: "Title Name is required."
+                            },
+                            nochapter:{
+                                required: "Number of Images is required."
+                            },
+                            description:{
+                                required: "Description is required."
+                            }*!/
+                        },
+                        invalidHandler: function (event, validator) { //display error alert on form submit
+                            success.hide();
+                            error.show();
+                        },
+                        highlight: function (element) { // hightlight error inputs
+                            $(element)
+                                .closest('.form-group').addClass('has-error'); // set error class to the control group
+                        },
+                        unhighlight: function (element) { // revert the change done by hightlight
+                            $(element)
+                                .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                        },
+                        success: function (label) {
+                            label
+                                .closest('.form-group').addClass('has-success');
+                        },
+                        submitHandler: function (form) {
+                            console.log(1234);
+                            $("button[type='submit']").prop('disabled', true);
+                            success.show();
+                            error.hide();
+                            form.submit();
+                        }
+                    });
+                }
+                return {
+                    init: function () {
+                        handleCreate();
+                    }
+                };
+            }();*/
+            var  CreateCheckListStructure = function () {
+                var handleCreate = function() {
+                    var form = $('#createChecklistStructureForm');
+                    var error = $('.alert-danger', form);
+                    var success = $('.alert-success', form);
+                    form.validate({
+                        errorElement: 'span', //default input error message container
+                        errorClass: 'help-block', // default input error message class
+                        focusInvalid: false, // do not focus the last invalid input
+                        rules: {
+                            main_category_id:{
+                                required: true
+                            },
+                            sub_category_id:{
+                                required: true
+                            }
+
+                        },
+
+                        messages: {
+
+                        },
+
+                        invalidHandler: function (event, validator) { //display error alert on form submit
+                            success.hide();
+                            error.show();
+                        },
+
+                        highlight: function (element) { // hightlight error inputs
+                            $(element)
+                                .closest('.form-group').addClass('has-error'); // set error class to the control group
+                        },
+
+                        unhighlight: function (element) { // revert the change done by hightlight
+                            $(element)
+                                .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                        },
+
+                        success: function (label) {
+                            label
+                                .closest('.form-group').addClass('has-success');
+                        },
+
+                        submitHandler: function (form) {
+                            $("button[type='submit']").prop('disabled', true);
+                            success.show();
+                            error.hide();
+                            form.submit();
+                        }
+                    });
+                }
+
+                return {
+                    init: function () {
+                        handleCreate();
+                    }
+                };
+            }();
             CreateCheckListStructure.init();
+            applyCheckpointValidation();
             $("#main_cat").on('change', function(){
                 var mainCategoryId = $(this).val();
                 if(typeof mainCategoryId == 'undefined' || mainCategoryId == ''){
@@ -195,80 +303,19 @@
     <script>
 
 
-        var  CreateCheckListStructure = function () {
-            var handleCreate = function() {
-                var form = $('#createChecklistStructure');
-                var error = $('.alert-danger', form);
-                var success = $('.alert-success', form);
-                form.validate({
-                    errorElement: 'span', //default input error message container
-                    errorClass: 'help-block', // default input error message class
-                    focusInvalid: false, // do not focus the last invalid input
-                    rules: {
-                        main_category_id: {
-                            required: true
-                        },
-                        sub_category_id:{
-                            required: true
-                        },
-                        /*title_name:{
-                            required: true
-                        },
-                        nochapter:{
-                            required: true,
-                            email: true
-                        },
-                        description:{
-                            required: true
-                        }*/
-                    },
-                    messages: {
-                        main_category_id: {
-                            required: "Main Category Name is required."
-                        },
-                        sub_category_id:{
-                            required: "Sub Category Name is required."
-                        },
-                        /*title_name:{
-                            required: "Title Name is required."
-                        },
-                        nochapter:{
-                            required: "Number of Images is required."
-                        },
-                        description:{
-                            required: "Description is required."
-                        }*/
-                    },
-                    invalidHandler: function (event, validator) { //display error alert on form submit
-                        success.hide();
-                        error.show();
-                    },
-                    highlight: function (element) { // hightlight error inputs
-                        $(element)
-                            .closest('.form-group').addClass('has-error'); // set error class to the control group
-                    },
-                    unhighlight: function (element) { // revert the change done by hightlight
-                        $(element)
-                            .closest('.form-group').removeClass('has-error'); // set error class to the control group
-                    },
-                    success: function (label) {
-                        label
-                            .closest('.form-group').addClass('has-success');
-                    },
-                    submitHandler: function (form) {
-                        $("button[type='submit']").prop('disabled', true);
-                        success.show();
-                        error.hide();
-                        form.submit();
-                    }
-                });
-            }
-            return {
-                init: function () {
-                    handleCreate();
-                }
-            };
-        }();
+
+
+        function applyCheckpointValidation(){
+            $(".checkpoint-description, .number-of-image").each(function(){
+                $(this).rules('add',{
+                    required : true
+                })
+            });
+        }
+
+        function applyImageCheckpointValidation(){
+
+        }
     </script>
 
 @endsection

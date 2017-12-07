@@ -20,4 +20,8 @@ class ChecklistCategory extends Model
             ]
         ];
     }
+
+    public function mainCategory(){
+        return $this->belongsTo('App\ChecklistCategory','category_id');
+    }
 }
