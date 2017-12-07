@@ -349,13 +349,21 @@
                                                 </div>
                                                 <div id="maintenance_form" hidden>
                                                     <div class="form-group">
-                                                        <label class="control-label"> Client: Client Name</label>
+                                                        <label class="control-label"> Client: {{$projectInfo['client']}}</label>
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="control-label"> Project: Project Name</label>
+                                                        <label class="control-label"> Project: {{$projectInfo['project']}}</label>
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="control-label"> Project: Project Site Name</label>
+                                                        <label class="control-label"> Project: {{$projectInfo['project_site']}}</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="hidden" name="unit_id" value="{{$nosUnitId}}">
+                                                        <label class="control-label"> Unit: Nos</label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <label class="control-label"> Quantity: 1</label>
                                                     </div>
                                                     <div class="form-group">
                                                         <textarea class="form-control" placeholder="Remark" name="remark" id="remark"></textarea>

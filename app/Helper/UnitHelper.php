@@ -37,4 +37,26 @@ class UnitHelper{
         }
         return $materialRateTo;
     }
+
+    public static function unitQuantityConversion($fromUnit,$toUnit,$quantity){
+        if($fromUnit == $toUnit){
+            $quantityRate = 1;
+        }else{
+            $conversion = UnitConversion::where('unit_1_id',$fromUnit)->where('unit_2_id',$toUnit)->first();
+            if($conversion != null){
+                $quantityRate = $conversion->unit_2_value / $conversion->unit_1_value;
+            }else{
+                $conversion = UnitConversion::where('unit_2_id',$fromUnit)->where('unit_1_id',$toUnit)->first();
+                if($conversion != null){
+                    $quantityRate = $conversion->unit_1_value / $conversion->unit_2_value;
+                }else{
+                    $unit1 = Unit::where('id',$fromUnit)->pluck('name')->first();
+                    $unit2 = Unit::where('id',$toUnit)->pluck('name')->first();
+                    $quantityRate['message'] = "$unit1-$unit2 conversion is not present.";
+                    return $quantityRate;
+                }
+            }
+        }
+        return $quantityRate*$quantity;
+    }
 }

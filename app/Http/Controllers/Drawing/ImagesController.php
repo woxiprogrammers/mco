@@ -232,7 +232,7 @@ class ImagesController extends Controller
             $categories = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
-                    $subCategories[$pagination]['id'],
+                    ProjectSite::where('id',$subCategories[$pagination]['project_site_id'])->pluck('name')->first(),
                     DrawingCategory::where('id',$subCategories[$pagination]['drawing_category_id'])->pluck('name')->first(),
                     $subCategories[$pagination]['name'],
                     '<div class="btn-group">

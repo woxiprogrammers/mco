@@ -119,6 +119,7 @@ class PurchaseOrderBillingController extends Controller
             $status = 200;
             $response = array();
             $billPendingTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_statuses','purchase_order_transactions.purchase_order_transaction_status_id','=','purchase_order_transaction_statuses.id')
+                                                ->join('purchase_order_bill_transaction_relation','purchase_order_bill_transaction_relation.purchase_order_transaction_id','!=','purchase_order_transactions.id')
                                                 ->where('purchase_order_transaction_statuses.slug','bill-pending')
                                                 ->where('purchase_order_transactions.purchase_order_id',$request->purchase_order_id)
                                                 ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn')
@@ -232,7 +233,12 @@ class PurchaseOrderBillingController extends Controller
             $records["draw"] = intval($request->draw);
             $purchaseOrderBillData = PurchaseOrderBill::orderBy('created_at','desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
+            if($request->length == -1){
+                $length = $records["recordsTotal"];
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     $purchaseOrderBillData[$pagination]['bill_number'],
                     $purchaseOrderBillData[$pagination]->purchaseOrder->format_id,
@@ -257,6 +263,10 @@ class PurchaseOrderBillingController extends Controller
 
     public function getEditView(Request $request,$purchaseOrderBill){
         try{
+            $grn = '';
+            foreach($purchaseOrderBill->purchaseOrderTransactionRelation as $transactionRelation){
+                $grn .= $transactionRelation->purchaseOrderTransaction->grn.', ';
+            }
             $purchaseOrderBillImagePaths = array();
             $purchaseOrderBillImages = PurchaseOrderBillImage::where('purchase_order_bill_id',$purchaseOrderBill->id)->get();
             $purchaseOrderDirectoryName = sha1($purchaseOrderBill->purchase_order_id);
@@ -275,7 +285,7 @@ class PurchaseOrderBillingController extends Controller
                 $purchaseOrderBillImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
             }
             $paymentTypes = PaymentType::select('id','name')->get();
-            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes'));
+            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get PO billing get edit view',

@@ -263,6 +263,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
             Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
+            Route::post('get-in-indent-components',array('uses' => 'Purchase\PurchaseRequestController@getInIndentComponents'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
@@ -281,11 +282,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('download-po-pdf/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@downloadPoPDF'));
             Route::post('close-purchase-order',array('uses'=> 'Purchase\PurchaseOrderController@closePurchaseOrder'));
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
+            Route::get('get-purchase-order-details/{purchaseRequestId}',array('uses'=> 'Purchase\PurchaseOrderController@getOrderDetails'));
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
                 Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
                 Route::get('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionDetails'));
                 Route::get('check-generated-grn/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@checkGeneratedGRN'));
+                Route::get('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionEditView'));
+                Route::post('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@transactionEdit'));
             });
         });
 
@@ -436,7 +440,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
         Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageView'));
         Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorListing'));
-        Route::get('change-status/{labour}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
+        Route::get('change-status/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
         Route::get('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
         Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
 
@@ -492,12 +496,22 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
         Route::group(['prefix' => 'salary-request'], function(){
             Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryRequestCreateView'));
+            Route::post('create',array('uses' => 'Peticash\PeticashController@createSalaryRequestCreate'));
             Route::post('get-labours',array('uses' => 'Peticash\PeticashController@getLabours'));
+            Route::post('change-status',array('uses' => 'Peticash\PeticashController@salaryRequestedChangeStatus'));
         });
 
 
         Route::group(['prefix' => 'peticash-management'], function(){
-            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+//            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+            Route::group(['prefix' => 'purchase'], function(){
+                Route::get('manage',array('uses' => 'Peticash\PeticashController@getPurchaseManageView'));
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@purchaseTransactionListing'));
+            });
+            Route::group(['prefix' => 'salary'], function(){
+                Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
+            });
         });
     });
 

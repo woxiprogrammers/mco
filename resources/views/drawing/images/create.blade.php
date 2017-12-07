@@ -54,7 +54,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="clientId">
+                                                            <select class="form-control" id="clientId" required>
                                                                 <option value="">Select Client name from here </option>
                                                                 @foreach($clients as $client)
                                                                 <option value="{{$client['id']}}">{{$client['company']}} </option>
@@ -68,7 +68,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="projectId" >
+                                                            <select class="form-control" id="projectId" required>
                                                                 <option value="">Select Project Name from here</option>
                                                             </select>
                                                         </div>
@@ -79,7 +79,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="projectSiteId" name="site_id">
+                                                            <select class="form-control" id="projectSiteId" name="site_id" required>
                                                                 <option value="">Select Site Name from here</option>
                                                             </select>
                                                         </div>
@@ -90,7 +90,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="main_category_id" >
+                                                            <select class="form-control" id="main_category_id" required>
                                                                 <option value="">Select Main Category from here</option>
                                                                 @foreach($categories as $category)
                                                                     <option value="{{$category['id']}}">{{$category['name']}} </option>
@@ -104,7 +104,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="sub_category_id" name="drawing_category_id">
+                                                            <select class="form-control" id="sub_category_id" name="drawing_category_id" required>
                                                                 <option value="">Select Sub Category from here</option>
                                                             </select>
                                                         </div>

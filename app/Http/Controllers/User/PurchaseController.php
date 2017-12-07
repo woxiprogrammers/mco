@@ -144,7 +144,8 @@ class PurchaseController extends Controller
             $materialRequestList = array();
             $iterator = 0;
             foreach($materialRequests as $key => $materialRequest){
-                foreach($materialRequest->materialRequestComponents as $key => $materialRequestComponents){
+                $materialRequestComponentArray = MaterialRequestComponents::where('material_request_id',$materialRequest->id)->orderBy('id','desc')->get();
+                foreach($materialRequestComponentArray as $key => $materialRequestComponents){
                   $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponents->id;
                   $materialRequestList[$iterator]['name'] = $materialRequestComponents->name;
                   $materialRequestList[$iterator]['quantity'] = $materialRequestComponents->quantity;
@@ -167,10 +168,16 @@ class PurchaseController extends Controller
               }
           }
           $iTotalRecords = count($materialRequestList);
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+
           $records = array();
           $records['data'] = array();
           $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
-          for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+          for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
               switch(strtolower($materialRequestList[$pagination]['component_status'])){
                   case 'pending':
                       if(in_array($materialRequestList[$pagination]['component_type_id'],$assetComponentTypeIds)){
@@ -393,7 +400,7 @@ class PurchaseController extends Controller
                         $materialList[$iterator]['material_request_component_type_id'] = $structureMaterialSlug->id;
                         $iterator++;
                     }*/
-                    if(count($materialList) == 0){
+                    /*if(count($materialList) == 0){
                         $materialList[$iterator]['material_name'] = null;
                         $systemUnits = Unit::where('is_active',true)->get();
                         $j = 0;
@@ -406,7 +413,7 @@ class PurchaseController extends Controller
                         $newMaterialSlug = MaterialRequestComponentTypes::where('slug','new-material')->first();
                         $materialList[$iterator]['material_request_component_type_slug'] = $newMaterialSlug->slug;
                         $materialList[$iterator]['material_request_component_type_id'] = $newMaterialSlug->id;
-                    }
+                    }*/
                     $data= $materialList;
                     break;
                 case "asset" :
@@ -422,14 +429,14 @@ class PurchaseController extends Controller
                         $assetList[$iterator]['material_request_component_type_id'] = $systemAssetStatus->id;
                         $iterator++;
                     }
-                    if(count($assetList) == 0){
+                    /*if(count($assetList) == 0){
                         $assetList[$iterator]['asset_id'] = null;
                         $assetList[$iterator]['asset_name'] = null;
                         $assetList[$iterator]['asset_unit'] = $assetUnit;
                         $newAssetSlug = MaterialRequestComponentTypes::where('slug','new-asset')->first();
                         $assetList[$iterator]['material_request_component_type_slug'] = $newAssetSlug->slug;
                         $assetList[$iterator]['material_request_component_type_id'] = $newAssetSlug->id;
-                    }
+                    }*/
                     $data = $assetList;
                     break;
             }
@@ -747,7 +754,12 @@ class PurchaseController extends Controller
               $records = array();
               $iterator = 0;
               $records['data'] = array();
-              for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+              if($request->length == -1){
+                  $length = $iTotalRecords;
+              }else{
+                  $length = $request->length;
+              }
+              for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
                   $records['data'][$iterator] = [
                       $materialRequestList[$pagination]['rm_id'],
                       $materialRequestList[$pagination]['client_name'],
@@ -794,11 +806,6 @@ class PurchaseController extends Controller
             switch($newStatus){
                 case 'admin-approved':
                     $componentIds = $request->component_id;
-                    if($request->has('request')){
-                        $remark = $request->remark;
-                    }else{
-                        $remark = '';
-                    }
                     foreach($componentIds as $componentId){
                         $materialRequestComponent = MaterialRequestComponents::where('id',$componentId)->first();
                         if($materialRequestComponent->purchaseRequestComponentStatuses->slug == 'pending'){
@@ -813,7 +820,7 @@ class PurchaseController extends Controller
                             $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
                             $materialComponentHistoryData = array();
                             $materialComponentHistoryData['component_status_id'] = $adminApproveComponentStatusId;
-                            $materialComponentHistoryData['remark'] = $remark;
+                            $materialComponentHistoryData['remark'] = $request->remark;
                             $materialComponentHistoryData['user_id'] = Auth::user()->id;
                             $materialComponentHistoryData['material_request_component_id'] = $componentId;
                             if($materialRequestComponent['component_type_id'] == $quotationMaterialType->id){
@@ -836,13 +843,9 @@ class PurchaseController extends Controller
                                     ->whereIn('product_material_relation.material_version_id',$materialVersions)
                                     ->sum(DB::raw('quotation_products.quantity * product_material_relation.material_quantity'));
                                 $allowedQuantity = $material_quantity - $usedQuantity;
-                                if((int)$materialRequestComponent['quantity'] < $allowedQuantity){
-                                    MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
-                                    $message = "Status Updated Successfully";
-                                    MaterialRequestComponentHistory::create($materialComponentHistoryData);
-                                }else{
-                                    $message = "Allowed quantity is ".$allowedQuantity;
-                                }
+                                MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
+                                MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                                $message = "Status Updated Successfully";
                             }else{
                                 MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
                                 $message = "Status Updated Successfully";
@@ -882,6 +885,7 @@ class PurchaseController extends Controller
                     MaterialRequestComponentHistory::create($materialComponentHistoryData);
                     break;
             }
+            $request->session()->flash('success', "Status updated successfully.");
             return redirect('/purchase/material-request/manage');
         }catch(\Exception $e){
             $data = [

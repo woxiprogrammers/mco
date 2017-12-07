@@ -22,7 +22,7 @@
                 <div class="page-container">
                     <!-- BEGIN CONTENT -->
                     <div class="page-content-wrapper">
-                        <form action="/purchase/purchase-order-bill/create" method="POST" role="form" enctype="multipart/form-data">
+                        <form action="/purchase/purchase-order-bill/create" method="POST" id="purchaseOrderBillCreateForm" role="form" enctype="multipart/form-data">
                             {!! csrf_field() !!}
                             <div class="page-head">
                                 <div class="container">
@@ -212,8 +212,10 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/custom/purchase/purchase-order-billing/validations.js"></script>
     <script>
         $(document).ready(function(){
+            CreatePurchaseOrderBill.init();
             $("#clientId").on('change', function(){
                 var clientId = $(this).val();
                 if(clientId == ""){
@@ -265,6 +267,7 @@
                        },
                         success: function(data,textStatus, xhr){
                             $("#subTotal").val(data.sub_total);
+                            $("#totalAmount").val(data.sub_total);
                             $("#billData").show();
                         },
                         error: function(errorData){
@@ -378,6 +381,7 @@
                         $('#projectSiteId').html(data);
                         $('#projectSiteId').prop('disabled', false);
                         $("#projectSiteId").trigger('change');
+
                     }else{
                         $('#projectSiteId').html("");
                         $('#projectSiteId').prop('disabled', false);
