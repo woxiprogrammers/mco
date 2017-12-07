@@ -113,7 +113,6 @@
                                                             </thead>
                                                             <tbody>
                                                                 @foreach($materialList as $key => $materialData)
-
                                                                     <tr>
                                                                         <td> {{$materialData['material_component_name']}} </td>
                                                                         <td>  {{$materialData['material_component_quantity']}} </td>
@@ -126,7 +125,7 @@
                                                         </table>
                                                     </div>
                                                     <div class="modal fade" id="ImageUpload" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                                        <div class="modal-dialog">
+                                                        <div class="modal-dialog transaction-modal">
                                                             <div class="modal-content">
                                                                 <div class="modal-header" >
                                                                     <div class="row">
@@ -144,73 +143,27 @@
                                                                                 <input type="text" class="form-control empty typeahead tt-input" id="material_name" placeholder="Enter material name" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="qty" placeholder="Enter Quantity" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="unit" placeholder="Enter Unit" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
+                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="rate" placeholder="Enter Rate" autocomplete="off" readonly>
                                                                                 <br><input type="hidden" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Rate" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="hsn_code" placeholder="Enter HSNCODE" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" >
                                                                                <br>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-12">
                                                                                         Vendor Quotation Image
-                                                                                        <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
-                                                                                            <!-- Indicators -->
-                                                                                            <ol class="carousel-indicators">
-                                                                                                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="1"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="2"></li>
-                                                                                            </ol>
-
                                                                                             <!-- Wrapper for slides -->
-                                                                                            <div class="carousel-inner">
                                                                                                 <div id ="imagecorousel">
 
                                                                                                 </div>
-
-                                                                                            </div>
-
-
-                                                                                            <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-                                                                                                <span class="glyphicon glyphicon-chevron-left"></span>
-                                                                                                <span class="sr-only">Previous</span>
-                                                                                            </a>
-                                                                                            <a class="right carousel-control" href="#myCarousel" data-slide="next">
-                                                                                                <span class="glyphicon glyphicon-chevron-right"></span>
-                                                                                                <span class="sr-only">Next</span>
-                                                                                            </a>
-                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
                                                                                 <br>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-12">
                                                                                         Client Approval Note Image
-                                                                                        <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
-                                                                                            <!-- Indicators -->
-                                                                                            <ol class="carousel-indicators">
-                                                                                                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="1"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="2"></li>
-                                                                                            </ol>
-
-                                                                                            <!-- Wrapper for slides -->
-                                                                                            <div class="carousel-inner">
                                                                                                 <div id ="imagecorouselForClientApproval">
 
                                                                                                 </div>
-
-                                                                                            </div>
-                                                                                                <!-- Left and right controls -->
-                                                                                                <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-                                                                                                    <span class="glyphicon glyphicon-chevron-left"></span>
-                                                                                                    <span class="sr-only">Previous</span>
-                                                                                                </a>
-                                                                                                <a class="right carousel-control" href="#myCarousel" data-slide="next">
-                                                                                                    <span class="glyphicon glyphicon-chevron-right"></span>
-                                                                                                    <span class="sr-only">Next</span>
-                                                                                                </a>
-                                                                                            </div>
-                                                                                        </div>
                                                                                     </div>
-
-                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </form>
