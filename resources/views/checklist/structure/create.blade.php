@@ -32,7 +32,7 @@
                                 <div class="col-md-11">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
-
+                                        <input type="hidden" id="numberOfCheckpoints" value="1">
                                         <div class="portlet-body form">
                                             <form role="form" id="createChecklistStructure" class="form-horizontal" method="post" action="/checklist/structure/create">
                                                 {!! csrf_field() !!}
@@ -65,7 +65,7 @@
                                                     <div class="input_fields_wrap">
                                                         <div class="checkpoint">
                                                             <fieldset>
-                                                                <legend style="margin-left: 15%">Checkpoint -1</legend>
+                                                                <legend style="margin-left: 15%">Checkpoint</legend>
                                                                 <div class="form-group">
                                                                     <div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">
                                                                         <label for="title" class="control-label">Description</label>
@@ -85,10 +85,9 @@
                                                                     </div>
 
                                                                     <div class="col-md-2">
-                                                                        <select class="form-control" id="isMandatory" name="is_mandatory">
-                                                                            <option value="">Select Option</option>
+                                                                        <select class="form-control" id="isMandatory" name="checkpoints[0][is_mandatory]">
+                                                                            <option value="false" selected>No</option>
                                                                             <option value="true">Yes</option>
-                                                                            <option value="false">No</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -98,11 +97,14 @@
                                                                         <span>*</span>
                                                                     </div>
                                                                     <div class="col-md-2">
-                                                                        <input type="text" class="form-control" >
+                                                                        <input type="text" class="form-control number-of-image" name="checkpoints[0][number_of_images]">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <a class="btn blue" href="javascript:void(0);" onclick="getImageTable(this,0)">Set</a>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
-                                                                    <div class="col-md-7 col-md-offset-3">
+                                                                    <div class="col-md-7 col-md-offset-3 image-table-section">
                                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column">
                                                                             <tr>
                                                                                 <th>
@@ -158,7 +160,7 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    {{--<script src="/assets/custom/checklist/checklist.js" type="application/javascript"></script>--}}
+    <script src="/assets/custom/checklist/checklist.js" type="application/javascript"></script>
     <script src="/assets/custom/checklist/validation.js" type="application/javascript"></script>
 
 
@@ -191,86 +193,7 @@
 
     </script>
     <script>
-        x=1;
-        $(document).ready(function() {
-            var wrapper         = $(".input_fields_wrap");
-            var add_button      = $(".add_field_button");
-            $(add_button).click(function(e){
-                x++;
-                e.preventDefault();
-                $(wrapper).append(
-                    '<div class="checkpoint" style="margin-top: 5%">\n' +
-                    '<fieldset>'+
-                    '<legend style="margin-left: 15%"> Checkpoint -'+x+'</legend>'+
-                    '<div class="form-group row">\n' +
-                    '<div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">\n' +
-                    '<label for="title" class="control-label">Description</label>\n' +
-                    '<span>*</span>\n' +
-                    '</div>\n' +
-                    '<div class="col-md-7">\n' +
-                    '<textarea class="form-control" name="checkpoints[0][description]"  placeholder="Enter Description" style="width: 78%;"></textarea>\n' +
-                    '<a class="btn blue" href="javascript:void(0);" id="add" style="margin-left: 80%; margin-top: -13%" onclick="return createCheckpoint()">\n' +
-                    '<i class="fa fa-plus"></i>\n' +
-                    '</a>\n' +
-                    '<a class="btn blue" id="add" href="javascript:void(0);" style=" margin-top: -13%" onclick="return removeCheckpoint(this)">\n' +
-                    '<i class="fa fa-minus"></i>\n' +
-                    '</a>\n' +
-                    '</div>\n' +
-                    '</div>\n' +
-                    '<div class="form-group">\n' +
-                    '<div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">\n' +
-                    '<label for="title" class="control-label">Is Remark Mandatory</label>\n' +
-                    '<span>*</span>\n' +
-                    '</div>\n' +
-                    '\n' +
-                    '<div class="col-md-2">\n' +
-                    '<select class="form-control" id="isMandatory" name="is_mandatory">\n' +
-                    '<option value="">Select Option</option>\n' +
-                    '<option value="True">Yes</option>\n' +
-                    '<option value="False">No</option>\n' +
-                    '</select>\n' +
-                    '</div>\n' +
-                    '</div>\n' +
-                    '<div class="form-group">\n' +
-                    '<div class="col-md-5" style="text-align: right ; margin-left: -6.6% ; font-size: 14px">\n' +
-                    '<label for="title" class="control-label"> No. of Images </label>\n' +
-                    '<span>*</span>\n' +
-                    '</div>\n' +
-                    '<div class="col-md-2">\n' +
-                    '<input type="text" class="form-control" >\n' +
-                    '</div>\n' +
-                    '</div>\n' +
-                    '</fieldset>'+
-                    '</div>');
 
-            });
-
-            $(".remove_field").click(function(e) {
-                e.preventDefault();
-                console.log('in remove');
-                $(this).closest('.checkpoint').remove();
-                x--;
-            });
-
-        });
-
-        function generate() {
-            var number = parseInt($("#nochapter").val());
-            $('#append').html('');
-            $('#extra').hide();
-            for (max = 0; max < number; max++) {
-                ($('#extra').clone()).appendTo('#append');
-                $('#extra').show();
-            }
-        }
-        function createCheckpoint(){
-            $(".add_field_button").trigger('click');
-        }
-        function removeCheckpoint(element){
-            console.log(' in remove funciton');
-            $(element).closest('.checkpoint').remove();
-            x--;
-        }
 
         var  CreateCheckListStructure = function () {
             var handleCreate = function() {
