@@ -749,7 +749,7 @@ trait QuotationTrait{
                 ->join('units','units.id','=','materials.unit_id')
                 ->join('category_material_relations','category_material_relations.material_id','=','materials.id')
                 ->join('categories','category_material_relations.category_id','=','categories.id')
-                ->select('categories.name as category_name','quotation_materials.id as quotation_material_id','quotation_materials.material_id as material_id','materials.name as material_name','quotation_materials.rate_per_unit as rate_per_unit','units.id as unit_id','units.name as unit_name','quotation_materials.quantity as quantity')
+                ->select('categories.name as category_name','quotation_materials.id as quotation_material_id','quotation_materials.material_id as material_id','materials.name as material_name','quotation_materials.rate_per_unit as rate_per_unit','units.id as unit_id','units.name as unit_name','quotation_materials.quantity as quantity','quotation_materials.is_client_supplied')
                 ->get();
             if($quotationMiscellaneousMaterials == null || count($quotationMiscellaneousMaterials) == 0){
                 $quotationMiscellaneousMaterials = Material::join('units','units.id','=','materials.unit_id')
@@ -1431,14 +1431,19 @@ trait QuotationTrait{
             }
             if($request->has('miscellaneous_material_id')){
                 foreach ($request['miscellaneous_material_id'] as $material_id => $materialData){
+                    if(array_key_exists('is_client_supplied',$materialData)){
+                        $is_client_supplied = true;
+                    }else{
+                        $is_client_supplied = false;
+                    }
                     if(array_key_exists('quotation_material_id',$materialData)){
-                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit']]);
+                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit'], 'is_client_supplied' => $is_client_supplied]);
                     }else{
                         QuotationMaterial::create([
                             'material_id' => $material_id,
                             'rate_per_unit' => $materialData['rate_per_unit'],
                             'unit_id' => $materialData['unit_id'],
-                            'is_client_supplied' => false,
+                            'is_client_supplied' => $is_client_supplied,
                             'quotation_id' => $request['quotation_id'],
                             'quantity' => $materialData['quantity']
                         ]);

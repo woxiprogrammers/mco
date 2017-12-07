@@ -8,6 +8,7 @@ use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
+use App\MaterialRequests;
 use App\Project;
 use App\ProjectSite;
 use App\PurchaseRequest;
@@ -53,19 +54,7 @@ class PurchaseRequestController extends Controller
             $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
             $iterator = 0;
             $units = Unit::select('id','name')->get()->toArray();
-            $materialRequestComponents = MaterialRequestComponents::where('component_status_id',$inIndentStatusId)->get();
-            foreach($materialRequestComponents as $index => $materialRequestComponent){
-                $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
-                $materialRequestList[$iterator]['name'] = $materialRequestComponent->name;
-                $materialRequestList[$iterator]['quantity'] = $materialRequestComponent->quantity;
-                $materialRequestList[$iterator]['unit_id'] = $materialRequestComponent->unit_id;
-                $materialRequestList[$iterator]['unit'] = $materialRequestComponent->unit->name;
-                $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponent->component_type_id;
-                $materialRequestList[$iterator]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
-                $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponent->component_status_id;
-                $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
-                $iterator++;
-            }
+
             return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId','units'));
         }catch(\Exception $e){
             $data = [
@@ -95,7 +84,7 @@ class PurchaseRequestController extends Controller
                                                                             ->where('material_request_components.id',$materialRequestComponent->id)
                                                                             ->pluck('purchase_request_component_vendor_relation.vendor_id')->toArray();
                     if($materialRequestComponentID == $materialRequestComponent->component_type_id){
-                        $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id');
+                        $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id')->first();
                         $vendorAssignedIds = VendorMaterialRelation::where('material_id',$material_id)->pluck('vendor_id');
                         if(count($vendorAssignedIds) > 0){
                             $materialRequestComponentDetails[$iterator]['vendors'] = Vendor::whereIn('id',$vendorAssignedIds)->select('id','company')->get()->toArray();
@@ -565,6 +554,41 @@ class PurchaseRequestController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getInIndentComponents(Request $request){
+        try{
+            $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
+            $iterator = 0;
+            $materialRequestList = array();
+            $materialRequestIds = MaterialRequests::where('project_site_id',$request->project_site_id)->pluck('id');
+            if(count($materialRequestIds) > 0){
+                $materialRequestIds = $materialRequestIds->toArray();
+                $materialRequestComponents = MaterialRequestComponents::whereIn('material_request_id',$materialRequestIds)->where('component_status_id',$inIndentStatusId)->get();
+                foreach($materialRequestComponents as $index => $materialRequestComponent){
+                    $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
+                    $materialRequestList[$iterator]['name'] = $materialRequestComponent->name;
+                    $materialRequestList[$iterator]['quantity'] = $materialRequestComponent->quantity;
+                    $materialRequestList[$iterator]['unit_id'] = $materialRequestComponent->unit_id;
+                    $materialRequestList[$iterator]['unit'] = $materialRequestComponent->unit->name;
+                    $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponent->component_type_id;
+                    $materialRequestList[$iterator]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
+                    $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponent->component_status_id;
+                    $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
+                    $iterator++;
+                }
+            }
+            return view('partials.purchase.purchase-request.indent-listing')->with(compact('materialRequestList'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get In Indent components',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            return reponse()->json([],500);
+
         }
     }
 }

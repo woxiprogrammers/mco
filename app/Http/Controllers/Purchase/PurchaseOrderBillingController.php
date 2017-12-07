@@ -232,7 +232,12 @@ class PurchaseOrderBillingController extends Controller
             $records["draw"] = intval($request->draw);
             $purchaseOrderBillData = PurchaseOrderBill::orderBy('created_at','desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
+            if($request->length == -1){
+                $length = $records["recordsTotal"];
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     $purchaseOrderBillData[$pagination]['bill_number'],
                     $purchaseOrderBillData[$pagination]->purchaseOrder->format_id,

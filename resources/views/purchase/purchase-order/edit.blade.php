@@ -4,13 +4,7 @@
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
     <style>
-        .thumbimage {
-            float:left;
-            width:100%;
-            height: 200px;
-            position:relative;
-            padding:5px;
-        }
+
     </style>
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection

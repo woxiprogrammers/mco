@@ -263,6 +263,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
             Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
+            Route::post('get-in-indent-components',array('uses' => 'Purchase\PurchaseRequestController@getInIndentComponents'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
@@ -491,12 +492,22 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
         Route::group(['prefix' => 'salary-request'], function(){
             Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryRequestCreateView'));
+            Route::post('create',array('uses' => 'Peticash\PeticashController@createSalaryRequestCreate'));
             Route::post('get-labours',array('uses' => 'Peticash\PeticashController@getLabours'));
+            Route::post('change-status',array('uses' => 'Peticash\PeticashController@salaryRequestedChangeStatus'));
         });
 
 
         Route::group(['prefix' => 'peticash-management'], function(){
-            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+//            Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewPeticashManagement'));
+            Route::group(['prefix' => 'purchase'], function(){
+                Route::get('manage',array('uses' => 'Peticash\PeticashController@getPurchaseManageView'));
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@purchaseTransactionListing'));
+            });
+            Route::group(['prefix' => 'salary'], function(){
+                Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
+            });
         });
     });
 

@@ -70,6 +70,7 @@ class PurchaseOrderController extends Controller
             $purchaseOrderComponentPRIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
             $adminApprovePurchaseRequestInfo = PurchaseRequestComponent::join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
                                                 ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
+                                                ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
                                                 ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
                                                 ->whereNotIn('purchase_request_components.id',$purchaseOrderComponentPRIds)
                                                 ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
@@ -206,7 +207,12 @@ class PurchaseOrderController extends Controller
             $iTotalRecords = count($purchaseOrderList);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
                 $actionData = "";
                 if ($purchaseOrderList[$pagination]['chk_status'] == true) {
                     $actionData =  '<div id="sample_editable_1_new" class="btn btn-small blue" >
