@@ -23,6 +23,7 @@ use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillPayment;
+use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionComponent;
@@ -1061,13 +1062,14 @@ class PurchaseOrderController extends Controller
             $materialList = array();
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
             $iterator = 0;
-            if($purchaseOrderTransaction->purchaseOrderTransactionStatus->slug == 'grn-generated'){
-                $purchaseOrderComponents = $purchaseOrder->purchaseOrderComponent;
+            $purchaseOrderBill = PurchaseOrderBillTransactionRelation::where('purchase_order_transaction_id',$purchaseOrderTransaction->id)->first();
+            if($purchaseOrderBill == null){
+                $canEdit = true;
             }else{
-                $purchaseOrderComponentIds = PurchaseOrderTransactionComponent::where('purchase_order_transaction_id',$purchaseOrderTransaction->id)->pluck('purchase_order_component_id')->toArray();
-                $purchaseOrderComponents = PurchaseOrderComponent::whereIn('id',$purchaseOrderComponentIds)->get();
+                $canEdit = false;
             }
-            foreach($purchaseOrderComponents as $key => $purchaseOrderComponent){
+            foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
+                $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
                 $materialRequestComponent = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent;
                 $materialList[$iterator]['purchase_order_component_id'] = $purchaseOrderComponent['id'];
                 $materialList[$iterator]['material_request_component_id'] = $materialRequestComponent['id'];
@@ -1078,16 +1080,16 @@ class PurchaseOrderController extends Controller
                 $materialList[$iterator]['unit_id'] = $purchaseOrderComponent->unit_id;
                 $materialList[$iterator]['units'] = array();
                 if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
-                    $purchaseOrderComponentData[$iterator]['units'] = Unit::where('slug','nos')->select('id','name')->get()->toArray();
+                    $materialList[$iterator]['units'] = Unit::where('slug','nos')->select('id','name')->get()->toArray();
                     $asset = Asset::where('name','ilike',$materialList[$iterator]['name'])->first();
                     $otherAssetTypeId = AssetType::where('slug','other')->pluck('id')->first();
                     if($asset != null && $asset->asset_types_id != $otherAssetTypeId){
-                        $quantityIsFixed = true;
+                        $materialList[$iterator]['quantityIsFixed'] = true;
                     }else{
-                        $quantityIsFixed = false;
+                        $materialList[$iterator]['quantityIsFixed'] = false;
                     }
                 }else{
-                    $quantityIsFixed = false;
+                    $materialList[$iterator]['quantityIsFixed'] = false;
                     $newMaterialTypeId = MaterialRequestComponentTypes::where('slug', 'new-material')->pluck('id')->first();
                     if ($newMaterialTypeId == $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id) {
                         $materialList[$iterator]['units'] = Unit::where('is_active', true)->select('id', 'name')->orderBy('name')->get()->toArray();
@@ -1134,7 +1136,7 @@ class PurchaseOrderController extends Controller
                 $preGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$preGrnImages[$iterator]->name;
                 $iterator++;
             }
-            return view('partials.purchase.purchase-order.edit-transaction')->with(compact('purchaseOrderTransaction','preGrnImagePaths','postGrnImagePaths','materialList','vendorName'));
+            return view('partials.purchase.purchase-order.edit-transaction')->with(compact('purchaseOrderTransaction','preGrnImagePaths','postGrnImagePaths','materialList','vendorName','quantityIsFixed','canEdit'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Order Transaction Edit View',
@@ -1144,6 +1146,31 @@ class PurchaseOrderController extends Controller
             ];
             Log::critical(json_encode($data));
             return response()->json([],500);
+        }
+    }
+
+    public function transactionEdit(Request $request,$purchaseOrderTransaction){
+        try{
+            $purchaseOrderTransactionData = $request->except('_token','component_data','vendor_name','purchase_order_id');
+            $purchaseOrderTransaction->update($purchaseOrderTransactionData);
+            foreach($request->component_data as $purchaseOrderComponentId => $purchaseOrderComponentData) {
+                $purchaseOrderTransactionComponent = PurchaseOrderTransactionComponent::where('purchase_order_component_id',$purchaseOrderComponentId)->first();
+                $purchaseOrderTransactionComponentData = [
+                    'quantity' => $purchaseOrderComponentData['quantity'],
+                    'unit_id' => $purchaseOrderComponentData['unit_id'],
+                ];
+                $purchaseOrderTransactionComponent->update($purchaseOrderTransactionComponentData);
+            }
+            return redirect('/purchase/purchase-order/edit/'.$purchaseOrderTransaction->purchase_order_id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Purchase Order Transaction',
+                'params' => $request->all(),
+                'transaction' => $purchaseOrderTransaction,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }
