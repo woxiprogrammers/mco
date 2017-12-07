@@ -54,7 +54,7 @@
                                                                     <th> Actions </th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_sr"> </th>
+                                                                    <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_sr" readonly> </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
                                                                     <th>
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>

@@ -24,7 +24,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Inventory</h1>
+                                    <h1>Manage Peticash Salary</h1>
                                 </div>
                             </div>
                         </div>

@@ -47,7 +47,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="clientId" readonly="true">
+                                                        <select class="form-control" id="clientId" readonly="true" required>
                                                                 <option value="{{$client['id']}}">{{$client['company']}} </option>
                                                         </select>
                                                     </div>
@@ -58,7 +58,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" readonly="true">
+                                                        <select class="form-control" id="projectId" readonly="true" required>
                                                             <option value="{{$project['id']}}">{{$project['name']}} </option>
                                                         </select>
                                                     </div>
@@ -69,7 +69,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" readonly="true">
+                                                        <select class="form-control" id="projectId" readonly="true" required>
                                                             <option value="{{$site['id']}}">{{$site['name']}} </option>
                                                         </select>
                                                     </div>
@@ -80,7 +80,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" readonly="true">
+                                                        <select class="form-control" id="projectId" readonly="true" required>
                                                             <option value="{{$main_category['id']}}">{{$main_category['name']}} </option>
                                                         </select>
                                                     </div>
@@ -91,7 +91,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" readonly="true">
+                                                        <select class="form-control" id="projectId" readonly="true" required>
                                                             <option value="{{$sub_category['id']}}">{{$sub_category['name']}} </option>
                                                         </select>
                                                     </div>

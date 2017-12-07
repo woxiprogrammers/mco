@@ -79,6 +79,35 @@ class ChecklistController extends Controller
             abort(500);
         }
     }
+
+    public function getCheckpointPartialView(Request $request){
+        try{
+            $index = $request->number_of_checkpoints;
+            return view('partials.checklist.structure.checkpoints')->with(compact('index'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get checkpoint partial view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function getCheckpointImagePartialView(Request $request){
+        try{
+            $index = $request->index;
+            $noOfImages = $request->number_of_images;
+            return view('partials.checklist.structure.image-table')->with(compact('index','noOfImages'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get checkpoint image partial view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
 }
 
 
