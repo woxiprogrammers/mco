@@ -414,7 +414,6 @@
                                                                     </thead>
                                                                     <tbody>
                                                                         @foreach($purchaseOrderTransactionListing as $purchaseOrderTransaction)
-                                                                            {{dd($purchaseOrderTransaction)}}
                                                                             <tr>
                                                                                 <td>
                                                                                     <input type="hidden" value="{{$purchaseOrderTransaction['purchase_order_transaction_id']}}">
