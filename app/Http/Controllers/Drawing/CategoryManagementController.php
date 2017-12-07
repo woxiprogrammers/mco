@@ -106,7 +106,7 @@ class CategoryManagementController extends Controller
             $category['drawing_category_id'] = $request->main_category_id;
             $query = DrawingCategory::create($category);
             $request->session()->flash('success', 'Sub category created successfully.');
-            return redirect('/drawing/category-management/create-main');
+            return redirect('/drawing/category-management/create-sub');
         }catch(\Exception $e){
             $data = [
                 'action' => 'create',

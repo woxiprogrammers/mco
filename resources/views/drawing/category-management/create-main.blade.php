@@ -47,7 +47,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="main_category" name="main_category">
+                                                            <input type="text" class="form-control" id="main_category" name="main_category" required>
                                                         </div>
                                                     </div>
                                                 </div>

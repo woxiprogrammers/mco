@@ -282,6 +282,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('download-po-pdf/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@downloadPoPDF'));
             Route::post('close-purchase-order',array('uses'=> 'Purchase\PurchaseOrderController@closePurchaseOrder'));
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
+            Route::get('get-purchase-order-details/{purchaseRequestId}',array('uses'=> 'Purchase\PurchaseOrderController@getOrderDetails'));
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
                 Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
