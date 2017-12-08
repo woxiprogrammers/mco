@@ -146,7 +146,7 @@ class ChecklistController extends Controller
                     $checklistCategory->mainCategory->name,
                     $checklistCategory->name,
                     ChecklistCheckpoint::where('checklist_category_id',$checklistCategory->id)->count(),
-                    ''
+                    '<a href="/checklist/structure/edit/'.$checklistCategory->id.'" class="btn blue">Edit</a>'
                 ];
             }
         }catch(\Exception $e){
@@ -160,6 +160,20 @@ class ChecklistController extends Controller
             $records = array();
         }
         return response()->json($records,$status);
+    }
+
+    public function getStructureEditView(Request $request,$checklistCategory){
+        try{
+            return view('checklist.structure.edit')->with(compact('checklistCategory'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get Checklist structure Edit View",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }
 

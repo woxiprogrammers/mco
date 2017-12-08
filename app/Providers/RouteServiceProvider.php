@@ -88,7 +88,6 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('purchaseOrderBill',PurchaseOrderBill::class);
         Route::model('subcontractor',Subcontractor::class);
         Route::model('purchaseOrderTransaction',PurchaseOrderTransaction::class);
-
     }
 
     /**

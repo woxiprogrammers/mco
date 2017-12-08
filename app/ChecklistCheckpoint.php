@@ -14,4 +14,8 @@ class ChecklistCheckpoint extends Model
         return $this->belongsTo('App\ChecklistCategory','checklist_category_id');
     }
 
+    public function checklistCheckpointsImages(){
+        return $this->hasMany('App\ChecklistCheckpointImages','checklist_checkpoint_id');
+    }
+
 }

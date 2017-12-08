@@ -282,6 +282,16 @@
                                     <i class="fa fa-sitemap"></i> Checklist Structure
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Project Site Assignment
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> User Checklist Management
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
