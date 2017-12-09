@@ -88,12 +88,14 @@
                                             <table class="table table-striped table-bordered table-hover" id="subcontractorStructureTable">
                                                 <thead>
                                                 <tr>
-                                                    <th> Employee Id </th>
-                                                    <th> Employee Name </th>
-                                                    <th> Contact No </th>
-                                                    <th> Per Day wages </th>
-                                                    <th> Project Site </th>
-                                                    <th> Status </th>
+                                                    <th> Subcontractor Name </th>
+                                                    <th> Summary Name </th>
+                                                    <th> Contract type </th>
+                                                    <th> rate </th>
+                                                    <th> Total Work Area </th>
+                                                    <th> Total Amount </th>
+                                                    <th> Project Sitename </th>
+                                                    <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 </thead>

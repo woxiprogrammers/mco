@@ -8,6 +8,10 @@ use App\ProjectSite;
 use App\Quotation;
 use App\QuotationStatus;
 use App\Subcontractor;
+use App\SubcontractorStructure;
+use App\SubcontractorStructureType;
+use App\Summary;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -197,7 +201,10 @@ class SubcontractorController extends Controller
             $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
             $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
             $projectSites = ProjectSite::select('id','name')->get()->toArray();
-            return view('subcontractor.structure.create')->with(compact('projectSites','clients'));
+            $subcontractor = Subcontractor::where('is_active',true)->orderBy('id','asc')->get(['id','subcontractor_name'])->toArray();
+            $summary = Summary::where('is_active',true)->orderBy('id','asc')->get(['id','name'])->toArray();
+            $ScStrutureTypes = SubcontractorStructureType::orderBy('id','asc')->get(['id','name','slug'])->toArray();
+            return view('subcontractor.structure.create')->with(compact('projectSites','clients','subcontractor','summary','ScStrutureTypes'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Structure Create View',
@@ -209,29 +216,57 @@ class SubcontractorController extends Controller
         }
     }
 
+    public function createSubcontractorStructure(Request $request) {
+        try{
+            $now = Carbon::now();
+            $ScStrutureData = null;
+            if($request->structure_type == 'areawise') {
+                $structure_type_id = SubcontractorStructureType::where('slug',$request->structure_type)->pluck('id')->toArray()[0];
+                $ScStrutureData['project_site_id'] = $request->site_id;
+                $ScStrutureData['subcontractor_id'] = $request->subcontractor_id;
+                $ScStrutureData['summary_id'] = $request->summary_id;
+                $ScStrutureData['sc_structure_type_id'] = $structure_type_id;
+                $ScStrutureData['rate'] = $request->rate;
+                $ScStrutureData['total_work_area'] = $request->total_work_area;
+                $ScStrutureData['description'] = $request->description;
+                $ScStrutureData['created_at'] = $now;
+                $ScStrutureData['updated_at'] = $now;
+                SubcontractorStructure::create($ScStrutureData);
+            } else {
+                // here we have to do logic of amountwise
+            }
+            $request->session()->flash('success', 'Subcontractor Structured Created successfully.');
+            return redirect('/subcontractor/subcontractor-structure/create');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Subcontractor',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function subcontractorStructureListing(Request $request){
         try{
-            $listingData = Employee::get();
+            $listingData = SubcontractorStructure::get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                if( $listingData[$pagination]['is_active'] == true){
-                    $labourStatus = '<td><span class="label label-sm label-success"> Enabled </span></td>';
-                    $status = 'Disable';
-                }else{
-                    $labourStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
-                    $status = 'Enable';
-                }
                 $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
+                $total_amount = $listingData[$pagination]['rate']*$listingData[$pagination]['total_work_area'];
                 $records['data'][$iterator] = [
-                    $listingData[$pagination]['employee_id'],
-                    $listingData[$pagination]['name'],
-                    $listingData[$pagination]['mobile'],
-                    $listingData[$pagination]['per_day_wages'],
+                    $listingData[$pagination]->subcontractor->subcontractor_name,
+                    $listingData[$pagination]->summary->name,
+                    $listingData[$pagination]->contractType->name,
+                    $listingData[$pagination]['rate'],
+                    $listingData[$pagination]['total_work_area'],
+                    $total_amount,
                     $projectSiteName,
-                    $labourStatus,
+                    date('d M Y',strtotime($listingData[$pagination]['created_at'])),
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
@@ -242,10 +277,6 @@ class SubcontractorController extends Controller
                                 <a href="/subcontractor/subcontractor-structure/edit/'.$listingData[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
-                            <!--<li>
-                                <a href="/subcontractor/change-status/'.$listingData[$pagination]['id'].'">
-                                    <i class="icon-docs"></i> '.$status.' </a>
-                            </li>-->
                         </ul>
                     </div>'
                 ];
@@ -306,5 +337,60 @@ class SubcontractorController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getProjects(Request $request, $client){
+        try{
+            $status = 200;
+            if ($client == 0) {
+                $projectOptions[] = '<option value="0">ALL</option>';
+            } else {
+                $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
+                $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
+                $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
+                $projects = Project::where('client_id',$client)->whereIn('id',$projectIds)->get()->toArray();
+                $projectOptions = array();
+                for($i = 0 ; $i < count($projects); $i++){
+                    $projectOptions[] = '<option value="'.$projects[$i]['id'].'"> '.$projects[$i]['name'].' </option>';
+                }
+            }
+        }catch (\Exception $e){
+            $projectOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Get Project from client',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectOptions,$status);
+    }
+
+    public function getProjectSites(Request $request,$project){
+        try{
+            $status = 200;
+            if ($project == 0) {
+                $projectSitesOptions[] = '<option value="0">ALL</option>';
+            } else {
+                $projectSites = ProjectSite::where('project_id', $project)->get()->toArray();
+                $projectSitesOptions = array();
+                for($i = 0 ; $i < count($projectSites); $i++){
+                    $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';
+                }
+            }
+        }catch (\Exception $e){
+            $projectSitesOptions = array();
+            $status = 500;
+            $data = [
+                'actions' => 'Get Project Site',
+                'params' => $request->all(),
+                'exception' => $e->getMessage(),
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($projectSitesOptions,$status);
     }
 }
