@@ -275,28 +275,7 @@
             }();
             CreateCheckListStructure.init();
             applyCheckpointValidation();
-            $("#main_cat").on('change', function(){
-                var mainCategoryId = $(this).val();
-                if(typeof mainCategoryId == 'undefined' || mainCategoryId == ''){
-                    $("#sub_cat").html('<option value="">--Select Sub Category --</option>');
-                }else{
-                    $.ajax({
-                        url: '/checklist/structure/get-sub-category',
-                        type: 'POST',
-                        data: {
-                            _token: $('input[name="_token"]').val(),
-                            category_id: mainCategoryId
-                        },
-                        success: function(data,textStatus,xhr){
-                            $("#sub_cat").html(data);
-                        },
-                        error: function(errorData){
-                            alert('Something went wrong.');
-                        }
-                    });
-                }
 
-            });
         });
 
     </script>

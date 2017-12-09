@@ -283,7 +283,7 @@
                                 </a>
                             </li>
                             <li aria-haspopup="true">
-                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                <a href="/checklist/site-assignment/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Project Site Assignment
                                 </a>
                             </li>
