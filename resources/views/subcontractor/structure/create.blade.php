@@ -270,32 +270,10 @@
 <script>
     $(document).ready(function() {
         CreateSubcontractorStructure.init();
-       /* $("#search-withfilter").on('click',function(){
-            var client_id = $('#client_id').val();
-            var project_id = $('#project_id').val();
-            var site_id = $('#site_id').val();
-            var year = $('#year').val();
-            var month = $('#month').val();
-            var status_id = $('#status_id').val();
-            var search_name = $('#search_name').val();
-            var emp_id = $('#emp_id').val();
-
-            var postData =
-                'client_id=>'+client_id+','+
-                    'project_id=>'+project_id+','+
-                    'site_id=>'+site_id+','+
-                    'year=>'+year+','+
-                    'month=>'+month;
-
-            $("input[name='postdata']").val(postData);
-            $("input[name='search_name']").val(search_name);
-            $("input[name='search_employee_id']").val(emp_id);
-            $(".filter-submit").trigger('click');
-        });*/
         getProjects($('#client_id').val());
         getProjectSites($('#project_id').val());
 
-        
+
         $("#client_id").on('change', function(){
             getProjects($('#client_id').val());
         });

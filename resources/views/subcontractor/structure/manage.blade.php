@@ -39,7 +39,7 @@
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
                                             <div class="row">
-                                                <div class="col-md-2">
+                                                <!--<div class="col-md-2">
                                                     <label>Select Client :</label>
                                                     <select class="form-control" id="client_id" name="client_id">
                                                         <option value="0">ALL</option>
@@ -60,17 +60,6 @@
                                                         <option value="0">ALL</option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-2">
-                                                    <label>Select Subcontractor :</label>
-                                                    <select class="form-control" id="year" name="subcontractor">
-                                                        <option value="0">ALL</option>
-                                                        <option value="2017">SC1</option>
-                                                        <option value="2018">SC2</option>
-                                                        <option value="2019">SC3</option>
-                                                        <option value="2020">SC4</option>
-                                                        <option value="2021">Sc5</option>
-                                                    </select>
-                                                </div>
                                                 <div class="col-md-1">
                                                     <label>&nbsp;</label>
                                                     <div class="btn-group">
@@ -84,14 +73,14 @@
                                                 <div class="col-md-3">
                                                 </div>
                                             </div>
-                                            <hr/>
+                                            <hr/>-->
                                             <table class="table table-striped table-bordered table-hover" id="subcontractorStructureTable">
                                                 <thead>
                                                 <tr>
                                                     <th> Subcontractor Name </th>
                                                     <th> Summary Name </th>
                                                     <th> Contract type </th>
-                                                    <th> rate </th>
+                                                    <th> Rate </th>
                                                     <th> Total Work Area </th>
                                                     <th> Total Amount </th>
                                                     <th> Project Sitename </th>
@@ -126,6 +115,49 @@
 <script>
     $(document).ready(function() {
         $('#subcontractorStructureTable').DataTable();
+
+        $("#client_id").on('change', function(){
+            getProjects($('#client_id').val());
+        });
+        $("#project_id").on('change', function(){
+            getProjectSites($('#project_id').val());
+        });
     });
+
+    function getProjects(client_id){
+        $.ajax({
+            url: '/subcontractor/projects/'+client_id,
+            type: 'GET',
+            async : false,
+            success: function(data,textStatus,xhr){
+                if(xhr.status == 200){
+                    $('#project_id').html(data);
+                    $('#project_id').prop('disabled',false);
+                    getProjectSites($('#project_id').val());
+                }
+            },
+            error: function(errorStatus,xhr){
+
+            }
+        });
+    }
+
+    function getProjectSites(project_id){
+        $.ajax({
+            url: '/subcontractor/project-sites/'+project_id,
+            type: 'GET',
+            async : false,
+            success: function(data,textStatus,xhr){
+                if(xhr.status == 200){
+                    $('#site_id').html(data);
+                    $('#site_id').prop('disabled',false);
+                    $("#search-withfilter").trigger('click');
+                }
+            },
+            error: function(errorStatus,xhr){
+
+            }
+        });
+    }
 </script>
 @endsection
