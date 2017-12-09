@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Labour;
 
 use App\Employee;
+use App\EmployeeImage;
+use App\EmployeeImageType;
 use App\EmployeeType;
 use App\Labour;
 use App\ProjectSite;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 class LabourController extends Controller
@@ -35,13 +38,36 @@ class LabourController extends Controller
     public function createLabour(Request $request){
         try{
             if($request['project_site_id'] == -1){
-                $labourData = $request->except('_token','project_site_id');
+                $labourData = $request->except('_token','project_site_id','profile_image');
             }else{
-                $labourData = $request->except('_token');
+                $labourData = $request->except('_token','profile_image');
             }
             $labourData['is_active'] = (boolean)false;
             $labourData['employee_type_id'] = EmployeeType::where('slug',$request['employee_type'])->pluck('id')->first();
-            Employee::create($labourData);
+            $employee = Employee::create($labourData);
+            if($request->has('profile_image')){
+                $imageTypeId = EmployeeImageType::where('slug','profile')->pluck('id')->first();
+                $employeeDirectoryName = sha1($employee->id);
+                $imageUploadPath = public_path().env('EMPLOYEE_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$employeeDirectoryName.DIRECTORY_SEPARATOR.'profile';
+                if(!file_exists($imageUploadPath)){
+                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                }
+                $profileImage = $request->profile_image;
+                $imageArray = explode(';',$profileImage);
+                $image = explode(',',$imageArray[1])[1];
+                $pos  = strpos($profileImage, ';');
+                $type = explode(':', substr($profileImage, 0, $pos))[1];
+                $extension = explode('/',$type)[1];
+                $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                file_put_contents($fileFullPath,base64_decode($image));
+                $employeeImageData = [
+                    'employee_id' => $employee->id,
+                    'employee_image_type_id' => $imageTypeId,
+                    'name' => $filename
+                ];
+                EmployeeImage::create($employeeImageData);
+            }
             $request->session()->flash('success', 'Labour Created successfully.');
             return redirect('/labour/create');
         }catch(\Exception $e){
@@ -146,7 +172,16 @@ class LabourController extends Controller
     public function getEditView(Request $request,$labour){
         try{
             $projectSites = ProjectSite::select('id','name')->get()->toArray();
-            return view('labour.edit')->with(compact('labour','projectSites'));
+            $profilePicTypeId = EmployeeImageType::where('slug','profile')->pluck('id')->first();
+            $employeeProfilePic = EmployeeImage::where('employee_id',$labour->id)->where('employee_image_type_id',$profilePicTypeId)->first();
+            if($employeeProfilePic == null){
+                $profileImagePath = null;
+            }else{
+                $employeeDirectoryName = sha1($labour->id);
+                $imageUploadPath = env('EMPLOYEE_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$employeeDirectoryName.DIRECTORY_SEPARATOR.'profile';
+                $profileImagePath = $imageUploadPath.DIRECTORY_SEPARATOR.$employeeProfilePic->name;
+            }
+            return view('labour.edit')->with(compact('labour','projectSites','profileImagePath'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -161,12 +196,40 @@ class LabourController extends Controller
     public function editLabour(Request $request,$labour){
         try{
             if($request['project_site_id'] != -1){
-                $updateLabourData = $request->except('_token');
+                $updateLabourData = $request->except('_token','profile_image');
             }else{
-                $updateLabourData = $request->except('_token','project_site_id');
+                $updateLabourData = $request->except('_token','project_site_id','profile_image');
             }
             $updateLabourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
             Employee::where('id',$labour['id'])->update($updateLabourData);
+            if($request->has('profile_image')){
+                $imageTypeId = EmployeeImageType::where('slug','profile')->pluck('id')->first();
+                $employeeProfilePic = EmployeeImage::where('employee_id',$labour->id)->where('employee_image_type_id',$imageTypeId)->first();
+                $employeeDirectoryName = sha1($labour->id);
+                $imageUploadPath = public_path().env('EMPLOYEE_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$employeeDirectoryName.DIRECTORY_SEPARATOR.'profile';
+                if(!file_exists($imageUploadPath)){
+                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                }
+                $profileImage = $request->profile_image;
+                $imageArray = explode(';',$profileImage);
+                $image = explode(',',$imageArray[1])[1];
+                $pos  = strpos($profileImage, ';');
+                $type = explode(':', substr($profileImage, 0, $pos))[1];
+                $extension = explode('/',$type)[1];
+                $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                file_put_contents($fileFullPath,base64_decode($image));
+                if($employeeProfilePic == null){
+                    $employeeImageData = [
+                        'employee_id' => $labour->id,
+                        'employee_image_type_id' => $imageTypeId,
+                        'name' => $filename
+                    ];
+                    EmployeeImage::create($employeeImageData);
+                }else{
+                    $employeeProfilePic->update(['name' => $filename]);
+                }
+            }
             $request->session()->flash('success', 'Labour Edited successfully.');
             return redirect('/labour/edit/'.$labour->id);
         }catch(\Exception $e){

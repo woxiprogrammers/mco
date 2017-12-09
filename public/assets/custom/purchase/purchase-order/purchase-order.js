@@ -14,16 +14,17 @@ $(document).ready(function(){
                $('#qty').val(data.quantity);
                $('#unit').val(data.unit_name);
                $('#hsn_code').val(data.hsn_code);
+               $('#rate').val(data.rate_per_unit);
                var abc = [];
+               var img = [];
                $.each(data.material_component_images ,function(key,value){
-                 abc += '<div class="item"><img src="'+ value.name + '"alt="New york" style="width:100%;height: 170px"></div>';
+                 abc += '<a href="\'+value.name+\'"><img src="'+ value.name + '" style="height: 170px"></a>';
                 });
                 $('#imagecorousel').html(abc);
                 $.each(data.client_approval_images ,function(key,value){
-                    abc += '<div class="item"><img id="image" src="'+ value.name + '"alt="New york" style="width:100%;height: 170px"></div>';
+                    img += '<a href="'+value.name+'"> <img id="image" src="'+ value.name + '" style="text-align:left;height: 170px"></a>';
                 });
-                $('#imagecorouselForClientApproval').html(abc);
-
+                $('#imagecorouselForClientApproval').html(img);
             }
         });
         $("#ImageUpload").modal();

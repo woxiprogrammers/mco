@@ -20,9 +20,9 @@
             <th style="width: 13%; text-align: center" >
                 Is Client supplied?
             </th>
-            <th style="width: 13%; text-align: center">
+            {{--<th style="width: 13%; text-align: center">
                 Required Client Approval
-            </th>
+            </th>--}}
             <th style=" text-align: center">
                 Material Name
             </th>
@@ -52,9 +52,9 @@
                     @endif
 
                 </td>
-                <td>
+                {{--<td>
                     <input type="checkbox">
-                </td>
+                </td>--}}
                 <td>
                     {{$material['name']}}
                 </td>

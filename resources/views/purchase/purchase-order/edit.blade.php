@@ -4,13 +4,7 @@
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
     <style>
-        .thumbimage {
-            float:left;
-            width:100%;
-            height: 200px;
-            position:relative;
-            padding:5px;
-        }
+
     </style>
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
@@ -113,7 +107,6 @@
                                                             </thead>
                                                             <tbody>
                                                                 @foreach($materialList as $key => $materialData)
-
                                                                     <tr>
                                                                         <td> {{$materialData['material_component_name']}} </td>
                                                                         <td>  {{$materialData['material_component_quantity']}} </td>
@@ -126,7 +119,7 @@
                                                         </table>
                                                     </div>
                                                     <div class="modal fade" id="ImageUpload" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                                        <div class="modal-dialog">
+                                                        <div class="modal-dialog transaction-modal">
                                                             <div class="modal-content">
                                                                 <div class="modal-header" >
                                                                     <div class="row">
@@ -135,82 +128,39 @@
                                                                         <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                                     </div>
                                                                 </div>
-                                                            <div class="modal-body">
-                                                                <form role="form" class="form-horizontal" method="post">
+                                                                <div class="modal-body">
+                                                                    <form role="form" class="form-horizontal" method="post">
                                                                     {!! csrf_field() !!}
-                                                                    <div class="form-body">
-                                                                        <div class="form-group row">
-                                                                            <div class="col-md-12" style="text-align: right">
+                                                                        <div class="form-body">
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-12" style="text-align: right">
                                                                                 <input type="text" class="form-control empty typeahead tt-input" id="material_name" placeholder="Enter material name" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="qty" placeholder="Enter Quantity" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="unit" placeholder="Enter Unit" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
+                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="rate" placeholder="Enter Rate" autocomplete="off" readonly>
                                                                                 <br><input type="hidden" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Rate" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
                                                                                 <br><input type="text" class="form-control empty typeahead tt-input" id="hsn_code" placeholder="Enter HSNCODE" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" >
                                                                                <br>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-12">
                                                                                         Vendor Quotation Image
-                                                                                        <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
-                                                                                            <!-- Indicators -->
-                                                                                            <ol class="carousel-indicators">
-                                                                                                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="1"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="2"></li>
-                                                                                            </ol>
-
                                                                                             <!-- Wrapper for slides -->
-                                                                                            <div class="carousel-inner">
                                                                                                 <div id ="imagecorousel">
 
                                                                                                 </div>
-
-                                                                                            </div>
-
-
-                                                                                            <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-                                                                                                <span class="glyphicon glyphicon-chevron-left"></span>
-                                                                                                <span class="sr-only">Previous</span>
-                                                                                            </a>
-                                                                                            <a class="right carousel-control" href="#myCarousel" data-slide="next">
-                                                                                                <span class="glyphicon glyphicon-chevron-right"></span>
-                                                                                                <span class="sr-only">Next</span>
-                                                                                            </a>
-                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
                                                                                 <br>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-12">
                                                                                         Client Approval Note Image
-                                                                                        <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
-                                                                                            <!-- Indicators -->
-                                                                                            <ol class="carousel-indicators">
-                                                                                                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="1"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="2"></li>
-                                                                                            </ol>
-
-                                                                                            <!-- Wrapper for slides -->
-                                                                                            <div class="carousel-inner">
                                                                                                 <div id ="imagecorouselForClientApproval">
 
                                                                                                 </div>
-
-                                                                                            </div>
-                                                                                                <!-- Left and right controls -->
-                                                                                                <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-                                                                                                    <span class="glyphicon glyphicon-chevron-left"></span>
-                                                                                                    <span class="sr-only">Previous</span>
-                                                                                                </a>
-                                                                                                <a class="right carousel-control" href="#myCarousel" data-slide="next">
-                                                                                                    <span class="glyphicon glyphicon-chevron-right"></span>
-                                                                                                    <span class="sr-only">Next</span>
-                                                                                                </a>
-                                                                                            </div>
-                                                                                        </div>
                                                                                     </div>
+                                                                            </div>
+                                                                        </div>
 
-                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </form>
@@ -398,6 +348,23 @@
                                                                             </div>
                                                                         </div>
                                                                     </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal fade" id="editTransactionModal" role="dialog">
+                                                        <div class="modal-dialog transaction-modal" style="width: 90%; ">
+                                                            <!-- Modal content-->
+                                                            <div class="modal-content" style="overflow: scroll !important;">
+                                                                <div class="modal-header">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4"></div>
+                                                                        <div class="col-md-4" style="font-size: 18px"> Purchase Order Transaction</div>
+                                                                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-body" style="padding:40px 50px;">
+
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -617,6 +584,18 @@
 
             $(".transaction-edit-btn").on('click', function(){
                var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
+               console.log(transactionId);
+               $.ajax({
+                    url:'/purchase/purchase-order/transaction/edit/'+transactionId+'?_token='+$('input[name="_token"]').val(),
+                    type: 'GET',
+                    success: function(data,textStatus,xhr){
+                        $("#editTransactionModal .modal-body").html(data);
+                        $("#editTransactionModal").modal('show');
+                    },
+                    error: function(errorStatus){
+
+                    }
+               });
             });
 
             $("#transactionButton").on('click',function(){
