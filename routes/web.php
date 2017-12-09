@@ -371,6 +371,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
 
     Route::group(['prefix' => 'checklist'], function(){
+        Route::post('get-projects',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getProjects'));
+        Route::post('get-project-sites',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getProjectSites'));
+        Route::post('get-quotation-floors',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getQuotationFloors'));
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
             Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
@@ -382,6 +385,21 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'structure'],function(){
             Route::get('manage',array('uses' => 'Checklist\ChecklistController@getManageView'));
             Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
+            Route::get('edit/{checklistCategory}',array('uses' => 'Checklist\ChecklistController@getStructureEditView'));
+            Route::post('create',array('uses' => 'Checklist\ChecklistController@createStructure'));
+            Route::post('listing',array('uses' => 'Checklist\ChecklistController@structureListing'));
+            Route::post('get-sub-category',array('uses' => 'Checklist\ChecklistController@getSubCategories'));
+            Route::post('get-checkpoint-partial-view',array('uses' => 'Checklist\ChecklistController@getCheckpointPartialView'));
+            Route::post('get-checkpoint-image-partial-view',array('uses' => 'Checklist\ChecklistController@getCheckpointImagePartialView'));
+        });
+
+        Route::group(['prefix' => 'site-assignment'],function(){
+            Route::get('manage',array('uses' => 'Checklist\ChecklistSiteAssignmentController@getManageView'));
+            Route::get('create',array('uses' => 'Checklist\ChecklistSiteAssignmentController@getCreateView'));
+            Route::get('edit/{projectSiteChecklist}',array('uses' => 'Checklist\ChecklistSiteAssignmentController@getSiteAssignmentEditView'));
+            Route::get('get-checkpoints/{checklistCategory}',array('uses' => 'Checklist\ChecklistSiteAssignmentController@getCheckpoints'));
+            Route::post('create',array('uses' => 'Checklist\ChecklistSiteAssignmentController@siteAssignmentCreate'));
+            Route::post('listing',array('uses' => 'Checklist\ChecklistSiteAssignmentController@siteAssignmentListing'));
         });
     });
 
