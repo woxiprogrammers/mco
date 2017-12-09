@@ -1,6 +1,4 @@
-x=1;
 $(document).ready(function() {
-    var wrapper         = $(".input_fields_wrap");
     var add_button      = $(".add_field_button");
     $(add_button).click(function(e){
         e.preventDefault();
@@ -93,9 +91,7 @@ function addCheckpoint(){
     $(".add_field_button").trigger('click');
 }
 function removeCheckpoint(element){
-    console.log(' in remove funciton');
     $(element).closest('.checkpoint').remove();
-    x--;
 }
 function getImageTable(element, index){
     var noOfImage = $(element).closest('.form-group').find('.number-of-image').val();
