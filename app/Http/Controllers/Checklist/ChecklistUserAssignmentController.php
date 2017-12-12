@@ -6,6 +6,8 @@ use App\ChecklistCategory;
 use App\ChecklistStatus;
 use App\Client;
 use App\ProjectSiteChecklist;
+use App\ProjectSiteUserChecklistAssignment;
+use App\ProjectSiteUserCheckpoint;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -22,7 +24,32 @@ class ChecklistUserAssignmentController extends Controller
     public function getManageView(Request $request)
     {
         try {
-            return view('checklist.user-assignment.manage');
+            $assignedChecklistIds = ProjectSiteUserChecklistAssignment::join('checklist_statuses','checklist_statuses.id','=','project_site_user_checklist_assignments.checklist_status_id')
+                                                    ->where('checklist_statuses.slug','assigned')
+                                                    ->pluck('project_site_user_checklist_assignments.id');
+            $inProgressChecklistIds = ProjectSiteUserChecklistAssignment::join('checklist_statuses','checklist_statuses.id','=','project_site_user_checklist_assignments.checklist_status_id')
+                ->where('checklist_statuses.slug','in-progress')
+                ->pluck('project_site_user_checklist_assignments.id');
+            $reviewChecklistIds = ProjectSiteUserChecklistAssignment::join('checklist_statuses','checklist_statuses.id','=','project_site_user_checklist_assignments.checklist_status_id')
+                ->where('checklist_statuses.slug','review')
+                ->pluck('project_site_user_checklist_assignments.id');
+            $completedChecklistIds = ProjectSiteUserChecklistAssignment::join('checklist_statuses','checklist_statuses.id','=','project_site_user_checklist_assignments.checklist_status_id')
+                ->where('checklist_statuses.slug','completed')
+                ->pluck('project_site_user_checklist_assignments.id');
+            $assignedChecklists = $inProgressChecklists = $reviewChecklists = $completedChecklists = null;
+            if(count($assignedChecklistIds) > 0){
+                $assignedChecklists = ProjectSiteUserChecklistAssignment::whereIn('id',($assignedChecklistIds->toArray()))->get();
+            }
+            if(count($inProgressChecklistIds) > 0){
+                $inProgressChecklists = ProjectSiteUserChecklistAssignment::whereIn('id',($inProgressChecklistIds->toArray()))->get();
+            }
+            if(count($reviewChecklistIds) > 0){
+                $reviewChecklists = ProjectSiteUserChecklistAssignment::whereIn('id',($reviewChecklistIds->toArray()))->get();
+            }
+            if(count($completedChecklistIds) > 0){
+                $completedChecklists = ProjectSiteUserChecklistAssignment::whereIn('id',($completedChecklistIds->toArray()))->get();
+            }
+            return view('checklist.user-assignment.manage')->with(compact('assignedChecklists','reviewChecklists','completedChecklists','inProgressChecklists'));
         } catch (\Exception $e) {
             $data = [
                 'action' => "Get Check List manage view",
@@ -150,7 +177,6 @@ class ChecklistUserAssignmentController extends Controller
 
     public function createUserAssignment(Request $request){
         try{
-            dd($request->all());
             $projectSiteChecklist = ProjectSiteChecklist::where('project_site_id',$request->project_site_id)
                                                         ->where('quotation_floor_id', $request->quotation_floor_id)
                                                         ->where('checklist_category_id', $request->sub_category_id)
@@ -164,8 +190,21 @@ class ChecklistUserAssignmentController extends Controller
             if($request->has('users')){
                 foreach($request->users as $userId){
                     $projectSiteUserAssignmentData['assigned_to'] = $userId;
+                    $projectSiteUserAssignment = ProjectSiteUserChecklistAssignment::create($projectSiteUserAssignmentData);
+                    $projectSiteUserCheckpointsData = [
+                        'project_site_user_checklist_assignment_id' => $projectSiteUserAssignment->id
+                    ];
+                    foreach($projectSiteChecklist->projectSiteChecklistCheckpoints as $projectSiteChecklistCheckpoint){
+                        $projectSiteUserCheckpointsData['project_site_checklist_checkpoint_id'] = $projectSiteChecklistCheckpoint->id;
+                        $projectSiteUserCheckpoint = ProjectSiteUserCheckpoint::create($projectSiteUserCheckpointsData);
+                    }
                 }
+            }else{
+                $request->session()->flash('error','Please select atleast one user');
+                return redirect('/checklist/user-assignment/create');
             }
+            $request->session()->flash('success','Checklist assigned to user successfully');
+            return redirect('/checklist/user-assignment/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => "Get Check List User Assignment Create view",
