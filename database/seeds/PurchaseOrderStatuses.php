@@ -22,6 +22,12 @@ class PurchaseOrderStatuses extends Seeder
                 'created_at' => $now,
                 'updated_at' => $now
             ],
+            [
+                'name' => 'Active',
+                'slug' => 'active',
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
         ]);
     }
 }
