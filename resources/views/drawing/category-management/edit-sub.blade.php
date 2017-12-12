@@ -48,7 +48,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="main_category" name="main_category_id">
+                                                            <select class="form-control" id="main_category" name="main_category_id" required>
                                                                 <option value="">Select Main Category from here</option>
                                                                 @foreach($categories as $category)
                                                                     @if($drawing_category_id == $category['id'])
@@ -66,7 +66,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="sub_category" name="sub_category" value="{{$name['name']}}">
+                                                            <input type="text" class="form-control" id="sub_category" name="sub_category" value="{{$name['name']}}" required>
                                                         </div>
                                                     </div>
                                                 </div>

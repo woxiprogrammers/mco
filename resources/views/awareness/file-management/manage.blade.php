@@ -46,7 +46,7 @@
                                                 <div class="portlet-body">
                                                     <div class="row">
                                                          <div class="col-md-6">
-                                                             <select class="bs-select form-control" id="mainCategoryId" name="main_category_id">
+                                                             <select class="bs-select form-control" id="mainCategoryId" name="main_category_id" required>
                                                                  <option value="">Select Main Category</option>
                                                                 @foreach($main_categories as $category)
                                                                  <option value="{{$category['id']}}">{{$category['name']}}</option>
@@ -54,7 +54,7 @@
                                                              </select>
                                                          </div>
                                                         <div class="col-md-6">
-                                                            <select class="bs-select form-control" id="subCategoryId" name="sub_category_id">
+                                                            <select class="bs-select form-control" id="subCategoryId" name="sub_category_id" required>
                                                                 <option value="">Select Sub Category</option>
                                                             </select>
                                                         </div>

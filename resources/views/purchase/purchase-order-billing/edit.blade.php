@@ -93,6 +93,14 @@
                                                             <legend> Bill Details </legend>
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
+                                                                    <label class="control-label pull-right"> GRN </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control calculate-amount" name="grn" id="subTotal" value="{{$grn}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
                                                                     <label class="control-label pull-right">Sub-Total</label>
                                                                 </div>
                                                                 <div class="col-md-6">

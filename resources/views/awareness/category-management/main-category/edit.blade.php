@@ -39,7 +39,7 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             @foreach($categories as $category)
-                                                            <input type="text" class="form-control" id="name" name="name" value="{{$category['name']}}">
+                                                            <input type="text" class="form-control" id="name" name="name" value="{{$category['name']}}" required>
                                                             <input type="hidden" class="form-control" id="name" name="id" value="{{$category['id']}}">
                                                                 @endforeach
                                                         </div>

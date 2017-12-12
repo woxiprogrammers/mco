@@ -282,11 +282,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('download-po-pdf/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@downloadPoPDF'));
             Route::post('close-purchase-order',array('uses'=> 'Purchase\PurchaseOrderController@closePurchaseOrder'));
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
+            Route::get('get-purchase-order-details/{purchaseRequestId}',array('uses'=> 'Purchase\PurchaseOrderController@getOrderDetails'));
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
                 Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
                 Route::get('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionDetails'));
                 Route::get('check-generated-grn/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@checkGeneratedGRN'));
+                Route::get('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionEditView'));
+                Route::post('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@transactionEdit'));
             });
         });
 
@@ -368,6 +371,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
 
     Route::group(['prefix' => 'checklist'], function(){
+        Route::post('get-projects',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getProjects'));
+        Route::post('get-project-sites',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getProjectSites'));
+        Route::post('get-quotation-floors',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getQuotationFloors'));
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
             Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
@@ -379,6 +385,21 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'structure'],function(){
             Route::get('manage',array('uses' => 'Checklist\ChecklistController@getManageView'));
             Route::get('create',array('uses' => 'Checklist\ChecklistController@getCreateView'));
+            Route::get('edit/{checklistCategory}',array('uses' => 'Checklist\ChecklistController@getStructureEditView'));
+            Route::post('create',array('uses' => 'Checklist\ChecklistController@createStructure'));
+            Route::post('listing',array('uses' => 'Checklist\ChecklistController@structureListing'));
+            Route::post('get-sub-category',array('uses' => 'Checklist\ChecklistController@getSubCategories'));
+            Route::post('get-checkpoint-partial-view',array('uses' => 'Checklist\ChecklistController@getCheckpointPartialView'));
+            Route::post('get-checkpoint-image-partial-view',array('uses' => 'Checklist\ChecklistController@getCheckpointImagePartialView'));
+        });
+
+        Route::group(['prefix' => 'site-assignment'],function(){
+            Route::get('manage',array('uses' => 'Checklist\ChecklistSiteAssignmentController@getManageView'));
+            Route::get('create',array('uses' => 'Checklist\ChecklistSiteAssignmentController@getCreateView'));
+            Route::get('edit/{projectSiteChecklist}',array('uses' => 'Checklist\ChecklistSiteAssignmentController@getSiteAssignmentEditView'));
+            Route::get('get-checkpoints/{checklistCategory}',array('uses' => 'Checklist\ChecklistSiteAssignmentController@getCheckpoints'));
+            Route::post('create',array('uses' => 'Checklist\ChecklistSiteAssignmentController@siteAssignmentCreate'));
+            Route::post('listing',array('uses' => 'Checklist\ChecklistSiteAssignmentController@siteAssignmentListing'));
         });
     });
 
@@ -435,7 +456,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
         Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageView'));
         Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorListing'));
-        Route::get('change-status/{labour}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
+        Route::get('change-status/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
         Route::get('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
         Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
 

@@ -43,6 +43,11 @@ class InventoryManageController extends Controller
 
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
+            $projectInfo = [
+                'project' => $inventoryComponent->projectSite->project->name,
+                'client' => $inventoryComponent->projectSite->project->client->company,
+                'project_site' => $inventoryComponent->projectSite->name,
+            ];
             $user = Auth::user();
             if($inventoryComponent->is_material == true){
                 $isReadingApplicable = false;
@@ -101,7 +106,7 @@ class InventoryManageController extends Controller
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId'));
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',

@@ -49,7 +49,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <select name="main_category_id" id="main_category_id" class="form-control" aria-required="true" aria-invalid="false" >
+                                                                <select name="main_category_id" id="main_category_id" class="form-control" aria-required="true" aria-invalid="false" required>
                                                                    <option>Select</option>
                                                                     @foreach($main_categories as $main_category)
                                                                     <option value="{{$main_category['id']}}"> {{$main_category['name']}} </option>
@@ -63,7 +63,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <select name="sub_category_sub" id="sub_category_sub" class="form-control" aria-required="true" aria-invalid="false" >
+                                                                <select name="sub_category_sub" id="sub_category_sub" class="form-control" aria-required="true" aria-invalid="false" required>
 
                                                                 </select>
                                                             </div>
