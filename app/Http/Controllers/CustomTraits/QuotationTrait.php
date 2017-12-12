@@ -1280,6 +1280,39 @@ trait QuotationTrait{
                 $quotationExtraItemData['rate'] = $extraItemValue;
                 QuotationExtraItem::create($quotationExtraItemData);
             }
+            if($request->has('bank')){
+                foreach($request->bank as $key => $bankID){
+                    $quotationBankInfoData['bank_info_id'] = $bankID;
+                    $quotationBankInfoData['quotation_id'] = $request->quotation_id;
+                    $quotationBankInfo = QuotationBankInfo::where('quotation_id',$request->quotation_id)->where('bank_info_id',$bankID)->first();
+                    if($quotationBankInfo != null){
+                        $quotationBankInfo->update($quotationBankInfoData);
+                    }else{
+                        QuotationBankInfo::create($quotationBankInfoData);
+                    }
+                }
+            }
+            if($request->has('miscellaneous_material_id')){
+                foreach ($request['miscellaneous_material_id'] as $material_id => $materialData){
+                    if(array_key_exists('is_client_supplied',$materialData)){
+                        $is_client_supplied = true;
+                    }else{
+                        $is_client_supplied = false;
+                    }
+                    if(array_key_exists('quotation_material_id',$materialData)){
+                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit'], 'is_client_supplied' => $is_client_supplied]);
+                    }else{
+                        QuotationMaterial::create([
+                            'material_id' => $material_id,
+                            'rate_per_unit' => $materialData['rate_per_unit'],
+                            'unit_id' => $materialData['unit_id'],
+                            'is_client_supplied' => $is_client_supplied,
+                            'quotation_id' => $request['quotation_id'],
+                            'quantity' => $materialData['quantity']
+                        ]);
+                    }
+                }
+            }
             $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
             $request->session()->flash('success','Quotation Approved Successfully');
             Quotation::where('id',$request->quotation_id)->update($quotationData);

@@ -387,12 +387,14 @@
                                                         <li>
                                                             <a href="#miscellaneousFormTab" data-toggle="tab"> Miscellaneous Category </a>
                                                         </li>
+                                                        <li>
+                                                            <a href="#floorFormTab" data-toggle="tab"> Floors </a>
+                                                        </li>
                                                         @if($quotation->quotation_status->slug == 'approved'&& $userRole == 'superadmin')
                                                             <li>
                                                                 <a href="#openingExpensesFormTab" data-toggle="tab"> Opening Expenses </a>
                                                             </li>
                                                         @endif
-
                                                     </ul>
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="workOrderFormTab">
@@ -429,9 +431,9 @@
                                                                                 </label>
                                                                             </div>
                                                                             <div class="col-md-3">
-                                                                        <textarea class="form-control" name="description" id="workOrderDescription">
-                                                                            {{$quotation->work_order->description}}
-                                                                        </textarea>
+                                                                                <textarea class="form-control" name="description" id="workOrderDescription">
+                                                                                    {{$quotation->work_order->description}}
+                                                                                </textarea>
                                                                             </div>
                                                                         </div>
                                                                         <div class="form-group">
@@ -444,7 +446,6 @@
                                                                                 <input class="form-control" value="{{$quotation->work_order->scope}}" name="scope" id="scope" type="text">
                                                                             </div>
                                                                         </div>
-
                                                                         <div class="form-group">
                                                                             <div class="col-md-3">
                                                                                 <label for="order_value" class="control-form pull-right">
@@ -455,7 +456,6 @@
                                                                                 <input class="form-control" value="{{$beforeTaxOrderValue}}" name="order_value" id="OrderValueWithoutTax" type="text" readonly>
                                                                             </div>
                                                                         </div>
-
                                                                         <div class="form-group">
                                                                             <div class="col-md-3">
                                                                                 <label for="order_value" class="control-form pull-right">
@@ -500,9 +500,7 @@
                                                                                 </tbody>
                                                                             </table>
                                                                         </div>
-                                                                        <div class="form-group">
-
-                                                                        </div>
+                                                                    </div>
                                                             @elseif($quotation->quotation_status->slug == 'draft')
                                                                     <input type="hidden" name="quotation_id" value="{{$quotation->id}}">
                                                                     <div class="col-md-offset-2">
@@ -533,8 +531,8 @@
                                                                                 </label>
                                                                             </div>
                                                                             <div class="col-md-3">
-                                                                        <textarea class="form-control" name="description" id="workOrderDescription">
-                                                                        </textarea>
+                                                                                <textarea class="form-control" name="description" id="workOrderDescription">
+                                                                                </textarea>
                                                                             </div>
                                                                         </div>
                                                                         <div class="form-group">
@@ -579,113 +577,133 @@
                                                                                 </tbody>
                                                                             </table>
                                                                         </div>
-
+                                                                    </div>
                                                             @endif
                                                         </div>
-                                                    </div>
-                                                    <div class="tab-pane fade in" id="extraItemFormTab">
-                                                        @foreach($extraItems as $extraItem)
+                                                        <div class="tab-pane fade in" id="extraItemFormTab">
+                                                            @foreach($extraItems as $extraItem)
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3">
+                                                                        <label class="control-form pull-right">
+                                                                            {{$extraItem['name']}}
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="col-md-5">
+                                                                        <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
+                                                                        @if(array_key_exists('slug',$extraItem))
+                                                                            <i> Note : This is newly created item and not added to quotation yet</i>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        <div class="tab-pane fade in" id="bankassignFormTab">
+                                                            <div class="form-group" style="margin-top: 3%">
+                                                                <div class="col-md-3" style="margin-left: 2%">
+                                                                    <label class="control-form pull-right">
+                                                                        Select Bank :
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-control product-material-select" style="height: 150px;" >
+                                                                        <ul id="bank_id" class="list-group">
+                                                                            @foreach($bankInfo as $bank)
+                                                                                @if(in_array($bank['id'],$checkBank))
+                                                                                    <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}" checked> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                                @else
+                                                                                    <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}"> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
+                                                                                @endif
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tab-pane fade in" id="miscellaneousFormTab">
+                                                            <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
+                                                                <tr>
+                                                                    <th style="width: 13%; text-align: center" >
+                                                                        Is Client supplied?
+                                                                    </th>
+                                                                    <th  style="text-align: center"> Category name </th>
+                                                                    <th style="text-align: center"> Material name </th>
+                                                                    <th  style="text-align: center"> Rate per unit </th>
+                                                                    <th  style="text-align: center"> Unit </th>
+                                                                    <th  style="text-align: center"> Quantity </th>
+                                                                </tr>
+                                                                @foreach($quotationMiscellaneousMaterials as $key => $miscellaneousMaterial)
+                                                                    <tr id = "id_{{$miscellaneousMaterial['material_id']}}">
+                                                                        <td>
+                                                                            @if(array_key_exists('is_client_supplied',$miscellaneousMaterial) && $miscellaneousMaterial['is_client_supplied'] == true)
+                                                                                <input type="checkbox" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][is_client_supplied]" checked>
+                                                                            @else
+                                                                                <input type="checkbox" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][is_client_supplied]">
+                                                                            @endif
+                                                                        </td>
+                                                                        <td>
+                                                                            <span>{{$miscellaneousMaterial['category_name']}}</span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span>{{$miscellaneousMaterial['material_name']}}</span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control" type="text" id="rate_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][rate_per_unit]" value="{{$miscellaneousMaterial['rate_per_unit']}}">
+                                                                        </td>
+                                                                        <td>
+                                                                            <span>{{$miscellaneousMaterial['unit_name']}}</span>
+                                                                            <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][unit_id]" value="{{$miscellaneousMaterial['unit_id']}}">
+                                                                        </td>
+                                                                        @if(array_key_exists('quantity',$miscellaneousMaterial))
+                                                                            <td class="form-group">
+                                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="{{$miscellaneousMaterial['quantity']}}">
+                                                                                <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quotation_material_id]" value="{{$miscellaneousMaterial['quotation_material_id']}}">
+                                                                            </td>
+                                                                        @else
+                                                                            <td class="form-group">
+                                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="0">
+                                                                            </td>
+                                                                        @endif
+                                                                    </tr>
+                                                                @endforeach
+                                                            </table>
+                                                        </div>
+                                                        <div class="tab-pane fade in" id="openingExpensesFormTab">
                                                             <div class="form-group">
                                                                 <div class="col-md-3">
                                                                     <label class="control-form pull-right">
-                                                                            {{$extraItem['name']}}
+                                                                        Opening Expenses
                                                                     </label>
                                                                 </div>
                                                                 <div class="col-md-5">
-                                                                    <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
-                                                                    @if(array_key_exists('slug',$extraItem))
-                                                                        <i> Note : This is newly created item and not added to quotation yet</i>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                    <div class="tab-pane fade in" id="bankassignFormTab">
-                                                        <div class="form-group" style="margin-top: 3%">
-                                                            <div class="col-md-3" style="margin-left: 2%">
-                                                                <label class="control-form pull-right">
-                                                                    Select Bank :
-                                                                </label>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-control product-material-select" style="height: 150px;" >
-                                                                    <ul id="bank_id" class="list-group">
-                                                                        @foreach($bankInfo as $bank)
-                                                                            @if(in_array($bank['id'],$checkBank))
-                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}" checked> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
-                                                                            @else
-                                                                            <li> <input type="checkbox" name="bank[]" value="{{$bank['id']}}"> {{$bank['bank_name']}} ({{$bank['account_number']}}) </li>
-                                                                        @endif
-                                                                            @endforeach
-                                                                    </ul>
+                                                                    <input class="form-control" name="open_expenses" id="open_expenses" value=0 >
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="tab-pane fade in" id="miscellaneousFormTab">
-                                                        <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
-                                                            <tr>
-                                                                <th style="width: 13%; text-align: center" >
-                                                                    Is Client supplied?
-                                                                </th>
-                                                                <th  style="text-align: center"> Category name </th>
-                                                                <th style="text-align: center"> Material name </th>
-                                                                <th  style="text-align: center"> Rate per unit </th>
-                                                                <th  style="text-align: center"> Unit </th>
-                                                                <th  style="text-align: center"> Quantity </th>
-                                                            </tr>
-                                                            @foreach($quotationMiscellaneousMaterials as $key => $miscellaneousMaterial)
-                                                                <tr id = "id_{{$miscellaneousMaterial['material_id']}}">
-                                                                    <td>
-                                                                        @if(array_key_exists('is_client_supplied',$miscellaneousMaterial) && $miscellaneousMaterial['is_client_supplied'] == true)
-                                                                            <input type="checkbox" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][is_client_supplied]" checked>
-                                                                        @else
-                                                                            <input type="checkbox" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][is_client_supplied]">
-                                                                        @endif
-                                                                    </td>
-                                                                    <td>
-                                                                        <span>{{$miscellaneousMaterial['category_name']}}</span>
-                                                                    </td>
-                                                                    <td>
-                                                                        <span>{{$miscellaneousMaterial['material_name']}}</span>
-                                                                    </td>
-                                                                    <td>
-                                                                        <input class="form-control" type="text" id="rate_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][rate_per_unit]" value="{{$miscellaneousMaterial['rate_per_unit']}}">
-                                                                    </td>
-                                                                    <td>
-                                                                        <span>{{$miscellaneousMaterial['unit_name']}}</span>
-                                                                        <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][unit_id]" value="{{$miscellaneousMaterial['unit_id']}}">
-                                                                    </td>
-                                                                    @if(array_key_exists('quantity',$miscellaneousMaterial))
-                                                                        <td class="form-group">
-                                                                            <input class="form-control current_quantity" type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="{{$miscellaneousMaterial['quantity']}}">
-                                                                            <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quotation_material_id]" value="{{$miscellaneousMaterial['quotation_material_id']}}">
-                                                                        </td>
-                                                                    @else
-                                                                        <td class="form-group">
-                                                                            <input class="form-control current_quantity" type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="0">
-                                                                        </td>
-                                                                    @endif
-                                                                </tr>
-                                                            @endforeach
-                                                        </table>
-                                                    </div>
-                                                    <div class="tab-pane fade in" id="openingExpensesFormTab">
-                                                        <div class="form-group">
-                                                            <div class="col-md-3">
-                                                                <label class="control-form pull-right">
-                                                                    Opening Expenses
-                                                                </label>
-                                                            </div>
-                                                            <div class="col-md-5">
-                                                                <input class="form-control" name="open_expenses" id="open_expenses" value=0 >
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </form>
+                                                        <div class="tab-pane fade in" id="floorFormTab">
+                                                            <div class="form-group">
+                                                                @if(count($quotation->quotation_floor) > 0)
 
-                                    </div>
+
+                                                                @else
+                                                                    <div class="form-group">
+                                                                        <div class="col-md-3">
+                                                                            <label for="work_order_number" class="control-form pull-right">
+                                                                                Number of floors:
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <input class="form-control" name="number_of_floors" id="numberOfFloors" type="text">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div id="floorNameDiv">
+
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    </form>
+                                                </div>
                                 </div>
                                 </div>
                                 <div id="productView" class="modal fade" role="dialog">
@@ -787,6 +805,31 @@
             $("input[name='product_quantity["+value.product_id+"]']").rules('add',{
                 min: parseInt(value.product_bill_count)
             });
+        });
+        $("#numberOfFloors").on('keyup', function(){
+            var number = parseInt($(this).val());
+            if(!isNaN(number)){
+                var floorString = '<table class="table table-bordered table-striped table-condensed flip-content" style="width:50%;overflow: scroll; margin-left: 10%;">' +
+                    '<thead>' +
+                    '<tr>' +
+                    '<th style="width: 10%"> No. </th>'+
+                    '<th> Name </th>' +
+                    '</tr>' +
+                    '</thead>' +
+                    '<tbody>';
+                for(var iterator = 0; iterator < number; iterator++){
+                    var no = iterator+1;
+                    floorString += '<tr>' +
+                        '<td>'+no+'</td>' +
+                        '<td><input type="text" name="quotation_floor['+iterator+']" class="form-control"></td>' +
+                        '</tr>';
+                }
+                floorString += '</tbody></table>';
+                $("#floorNameDiv").html(floorString);
+            }else{
+                $("#floorNameDiv").html('');
+            }
+
         });
     });
 </script>
