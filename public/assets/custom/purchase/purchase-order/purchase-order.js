@@ -91,9 +91,24 @@ $(document).ready(function(){
             beforeSend: function(){
             },
             success: function(data){
-              alert(data);
                 location.reload();
             }
         });
     });
+    $('#poReopenBtn').click(function (){
+        var po_id = $('#po_id').val();
+        var vendor_id = $('#vendor_id').val();
+        $.ajax({
+            type: "POST",
+            url: "/purchase/purchase-order/reopen",
+            data:{po_id : po_id , vendor_id:vendor_id},
+            beforeSend: function(){
+
+                },
+            success: function(data){
+                location.reload();
+            }
+        });
+    });
+
 });

@@ -25,6 +25,7 @@ use App\PurchaseOrderBill;
 use App\PurchaseOrderBillPayment;
 use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderComponent;
+use App\PurchaseOrderStatus;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionComponent;
 use App\PurchaseOrderTransactionImage;
@@ -289,7 +290,8 @@ class PurchaseOrderController extends Controller
     public function closePurchaseOrder(Request $request){
         try{
             $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();
-            $purchase_order_data['is_closed'] = true;
+            $purchase_order_data['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','close')->pluck('id')->first();
+            //$purchase_order_data['is_closed'] = true;
             PurchaseOrder::where('id',$request['po_id'])->update($purchase_order_data);
             $mailData = ['toMail' => $mail_id];
             Mail::send('purchase.purchase-order.email.purchase-order-close', [], function($message) use ($mailData){
@@ -310,9 +312,26 @@ class PurchaseOrderController extends Controller
 
 
     }
-    public function getEditView(Request $request,$id)
-    {
+
+    public function reopenPurchaseOrder(Request $request){
         try{
+            $purchase_order_data['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','re-open')->pluck('id')->first();
+            PurchaseOrder::where('id',$request['po_id'])->update($purchase_order_data);
+            $message = "Purchase order re-opened successfully !";
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Reopen Purchase Order',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $message = "Something went wrong" .$e->getMessage();
+        }
+        return response()->json($message);
+    }
+    public function getEditView(Request $request,$id){
+        try{
+            $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
             $purchaseOrder =PurchaseOrder::where('id',$id)->first();
             $purchaseOrderList = array();
             $iterator = 0;
@@ -382,16 +401,17 @@ class PurchaseOrderController extends Controller
             }
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
             $transaction_types = PaymentType::select('slug')->where('slug','!=','peticash')->get();
-            $isClosed = $purchaseOrder->is_closed;
-            return view('purchase/purchase-order/edit')->with(compact('isClosed','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName'));
+            $purchaseOrderStatusSlug = $purchaseOrder->purchaseOrderStatus->slug;
+
+            return view('purchase/purchase-order/edit')->with(compact('userRole','purchaseOrderStatusSlug','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName'));
         }catch (\Exception $e){
-            $data = [
-                'action' => 'Get Purchase Order Edit View',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
+                $data = [
+                    'action' => 'Get Purchase Order Edit View',
+                    'params' => $request->all(),
+                    'exception' => $e->getMessage()
+                ];
+                Log::critical(json_encode($data));
+                abort(500);
         }
     }
     public function getPurchaseOrderComponentDetails(Request $request){
@@ -703,6 +723,7 @@ class PurchaseOrderController extends Controller
                             $approvePurchaseOrderData['user_id'] = Auth::user()->id;
                             $approvePurchaseOrderData['serial_no'] = ++$todaysCount;
                             $approvePurchaseOrderData['format_id'] = $this->getPurchaseIDFormat('purchase-order',$project_site_id,Carbon::now(),$approvePurchaseOrderData['serial_no']);
+                            $approvePurchaseOrderData['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','open')->pluck('id')->first();
                             $approvedPurchaseOrder = PurchaseOrder::create($approvePurchaseOrderData);
                         }
                         $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
@@ -726,6 +747,7 @@ class PurchaseOrderController extends Controller
                             $disapprovePurchaseOrderData['user_id'] = Auth::user()->id;
                             $disapprovePurchaseOrderData['serial_no'] = ++$todaysCount;
                             $disapprovePurchaseOrderData['format_id'] = $this->getPurchaseIDFormat('purchase-order',$project_site_id,Carbon::now(),$disapprovePurchaseOrderData['serial_no']);
+                            $disapprovePurchaseOrderData['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','close')->pluck('id')->first();
                             $disapprovePurchaseOrder = PurchaseOrder::create($disapprovePurchaseOrderData);
                         }
                         $purchaseOrderComponentData['purchase_order_id'] = $disapprovePurchaseOrder['id'];

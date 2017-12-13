@@ -22,11 +22,18 @@
                                 <div class="page-title">
                                     <h1>Edit Purchase Order</h1>
                                 </div>
-                                @if($isClosed != true)
+                                @if($purchaseOrderStatusSlug != 'close')
                                     <div class="form-group " style="text-align: center">
                                         <button id="poCloseBtn" type="submit" class="btn red pull-right margin-top-15">
                                             <i class="fa fa-close" style="font-size: large"></i>
-                                            Close this purchase order.
+                                            Close
+                                        </button>
+                                    </div>
+                                @elseif($purchaseOrderStatusSlug == 'close' && $userRole == 'superadmin')
+                                    <div class="form-group " style="text-align: center">
+                                        <button id="poReopenBtn" type="submit" class="btn red pull-right margin-top-15">
+                                            <i class="fa fa-open" style="font-size: large"></i>
+                                            Reopen
                                         </button>
                                     </div>
                                 @endif
@@ -86,7 +93,7 @@
                                             <div class="portlet light ">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        @if($isClosed != true)
+                                                        @if($purchaseOrderStatusSlug == 'open' || $purchaseOrderStatusSlug == 're-open')
                                                             <div class="row">
                                                                 <div class="col-md-offset-9 col-md-3 ">
                                                                     <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
