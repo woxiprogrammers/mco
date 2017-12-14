@@ -169,7 +169,6 @@ class CategoryManagementController extends Controller
     public function changeStatus(Request $request,$id,$status){
         try {
                $categoryData['is_active'] = (bool)$status;
-                 dd($categoryData);
                $query = DrawingCategory::where('id',$id)->update($categoryData);
                $request->session()->flash('success', 'Status changed successfully.');
                return redirect('/drawing/category-management/manage');
