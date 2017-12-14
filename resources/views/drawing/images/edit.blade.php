@@ -204,6 +204,7 @@
     <script src="/assets/custom/admin/drawing/image/image-upload.js"></script>
     <script src="/assets/custom/admin/drawing/image/image-version-upload.js"></script>
     <script src="/assets/custom/admin/drawing/image/validation.js" type="application/javascript"></script>
+    <script src="/assets/custom/Drawing/drawing.js" type="application/javascript"></script>
     <script>
         $(document).ready(function(){
             EditImage.init();
