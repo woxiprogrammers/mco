@@ -19,6 +19,7 @@ use App\Product;
 use App\ProfitMargin;
 use App\Project;
 use App\ProjectSite;
+use App\ProjectSiteChecklist;
 use App\PurchaseOrder;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderTransaction;
@@ -88,7 +89,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('purchaseOrderBill',PurchaseOrderBill::class);
         Route::model('subcontractor',Subcontractor::class);
         Route::model('purchaseOrderTransaction',PurchaseOrderTransaction::class);
-
+        Route::model('projectSiteChecklist',ProjectSiteChecklist::class);
     }
 
     /**
