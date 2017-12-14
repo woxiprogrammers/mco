@@ -288,7 +288,7 @@
                                 </a>
                             </li>
                             <li aria-haspopup="true">
-                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                <a href="/checklist/user-assignment/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> User Checklist Management
                                 </a>
                             </li>
