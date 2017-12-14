@@ -100,3 +100,70 @@ ul.tabs li.current{
   position:relative;
   padding:5px;
 }
+
+.board {
+  left: 0;
+  height: 90%;
+  padding-top: 10px;
+  padding-left: 10px;
+}
+
+.taskColumn {
+  float: left;
+  background-color: lightgray;
+  margin-right: 10px;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  padding-bottom: 20px;
+  min-height: 60px;
+  width:24%
+}
+
+.taskDiv {
+  background-color: white;
+  margin: 2px 6px 4px 6px;
+  min-height: 1.6rem;
+  border-radius: 2px;
+  padding: 2px;
+  font-size: 0.9rem;
+}
+
+.taskDiv:hover {
+  cursor: pointer;
+}
+
+.colHdr {
+  top: 0;
+  height: 1.8rem;
+  line-height: 1.8rem;
+  position: relative;
+  background-color: lightgray;
+  margin-bottom: 30px;
+  padding: 2px 0px 0px 6px;
+}
+
+.colFtr {
+  bottom: 0;
+  height: 1.8rem;
+  line-height: 1.8rem;
+  position: relative;
+  background-color: lightgray;
+  margin-top: 20px;
+}
+
+.dragOver {
+  border: 1px dotted rgb(255, 0, 0);
+}
+
+.taskDivTopMargin {
+  margin-top: 20px;
+}
+
+.hdr {
+  height: 50px;
+  font-size: 1.9rem;
+  color: white;
+  line-height: 50px;
+  padding-left: 15px;
+  background-color: rgb(0, 0, 150);
+}
