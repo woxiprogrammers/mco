@@ -401,6 +401,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses' => 'Checklist\ChecklistSiteAssignmentController@siteAssignmentCreate'));
             Route::post('listing',array('uses' => 'Checklist\ChecklistSiteAssignmentController@siteAssignmentListing'));
         });
+
+        Route::group(['prefix' => 'user-assignment'], function(){
+            Route::get('manage',array('uses' => 'Checklist\ChecklistUserAssignmentController@getManageView'));
+            Route::get('create',array('uses' => 'Checklist\ChecklistUserAssignmentController@getCreateView'));
+            Route::post('create',array('uses' => 'Checklist\ChecklistUserAssignmentController@createUserAssignment'));
+            Route::post('get-categories',array('uses' => 'Checklist\ChecklistUserAssignmentController@getCategories'));
+            Route::post('get-users',array('uses' => 'Checklist\ChecklistUserAssignmentController@getUsers'));
+        });
     });
 
     Route::group(['prefix'=>'drawing'],function() {
