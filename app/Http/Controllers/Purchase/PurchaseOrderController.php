@@ -359,6 +359,9 @@ class PurchaseOrderController extends Controller
                 $materialList[$iterator]['material_component_unit_id'] = $materialRequestComponent['unit_id'];
                 $materialList[$iterator]['material_component_unit_name'] = $materialRequestComponent->unit->name;
                 $materialList[$iterator]['material_component_quantity'] = $materialRequestComponent->quantity;
+                $quantityConsumed = $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
+                $quantityUnused = $purchaseOrderComponent['quantity'] - $quantityConsumed;
+                $materialList[$iterator]['material_component_remaining_quantity'] = (0.1 * ($quantityUnused)) + $quantityUnused;
                 $mainDirectoryName = sha1($id);
                 $componentDirectoryName = sha1($purchaseOrderComponent['id']);
                 $uploadPath = url('/').public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
@@ -402,7 +405,6 @@ class PurchaseOrderController extends Controller
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
             $transaction_types = PaymentType::select('slug')->where('slug','!=','peticash')->get();
             $purchaseOrderStatusSlug = $purchaseOrder->purchaseOrderStatus->slug;
-
             return view('purchase/purchase-order/edit')->with(compact('userRole','purchaseOrderStatusSlug','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName'));
         }catch (\Exception $e){
                 $data = [

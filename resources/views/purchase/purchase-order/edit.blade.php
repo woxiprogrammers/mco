@@ -302,7 +302,11 @@
                                                                                     <div class="form-control product-material-select" style="font-size: 14px; height: 200px !important;" >
                                                                                         <ul id="material_id" class="list-group">
                                                                                             @foreach($materialList as $key => $materialData)
-                                                                                                <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}"><label class="control-label">{{$materialData['material_component_name']}} </label></li>
+                                                                                                @if($materialData['material_component_remaining_quantity'] != 0.0)
+                                                                                                   <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}"><label class="control-label">{{$materialData['material_component_name']}} </label></li>
+                                                                                                @else
+                                                                                                    <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}" disabled="disabled"><label class="control-label">{{$materialData['material_component_name']}} </label>&nbsp;&nbsp;&nbsp;(PO Complete)</li>
+                                                                                                @endif
                                                                                             @endforeach
                                                                                         </ul>
                                                                                     </div>
