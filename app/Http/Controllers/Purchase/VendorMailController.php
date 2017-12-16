@@ -30,17 +30,24 @@ class VendorMailController extends Controller
     public function listing(Request $request){
         try{
             $status = 200;
-            $records = [
-                'data' => array()
-            ];
             $vendorMailData = PurchaseRequestComponentVendorMailInfo::orderBy('created_at','desc')->get();
+            $iTotalRecords = count($vendorMailData);
             if($request->length == -1){
                 $length = count($vendorMailData);
             }else{
                 $length = $request->length;
             }
+            $records = [
+                'data' => array(),
+                'draw' => intval($request->draw),
+                'recordsTotal' => $iTotalRecords,
+                'recordsFiltered' => $iTotalRecords
+            ];
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($vendorMailData); $iterator++,$pagination++ ){
-
+                $records['data'][] = [
+                    ($iterator+1),
+                    $vendorMailData[$pagination]->componentVendorRelation->vendor->name
+                ];
             }
         }catch (\Exception $e){
             $data = [

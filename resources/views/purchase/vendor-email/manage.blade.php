@@ -26,12 +26,8 @@
                                                     <table class="table table-striped table-bordered table-hover table-checkable order-column" id="vendorMailTable">
                                                         <thead>
                                                             <tr>
-                                                                <th style="width:20%"> PR Id </th>
-                                                                <th> Client Name</th>
-                                                                <th> Project Name - Site Name </th>
-                                                                <th> Created At</th>
-                                                                <th> Status  </th>
-                                                                <th> Action </th>
+                                                                <th style="width:20%"> Seq. No. </th>
+                                                                <th> Vendor Name</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -59,4 +55,5 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/custom/purchase/vendor-email-datatable.js"></script>
 @endsection
