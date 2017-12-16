@@ -308,6 +308,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createPayment'));
             });
         });
+        Route::group(['prefix' => 'vendor-mail'],function(){
+            Route::get('manage',array('uses' => 'Purchase\VendorMailController@getManageView'));
+            Route::post('listing',array('uses' => 'Purchase\VendorMailController@listing'));
+        });
     });
 
     Route::group(['prefix' => 'inventory'], function(){
