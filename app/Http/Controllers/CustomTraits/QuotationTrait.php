@@ -1267,6 +1267,7 @@ trait QuotationTrait{
 
     public function approve(Request $request,$quotation){
         try{
+            dd($request->all());
             $quotationApprovedStatusId = QuotationStatus::where('slug','approved')->pluck('id')->first();
             $quotationData = array();
             $quotationData['quotation_status_id'] = $quotationApprovedStatusId;

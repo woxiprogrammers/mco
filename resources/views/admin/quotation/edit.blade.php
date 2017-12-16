@@ -821,11 +821,16 @@
                     var no = iterator+1;
                     floorString += '<tr>' +
                         '<td>'+no+'</td>' +
-                        '<td><input type="text" name="quotation_floor['+iterator+']" class="form-control"></td>' +
+                        '<td><div class="form-group" style="width:80%;margin-left: 10%"><input type="text" name="quotation_floor['+iterator+']" class="form-control quotation-floor"></div></td>' +
                         '</tr>';
                 }
                 floorString += '</tbody></table>';
                 $("#floorNameDiv").html(floorString);
+                $(".quotation-floor").each(function(){
+                    $(this).rules('add',{
+                       required: true
+                    });
+                });
             }else{
                 $("#floorNameDiv").html('');
             }
