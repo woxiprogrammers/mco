@@ -61,49 +61,6 @@ $(document).ready(function(){
         }
     });
 
-    $("#clientSearchbox").keyup(function(){
-        if($(this).val().length > 0){
-            $.ajax({
-                type: "POST",
-                url: "/purchase/material-request/get-clients?_token="+$('input[name="_token"]').val(),
-                data:'keyword='+$(this).val(),
-                beforeSend: function(){
-                    $.LoadingOverlay("hide");
-                    $("#client-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
-                },
-                success: function(data){
-                    $("#client-suggesstion-box").show();
-                    $("#client-suggesstion-box").html(data);
-                    $("#clientSearchbox").css("background-color","#FFF");
-                }
-            });
-        }else{
-            $("#client-suggesstion-box").hide();
-        }
-    });
-
-    $("#projectSearchbox").keyup(function(){
-        if($(this).val().length > 0){
-            var clientName = $("#clientSearchbox").val();
-            $.ajax({
-                type: "POST",
-                url: "/purchase/material-request/get-projects?_token="+$('input[name="_token"]').val(),
-                data:'keyword='+$(this).val()+'&client_name='+clientName,
-                beforeSend: function(){
-                    $.LoadingOverlay("hide");
-                    $("#project-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
-                },
-                success: function(data){
-                    $("#project-suggesstion-box").show();
-                    $("#project-suggesstion-box").html(data);
-                    $("#projectSearchbox").css("background-color","#FFF");
-                }
-            });
-        }else{
-            $("#project-suggesstion-box").hide();
-        }
-    });
-
     $("#userSearchbox").keyup(function(){
         if($(this).val().length > 0){
             $.ajax({
@@ -302,10 +259,4 @@ function selectProject(nameProject,id) {
         .on('typeahead:open', function (obj, datum) {
             $('#component_id').val(4);
         });
-}
-
-function selectUser(id,id1) {
-    $('#user_id_').val(id1);
-    $("#userSearchbox").val(id);
-    $("#user-suggesstion-box").hide();
 }

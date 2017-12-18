@@ -43,15 +43,13 @@
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control empty" id="clientSearchbox" name="client_name" placeholder="Enter client name" >
-                                                        <div id="client-suggesstion-box"></div>
+                                                        <input type="text" class="form-control empty" id="clientSearchbox" name="client_name" value="{{$globalProjectSite->project->client->company}}" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control empty" id="projectSearchbox"  placeholder="Enter project name" >
-                                                        <input type="hidden"  id="project_side_id" name="project_site_id">
-                                                        <div id="project-suggesstion-box"></div>
+                                                        <input type="text" class="form-control empty" id="projectSearchbox" value="{{$globalProjectSite->project->name}} - {{$globalProjectSite->name}}" readonly>
+                                                        <input type="hidden"  id="project_side_id" name="project_site_id" value="{{$globalProjectSite->id}}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">

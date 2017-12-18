@@ -27,6 +27,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class PurchaseController extends Controller
 {
@@ -37,14 +38,9 @@ class PurchaseController extends Controller
     }
     public function getManageView(Request $request){
         try{
-            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
-            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
-            $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
-            $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
-            $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
             $purchaseStatus = PurchaseRequestComponentStatuses::get()->toArray();
             $units = Unit::where('is_active', true)->select('id','name')->get();
-            return view('purchase/material-request/manage')->with(compact('units','clients','purchaseStatus'));
+            return view('purchase/material-request/manage')->with(compact('units','purchaseStatus'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Material Request manage page',
@@ -68,15 +64,12 @@ class PurchaseController extends Controller
             $month = 0;
             $year = 0;
             $m_count = 0;
-            $client_id = 0;
-            $project_id = 0;
             $postDataArray = array();
             if ($request->has('m_name')) {
                 if ($request['m_name'] != "") {
                     $m_name = $request['m_name'];
                 }
             }
-
             if ($request->has('status')) {
                 $status = $request['status'];
             }
@@ -92,45 +85,41 @@ class PurchaseController extends Controller
                         $postDataArray[$narr[0]] = $ytr[1];
                     }
                 }
-                $client_id = $postDataArray['client_id'];
-                $project_id = $postDataArray['project_id'];
-                $site_id = $postDataArray['site_id'];
                 $month = $postDataArray['month'];
                 $year = $postDataArray['year'];
                 $m_count = $postDataArray['m_count'];
             }
+            if($request->has('site_id')){
+                $site_id = $request->site_id;
+            }
             $materialRequests = array();
             $ids = MaterialRequests::all()->pluck('id');
             $filterFlag = true;
-
             if ($site_id != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($year != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($month != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-           if ($status != 0 && $filterFlag == true) {
+            if ($status != 0 && $filterFlag == true) {
                $ids = MaterialRequests::join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                    ->where('material_request_components.component_status_id',$status)->distinct('material_requests.id')->pluck('material_requests.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($m_count != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->where('serial_no', $m_count)->pluck('id');
                 if(count($ids) <= 0) {
@@ -549,43 +538,6 @@ class PurchaseController extends Controller
             $projects = '';
         }
         return response()->json($projects,$status);
-
-    }
-    public function  getClientsList(Request $request){
-        try{
-            $status = 200;
-            $data = $request->all();
-            $user = Auth::user();
-            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
-                $clients = Client::where('company','ilike','%'.$data['keyword'].'%')->select('company','id')->get()->toarray();
-            }else{
-                $clients = Client::join('projects','projects.client_id','=','clients.id')
-                    ->join('project_sites','project_sites.project_id','=','projects.id')
-                    ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','project_sites.id')
-                    ->where('clients.company','ilike','%'.$data['keyword'].'%')
-                    ->where('user_project_site_relation.user_id',$user->id)
-                    ->select('clients.company as company','clients.id as id')
-                    ->distinct('id')
-                    ->get();
-            }
-            $opt= '';
-            foreach ($clients as $client) {
-                $opt .= '<li onclick="selectClient(\''.htmlspecialchars($client['company'], ENT_QUOTES).'\')">'.$client['company'].'</li>';
-            }
-            $abc = $opt;
-            $str3 = '<ul id="client-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
-            $clients = $str3;
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Get Client List',
-                'params' => $request->all(),
-                'exception' => $request->all()
-            ];
-            Log::critical(json_encode($data));
-            $status = 500;
-            $clients = '';
-        }
-        return response()->json($clients,$status);
 
     }
     public function getUsersList(Request $request){
