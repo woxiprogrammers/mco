@@ -18,6 +18,7 @@
     <link href="/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css" />
     <!-- END GLOBAL MANDATORY STYLES -->
     <!-- BEGIN THEME GLOBAL STYLES -->
     <link href="/assets/global/css/components-md.min.css" rel="stylesheet" id="style_components" type="text/css" />
@@ -32,7 +33,7 @@
     <link rel="shortcut icon" href="favicon.ico" /> </head>
 <!-- END HEAD -->
 <body class="page-container-bg-solid page-md">
-        @yield('nav-bar')
+        @yield('navBar')
         @yield('content')
         <!-- <div class="page-wrapper-row">
             <div class="page-wrapper-bottom">
@@ -60,6 +61,7 @@
 <script src="/assets/global/plugins/js.cookie.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/jquery.blockui.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
 <!-- END CORE PLUGINS -->
 <!-- BEGIN THEME GLOBAL SCRIPTS -->
@@ -71,6 +73,7 @@
 <script src="/assets/layouts/layout3/scripts/demo.min.js" type="text/javascript"></script>
 <script src="/assets/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script>
 <script src="/assets/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script>
+<script src="/assets/pages/scripts/components-bootstrap-select.min.js" type="text/javascript"></script>
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
         <!-- END THEME LAYOUT SCRIPTS -->
 <script>
@@ -79,6 +82,23 @@
         $('#clickmewow').click(function()
         {
             $('#radio1003').attr('checked', 'checked');
+        });
+
+        $("#globalProjectSite").on('changed.bs.select', function(){
+            var newProjectSite = $(this).val();
+            $.ajax({
+                url: '/change-project-site',
+                type: 'POST',
+                data: {
+                    project_site_id: newProjectSite
+                },
+                success: function(data,textStatus,xhr){
+                    location.reload();
+                },
+                error: function(errorData){
+
+                }
+            });
         });
     });
     $(document).ajaxStart(function(){

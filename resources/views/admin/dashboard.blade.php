@@ -1,6 +1,9 @@
 @extends('layout.master')
 @section('title','Constro')
 @include('partials.common.navbar')
+@section('css')
+    <link href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css" />
+@endsection
 @section('content')
 
 {!! Charts::assets() !!}
@@ -72,4 +75,7 @@
 <!-- END QUICK SIDEBAR -->
 </div>
 <!-- END CONTAINER -->
+@endsection
+@section('javascript')
+<script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
 @endsection
