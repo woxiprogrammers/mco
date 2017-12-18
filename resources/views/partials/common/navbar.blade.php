@@ -420,6 +420,23 @@
                             </li>
                         </ul>
                     </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> DPR
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/dpr/category_manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/dpr/manage_dpr" class="nav-link nav-toggle ">
+                                    <i class="fa fa-file" aria-hidden="true"></i> DPR Management
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </li>
         </div>

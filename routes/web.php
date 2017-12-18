@@ -569,4 +569,20 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
 
     });
+    Route::group(['prefix'=>'dpr'],function (){
+        Route::get('category_manage',array('uses' => 'Dpr\DprController@getCategoryManageView'));
+        Route::get('create-category-view',array('uses' => 'Dpr\DprController@getCategoryCreateView'));
+        Route::get('create-dpr-view',array('uses' => 'Dpr\DprController@getDprCreateView'));
+        Route::get('dpr-edit/{id}',array('uses' => 'Dpr\DprController@getDprEditView'));
+        Route::get('category-edit/{id}',array('uses' => 'Dpr\DprController@getCategoryEditView'));
+        Route::post('dpr-edit',array('uses' => 'Dpr\DprController@dprEdit'));
+        Route::post('category-edit',array('uses' => 'Dpr\DprController@categoryEdit'));
+        Route::post('create-category',array('uses' => 'Dpr\DprController@createCategory'));
+        Route::post('create-dpr',array('uses' => 'Dpr\DprController@createDpr'));
+        Route::get('manage_dpr',array('uses' => 'Dpr\DprController@getDprManageView'));
+        Route::post('category-listing',array('uses' => 'Dpr\DprController@categoryListing'));
+        Route::post('dpr-listing',array('uses' => 'Dpr\DprController@dprListing'));
+        Route::get('change-status/{id}/{status}',array('uses'=> 'Dpr\DprController@changeStatus'));
+    });
+
 });
