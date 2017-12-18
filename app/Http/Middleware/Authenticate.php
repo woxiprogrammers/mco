@@ -45,8 +45,8 @@ class Authenticate
                 'action' => 'Authenticate middleware',
                 'exception' => $e->getMessage()
             ];
-            dd($e->getMessage());
             Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }
