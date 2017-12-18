@@ -682,8 +682,34 @@
                                                         <div class="tab-pane fade in" id="floorFormTab">
                                                             <div class="form-group">
                                                                 @if(count($quotation->quotation_floor) > 0)
-
-
+                                                                    <div class="form-group">
+                                                                        <div class="col-md-3">
+                                                                            <label for="work_order_number" class="control-form pull-right">
+                                                                                Number of floors:
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <input class="form-control" name="number_of_floors" id="numberOfFloors" type="text" value="{!! count($quotation->quotation_floor) !!}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div id="floorNameDiv">
+                                                                        <table class="table table-bordered table-striped table-condensed flip-content" style="width:50%;overflow: scroll; margin-left: 10%;">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width: 10%"> No. </th>
+                                                                                    <th> Name </th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                @for($iterator = 0; $iterator < count($quotation->quotation_floor); $iterator++)
+                                                                                    <tr>
+                                                                                        <td>{!! $iterator+1 !!}</td>
+                                                                                        <td><div class="form-group" style="width:80%;margin-left: 10%"><input type="text" name="quotation_floor[{{$iterator}}]" class="form-control quotation-floor" value="{{$quotation->quotation_floor[$iterator]->name}}"></div></td>
+                                                                                    </tr>
+                                                                                @endfor
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
                                                                 @else
                                                                     <div class="form-group">
                                                                         <div class="col-md-3">
@@ -799,6 +825,8 @@
         WorkOrderFrom.init();
         calculateSubtotal();
         applyValidation("QuotationEditForm");
+        var typingTimer;
+        var doneTypingInterval = 500;
         var quotationProducts = $("#quotationProducts").val();
         quotationProducts = jQuery.parseJSON(quotationProducts);
         $.each(quotationProducts, function(index, value){
@@ -806,8 +834,15 @@
                 min: parseInt(value.product_bill_count)
             });
         });
-        $("#numberOfFloors").on('keyup', function(){
-            var number = parseInt($(this).val());
+        $("#numberOfFloors").on('keyup', function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(doneTyping, doneTypingInterval);
+        });
+        $("#numberOfFloors").on('keydown', function () {
+            clearTimeout(typingTimer);
+        });
+        function doneTyping () {
+            var number = parseInt($("#numberOfFloors").val());
             if(!isNaN(number)){
                 var floorString = '<table class="table table-bordered table-striped table-condensed flip-content" style="width:50%;overflow: scroll; margin-left: 10%;">' +
                     '<thead>' +
@@ -828,14 +863,13 @@
                 $("#floorNameDiv").html(floorString);
                 $(".quotation-floor").each(function(){
                     $(this).rules('add',{
-                       required: true
+                        required: true
                     });
                 });
             }else{
                 $("#floorNameDiv").html('');
             }
-
-        });
+        }
     });
 </script>
 @endsection

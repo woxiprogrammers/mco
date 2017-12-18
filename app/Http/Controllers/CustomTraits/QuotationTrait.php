@@ -28,6 +28,7 @@ use App\ProjectSite;
 use App\Quotation;
 use App\QuotationBankInfo;
 use App\QuotationExtraItem;
+use App\QuotationFloor;
 use App\QuotationMaterial;
 use App\QuotationProduct;
 use App\QuotationProfitMarginVersion;
@@ -1267,7 +1268,6 @@ trait QuotationTrait{
 
     public function approve(Request $request,$quotation){
         try{
-            dd($request->all());
             $quotationApprovedStatusId = QuotationStatus::where('slug','approved')->pluck('id')->first();
             $quotationData = array();
             $quotationData['quotation_status_id'] = $quotationApprovedStatusId;
@@ -1315,6 +1315,15 @@ trait QuotationTrait{
                 }
             }
             $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
+            if($request->has('quotation_floor')){
+                $quotationFloorData = [
+                    'quotation_id' => $quotation->id
+                ];
+                foreach($request->quotation_floor as $quotationFloor){
+                    $quotationFloorData['name'] = $quotationFloor;
+                    QuotationFloor::create($quotationFloorData);
+                }
+            }
             $request->session()->flash('success','Quotation Approved Successfully');
             Quotation::where('id',$request->quotation_id)->update($quotationData);
             return redirect('/quotation/edit/'.$request->quotation_id);
@@ -1325,6 +1334,7 @@ trait QuotationTrait{
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+            abort(500);
         }
     }
 
@@ -1484,8 +1494,38 @@ trait QuotationTrait{
                     }
                 }
             }
-
             $isImagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$workOrder->quotation_id,$workOrder['id']);
+            if($request->has('quotation_floor')){
+                $quotationFloors = QuotationFloor::where('quotation_id',$request->quotation_id)->orderBy('id')->get();
+                $quotationFloorData = [
+                    'quotation_id' => $request->quotation_id
+                ];
+                if($quotationFloors == null){
+                    foreach($request->quotation_floor as $quotationFloor){
+                        $quotationFloorData['name'] = $quotationFloor;
+                        QuotationFloor::create($quotationFloorData);
+                    }
+                }else{
+                    $jIterator = $iIterator = 0;
+                    while($jIterator < count($quotationFloors) && $iIterator < count($request->quotation_floor)){
+                        $quotationFloorData['name'] = $request->quotation_floor[$iIterator];
+                        $quotationFloors[$jIterator]->update($quotationFloorData);
+                        $iIterator++;
+                        $jIterator++;
+                    }
+                    while($jIterator < count($quotationFloors)){
+                        QuotationFloor::where('id',$quotationFloors[$jIterator]->id)->delete();
+                        $jIterator++;
+                    }
+                    while($iIterator < count($request->quotation_floor)){
+                        $quotationFloorData['name'] = $request->quotation_floor[$iIterator];
+                        QuotationFloor::create($quotationFloorData);
+                        $iIterator++;
+                    }
+                }
+            }else{
+                QuotationFloor::where('quotation_id',$request->quotation_id)->delete();
+            }
             $request->session()->flash('success','Work Order Updated Successfully');
             return redirect('/quotation/edit/'.$request->quotation_id);
         }catch(\Exception $e){
@@ -1495,6 +1535,7 @@ trait QuotationTrait{
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+            abort(500);
         }
     }
 
