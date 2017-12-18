@@ -32,4 +32,8 @@ class Quotation extends Model
     public function work_order(){
         return $this->hasOne('App\QuotationWorkOrder','quotation_id');
     }
+
+    public function quotation_floor(){
+        return $this->hasMany('App\QuotationFloor','quotation_id');
+    }
 }
