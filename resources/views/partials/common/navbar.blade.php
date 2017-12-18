@@ -261,6 +261,11 @@
                                     <i class="fa fa-bars"></i> Purchase Order Billing
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/vendor-mail/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Vendor Mails
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endif
