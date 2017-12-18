@@ -24,7 +24,7 @@ class CreateMaterialRequestComponentVersionsTable extends Migration
             $table->double('quantity');
             $table->unsignedInteger('unit_id');
             $table->foreign('unit_id')->references('id')->on('units')->onUpdate('cascade')->onDelete('cascade');
-            $table->text('remark');
+            $table->text('remark')->nullable();
             $table->timestamps();
 
         });
