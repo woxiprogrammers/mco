@@ -19,13 +19,15 @@
                                 <div class="page-title">
                                     <h1>Manage Material</h1>
                                 </div>
-                                <div class="btn-group"  style="float: right;margin-top:1%">
-                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">
-                                            <i class="fa fa-plus"></i>
-                                            Material Request
-                                        </a>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-material-request') || $user->customHasPermission('approve-material-request'))
+                                    <div class="btn-group"  style="float: right;margin-top:1%">
+                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">
+                                                <i class="fa fa-plus"></i>
+                                                Material Request
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
@@ -46,27 +48,6 @@
                                                 <hr/>
                                                 <div class="portlet-body">
                                                     <div class="row">
-                                                        <div class="col-md-2">
-                                                            <label>Select Client :</label>
-                                                            <select class="form-control" id="client_id" name="client_id">
-                                                                <option value="0">ALL</option>
-                                                                @foreach($clients as $client)
-                                                                <option value="{{$client['id']}}">{{$client['company']}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <label>Select Project :</label>
-                                                            <select class="form-control" id="project_id" name="project_id">
-                                                                <option value="0">ALL</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <label>Select Site :</label>
-                                                            <select class="form-control" id="site_id" name="site_id">
-                                                                <option value="0">ALL</option>
-                                                            </select>
-                                                        </div>
                                                         <div class="col-md-2">
                                                             <label>Select Year :</label>
                                                             <select class="form-control" id="year" name="year">
@@ -178,88 +159,41 @@
                 </div>
             </div>
         </div>
-        @endsection
-        @section('javascript')
-            <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
-            <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
-            <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
-            <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-            <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
-            <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-            <script src="/assets/custom/purchase/manage-materialRequestWiseListing-datatable.js" type="text/javascript"></script>
-            <script>
-                $(document).ready(function() {
-                    $('#materialRequestWise').DataTable();
-                    $('[data-toggle="tooltip"]').tooltip();
-                    $('#materialRequestWiseListing').attr ( "checked" ,"checked" );
+@endsection
+@section('javascript')
+<link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+<script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+<script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/custom/purchase/manage-materialRequestWiseListing-datatable.js" type="text/javascript"></script>
+<script>
+    $(document).ready(function() {
+        $('#materialRequestWise').DataTable();
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#materialRequestWiseListing').attr ( "checked" ,"checked" );
 
-                    $('#materialWiseListing').click(function(){
-                        window.location.replace("/purchase/material-request/manage");
-                    });
+        $('#materialWiseListing').click(function(){
+            window.location.replace("/purchase/material-request/manage");
+        });
 
-                    $("#client_id").on('change', function(){
-                        getProjects($('#client_id').val());
-                    });
-                    $("#project_id").on('change', function(){
-                        getProjectSites($('#project_id').val());
-                    });
+        $("#search-withfilter").on('click',function(){
+            var site_id = $('#globalProjectSite').val();
+            var year = $('#year').val();
+            var month = $('#month').val();
+            var mr_name = $('#mr_name').val();
+            var mr_count = $('#mr_count').val();
+            var postData =
+                    'site_id=>'+site_id+','+
+                    'year=>'+year+','+
+                    'month=>'+month+','+
+                    'mr_count=>'+mr_count;
 
-                    $("#search-withfilter").on('click',function(){
-                        var client_id = $('#client_id').val();
-                        var project_id = $('#project_id').val();
-                        var site_id = $('#site_id').val();
-                        var year = $('#year').val();
-                        var month = $('#month').val();
-                        var mr_name = $('#mr_name').val();
-                        var mr_count = $('#mr_count').val();
-                        var postData =
-                            'client_id=>'+client_id+','+
-                                'project_id=>'+project_id+','+
-                                'site_id=>'+site_id+','+
-                                'year=>'+year+','+
-                                'month=>'+month+','+
-                                'mr_count=>'+mr_count;
-
-                        $("input[name='postdata']").val(postData);
-                        $("input[name='mr_name']").val(mr_name);
-                        $(".filter-submit").trigger('click');
-                    });
-                });
-
-                function getProjects(client_id){
-                    $.ajax({
-                        url: '/purchase/projects/'+client_id,
-                        type: 'GET',
-                        async : false,
-                        success: function(data,textStatus,xhr){
-                            if(xhr.status == 200){
-                                $('#project_id').html(data);
-                                $('#project_id').prop('disabled',false);
-                                getProjectSites($('#project_id').val());
-                            }
-                        },
-                        error: function(errorStatus,xhr){
-
-                        }
-                    });
-                }
-
-                function getProjectSites(project_id){
-                    $.ajax({
-                        url: '/purchase/project-sites/'+project_id,
-                        type: 'GET',
-                        async : false,
-                        success: function(data,textStatus,xhr){
-                            if(xhr.status == 200){
-                                $('#site_id').html(data);
-                                $('#site_id').prop('disabled',false);
-                            }
-                        },
-                        error: function(errorStatus,xhr){
-
-                        }
-                    });
-                }
-            </script>
-
+            $("input[name='postdata']").val(postData);
+            $("input[name='mr_name']").val(mr_name);
+            $(".filter-submit").trigger('click');
+        });
+    });
+</script>
 @endsection
