@@ -1,3 +1,4 @@
+@section('navBar')
 <div class="page-header">
     <div class="page-header-top">
         <div class="container">
@@ -8,6 +9,17 @@
                 </a>
             </div>
             <!-- END LOGO -->
+            <div class="col-md-3 col-md-offset-2 form-group globalSiteSelect">
+                <select class="bs-select form-control" data-style="btn-info" data-width="100%" id="globalProjectSite">
+                    @foreach($globalProjectSites as $projectSite)
+                        @if($projectSite->project_site_id == $selectGlobalProjectSite)
+                            <option value="{{$projectSite->project_site_id}}" selected>{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                        @else
+                            <option value="{{$projectSite->project_site_id}}">{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
             <!-- BEGIN RESPONSIVE MENU TOGGLER -->
             <a href="javascript:;" class="menu-toggler"></a>
             <!-- END RESPONSIVE MENU TOGGLER -->
@@ -249,6 +261,11 @@
                                     <i class="fa fa-bars"></i> Purchase Order Billing
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/vendor-mail/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Vendor Mails
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endif
@@ -443,3 +460,4 @@
     <!-- END HEADER MENU -->
 </div>
 </div>
+@endsection

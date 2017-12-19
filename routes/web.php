@@ -15,6 +15,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
     Route::get('/dashboard',array('uses' => 'Admin\DashboardController@index'));
+    Route::post('/change-project-site',array('uses' => 'Auth\LoginController@changeProjectSite'));
 
     Route::group(['prefix' => 'user'],function (){
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
@@ -281,6 +282,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('get-client-project/{purchaseRequest}',array('uses'=> 'Purchase\PurchaseOrderController@getClientProjectName'));
             Route::get('download-po-pdf/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@downloadPoPDF'));
             Route::post('close-purchase-order',array('uses'=> 'Purchase\PurchaseOrderController@closePurchaseOrder'));
+            Route::post('reopen',array('uses'=> 'Purchase\PurchaseOrderController@reopenPurchaseOrder'));
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
             Route::get('get-purchase-order-details/{purchaseRequestId}',array('uses'=> 'Purchase\PurchaseOrderController@getOrderDetails'));
             Route::group(['prefix' => 'transaction'], function(){
@@ -307,6 +309,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('listing/{purchaseOrderBillId}',array('uses' => 'Purchase\PurchaseOrderBillingController@paymentListing'));
                 Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createPayment'));
             });
+        });
+        Route::group(['prefix' => 'vendor-mail'],function(){
+            Route::get('manage',array('uses' => 'Purchase\VendorMailController@getManageView'));
+            Route::post('listing',array('uses' => 'Purchase\VendorMailController@listing'));
         });
     });
 

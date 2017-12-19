@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {
@@ -39,7 +40,7 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest')->except('logout');
+        $this->middleware('guest')->except('logout','changeProjectSite');
     }
 
 
@@ -65,6 +66,25 @@ class LoginController extends Controller
         $message="Logout Successful";
         $request->session()->flash('error', $message);
         return redirect('/');
+    }
+
+    public function changeProjectSite(Request $request){
+        try{
+            Session::put('global_project_site',$request->project_site_id);
+            $status = 200;
+            $response = [
+                'message' => 'Project Site Changed Successfully'
+            ];
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Change Global Project Site',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = [];
+        }
+        return response()->json($response,$status);
     }
 
 }

@@ -22,11 +22,18 @@
                                 <div class="page-title">
                                     <h1>Edit Purchase Order</h1>
                                 </div>
-                                @if($isClosed != true)
+                                @if($purchaseOrderStatusSlug != 'close')
                                     <div class="form-group " style="text-align: center">
                                         <button id="poCloseBtn" type="submit" class="btn red pull-right margin-top-15">
                                             <i class="fa fa-close" style="font-size: large"></i>
-                                            Close this purchase order.
+                                            Close
+                                        </button>
+                                    </div>
+                                @elseif($purchaseOrderStatusSlug == 'close' && $userRole == 'superadmin')
+                                    <div class="form-group " style="text-align: center">
+                                        <button id="poReopenBtn" type="submit" class="btn red pull-right margin-top-15">
+                                            <i class="fa fa-open" style="font-size: large"></i>
+                                            Reopen
                                         </button>
                                     </div>
                                 @endif
@@ -86,7 +93,7 @@
                                             <div class="portlet light ">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        @if($isClosed != true)
+                                                        @if($purchaseOrderStatusSlug == 'open' || $purchaseOrderStatusSlug == 're-open')
                                                             <div class="row">
                                                                 <div class="col-md-offset-9 col-md-3 ">
                                                                     <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
@@ -295,7 +302,11 @@
                                                                                     <div class="form-control product-material-select" style="font-size: 14px; height: 200px !important;" >
                                                                                         <ul id="material_id" class="list-group">
                                                                                             @foreach($materialList as $key => $materialData)
-                                                                                                <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}"><label class="control-label">{{$materialData['material_component_name']}} </label></li>
+                                                                                                @if($materialData['material_component_remaining_quantity'] != 0.0)
+                                                                                                   <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}"><label class="control-label">{{$materialData['material_component_name']}} </label></li>
+                                                                                                @else
+                                                                                                    <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}" disabled="disabled"><label class="control-label">{{$materialData['material_component_name']}} </label>&nbsp;&nbsp;&nbsp;(PO Complete)</li>
+                                                                                                @endif
                                                                                             @endforeach
                                                                                         </ul>
                                                                                     </div>
