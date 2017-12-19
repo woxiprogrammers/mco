@@ -36,20 +36,20 @@ trait MaterialRequestTrait{
             $prAssignedStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-assigned')->pluck('id')->first();
             $iterator = 0;
             $materialComponentHistoryData = array();
-            $materialComponentHistoryData['remark'] = '';
-            $materialComponentHistoryData['user_id'] = $user['id'];
+            $materialComponentHistoryData['remark'] = $materialRequestComponentVersion['remark'] = '';
+            $materialComponentHistoryData['user_id'] = $materialRequestComponentVersion['user_id'] = $user['id'];
             $materialRequestComponent = array();
             foreach($data['item_list'] as $key => $itemData){
                 $materialRequestComponentData['material_request_id'] = $materialRequest['id'];
                 $materialRequestComponentData['name'] = $itemData['name'];
-                $materialRequestComponentData['quantity'] = $itemData['quantity_id'];
-                $materialRequestComponentData['unit_id'] = $itemData['unit_id'];
+                $materialRequestComponentData['quantity'] = $materialRequestComponentVersion['quantity'] = $itemData['quantity_id'];
+                $materialRequestComponentData['unit_id'] = $materialRequestComponentVersion['unit_id'] = $itemData['unit_id'];
                 if($is_purchase_request == true){
                     $materialRequestComponentData['component_status_id'] = $prAssignedStatusId;
-                    $materialComponentHistoryData['component_status_id'] = $prAssignedStatusId;
+                    $materialComponentHistoryData['component_status_id'] = $materialRequestComponentVersion['component_status_id'] = $prAssignedStatusId;
                 }else{
                     $materialRequestComponentData['component_status_id'] = $pendingStatusId;
-                    $materialComponentHistoryData['component_status_id'] = $pendingStatusId;
+                    $materialComponentHistoryData['component_status_id'] = $materialRequestComponentVersion['component_status_id'] = $pendingStatusId;
                 }
                 $materialRequestComponentData['component_type_id'] = $itemData['component_type_id'];
                 $materialRequestComponentData['component_status_id'] = $pendingStatusId;
@@ -59,7 +59,7 @@ trait MaterialRequestTrait{
                 $materialRequestComponentData['serial_no'] = ($materialRequestComponentCount+1);
                 $materialRequestComponentData['format_id'] =  $this->getPurchaseIDFormat('material-request-component',$data['project_site_id'],$materialRequestComponentData['created_at'],$materialRequestComponentData['serial_no']);
                 $materialRequestComponent[$iterator] = MaterialRequestComponents::insertGetId($materialRequestComponentData);
-                $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponent[$iterator];
+                $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentVersion['material_request_component_id'] = $materialRequestComponent[$iterator];
                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
                 if(array_has($itemData,'images')){
                     $sha1MaterialRequestId = sha1($materialRequest['id']);
