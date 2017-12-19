@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -44,7 +45,111 @@ class ReportController extends Controller
     }
 
     public function downloadReports(Request $request) {
-        //download report code here
-        dd($request->all());
+        $downloadSheetFlag = true;
+        $curr_date = Carbon::now();
+        $curr_date = date('d_m_Y_h_i_s',strtotime($curr_date));
+        $report_type = $request->report_type;
+
+        switch($report_type) {
+            case 'materialwise_purchase_report':
+                $header = array(
+                    'Sr. No', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
+                    'Total Amount', 'Average Amount'
+                );
+                $data = array(
+                    array('data1', 'data2'),
+                    array('data3', 'data4')
+                );
+                break;
+            case 'receiptwise_p_and_l_report':
+                $header = array(null, null);
+                $data = array(
+                    array('Total Sale Entry', 1),
+                    array('Total receipt entry', 1),
+                    array(null, null),
+                    array('Labour + Staff Salary', null),
+                    array('Total Purchase', null),
+                    array('Total Miscellaneous Purchase', null),
+                    array('Subcontractor', null),
+                    array('Indirect Expences (GST,TDS Paid to government from manisha)', null),
+                    array('Total Expence', null),
+                    array(null, null),
+                    array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
+                    array(1, 1),
+                );
+                break;
+            case 'subcontractor_report':
+                $header = array(
+                    'Sr. No', 'Summary Type', 'Bill No', 'Total Bill Amount', 'TDS',
+                    'Retention', 'Total Bill Amount', 'Total Pay Amount', 'Balance'
+                );
+                $data = array(
+                    array('data1', 'data2'),
+                    array('data3', 'data4')
+                );
+                break;
+            case 'labour_specific_report':
+                $header = array(
+                    'Sr. No', 'Gross Salary', 'PT', 'PF', 'ESIC',
+                    'TDS', 'ADVANCE', 'Net Payment'
+                );
+                $data = array(
+                    array('data1', 'data2'),
+                    array('data3', 'data4')
+                );
+                break;
+            case 'purchase_bill_tax_report':
+                $header = array(
+                    'Sr. No', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
+                    'With Tax Amount'
+                );
+                $data = array(
+                    array('data1', 'data2'),
+                    array('data3', 'data4')
+                );
+                break;
+            case 'sales_bill_tax_report':
+                $header = array(
+                    'RA Bill Number', 'Basic Amount', 'Tax Amount', 'Total Amount',
+                    'Mobilise Advance', 'Debit', 'Hold', 'Retention',
+                    'TDS', 'Other Recovery', 'Payble Amount', 'Check Amount',
+                    'Balance'
+                );
+                $data = array(
+                    array('data1', 'data2'),
+                    array('data3', 'data4')
+                );
+                break;
+            default :
+                $downloadSheetFlag = false;
+                break;
+        }
+
+        if ($downloadSheetFlag) {
+            Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                $excel->sheet($report_type, function($sheet) use($data, $header) {
+                    $sheet->setOrientation('landscape');
+                    $sheet->setPageMargin(0.25);
+                    $sheet->protect('constro');
+                    // Manipulate first row
+                    $sheet->fromArray($data, null, 'A1', false, false);
+
+                    // Add before first row
+                    $sheet->prependRow(1, $header);
+
+                    // Set black background
+                    $sheet->row(1, function($row) {
+                        // call cell manipulation methods
+                        $row->setBackground('#f2f2f2');
+                    });
+                    // Freeze first row
+                    $sheet->freezeFirstRow();
+                    // Set auto size for sheet
+                    $sheet->setAutoSize(true);
+
+                });
+            })->export('xls');
+        }
+
     }
 }

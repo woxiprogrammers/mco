@@ -57,17 +57,17 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type">
-                                                            <option value="materialwise_purchase_id">Materialwise Purchase</option>
-                                                            <option value="receiptwise_p_and_l_id">Receiptwise P & L</option>
-                                                            <option value="subcontractor_report_id">Subcontractor</option>
-                                                            <option value="labour_specific_id">Labour Specific Report</option>
-                                                            <option value="purchase_bill_tax_id">Purchase Bill Tax Report</option>
-                                                            <option value="sales_bill_tax_id">Sales Bill Tax Reports</option>
+                                                            <option value="materialwise_purchase_report">Materialwise Purchase</option>
+                                                            <option value="receiptwise_p_and_l_report">Receiptwise P & L</option>
+                                                            <option value="subcontractor_report">Subcontractor</option>
+                                                            <option value="labour_specific_report">Labour Specific Report</option>
+                                                            <option value="purchase_bill_tax_report">Purchase Bill Tax Report</option>
+                                                            <option value="sales_bill_tax_report">Sales Bill Tax Reports</option>
                                                         </select>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="materialwise_purchase_id" id="materialwise_purchase_id">
+                                            <div class="row" name="materialwise_purchase_report" id="materialwise_purchase_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Materialwise Report</h3>
@@ -91,11 +91,8 @@
                                                         <label>Select Category : </label>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <div class="input-group select2-bootstrap-prepend">
-                                                            <span class="input-group-btn">
-                                                                <button class="btn btn-default" type="button" data-select2-open="category_id"> Category </button>
-                                                            </span>
-                                                            <select class="form-control select2" multiple id="category_id" name="category_id" required="required" data-placeholder="">
+                                                        <div class="input-group">
+                                                            <select class="form-control" id="category_id" name="category_id" data-placeholder="">
                                                                 <option value="0">ALL</option>
                                                                 @foreach($categories as $category)
                                                                 <option value="{{$category['id']}}">{{$category['name']}}</option>
@@ -110,10 +107,10 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="input-group select2-bootstrap-prepend">
-                                                            <span class="input-group-btn">
+                                                            <!--<span class="input-group-btn">
                                                                 <button class="btn btn-default" type="button" data-select2-open="material_id"> Materials </button>
-                                                            </span>
-                                                            <select class="form-control select2" multiple id="material_id" name="material_id" required="required" data-placeholder="">
+                                                            </span>-->
+                                                            <select class="form-control select2" multiple id="material_id" name="material_id[]" data-placeholder="">
                                                                 <option value="0">ALL</option>
                                                                 @foreach($materials as $material)
                                                                 <option value="{{$material['id']}}">{{$material['name']}}</option>
@@ -123,7 +120,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="receiptwise_p_and_l_id" id="receiptwise_p_and_l_id">
+                                            <div class="row" name="receiptwise_p_and_l_report" id="receiptwise_p_and_l_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Receiptwise P & L Report</h3>
@@ -143,7 +140,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="subcontractor_report_id" id="subcontractor_report_id">
+                                            <div class="row" name="subcontractor_report" id="subcontractor_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Subcontractor Report</h3>
@@ -175,7 +172,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="labour_specific_id" id="labour_specific_id">
+                                            <div class="row" name="labour_specific_report" id="labour_specific_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Labour Report</h3>
@@ -214,7 +211,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="purchase_bill_tax_id" id="purchase_bill_tax_id">
+                                            <div class="row" name="purchase_bill_tax_report" id="purchase_bill_tax_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Purchase Bill Tax Vendorwise Report</h3>
@@ -253,7 +250,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="sales_bill_tax_id" id="sales_bill_tax_id">
+                                            <div class="row" name="sales_bill_tax_report" id="sales_bill_tax_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Sales Bill Tax Report</h3>
@@ -305,16 +302,31 @@
 <script type="text/javascript">
     $(document).ready(function(){
         toggleReportTypeContent();
-       $('#report_type').on('change',function() {
+        disabledMaterial();
+        $('#report_type').on('change',function() {
            toggleReportTypeContent();
-       });
+        });
+
+        $('#category_id').on('change', function(){
+            disabledMaterial();
+        });
+
     });
+
+    function disabledMaterial() {
+        var category_val = $('#category_id').val();
+        if (category_val == 0) {
+            $('#material_id').prop("disabled", true);
+        } else {
+            $('#material_id').prop("disabled", false);
+        }
+    }
 
     function toggleReportTypeContent() {
         var report_type = $('#report_type').val();
-        var report_type_array = [ 'sales_bill_tax_id','materialwise_purchase_id',
-            'receiptwise_p_and_l_id','subcontractor_report_id',
-            'labour_specific_id','purchase_bill_tax_id'];
+        var report_type_array = [ 'sales_bill_tax_report','materialwise_purchase_report',
+            'receiptwise_p_and_l_report','subcontractor_report',
+            'labour_specific_report','purchase_bill_tax_report'];
         $.each(report_type_array, function( index, value ) {
             if (report_type === value) {
                 $('#'+ value).show();
