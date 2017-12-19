@@ -9,6 +9,7 @@ use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
+use App\MaterialRequestComponentVersion;
 use App\MaterialRequests;
 use App\MaterialVersion;
 use App\Project;
@@ -186,7 +187,7 @@ class PurchaseController extends Controller
                         /*if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material-request') || $user->customHasPermission('approve-material-request')){
                         $actionDropDown .= '<li>
                                     <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
+                                        <i class="icon-docs"></i> Edit
                                     </a>
                                 </li>';
                         }*/
@@ -219,13 +220,10 @@ class PurchaseController extends Controller
                         }*/
                         if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request')){
                             $actionDropDown .= '<li>
-                                <form action="/purchase/material-request/change-status/in-indent/'.$materialRequestList[$pagination]['material_request_component_id'].'" method="post">
-                                    <a href="javascript:void(0);" onclick="submitIndentForm(this)">
-                                        <i class="icon-tag"></i> Move To indent 
+                                    <a href="javascript:void(0);" onclick="openIndentModal('.$materialRequestList[$pagination]['material_request_component_id'].')">
+                                        <i class="icon-tag"></i>  Move To indent
                                     </a>
-                                    <input type="hidden" name="_token">
-                                </form>
-                            </li>';
+                                </li>';
                         }
                         $actionDropDown .= '</ul>
                             </div>';
@@ -765,21 +763,40 @@ class PurchaseController extends Controller
 
     public function changeMaterialRequestComponentStatus(Request $request,$newStatus,$componentId = null){
         try{
+            $user = Auth::user();
             switch($newStatus){
                 case 'admin-approved':
                     $componentIds = $request->component_id;
                     foreach($componentIds as $componentId){
                         $materialRequestComponent = MaterialRequestComponents::where('id',$componentId)->first();
+                        $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
                         if($materialRequestComponent->purchaseRequestComponentStatuses->slug == 'pending'){
                             if($request->has('quantity')){
+                                if($materialRequestComponent['quantity'] != $request->quantity){
+                                    $materialRequestComponentVersion['material_request_component_id'] = $materialRequestComponent['id'];
+                                    $materialRequestComponentVersion['component_status_id'] = $adminApproveComponentStatusId;
+                                    $materialRequestComponentVersion['user_id'] = $user['id'];
+                                    $materialRequestComponentVersion['quantity'] = $request->quantity;
+                                    $materialRequestComponentVersion['unit_id'] = $materialRequestComponent['unit_id'];
+                                    $materialRequestComponentVersion['remark'] = $request->remark;
+                                    MaterialRequestComponentVersion::create($materialRequestComponentVersion);
+                                }
                                 $materialRequestComponent->update(['quantity' => $request->quantity]);
                             }
                             if($request->has('unit_id')){
+                                if($materialRequestComponent['unit_id'] != $request->unit_id) {
+                                    $materialRequestComponentVersion['material_request_component_id'] = $materialRequestComponent['id'];
+                                    $materialRequestComponentVersion['component_status_id'] = $adminApproveComponentStatusId;
+                                    $materialRequestComponentVersion['user_id'] = $user['id'];
+                                    $materialRequestComponentVersion['quantity'] = $materialRequestComponent['quantity'];
+                                    $materialRequestComponentVersion['unit_id'] = $request->unit_id;
+                                    $materialRequestComponentVersion['remark'] = $request->remark;
+                                    MaterialRequestComponentVersion::create($materialRequestComponentVersion);
+                                }
                                 $materialRequestComponent->update(['unit_id' => $request->unit_id]);
                             }
                             $quotationMaterialType = MaterialRequestComponentTypes::where('slug','quotation-material')->first();
                             $projectSiteId = $materialRequestComponent->materialRequest->project_site_id;
-                            $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
                             $materialComponentHistoryData = array();
                             $materialComponentHistoryData['component_status_id'] = $adminApproveComponentStatusId;
                             $materialComponentHistoryData['remark'] = $request->remark;
@@ -838,12 +855,21 @@ class PurchaseController extends Controller
 
                 case 'in-indent':
                     $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug',$newStatus)->pluck('id')->first();
-                    MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $inIndentStatusId]);
-                    $materialComponentHistoryData['material_request_component_id'] = $componentId;
+                    $materialRequestComponent = MaterialRequestComponents::where('id',$request['component_id'])->first();
+                    if($materialRequestComponent['quantity'] != $request->quantity || $materialRequestComponent['unit_id'] != $request->unit_id){
+                        $materialRequestComponentVersion['material_request_component_id'] = $request['component_id'];
+                        $materialRequestComponentVersion['component_status_id'] = $inIndentStatusId;
+                        $materialRequestComponentVersion['user_id'] = $user['id'];
+                        $materialRequestComponentVersion['quantity'] = $request->quantity;
+                        $materialRequestComponentVersion['unit_id'] = $request->unit_id;
+                        $materialRequestComponentVersion['remark'] = $request->remark;
+                        MaterialRequestComponentVersion::create($materialRequestComponentVersion);
+                    }
+                    MaterialRequestComponents::where('id',$request['component_id'])->update(['component_status_id' => $inIndentStatusId]);
                     $materialComponentHistoryData = array();
                     $materialComponentHistoryData['component_status_id'] = $inIndentStatusId;
                     $materialComponentHistoryData['user_id'] = Auth::user()->id;
-                    $materialComponentHistoryData['material_request_component_id'] = $componentId;
+                    $materialComponentHistoryData['material_request_component_id'] = $request['component_id'];
                     MaterialRequestComponentHistory::create($materialComponentHistoryData);
                     break;
             }

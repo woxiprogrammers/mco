@@ -146,7 +146,7 @@
                                                                     <button type="submit" class="btn blue">disapprove</button>
                                                                 </div>
                                                             </form>
-                                                        </div>
+                                                        </div>`
                                                     </div>
                                                 </div>
                                             </div>

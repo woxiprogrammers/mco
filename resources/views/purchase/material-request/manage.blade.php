@@ -208,6 +208,56 @@
                                                 </form>
                                             </div>
                                         </div>
+                                        <div class="modal fade" id="indentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                                  <div class="modal-dialog">
+                                                      <form class="modal-content" method="post">
+                                                          {!! csrf_field() !!}
+                                                          <input type="hidden" name="component_id" id="componentId">
+                                                          <div class="modal-header">
+                                                              <div class="row">
+                                                                  <div class="col-md-4"></div>
+                                                                  <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">REMARK</h4></center></div>
+                                                                  <div class="col-md-4"><button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="modal-body">
+                                                              <div class="form-body">
+                                                                  <div class="form-group row">
+                                                                      <div class="col-md-3" style="text-align: right">
+                                                                          <label for="company" class="control-label">Quantity</label>
+                                                                      </div>
+                                                                      <div class="col-md-6">
+                                                                          <input type="text" class="form-control" id="quantity" name="quantity">
+                                                                      </div>
+                                                                  </div>
+                                                                  <div class="form-group row">
+                                                                      <div class="col-md-3" style="text-align: right">
+                                                                          <label for="company" class="control-label">Unit</label>
+                                                                      </div>
+                                                                      <div class="col-md-6">
+                                                                          <select class="form-control" name="unit_id" id="unitId">
+                                                                              @foreach($units as $unit)
+                                                                                  <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                              @endforeach
+                                                                          </select>
+                                                                      </div>
+                                                                  </div>
+                                                                  <div class="form-group row">
+                                                                      <div class="col-md-3" style="text-align: right">
+                                                                          <label for="company" class="control-label">Remark</label>
+                                                                      </div>
+                                                                      <div class="col-md-6">
+                                                                          <input type="text" class="form-control" id="remark" name="remark">
+                                                                      </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="modal-footer">
+                                                              <a class="btn blue approve-modal-footer-buttons">Move to Indent</a>
+                                                          </div>
+                                                      </form>
+                                                  </div>
+                                          </div>
                                       </div>
                                   </div>
                               </div>
@@ -243,6 +293,10 @@
             }else{
                 if(buttonType == 'Disapprove'){
                     var action = "/purchase/material-request/change-status/admin-disapproved"
+                }else{
+                    if(buttonType == 'Move to Indent'){
+                        var action = "/purchase/material-request/change-status/in-indent"
+                    }
                 }
             }
             $(this).closest('form').attr('action',action);
@@ -327,7 +381,7 @@
             success: function(data,textStatus,xhr){
                 $("#remarkModal #unitId").html(data.units);
                 $("#remarkModal #quantity").val(data.quantity);
-                $("#componentId").val(componentId);
+                $("#remarkModal #componentId").val(componentId);
             },
             error: function(errorData){
 
@@ -341,6 +395,22 @@
         var token = $('input[name="_token"]').val();
         $(element).next('input[name="_token"]').val(token);
         $(element).closest('form').submit();
+    }
+
+    function openIndentModal(componentId){
+        $.ajax({
+            url: '/purchase/material-request/get-material-request-component-details/'+componentId+'?_token='+$("input[name='_token']").val(),
+            type: 'GET',
+            success: function(data,textStatus,xhr){
+                $("#indentModal #unitId").html(data.units);
+                $("#indentModal #quantity").val(data.quantity);
+                $("#indentModal #componentId").val(componentId);
+            },
+            error: function(errorData){
+
+            }
+        })
+        $("#indentModal").modal('show');
     }
 </script>
 @endsection
