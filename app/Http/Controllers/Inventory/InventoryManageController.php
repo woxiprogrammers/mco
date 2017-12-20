@@ -12,6 +12,7 @@ use App\InventoryComponentTransfers;
 use App\InventoryTransferTypes;
 use App\Material;
 use App\ProjectSite;
+use App\ProjectSiteUserCheckpoint;
 use App\Quotation;
 use App\QuotationMaterial;
 use App\Unit;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Log;
 
 class InventoryManageController extends Controller
 {
+    use InventoryTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -38,6 +40,50 @@ class InventoryManageController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+        }
+    }
+
+    public function getTransferManageView(Request $request){
+        try{
+            return view('inventory/transfer/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory Transfer manage view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function getTransferCreateView(Request $request){
+        try{
+            $projectSites  = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                ->where('projects.is_active',true)->select('project_sites.id','project_sites.name','projects.name as project_name')->get()->toArray();
+            return view('inventory.transfer.create')->with(compact('projectSites'));
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get Labour Create View',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function CreateOutTransfer(Request $request){
+        try{
+            dd($request->all());
+
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Create Out Transfer',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 
@@ -338,7 +384,6 @@ class InventoryManageController extends Controller
         }
     }
 
-    use InventoryTrait;
     public function addComponentTransfer(Request $request,$inventoryComponent){
         try{
             $data = $request->except(['_token','work_order_images','project_site_id']);
@@ -526,5 +571,69 @@ class InventoryManageController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function autoSuggest(Request $request,$projectSiteId,$type,$keyword){
+        try{
+            if($type == 'material'){
+                $inventoryComponents = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',true)->where('project_site_id',$projectSiteId)->get();
+            }else{
+                $inventoryComponents = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',false)->where('project_site_id',$projectSiteId)->get();
+            }
+            $response = array();
+            if($inventoryComponents != null){
+                $iterator = 0;
+                foreach($inventoryComponents as $inventoryComponent){
+                    $inventoryTransferTypes = InventoryComponentTransfers::where('inventory_component_id',$inventoryComponent['id'])->pluck('transfer_type_id')->toArray();
+                    $inventoryComponentInData = InventoryTransferTypes::join('inventory_component_transfers','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->whereIn('inventory_transfer_types.id',$inventoryTransferTypes)
+                        ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                        ->where('inventory_transfer_types.type','IN')
+                        ->select('inventory_component_transfers.id','inventory_component_transfers.quantity','inventory_component_transfers.unit_id')->orderBy('inventory_component_transfers.id')->get()->toArray();
+                    $unitId = Material::where('id',$inventoryComponent['reference_id'])->pluck('unit_id')->first();
+                    $totalIN = 0;
+                    foreach($inventoryComponentInData as $key1 => $inventoryComponentINTransfer){
+                        if($inventoryComponentINTransfer['unit_id'] == $unitId){
+                            $totalIN += $inventoryComponentINTransfer['quantity'];
+                        }else{
+                            $conversionData = $this->unitConversion($inventoryComponentINTransfer['unit_id'],$unitId,$inventoryComponentINTransfer['quantity']);
+                            $totalIN += $conversionData['quantity_to'];
+                        }
+                    }
+                    $inventoryComponentOutData = InventoryTransferTypes::join('inventory_component_transfers','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->whereIn('inventory_transfer_types.id',$inventoryTransferTypes)
+                        ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                        ->where('inventory_transfer_types.type','OUT')
+                        ->select('inventory_component_transfers.id','inventory_component_transfers.quantity','inventory_component_transfers.unit_id')->orderBy('inventory_component_transfers.id')->get()->toArray();
+                    $totalOUT = 0;
+                    foreach($inventoryComponentOutData as $key1 => $inventoryComponentOUTTransfer){
+                        if($inventoryComponentOUTTransfer['unit_id'] == $unitId){
+                            $totalOUT += $inventoryComponentOUTTransfer['quantity'];
+                        }else{
+                            $conversionData = $this->unitConversion($inventoryComponentOUTTransfer['unit_id'],$unitId,$inventoryComponentOUTTransfer['quantity']);
+                            $totalOUT += $conversionData['quantity_to'];
+                        }
+                    }
+                    $quantity_available = $totalIN - $totalOUT;
+                    if($quantity_available != 0){
+                        $response[$iterator]['unit_id'] = $unitId;
+                        $response[$iterator]['unit'] = Unit::where('id',$unitId)->pluck('name')->first();
+                        $response[$iterator]['name'] = $inventoryComponent['name'];
+                        $iterator++;
+                    }
+                }
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $response = array();
+            $data = [
+                'action' => 'Inventory Transfer Auto-suggest',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
+        return response()->json($response,$status);
     }
 }

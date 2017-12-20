@@ -336,6 +336,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('add/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@addInventoryComponentReading'));
             });
         });
+        Route::group(['prefix' => 'transfer'], function (){
+            Route::get('manage',array('uses' => 'Inventory\InventoryManageController@getTransferManageView'));
+            Route::get('create',array('uses' => 'Inventory\InventoryManageController@getTransferCreateView'));
+            Route::post('create',array('uses' => 'Inventory\InventoryManageController@CreateOutTransfer'));
+            Route::get('auto-suggest/{projectSiteId}/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
+        });
     });
 
     Route::group(['prefix' => 'vendors'],function(){
