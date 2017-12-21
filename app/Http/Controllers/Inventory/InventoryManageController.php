@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\Material;
 use App\ProjectSite;
@@ -32,7 +33,9 @@ class InventoryManageController extends Controller
     }
     public function getManageView(Request $request){
         try{
-            return view('inventory/manage');
+            $projectSites  = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                ->where('projects.is_active',true)->select('project_sites.id','project_sites.name','projects.name as project_name')->get()->toArray();
+            return view('inventory/manage')->with(compact('projectSites'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -48,7 +51,7 @@ class InventoryManageController extends Controller
             return view('inventory/transfer/manage');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Inventory Transfer manage view',
+                'action' => 'Inventory Request Transfer manage view',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -56,29 +59,59 @@ class InventoryManageController extends Controller
         }
     }
 
-    public function getTransferCreateView(Request $request){
+    public function getSiteTransferRequestListing(Request $request){
         try{
-            $projectSites  = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                ->where('projects.is_active',true)->select('project_sites.id','project_sites.name','projects.name as project_name')->get()->toArray();
-            return view('inventory.transfer.create')->with(compact('projectSites'));
+            $status = 200;
+            if($request->has('search_name')){
+                // Inventory listing search
+            }else{
+                $inventoryTransferData = InventoryComponentTransfers::where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first())->orderBy('created_at','desc')->get();
+            }
+            $iTotalRecords = count($inventoryTransferData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($inventoryTransferData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryTransferData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $inventoryTransferData[$pagination]->inventoryComponent->projectSite->name,
+                    $inventoryTransferData[$pagination]->source_name,
+                    $inventoryTransferData[$pagination]->inventoryComponent->name,
+                    $inventoryTransferData[$pagination]->quantity,
+                    $inventoryTransferData[$pagination]->unit->name,
+                    1
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
         }catch (\Exception $e){
             $data = [
-                'action' => 'Get Labour Create View',
-                'exception' => $e->getMessage(),
-                'request' => $request->all()
+                'action' => 'Request Component listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            abort(500);
+            $status = 500;
+            $response = array();
         }
+        return response()->json($records,$status);
     }
 
-    public function CreateOutTransfer(Request $request){
+    public function createInventoryComponent(Request $request){
         try{
-            dd($request->all());
-
+            $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($request['component_name']))->first();
+            if($newInventoryComponent == null){
+                $inventoryComponentData['name'] = $request['component_name'];
+                $inventoryComponentData['is_material'] = ($request['inventory_type'] == 'material') ? true : false;
+                $inventoryComponentData['project_site_id'] = $request->project_site_id;
+                $inventoryComponentData['opening_stock'] = ($request->has('opening_stock')) ? $request['opening_stock'] : 0;
+                $inventoryComponentData['reference_id'] = 1;
+                InventoryComponent::create($inventoryComponentData);
+            }
+            return redirect('/inventory/manage');
         }catch (\Exception $e){
             $data = [
-                'action' => 'Create Out Transfer',
+                'action' => 'Create Inventory Component',
                 'exception' => $e->getMessage(),
                 'request' => $request->all()
             ];
@@ -142,12 +175,12 @@ class InventoryManageController extends Controller
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
             $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
-            $inTransfers = InventoryTransferTypes::where('type','ilike','IN')->get();
+            $inTransfers = InventoryTransferTypes::where('slug','site')->where('type','ilike','IN')->get();
             $inTransferTypes = '<option value=""> -- Select Transfer Type -- </option>';
             foreach($inTransfers as $transfer){
                 $inTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            $outTransfers = InventoryTransferTypes::where('type','ilike','OUT')->get();
+            $outTransfers = InventoryTransferTypes::whereIn('slug',['site','labour'])->where('type','ilike','OUT')->get();
             $outTransferTypes = '<option value=""> -- Select Transfer Type -- </option>';
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
@@ -388,11 +421,22 @@ class InventoryManageController extends Controller
         try{
             $data = $request->except(['_token','work_order_images','project_site_id']);
             $data['inventory_component_id'] = $inventoryComponent->id;
+            $data['date'] = Carbon::now();
+            if($request->has('project_site_id') && $request->transfer_type =='site'){
+                $data['source_name'] = ProjectSite::where('id',$request['project_site_id'])->pluck('name')->first();
+                if($request->has('in_or_out')){
+                    $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+                }else{
+                    $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
+                }
+            }else{
+                $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+            }
             $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
             if($request->has('work_order_images')){
                 $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
             }
-            if($request->has('project_site_id') && $request->transfer_type =='site'){
+            /*if($request->has('project_site_id') && $request->transfer_type =='site'){
                 $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($inventoryComponent->name))->first();
                 if($newInventoryComponent == null){
                     $inventoryComponentData = [
@@ -410,9 +454,20 @@ class InventoryManageController extends Controller
                 if($request->has('work_order_images')){
                     $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
                 }
+            }*/
+            if($request->has('project_site_id') && $request->transfer_type =='site'){
+                if($request->has('in_or_out')) {
+                    $request->session()->flash('success', 'Inventory Component Transfer Saved Successfully!!');
+                    return redirect('/inventory/transfer/manage');
+                }else{
+                    $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
+                    return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+                }
+            }else{
+                $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
+                return redirect('/inventory/component/manage/'.$inventoryComponent->id);
             }
-            $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
-            return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add Inventory Component Transfer',

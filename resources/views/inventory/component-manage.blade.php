@@ -421,9 +421,6 @@
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <input type="date" name="date" id="date" class="form-control" placeholder="Enter Date">
-                                                    </div>
-                                                    <div class="form-group">
                                                         <textarea name="remark" class="form-control" id="remark" placeholder="Remark..."></textarea>
                                                     </div>
                                                 </div>

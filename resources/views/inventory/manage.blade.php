@@ -19,6 +19,11 @@
                                 <div class="page-title">
                                     <h1>Manage Inventory</h1>
                                 </div>
+                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 70%">
+                                    <a href="javascript:void(0);" style="color: white" id="createInventoryComponent">
+                                        <i class="fa fa-plus"></i> Inventory Component
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">
@@ -64,6 +69,71 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="modal fade" id="inventoryComponentModal" role="dialog">
+                                    <div class="modal-dialog">
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header" style="padding-bottom:10px">
+                                                <div class="row">
+                                                    <div class="col-md-4"></div>
+                                                    <div class="col-md-4"> Inventory Component</div>
+                                                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-body" style="padding:40px 50px;">
+                                                <form role="form" action="/inventory/component/create" method="POST" id="addTransferForm">
+                                                    {!! csrf_field() !!}
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+                                                            <label for="name" class="control-label">Project Site : </label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <select class="form-control" id="project_site" name="project_site_id">
+                                                                <option value="">Select Project Site</option>
+                                                                @foreach($projectSites as $projectSite)
+                                                                    <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+                                                            <label for="name" class="control-label">Inventory Type: </label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <select class="form-control" id="inventory_type" name="inventory_type">
+                                                                <option value="">Select Inventory Type</option>
+                                                                <option value="material">Material</option>
+                                                                <option value="asset">Asset</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+                                                            <label for="name" class="control-label">Name : </label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <input type="text" class="form-control" id="component_name" name="component_name">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+                                                            <label for="name" class="control-label">Opening Stock : </label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <input type="text" class="form-control" id="opening_stock" name="opening_stock">
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn red pull-right" id="createComponentButton" hidden> Create</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -84,6 +154,64 @@
     <script>
         $(document).ready(function() {
             InventoryListing.init();
+            $("#createInventoryComponent").click(function(){
+                $("#inventoryComponentModal").modal();
+            });
+            $("#inventory_type,#project_site").on('change',function(){
+                var componentType = $("#inventory_type").val();
+                var project_site_id = $('#project_site').val();
+                if(typeof componentType != 'undefined' && componentType != '' && typeof project_site_id != 'undefined' && project_site_id != ''){
+                    $('#name').removeClass('typeahead');
+                    $('#name').typeahead('destroy');
+                    $('#name').addClass('typeahead');
+                    var citiList = new Bloodhound({
+                        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                        queryTokenizer: Bloodhound.tokenizers.whitespace,
+                        remote: {
+                            url: "/inventory/transfer/auto-suggest/"+project_site_id+"/"+componentType+"/%QUERY",
+                            filter: function(x) {
+                                if($(window).width()<420){
+                                    $("#header").addClass("fixed");
+                                }
+                                return $.map(x, function (data) {
+                                    return {
+                                        name:data.name,
+                                        unit:data.unit
+                                    };
+                                });
+                            },
+                            wildcard: "%QUERY"
+                        }
+                    });
+                    citiList.initialize();
+                    $('.typeahead').typeahead(null, {
+                        displayKey: 'name',
+                        engine: Handlebars,
+                        source: citiList.ttAdapter(),
+                        limit: 30,
+                        templates: {
+                            empty: [
+                                '<div class="empty-suggest">',
+                                'Unable to find any Result that match the current query',
+                                '</div>'
+                            ].join('\n'),
+                            suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+                        },
+
+                    }).on('typeahead:selected', function (obj, datum) {
+                        var POData = $.parseJSON(JSON.stringify(datum));
+                        POData.name = POData.name.replace(/\&/g,'%26');
+                        $("#unit").val(POData.unit);
+                        $("#name").val(POData.name);
+                    })
+                        .on('typeahead:open', function (obj, datum) {
+
+                        });
+                }else{
+                    $('#name').removeClass('typeahead');
+                    $('#name').typeahead('destroy');
+                }
+            });
         });
     </script>
 @endsection

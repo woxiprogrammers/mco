@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Manage Materials')
+@section('title','Constro | Manage Transfers')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -17,12 +17,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Inventory Transfer</h1>
-                                </div>
-                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 65%">
-                                    <a href="/inventory/transfer/create" style="color: white">
-                                        <i class="fa fa-plus"></i> Site Transfer
-                                    </a>
+                                    <h1>Manage Requested Transfer</h1>
                                 </div>
                             </div>
                         </div>
@@ -37,7 +32,7 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        <table class="table table-striped table-bordered table-hover order-column" id="inventoryListingTable">
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="requestComponentListingTable">
                                                             <thead>
                                                             <tr>
                                                                 <th> Project Site From</th>
@@ -45,16 +40,12 @@
                                                                 <th> Material Name </th>
                                                                 <th> Quantity</th>
                                                                 <th> Unit </th>
-                                                                <th> Type </th>
-                                                                <th> Status  </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th> <input type="text" class="form-control form-filter" name="search_project" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_name" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                                 <th>
@@ -88,10 +79,10 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    {{--<script src="/assets/custom/inventory/manage-datatable.js" type="text/javascript"></script>--}}
+    <script src="/assets/custom/inventory/request-component-datatable.js" type="text/javascript"></script>
     <script>
-        /*$(document).ready(function() {
-            InventoryListing.init();
-        });*/
+        $(document).ready(function() {
+            RequestComponentListing.init();
+        });
     </script>
 @endsection
