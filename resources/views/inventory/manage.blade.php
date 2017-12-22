@@ -3,6 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -116,9 +117,10 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-8">
-                                                            <input type="text" class="form-control" id="component_name" name="component_name">
+                                                            <input type="text" class="form-control" id="name" name="name">
                                                         </div>
                                                     </div>
+                                                    <input type="hidden" class="form-control" id="reference_id" name="reference_id">
                                                     <div class="form-group row">
                                                         <div class="col-md-4" style="text-align: right">
                                                             <label for="name" class="control-label">Opening Stock : </label>
@@ -151,6 +153,8 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+    <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function() {
             InventoryListing.init();
@@ -176,7 +180,7 @@
                                 return $.map(x, function (data) {
                                     return {
                                         name:data.name,
-                                        unit:data.unit
+                                        reference_id:data.reference_id
                                     };
                                 });
                             },
@@ -201,7 +205,7 @@
                     }).on('typeahead:selected', function (obj, datum) {
                         var POData = $.parseJSON(JSON.stringify(datum));
                         POData.name = POData.name.replace(/\&/g,'%26');
-                        $("#unit").val(POData.unit);
+                        $("#reference_id").val(POData.reference_id);
                         $("#name").val(POData.name);
                     })
                         .on('typeahead:open', function (obj, datum) {

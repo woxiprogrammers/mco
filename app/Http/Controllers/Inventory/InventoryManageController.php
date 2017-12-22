@@ -99,13 +99,13 @@ class InventoryManageController extends Controller
 
     public function createInventoryComponent(Request $request){
         try{
-            $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($request['component_name']))->first();
+            $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($request['name']))->first();
             if($newInventoryComponent == null){
-                $inventoryComponentData['name'] = $request['component_name'];
+                $inventoryComponentData['name'] = $request['name'];
                 $inventoryComponentData['is_material'] = ($request['inventory_type'] == 'material') ? true : false;
                 $inventoryComponentData['project_site_id'] = $request->project_site_id;
                 $inventoryComponentData['opening_stock'] = ($request->has('opening_stock')) ? $request['opening_stock'] : 0;
-                $inventoryComponentData['reference_id'] = 1;
+                $inventoryComponentData['reference_id'] = $request['reference_id'];
                 InventoryComponent::create($inventoryComponentData);
             }
             return redirect('/inventory/manage');
@@ -630,53 +630,11 @@ class InventoryManageController extends Controller
 
     public function autoSuggest(Request $request,$projectSiteId,$type,$keyword){
         try{
-            if($type == 'material'){
-                $inventoryComponents = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',true)->where('project_site_id',$projectSiteId)->get();
-            }else{
-                $inventoryComponents = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',false)->where('project_site_id',$projectSiteId)->get();
-            }
             $response = array();
-            if($inventoryComponents != null){
-                $iterator = 0;
-                foreach($inventoryComponents as $inventoryComponent){
-                    $inventoryTransferTypes = InventoryComponentTransfers::where('inventory_component_id',$inventoryComponent['id'])->pluck('transfer_type_id')->toArray();
-                    $inventoryComponentInData = InventoryTransferTypes::join('inventory_component_transfers','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
-                        ->whereIn('inventory_transfer_types.id',$inventoryTransferTypes)
-                        ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
-                        ->where('inventory_transfer_types.type','IN')
-                        ->select('inventory_component_transfers.id','inventory_component_transfers.quantity','inventory_component_transfers.unit_id')->orderBy('inventory_component_transfers.id')->get()->toArray();
-                    $unitId = Material::where('id',$inventoryComponent['reference_id'])->pluck('unit_id')->first();
-                    $totalIN = 0;
-                    foreach($inventoryComponentInData as $key1 => $inventoryComponentINTransfer){
-                        if($inventoryComponentINTransfer['unit_id'] == $unitId){
-                            $totalIN += $inventoryComponentINTransfer['quantity'];
-                        }else{
-                            $conversionData = $this->unitConversion($inventoryComponentINTransfer['unit_id'],$unitId,$inventoryComponentINTransfer['quantity']);
-                            $totalIN += $conversionData['quantity_to'];
-                        }
-                    }
-                    $inventoryComponentOutData = InventoryTransferTypes::join('inventory_component_transfers','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
-                        ->whereIn('inventory_transfer_types.id',$inventoryTransferTypes)
-                        ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
-                        ->where('inventory_transfer_types.type','OUT')
-                        ->select('inventory_component_transfers.id','inventory_component_transfers.quantity','inventory_component_transfers.unit_id')->orderBy('inventory_component_transfers.id')->get()->toArray();
-                    $totalOUT = 0;
-                    foreach($inventoryComponentOutData as $key1 => $inventoryComponentOUTTransfer){
-                        if($inventoryComponentOUTTransfer['unit_id'] == $unitId){
-                            $totalOUT += $inventoryComponentOUTTransfer['quantity'];
-                        }else{
-                            $conversionData = $this->unitConversion($inventoryComponentOUTTransfer['unit_id'],$unitId,$inventoryComponentOUTTransfer['quantity']);
-                            $totalOUT += $conversionData['quantity_to'];
-                        }
-                    }
-                    $quantity_available = $totalIN - $totalOUT;
-                    if($quantity_available != 0){
-                        $response[$iterator]['unit_id'] = $unitId;
-                        $response[$iterator]['unit'] = Unit::where('id',$unitId)->pluck('name')->first();
-                        $response[$iterator]['name'] = $inventoryComponent['name'];
-                        $iterator++;
-                    }
-                }
+            if($type == 'material'){
+                $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',true)->where('project_site_id','!=',$projectSiteId)->distinct('name')->select('name','reference_id')->get();
+            }else{
+                $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',false)->where('project_site_id','!=',$projectSiteId)->distinct('name')->select('name','reference_id')->get();
             }
             $status = 200;
         }catch(\Exception $e){
