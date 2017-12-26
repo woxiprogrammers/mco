@@ -111,14 +111,6 @@ $(document).ready(function(){
             var POData = datum;
             var componentTypeId = datum.component_type_id;
             $('#component_id').val(componentTypeId);
-            var options = '';
-            $.each( POData, function( key, value ) {
-                var unitId = value.unit_id;
-                var unitName = value.unit_name;
-                options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
-            });
-            var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center">'+options+ '</select>';
-            $('#unitDrpdn').append(str1);
         })
             .on('typeahead:open', function (obj, datum) {
                 $('#component_id').val(6);
