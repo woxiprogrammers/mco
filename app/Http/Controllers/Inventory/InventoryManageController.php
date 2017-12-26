@@ -261,11 +261,13 @@ class InventoryManageController extends Controller
                     $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
                         ->get();
                     $outTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','out')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
                         ->get();
                     $inQuantity = $outQuantity = 0;
@@ -285,10 +287,12 @@ class InventoryManageController extends Controller
                     $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->sum('inventory_component_transfers.quantity');
                     $outQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','out')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->sum('inventory_component_transfers.quantity');
                 }
                 $availableQuantity = $inQuantity - $outQuantity;
@@ -341,6 +345,7 @@ class InventoryManageController extends Controller
                     $inventoryComponentTransfers[$pagination]['quantity'],
                     $inventoryComponentTransfers[$pagination]->unit->name,
                     $transferStatus,
+                    $inventoryComponentTransfers[$pagination]->inventoryComponentTransferStatus->name,
                     '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
                         Details
                     </a>'
