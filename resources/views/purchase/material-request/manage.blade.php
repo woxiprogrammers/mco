@@ -22,31 +22,37 @@
                                         <h1>Manage Material</h1>
                                     </div>
                                 </div>
-                                <div class="col-md-4" style="text-align: right">
-                                    <div class="table-actions-wrapper" style="margin-top: 12px;">
-                                        <span> </span>
-                                        <form role="form" method="POST">
-                                            {!! csrf_field() !!}
-                                            <label>For Bulk Approval : </label>
-                                            <select class="form-control input-inline" id="statusChangeDropdown">
-                                                <option value="">Select...</option>
-                                                <option value="approve">Approve</option>
-                                                <option value="disapprove">Disapprove</option>
-                                            </select>
-                                            <a href="javascript:void(0);" class="btn btn-sm green" id="multipleStatusChangeSubmit">
-                                                <i class="fa fa-check"></i> Submit
-                                            </a>
-                                        </form>
-                                    </div>
-                                </div>
-                                <div class="col-md-2" style="margin-top: 12px;">
-                                    <div class="btn-group"  style="float: right;margin-top:1%">
-                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                Material Request
-                                            </a>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request'))
+                                    <div class="col-md-4" style="text-align: right">
+                                        <div class="table-actions-wrapper" style="margin-top: 12px;">
+                                            <span> </span>
+                                            <form role="form" method="POST">
+                                                {!! csrf_field() !!}
+                                                <label>For Bulk Approval : </label>
+                                                <select class="form-control input-inline" id="statusChangeDropdown">
+                                                    <option value="">Select...</option>
+                                                    <option value="approve">Approve</option>
+                                                    <option value="disapprove">Disapprove</option>
+                                                </select>
+                                                <a href="javascript:void(0);" class="btn btn-sm green" id="multipleStatusChangeSubmit">
+                                                    <i class="fa fa-check"></i> Submit
+                                                </a>
+                                            </form>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request') || $user->customHasPermission('create-material-request'))
+                                    <div class="col-md-2" style="margin-top: 12px;">
+                                        <div class="btn-group"  style="float: right;margin-top:1%">
+                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">
+                                                    <i class="fa fa-plus"></i>
+                                                    Material Request
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
                             </div>
                         </div>
                     </div>
