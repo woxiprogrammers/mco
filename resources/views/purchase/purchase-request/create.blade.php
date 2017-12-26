@@ -216,7 +216,7 @@
                                                 <input id="files" type="file" multiple="multiple" />
                                                 <output id="result" />
                                             </article>
-                                            <div class="btn red pull-right" id="createMaterial"> Createeee</div>
+                                            <div class="btn red pull-right" id="createMaterial"> Create</div>
                                         </div>
                                     </div>
                                 </div>

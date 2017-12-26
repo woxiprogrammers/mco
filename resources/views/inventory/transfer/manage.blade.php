@@ -84,5 +84,11 @@
         $(document).ready(function() {
             RequestComponentListing.init();
         });
+
+        function changeStatus(element){
+            var token = $('input[name="_token"]').val();
+            $(element).next('input[name="_token"]').val(token);
+            $(element).closest('form').submit();
+        }
     </script>
 @endsection
