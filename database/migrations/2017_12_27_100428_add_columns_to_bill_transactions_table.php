@@ -18,7 +18,7 @@ class AddColumnsToBillTransactionsTable extends Migration
             $table->double('tds')->nullable();
             $table->double('debit')->nullable();
             $table->double('hold')->nullable();
-            $table->double('balance_advanced_amount ')->nullable();
+            $table->double('balance_advanced_amount')->nullable();
             $table->boolean('paid_from_advanced')->nullable();
         });
     }
