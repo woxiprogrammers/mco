@@ -83,7 +83,6 @@
                                                     <th> Rate </th>
                                                     <th> Total Work Area </th>
                                                     <th> Total Amount </th>
-                                                    <th> Project Sitename </th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>

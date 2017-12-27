@@ -486,8 +486,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorStructure'));
             Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureView'));
             Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorStructureListing'));
-            Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
-            Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
+            Route::get('edit/{subcontractor_struct}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
+            Route::post('edit/{subcontractor_struct}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
         });
 
         Route::group(['prefix' => 'subcontractor-bills'], function(){

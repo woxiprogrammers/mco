@@ -46,29 +46,11 @@
 {!! csrf_field() !!}
 <div class="form-body">
     <div class="row form-group">
+        <div class="col-md-3" style="text-align: right">
+            <label for="description" class="control-label">Select Subcontractor : </label>
+            <span>*</span>
+        </div>
         <div class="col-md-3">
-            &nbsp;
-        </div>
-        <div class="col-md-2">
-            <label>Select Client :</label>
-            <select class="form-control" id="client_id" name="client_id">
-                @foreach($clients as $client)
-                    <option value="{{$client['id']}}">{{$client['company']}}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label>Select Project :</label>
-            <select class="form-control" id="project_id" name="project_id">
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label>Select Site :</label>
-            <select class="form-control" id="site_id" name="site_id">
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label>Select Subcontractor :</label>
             <select class="form-control" id="subcontractor_id" name="subcontractor_id">
                 @foreach($subcontractor as $sc)
                     <option value="{{$sc['id']}}">{{$sc['subcontractor_name']}}</option>
@@ -78,7 +60,7 @@
     </div>
     <div class="form-group row">
         <div class="col-md-3" style="text-align: right">
-            <label for="description" class="control-label">Description</label>
+            <label for="description" class="control-label">Description : </label>
             <span>*</span>
         </div>
         <div class="col-md-6">
@@ -87,7 +69,7 @@
     </div>
     <div class="form-group row">
         <div class="col-md-3" style="text-align: right">
-            <label for="summary_id" class="control-label">Select Summary:</label>
+            <label for="summary_id" class="control-label">Select Summary : </label>
             <span>*</span>
         </div>
         <div class="col-md-3">
@@ -270,17 +252,6 @@
 <script>
     $(document).ready(function() {
         CreateSubcontractorStructure.init();
-        getProjects($('#client_id').val());
-        getProjectSites($('#project_id').val());
-
-
-        $("#client_id").on('change', function(){
-            getProjects($('#client_id').val());
-        });
-        $("#project_id").on('change', function(){
-            getProjectSites($('#project_id').val());
-        });
-
         $("#rate").on('keyup', function(){
             var rate = $('#rate').val();
             var total_work_area = $('#total_work_area').val();
@@ -297,41 +268,6 @@
             $('#total_amount_inwords').val(number2text(total_amount));
         });
     });
-    function getProjects(client_id){
-        $.ajax({
-            url: '/subcontractor/projects/'+client_id,
-            type: 'GET',
-            async : false,
-            success: function(data,textStatus,xhr){
-                if(xhr.status == 200){
-                    $('#project_id').html(data);
-                    $('#project_id').prop('disabled',false);
-                    getProjectSites($('#project_id').val());
-                }
-            },
-            error: function(errorStatus,xhr){
-
-            }
-        });
-    }
-
-    function getProjectSites(project_id){
-        $.ajax({
-            url: '/subcontractor/project-sites/'+project_id,
-            type: 'GET',
-            async : false,
-            success: function(data,textStatus,xhr){
-                if(xhr.status == 200){
-                    $('#site_id').html(data);
-                    $('#site_id').prop('disabled',false);
-                    $("#search-withfilter").trigger('click');
-                }
-            },
-            error: function(errorStatus,xhr){
-
-            }
-        });
-    }
 
     function number2text(value) {
         var fraction = Math.round(frac(value)*100);

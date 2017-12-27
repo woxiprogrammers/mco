@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 use App\Client;
+use Illuminate\Support\Facades\Session;
 
 class SubcontractorController extends Controller
 {
@@ -219,10 +220,14 @@ class SubcontractorController extends Controller
     public function createSubcontractorStructure(Request $request) {
         try{
             $now = Carbon::now();
+            $selectGlobalProjectSite = 0;
+            if(Session::has('global_project_site')){
+                $selectGlobalProjectSite = Session::get('global_project_site');
+            }
             $ScStrutureData = null;
             if($request->structure_type == 'areawise') {
                 $structure_type_id = SubcontractorStructureType::where('slug',$request->structure_type)->pluck('id')->toArray()[0];
-                $ScStrutureData['project_site_id'] = $request->site_id;
+                $ScStrutureData['project_site_id'] = $selectGlobalProjectSite;
                 $ScStrutureData['subcontractor_id'] = $request->subcontractor_id;
                 $ScStrutureData['summary_id'] = $request->summary_id;
                 $ScStrutureData['sc_structure_type_id'] = $structure_type_id;
@@ -250,13 +255,17 @@ class SubcontractorController extends Controller
 
     public function subcontractorStructureListing(Request $request){
         try{
-            $listingData = SubcontractorStructure::get();
+            $selectGlobalProjectSite = 0;
+            if(Session::has('global_project_site')){
+                $selectGlobalProjectSite = Session::get('global_project_site');
+            }
+            $listingData = SubcontractorStructure::where('project_site_id', $selectGlobalProjectSite)->get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
+                //$projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
                 $total_amount = $listingData[$pagination]['rate']*$listingData[$pagination]['total_work_area'];
                 $records['data'][$iterator] = [
                     $listingData[$pagination]->subcontractor->subcontractor_name,
@@ -265,7 +274,7 @@ class SubcontractorController extends Controller
                     $listingData[$pagination]['rate'],
                     $listingData[$pagination]['total_work_area'],
                     $total_amount,
-                    $projectSiteName,
+                    //$projectSiteName,
                     date('d M Y',strtotime($listingData[$pagination]['created_at'])),
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -274,11 +283,12 @@ class SubcontractorController extends Controller
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/subcontractor/subcontractor-structure/edit/'.$listingData[$pagination]['id'].'">
+                                <a href="#">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
                         </ul>
                     </div>'
+                    // need to replece for edit functionality : <a href="/subcontractor/subcontractor-structure/edit/'.$listingData[$pagination]['id'].'">
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -297,15 +307,17 @@ class SubcontractorController extends Controller
         return response()->json($records,200);
     }
 
-    public function getSubcontractorStructureEditView(Request $request,$labour){
+    public function getSubcontractorStructureEditView(Request $request, $subcontractor_struct){
         try{
+            $subcontractor = Subcontractor::where('is_active',true)->where('id',$subcontractor_struct->subcontractor_id)->orderBy('id','asc')->get(['id','subcontractor_name'])->toArray();
+            $summary = Summary::where('is_active',true)->where('id',$subcontractor_struct->summary_id)->orderBy('id','asc')->get(['id','name'])->toArray();
             $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
             $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
             $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
             $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
             $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
             $projectSites = ProjectSite::select('id','name')->get()->toArray();
-            return view('subcontractor.structure.edit')->with(compact('labour','projectSites','clients'));
+            return view('subcontractor.structure.edit')->with(compact('summary','subcontractor_struct','projectSites','clients','subcontractor'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
