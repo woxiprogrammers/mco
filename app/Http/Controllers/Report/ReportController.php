@@ -49,9 +49,14 @@ class ReportController extends Controller
         $curr_date = Carbon::now();
         $curr_date = date('d_m_Y_h_i_s',strtotime($curr_date));
         $report_type = $request->report_type;
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
 
         switch($report_type) {
             case 'materialwise_purchase_report':
+                $site_id = $request->materialwise_purchase_report_site_id;
+                $category_id = $request->category_id;
+                $material_ids = $request->material_id;
                 $header = array(
                     'Sr. No', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
                     'Total Amount', 'Average Amount'
@@ -62,6 +67,7 @@ class ReportController extends Controller
                 );
                 break;
             case 'receiptwise_p_and_l_report':
+                $site_id = $request->receiptwise_p_and_l_report_site_id;
                 $header = array(null, null);
                 $data = array(
                     array('Total Sale Entry', 1),
@@ -79,6 +85,8 @@ class ReportController extends Controller
                 );
                 break;
             case 'subcontractor_report':
+                $site_id = $request->subcontractor_report_site_id;
+                $subcontractor_id = $request->subcontractor_id;
                 $header = array(
                     'Sr. No', 'Summary Type', 'Bill No', 'Total Bill Amount', 'TDS',
                     'Retention', 'Total Bill Amount', 'Total Pay Amount', 'Balance'
@@ -89,6 +97,8 @@ class ReportController extends Controller
                 );
                 break;
             case 'labour_specific_report':
+                $site_id = $request->labour_specific_report_site_id;
+                $labour_id = $request->labour_id;
                 $header = array(
                     'Sr. No', 'Gross Salary', 'PT', 'PF', 'ESIC',
                     'TDS', 'ADVANCE', 'Net Payment'
@@ -99,6 +109,8 @@ class ReportController extends Controller
                 );
                 break;
             case 'purchase_bill_tax_report':
+                $site_id = $request->purchase_bill_tax_report_site_id;
+                $vendor_id = $request->vendor_id;
                 $header = array(
                     'Sr. No', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
                     'With Tax Amount'
@@ -109,6 +121,7 @@ class ReportController extends Controller
                 );
                 break;
             case 'sales_bill_tax_report':
+                $site_id = $request->sales_bill_tax_report_site_id;
                 $header = array(
                     'RA Bill Number', 'Basic Amount', 'Tax Amount', 'Total Amount',
                     'Mobilise Advance', 'Debit', 'Hold', 'Retention',

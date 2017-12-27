@@ -79,7 +79,7 @@
                                                         <label>Select Project Site : </label>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <select class="form-control" id="site_id" name="site_id">
+                                                        <select class="form-control" id="materialwise_purchase_report_site_id" name="materialwise_purchase_report_site_id">
                                                             @foreach($sites as $site)
                                                             <option value="{{$site['id']}}">{{$site['name']}}</option>
                                                             @endforeach
@@ -119,6 +119,11 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="row" name="receiptwise_p_and_l_report" id="receiptwise_p_and_l_report">
                                                 <div class="row">
@@ -132,11 +137,16 @@
                                                         <label>Select Project Site : </label>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <select class="form-control" id="site_id" name="site_id">
+                                                        <select class="form-control" id="receiptwise_p_and_l_report_site_id" name="receiptwise_p_and_l_report_site_id">
                                                             @foreach($sites as $site)
                                                             <option value="{{$site['id']}}">{{$site['name']}}</option>
                                                             @endforeach
                                                         </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -152,7 +162,7 @@
                                                         <label>Select Project Site : </label>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <select class="form-control" id="site_id" name="site_id">
+                                                        <select class="form-control" id="subcontractor_report_site_id" name="subcontractor_report_site_id">
                                                             @foreach($sites as $site)
                                                             <option value="{{$site['id']}}">{{$site['name']}}</option>
                                                             @endforeach
@@ -171,6 +181,11 @@
                                                         </select>
                                                     </div>
                                                 </div>
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="row" name="labour_specific_report" id="labour_specific_report">
                                                 <div class="row">
@@ -184,12 +199,13 @@
                                                         <label>Select Project Site : </label>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <select class="form-control" id="site_id" name="site_id">
+                                                        <select class="form-control" id="labour_specific_report_site_id" name="labour_specific_report_site_id">
                                                             @foreach($sites as $site)
                                                             <option value="{{$site['id']}}">{{$site['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
+                                                    <div class="form-actions noborder row">
                                                 </div>
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
@@ -210,6 +226,12 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             </div>
                                             <div class="row" name="purchase_bill_tax_report" id="purchase_bill_tax_report">
                                                 <div class="row">
@@ -223,7 +245,7 @@
                                                         <label>Select Project Site : </label>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <select class="form-control" id="site_id" name="site_id">
+                                                        <select class="form-control" id="purchase_bill_tax_report_site_id" name="purchase_bill_tax_report_site_id">
                                                             @foreach($sites as $site)
                                                             <option value="{{$site['id']}}">{{$site['name']}}</option>
                                                             @endforeach
@@ -249,6 +271,11 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="row" name="sales_bill_tax_report" id="sales_bill_tax_report">
                                                 <div class="row">
@@ -262,17 +289,17 @@
                                                         <label>Select Project Site : </label>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <select class="form-control" id="site_id" name="site_id">
+                                                        <select class="form-control" id="sales_bill_tax_report_site_id" name="sales_bill_tax_report_site_id">
                                                             @foreach($sites as $site)
                                                             <option value="{{$site['id']}}">{{$site['name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3" style="margin-left: 26%">
-                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </form>
