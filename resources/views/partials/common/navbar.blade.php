@@ -219,7 +219,7 @@
                             </li>
                     @endif
                     <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
-                    @if($hasStructurePermission)
+                    @if($hasQuotationPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a href="/quotation/manage/status#2"> Quotations
                                 <span class="arrow"></span>
@@ -279,6 +279,11 @@
                                 <li aria-haspopup="true">
                                     <a href="/inventory/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Store Keeper
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Site Transfer
                                     </a>
                                 </li>
                             </ul>

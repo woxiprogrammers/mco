@@ -9,9 +9,11 @@ use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\Material;
 use App\ProjectSite;
+use App\ProjectSiteUserCheckpoint;
 use App\Quotation;
 use App\QuotationMaterial;
 use App\Unit;
@@ -25,12 +27,15 @@ use Illuminate\Support\Facades\Log;
 
 class InventoryManageController extends Controller
 {
+    use InventoryTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
     public function getManageView(Request $request){
         try{
-            return view('inventory/manage');
+            $projectSites  = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                ->where('projects.is_active',true)->select('project_sites.id','project_sites.name','projects.name as project_name')->get()->toArray();
+            return view('inventory/manage')->with(compact('projectSites'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -38,6 +43,120 @@ class InventoryManageController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+        }
+    }
+
+    public function getTransferManageView(Request $request){
+        try{
+            return view('inventory/transfer/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory Request Transfer manage view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function getSiteTransferRequestListing(Request $request){
+        try{
+            $status = 200;
+            if($request->has('search_name')){
+                // Inventory listing search
+            }else{
+                $inventoryTransferData = InventoryComponentTransfers::where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first())->orderBy('created_at','desc')->get();
+            }
+            $iTotalRecords = count($inventoryTransferData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($inventoryTransferData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryTransferData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $inventoryTransferData[$pagination]->inventoryComponent->projectSite->name,
+                    $inventoryTransferData[$pagination]->source_name,
+                    $inventoryTransferData[$pagination]->inventoryComponent->name,
+                    $inventoryTransferData[$pagination]->quantity,
+                    $inventoryTransferData[$pagination]->unit->name,
+                    $actionDropDown = '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                     <form action="/inventory/transfer/change-status/approved/'.$inventoryTransferData[$pagination]->id.'" method="post">
+                                        <a href="javascript:void(0);" onclick="changeStatus(this)">
+                                            <i class="icon-docs"></i> Approve 
+                                        </a>
+                                        <input type="hidden" name="_token">
+                                    </form>
+                                </li>
+                                 <li>
+                                    <form action="/inventory/transfer/change-status/disapproved/'.$inventoryTransferData[$pagination]->id.'" method="post">
+                                        <a href="javascript:void(0);" onclick="changeStatus(this)">
+                                            <i class="icon-tag"></i> Disapprove 
+                                        </a>
+                                        <input type="hidden" name="_token">
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Request Component listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = array();
+        }
+        return response()->json($records,$status);
+    }
+
+    public function changeStatus(Request $request,$status,$inventoryTransferId){
+        try{
+            InventoryComponentTransfers::where('id',$inventoryTransferId)->update([
+                'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug',$status)->pluck('id')->first()
+            ]);
+            return view('/inventory/transfer/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Change Status',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function createInventoryComponent(Request $request){
+        try{
+            $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($request['name']))->first();
+            if($newInventoryComponent == null){
+                $inventoryComponentData['name'] = $request['name'];
+                $inventoryComponentData['is_material'] = ($request['inventory_type'] == 'material') ? true : false;
+                $inventoryComponentData['project_site_id'] = $request->project_site_id;
+                $inventoryComponentData['opening_stock'] = ($request->has('opening_stock')) ? $request['opening_stock'] : 0;
+                $inventoryComponentData['reference_id'] = $request['reference_id'];
+                InventoryComponent::create($inventoryComponentData);
+            }
+            return redirect('/inventory/manage');
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Create Inventory Component',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 
@@ -96,12 +215,12 @@ class InventoryManageController extends Controller
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
             $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
-            $inTransfers = InventoryTransferTypes::where('type','ilike','IN')->get();
+            $inTransfers = InventoryTransferTypes::where('slug','site')->where('type','ilike','IN')->get();
             $inTransferTypes = '<option value=""> -- Select Transfer Type -- </option>';
             foreach($inTransfers as $transfer){
                 $inTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            $outTransfers = InventoryTransferTypes::where('type','ilike','OUT')->get();
+            $outTransfers = InventoryTransferTypes::whereIn('slug',['site','user'])->where('type','ilike','OUT')->get();
             $outTransferTypes = '<option value=""> -- Select Transfer Type -- </option>';
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
@@ -142,12 +261,13 @@ class InventoryManageController extends Controller
                     $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
                         ->get();
-
                     $outTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','out')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
                         ->get();
                     $inQuantity = $outQuantity = 0;
@@ -167,10 +287,12 @@ class InventoryManageController extends Controller
                     $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->sum('inventory_component_transfers.quantity');
                     $outQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','out')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->sum('inventory_component_transfers.quantity');
                 }
                 $availableQuantity = $inQuantity - $outQuantity;
@@ -223,6 +345,7 @@ class InventoryManageController extends Controller
                     $inventoryComponentTransfers[$pagination]['quantity'],
                     $inventoryComponentTransfers[$pagination]->unit->name,
                     $transferStatus,
+                    $inventoryComponentTransfers[$pagination]->inventoryComponentTransferStatus->name,
                     '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
                         Details
                     </a>'
@@ -338,16 +461,26 @@ class InventoryManageController extends Controller
         }
     }
 
-    use InventoryTrait;
     public function addComponentTransfer(Request $request,$inventoryComponent){
         try{
             $data = $request->except(['_token','work_order_images','project_site_id']);
             $data['inventory_component_id'] = $inventoryComponent->id;
+            $data['date'] = Carbon::now();
+            if($request->has('project_site_id') && $request->transfer_type =='site'){
+                $data['source_name'] = ProjectSite::where('id',$request['project_site_id'])->pluck('name')->first();
+                if($request->has('in_or_out')){
+                    $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+                }else{
+                    $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
+                }
+            }else{
+                $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+            }
             $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
             if($request->has('work_order_images')){
                 $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
             }
-            if($request->has('project_site_id') && $request->transfer_type =='site'){
+            /*if($request->has('project_site_id') && $request->transfer_type =='site'){
                 $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($inventoryComponent->name))->first();
                 if($newInventoryComponent == null){
                     $inventoryComponentData = [
@@ -365,9 +498,20 @@ class InventoryManageController extends Controller
                 if($request->has('work_order_images')){
                     $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
                 }
+            }*/
+            if($request->has('project_site_id') && $request->transfer_type =='site'){
+                if($request->has('in_or_out')) {
+                    $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
+                    return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+                }else{
+                    $request->session()->flash('success', 'Inventory Component Transfer Saved Successfully!!');
+                    return redirect('/inventory/transfer/manage');
+                }
+            }else{
+                $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
+                return redirect('/inventory/component/manage/'.$inventoryComponent->id);
             }
-            $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
-            return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add Inventory Component Transfer',
@@ -526,5 +670,28 @@ class InventoryManageController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function autoSuggest(Request $request,$projectSiteId,$type,$keyword){
+        try{
+            $response = array();
+            $alreadyExitMaterialsIds = InventoryComponent::where('project_site_id',$projectSiteId)->pluck('reference_id');
+            if($type == 'material'){
+                $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',true)->whereNotIn('reference_id',$alreadyExitMaterialsIds)->distinct('name')->select('name','reference_id')->get();
+            }else{
+                $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',false)->whereNotIn('reference_id',$alreadyExitMaterialsIds)->distinct('name')->select('name','reference_id')->get();
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $response = array();
+            $data = [
+                'action' => 'Inventory Transfer Auto-suggest',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
+        return response()->json($response,$status);
     }
 }

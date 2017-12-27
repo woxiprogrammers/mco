@@ -1,14 +1,11 @@
-var MaterialRequestListing = function () {
-    var projectSiteId = $("#globalProjectSite").val();
-    if(typeof projectSiteId == 'undefined' || projectSiteId == ''){
-        projectSiteId = 0;
-    }
-    var handleOrders = function () {
-
+/**
+ * Created by Harsha Chotaliya on 21/12/17.
+ */
+var RequestComponentListing = function () {
+    var handleInventory = function () {
         var grid = new Datatable();
-
         grid.init({
-            src: $("#materialRequest"),
+            src: $("#requestComponentListingTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -28,13 +25,14 @@ var MaterialRequestListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/purchase/material-request/listing?site_id="+projectSiteId+"&_token="+$("input[name='_token']").val(), // ajax source
+                    "url": "/inventory/transfer/listing?_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]
                 ] // set first column as a default sort by asc
             }
         });
+
         // handle group actionsubmit button click
         grid.getTableWrapper().on('click', '.table-group-action-submit', function (e) {
             e.preventDefault();
@@ -63,17 +61,12 @@ var MaterialRequestListing = function () {
                 });
             }
         });
-
     }
     return {
-
         //main function to initiate the module
         init: function () {
-            handleOrders();
+            handleInventory();
         }
-
     };
 }();
-jQuery(document).ready(function() {
-    MaterialRequestListing.init();
-});
+

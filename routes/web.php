@@ -247,8 +247,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('edit',array('uses'=> 'User\PurchaseController@editMaterialRequest'));
             Route::get('get-items',array('uses'=> 'User\PurchaseController@autoSuggest'));
             Route::post('get-units',array('uses'=> 'User\PurchaseController@getUnitsList'));
-            Route::post('get-projects',array('uses'=> 'User\PurchaseController@getProjectsList'));
-            Route::post('get-clients',array('uses'=> 'User\PurchaseController@getClientsList'));
             Route::post('get-users',array('uses'=> 'User\PurchaseController@getUsersList'));
             Route::post('create',array('uses'=> 'User\PurchaseController@createMaterialList'));
             Route::post('material-requestWise-listing',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListing'));
@@ -323,6 +321,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
        /* Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
         Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));*/
         Route::group(['prefix' => 'component'], function(){
+            Route::post('create',array('uses' => 'Inventory\InventoryManageController@createInventoryComponent'));
             Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentListing'));
             Route::get('manage/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@getComponentManageView'));
             Route::post('add-transfer/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@addComponentTransfer'));
@@ -335,6 +334,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentReadingListing'));
                 Route::post('add/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@addInventoryComponentReading'));
             });
+        });
+        Route::group(['prefix' => 'transfer'], function (){
+            Route::get('manage',array('uses' => 'Inventory\InventoryManageController@getTransferManageView'));
+            Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@getSiteTransferRequestListing'));
+            Route::get('auto-suggest/{projectSiteId}/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
+            Route::post('change-status/{status}/{inventoryTransferId}',array('uses'=> 'Inventory\InventoryManageController@changeStatus'));
         });
     });
 

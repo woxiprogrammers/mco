@@ -69,27 +69,6 @@
                                           <div class="portlet-body">
                                               <div class="row">
                                                   <div class="col-md-2">
-                                                      <label>Select Client :</label>
-                                                      <select class="form-control" id="client_id" name="client_id">
-                                                          <option value="0">ALL</option>
-                                                          @foreach($clients as $client)
-                                                          <option value="{{$client['id']}}">{{$client['company']}}</option>
-                                                          @endforeach
-                                                      </select>
-                                                  </div>
-                                                  <div class="col-md-2">
-                                                      <label>Select Project :</label>
-                                                      <select class="form-control" id="project_id" name="project_id">
-                                                          <option value="0">ALL</option>
-                                                      </select>
-                                                  </div>
-                                                  <div class="col-md-2">
-                                                      <label>Select Site :</label>
-                                                      <select class="form-control" id="site_id" name="site_id">
-                                                          <option value="0">ALL</option>
-                                                      </select>
-                                                  </div>
-                                                  <div class="col-md-2">
                                                       <label>Select Year :</label>
                                                       <select class="form-control" id="year" name="year">
                                                           <option value="0">ALL</option>
@@ -350,17 +329,8 @@
             }
         });
 
-        $("#client_id").on('change', function(){
-            getProjects($('#client_id').val());
-        });
-        $("#project_id").on('change', function(){
-            getProjectSites($('#project_id').val());
-        });
-
         $("#status_id").on('change',function(){
-            var client_id = $('#client_id').val();
-            var project_id = $('#project_id').val();
-            var site_id = $('#site_id').val();
+            var site_id = $('#globalProjectSite').val();
             var year = $('#year').val();
             var month = $('#month').val();
             var status_id = $('#status_id').val();
@@ -368,8 +338,6 @@
             var m_count = $('#m_count').val();
 
             var postData =
-                'client_id=>'+client_id+','+
-                    'project_id=>'+project_id+','+
                     'site_id=>'+site_id+','+
                     'year=>'+year+','+
                     'month=>'+month+','+
@@ -405,41 +373,6 @@
             $(".filter-submit").trigger('click');
         });
     });
-
-    function getProjects(client_id){
-        $.ajax({
-            url: '/purchase/projects/'+client_id,
-            type: 'GET',
-            async : false,
-            success: function(data,textStatus,xhr){
-                if(xhr.status == 200){
-                    $('#project_id').html(data);
-                    $('#project_id').prop('disabled',false);
-                    getProjectSites($('#project_id').val());
-                }
-            },
-            error: function(errorStatus,xhr){
-
-            }
-        });
-    }
-
-    function getProjectSites(project_id){
-        $.ajax({
-            url: '/purchase/project-sites/'+project_id,
-            type: 'GET',
-            async : false,
-            success: function(data,textStatus,xhr){
-                if(xhr.status == 200){
-                    $('#site_id').html(data);
-                    $('#site_id').prop('disabled',false);
-                }
-            },
-            error: function(errorStatus,xhr){
-
-            }
-        });
-    }
 
     function openApproveModal(componentId){
         $.ajax({

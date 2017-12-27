@@ -24,7 +24,11 @@
                             <div class="page-title">
                                 <h1>Create Material Request</h1>
                             </div>
-                            <div class="form-group " style="float: right;margin-top:1%">
+                            <div class="col-md-3 " style="float: right;margin-top:1%">
+                                <a href="/purchase/material-request/manage" class="btn btn-secondary-outline" style="margin-left: 45%;">
+                                    <i class="fa fa-angle-left"></i>
+                                    Back
+                                </a>
                                 <button type="submit" class="btn btn-set red pull-right">
                                     <i class="fa fa-check"></i>
                                     Submit
@@ -43,20 +47,18 @@
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control empty" id="clientSearchbox" name="client_name" placeholder="Enter client name" >
-                                                        <div id="client-suggesstion-box"></div>
+                                                        <input type="text" class="form-control empty" id="clientSearchbox" name="client_name" value="{{$globalProjectSite->project->client->company}}" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control empty" id="projectSearchbox"  placeholder="Enter project name" >
-                                                        <input type="hidden"  id="project_side_id" name="project_site_id">
-                                                        <div id="project-suggesstion-box"></div>
+                                                        <input type="text" class="form-control empty" id="projectSearchbox" value="{{$globalProjectSite->project->name}} - {{$globalProjectSite->name}}" readonly>
+                                                        <input type="hidden"  id="project_side_id" name="project_site_id" value="{{$globalProjectSite->id}}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter user name" >
+                                                        <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter user name" name="user_name">
                                                         <input type="hidden" name="user_id" id="user_id_">
                                                         <div id="user-suggesstion-box"></div>
                                                     </div>
@@ -158,8 +160,8 @@
                                             <div class="form-group" id="unitDrpdn">
                                                 <select id="materialUnit" style="width: 80%;height: 20px;text-align: center">
                                                     @foreach($units as $unit)
-                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                        @endforeach
+                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         <article>
@@ -193,7 +195,6 @@
                                         </div>
                                         <div class="form-group">
                                             <input type="text" class="form-control empty" id="AssetUnitsearchbox"  value="Nos" readonly >
-                                            <div id="asset_unit-suggesstion-box"></div>
                                         </div>
                                         <article>
                                             <label for="filesAsset">Select multiple files:</label>
@@ -220,6 +221,12 @@
 <link rel="stylesheet"  href="/assets/global/css/app.css"/>
 <link rel="stylesheet"  href="/assets/custom/purchase/material-request/material-request.css"/>
 <script src="/assets/custom/purchase/material-request/material-request.js" type="text/javascript"></script>
+<script src="/assets/custom/purchase/validations.js" type="text/javascript"></script>
+<script>
+    $(document).ready(function(){
+        CreateMaterialRequest.init();
+    });
+</script>
     <script>
         function handleFileSelect() {
             //Check File API support
@@ -248,8 +255,6 @@
             }
         }
         document.getElementById('files').addEventListener('change', handleFileSelect, false);
-    </script>
-<script>
     function handleFileSelectForAsset() {
         //Check File API support
         if (window.File && window.FileList && window.FileReader) {
