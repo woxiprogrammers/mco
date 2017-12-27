@@ -81,6 +81,7 @@
                                                                                     <th> Quantity </th>
                                                                                     <th> Unit </th>
                                                                                     <th> Status </th>
+                                                                                    <th> Status </th>
                                                                                     <th> Action </th>
                                                                                 </tr>
                                                                                 </thead>
@@ -305,7 +306,7 @@
                                                 </div>
                                                 <div id="labour_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="text" name="source_name" id="sourceName" class="form-control" placeholder="Enter Labour's Name">
+                                                        <input type="text" name="source_name" id="sourceName" class="form-control" placeholder="Enter User's Name">
                                                     </div>
                                                     <div class="form-group">
                                                         <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Enter Quantity">
@@ -317,9 +318,6 @@
                                                                 <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <input type="text" name="date" class="form-control" id="date" placeholder="Enter Date">
                                                     </div>
                                                     <div class="form-group">
                                                         <textarea name="remark" class="form-control" id="remark" placeholder="Remark"></textarea>
@@ -419,9 +417,6 @@
                                                                 <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                             @endforeach
                                                         </select>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <input type="date" name="date" id="date" class="form-control" placeholder="Enter Date">
                                                     </div>
                                                     <div class="form-group">
                                                         <textarea name="remark" class="form-control" id="remark" placeholder="Remark..."></textarea>
@@ -953,7 +948,7 @@
             }else if($(this).val() == 'office'){
                 $("#dynamicForm").html($('#office_form').clone().show(500));
                 $("#inOutSubmit").show();
-            }else if($(this).val() == 'labour'){
+            }else if($(this).val() == 'user'){
                 $("#dynamicForm").html($('#labour_form').clone().show(500));
                 $("#inOutSubmit").show();
             }else if($(this).val() == 'sub-contractor'){
@@ -976,6 +971,8 @@
             }
             CreateInventoryComponentTransfer.init();
         })
+
+
 
 
     </script>
