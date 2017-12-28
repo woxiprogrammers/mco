@@ -281,6 +281,11 @@
                                         <i class="fa fa-sitemap"></i> Store Keeper
                                     </a>
                                 </li>
+                                <li aria-haspopup="true">
+                                    <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Site Transfer
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     @endif

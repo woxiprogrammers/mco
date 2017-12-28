@@ -10,7 +10,7 @@ class InventoryComponentTransfers extends Model{
 
     protected $fillable = ['inventory_component_id','transfer_type_id','quantity','unit_id','remark','source_name',
         'bill_number','bill_amount','vehicle_number','in_time','out_time','payment_type_id','date','next_maintenance_hour',
-        'user_id','comment_data','grn'];
+        'user_id','comment_data','grn','inventory_component_transfer_status_id'];
 
     public function inventoryComponent(){
         return $this->belongsTo('App\InventoryComponent','inventory_component_id');
@@ -29,5 +29,8 @@ class InventoryComponentTransfers extends Model{
     }
     public function images(){
         return $this->hasMany('App\InventoryComponentTransferImage','inventory_component_transfer_id');
+    }
+    public function inventoryComponentTransferStatus(){
+        return $this->belongsTo('App\InventoryComponentTransferStatus','inventory_component_transfer_status_id');
     }
 }

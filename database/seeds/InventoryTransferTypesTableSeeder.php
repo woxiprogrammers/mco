@@ -66,8 +66,8 @@ class InventoryTransferTypesTableSeeder extends Seeder
                 'updated_at' => $now,
             ],
             [
-                'name' => 'Labour',
-                'slug' => 'labour',
+                'name' => 'User',
+                'slug' => 'user',
                 'type' => 'OUT',
                 'created_at' => $now,
                 'updated_at' => $now,
