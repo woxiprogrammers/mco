@@ -53,7 +53,7 @@
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <input type="text" class="form-control empty" id="projectSearchbox" value="{{$globalProjectSite->project->name}} - {{$globalProjectSite->name}}" readonly>
-                                                        <input type="hidden"  id="project_side_id" name="project_site_id" value="{{$globalProjectSite->id}}">
+                                                        <input type="hidden"  id="project_site_id" name="project_site_id" value="{{$globalProjectSite->id}}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -231,15 +231,12 @@
         function handleFileSelect() {
             //Check File API support
             if (window.File && window.FileList && window.FileReader) {
-
                 var files = event.target.files; //FileList object
                 var output = document.getElementById("result");
-
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
                     //Only pics
                     if (!file.type.match('image')) continue;
-
                     var picReader = new FileReader();
                     picReader.addEventListener("load", function (event) {
                         var picFile = event.target;
@@ -275,7 +272,7 @@
                 picReader.readAsDataURL(file);
             }
         } else {
-            console.log("Your browser does not support File API");
+            alert("Your browser does not support File API");
         }
     }
     document.getElementById('filesAsset').addEventListener('change', handleFileSelectForAsset, false);
