@@ -5,7 +5,7 @@
  * Time: 7:10 PM
  */
 ?>
-@if(count($materialRequestList) > 0)
+@if()
     @foreach($materialRequestList as $components)
         <tr>
             <td> <input type="checkbox"> <input type="hidden" name="material_request_component_ids[]" value="{{$components['material_request_component_id']}}"></td>

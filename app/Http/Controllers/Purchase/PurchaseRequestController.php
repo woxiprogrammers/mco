@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
 
 class PurchaseRequestController extends Controller
 {
@@ -49,12 +50,33 @@ class PurchaseRequestController extends Controller
     }
     public function getCreateView(Request $request){
         try{
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+            }else{
+                $projectSiteId = null;
+            }
             $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
-            $materialRequestList = array();
+            $units = Unit::select('id','name')->get()->toArray();
             $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
             $iterator = 0;
-            $units = Unit::select('id','name')->get()->toArray();
-
+            $materialRequestList = array();
+            $materialRequestIds = MaterialRequests::where('project_site_id',$projectSiteId)->pluck('id');
+            if(count($materialRequestIds) > 0){
+                $materialRequestIds = $materialRequestIds->toArray();
+                $materialRequestComponents = MaterialRequestComponents::whereIn('material_request_id',$materialRequestIds)->where('component_status_id',$inIndentStatusId)->get();
+                foreach($materialRequestComponents as $index => $materialRequestComponent){
+                    $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
+                    $materialRequestList[$iterator]['name'] = $materialRequestComponent->name;
+                    $materialRequestList[$iterator]['quantity'] = $materialRequestComponent->quantity;
+                    $materialRequestList[$iterator]['unit_id'] = $materialRequestComponent->unit_id;
+                    $materialRequestList[$iterator]['unit'] = $materialRequestComponent->unit->name;
+                    $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponent->component_type_id;
+                    $materialRequestList[$iterator]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
+                    $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponent->component_status_id;
+                    $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
+                    $iterator++;
+                }
+            }
             return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId','units'));
         }catch(\Exception $e){
             $data = [
@@ -274,14 +296,14 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request') || $user->customHasPermission('edit-material-request')){
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
                             $action .= '<!--<li>'
                                 .'<a href="/purchase/purchase-request/edit/'.$txnInfo['slug'].'/'.$purchaseRequests[$pagination]['id'].'">'.
                                 '<i class="icon-docs"></i> Edit 
                                     </a>
                                 </li>-->';
                         }
-                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request')){
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request')){
                             $action .= '<li>
                                     <a href="javascript:void(0);" onclick="openApproveModal('.$purchaseRequests[$pagination]['id'].')">
                                         <i class="icon-tag"></i> Approve / Disapprove 
@@ -299,7 +321,7 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request') || $user->customHasPermission('edit-material-request')){
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
                             $action .= '<li>'
                                     .'<a href="/purchase/purchase-request/edit/'.$txnInfo['slug'].'/'.$purchaseRequests[$pagination]['id'].'">'.
                                     '<i class="icon-docs"></i> Edit
@@ -317,9 +339,9 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request') || $user->customHasPermission('edit-material-request')){
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
                             $action .= '<li>'
-                                .'<a href=/purchase/purchase-request/edit/p-r-admin-approved/'.$purchaseRequests[$pagination]['id'].'">'.
+                                .'<a href="/purchase/purchase-request/edit/p-r-admin-approved/'.$purchaseRequests[$pagination]['id'].'">'.
                                 '<i class="icon-docs"></i> Edit
                                     </a>
                                     </li>';
@@ -337,7 +359,7 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request') || $user->customHasPermission('edit-material-request')){
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
                             $action .= '<!--<li>'
                                 .'<a href="/purchase/purchase-request/edit/'.$txnInfo['slug'].'">'.
                                 '<i class="icon-docs"></i> Edit 
@@ -356,7 +378,7 @@ class PurchaseRequestController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request') || $user->customHasPermission('edit-material-request')){
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
                             $action .= '<!--<li>'
                                 .'<a href="/purchase/purchase-request/edit/'.$txnInfo['slug'].'">'.
                                 '<i class="icon-docs"></i> Edit 
@@ -559,26 +581,7 @@ class PurchaseRequestController extends Controller
 
     public function getInIndentComponents(Request $request){
         try{
-            $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
-            $iterator = 0;
-            $materialRequestList = array();
-            $materialRequestIds = MaterialRequests::where('project_site_id',$request->project_site_id)->pluck('id');
-            if(count($materialRequestIds) > 0){
-                $materialRequestIds = $materialRequestIds->toArray();
-                $materialRequestComponents = MaterialRequestComponents::whereIn('material_request_id',$materialRequestIds)->where('component_status_id',$inIndentStatusId)->get();
-                foreach($materialRequestComponents as $index => $materialRequestComponent){
-                    $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
-                    $materialRequestList[$iterator]['name'] = $materialRequestComponent->name;
-                    $materialRequestList[$iterator]['quantity'] = $materialRequestComponent->quantity;
-                    $materialRequestList[$iterator]['unit_id'] = $materialRequestComponent->unit_id;
-                    $materialRequestList[$iterator]['unit'] = $materialRequestComponent->unit->name;
-                    $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponent->component_type_id;
-                    $materialRequestList[$iterator]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
-                    $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponent->component_status_id;
-                    $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
-                    $iterator++;
-                }
-            }
+
             return view('partials.purchase.purchase-request.indent-listing')->with(compact('materialRequestList'));
         }catch(\Exception $e){
             $data = [

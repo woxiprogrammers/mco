@@ -85,13 +85,14 @@
                                         <div class="portlet-body form">
                                             <div class="portlet light ">
                                                 <div class="portlet-title">
-                                                    <button class="btn btn-xs green  pull-right" type="button" aria-expanded="true" id="previewBtn">
-                                                        Preview
-                                                    </button>
+                                                    @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
+                                                        <button class="btn btn-xs green  pull-right" type="button" aria-expanded="true" id="previewBtn">
+                                                            Preview
+                                                        </button>
+                                                    @endif
                                                     <div class="caption">
                                                         <i class="fa fa-bars font-red"></i>&nbsp
                                                         <span class="caption-subject font-red sbold uppercase">Material / Asset List</span>
-
                                                     </div>
                                                 </div>
                                                 <div class="portlet-body">
@@ -102,7 +103,9 @@
                                                             <th> Name </th>
                                                             <th> Quantity </th>
                                                             <th> Unit </th>
-                                                            <th> Action </th>
+                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
+                                                                <th> Action </th>
+                                                            @endif
                                                         </tr>
                                                         </thead>
                                                         <tbody style="height: 500px">
@@ -112,19 +115,21 @@
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['name']}} </td>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['quantity']}} </td>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
-                                                                    <td>
-                                                                        <div>
-                                                                            <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
-                                                                                @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
-                                                                                    @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedVendorData[$materialRequestComponentDetails[$iterator]['id']]))
-                                                                                        <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
-                                                                                    @else
-                                                                                        <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
-                                                                                    @endif
-                                                                                @endfor
-                                                                            </select>
-                                                                        </div>
-                                                                    </td>
+                                                                    @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
+                                                                        <td>
+                                                                            <div>
+                                                                                <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
+                                                                                    @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
+                                                                                        @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedVendorData[$materialRequestComponentDetails[$iterator]['id']]))
+                                                                                            <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                        @else
+                                                                                            <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                        @endif
+                                                                                    @endfor
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                    @endif
                                                                 </tr>
                                                             @endfor
                                                         </tbody>

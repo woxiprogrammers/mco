@@ -53,7 +53,7 @@
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <input type="text" class="form-control empty" id="projectSearchbox" value="{{$globalProjectSite->project->name}} - {{$globalProjectSite->name}}" readonly>
-                                                        <input type="hidden"  id="project_side_id" name="project_site_id" value="{{$globalProjectSite->id}}">
+                                                        <input type="hidden"  id="project_site_id" name="project_site_id" value="{{$globalProjectSite->id}}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
