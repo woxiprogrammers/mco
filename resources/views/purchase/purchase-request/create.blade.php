@@ -281,19 +281,15 @@
         function handleFileSelect() {
             //Check File API support
             if (window.File && window.FileList && window.FileReader) {
-
                 var files = event.target.files; //FileList object
                 var output = document.getElementById("result");
-
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
                     //Only pics
                     if (!file.type.match('image')) continue;
-
                     var picReader = new FileReader();
                     picReader.addEventListener("load", function (event) {
                         var picFile = event.target;
-                        console.log(picFile);
                         var div = document.createElement("div");
                         div.innerHTML = "<img class='thumbnail img' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
                         output.insertBefore(div, null);
@@ -302,7 +298,7 @@
                     picReader.readAsDataURL(file);
                 }
             } else {
-                console.log("Your browser does not support File API");
+                alert("Your browser does not support File API");
             }
         }
         document.getElementById('files').addEventListener('change', handleFileSelect, false);
@@ -318,7 +314,6 @@
                     var picReader = new FileReader();
                     picReader.addEventListener("load", function (event) {
                         var picFiles = event.target;
-                        console.log(picFiles);
                         var div = document.createElement("div");
                         div.innerHTML = "<img class='thumbnail assetImg' src='" + picFiles.result + "'" + "title='" + picFiles.name + "'/>";
                         output.insertBefore(div, null);
@@ -327,7 +322,7 @@
                     picReader.readAsDataURL(file);
                 }
             } else {
-                console.log("Your browser does not support File API");
+                alert("Your browser does not support File API");
             }
         }
         document.getElementById('filesAsset').addEventListener('change', handleFileSelectForAsset, false);
