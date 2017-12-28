@@ -4,7 +4,6 @@ $(document).ready(function(){
     $('#iterator').val(iterator);
     var project_site_id = $("#project_site_id").val();
     $("#myBtn").click(function(){
-        var search_in = 'material';
         var materialList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -38,7 +37,7 @@ $(document).ready(function(){
                     'Unable to find any Result that match the current query',
                     '</div>'
                 ].join('\n'),
-                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+                suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
             },
         }).on('typeahead:selected', function (obj, datum) {
             var POData = datum.unit;
@@ -141,32 +140,6 @@ $("#userSearchbox").keyup(function(){
         $("#user-suggesstion-box").hide();
     }
 });
-function selectClient(id) {
-    $("#clientSearchbox").val(id);
-    $("#client-suggesstion-box").hide();
-}
-
-function selectProject(nameProject,id) {
-    $( "#assetBtn" ).show();
-    $( "#myBtn" ).show();
-
-
-    $.ajax({
-       url:'/purchase/purchase-request/get-in-indent-components',
-       type: 'POST',
-       data:{
-           _token: $("input[name='_token']").val(),
-           project_site_id: project_site_id
-       },
-       success: function(data,textStatus,xhr){
-            $("#collapseOne table tbody").html(data);
-            $("#indentPanel").show();
-       },
-       error: function(errorData){
-
-       }
-    });
-}
 function selectUser(name,id) {
     $('#user_id_').val(id);
     $("#userSearchbox").val(name);

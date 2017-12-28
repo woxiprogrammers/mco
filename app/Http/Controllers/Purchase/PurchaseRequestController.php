@@ -578,20 +578,4 @@ class PurchaseRequestController extends Controller
             abort(500);
         }
     }
-
-    public function getInIndentComponents(Request $request){
-        try{
-
-            return view('partials.purchase.purchase-request.indent-listing')->with(compact('materialRequestList'));
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Get In Indent components',
-                'exception' => $e->getMessage(),
-                'params' => $request->all()
-            ];
-            Log::critical(json_encode($data));
-            return reponse()->json([],500);
-
-        }
-    }
 }
