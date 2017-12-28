@@ -78,9 +78,9 @@ jQuery(document).ready(function() {
     SubcontractorListing.init();
 });
 
-var  CreateSubcontractor = function () {
+var  CreateSubcontractorStructure = function () {
     var handleCreate = function() {
-        var form = $('#createSubcontractor');
+        var form = $('#createSubcontractorStructure');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -152,7 +152,7 @@ var  CreateSubcontractor = function () {
 
 var  EditSubcontractor = function () {
     var handleEdit = function() {
-        var form = $('#editSubcontractor');
+        var form = $('#editSubcontractorStructure');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({

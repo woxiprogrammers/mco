@@ -27,6 +27,7 @@ use App\Quotation;
 use App\QuotationWorkOrder;
 use App\Role;
 use App\Subcontractor;
+use App\SubcontractorStructure;
 use App\Summary;
 use App\Unit;
 use App\Tax;
@@ -90,6 +91,8 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('subcontractor',Subcontractor::class);
         Route::model('purchaseOrderTransaction',PurchaseOrderTransaction::class);
         Route::model('projectSiteChecklist',ProjectSiteChecklist::class);
+        Route::model('subcontractor_struct',SubcontractorStructure::class);
+
     }
 
     /**
