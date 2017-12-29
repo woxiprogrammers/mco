@@ -41,40 +41,16 @@
 <!-- BEGIN VALIDATION STATES-->
 <div class="portlet light ">
 <div class="portlet-body form">
-<form role="form" id="editSubcontractor" class="form-horizontal" method="post" action="/subcontractor/subcontractor-structure/edit/{{$labour['id']}}">
+<form role="form" id="editSubcontractor" class="form-horizontal" method="post" action="/subcontractor/subcontractor-structure/edit/{{$subcontractor_struct['id']}}">
     {!! csrf_field() !!}
     <div class="form-body">
         <div class="row form-group">
+            <div class="col-md-3" style="text-align: right">
+                <label for="description" class="control-label">Subcontractor Name : </label>
+                <span>*</span>
+            </div>
             <div class="col-md-3">
-                &nbsp;
-            </div>
-            <div class="col-md-2">
-                <label>Select Client :</label>
-                <select class="form-control" id="client_id" name="client_id">
-                    @foreach($clients as $client)
-                    <option value="{{$client['id']}}">{{$client['company']}}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label>Select Project :</label>
-                <select class="form-control" id="project_id" name="project_id">
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label>Select Site :</label>
-                <select class="form-control" id="site_id" name="site_id">
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label>Select Subcontractor :</label>
-                <select class="form-control" id="year" name="subcontractor">
-                    <option value="2017">SC1</option>
-                    <option value="2018">SC2</option>
-                    <option value="2019">SC3</option>
-                    <option value="2020">SC4</option>
-                    <option value="2021">Sc5</option>
-                </select>
+                <label class="control-label">{{$subcontractor[0]['subcontractor_name']}}</label>
             </div>
         </div>
         <div class="form-group row">
@@ -83,22 +59,18 @@
                 <span>*</span>
             </div>
             <div class="col-md-6">
-                <textarea class="form-control" id="description" name="description"></textarea>
+                <textarea class="form-control" id="description" name="description" readonly>{{$subcontractor_struct['description']}}</textarea>
             </div>
         </div>
         <div class="form-group row">
             <div class="col-md-3" style="text-align: right">
-                <label for="summary" class="control-label">Select Summary:</label>
+                <label for="summary" class="control-label">Summary:</label>
                 <span>*</span>
             </div>
             <div class="col-md-3">
-                <select class="form-control" id="year" name="summary">
-                    <option value="2017">Summary 1</option>
-                    <option value="2018">Summary 2</option>
-                    <option value="2019">Summary 3</option>
-                    <option value="2020">Summary 4</option>
-                    <option value="2021">Summary 5</option>
-                </select>
+                <div class="col-md-6">
+                    <label class="control-label">{{$summary[0]['name']}}</label>
+                </div>
             </div>
         </div>
         <div class="form-group row">
@@ -107,7 +79,7 @@
                 <span>*</span>
             </div>
             <div class="col-md-3">
-                <input type="text" class="form-control" id="rate" name="rate">
+                <input type="text" class="form-control" id="rate" name="rate" value="{{$subcontractor_struct['rate']}}">
             </div>
         </div>
         <div class="form-group row">
@@ -116,7 +88,7 @@
                 <span>*</span>
             </div>
             <div class="col-md-3">
-                <input type="text" class="form-control" id="total_work_area" name="total_work_area">
+                <input type="text" class="form-control" id="total_work_area" name="total_work_area" value="{{$subcontractor_struct['total_work_area']}}">
             </div>
         </div>
         <div class="form-group row">

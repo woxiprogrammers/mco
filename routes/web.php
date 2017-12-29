@@ -262,7 +262,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
             Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
-            Route::post('get-in-indent-components',array('uses' => 'Purchase\PurchaseRequestController@getInIndentComponents'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
@@ -478,14 +477,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@changeSubcontractorStatus'));
         Route::get('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@getEditView'));
         Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
+        Route::get('projects/{client_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjects'));
+        Route::get('project-sites/{project_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjectSites'));
 
         Route::group(['prefix' => 'subcontractor-structure'], function(){
             Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
-            Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractor'));
+            Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorStructure'));
             Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureView'));
             Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorStructureListing'));
-            Route::get('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
-            Route::post('edit/{labour}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
+            Route::get('edit/{subcontractor_struct}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
+            Route::post('edit/{subcontractor_struct}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
         });
 
         Route::group(['prefix' => 'subcontractor-bills'], function(){
@@ -593,6 +594,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('category-listing',array('uses' => 'Dpr\DprController@categoryListing'));
         Route::post('dpr-listing',array('uses' => 'Dpr\DprController@dprListing'));
         Route::get('change-status/{id}/{status}',array('uses'=> 'Dpr\DprController@changeStatus'));
+    });
+
+    Route::group(['prefix'=>'reports'],function (){
+        Route::get('/',array('uses' => 'Report\ReportController@reportsRoute'));
+        Route::post('download',array('uses' => 'Report\ReportController@downloadReports'));
     });
 
 });

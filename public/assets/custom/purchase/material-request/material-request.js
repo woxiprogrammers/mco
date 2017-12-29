@@ -65,7 +65,6 @@ $(document).ready(function(){
             });
         $("#myModal").modal();
     });
-
     $("#assetBtn").click(function(){
         $('#component_id').val(6);
         var search_in = 'asset';
@@ -118,54 +117,12 @@ $(document).ready(function(){
         $("#myModal1").modal();
 
     });
-    $("#Unitsearchbox").keyup(function(){
-        if($(this).val().length > 0){
-            $.ajax({
-                type: "POST",
-                url: "/purchase/material-request/get-units",
-                data:'keyword='+$(this).val(),
-                beforeSend: function(){
-                    $.LoadingOverlay("hide");
-                    $("#unit-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
-                },
-                success: function(data){
-                    $("#unit-suggesstion-box").show();
-                    $("#unit-suggesstion-box").html(data);
-                    $("#Unitsearchbox").css("background-color","#FFF");
-                }
-            });
-        }else{
-            $("#unit-suggesstion-box").hide();
-        }
-
-    });
-    $("#AssetUnitsearchbox").keyup(function(){
-        if($(this).val().length > 0){
-            $.ajax({
-                type: "POST",
-                url: "/purchase/material-request/get-units",
-                data:'keyword='+$(this).val(),
-                beforeSend: function(){
-                    $.LoadingOverlay("hide");
-                    $("#unit-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});
-                },
-                success: function(data){
-                    $("#unit-suggesstion-box").show();
-                    $("#unit-suggesstion-box").html(data);
-                    $("#Unitsearchbox").css("background-color","#FFF");
-                }
-            });
-        }else{
-            $("#unit-suggesstion-box").hide();
-        }
-    });
-
     $("#userSearchbox").keyup(function(){
         if($(this).val().length > 0){
             $.ajax({
                 type: "POST",
                 url: "/purchase/material-request/get-users?_token="+$('input[name="_token"]').val(),
-                data:'keyword='+$(this).val()+'&project_site_name='+$("#projectSearchbox").val(),
+                data:'keyword='+$(this).val()+'&project_site_id='+$("#project_site_id").val()+'&module=material-request',
                 beforeSend: function(){
                     $.LoadingOverlay("hide");
                     $("#user-suggesstion-box").css({"background": "palegreen", "font-size": "initial" , "color":"brown"});

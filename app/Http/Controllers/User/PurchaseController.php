@@ -474,115 +474,60 @@ class PurchaseController extends Controller
         }
         return $data;
     }
-    public function getUnitsList(Request $request){
-        try{
-            $data = $request->all();
-            $units = Unit::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
-            $opt= '';
-            foreach ($units as $unit) {
-                $opt .= '<li onclick="selectUnit(\''.htmlspecialchars($unit['name'], ENT_QUOTES).'\')">'.$unit['name'].'</li>';
-            }
-            $abc = $opt;
-            $str3 = '<ul id="material-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
-            $units = $str3;
-            return ($units);
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'M.R. Get Unit List',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            $status = 500;
-            $units = null;
-        }
-        return response()->json($units,$status);
-    }
-    public function getAssetUnitsList(Request $request){
-        $data = $request->all();
-        $units = Unit::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
-        $opt= '';
-        foreach ($units as $unit) {
-            $opt .= '<li onclick="selectAssetUnit(\''.htmlspecialchars($unit['name'], ENT_QUOTES).'\')">'.$unit['name'].'</li>';
-        }
-        $abc = $opt;
-        $str3 = '<ul id="asset-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
-        $units = $str3;
-        return ($units);
-    }
 
-    public function getProjectsList(Request $request){
-        try{
-            $data = $request->all();
-            $user = Auth::user();
-            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
-                $projects = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                                    ->join('clients','clients.id','=','projects.client_id')
-                                    ->where('project_sites.name','ilike','%'.$data['keyword'].'%')
-                                    ->where('clients.company','ilike','%'.$data['client_name'].'%')
-                                    ->select('project_sites.name as name','project_sites.id as id')
-                                    ->get()
-                                    ->toarray();
-            }else{
-                $projects = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                    ->join('clients','clients.id','=','projects.client_id')
-                    ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','user_project_sites.id')
-                    ->where('project_sites.name','ilike','%'.$data['keyword'].'%')
-                    ->where('clients.company','ilike','%'.$data['client_name'].'%')
-                    ->where('user_project_site_relation.user_id',$user->id)
-                    ->select('project_sites.name as name','project_sites.id as id')
-                    ->get()
-                    ->toarray();
-            }
-            $opt= '';
-            foreach ($projects as $project) {
-                $opt .= '<li onclick="selectProject(\''.htmlspecialchars($project['name'], ENT_QUOTES).'\','.$project['id'].')">'.$project['name'].'</li>';
-            }
-            $abc = $opt;
-            $str3 = '<ul id="asset-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
-            $projects = $str3;
-            $status = 200;
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Get Project List',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            $status = 500;
-            $projects = '';
-        }
-        return response()->json($projects,$status);
-
-    }
     public function getUsersList(Request $request){
         try{
             $data = $request->all();
-            $projectSite = ProjectSite::where('name','ilike',$data['project_site_name'])->pluck('id')->first();
-            $adminUsers = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
-                                ->join('roles','roles.id','=','user_has_roles.role_id')
-                                ->whereIn('roles.slug',['admin','superadmin'])
-                                ->where(function($query) use($data){
-                                    $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
-                                    $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
-                                })
-                                ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
-                                ->get()->toArray();
-            $users = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
-                        ->join('roles','roles.id','=','user_has_roles.role_id')
-                        ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
-                        ->whereNotIn('roles.slug',['admin','superadmin'])
-                        ->where(function($query) use($data){
-                            $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
-                            $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
-                        })
-                        ->where('user_project_site_relation.project_site_id',$projectSite)
-                        ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
-                        ->get()->toArray();
-            $users = array_merge($adminUsers,$users);
+            $projectSiteId = $request->project_site_id;
+            if($request->module == 'material-request'){
+                $users = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                    ->join('roles','roles.id','=','user_has_roles.role_id')
+                    ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
+                    ->join('user_has_permissions','user_has_permissions.user_id','=','users.id')
+                    ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                    ->whereNotIn('roles.slug',['admin','superadmin'])
+                    ->where(function($query) use($data){
+                        $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
+                        $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
+                    })
+                    ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                    ->whereIn('permissions.name',['create-material-request','approve-material-request'])
+                    ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
+                    ->distinct('id')
+                    ->get()->toArray();
+            }elseif ($request->module == 'purchase-request'){
+                $users = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                    ->join('roles','roles.id','=','user_has_roles.role_id')
+                    ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
+                    ->join('user_has_permissions','user_has_permissions.user_id','=','users.id')
+                    ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                    ->whereNotIn('roles.slug',['admin','superadmin'])
+                    ->where(function($query) use($data){
+                        $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
+                        $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
+                    })
+                    ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                    ->whereIn('permissions.name',['create-purchase-request','approve-purchase-request'])
+                    ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
+                    ->distinct('id')
+                    ->get()->toArray();
+            }else{
+                $users = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                    ->join('roles','roles.id','=','user_has_roles.role_id')
+                    ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
+                    ->whereNotIn('roles.slug',['admin','superadmin'])
+                    ->where(function($query) use($data){
+                        $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
+                        $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
+                    })
+                    ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                    ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
+                    ->distinct('id')
+                    ->get()->toArray();
+            }
             $opt= '';
             foreach ($users as $user) {
-                $opt .= '<li onclick="selectUser(\''.htmlspecialchars($user['first_name'], ENT_QUOTES).'\','.$user['id'].')">'.$user['first_name'].' '.$user['last_name'].'</li>';
+                $opt .= '<li onclick="selectUser(\''.htmlspecialchars($user['first_name'].' '.$user['last_name'], ENT_QUOTES).'\','.$user['id'].')">'.$user['first_name'].' '.$user['last_name'].'</li>';
             }
             $abc = $opt;
             $str3 = '<ul id="asset-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
@@ -622,7 +567,6 @@ class PurchaseController extends Controller
             abort(500);
         }
     }
-
     public function getMaterialRequestWiseListing(Request $request){
         try{
             $postdata = null;
@@ -760,7 +704,6 @@ class PurchaseController extends Controller
         $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
         return view ('purchase/material-request/material-request-listing')->with(compact('clients'));
     }
-
     public function changeMaterialRequestComponentStatus(Request $request,$newStatus,$componentId = null){
         try{
             $user = Auth::user();
@@ -884,7 +827,6 @@ class PurchaseController extends Controller
             Log::critical(json_encode($data));
         }
     }
-
     public function getMaterialRequestComponentDetail(Request $request,$materialRequestComponent)
     {
         try {
@@ -939,60 +881,5 @@ class PurchaseController extends Controller
             $response = null;
         }
         return response()->json($response, $status);
-    }
-
-    public function getProjects(Request $request, $client){
-        try{
-            $status = 200;
-            if ($client == 0) {
-                $projectOptions[] = '<option value="0">ALL</option>';
-            } else {
-                $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
-                $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
-                $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
-                $projects = Project::where('client_id',$client)->whereIn('id',$projectIds)->get()->toArray();
-                $projectOptions = array();
-                for($i = 0 ; $i < count($projects); $i++){
-                    $projectOptions[] = '<option value="'.$projects[$i]['id'].'"> '.$projects[$i]['name'].' </option>';
-                }
-            }
-        }catch (\Exception $e){
-            $projectOptions = array();
-            $status = 500;
-            $data = [
-                'actions' => 'Get Project from client',
-                'params' => $request->all(),
-                'exception' => $e->getMessage(),
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-        return response()->json($projectOptions,$status);
-    }
-
-    public function getProjectSites(Request $request,$project){
-        try{
-            $status = 200;
-            if ($project == 0) {
-                $projectSitesOptions[] = '<option value="0">ALL</option>';
-            } else {
-                $projectSites = ProjectSite::where('project_id', $project)->get()->toArray();
-                $projectSitesOptions = array();
-                for($i = 0 ; $i < count($projectSites); $i++){
-                    $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';
-                }
-            }
-        }catch (\Exception $e){
-            $projectSitesOptions = array();
-            $status = 500;
-            $data = [
-                'actions' => 'Get Project Site',
-                'params' => $request->all(),
-                'exception' => $e->getMessage(),
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-        return response()->json($projectSitesOptions,$status);
     }
 }
