@@ -11,6 +11,7 @@ use App\Employee;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\Material;
 use App\MaterialRequestComponentTypes;
@@ -1214,6 +1215,7 @@ class PeticashController extends Controller
             $transferData['source_name'] = $purchaseTxnData['source_name'];
             $transferData['grn'] = $purchaseTxnData['grn'];
             $transferData['user_id'] = $user['id'];
+            $transferData['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
             $createdTransferId = $this->createInventoryTransferComponent($transferData, $name, $type);
             $transferData['images'] = array();
             $purchaseOrderBillImages = PurchasePeticashTransactionImage::where('purchase_peticash_transaction_id',$request->txn_id)->get();
