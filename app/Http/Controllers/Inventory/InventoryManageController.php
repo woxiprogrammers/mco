@@ -467,7 +467,8 @@ class InventoryManageController extends Controller
             $data['inventory_component_id'] = $inventoryComponent->id;
             $data['date'] = Carbon::now();
             if($request->has('project_site_id') && $request->transfer_type =='site'){
-                $data['source_name'] = ProjectSite::where('id',$request['project_site_id'])->pluck('name')->first();
+                $projectSite = ProjectSite::where('id',$request['project_site_id'])->first();
+                $data['source_name'] = $projectSite->project->name.'-'.$projectSite->name;
                 if($request->has('in_or_out')){
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                 }else{

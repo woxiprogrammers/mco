@@ -9,6 +9,7 @@ use App\CategoryMaterialRelation;
 use App\Client;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
+use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
@@ -550,6 +551,7 @@ class PurchaseOrderController extends Controller
                 ];
                 $inventoryComponentTransferData = array_merge($inventoryComponentTransferData,$request->except('type','component_data','material','unit_name','vendor_name','purchase_order_component_id'));
                 $inventoryComponentTransferData['source_name'] = $request->vendor_name;
+                $inventoryComponentTransferData['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                 $this->createInventoryComponentTransfer($inventoryComponentTransferData);
             }
             $request->session()->flash('success','Transaction added successfully');
