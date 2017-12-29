@@ -56,13 +56,13 @@
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <input type="text" class="form-control" value="Client Name" id="client"readonly>
+                                                                <input type="text" class="form-control" id="client"readonly value="{{$globalProjectSite->project->client->company}}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="form-group">
                                                                 <div class="form-group">
-                                                                    <input type="text" class="form-control" value="Project-Project Site" id="project" readonly>
+                                                                    <input type="text" class="form-control" value="{{$globalProjectSite->project->name}} - {{$globalProjectSite->name}}" id="project" readonly>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -90,9 +90,10 @@
                                                                         <th style="width: 12%"> Vendor </th>
                                                                         <th style="width: 10%"> Rate </th>
                                                                         <th style="width: 10%"> HSN code </th>
+                                                                        <th style="width: 10%"> Tax </th>
                                                                         <th style="width: 18%"> Expected Delivery Date </th>
-                                                                        <th style="width: 18%;"> Vendor quotation images </th>
-                                                                        <th style="width: 18%;"> Client Approval images </th>
+                                                                        <th style="width: 22%;"> Vendor quotation images </th>
+                                                                        <th style="width: 22%;"> Client Approval images </th>
                                                                         <th style="width: 10%;"> Status </th>
                                                                     </tr>
                                                                 </thead>
@@ -203,6 +204,26 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="modal fade" id="taxModal" role="dialog">
+                            <div class="modal-dialog">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header" style="padding-bottom:10px">
+                                        <div class="row">
+                                            <div class="col-md-4"></div>
+                                            <div class="col-md-4">Add Taxes</div>
+                                            <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                        </div>
+                                    </div>
+                                    <form id="addTaxForm">
+                                        <div class="modal-body" >
+
+
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -219,107 +240,131 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script>
-             function getDetails(purchaseRequestId){
-
-                 var data = '<input type="hidden" name="purchase_request_id" value="'+purchaseRequestId+'">';
-                 $('#purchaseRequestID').html(data);
-                 $.ajax({
-                     url: '/purchase/purchase-order/get-purchase-order-details/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
-                     type: 'GET',
-                     async: true,
-                     success: function (data, textStatus, xhr) {
-                         if (xhr.status == 203) {
-                             alert(data.message);
-                         } else {
-                             console.log(data);
-                             $('#mymodal4').modal();
-                             $("#detailsId").html(data);
-                         }
-
-                     },
-                     error: function (errorData) {
-                         alert('Something went wrong');
-                     }
-                 });
-             };
-             function getData (purchaseRequestId,po_id_div) {
-                 $('#po_id_div').html(po_id_div);
-                if (typeof purchaseRequestId == 'undefined' || purchaseRequestId == '') {
-                    $('#client').val('');
-                    $('#project').val('');
-                    $('#purchaseRequest').hide();
-                } else {
-                    $.ajax({
-                        url: '/purchase/purchase-order/get-client-project/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
-                        type: 'GET',
-                        success: function (data, textStatus, xhr) {
-                            $('#client').val(data.client);
-                            $('#project').val(data.project);
-                        },
-                        error: function (errorData) {
-                        }
-                    });
-                    $.ajax({
-                        url: '/purchase/purchase-order/get-purchase-request-component/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
-                        type: 'GET',
-                        async: true,
-                        success: function (data, textStatus, xhr) {
-                            if (xhr.status == 203) {
-                                alert(data.message);
-                            } else {
-                                $("#purchaseRequest tbody").html(data);
-                                $('#purchaseRequest').show();
-                            }
-
-                        },
-                        error: function (errorData) {
-                            alert('Something went wrong');
-                        }
-                    });
-                }
-            };
-
-    </script>
-    <script>
-        $("#materialCreateSubmit").on('click',function(e) {
-            e.stopPropagation();
-            var purchaseRequestComponentId = $("#materialCreateForm #purchaseRequestComponentId").val();
-            var vendorId = $("#materialCreateForm #vendor_id").val();
-            var url = "/purchase/purchase-order/create-material"; // the script where you handle the form input.
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: $("#materialCreateForm").serialize(), // serializes the form's elements.
-                success: function(data)
-                {
-                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:selected").val();
-                    $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:not([value='"+selectedFlag+"'])").each(function(){
-                       $(this).prop('disabled', true);
-                    });
-                    $('#myModal1').modal('toggle');
-                    alert('New Material Created Successfully');
-                }
+        $(document).ready(function(){
+            $("#materialCreateSubmit").on('click',function(e) {
+                e.stopPropagation();
+                var purchaseRequestComponentId = $("#materialCreateForm #purchaseRequestComponentId").val();
+                var vendorId = $("#materialCreateForm #vendor_id").val();
+                var url = "/purchase/purchase-order/create-material"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: $("#materialCreateForm").serialize(), // serializes the form's elements.
+                    success: function(data)
+                    {
+                        var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:selected").val();
+                        $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:not([value='"+selectedFlag+"'])").each(function(){
+                            $(this).prop('disabled', true);
+                        });
+                        $('#myModal1').modal('toggle');
+                        alert('New Material Created Successfully');
+                    }
+                });
+            });
+            $("#assetCreateSubmit").on('click',function(e) {
+                e.stopPropagation();
+                var purchaseRequestComponentId = $("#assetCreateForm #purchaseRequestComponentId").val();
+                var vendorId = $("#assetCreateForm #asset_vendor_id").val();
+                var url = "/purchase/purchase-order/create-asset"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: $("#assetCreateForm").serialize(), // serializes the form's elements.
+                    success: function(data)
+                    {
+                        var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:selected").val();
+                        $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:not([value='"+selectedFlag+"'])").each(function(){
+                            $(this).prop('disabled', true);
+                        });
+                        $('#myModal2').modal('toggle');
+                        alert('New Asset Created Successfully');
+                    }
+                });
             });
         });
-        $("#assetCreateSubmit").on('click',function(e) {
-            e.stopPropagation();
-            var purchaseRequestComponentId = $("#assetCreateForm #purchaseRequestComponentId").val();
-            var vendorId = $("#assetCreateForm #asset_vendor_id").val();
-            var url = "/purchase/purchase-order/create-asset"; // the script where you handle the form input.
+        function getDetails(purchaseRequestId){
+            var data = '<input type="hidden" name="purchase_request_id" value="'+purchaseRequestId+'">';
+            $('#purchaseRequestID').html(data);
             $.ajax({
-                type: "POST",
-                url: url,
-                data: $("#assetCreateForm").serialize(), // serializes the form's elements.
-                success: function(data)
-                {
-                    var selectedFlag = $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:selected").val();
-                    $("#is_approve_"+purchaseRequestComponentId+"_"+vendorId+" option:not([value='"+selectedFlag+"'])").each(function(){
-                        $(this).prop('disabled', true);
-                    });
-                    $('#myModal2').modal('toggle');
-                    alert('New Asset Created Successfully');
+                url: '/purchase/purchase-order/get-purchase-order-details/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
+                type: 'GET',
+                async: true,
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status == 203) {
+                        alert(data.message);
+                    } else {
+                        $('#mymodal4').modal();
+                        $("#detailsId").html(data);
+                    }
+
+                },
+                error: function (errorData) {
+                    alert('Something went wrong');
                 }
             });
-        });
+        };
+        function getData (purchaseRequestId,po_id_div) {
+            $('#po_id_div').html(po_id_div);
+            if (typeof purchaseRequestId == 'undefined' || purchaseRequestId == '') {
+                $('#client').val('');
+                $('#project').val('');
+                $('#purchaseRequest').hide();
+            } else {
+                $.ajax({
+                    url: '/purchase/purchase-order/get-client-project/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
+                    type: 'GET',
+                    success: function (data, textStatus, xhr) {
+                        $('#client').val(data.client);
+                        $('#project').val(data.project);
+                    },
+                    error: function (errorData) {
+                    }
+                });
+                $.ajax({
+                    url: '/purchase/purchase-order/get-purchase-request-component/' + purchaseRequestId + '?_token=' + $('input[name="_token"]').val(),
+                    type: 'GET',
+                    async: true,
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status == 203) {
+                            alert(data.message);
+                        } else {
+                            $("#purchaseRequest tbody").html(data);
+                            $('#purchaseRequest').show();
+                        }
+
+                    },
+                    error: function (errorData) {
+                        alert('Something went wrong');
+                    }
+                });
+            }
+        };
+        function addTax(element){
+            var purchaseRequestComponentId = $(element).closest('tr').find('.component-id').val();
+            var vendorId = $(element).closest('tr').find('.component-vendor').val();
+            var rate = $(element).closest('tr').find('.component-rate').val()
+            var quantity = $(element).closest('tr').find('.component-quantity').val()
+            $.ajax({
+                url: '/purchase/purchase-order/get-tax-details/'+purchaseRequestComponentId+'?_token='+$("input[name='_token']").val(),
+                type: 'POST',
+                data:{
+                    _token : $('input[name="_token"]').val(),
+                    vendor_id: vendorId,
+                    rate: rate,
+                    quantity: quantity
+                },
+                success: function(data,textStatus, xhr){
+                    $("#taxModal .modal-body").html(data);
+                    $("#taxModal").modal('show');
+                },
+                error: function(errorData){
+
+                }
+            });
+        }
+        function submitTaxForm(){
+            var formData = $("#addTaxForm").serializeArray();
+            console.log(formData);
+        }
     </script>
 @endsection

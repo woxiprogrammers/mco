@@ -50,6 +50,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use App\Unit;
+use Illuminate\Support\Facades\Session;
 
 
 class PurchaseOrderController extends Controller
@@ -70,14 +71,27 @@ class PurchaseOrderController extends Controller
     public function getCreateView(Request $request){
         try{
             $purchaseOrderComponentPRIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
-            $adminApprovePurchaseRequestInfo = PurchaseRequestComponent::join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
-                                                ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
-                                                ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
-                                                ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
-                                                ->whereNotIn('purchase_request_components.id',$purchaseOrderComponentPRIds)
-                                                ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
-                                                ->get()
-                                                ->toArray();
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $adminApprovePurchaseRequestInfo = PurchaseRequestComponent::join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                    ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
+                    ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
+                    ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
+                    ->whereNotIn('purchase_request_components.id',$purchaseOrderComponentPRIds)
+                    ->where('purchase_requests.project_site_id',$projectSiteId)
+                    ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
+                    ->get()
+                    ->toArray();
+            }else{
+                $adminApprovePurchaseRequestInfo = PurchaseRequestComponent::join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                    ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
+                    ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
+                    ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
+                    ->whereNotIn('purchase_request_components.id',$purchaseOrderComponentPRIds)
+                    ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
+                    ->get()
+                    ->toArray();
+            }
             $categories = Category::where('is_miscellaneous',true)->select('id','name')->get()->toArray();
             $purchaseRequests = array();
             foreach($adminApprovePurchaseRequestInfo as $purchaseRequest){
@@ -99,14 +113,11 @@ class PurchaseOrderController extends Controller
     public function getListing(Request $request){
         try{
             $postdata = null;
-            $po_name = "";
             $status = 0;
             $site_id = 0;
             $month = 0;
             $year = 0;
             $po_count = 0;
-            $client_id = 0;
-            $project_id = 0;
             $postDataArray = array();
             if ($request->has('po_name')) {
                 if ($request['po_name'] != "") {
@@ -129,18 +140,17 @@ class PurchaseOrderController extends Controller
                         $postDataArray[$narr[0]] = $ytr[1];
                     }
                 }
-                $client_id = $postDataArray['client_id'];
-                $project_id = $postDataArray['project_id'];
                 $site_id = $postDataArray['site_id'];
                 $month = $postDataArray['month'];
                 $year = $postDataArray['year'];
                 $po_count = $postDataArray['po_count'];
             }
             $purchaseOrderDetail = array();
-
+            if($request->has('site_id')){
+                $site_id = $request->site_id;
+            }
             $ids = PurchaseOrder::all()->pluck('id');
             $filterFlag = true;
-
             if ($site_id != 0 && $filterFlag == true) {
                 $ids = PurchaseOrder::join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                     ->where('purchase_requests.project_site_id',$site_id)->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
@@ -1268,6 +1278,37 @@ class PurchaseOrderController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getComponentTaxData(Request $request,$purchaseRequestComponent){
+        try{
+            $data = [
+                'purchase_request_component_id' => $purchaseRequestComponent->id,
+                'name' => $purchaseRequestComponent->materialRequestComponent->name,
+                'vendor_id' => $request->vendor_id
+            ];
+            if($request->has('rate') && $request->rate != null){
+                $data['rate'] = $request->rate;
+            }else{
+                $data['rate'] = '';
+            }
+            if($request->has('quantity') && $request->quantity != null){
+                $data['quantity'] = $request->quantity;
+            }else{
+                $data['quantity'] = '';
+            }
+            return view('partials.purchase.purchase-order.component-tax-modal')->with(compact('data'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get purchase request component tax data',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = [];
+            return response()->json($response,$status);
         }
     }
 }
