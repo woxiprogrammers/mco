@@ -77,18 +77,25 @@ table {
                 <td style="width: 50%;"><b>Unit</b></td>
                 <td style="text-align: left;">{!! $unit !!}</td>
             </tr>
-            <tr>
-                <td style="width: 50%;"><b>Rate</b></td>
-                <td style="text-align: left;">{!! $rate !!}</td>
-            </tr>
-            <tr>
-                <td style="width: 50%;"><b>Tax</b></td>
-                <td style="text-align: left;">{!! $tax !!}</td>
-            </tr>
-            <tr>
-                <td style="width: 50%;"><b>Total Amount</b></td>
-            <td style="text-align: left;">{!! $total_amount !!}</td>
-            </tr>
+            @if($is_material == true)
+                <tr>
+                    <td style="width: 50%;"><b>Rate</b></td>
+                    <td style="text-align: left;">{!! $rate !!}</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;"><b>Tax</b></td>
+                    <td style="text-align: left;">{!! $tax !!}</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;"><b>Total Amount</b></td>
+                <td style="text-align: left;">{!! $total_amount !!}</td>
+                </tr>
+            @else
+                <tr>
+                    <td style="width: 50%;"><b>Rent Per Day</b></td>
+                    <td style="text-align: left;">{!! $rent !!}</td>
+                </tr>
+            @endif
         </table>
 </body>
 </html>

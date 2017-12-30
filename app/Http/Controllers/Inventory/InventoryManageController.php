@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Inventory;
 
+use App\Asset;
 use App\Client;
 use App\FuelAssetReading;
 use App\Helper\UnitHelper;
@@ -253,10 +254,10 @@ class InventoryManageController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryData); $iterator++,$pagination++ ){
-                $materialUnit = Material::where('id',$inventoryData[$iterator]['reference_id'])->pluck('unit_id')->first();
-                $unitName = Unit::where('id',$materialUnit)->pluck('name')->first();
                 $projectName = $inventoryData[$pagination]->projectSite->project->name.' - '.$inventoryData[$pagination]->projectSite->name.' ('.$inventoryData[$pagination]->projectSite->project->client->company.')';
                 if($inventoryData[$pagination]->is_material == true){
+                    $materialUnit = Material::where('id',$inventoryData[$iterator]['reference_id'])->pluck('unit_id')->first();
+                    $unitName = Unit::where('id',$materialUnit)->pluck('name')->first();
                     $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
@@ -283,6 +284,7 @@ class InventoryManageController extends Controller
                         }
                     }
                 }else{
+                    $unitName = Unit::where('slug','nos')->pluck('name')->first();
                     $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
@@ -472,6 +474,7 @@ class InventoryManageController extends Controller
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                 }else{
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
+                    $data['bill_amount'] = $request['rent'];
                 }
             }else{
                 $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
@@ -710,9 +713,15 @@ class InventoryManageController extends Controller
             $data['component_name'] = $inventoryComponent['name'];
             $data['quantity'] = $inventoryComponentTransfer['quantity'];
             $data['unit'] = $inventoryComponentTransfer->unit->name;
-            $data['rate'] = 30;
-            $data['tax'] = 4;
-            $data['total_amount'] = 34;
+            $data['is_material'] = $inventoryComponentTransfer->inventoryComponent->is_material;
+
+            if($data['is_material'] == true){
+                $data['rate'] = null;
+                $data['tax'] = null;
+                $data['total_amount'] = null;
+            }else{
+                $data['rent'] = $inventoryComponentTransfer->bill_amount;
+            }
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('inventory.transfer.request-pdf',$data));
             return $pdf->stream();
