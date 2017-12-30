@@ -362,9 +362,46 @@
                 }
             });
         }
-        function submitTaxForm(){
+        function submitTaxForm(purchaseRequestComponentId){
+            var row = $(".row-component-"+purchaseRequestComponentId);
             var formData = $("#addTaxForm").serializeArray();
-            console.log(formData);
+            $.each(formData, function(key, value){
+                var inputData = '<input type="hidden" name="'+value.name+'" class="" value="'+value.value+'">'
+                row.append(inputData);
+            });
+        }
+
+        function calculateTaxes(element){
+            console.log(element);
+            var rate = parseFloat($(element).closest('.modal-body').find('.tax-modal-rate').val());
+            if(typeof rate == 'undefined' || rate == '' || isNaN(rate)){
+                rate = 0;
+            }
+            var quantity = parseFloat($(element).closest('.modal-body').find('.tax-modal-quantity').val());
+            if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
+                quantity = 0;
+            }
+            var subtotal = rate * quantity;
+            var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-cgst-percentage').val());
+            if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
+                cgstPercentage = 0;
+            }
+            var sgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-sgst-percentage').val());
+            if(typeof sgstPercentage == 'undefined' || sgstPercentage == '' || isNaN(sgstPercentage)){
+                sgstPercentage = 0;
+            }
+            var igstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-igst-percentage').val());
+            if(typeof igstPercentage == 'undefined' || igstPercentage == '' || isNaN(igstPercentage)){
+                igstPercentage = 0;
+            }
+            var cgstAmount = subtotal * (cgstPercentage / 100);
+            var sgstAmount = subtotal * (sgstPercentage / 100);
+            var igstAmount = subtotal * (igstPercentage / 100);
+            $(element).closest('.modal-body').find('.tax-modal-cgst-amount').val(cgstAmount);
+            $(element).closest('.modal-body').find('.tax-modal-sgst-amount').val(sgstAmount);
+            $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
+            var total = subtotal + cgstAmount + sgstAmount + igstAmount;
+            $(element).closest('.modal-body').find('.tax-modal-total').val(total);
         }
     </script>
 @endsection

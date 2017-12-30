@@ -1,5 +1,5 @@
 @foreach($purchaseRequestComponents as $purchaseRequestComponent)
-    <tr id="{{$purchaseRequestComponent['material_request_component_slug']}}">
+    <tr id="{{$purchaseRequestComponent['material_request_component_slug']}}" class="row-component-{{$purchaseRequestComponent['purchase_request_component_id']}}">
         <td style="text-align: center">
             <select class="form-control component-category">
                 @foreach($purchaseRequestComponent['categories'] as $category)
