@@ -40,12 +40,14 @@
                                                                 <th> Material Name </th>
                                                                 <th> Quantity</th>
                                                                 <th> Unit </th>
+                                                                <th> Status </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th> <input type="text" class="form-control form-filter" name="search_project" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_name" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                                 <th>
