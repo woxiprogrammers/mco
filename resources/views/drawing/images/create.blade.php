@@ -120,7 +120,7 @@
     <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/admin/drawing/image/image-datatable2.js"></script>
-    <script src="/assets/custom/admin/drawing/image/image-upload1.js"></script>
-    <script src="/assets/custom/Drawing/drawing1.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/drawing/image/image-datatable.js"></script>
+    <script src="/assets/custom/admin/drawing/image/image-upload.js"></script>
+    <script src="/assets/custom/Drawing/drawing.js" type="application/javascript"></script>
 @endsection
