@@ -50,42 +50,6 @@
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Client Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="clientId" required>
-                                                                <option value="">Select Client name from here </option>
-                                                                @foreach($clients as $client)
-                                                                <option value="{{$client['id']}}">{{$client['company']}} </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Project Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="projectId" required>
-                                                                <option value="">Select Project Name from here</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Site Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="projectSiteId" name="site_id" required>
-                                                                <option value="">Select Site Name from here</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
                                                             <label for="name" class="control-label">Main Category</label>
                                                             <span>*</span>
                                                         </div>
@@ -156,7 +120,7 @@
     <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/admin/drawing/image/image-datatable.js"></script>
-    <script src="/assets/custom/admin/drawing/image/image-upload.js"></script>
-    <script src="/assets/custom/Drawing/drawing.js" type="application/javascript"></script>
+    <script src="/assets/custom/admin/drawing/image/image-datatable2.js"></script>
+    <script src="/assets/custom/admin/drawing/image/image-upload1.js"></script>
+    <script src="/assets/custom/Drawing/drawing1.js" type="application/javascript"></script>
 @endsection
