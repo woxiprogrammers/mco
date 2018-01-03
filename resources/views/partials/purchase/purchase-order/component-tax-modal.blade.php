@@ -44,7 +44,7 @@
     </div>
     <div class="col-md-5">
         <div class="input-group" >
-            <input type="text" class="form-control tax-modal-cgst-percentage" name="purchase[{{$data['vendor_id']}}][{{$data['purchase_request_component_id']}}][cgst_percentage]" onkeyup="calculateTaxes(this)">
+            <input type="text" class="form-control tax-modal-cgst-percentage" name="purchase[{{$data['vendor_id']}}][{{$data['purchase_request_component_id']}}][cgst_percentage]" onkeyup="calculateTaxes(this)" value="{{$data['cgst_percentage']}}">
             <span class="input-group-addon">%</span>
         </div>
     </div>
@@ -58,7 +58,7 @@
     </div>
     <div class="col-md-5">
         <div class="input-group" >
-            <input type="text" class="form-control tax-modal-sgst-percentage" name="purchase[{{$data['vendor_id']}}][{{$data['purchase_request_component_id']}}][sgst_percentage]" onkeyup="calculateTaxes(this)">
+            <input type="text" class="form-control tax-modal-sgst-percentage" name="purchase[{{$data['vendor_id']}}][{{$data['purchase_request_component_id']}}][sgst_percentage]" onkeyup="calculateTaxes(this)" value="{{$data['sgst_percentage']}}">
             <span class="input-group-addon">%</span>
         </div>
     </div>
@@ -72,7 +72,7 @@
     </div>
     <div class="col-md-5">
         <div class="input-group" >
-            <input type="text" class="form-control tax-modal-igst-percentage" name="purchase[{{$data['vendor_id']}}][{{$data['purchase_request_component_id']}}][igst_percentage]" onkeyup="calculateTaxes(this)">
+            <input type="text" class="form-control tax-modal-igst-percentage" name="purchase[{{$data['vendor_id']}}][{{$data['purchase_request_component_id']}}][igst_percentage]" onkeyup="calculateTaxes(this)" value="{{$data['igst_percentage']}}">
             <span class="input-group-addon">%</span>
         </div>
     </div>
@@ -93,3 +93,12 @@
         <a href="javascript:void(0)" class="btn red pull-right" onclick="submitTaxForm({{$data['purchase_request_component_id']}})">Submit</a>
     </div>
 </div>
+
+
+<script>
+    $(document).ready(function(){
+        $(".tax-modal-quantity").each(function(){
+           calculateTaxes(this);
+        });
+    });
+</script>

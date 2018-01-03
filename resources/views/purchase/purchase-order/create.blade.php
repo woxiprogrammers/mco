@@ -29,6 +29,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="page-content">
                                 @include('partials.common.messages')
                                 <div class="container">
@@ -343,7 +344,10 @@
             var purchaseRequestComponentId = $(element).closest('tr').find('.component-id').val();
             var vendorId = $(element).closest('tr').find('.component-vendor').val();
             var rate = $(element).closest('tr').find('.component-rate').val()
-            var quantity = $(element).closest('tr').find('.component-quantity').val()
+            var quantity = $(element).closest('tr').find('.component-quantity').val();
+            var cgstPercentage = $(element).closest('tr').find('.tax-modal-cgst-percentage').val();
+            var sgstPercentage = $(element).closest('tr').find('.tax-modal-sgst-percentage').val();
+            var igstPercentage = $(element).closest('tr').find('.tax-modal-igst-percentage').val();
             $.ajax({
                 url: '/purchase/purchase-order/get-tax-details/'+purchaseRequestComponentId+'?_token='+$("input[name='_token']").val(),
                 type: 'POST',
@@ -351,7 +355,10 @@
                     _token : $('input[name="_token"]').val(),
                     vendor_id: vendorId,
                     rate: rate,
-                    quantity: quantity
+                    quantity: quantity,
+                    cgst_percentage : cgstPercentage,
+                    sgst_percentage : sgstPercentage,
+                    igst_percentage : igstPercentage,
                 },
                 success: function(data,textStatus, xhr){
                     $("#taxModal .modal-body").html(data);
@@ -365,10 +372,16 @@
         function submitTaxForm(purchaseRequestComponentId){
             var row = $(".row-component-"+purchaseRequestComponentId);
             var formData = $("#addTaxForm").serializeArray();
+            var rate = $("#addTaxForm .tax-modal-rate").val();
+            var quantity = $("#addTaxForm .tax-modal-quantity").val();
+            row.find('.component-rate').val(rate);
+            row.find('.component-quantity').val(quantity);
             $.each(formData, function(key, value){
-                var inputData = '<input type="hidden" name="'+value.name+'" class="" value="'+value.value+'">'
+                var className = $("input[name='"+ value.name +"']").attr('class');
+                var inputData = '<input type="hidden" name="'+value.name+'" class="'+className+'" value="'+value.value+'">'
                 row.append(inputData);
             });
+            $("#taxModal").modal('toggle');
         }
 
         function calculateTaxes(element){
