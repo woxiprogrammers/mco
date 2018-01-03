@@ -282,6 +282,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('reopen',array('uses'=> 'Purchase\PurchaseOrderController@reopenPurchaseOrder'));
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
             Route::get('get-purchase-order-details/{purchaseRequestId}',array('uses'=> 'Purchase\PurchaseOrderController@getOrderDetails'));
+            Route::post('get-tax-details/{purchaseRequestComponent}',array('uses' => 'Purchase\PurchaseOrderController@getComponentTaxData'));
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
                 Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));

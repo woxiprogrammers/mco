@@ -23,6 +23,7 @@ use App\ProjectSiteChecklist;
 use App\PurchaseOrder;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderTransaction;
+use App\PurchaseRequestComponent;
 use App\Quotation;
 use App\QuotationWorkOrder;
 use App\Role;
@@ -92,6 +93,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('purchaseOrderTransaction',PurchaseOrderTransaction::class);
         Route::model('projectSiteChecklist',ProjectSiteChecklist::class);
         Route::model('subcontractor_struct',SubcontractorStructure::class);
+        Route::model('purchaseRequestComponent',PurchaseRequestComponent::class);
 
     }
 

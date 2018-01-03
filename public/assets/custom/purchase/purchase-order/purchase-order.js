@@ -1,6 +1,6 @@
 
 $(document).ready(function(){
-    $(".image").click(function(){
+    $(".component-view").click(function(){
         var component_id = $(this).val();
         $.ajax({
             type: "POST",
@@ -10,24 +10,11 @@ $(document).ready(function(){
                 $.LoadingOverlay("hide");
             },
             success: function(data){
-               $('#material_name').val(data.name);
-               $('#qty').val(data.quantity);
-               $('#unit').val(data.unit_name);
-               $('#hsn_code').val(data.hsn_code);
-               $('#rate').val(data.rate_per_unit);
-               var abc = [];
-               var img = [];
-               $.each(data.material_component_images ,function(key,value){
-                 abc += '<a href="\'+value.name+\'"><img src="'+ value.name + '" style="height: 170px"></a>';
-                });
-                $('#imagecorousel').html(abc);
-                $.each(data.client_approval_images ,function(key,value){
-                    img += '<a href="'+value.name+'"> <img id="image" src="'+ value.name + '" style="text-align:left;height: 170px"></a>';
-                });
-                $('#imagecorouselForClientApproval').html(img);
+                $("#ImageUpload .modal-body form").html(data);
+                $("#ImageUpload").modal();
             }
         });
-        $("#ImageUpload").modal();
+
     });
     $(".transaction").click(function(){
         var component_id = $(this).val();
