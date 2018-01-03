@@ -550,10 +550,13 @@
 
             $(".transaction-edit-btn").on('click', function(){
                var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
-               console.log(transactionId);
                $.ajax({
-                    url:'/purchase/purchase-order/transaction/edit/'+transactionId+'?_token='+$('input[name="_token"]').val(),
-                    type: 'GET',
+                    url:'/purchase/purchase-order/transaction/edit/'+transactionId,
+                    type: 'POST',
+                    data:{
+                        _token: $('input[name="_token"]').val(),
+                        isShowTax: false
+                    },
                     success: function(data,textStatus,xhr){
                         $("#editTransactionModal .modal-body").html(data);
                         $("#editTransactionModal").modal('show');

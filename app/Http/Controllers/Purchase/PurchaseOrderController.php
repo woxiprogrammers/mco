@@ -1204,6 +1204,10 @@ class PurchaseOrderController extends Controller
             }else{
                 $canEdit = false;
             }
+            $isShowTaxes = $request->isShowTaxes;
+            if($isShowTaxes == true){
+                $canEdit = false;
+            }
             foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
                 $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
                 $materialRequestComponent = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent;
@@ -1224,8 +1228,10 @@ class PurchaseOrderController extends Controller
                     }else{
                         $materialList[$iterator]['quantityIsFixed'] = false;
                     }
+                    $materialList[$iterator]['rate_per_unit'] = $purchaseOrderComponent->rate_per_unit;
                 }else{
                     $materialList[$iterator]['quantityIsFixed'] = false;
+                    $materialList[$iterator]['rate_per_unit'] = UnitHelper::unitConversion($purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderComponent->rate_per_unit);
                     $newMaterialTypeId = MaterialRequestComponentTypes::where('slug', 'new-material')->pluck('id')->first();
                     if ($newMaterialTypeId == $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id) {
                         $materialList[$iterator]['units'] = Unit::where('is_active', true)->select('id', 'name')->orderBy('name')->get()->toArray();
@@ -1248,6 +1254,15 @@ class PurchaseOrderController extends Controller
                             'name' => $material->unit->name,
                         ];
                     }
+                }
+                if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
+                    $materialList[$iterator]['cgst_percentage'] = $purchaseOrderComponent->cgst_percent;
+                }
+                if($purchaseOrderComponent->sgst_percentage != null || $purchaseOrderComponent->sgst_percentage != ''){
+                    $materialList[$iterator]['sgst_percentage'] = $purchaseOrderComponent->sgst_percent;
+                }
+                if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
+                    $materialList[$iterator]['igst_percentage'] = $purchaseOrderComponent->igst_percent;
                 }
                 $iterator++;
             }
@@ -1272,7 +1287,8 @@ class PurchaseOrderController extends Controller
                 $preGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$preGrnImages[$iterator]->name;
                 $iterator++;
             }
-            return view('partials.purchase.purchase-order.edit-transaction')->with(compact('purchaseOrderTransaction','preGrnImagePaths','postGrnImagePaths','materialList','vendorName','quantityIsFixed','canEdit'));
+
+            return view('partials.purchase.purchase-order.edit-transaction')->with(compact('purchaseOrderTransaction','preGrnImagePaths','postGrnImagePaths','materialList','vendorName','quantityIsFixed','canEdit','isShowTaxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Order Transaction Edit View',

@@ -16,8 +16,10 @@ use App\PurchaseOrderTransaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class PurchaseOrderBillingController extends Controller
 {
@@ -63,41 +65,31 @@ class PurchaseOrderBillingController extends Controller
         }
     }
 
-    public function getProjectSites(Request $request){
-        try{
-            $projectSites = ProjectSite::where('project_id',$request->project_id)->select('id','name')->get();
-            $response = array();
-            foreach($projectSites as $projectSite){
-                $response[] = '<option value="'.$projectSite['id'].'">'.$projectSite['name'].'</option>';
-            }
-            $status = 200;
-        }catch (\Exception $e){
-            $data = [
-                'action' => 'Get PO billing Project Sites',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::cirtical(json_encode($data));
-            $response = array();
-            $status = 500;
-        }
-        return response()->json($response,$status);
-    }
-
     public function getPurchaseOrders(Request $request){
         try{
-            $purchaseOrders = PurchaseOrder::join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                                        ->join('purchase_order_transactions','purchase_order_transactions.purchase_order_id','=','purchase_orders.id')
-                                        ->join('purchase_order_transaction_statuses','purchase_order_transaction_statuses.id','=','purchase_order_transactions.purchase_order_transaction_status_id')
-                                        ->where('purchase_order_transaction_statuses.slug','bill-pending')
-                                        ->where('purchase_requests.project_site_id',$request->project_site_id)
-                                        ->select('purchase_orders.id as id','purchase_orders.format_id as format_id')
-                                        ->distinct('format_id')
-                                        ->get();
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $purchaseOrders = PurchaseOrder::join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->join('purchase_order_transactions','purchase_order_transactions.purchase_order_id','=','purchase_orders.id')
+                    ->join('purchase_order_transaction_statuses','purchase_order_transaction_statuses.id','=','purchase_order_transactions.purchase_order_transaction_status_id')
+                    ->where('purchase_order_transaction_statuses.slug','bill-pending')
+                    ->where('purchase_requests.project_site_id',$projectSiteId)
+                    ->where('purchase_orders.format_id','ilike','%'.$request->keyword.'%')
+                    ->select('purchase_orders.id as id','purchase_orders.format_id as format_id','purchase_order_transactions.id as purchase_order_transaction_id','purchase_order_transactions.grn as grn')
+                    ->distinct('format_id')
+                    ->get();
+            }else{
+                $purchaseOrders = [];
+            }
+
             $response = array();
             $status = 200;
+            $iterator = 0;
             foreach ($purchaseOrders as $purchaseOrder){
-                $response[] = '<option value="'.$purchaseOrder['id'].'">'.$purchaseOrder['format_id'].'</option>';
+                $response[$iterator]['format'] = $purchaseOrder['format_id'];
+                $response[$iterator]['id'] = $purchaseOrder['id'];
+                $response[$iterator]['grn'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrder['purchase_order_transaction_id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrder['grn'].' </label> <a href="javascript:void(0);" onclick="viewTransactionDetails('.$purchaseOrder['purchase_order_transaction_id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
+                $iterator++;
             }
         }catch (\Exception $e){
             $data = [
@@ -119,19 +111,21 @@ class PurchaseOrderBillingController extends Controller
             $status = 200;
             $response = array();
             $billPendingTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_statuses','purchase_order_transactions.purchase_order_transaction_status_id','=','purchase_order_transaction_statuses.id')
-                                                ->join('purchase_order_bill_transaction_relation','purchase_order_bill_transaction_relation.purchase_order_transaction_id','!=','purchase_order_transactions.id')
                                                 ->where('purchase_order_transaction_statuses.slug','bill-pending')
-                                                ->where('purchase_order_transactions.purchase_order_id',$request->purchase_order_id)
+                                                ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
                                                 ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn')
                                                 ->get();
             if(count($billPendingTransactions) > 0){
+                $iterator = 0;
                 foreach($billPendingTransactions as $purchaseOrderTransaction){
-                    $response[] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrderTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrderTransaction['grn'].' </label></li>';
+                    $response[$iterator]['list'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrderTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrderTransaction['grn'].' </label><a href="javascript:void(0);" onclick="viewTransactionDetails('.$purchaseOrderTransaction['id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
+                    $response[$iterator]['id'] = $purchaseOrderTransaction['id'];
+                    $response[$iterator]['grn'] = $purchaseOrderTransaction['grn'];
+                    $iterator++;
                 }
             }else{
                 $status = 204;
             }
-
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get PO billing pending bill transactions',
@@ -231,21 +225,40 @@ class PurchaseOrderBillingController extends Controller
             $status = 200;
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
-            $purchaseOrderBillData = PurchaseOrderBill::orderBy('created_at','desc')->get();
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                                ->where('purchase_requests.project_site_id', $projectSiteId)
+                                                ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as bill_number','purchase_order_bills.amount as amount','purchase_orders.format_id as format_id')
+                                                ->orderBy('id','desc')
+                                                ->get();
+            }else{
+                $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                                ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as bill_number','purchase_order_bills.amount as amount','purchase_orders.format_id as format_id')
+                                                ->orderBy('id','desc')
+                                                ->get();
+            }
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
             if($request->length == -1){
                 $length = $records["recordsTotal"];
             }else{
                 $length = $request->length;
             }
+            $user = Auth::user();
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill') || $user->customHasPermission('edit-purchase-bill')){
+                    $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                        <a href="/purchase/purchase-order-bill/edit/'.$purchaseOrderBillData[$pagination]['id'].'" style="color: white"> Edit
+                    </div>';
+                }else{
+                    $editButton = '';
+                }
                 $records['data'][] = [
                     $purchaseOrderBillData[$pagination]['bill_number'],
-                    $purchaseOrderBillData[$pagination]->purchaseOrder->format_id,
+                    $purchaseOrderBillData[$pagination]['format_id'],
                     $purchaseOrderBillData[$pagination]['amount'],
-                    '<div id="sample_editable_1_new" class="btn btn-small blue" >
-                        <a href="/purchase/purchase-order-bill/edit/'.$purchaseOrderBillData[$pagination]['id'].'" style="color: white"> Edit
-                    </div>'
+                    $editButton
                 ];
             }
         }catch (\Exception $e){
