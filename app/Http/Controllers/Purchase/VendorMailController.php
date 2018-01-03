@@ -44,9 +44,22 @@ class VendorMailController extends Controller
                 'recordsFiltered' => $iTotalRecords
             ];
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($vendorMailData); $iterator++,$pagination++ ){
+                switch($vendorMailData[$pagination]['type_slug']){
+                    case 'for-quotation':
+                        $slug = 'For Quotation';
+                        break;
+
+                    case 'for-purchase-order':
+                        $slug = 'For Purchase Order';
+                        break;
+
+                    default:
+                        $slug = '';
+                }
                 $records['data'][] = [
                     ($iterator+1),
-                    $vendorMailData[$pagination]->componentVendorRelation->vendor->name
+                    $vendorMailData[$pagination]->componentVendorRelation->vendor->name,
+                    $slug
                 ];
             }
         }catch (\Exception $e){
