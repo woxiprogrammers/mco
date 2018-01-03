@@ -32,6 +32,7 @@ use App\PurchaseOrderTransactionComponent;
 use App\PurchaseOrderTransactionImage;
 use App\PurchaseOrderTransactionStatus;
 use App\PurchaseRequest;
+use App\PurchaseRequestComponentVendorMailInfo;
 use App\Quotation;
 use App\QuotationStatus;
 use App\UnitConversion;
@@ -854,6 +855,13 @@ class PurchaseOrderController extends Controller
                         $message->from(env('MAIL_USERNAME'));
                         $message->attach($mailData['path']);
                     });
+                    $mailInfoData = [
+                        'user_id' => Auth::user()->id,
+                        'type_slug' => 'for-purchase-order',
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ];
+                    PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
                     unlink($pdfUploadPath);
                 }
             }

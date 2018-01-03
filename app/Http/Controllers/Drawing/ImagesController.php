@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class ImagesController extends Controller
 {
@@ -27,8 +28,7 @@ class ImagesController extends Controller
     public function getCreateView(Request $request){
         try{
              $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
-             $clients = Client::select('id','company')->get();
-            return view('drawing/images/create')->with(compact('clients','categories'));
+            return view('drawing/images/create')->with(compact('categories'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Listing',
@@ -100,6 +100,10 @@ class ImagesController extends Controller
                 ],
                 'id' => 'id'
             ];
+            Log::critical(json_encode([
+                'action' => 'Upload drawing Temp Images',
+                'exception' => $e->getMessage(),
+            ]));
         }
         return response()->json($response);
     }
@@ -125,40 +129,6 @@ class ImagesController extends Controller
             return response(500);
         }
     }
-    public function getProjects(Request $request){
-        try{
-            $projects = Project::where('client_id',$request->id)->select('id','name')->get();
-            $response = [
-                "projects" => $projects
-            ];
-            return Response()->json($response);
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Listing',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-    }
-    public function getProjectSites(Request $request){
-        try{
-            $projects = ProjectSite::where('project_id',$request->id)->select('id','name')->get();
-            $response = [
-                "projects" => $projects
-            ];
-            return Response()->json($response);
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Listing',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-    }
     public function getSubCategories(Request $request){
         try{
             $projects = DrawingCategory::where('drawing_category_id',$request->id)->select('id','name')->get();
@@ -179,36 +149,47 @@ class ImagesController extends Controller
     public function create(Request $request){
         try{
             $user_id = Auth::id();
-            $directoryName = sha1($request->site_id).DIRECTORY_SEPARATOR.sha1($request->drawing_category_id);
-            $tempImageUploadPath = public_path().env('DRAWING_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user_id);
-            $imageUploadPath = public_path().env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.$directoryName;
-            $workOrderImagesData = array();
-            $files = $request->work_order_images;
-            $workOrderImagesData['project_site_id']=$request->site_id;
-            $workOrderImagesData['drawing_category_id']=$request->drawing_category_id;
-            $drawing_categories_site_relation_id = DrawingCategorySiteRelation::insertGetId($workOrderImagesData);
-            foreach($files as $image){
-                $imageName = urldecode(basename($image['image_name']));
-                $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
-                $imageData['random_string'] = rand(10,100).sha1(time());
-                $imageData['drawing_category_site_relation_id'] = $drawing_categories_site_relation_id;
-                $drawing_image_id = DrawingImage::insertGetId($imageData);
-                $imageVersionData['title'] = $image['title'];
-                $imageVersionData['name'] = $imageName;
-                $imageVersionData['drawing_image_id'] =$drawing_image_id;
-                $drawing_image_version_id = DrawingImageVersion::insertGetId($imageVersionData);
-                if (!file_exists($imageUploadPath)) {
-                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            if(Session::has('global_project_site')){
+                if(count($request->work_order_images) > 0){
+                    $siteId = Session::get('global_project_site');
+                    $directoryName = sha1($siteId).DIRECTORY_SEPARATOR.sha1($request->drawing_category_id);
+                    $tempImageUploadPath = public_path().env('DRAWING_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user_id);
+                    $imageUploadPath = public_path().env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.$directoryName;
+                    $workOrderImagesData = array();
+                    $files = $request->work_order_images;
+                    $workOrderImagesData['project_site_id'] = $siteId;
+                    $workOrderImagesData['drawing_category_id'] = $request->drawing_category_id;
+                    $drawing_categories_site_relation_id = DrawingCategorySiteRelation::insertGetId($workOrderImagesData);
+                    foreach($files as $image){
+                        $imageName = urldecode(basename($image['image_name']));
+                        $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
+                        $imageData['random_string'] = rand(10,100).sha1(time());
+                        $imageData['drawing_category_site_relation_id'] = $drawing_categories_site_relation_id;
+                        $drawing_image_id = DrawingImage::insertGetId($imageData);
+                        $imageVersionData['title'] = $image['title'];
+                        $imageVersionData['name'] = $imageName;
+                        $imageVersionData['drawing_image_id'] =$drawing_image_id;
+                        $drawing_image_version_id = DrawingImageVersion::insertGetId($imageVersionData);
+                        if (!file_exists($imageUploadPath)) {
+                            File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                        }
+                        if(File::exists($newTempImageUploadPath)){
+                            $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
+                            File::move($newTempImageUploadPath,$imageUploadNewPath);
+                        }
+                    }
+                    if(count(scandir($tempImageUploadPath)) <= 2){
+                        rmdir($tempImageUploadPath);
+                    }
+                    $request->session()->flash('success','Data Saved successfully.');
+                }else{
+                    $request->session()->flash('error','Please select Images.');
                 }
-                if(File::exists($newTempImageUploadPath)){
-                    $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
-                    File::move($newTempImageUploadPath,$imageUploadNewPath);
-                }
+            }else{
+                $request->session()->flash('error','Global Site is not selected. Please refresh the page.');
+
             }
-            if(count(scandir($tempImageUploadPath)) <= 2){
-                rmdir($tempImageUploadPath);
-            }
-            $request->session()->flash('success','Data Saved successfully.');
+
             return redirect('/drawing/images/create');
 
         }catch(\Exception $e){
@@ -223,8 +204,17 @@ class ImagesController extends Controller
     }
     public function listing(Request $request){
         try{
-            $subCategories = DrawingCategorySiteRelation::join('drawing_categories','drawing_categories.id','=','drawing_category_site_relations.drawing_category_id')
-                ->select('drawing_categories.name','drawing_categories.id','drawing_categories.drawing_category_id','drawing_category_site_relations.project_site_id')->get();
+            if(Session::has('global_project_site')){
+                $subCategories = DrawingCategorySiteRelation::join('drawing_categories','drawing_categories.id','=','drawing_category_site_relations.drawing_category_id')
+                    ->where('drawing_category_site_relations.project_site_id', Session::get('global_project_site'))
+                    ->select('drawing_categories.name','drawing_categories.id','drawing_categories.drawing_category_id','drawing_category_site_relations.project_site_id')
+                    ->get();
+            }else{
+                $subCategories = DrawingCategorySiteRelation::join('drawing_categories','drawing_categories.id','=','drawing_category_site_relations.drawing_category_id')
+                    ->select('drawing_categories.name','drawing_categories.id','drawing_categories.drawing_category_id','drawing_category_site_relations.project_site_id')
+                    ->get();
+            }
+
             $iTotalRecords = count($subCategories);
             $records = array();
             $records['data'] = array();
