@@ -59,20 +59,6 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label style="color: darkblue;">Client Name</label>
-                                                            <input type="text" class="form-control" name="client_name" value="{{$purchaseOrderList['client_name']}}" readonly tabindex="-1">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label style="color: darkblue;">Project Name</label>
-                                                            <input type="text" class="form-control" name="project_name" value="{{$purchaseOrderList['project']}}" readonly tabindex="-1">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
                                                             <label style="color: darkblue;">Purchase Request Id</label>
                                                             <input type="text" class="form-control" name="client_name"  value="{{$purchaseOrderList['purchase_request_format_id']}}" readonly tabindex="-1">
                                                         </div>
@@ -118,7 +104,7 @@
                                                                         <td> {{$materialData['material_component_name']}} </td>
                                                                         <td>  {{$materialData['material_component_quantity']}} </td>
                                                                         <td> {{$materialData['material_component_unit_name']}} </td>
-                                                                        <td><button class="image" value="{{$materialData['purchase_order_component_id']}}">View</button>
+                                                                        <td><button class="component-view" value="{{$materialData['purchase_order_component_id']}}">View</button>
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
@@ -128,6 +114,7 @@
                                                     <div class="modal fade" id="ImageUpload" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                                         <div class="modal-dialog transaction-modal">
                                                             <div class="modal-content">
+
                                                                 <div class="modal-header" >
                                                                     <div class="row">
                                                                         <div class="col-md-4"></div>
@@ -137,39 +124,7 @@
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form role="form" class="form-horizontal" method="post">
-                                                                    {!! csrf_field() !!}
-                                                                        <div class="form-body">
-                                                                            <div class="form-group row">
-                                                                                <div class="col-md-12" style="text-align: right">
-                                                                                <input type="text" class="form-control empty typeahead tt-input" id="material_name" placeholder="Enter material name" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="qty" placeholder="Enter Quantity" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="unit" placeholder="Enter Unit" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="rate" placeholder="Enter Rate" autocomplete="off" readonly>
-                                                                                <br><input type="hidden" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Rate" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="hsn_code" placeholder="Enter HSNCODE" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" >
-                                                                               <br>
-                                                                                <div class="form-group row">
-                                                                                    <div class="col-md-12">
-                                                                                        Vendor Quotation Image
-                                                                                            <!-- Wrapper for slides -->
-                                                                                                <div id ="imagecorousel">
 
-                                                                                                </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <br>
-                                                                                <div class="form-group row">
-                                                                                    <div class="col-md-12">
-                                                                                        Client Approval Note Image
-                                                                                                <div id ="imagecorouselForClientApproval">
-
-                                                                                                </div>
-                                                                                    </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                            </div>
-                                                                        </div>
                                                                     </form>
                                                                 </div>
                                                             </div>

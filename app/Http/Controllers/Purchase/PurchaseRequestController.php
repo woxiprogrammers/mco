@@ -520,6 +520,7 @@ class PurchaseRequestController extends Controller
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
                             $mailInfoData[$jIterator] = [
                                 'user_id' => Auth::user()->id,
+                                'type_slug' => 'for-quotation',
                                 'created_at' => Carbon::now(),
                                 'updated_at' => Carbon::now()
                             ];

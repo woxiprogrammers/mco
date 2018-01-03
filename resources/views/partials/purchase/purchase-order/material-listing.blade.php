@@ -1,5 +1,5 @@
 @foreach($purchaseRequestComponents as $purchaseRequestComponent)
-    <tr id="{{$purchaseRequestComponent['material_request_component_slug']}}">
+    <tr id="{{$purchaseRequestComponent['material_request_component_slug']}}" class="row-component-{{$purchaseRequestComponent['purchase_request_component_id']}}">
         <td style="text-align: center">
             <select class="form-control component-category">
                 @foreach($purchaseRequestComponent['categories'] as $category)
@@ -9,11 +9,11 @@
         </td>
         <td style="text-align: center; width: 15%">
             <input type="hidden" value="{{$purchaseRequestComponent['vendor_id']}}" class="component-vendor">
-            <input type="hidden" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][id]" value="{{$purchaseRequestComponent['purchase_request_component_id']}}">
+            <input type="hidden" class="component-id" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][id]" value="{{$purchaseRequestComponent['purchase_request_component_id']}}">
             <input type="text" class="form-control component-name" value="{{$purchaseRequestComponent['name']}}" readonly>
         </td>
         <td style="text-align: center">
-            <input type="text" style="width: 90%;" class="form-control" value="{{$purchaseRequestComponent['quantity']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][quantity]">
+            <input type="text" style="width: 90%;" class="form-control component-quantity" value="{{$purchaseRequestComponent['quantity']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][quantity]">
         </td>
         <td style="text-align: center">
             <select style="width: 90%" class="form-control component-unit" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][unit_id]">
@@ -37,6 +37,9 @@
         </td>
         <td style="text-align: center">
             <input type="text" style="width: 90%" class="form-control component-hsn-code"  value="{{$purchaseRequestComponent['hsn_code']}}" name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][hsn_code]">
+        </td>
+        <td style="text-align: center">
+            <a style="width: 90%" class="btn btn-xs blue  component-tax-button" onclick="addTax(this)">Add Tax</a>
         </td>
         <td style="text-align: center">
             <input type="date" style="width: 90%" class="form-control component-delivery-date"  name="purchase[{{$purchaseRequestComponent['vendor_id']}}][{{$purchaseRequestComponent['purchase_request_component_id']}}][expected_delivery_date]">

@@ -28,6 +28,7 @@
                                                             <tr>
                                                                 <th style="width:20%"> Seq. No. </th>
                                                                 <th> Vendor Name</th>
+                                                                <th> Mailed For</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
