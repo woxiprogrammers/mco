@@ -319,6 +319,11 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
+                                                    @if($isReadingApplicable)
+                                                        <div class="form-group">
+                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent" hidden>
+                                                        </div>
+                                                    @endif
                                                     <div class="form-group">
                                                         <textarea name="remark" class="form-control" id="remark" placeholder="Remark"></textarea>
                                                     </div>
@@ -418,6 +423,11 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
+                                                    @if($isReadingApplicable)
+                                                        <div class="form-group">
+                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent" hidden>
+                                                        </div>
+                                                    @endif
                                                     <div class="form-group">
                                                         <textarea name="remark" class="form-control" id="remark" placeholder="Remark..."></textarea>
                                                     </div>
@@ -755,6 +765,15 @@
             $('#inOutCheckbox').on('switchChange.bootstrapSwitch', function(event, state) {
                 changeType();
             });
+
+
+                $("#transfer_type").on('change', function () {
+                    if($("#inOutCheckbox").is(':checked') == false) {
+                        $('#rent').show();
+                    }else{
+                        $('#rent').hide();
+                    }
+                });
 
             if(typeof ($("#assetType").val()) != 'undefined'){
                 var assetType = $("#assetType").val();

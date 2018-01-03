@@ -314,6 +314,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
 
     Route::group(['prefix' => 'inventory'], function(){
+        Route::get('pdf/{inventoryComponentTransferId}',array('uses'=> 'Inventory\InventoryManageController@getInventoryComponentTransferPDF'));
         Route::get('manage',array('uses'=> 'Inventory\InventoryManageController@getManageView'));
         Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@inventoryListing'));
         Route::post('get-project-sites',array('uses'=> 'Inventory\InventoryManageController@getProjectSites'));

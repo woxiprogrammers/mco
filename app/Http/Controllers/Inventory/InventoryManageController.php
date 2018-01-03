@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Inventory;
 
+use App\Asset;
 use App\Client;
 use App\FuelAssetReading;
 use App\Helper\UnitHelper;
@@ -21,6 +22,7 @@ use App\UnitConversion;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -65,43 +67,46 @@ class InventoryManageController extends Controller
             if($request->has('search_name')){
                 // Inventory listing search
             }else{
-                $inventoryTransferData = InventoryComponentTransfers::where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first())->orderBy('created_at','desc')->get();
+                $siteOutTransferTypeID = InventoryTransferTypes::where('slug','site')->where('type','OUT')->pluck('id')->first();
+                $inventoryTransferData = InventoryComponentTransfers::where('transfer_type_id',$siteOutTransferTypeID)->orderBy('created_at','desc')->get();
             }
             $iTotalRecords = count($inventoryTransferData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryTransferData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryTransferData); $iterator++,$pagination++ ){
+                if($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'approved'){
+                    $actionDropDown =  '<div id="sample_editable_1_new" class="btn btn-small blue">
+                                            <a href="/inventory/pdf/'.$inventoryTransferData[$pagination]['id'].'" style="color: white"> 
+                                                PDF <i class="fa fa-download" aria-hidden="true"></i>
+                                            </a>
+                                        </div>';
+                }else{
+                    $actionDropDown =  '<button class="btn btn-xs blue"> 
+                                            <form action="/inventory/transfer/change-status/approved/'.$inventoryTransferData[$pagination]->id.'" method="post">
+                                                <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: white">
+                                                     Approve 
+                                                </a>
+                                                <input type="hidden" name="_token">
+                                            </form> 
+                                        </button>
+                                        <button class="btn btn-xs default "> 
+                                            <form action="/inventory/transfer/change-status/disapproved/'.$inventoryTransferData[$pagination]->id.'" method="post">
+                                                <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: grey">
+                                                    Disapprove 
+                                                </a>
+                                                <input type="hidden" name="_token">
+                                            </form>
+                                        </button>';
+                }
                 $records['data'][$iterator] = [
                     $inventoryTransferData[$pagination]->inventoryComponent->projectSite->name,
                     $inventoryTransferData[$pagination]->source_name,
                     $inventoryTransferData[$pagination]->inventoryComponent->name,
                     $inventoryTransferData[$pagination]->quantity,
                     $inventoryTransferData[$pagination]->unit->name,
-                    $actionDropDown = '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                     <form action="/inventory/transfer/change-status/approved/'.$inventoryTransferData[$pagination]->id.'" method="post">
-                                        <a href="javascript:void(0);" onclick="changeStatus(this)">
-                                            <i class="icon-docs"></i> Approve 
-                                        </a>
-                                        <input type="hidden" name="_token">
-                                    </form>
-                                </li>
-                                 <li>
-                                    <form action="/inventory/transfer/change-status/disapproved/'.$inventoryTransferData[$pagination]->id.'" method="post">
-                                        <a href="javascript:void(0);" onclick="changeStatus(this)">
-                                            <i class="icon-tag"></i> Disapprove 
-                                        </a>
-                                        <input type="hidden" name="_token">
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>'
+                    $inventoryTransferData[$pagination]->inventoryComponentTransferStatus->name,
+                    $actionDropDown
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -249,15 +254,10 @@ class InventoryManageController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryData); $iterator++,$pagination++ ){
-                $quotation = Quotation::where('project_site_id',$inventoryData[$pagination]->project_site_id)->first();
-                $quotationMaterialUnit = QuotationMaterial::join('materials','materials.id','=','quotation_materials.material_id')
-                                                ->where('materials.name','ilike',$inventoryData[$pagination]->name)
-                                                ->where('quotation_materials.quotation_id',$quotation->id)
-                                                ->pluck('quotation_materials.unit_id')
-                                                ->first();
-                $unitName = Unit::where('id',$quotationMaterialUnit)->pluck('name')->first();
                 $projectName = $inventoryData[$pagination]->projectSite->project->name.' - '.$inventoryData[$pagination]->projectSite->name.' ('.$inventoryData[$pagination]->projectSite->project->client->company.')';
                 if($inventoryData[$pagination]->is_material == true){
+                    $materialUnit = Material::where('id',$inventoryData[$iterator]['reference_id'])->pluck('unit_id')->first();
+                    $unitName = Unit::where('id',$materialUnit)->pluck('name')->first();
                     $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
@@ -272,18 +272,19 @@ class InventoryManageController extends Controller
                         ->get();
                     $inQuantity = $outQuantity = 0;
                     foreach($inTransferQuantities as $inTransferQuantity){
-                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$quotationMaterialUnit,$inTransferQuantity['quantity']);
+                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$materialUnit,$inTransferQuantity['quantity']);
                         if(!is_array($unitConversionQuantity)){
                             $inQuantity += $unitConversionQuantity;
                         }
                     }
                     foreach($outTransferQuantities as $outTransferQuantity){
-                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($outTransferQuantity['unit_id'],$quotationMaterialUnit,$outTransferQuantity['quantity']);
+                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($outTransferQuantity['unit_id'],$materialUnit,$outTransferQuantity['quantity']);
                         if(!is_array($unitConversionQuantity)){
                             $outQuantity += $unitConversionQuantity;
                         }
                     }
                 }else{
+                    $unitName = Unit::where('slug','nos')->pluck('name')->first();
                     $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
@@ -473,6 +474,7 @@ class InventoryManageController extends Controller
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                 }else{
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
+                    $data['bill_amount'] = $request['rent'];
                 }
             }else{
                 $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
@@ -694,5 +696,43 @@ class InventoryManageController extends Controller
             $status = 500;
         }
         return response()->json($response,$status);
+    }
+
+    public function getInventoryComponentTransferPDF(Request $request,$inventoryComponentTransferID){
+        try{
+            $data = array();
+            $inventoryComponentTransfer = InventoryComponentTransfers::where('id',$inventoryComponentTransferID)->first();
+            $inventoryComponent = $inventoryComponentTransfer->inventoryComponent;
+            $projectSiteFrom = $inventoryComponent->projectSite;
+            $data['project_site_from'] = $projectSiteFrom->project->name.'-'.$projectSiteFrom->name;
+            $data['project_site_from_address'] = $projectSiteFrom->address;
+            $data['project_site_to'] = $inventoryComponentTransfer['source_name'];
+            $project_site_data = explode('-',$inventoryComponentTransfer['source_name']);
+            $data['project_site_to_address'] = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                                ->where('projects.name',$project_site_data[0])->where('project_sites.name',$project_site_data[1])->pluck('project_sites.address')->first();
+            $data['component_name'] = $inventoryComponent['name'];
+            $data['quantity'] = $inventoryComponentTransfer['quantity'];
+            $data['unit'] = $inventoryComponentTransfer->unit->name;
+            $data['is_material'] = $inventoryComponentTransfer->inventoryComponent->is_material;
+
+            if($data['is_material'] == true){
+                $data['rate'] = null;
+                $data['tax'] = null;
+                $data['total_amount'] = null;
+            }else{
+                $data['rent'] = $inventoryComponentTransfer->bill_amount;
+            }
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('inventory.transfer.request-pdf',$data));
+            return $pdf->stream();
+        }catch(\Exception $e){
+            $data = [
+                'actions' => 'Generate Inventory Component Transfer PDF',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500,$e->getMessage());
+        }
     }
 }

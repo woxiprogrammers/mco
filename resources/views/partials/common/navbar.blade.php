@@ -448,11 +448,11 @@
                         </ul>
                     </li>
                     @if(($user->roles[0]->role->slug == 'superadmin'))
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                    {{--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/reports"> Reports
                             <span class="arrow"></span>
                         </a>
-                    </li>
+                    </li>--}}
                     @endif
                 </ul>
             </li>
