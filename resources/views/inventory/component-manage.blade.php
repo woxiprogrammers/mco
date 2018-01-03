@@ -312,16 +312,26 @@
                                                         <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Enter Quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select name="unit_id" class="form-control" id="unit">
-                                                            <option value="">--Select Unit--</option>
-                                                            @foreach($units as $unit)
-                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                            @endforeach
-                                                        </select>
+                                                        @if($isReadingApplicable)
+                                                            <select class="form-control" id="unit" name="unit_id">
+                                                                <option value="{{$nosUnitId}}">Nos</option>
+                                                            </select>
+                                                        @else
+                                                            <select class="form-control" id="unit" name="unit_id">
+                                                                <option value=""> -- Unit -- </option>
+                                                                @foreach($units as $unit)
+                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @endif
                                                     </div>
                                                     @if($isReadingApplicable)
                                                         <div class="form-group">
-                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent" hidden>
+                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent"  value="{!! $amount !!}" hidden>
+                                                        </div>
+                                                    @else
+                                                        <div class="form-group">
+                                                            <input type="text" name="rate" id="rate" class="form-control" value="{!! $amount !!}" hidden>
                                                         </div>
                                                     @endif
                                                     <div class="form-group">
@@ -412,20 +422,40 @@
                                                             <option value="">--Select Project Site Name--</option>
                                                         </select>
                                                     </div>
+                                                    @if($isReadingApplicable)
+                                                        <div class="form-group">
+                                                            <select class="form-control assetTypeSelect" onchange="assetTypeSelect(this)">
+                                                                <option value="">--Select Asset Type--</option>
+                                                                @foreach($asset_types as $asset_type)
+                                                                    <option value="{{$asset_type['slug']}}">{{$asset_type['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    @endif
                                                     <div class="form-group">
-                                                        <input type="text" name="quantity" class="form-control" placeholder="Enter Quantity">
+                                                        <input type="text" id="site_form_quantity" name="quantity" class="form-control" placeholder="Enter Quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select class="form-control" id="unit" name="unit_id">
-                                                            <option value=""> -- Unit -- </option>
-                                                            @foreach($units as $unit)
-                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                            @endforeach
-                                                        </select>
+                                                        @if($isReadingApplicable)
+                                                            <select class="form-control" id="unit" name="unit_id">
+                                                                <option value="{{$nosUnitId}}">Nos</option>
+                                                            </select>
+                                                        @else
+                                                            <select class="form-control" id="unit" name="unit_id">
+                                                                <option value=""> -- Unit -- </option>
+                                                                @foreach($units as $unit)
+                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @endif
                                                     </div>
                                                     @if($isReadingApplicable)
                                                         <div class="form-group">
-                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent" hidden>
+                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent" value="{!! $amount !!}">
+                                                        </div>
+                                                    @else
+                                                        <div class="form-group">
+                                                            <input type="text" name="rate" id="rate" class="form-control" placeholder="Enter Rate" value="{!! $amount !!}">
                                                         </div>
                                                     @endif
                                                     <div class="form-group">
@@ -874,6 +904,7 @@
             }
             $("#transfer_type").trigger('change');
         }
+
         function openDetails(componentTransferId){
             $.ajax({
                 url: '/inventory/component/detail/'+componentTransferId+'?_token='+$("input[name='_token']").val(),
@@ -888,6 +919,16 @@
                 }
 
             });
+        }
+
+        function assetTypeSelect(assetSlug){
+            if($(assetSlug).val() == 'fuel_dependent' || $(assetSlug).val() == 'electricity_dependent' || $(assetSlug).val() == 'fuel_and_electricity_dependent'){
+                $('#site_form_quantity').val(1);
+                $('#site_form_quantity').prop('disabled',true);
+            }else{
+                $('#site_form_quantity').val('');
+                $('#site_form_quantity').prop('disabled',false);
+            }
         }
         var  CreateInventoryComponentTransfer = function () {
             var handleCreate = function() {

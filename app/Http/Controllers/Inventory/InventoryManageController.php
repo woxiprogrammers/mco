@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Asset;
+use App\AssetType;
 use App\Client;
 use App\FuelAssetReading;
 use App\Helper\UnitHelper;
@@ -13,8 +14,11 @@ use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\Material;
+use App\MaterialRequestComponents;
 use App\ProjectSite;
 use App\ProjectSiteUserCheckpoint;
+use App\PurchaseOrderComponent;
+use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use App\QuotationMaterial;
 use App\Unit;
@@ -167,6 +171,7 @@ class InventoryManageController extends Controller
 
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
+
             $projectInfo = [
                 'project' => $inventoryComponent->projectSite->project->name,
                 'client' => $inventoryComponent->projectSite->project->client->company,
@@ -216,7 +221,16 @@ class InventoryManageController extends Controller
                     'id' => $inventoryComponent->material->unit->id,
                     'name' => $inventoryComponent->material->unit->name,
                 ];
+                $amount = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                    ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                    ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                    ->where('material_requests.project_site_id',$inventoryComponent['project_site_id'])
+                    ->where('material_request_components.name',$inventoryComponent['name'])
+                    ->orderBy('purchase_order_components.id','desc')
+                    ->pluck('purchase_order_components.rate_per_unit')
+                    ->first();
             }else{
+                $amount = Asset::where('name',$inventoryComponent['name'])->pluck('rent_per_day');
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
             $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
@@ -230,7 +244,8 @@ class InventoryManageController extends Controller
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo'));
+            $asset_types = AssetType::select('slug','name')->get()->toArray();
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_types','amount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
