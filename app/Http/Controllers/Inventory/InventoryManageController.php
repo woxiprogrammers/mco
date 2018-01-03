@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Asset;
+use App\AssetType;
 use App\Client;
 use App\FuelAssetReading;
 use App\Helper\UnitHelper;
@@ -13,8 +14,11 @@ use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\Material;
+use App\MaterialRequestComponents;
 use App\ProjectSite;
 use App\ProjectSiteUserCheckpoint;
+use App\PurchaseOrderComponent;
+use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use App\QuotationMaterial;
 use App\Unit;
@@ -167,6 +171,7 @@ class InventoryManageController extends Controller
 
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
+
             $projectInfo = [
                 'project' => $inventoryComponent->projectSite->project->name,
                 'client' => $inventoryComponent->projectSite->project->client->company,
@@ -216,7 +221,16 @@ class InventoryManageController extends Controller
                     'id' => $inventoryComponent->material->unit->id,
                     'name' => $inventoryComponent->material->unit->name,
                 ];
+                $amount = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                    ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                    ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                    ->where('material_requests.project_site_id',$inventoryComponent['project_site_id'])
+                    ->where('material_request_components.name',$inventoryComponent['name'])
+                    ->orderBy('purchase_order_components.id','desc')
+                    ->select('purchase_order_components.rate_per_unit','purchase_order_components.cgst_percentage','purchase_order_components.cgst_amount')
+                    ->first();
             }else{
+                $amount = Asset::where('name',$inventoryComponent['name'])->pluck('rent_per_day')->first();
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
             $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
@@ -230,7 +244,8 @@ class InventoryManageController extends Controller
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo'));
+            $asset_types = AssetType::select('slug','name')->get()->toArray();
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_types','amount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -472,9 +487,10 @@ class InventoryManageController extends Controller
                 $data['source_name'] = $projectSite->project->name.'-'.$projectSite->name;
                 if($request->has('in_or_out')){
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+                    $data = $request->only('rate_per_unit','cgst_percentage','sgst_percentage','igst_percentage','cgst_amount','sgst_amount','igst_amount','total');
                 }else{
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
-                    $data['bill_amount'] = $request['rent'];
+                    $data['rate_per_unit'] = $request['rate_per_unit'];
                 }
             }else{
                 $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
@@ -483,25 +499,6 @@ class InventoryManageController extends Controller
             if($request->has('work_order_images')){
                 $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
             }
-            /*if($request->has('project_site_id') && $request->transfer_type =='site'){
-                $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($inventoryComponent->name))->first();
-                if($newInventoryComponent == null){
-                    $inventoryComponentData = [
-                        'name' => $inventoryComponent->name,
-                        'project_site_id' => $request->project_site_id,
-                        'is_material' => $inventoryComponent->is_material,
-                        'reference_id' => $inventoryComponent->reference_id,
-                        'opening_stock' => 0
-                    ];
-                    $newInventoryComponent = InventoryComponent::create($inventoryComponentData);
-                }
-                $data['inventory_component_id'] = $newInventoryComponent->id;
-                $data['transfer_type_id'] = InventoryTransferTypes::where('type','ilike','IN')->where('name','ilike','office')->pluck('id')->first();
-                $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
-                if($request->has('work_order_images')){
-                    $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
-                }
-            }*/
             if($request->has('project_site_id') && $request->transfer_type =='site'){
                 if($request->has('in_or_out')) {
                     $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
@@ -712,6 +709,14 @@ class InventoryManageController extends Controller
                                 ->where('projects.name',$project_site_data[0])->where('project_sites.name',$project_site_data[1])->pluck('project_sites.address')->first();
             $data['component_name'] = $inventoryComponent['name'];
             $data['quantity'] = $inventoryComponentTransfer['quantity'];
+            $data['rate_per_unit'] = $inventoryComponentTransfer['rate_per_unit'];
+            $data['cgst_percentage'] = $inventoryComponentTransfer['cgst_percentage'];
+            $data['sgst_percentage'] = $inventoryComponentTransfer['sgst_percentage'];
+            $data['igst_percentage'] = $inventoryComponentTransfer['igst_percentage'];
+            $data['cgst_amount'] = $inventoryComponentTransfer['cgst_amount'];
+            $data['sgst_amount'] = $inventoryComponentTransfer['sgst_amount'];
+            $data['igst_amount'] = $inventoryComponentTransfer['igst_amount'];
+            $data['total'] = $inventoryComponentTransfer['total'];
             $data['unit'] = $inventoryComponentTransfer->unit->name;
             $data['is_material'] = $inventoryComponentTransfer->inventoryComponent->is_material;
 

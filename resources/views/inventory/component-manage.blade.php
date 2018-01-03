@@ -312,16 +312,26 @@
                                                         <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Enter Quantity">
                                                     </div>
                                                     <div class="form-group">
-                                                        <select name="unit_id" class="form-control" id="unit">
-                                                            <option value="">--Select Unit--</option>
-                                                            @foreach($units as $unit)
-                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                            @endforeach
-                                                        </select>
+                                                        @if($isReadingApplicable)
+                                                            <select class="form-control" id="unit" name="unit_id">
+                                                                <option value="{{$nosUnitId}}">Nos</option>
+                                                            </select>
+                                                        @else
+                                                            <select class="form-control" id="unit" name="unit_id">
+                                                                <option value=""> -- Unit -- </option>
+                                                                @foreach($units as $unit)
+                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @endif
                                                     </div>
                                                     @if($isReadingApplicable)
                                                         <div class="form-group">
-                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent" hidden>
+                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent"  value="{!! $amount !!}" hidden>
+                                                        </div>
+                                                    @else
+                                                        <div class="form-group">
+                                                            <input type="text" name="rate" id="rate" class="form-control" value="{!! $amount !!}" hidden>
                                                         </div>
                                                     @endif
                                                     <div class="form-group">
@@ -412,20 +422,122 @@
                                                             <option value="">--Select Project Site Name--</option>
                                                         </select>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <input type="text" name="quantity" class="form-control" placeholder="Enter Quantity">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <select class="form-control" id="unit" name="unit_id">
-                                                            <option value=""> -- Unit -- </option>
-                                                            @foreach($units as $unit)
-                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
                                                     @if($isReadingApplicable)
                                                         <div class="form-group">
-                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent" hidden>
+                                                            <select class="form-control assetTypeSelect" onchange="assetTypeSelect(this)">
+                                                                <option value="">--Select Asset Type--</option>
+                                                                @foreach($asset_types as $asset_type)
+                                                                    <option value="{{$asset_type['slug']}}">{{$asset_type['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    @endif
+                                                    @if($isReadingApplicable)
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Unit</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <select class="form-control" id="unit" name="unit_id">
+                                                                    <option value="{{$nosUnitId}}">Nos</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Rate</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <input type="text" name="rate_per_unit" id="rent" class="form-control" placeholder="Enter Rent" value="{!! $amount !!}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Quantity</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity">
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Unit</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <select class="form-control" id="unit" name="unit_id">
+                                                                    <option value=""> -- Unit -- </option>
+                                                                    @foreach($units as $unit)
+                                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Rate</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <input type="text" name="rate_per_unit" id="rate" class="form-control tax-modal-rate" placeholder="Enter Rate" value="{!! $amount['rate_per_unit'] !!}" onkeyup="calculateTaxes(this)">
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Quantity</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity" onkeyup="calculateTaxes(this)">
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">CGST</label>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <div class="input-group" >
+                                                                    <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['cgst_percentage']}}">
+                                                                    <span class="input-group-addon">%</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <input type="text" class="form-control tax-modal-cgst-amount" name="cgst_amount" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">SGST</label>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <div class="input-group" >
+                                                                    <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['sgst_percentage']}}">
+                                                                    <span class="input-group-addon">%</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <input type="text" class="form-control tax-modal-sgst-amount" name="sgst_amount" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">IGST</label>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <div class="input-group" >
+                                                                    <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['igst_percentage']}}">
+                                                                    <span class="input-group-addon">%</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <input type="text" class="form-control tax-modal-igst-amount" name="igst_amount" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Total</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control tax-modal-total" name="total" readonly>
+                                                            </div>
                                                         </div>
                                                     @endif
                                                     <div class="form-group">
@@ -874,6 +986,7 @@
             }
             $("#transfer_type").trigger('change');
         }
+
         function openDetails(componentTransferId){
             $.ajax({
                 url: '/inventory/component/detail/'+componentTransferId+'?_token='+$("input[name='_token']").val(),
@@ -888,6 +1001,16 @@
                 }
 
             });
+        }
+
+        function assetTypeSelect(assetSlug){
+            if($(assetSlug).val() == 'fuel_dependent' || $(assetSlug).val() == 'electricity_dependent' || $(assetSlug).val() == 'fuel_and_electricity_dependent'){
+                $('#site_form_quantity').val(1);
+                $('#site_form_quantity').prop('readonly',true);
+            }else{
+                $('#site_form_quantity').val('');
+                $('#site_form_quantity').prop('readonly',false);
+            }
         }
         var  CreateInventoryComponentTransfer = function () {
             var handleCreate = function() {
@@ -992,7 +1115,38 @@
         })
 
 
-
+        function calculateTaxes(element){
+            console.log(element);
+            var rate = parseFloat($(element).closest('.modal-body').find('.tax-modal-rate').val());
+            if(typeof rate == 'undefined' || rate == '' || isNaN(rate)){
+                rate = 0;
+            }
+            var quantity = parseFloat($(element).closest('.modal-body').find('.tax-modal-quantity').val());
+            if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
+                quantity = 0;
+            }
+            var subtotal = rate * quantity;
+            var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-cgst-percentage').val());
+            if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
+                cgstPercentage = 0;
+            }
+            var sgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-sgst-percentage').val());
+            if(typeof sgstPercentage == 'undefined' || sgstPercentage == '' || isNaN(sgstPercentage)){
+                sgstPercentage = 0;
+            }
+            var igstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-igst-percentage').val());
+            if(typeof igstPercentage == 'undefined' || igstPercentage == '' || isNaN(igstPercentage)){
+                igstPercentage = 0;
+            }
+            var cgstAmount = subtotal * (cgstPercentage / 100);
+            var sgstAmount = subtotal * (sgstPercentage / 100);
+            var igstAmount = subtotal * (igstPercentage / 100);
+            $(element).closest('.modal-body').find('.tax-modal-cgst-amount').val(cgstAmount);
+            $(element).closest('.modal-body').find('.tax-modal-sgst-amount').val(sgstAmount);
+            $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
+            var total = subtotal + cgstAmount + sgstAmount + igstAmount;
+            $(element).closest('.modal-body').find('.tax-modal-total').val(total);
+        }
 
     </script>
 @endsection
