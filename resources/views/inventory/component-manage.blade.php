@@ -445,12 +445,12 @@
                                                                 </select>
                                                             </div>
                                                         </div>
-                                                        <div class="row form-group">
+                                                        <div class="row form-group" id="rent">
                                                             <div class="col-md-2">
-                                                                <label class="control-label pull-right">Rate</label>
+                                                                <label class="control-label pull-right">Rent</label>
                                                             </div>
                                                             <div class="col-md-10">
-                                                                <input type="text" name="rate_per_unit" id="rent" class="form-control" placeholder="Enter Rent" value="{!! $amount !!}">
+                                                                <input type="text" name="rate_per_unit" id="rent_id" class="form-control" placeholder="Enter Rent" value="{!! $amount !!}">
                                                             </div>
                                                         </div>
                                                         <div class="row form-group">
@@ -475,7 +475,7 @@
                                                                 </select>
                                                             </div>
                                                         </div>
-                                                        <div class="row form-group">
+                                                        <div class="row form-group" id="site_out_rate">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">Rate</label>
                                                             </div>
@@ -491,7 +491,7 @@
                                                                 <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity" onkeyup="calculateTaxes(this)">
                                                             </div>
                                                         </div>
-                                                        <div class="row form-group">
+                                                        <div class="row form-group" id="site_cgst">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">CGST</label>
                                                             </div>
@@ -505,7 +505,7 @@
                                                                 <input type="text" class="form-control tax-modal-cgst-amount" name="cgst_amount" readonly>
                                                             </div>
                                                         </div>
-                                                        <div class="row form-group">
+                                                        <div class="row form-group" id="site_sgst">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">SGST</label>
                                                             </div>
@@ -519,7 +519,7 @@
                                                                 <input type="text" class="form-control tax-modal-sgst-amount" name="sgst_amount" readonly>
                                                             </div>
                                                         </div>
-                                                        <div class="row form-group">
+                                                        <div class="row form-group" id="site_igst">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">IGST</label>
                                                             </div>
@@ -533,7 +533,7 @@
                                                                 <input type="text" class="form-control tax-modal-igst-amount" name="igst_amount" readonly>
                                                             </div>
                                                         </div>
-                                                        <div class="row form-group">
+                                                        <div class="row form-group" id="total">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">Total</label>
                                                             </div>
@@ -884,8 +884,18 @@
                 $("#transfer_type").on('change', function () {
                     if($("#inOutCheckbox").is(':checked') == false) {
                         $('#rent').show();
+                        $('#site_out_rate').show();
+                        $('#site_cgst').show();
+                        $('#site_sgst').show();
+                        $('#site_igst').show();
+                        $('#total').show();
                     }else{
                         $('#rent').hide();
+                        $('#site_out_rate').hide();
+                        $('#site_cgst').hide();
+                        $('#site_sgst').hide();
+                        $('#site_igst').hide();
+                        $('#total').hide();
                     }
                 });
 

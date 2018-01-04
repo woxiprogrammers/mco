@@ -489,7 +489,7 @@ class InventoryManageController extends Controller
                 $data['source_name'] = $projectSite->project->name.'-'.$projectSite->name;
                 if($request->has('in_or_out')){
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
-                    $data = $request->only('rate_per_unit','cgst_percentage','sgst_percentage','igst_percentage','cgst_amount','sgst_amount','igst_amount','total');
+                    $data = array_merge($data,$request->only('rate_per_unit','cgst_percentage','sgst_percentage','igst_percentage','cgst_amount','sgst_amount','igst_amount','total','transfer_type'));
                 }else{
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
                     $data['rate_per_unit'] = $request['rate_per_unit'];
