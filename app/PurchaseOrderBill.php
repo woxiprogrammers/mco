@@ -9,9 +9,7 @@ class PurchaseOrderBill extends Model
     protected $table = 'purchase_order_bills';
 
     protected $fillable = [
-        'purchase_order_id','amount','extra_amount','cgst_percentage','cgst_amount','sgst_percentage','sgst_amount',
-        'igst_percentage','igst_amount','bill_number'
-
+        'purchase_order_id','amount','extra_amount','bill_number','tax_amount'
     ];
 
     public function purchaseOrder(){

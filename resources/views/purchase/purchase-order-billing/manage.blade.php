@@ -26,11 +26,13 @@
                                 <div class="page-title">
                                     <h1>Manage Purchase Order</h1>
                                 </div>
-                                <div class="btn-group pull-right margin-top-15">
-                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order-bill/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order Bill
-                                        </a>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill'))
+                                    <div class="btn-group pull-right margin-top-15">
+                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order-bill/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order Bill
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
@@ -81,8 +83,5 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order-billing/manage-datatables.js" type="text/javascript"></script>
-    <script>
-
-    </script>
 @endsection
 
