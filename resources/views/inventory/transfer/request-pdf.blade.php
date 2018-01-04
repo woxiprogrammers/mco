@@ -80,20 +80,28 @@ table {
             @if($is_material == true)
                 <tr>
                     <td style="width: 50%;"><b>Rate</b></td>
-                    <td style="text-align: left;">{!! $rate !!}</td>
+                    <td style="text-align: left;">{!! $rate_per_unit !!}</td>
                 </tr>
                 <tr>
-                    <td style="width: 50%;"><b>Tax</b></td>
-                    <td style="text-align: left;">{!! $tax !!}</td>
+                    <td style="width: 50%;"><b>CGST ({!! $cgst_percentage !!} %)</b></td>
+                    <td style="text-align: left;">{!! $cgst_amount !!}</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;"><b>SGST ({!! $sgst_percentage !!} %)</b></td>
+                    <td style="text-align: left;">{!! $sgst_amount !!}</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;"><b>IGST ({!! $igst_percentage !!} %)</b></td>
+                    <td style="text-align: left;">{!! $igst_amount !!}</td>
                 </tr>
                 <tr>
                     <td style="width: 50%;"><b>Total Amount</b></td>
-                <td style="text-align: left;">{!! $total_amount !!}</td>
+                <td style="text-align: left;">{!! $total !!}</td>
                 </tr>
             @else
                 <tr>
                     <td style="width: 50%;"><b>Rent Per Day</b></td>
-                    <td style="text-align: left;">{!! $rent !!}</td>
+                    <td style="text-align: left;">{!! $rate_per_unit !!}</td>
                 </tr>
             @endif
         </table>
