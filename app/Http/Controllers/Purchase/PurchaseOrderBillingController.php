@@ -103,9 +103,6 @@ class PurchaseOrderBillingController extends Controller
         }
         return response()->json($response,$status);
     }
-
-
-
     public function getBillPendingTransactions(Request $request){
         try{
             $status = 200;
@@ -113,12 +110,13 @@ class PurchaseOrderBillingController extends Controller
             $billPendingTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_statuses','purchase_order_transactions.purchase_order_transaction_status_id','=','purchase_order_transaction_statuses.id')
                                                 ->where('purchase_order_transaction_statuses.slug','bill-pending')
                                                 ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
-                                                ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn')
+                                                ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
                                                 ->get();
             if(count($billPendingTransactions) > 0){
                 $iterator = 0;
                 foreach($billPendingTransactions as $purchaseOrderTransaction){
                     $response[$iterator]['list'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrderTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrderTransaction['grn'].' </label><a href="javascript:void(0);" onclick="viewTransactionDetails('.$purchaseOrderTransaction['id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
+                    $response[$iterator]['purchase_order_id'] = $purchaseOrderTransaction['purchase_order_id'];
                     $response[$iterator]['id'] = $purchaseOrderTransaction['id'];
                     $response[$iterator]['grn'] = $purchaseOrderTransaction['grn'];
                     $iterator++;
@@ -142,17 +140,30 @@ class PurchaseOrderBillingController extends Controller
     public function getTransactionSubtotal(Request $request){
         try{
             $amount = 0;
+            $taxAmount = 0;
             $purchaseOrderTransactions = PurchaseOrderTransaction::whereIn('id',$request->transaction_id)->get();
             foreach($purchaseOrderTransactions as $purchaseOrderTransaction){
                 foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
+                    $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
                     $unitConversionRate = UnitHelper::unitConversion($purchaseOrderTransactionComponent->purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderTransactionComponent->purchaseOrderComponent->rate_per_unit);
                     if(!is_array($unitConversionRate)){
-                        $amount += $purchaseOrderTransactionComponent->quantity * $unitConversionRate;
+                        $tempAmount = $purchaseOrderTransactionComponent->quantity * $unitConversionRate;
+                        $amount += $tempAmount;
+                        if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
+                            $taxAmount += $tempAmount * ($purchaseOrderComponent->cgst_percent/100);
+                        }
+                        if($purchaseOrderComponent->sgst_percentage != null || $purchaseOrderComponent->sgst_percentage != ''){
+                            $taxAmount += $tempAmount * ($purchaseOrderComponent->sgst_percent/100);
+                        }
+                        if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
+                            $taxAmount += $tempAmount * ($purchaseOrderComponent->igst_percent/100);
+                        }
                     }
                 }
             }
             $response = [
-                'sub_total' => $amount
+                'sub_total' => $amount,
+                'tax_amount' => $taxAmount
             ];
             $status = 200;
         }catch (\Exception $e){
@@ -171,7 +182,7 @@ class PurchaseOrderBillingController extends Controller
     use MaterialRequestTrait;
     public function createBill(Request $request){
         try{
-            $purchaseOrderBillData = $request->except('_token','project_site_id','bill_images','transaction_id','sub_total');
+            $purchaseOrderBillData = $request->except('_token','project_site_id','bill_images','transaction_id','sub_total','transaction_grn','purchase_order_format');
             $today = Carbon::now();
             $purchaseOrderBillCount = PurchaseOrderBill::whereDate('created_at', $today)->count();
             $purchaseOrderBillData['bill_number'] = $this->getPurchaseIDFormat('purchase-order-bill',$request->project_site_id,$today,(++$purchaseOrderBillCount));

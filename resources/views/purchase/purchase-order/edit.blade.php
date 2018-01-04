@@ -551,7 +551,7 @@
             $(".transaction-edit-btn").on('click', function(){
                var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
                $.ajax({
-                    url:'/purchase/purchase-order/transaction/edit/'+transactionId,
+                    url:'/purchase/purchase-order/transaction/edit/'+transactionId+"?_token="+$('input[name="_token"]').val()+"&isShowTax=false",
                     type: 'POST',
                     data:{
                         _token: $('input[name="_token"]').val(),

@@ -54,6 +54,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4 form-group">
                                                                 <input type="text" class="form-control purchase-order-typeahead" name="purchase_order_format">
+                                                                <input type="hidden" name="purchase_order_id" id="purchaseOrderId">
                                                             </div>
                                                             <div class="col-md-4 form-group">
                                                                 <input type="text" class="form-control transaction-grn-typeahead" name="transaction_grn">
@@ -84,44 +85,10 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
-                                                                <label class="control-label pull-right">CGST</label>
+                                                                <label class="control-label pull-right">Tax Amount</label>
                                                             </div>
-                                                            <div class="col-md-3" id="inputGroup">
-                                                                <div class="input-group">
-                                                                    <input type="number" class="form-control tax" id="cgstPercentage" name="cgst_percentage">
-                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" placeholder="CGST Amount" name="cgst_amount">
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row">
-                                                            <div class="col-md-2">
-                                                                <label class="control-label pull-right">SGST</label>
-                                                            </div>
-                                                            <div class="col-md-3" id="inputGroup">
-                                                                <div class="input-group">
-                                                                    <input type="number" class="form-control tax" id="cgstPercentage" name="sgst_percentage">
-                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" placeholder="SGST Amount" name="sgst_amount">
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row">
-                                                            <div class="col-md-2">
-                                                                <label class="control-label pull-right">IGST</label>
-                                                            </div>
-                                                            <div class="col-md-3" id="inputGroup">
-                                                                <div class="input-group">
-                                                                    <input type="number" class="form-control tax" id="cgstPercentage" name="igst_percentage">
-                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" name="igst_amount" placeholder="IGST Amount">
+                                                            <div class="col-md-6">
+                                                                <input type="number" class="form-control tax" id="taxAmount" name="tax_amount" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -229,6 +196,7 @@
                         success: function(data,textStatus, xhr){
                             $("#subTotal").val(data.sub_total);
                             $("#totalAmount").val(data.sub_total);
+                            $("#taxAmount").val(data.tax_amount);
                             $("#billData").show();
                         },
                         error: function(errorData){
@@ -332,6 +300,7 @@
                 $(".transaction-grn-typeahead").attr('readonly', true);
                 var POData = $.parseJSON(JSON.stringify(datum));
                 $("input[name='purchase_order_format']").val(POData.format);
+                $("#purchaseOrderId").val(POData.id);
                 $("#grnSelectionDiv .list-group").html(POData.grns);
                 $("#grnSelectionDiv").show();
             })
@@ -363,6 +332,7 @@
                 var POData = $.parseJSON(JSON.stringify(datum));
                 $("input[name='transaction_grn']").val(POData.grn);
                 $("#grnSelectionDiv .list-group").html(POData.list);
+                $("#purchaseOrderId").val(POData.purchase_order_id);
                 $("#grnSelectionDiv").show();
                 $("#grnSelectionDiv .list-group input:checkbox").each(function(){
                     $(this).attr('checked', true);
@@ -390,12 +360,8 @@
         }
         function viewTransactionDetails(transactionId){
             $.ajax({
-                url:'/purchase/purchase-order/transaction/edit/'+transactionId,
-                type: 'POST',
-                data:{
-                    _token: $('input[name="_token"]').val(),
-                    isShowTax: true
-                },
+                url:'/purchase/purchase-order/transaction/edit/'+transactionId+"?_token="+$('input[name="_token"]').val()+"&isShowTax=true",
+                type: 'GET',
                 success: function(data,textStatus,xhr){
                     $("#editTransactionModal .modal-body").html(data);
                     $("#editTransactionModal").modal('show');

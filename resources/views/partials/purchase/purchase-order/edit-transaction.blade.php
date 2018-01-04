@@ -46,6 +46,26 @@
                         <th>
                             Quantity
                         </th>
+                        @if($isShowTaxes == true || $isShowTaxes == 'true')
+                            <th>
+                                Rate
+                            </th>
+                            <th>
+                                Subtotal
+                            </th>
+                            <th>
+                                CGST
+                            </th>
+                            <th>
+                                SGST
+                            </th>
+                            <th>
+                                IGST
+                            </th>
+                            <th>
+                                Total
+                            </th>
+                        @endif
                     </tr>
                     @foreach($materialList as $material)
                         <tr style="text-align: center">
@@ -68,9 +88,29 @@
                                 @if($material['quantityIsFixed'] == true)
                                     <input type="text" class="form-control" name="component_data[{{$material['purchase_order_component_id']}}][quantity]" value="1" readonly>
                                 @else
-                                    <input type="text" class="form-control" name="component_data[{{$material['purchase_order_component_id']}}][quantity]">
+                                    <input type="text" class="form-control" name="component_data[{{$material['purchase_order_component_id']}}][quantity]" value="{{$material['quantity']}}">
                                 @endif
                             </td>
+                            @if($isShowTaxes == true || $isShowTaxes == 'true')
+                                <td>
+                                    <input type="text" class="form-control" value="{!! $material['rate_per_unit'] !!}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" value="{!! $material['rate_per_unit'] * $material['quantity']!!}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" value="{!! ($material['rate_per_unit'] * $material['quantity']) * ($material['cgst_percentage'] / 100) !!}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" value="{!! ($material['rate_per_unit'] * $material['quantity']) * ($material['sgst_percentage'] / 100) !!}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" value="{!! ($material['rate_per_unit'] * $material['quantity']) * ($material['igst_percentage'] / 100) !!}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" value="{!! (($material['rate_per_unit'] * $material['quantity']) + (($material['rate_per_unit'] * $material['quantity']) * ($material['cgst_percentage'] / 100)) + (($material['rate_per_unit'] * $material['quantity']) * ($material['sgst_percentage'] / 100)) + (($material['rate_per_unit'] * $material['quantity']) * ($material['igst_percentage'] / 100))) !!}">
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                 </table>
