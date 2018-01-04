@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class InventoryManageController extends Controller
 {
@@ -259,8 +260,9 @@ class InventoryManageController extends Controller
     public function inventoryListing(Request $request){
         try{
             $status = 200;
-            if($request->has('search_name')){
-                // Inventory listing search
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)->orderBy('created_at','desc')->get();
             }else{
                 $inventoryData = InventoryComponent::orderBy('created_at','desc')->get();
             }
