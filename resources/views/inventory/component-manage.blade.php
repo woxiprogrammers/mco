@@ -66,10 +66,12 @@
                                                                             <a href="javascript:void(0);" class="btn yellow" id="stockButton" >
                                                                                 Opening Stock
                                                                             </a>
-                                                                            <a href="javascript:void(0);" class="btn yellow" style="margin: 20px" id="transaction">
-                                                                                <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
-                                                                                Transaction
-                                                                            </a>
+                                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-inventory-in-out-transfer'))
+                                                                                <a href="javascript:void(0);" class="btn yellow" style="margin: 20px" id="transaction">
+                                                                                    <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                                                                    Transaction
+                                                                                </a>
+                                                                            @endif
                                                                         </div>
                                                                     </div>
                                                                     <div class="portlet-body">

@@ -44,42 +44,20 @@
                                                     <fieldset>
                                                         <legend>Project</legend>
                                                         <div class="row">
-                                                            <div class="col-md-3 col-md-offset-0">
-                                                                Client Name
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                Project Name
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                Project Site Name
-                                                            </div>
-                                                            <div class="col-md-3">
+                                                            <div class="col-md-4">
                                                                 Purchase Order
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                Transaction GRN
                                                             </div>
                                                         </div>
                                                         <div class="row">
-                                                            <div class="col-md-3 form-group">
-                                                                <select class="form-control" id="clientId" style="width: 80%;">
-                                                                    <option value=""> -- Select Client -- </option>
-                                                                    @foreach($clients as $client)
-                                                                        <option value="{{$client['id']}}"> {{$client['company']}} </option>
-                                                                    @endforeach
-                                                                </select>
+                                                            <div class="col-md-4 form-group">
+                                                                <input type="text" class="form-control purchase-order-typeahead" name="purchase_order_format">
+                                                                <input type="hidden" name="purchase_order_id" id="purchaseOrderId">
                                                             </div>
-                                                            <div class="col-md-3 form-group">
-                                                                <select id="projectId" class="form-control" style="width: 80%;">
-                                                                    <option value=""> -- Select Project -- </option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-3 form-group">
-                                                                <select name="project_site_id" id="projectSiteId" class="form-control" style="width: 80%;">
-                                                                    <option value=""> -- Select Project site -- </option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-3 form-group">
-                                                                <select name="purchase_order_id" id="purchaseOrderId" class="form-control" style="width: 80%;">
-                                                                    <option value=""> -- Select Purchase Order -- </option>
-                                                                </select>
+                                                            <div class="col-md-4 form-group">
+                                                                <input type="text" class="form-control transaction-grn-typeahead" name="transaction_grn">
                                                             </div>
                                                         </div>
                                                     </fieldset>
@@ -107,44 +85,10 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
-                                                                <label class="control-label pull-right">CGST</label>
+                                                                <label class="control-label pull-right">Tax Amount</label>
                                                             </div>
-                                                            <div class="col-md-3" id="inputGroup">
-                                                                <div class="input-group">
-                                                                    <input type="number" class="form-control tax" id="cgstPercentage" name="cgst_percentage">
-                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" placeholder="CGST Amount" name="cgst_amount">
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row">
-                                                            <div class="col-md-2">
-                                                                <label class="control-label pull-right">SGST</label>
-                                                            </div>
-                                                            <div class="col-md-3" id="inputGroup">
-                                                                <div class="input-group">
-                                                                    <input type="number" class="form-control tax" id="cgstPercentage" name="sgst_percentage">
-                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" placeholder="SGST Amount" name="sgst_amount">
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row">
-                                                            <div class="col-md-2">
-                                                                <label class="control-label pull-right">IGST</label>
-                                                            </div>
-                                                            <div class="col-md-3" id="inputGroup">
-                                                                <div class="input-group">
-                                                                    <input type="number" class="form-control tax" id="cgstPercentage" name="igst_percentage">
-                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" name="igst_amount" placeholder="IGST Amount">
+                                                            <div class="col-md-6">
+                                                                <input type="number" class="form-control tax" id="taxAmount" name="tax_amount" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -197,6 +141,23 @@
                                 </div>
                             </div>
                         </form>
+                        <div class="modal fade" id="editTransactionModal" role="dialog">
+                            <div class="modal-dialog transaction-modal" style="width: 90%; ">
+                                <!-- Modal content-->
+                                <div class="modal-content" style="overflow: scroll !important;">
+                                    <div class="modal-header">
+                                        <div class="row">
+                                            <div class="col-md-4"></div>
+                                            <div class="col-md-4" style="font-size: 18px"> Purchase Order Transaction</div>
+                                            <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-body" style="padding:40px 50px;">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -213,44 +174,11 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order-billing/validations.js"></script>
+    <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+    <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function(){
             CreatePurchaseOrderBill.init();
-            $("#clientId").on('change', function(){
-                var clientId = $(this).val();
-                if(clientId == ""){
-                    $('#projectId').prop('disabled', false);
-                    $('#projectId').html('');
-                    $('#projectSiteId').prop('disabled', false);
-                    $('#projectSiteId').html('');
-                }else{
-                    $.ajax({
-                        url: '/quotation/get-projects',
-                        type: 'POST',
-                        async: true,
-                        data: {
-                            _token: $("input[name='_token']").val(),
-                            client_id: clientId
-                        },
-                        success: function(data,textStatus,xhr){
-                            $('#projectId').html(data);
-                            $('#projectId').prop('disabled', false);
-                            var projectId = $("#projectId").val();
-                            getProjectSites(projectId);
-                        },
-                        error: function(){
-
-                        }
-                    });
-                }
-
-            });
-
-            $("#projectId").on('change', function(){
-                var projectId = $(this).val();
-                getProjectSites(projectId);
-            });
-
             $("#transactionSelectButton").on('click', function(event){
                 event.stopPropagation();
                 if($(".transaction-select:checkbox:checked").length > 0 ){
@@ -268,6 +196,7 @@
                         success: function(data,textStatus, xhr){
                             $("#subTotal").val(data.sub_total);
                             $("#totalAmount").val(data.sub_total);
+                            $("#taxAmount").val(data.tax_amount);
                             $("#billData").show();
                         },
                         error: function(errorData){
@@ -275,51 +204,6 @@
                         }
                     });
                 }
-            });
-
-            $("#projectSiteId").on('change', function(){
-                var projectSiteId = $(this).val();
-                $.ajax({
-                    url: '/purchase/purchase-order-bill/get-purchase-orders',
-                    type: "POST",
-                    data : {
-                        _token: $('input[name="_token"]').val(),
-                        project_site_id: projectSiteId
-                    },
-                    success: function(data,textStatus, xhr){
-                        $("#purchaseOrderId").html(data);
-                        $("#purchaseOrderId").trigger('change');
-                    },
-                    error: function(errorStatus){
-
-                    }
-                });
-            });
-
-            $("#purchaseOrderId").on('change',function(){
-                var purchaseOrderId = $("#purchaseOrderId").val();
-                $.ajax({
-                    url:'/purchase/purchase-order-bill/get-bill-pending-transactions',
-                    type: "POST",
-                    data:{
-                        _token: $("input[name='_token']").val(),
-                        purchase_order_id: purchaseOrderId
-                    },
-                    success: function(data,textStatus, xhr){
-                        if(xhr.status == 200){
-                            $("#grnSelectionDiv ul").html(data);
-                            $("#grnSelectionDiv").show();
-                        }else{
-                            $("#grnSelectionDiv ul").html('');
-                            $("#grnSelectionDiv").hide();
-                            $("#billData").hide();
-                        }
-
-                    },
-                    error: function(errorData){
-
-                    }
-                });
             });
 
             $(".tax").on('keyup',function(){
@@ -356,6 +240,113 @@
                     alert("Select Only images");
                 }
             });
+
+            var citiList = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: "/purchase/purchase-order-bill/get-purchase-orders?keyword=%QUERY",
+                    filter: function(x) {
+                        if($(window).width()<420){
+                            $("#header").addClass("fixed");
+                        }
+                        return $.map(x, function (data) {
+                            return {
+                                id: data.id,
+                                format: data.format,
+                                grns:data.grn
+                            };
+                        });
+                    },
+                    wildcard: "%QUERY"
+                }
+            });
+            var transactionGrnList = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: "/purchase/purchase-order-bill/get-bill-pending-transactions?keyword=%QUERY",
+                    filter: function(x) {
+                        if($(window).width()<420){
+                            $("#header").addClass("fixed");
+                        }
+                        return $.map(x, function (data) {
+                            return {
+                                id: data.id,
+                                list: data.list,
+                                grn: data.grn
+                            };
+                        });
+                    },
+                    wildcard: "%QUERY"
+                }
+            });
+            transactionGrnList.initialize();
+            citiList.initialize();
+            $('.purchase-order-typeahead').typeahead(null, {
+                displayKey: 'name',
+                engine: Handlebars,
+                source: citiList.ttAdapter(),
+                limit: 30,
+                templates: {
+                    empty: [
+                        '<div class="empty-suggest">',
+                        'Unable to find any Result that match the current query',
+                        '</div>'
+                    ].join('\n'),
+                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{format}}</strong></div>')
+                },
+            }).on('typeahead:selected', function (obj, datum) {
+                $(".transaction-grn-typeahead").attr('readonly', true);
+                var POData = $.parseJSON(JSON.stringify(datum));
+                $("input[name='purchase_order_format']").val(POData.format);
+                $("#purchaseOrderId").val(POData.id);
+                $("#grnSelectionDiv .list-group").html(POData.grns);
+                $("#grnSelectionDiv").show();
+            })
+            .on('typeahead:open', function (obj, datum) {
+                $(".transaction-grn-typeahead").attr('readonly', false);
+                $(".transaction-grn-typeahead").val('');
+                $(".purchase-order-typeahead").val('');
+                $("#grnSelectionDiv .list-group").html('');
+                $("#grnSelectionDiv").hide();
+                $("#billData").hide();
+            });
+
+
+            $('.transaction-grn-typeahead').typeahead(null, {
+                displayKey: 'name',
+                engine: Handlebars,
+                source: transactionGrnList.ttAdapter(),
+                limit: 30,
+                templates: {
+                    empty: [
+                        '<div class="empty-suggest">',
+                        'Unable to find any Result that match the current query',
+                        '</div>'
+                    ].join('\n'),
+                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{grn}}</strong></div>')
+                },
+            }).on('typeahead:selected', function (obj, datum) {
+                $("input[name='purchase_order_format']").attr('readonly', true);
+                var POData = $.parseJSON(JSON.stringify(datum));
+                $("input[name='transaction_grn']").val(POData.grn);
+                $("#grnSelectionDiv .list-group").html(POData.list);
+                $("#purchaseOrderId").val(POData.purchase_order_id);
+                $("#grnSelectionDiv").show();
+                $("#grnSelectionDiv .list-group input:checkbox").each(function(){
+                    $(this).attr('checked', true);
+                });
+                $("#transactionSelectButton").trigger('click');
+            })
+            .on('typeahead:open', function (obj, datum) {
+                $("input[name='purchase_order_format']").attr('readonly', false);
+                $(".transaction-grn-typeahead").val('');
+                $(".purchase-order-typeahead").val('');
+                $("#grnSelectionDiv .list-group").html('');
+                $("#grnSelectionDiv").hide();
+                $("#billData").hide();
+            });
         });
         function calculateTotal(){
             var total = 0;
@@ -367,31 +358,18 @@
             });
             $("#totalAmount").val(total);
         }
-        function getProjectSites(projectId){
+        function viewTransactionDetails(transactionId){
             $.ajax({
-                url: '/purchase/purchase-order-bill/get-project-sites',
-                type: 'POST',
-                async: true,
-                data: {
-                    _token: $("input[name='_token']").val(),
-                    project_id: projectId
-                },
+                url:'/purchase/purchase-order/transaction/edit/'+transactionId+"?_token="+$('input[name="_token"]').val()+"&isShowTax=true",
+                type: 'GET',
                 success: function(data,textStatus,xhr){
-                    if(data.length > 0){
-                        $('#projectSiteId').html(data);
-                        $('#projectSiteId').prop('disabled', false);
-                        $("#projectSiteId").trigger('change');
-
-                    }else{
-                        $('#projectSiteId').html("");
-                        $('#projectSiteId').prop('disabled', false);
-                    }
+                    $("#editTransactionModal .modal-body").html(data);
+                    $("#editTransactionModal").modal('show');
                 },
-                error: function(){
+                error: function(errorStatus){
 
                 }
             });
         }
-
     </script>
 @endsection
