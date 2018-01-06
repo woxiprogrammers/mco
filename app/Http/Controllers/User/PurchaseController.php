@@ -924,7 +924,6 @@ class PurchaseController extends Controller
                 $user = User::where('id',$purchaseOrderComponent['user_id'])->first();
                 $data[$iterator]['display_message'] = date('l, d F Y',strtotime($purchaseOrderComponent['created_at'])).' '.$purchaseOrderComponent['quantity'].' '.$unitName.' purchase order created by '.$user->first_name.' '.$user->last_name.' with remark '.$purchaseOrderComponent['remark'];
             }
-            //dd($data);
             return view('partials.purchase.purchase-detail')->with(compact('data'));
         }catch(\Exception $e){
             $data = [
