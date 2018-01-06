@@ -14,6 +14,7 @@ use App\MaterialRequests;
 use App\MaterialVersion;
 use App\Project;
 use App\ProjectSite;
+use App\PurchaseOrderComponent;
 use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use App\QuotationMaterial;
@@ -184,13 +185,6 @@ class PurchaseController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>                      
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        /*if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material-request') || $user->customHasPermission('approve-material-request')){
-                        $actionDropDown .= '<li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit
-                                    </a>
-                                </li>';
-                        }*/
                         if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request')){
                             $actionDropDown .= '<li>
                                     <a href="javascript:void(0);" onclick="openApproveModal('.$materialRequestList[$pagination]['material_request_component_id'].')">
@@ -211,13 +205,6 @@ class PurchaseController extends Controller
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">';
-                        /*if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material-request') || $user->customHasPermission('approve-material-request')){
-                            $actionDropDown .= '<li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit
-                                    </a>
-                                </li>';
-                        }*/
                         if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request')){
                             $actionDropDown .= '<li>
                                     <a href="javascript:void(0);" onclick="openIndentModal('.$materialRequestList[$pagination]['material_request_component_id'].')">
@@ -238,13 +225,6 @@ class PurchaseController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        /*if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material-request') || $user->customHasPermission('approve-material-request')){
-                            $actionDropDown .= '<li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
-                                    </a>
-                                </li>';
-                        }*/
                         $actionDropDown .= '</ul>
                             </div>';
                         break;
@@ -258,13 +238,6 @@ class PurchaseController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        /*if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material-request') || $user->customHasPermission('approve-material-request')){
-                            $actionDropDown .= '<li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
-                                    </a>
-                                </li>';
-                        }*/
                         $actionDropDown .= '</ul>
                         </div>';
                         break;
@@ -278,13 +251,6 @@ class PurchaseController extends Controller
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">';
-                        /*if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material-request') || $user->customHasPermission('approve-material-request')){
-                            $actionDropDown .= '<li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit
-                                    </a>
-                                </li>';
-                        }*/
                         $actionDropDown .='</ul>
                             </div>';
                         break;
@@ -298,7 +264,10 @@ class PurchaseController extends Controller
                     $materialRequestList[$pagination]['mr_id'],
                     date('d M Y',strtotime($materialRequestList[$pagination]['created_at'])),
                     $user_status,
-                    $actionDropDown
+                    $actionDropDown,
+                    '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$materialRequestList[$pagination]['material_request_component_id'].')">
+                                        Details
+                                    </a>'
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -808,7 +777,7 @@ class PurchaseController extends Controller
                         $materialRequestComponentVersion['remark'] = $request->remark;
                         MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                     }
-                    MaterialRequestComponents::where('id',$request['component_id'])->update(['component_status_id' => $inIndentStatusId]);
+                    MaterialRequestComponents::where('id',$request['component_id'])->update(['component_status_id' => $inIndentStatusId,'quantity' => $request->quantity,'unit_id' => $request->unit_id]);
                     $materialComponentHistoryData = array();
                     $materialComponentHistoryData['component_status_id'] = $inIndentStatusId;
                     $materialComponentHistoryData['user_id'] = Auth::user()->id;
@@ -881,5 +850,90 @@ class PurchaseController extends Controller
             $response = null;
         }
         return response()->json($response, $status);
+    }
+
+    public function getPurchaseDetails(Request $request,$materialRequestComponentId){
+        try{
+            $data = array();
+            $materialRequestComponent = MaterialRequestComponents::where('id',$materialRequestComponentId)->first();
+            $materialComponentVersions = $materialRequestComponent->materialRequestComponentVersion;
+            $iterator = 0;
+            foreach($materialComponentVersions as $key => $materialComponentVersion){
+                $materialRequestComponentStatusSlug = $materialComponentVersion->purchaseRequestComponentStatuses->slug;
+                $user = $materialComponentVersion->user;
+                switch ($materialRequestComponentStatusSlug){
+                    case 'pending' :
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material requested by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'manager-approved' :
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material approved by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'manager-disapproved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material disapproved by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'admin-approved' :
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material approved by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'admin-disapproved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material disapproved by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'in-indent':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material moved to Purchase by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-assigned':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. created by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-manager-approved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. approved by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-manager-disapproved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. disapproved by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-admin-approved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. approved by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-admin-disapproved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. disapproved by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+
+                    case 'purchase-requested':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' purchase requested by '.$user->first_name.' '.$user->last_name.' with remark '.$materialComponentVersion->remark;
+                        break;
+                }
+                $iterator++;
+            }
+            $purchaseOrderComponent = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                ->where('material_request_components.id',$materialRequestComponentId)
+                ->select('purchase_orders.user_id','purchase_orders.is_approved','purchase_orders.purchase_order_status_id','purchase_orders.created_at','purchase_order_components.quantity','purchase_order_components.unit_id','purchase_order_components.remark')
+                ->first();
+            if($purchaseOrderComponent != null){
+                $unitName = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                $user = User::where('id',$purchaseOrderComponent['user_id'])->first();
+                $data[$iterator]['display_message'] = date('l, d F Y',strtotime($purchaseOrderComponent['created_at'])).' '.$purchaseOrderComponent['quantity'].' '.$unitName.' purchase order created by '.$user->first_name.' '.$user->last_name.' with remark '.$purchaseOrderComponent['remark'];
+            }
+            //dd($data);
+            return view('partials.purchase.purchase-detail')->with(compact('data'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
+        }
     }
 }
