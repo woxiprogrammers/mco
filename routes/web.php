@@ -237,6 +237,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
     });
     Route::group(['prefix' => 'purchase'], function(){
+        Route::get('get-detail/{materialRequestComponentID}',array('uses' => 'User\PurchaseController@getPurchaseDetails'));
         Route::get('projects/{client_id}',array('uses' => 'User\PurchaseController@getProjects'));
         Route::get('project-sites/{project_id}',array('uses' => 'User\PurchaseController@getProjectSites'));
 
