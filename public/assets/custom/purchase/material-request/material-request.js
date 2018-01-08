@@ -11,7 +11,7 @@ $(document).ready(function(){
     $('#iterator').val(iterator);
     $("#myBtn").click(function(){
         $('#component_id').val(4);
-        var site_name = $("#project_side_id").val();
+        var site_name = $("#globalProjectSite").val();
         var search_in = 'material';
         var materialList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
@@ -68,7 +68,7 @@ $(document).ready(function(){
     $("#assetBtn").click(function(){
         $('#component_id').val(6);
         var search_in = 'asset';
-        var site_name = $("#project_side_id").val();
+        var site_name = $("#globalProjectSite").val();
         var assetList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,

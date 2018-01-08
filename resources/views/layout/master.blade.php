@@ -66,42 +66,49 @@
 <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-messaging.js"></script>
 <script>
-const messaging = firebaseApp.messaging();
-        console.log(navigator.serviceWorker);
-        navigator.serviceWorker.register('https://test.mconstruction.co.in/firebase-messaging-sw.js')
-            .then((registration) => {
-                messaging.useServiceWorker(registration);
-                return messaging.getToken();
-            })
-            .then((token) => {
-                console.log('in token then')
-                console.log(token);
-            });
-	messaging.requestPermission()
-		.then(function(){
-			console.log('in request permission then');
-	/*messaging.getToken()
-		.then(function(token){
-			console.log('in permission token then');
-			console.log(token);	
-		})
-		.catch(function(err){
-			console.log(err);
-		});*/
-				
-		})
-		.catch(function(err){
-			console.log('in request catch', err);
-		});
-/*	messaging.getToken()
-		.then(function(token){
-			console.log('in then');
-			console.log(token);	
-		})
-		.catch(function(err){
-			console.log(err);
-		});*/
-        console.log(messaging);
+    const messaging = firebaseApp.messaging();
+    messaging.requestPermission()
+        .then(function(){
+            navigator.serviceWorker.register('https://test.mconstruction.co.in/firebase-messaging-sw.js')
+                .then((registration) => {
+                    messaging.useServiceWorker(registration);
+                    return messaging.getToken();
+                })
+                .then((token) => {
+                        sendfcmToken(token)
+                    });
+                })
+        .catch(function(err){
+
+        });
+    messaging.onTokenRefresh(function() {
+        messaging.getToken()
+        .then(function(refreshedToken) {
+            console.log('token refreshed');
+            console.log(refreshedToken);
+            sendfcmToken(refreshedToken);
+        })
+        .catch(function(err) {
+            console.log('in token refresh get token catch');
+        });
+    });
+    function sendfcmToken(token){
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data:{
+                _token : $("input[name='_token']").val(),
+                fcm_token: token
+            },
+            success: function(data, textStatus, xhr){
+                console.log('token stored successfully');
+            },
+            error: function(errorData){
+                console.log('fcm token ajax error');
+                console.log(errorData);
+            }
+        });
+    }
 </script>
 <!--[if lt IE 9]>
 <script src="/assets/global/plugins/respond.min.js"></script>
