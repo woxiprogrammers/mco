@@ -808,7 +808,7 @@ class PurchaseController extends Controller
                         $materialRequestComponentVersion['remark'] = $request->remark;
                         MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                     }
-                    MaterialRequestComponents::where('id',$request['component_id'])->update(['component_status_id' => $inIndentStatusId]);
+                    MaterialRequestComponents::where('id',$request['component_id'])->update(['component_status_id' => $inIndentStatusId,'quantity' => $request->quantity,'unit_id' => $request->unit_id]);
                     $materialComponentHistoryData = array();
                     $materialComponentHistoryData['component_status_id'] = $inIndentStatusId;
                     $materialComponentHistoryData['user_id'] = Auth::user()->id;

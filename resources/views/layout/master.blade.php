@@ -50,6 +50,59 @@
                 <!-- END INNER FOOTER -->
                 <!-- END FOOTER -->
     </div>
+<script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
+<script>
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyDtYXt1BQzsnLutfzZnlsDEXpM0N7pEp10",
+        authDomain: "mcon-android.firebaseapp.com",
+        databaseURL: "https://mcon-android.firebaseio.com",
+        projectId: "mcon-android",
+        storageBucket: "mcon-android.appspot.com",
+        messagingSenderId: "425183955461"
+    };
+    const firebaseApp = firebase.initializeApp(config);
+</script>
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-messaging.js"></script>
+<script>
+const messaging = firebaseApp.messaging();
+        console.log(navigator.serviceWorker);
+        navigator.serviceWorker.register('https://test.mconstruction.co.in/firebase-messaging-sw.js')
+            .then((registration) => {
+                messaging.useServiceWorker(registration);
+                return messaging.getToken();
+            })
+            .then((token) => {
+                console.log('in token then')
+                console.log(token);
+            });
+	messaging.requestPermission()
+		.then(function(){
+			console.log('in request permission then');
+	/*messaging.getToken()
+		.then(function(token){
+			console.log('in permission token then');
+			console.log(token);	
+		})
+		.catch(function(err){
+			console.log(err);
+		});*/
+				
+		})
+		.catch(function(err){
+			console.log('in request catch', err);
+		});
+/*	messaging.getToken()
+		.then(function(token){
+			console.log('in then');
+			console.log(token);	
+		})
+		.catch(function(err){
+			console.log(err);
+		});*/
+        console.log(messaging);
+</script>
 <!--[if lt IE 9]>
 <script src="/assets/global/plugins/respond.min.js"></script>
 <script src="/assets/global/plugins/excanvas.min.js"></script>
