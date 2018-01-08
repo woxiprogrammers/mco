@@ -880,24 +880,32 @@
                 changeType();
             });
 
+            $("#transfer_type").on('change', function () {
+                if($("#inOutCheckbox").is(':checked') == false) {
+                    $('#rent').show();
+                    $('#site_out_rate').show();
+                    $('#site_cgst').show();
+                    $('#site_sgst').show();
+                    $('#site_igst').show();
+                    $('#total').show();
+                }else{
+                    $('#rent').hide();
+                    $('#site_out_rate').hide();
+                    $('#site_cgst').hide();
+                    $('#site_sgst').hide();
+                    $('#site_igst').hide();
+                    $('#total').hide();
+                }
 
-                $("#transfer_type").on('change', function () {
-                    if($("#inOutCheckbox").is(':checked') == false) {
-                        $('#rent').show();
-                        $('#site_out_rate').show();
-                        $('#site_cgst').show();
-                        $('#site_sgst').show();
-                        $('#site_igst').show();
-                        $('#total').show();
-                    }else{
-                        $('#rent').hide();
-                        $('#site_out_rate').hide();
-                        $('#site_cgst').hide();
-                        $('#site_sgst').hide();
-                        $('#site_igst').hide();
-                        $('#total').hide();
-                    }
                 });
+            /*$("#transfer_type").on('change', function () {
+                $('#rent').show();
+                $('#site_out_rate').show();
+                $('#site_cgst').show();
+                $('#site_sgst').show();
+                $('#site_igst').show();
+                $('#total').show();
+            });*/
 
             if(typeof ($("#assetType").val()) != 'undefined'){
                 var assetType = $("#assetType").val();
@@ -1128,7 +1136,6 @@
 
 
         function calculateTaxes(element){
-            console.log(element);
             var rate = parseFloat($(element).closest('.modal-body').find('.tax-modal-rate').val());
             if(typeof rate == 'undefined' || rate == '' || isNaN(rate)){
                 rate = 0;
