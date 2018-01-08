@@ -355,8 +355,24 @@ class InventoryManageController extends Controller
 
                 if($inventoryComponentTransfers[$pagination]->transferType->type == 'IN'){
                     $transferStatus = 'IN - From '.$inventoryComponentTransfers[$pagination]->transferType->name;
+                    if($inventoryComponentTransfers[$pagination]->transferType->slug == 'site'){
+                        $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
+                                        Details
+                                    </a>
+                                    <a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                        Make Payment
+                                    </a>';
+                    }else{
+                        $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
+                                        Details
+                                    </a>
+                                    ';
+                    }
                 }else{
                     $transferStatus = 'OUT - To '.$inventoryComponentTransfers[$pagination]->transferType->name;
+                    $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
+                                        Details
+                                    </a>';
                 }
                 $records['data'][$iterator] = [
                     $inventoryComponentTransfers[$pagination]['grn'],
@@ -364,9 +380,7 @@ class InventoryManageController extends Controller
                     $inventoryComponentTransfers[$pagination]->unit->name,
                     $transferStatus,
                     $inventoryComponentTransfers[$pagination]->inventoryComponentTransferStatus->name,
-                    '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
-                        Details
-                    </a>'
+                    $action
                 ];
             }
             $records["draw"] = intval($request->draw);

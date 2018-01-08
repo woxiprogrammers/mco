@@ -8,6 +8,7 @@ use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
+use App\MaterialRequestComponentVersion;
 use App\MaterialRequests;
 use App\Project;
 use App\ProjectSite;
@@ -188,8 +189,18 @@ class PurchaseRequestController extends Controller
             $materialComponentHistoryData['component_status_id'] = $PRAssignedStatusId;
             if($request->has('material_request_component_ids')) {
                 foreach ($request['material_request_component_ids'] as $materialRequestComponentId) {
+                    $materialRequestComponent = MaterialRequestComponents::where('id',$materialRequestComponentId)->first();
                     $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentId;
                     MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                    $materialRequestComponentVersionData = [
+                        'material_request_component_id' => $materialRequestComponentId,
+                        'component_status_id' => $PRAssignedStatusId,
+                        'user_id' => $user['id'],
+                        'quantity' => $materialRequestComponent['quantity'],
+                        'unit_id' => $materialRequestComponent['unit_id'],
+                        'remark' => ''
+                    ];
+                    $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
                 }
             }
             $request->session()->flash('success', 'Purchase Request created successfully.');
@@ -441,8 +452,18 @@ class PurchaseRequestController extends Controller
                     MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $approveStatusId]);
                     $materialComponentHistoryData['component_status_id'] = $approveStatusId;
                     foreach($materialComponentIds as $materialComponentId) {
+                        $materialRequestComponentData = MaterialRequestComponents::where('id',$materialComponentId)->first();
                         $materialComponentHistoryData['material_request_component_id'] = $materialComponentId;
                         MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                        $materialRequestComponentVersionData = [
+                            'material_request_component_id' => $materialComponentId,
+                            'component_status_id' => $approveStatusId,
+                            'quantity' => $materialRequestComponentData['quantity'],
+                            'unit_id' => $materialRequestComponentData['unit_id'],
+                            'user_id' => $user['id'],
+                            'remark' => $request->remark
+                        ];
+                        $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
                     }
                     break;
 
@@ -459,8 +480,16 @@ class PurchaseRequestController extends Controller
                     MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $disapproveStatusId]);
                     $materialComponentHistoryData['component_status_id'] = $disapproveStatusId;
                     foreach($materialComponentIds as $materialComponentId) {
+                        $materialRequestComponentData = MaterialRequestComponents::where('id',$materialComponentId)->first();
                         $materialComponentHistoryData['material_request_component_id'] = $materialComponentId;
                         MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                        $materialRequestComponentVersionData = [
+                            'material_request_component_id' => $materialComponentId,
+                            'component_status_id' => $disapproveStatusId,
+                            'quantity' => $materialRequestComponentData['quantity'],
+                            'unit_id' => $materialRequestComponentData['unit_id'],
+                        ];
+                        $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
                     }
                     break;
 

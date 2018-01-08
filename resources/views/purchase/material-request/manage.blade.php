@@ -134,6 +134,7 @@
                                                   <th> Created At</th>
                                                   <th> Status </th>
                                                   <th> Action </th>
+                                                  <th> Detail </th>
                                               </tr>
                                               <tr class="filter">
                                                   <th></th>
@@ -156,6 +157,7 @@
                                                       <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                       <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                   </th>
+                                                  <th></th>
                                               </tr>
                                               </thead>
                                               <tbody>
@@ -269,6 +271,23 @@
                               </div>
                           </div>
                         </div>
+                            <div class="modal fade" id="purchaseDetailModel" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="padding-bottom:10px">
+                                            <div class="row">
+                                                <div class="col-md-4"></div>
+                                                <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">Purchase Details</h4></center></div>
+                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                    </div>
                 </div>
            </div>
@@ -417,6 +436,22 @@
             }
         })
         $("#indentModal").modal('show');
+    }
+
+    function openDetails(materialRequestComponentId){
+        $.ajax({
+            url: '/purchase/get-detail/'+materialRequestComponentId+'?_token='+$("input[name='_token']").val(),
+            type: 'GET',
+            async: true,
+            success: function(data,textStatus,xhr){
+                $("#purchaseDetailModel .modal-body").html(data);
+                $("#purchaseDetailModel").modal('show');
+            },
+            error:function(errorData){
+                alert('Something went wrong');
+            }
+
+        });
     }
 </script>
 @endsection
