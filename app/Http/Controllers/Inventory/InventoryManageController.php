@@ -497,9 +497,11 @@ class InventoryManageController extends Controller
 
     public function addComponentTransfer(Request $request,$inventoryComponent){
         try{
+            $user = Auth::user();
             $data = $request->except(['_token','work_order_images','project_site_id','grn']);
             $data['inventory_component_id'] = $inventoryComponent->id;
-            $data['date'] = Carbon::now();
+            $data['user_id'] = $user['id'];
+            $data['in_time'] = $data['out_time'] = $data['date'] = Carbon::now();
             if($request->has('project_site_id') && $request->transfer_type =='site'){
                 $projectSite = ProjectSite::where('id',$request['project_site_id'])->first();
                 $data['source_name'] = $projectSite->project->name.'-'.$projectSite->name;
