@@ -15,6 +15,7 @@ use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\Material;
 use App\MaterialRequestComponents;
+use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteUserCheckpoint;
 use App\PurchaseOrderComponent;
@@ -741,6 +742,7 @@ class InventoryManageController extends Controller
             $project_site_data = explode('-',$inventoryComponentTransfer['source_name']);
             $data['project_site_to_address'] = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                 ->where('projects.name',$project_site_data[0])->where('project_sites.name',$project_site_data[1])->pluck('project_sites.address')->first();
+            $data['grn'] = $inventoryComponentTransfer['grn'];
             $data['component_name'] = $inventoryComponent['name'];
             $data['quantity'] = $inventoryComponentTransfer['quantity'];
             $data['rate_per_unit'] = $inventoryComponentTransfer['rate_per_unit'];
@@ -778,6 +780,11 @@ class InventoryManageController extends Controller
     public function getGRNDetails(Request $request){
         try{
             $response['inventory_component_transfer'] = InventoryComponentTransfers::where('grn',$request['grn'])->first();
+            $projectSiteId = $response['inventory_component_transfer']->inventoryComponent->project_site_id;
+            $response['client_id'] = Client::join('projects','projects.client_id','=','clients.id')
+                                        ->join('project_sites','project_sites.project_id','=','projects.id')
+                                        ->where('project_sites.id',$projectSiteId)
+                                        ->pluck('clients.id')->first();
             $status = 200;
         }catch(\Exception $e){
             $data = [
