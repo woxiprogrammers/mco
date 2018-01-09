@@ -15,7 +15,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
     Route::get('/dashboard',array('uses' => 'Admin\DashboardController@index'));
-    Route::get('/get-pdf',array('uses' => 'Admin\DashboardController@getpdf'));
     Route::post('/change-project-site',array('uses' => 'Auth\LoginController@changeProjectSite'));
 
     Route::group(['prefix' => 'user'],function (){
@@ -552,6 +551,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::group(['prefix' => 'salary'], function(){
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
                 Route::post('listing',array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
+                Route::get('payment-voucher-pdf/{salaryTransactionId}',array('uses' => 'Peticash\PeticashController@getPaymentVoucherPdf'));
             });
         });
     });

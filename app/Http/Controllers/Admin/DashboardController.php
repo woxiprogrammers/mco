@@ -82,12 +82,4 @@ class DashboardController extends Controller
     function generateRandomString($length = 6) {
         return "#".substr(str_shuffle(str_repeat($x='0123456789abcdefABCDEF', ceil($length/strlen($x)) )),1,$length);
     }
-
-    public function getpdf(Request $request){
-
-        $pdf = App::make('dompdf.wrapper');
-        $pdf->loadHTML(view('pdf'));
-        /*$pdf->setPaper('A4', 'landscape');*/
-        return $pdf->stream();
-    }
 }
