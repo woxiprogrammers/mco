@@ -331,6 +331,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('display-images/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@displayTempImages'));
             Route::post('delete-temp-inventory-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
             Route::post('edit-opening-stock',['uses' => 'Inventory\InventoryManageController@editOpeningStock']);
+            Route::post('get-detail',['uses' => 'Inventory\InventoryManageController@getGRNDetails']);
             Route::get('detail/{inventoryComponentTransfer}',['uses' => 'Inventory\InventoryManageController@getInventoryComponentTransferDetail']);
             Route::group(['prefix' => 'readings'],function(){
                 Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentReadingListing'));
