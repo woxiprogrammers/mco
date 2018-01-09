@@ -188,6 +188,7 @@ class InventoryManageController extends Controller
                     $isReadingApplicable = false;
                 }
             }
+
             if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
                 $clients = Client::join('projects','projects.client_id','=','clients.id')
                     ->join('project_sites','project_sites.project_id','=','projects.id')
@@ -222,13 +223,14 @@ class InventoryManageController extends Controller
                     'id' => $inventoryComponent->material->unit->id,
                     'name' => $inventoryComponent->material->unit->name,
                 ];
+
                 $amount = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
                     ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
                     ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
                     ->where('material_requests.project_site_id',$inventoryComponent['project_site_id'])
                     ->where('material_request_components.name',$inventoryComponent['name'])
                     ->orderBy('purchase_order_components.id','desc')
-                    ->select('purchase_order_components.rate_per_unit','purchase_order_components.cgst_percentage','purchase_order_components.cgst_amount')
+                    ->select('purchase_order_components.rate_per_unit','purchase_order_components.cgst_percentage as cgst_percentage','purchase_order_components.cgst_amount as cgst_amount','purchase_order_components.sgst_percentage as sgst_percentage','purchase_order_components.sgst_amount as sgst_amount','purchase_order_components.igst_percentage as igst_percentage','purchase_order_components.igst_amount as igst_amount')
                     ->first();
             }else{
                 $amount = Asset::where('name',$inventoryComponent['name'])->pluck('rent_per_day')->first();
@@ -495,7 +497,7 @@ class InventoryManageController extends Controller
 
     public function addComponentTransfer(Request $request,$inventoryComponent){
         try{
-            $data = $request->except(['_token','work_order_images','project_site_id']);
+            $data = $request->except(['_token','work_order_images','project_site_id','grn']);
             $data['inventory_component_id'] = $inventoryComponent->id;
             $data['date'] = Carbon::now();
             if($request->has('project_site_id') && $request->transfer_type =='site'){
@@ -503,8 +505,22 @@ class InventoryManageController extends Controller
                 $data['source_name'] = $projectSite->project->name.'-'.$projectSite->name;
                 if($request->has('in_or_out')){
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
-                    $data = array_merge($data,$request->only('rate_per_unit','cgst_percentage','sgst_percentage','igst_percentage','cgst_amount','sgst_amount','igst_amount','total','transfer_type'));
+                    $baseInventoryComponentTransfer = InventoryComponentTransfers::where('grn',$request['grn'])->first();
+                    if($inventoryComponent['is_material'] == true){
+                        $data['rate_per_unit'] = $baseInventoryComponentTransfer['rate_per_unit'];
+                        $data['cgst_percentage'] = $baseInventoryComponentTransfer['cgst_percentage'];
+                        $data['sgst_percentage'] = $baseInventoryComponentTransfer['sgst_percentage'];
+                        $data['igst_percentage'] = $baseInventoryComponentTransfer['igst_percentage'];
+                        $subtotal = $data['quantity'] * $data['rate_per_unit'];
+                        $data['cgst_amount'] = $subtotal * ($data['cgst_percentage'] / 100) ;
+                        $data['sgst_amount'] = $subtotal * ($data['sgst_percentage'] / 100) ;
+                        $data['igst_amount'] = $subtotal * ($data['igst_percentage'] / 100) ;
+                        $data['total'] = $subtotal + $data['cgst_amount'] + $data['sgst_amount'] + $data['igst_amount'];
+                    }else{
+                        $data['rate_per_unit'] = $baseInventoryComponentTransfer['rate_per_unit'];
+                    }
                 }else{
+                    $data = array_merge($data,$request->only('rate_per_unit','cgst_percentage','sgst_percentage','igst_percentage','cgst_amount','sgst_amount','igst_amount','total','transfer_type'));
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
                     $data['rate_per_unit'] = $request['rate_per_unit'];
                 }
@@ -755,5 +771,22 @@ class InventoryManageController extends Controller
             Log::critical(json_encode($data));
             abort(500,$e->getMessage());
         }
+    }
+
+    public function getGRNDetails(Request $request){
+        try{
+            $response['inventory_component_transfer'] = InventoryComponentTransfers::where('grn',$request['grn'])->first();
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get GRN Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
     }
 }

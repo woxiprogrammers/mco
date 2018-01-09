@@ -94,6 +94,7 @@
                                                                         </div>
                                                                     </div>
                                                                 </div>
+
                                                                 @if($isReadingApplicable)
                                                                     <div id="readingTab" class="tab-pane fade">
                                                                         <div class="pull-right">
@@ -310,30 +311,55 @@
                                                     <div class="form-group">
                                                         <input type="text" name="source_name" id="sourceName" class="form-control" placeholder="Enter User's Name">
                                                     </div>
-                                                    <div class="form-group">
-                                                        <input type="text" name="quantity" id="quantity" class="form-control" placeholder="Enter Quantity">
+                                                    <div class="row form-group">
+                                                        <div class="col-md-2">
+                                                            <label class="control-label pull-right">Quantity</label>
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            <input type="text" id="quantity" name="quantity" class="form-control" placeholder="Enter Quantity">
+                                                        </div>
                                                     </div>
-                                                    <div class="form-group">
+                                                    <div class="row form-group">
                                                         @if($isReadingApplicable)
-                                                            <select class="form-control" id="unit" name="unit_id">
-                                                                <option value="{{$nosUnitId}}">Nos</option>
-                                                            </select>
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Unit</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <select class="form-control" id="unit" name="unit_id">
+                                                                    <option value="{{$nosUnitId}}">Nos</option>
+                                                                </select>
+                                                            </div>
                                                         @else
-                                                            <select class="form-control" id="unit" name="unit_id">
-                                                                <option value=""> -- Unit -- </option>
-                                                                @foreach($units as $unit)
-                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                                @endforeach
-                                                            </select>
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Unit</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <select class="form-control" id="unit" name="unit_id">
+                                                                    <option value=""> -- Unit -- </option>
+                                                                    @foreach($units as $unit)
+                                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
                                                         @endif
                                                     </div>
                                                     @if($isReadingApplicable)
-                                                        <div class="form-group">
-                                                            <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent"  value="{!! $amount !!}" hidden>
+                                                        <div class="row form-group" id="rent">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Rent</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <input type="text" name="rent" id="rent" class="form-control" placeholder="Enter Rent" value="{!! $amount !!}" hidden>
+                                                            </div>
                                                         </div>
                                                     @else
-                                                        <div class="form-group">
-                                                            <input type="text" name="rate" id="rate" class="form-control" value="{!! $amount !!}" hidden>
+                                                        <div class="row form-group" id="rent">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Rent</label>
+                                                            </div>
+                                                            <div class="col-md-10">
+                                                                <input type="text" name="rate" id="rate" class="form-control" placeholder="Enter Rate" value="{!! $amount['rate_per_unit'] !!}" hidden>
+                                                            </div>
                                                         </div>
                                                     @endif
                                                     <div class="form-group">
@@ -434,6 +460,19 @@
                                                             </select>
                                                         </div>
                                                     @endif
+                                                    <div class="row form-group" id="get_grn">
+                                                        <div class="col-md-2">
+                                                            <label class="control-label pull-right">GRN</label>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <input type="text" name="grn" id="grn" class="form-control" placeholder="Enter GRN">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <a href="javascript:void(0);" class="btn btn-primary pull-right" onclick="getGRNDetails()" id="get_grn_details">
+                                                                Get Details
+                                                            </a>
+                                                        </div>
+                                                    </div>
                                                     @if($isReadingApplicable)
                                                         <div class="row form-group">
                                                             <div class="col-md-2">
@@ -475,6 +514,7 @@
                                                                 </select>
                                                             </div>
                                                         </div>
+
                                                         <div class="row form-group" id="site_out_rate">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">Rate</label>
@@ -497,7 +537,11 @@
                                                             </div>
                                                             <div class="col-md-5">
                                                                 <div class="input-group" >
-                                                                    <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['cgst_percentage']}}">
+                                                                    @if($amount['cgst_percentage'] != null)
+                                                                        <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['cgst_percentage']}}">
+                                                                    @else
+                                                                        <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage" onkeyup="calculateTaxes(this)" value="0">
+                                                                    @endif
                                                                     <span class="input-group-addon">%</span>
                                                                 </div>
                                                             </div>
@@ -511,7 +555,11 @@
                                                             </div>
                                                             <div class="col-md-5">
                                                                 <div class="input-group" >
-                                                                    <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['sgst_percentage']}}">
+                                                                    @if($amount['sgst_percentage'] != null)
+                                                                        <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['sgst_percentage']}}">
+                                                                    @else
+                                                                        <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage" onkeyup="calculateTaxes(this)" value="0">
+                                                                    @endif
                                                                     <span class="input-group-addon">%</span>
                                                                 </div>
                                                             </div>
@@ -525,7 +573,11 @@
                                                             </div>
                                                             <div class="col-md-5">
                                                                 <div class="input-group" >
-                                                                    <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['igst_percentage']}}">
+                                                                    @if($amount['igst_percentage'] != null)
+                                                                        <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage" onkeyup="calculateTaxes(this)" value="{{$amount['igst_percentage']}}">
+                                                                    @else
+                                                                        <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage" onkeyup="calculateTaxes(this)" value="0">
+                                                                    @endif
                                                                     <span class="input-group-addon">%</span>
                                                                 </div>
                                                             </div>
@@ -852,6 +904,7 @@
             $("#transaction").click(function(){
                 $("#transactionModal").modal();
             });
+
             $("#stockButton").click(function(){
                $("#openingStockModel").modal('show');
             });
@@ -882,6 +935,7 @@
 
             $("#transfer_type").on('change', function () {
                 if($("#inOutCheckbox").is(':checked') == false) {
+                    $('#get_grn').hide();
                     $('#rent').show();
                     $('#site_out_rate').show();
                     $('#site_cgst').show();
@@ -889,6 +943,7 @@
                     $('#site_igst').show();
                     $('#total').show();
                 }else{
+                    $('#get_grn').show();
                     $('#rent').hide();
                     $('#site_out_rate').hide();
                     $('#site_cgst').hide();
@@ -898,14 +953,6 @@
                 }
 
                 });
-            /*$("#transfer_type").on('change', function () {
-                $('#rent').show();
-                $('#site_out_rate').show();
-                $('#site_cgst').show();
-                $('#site_sgst').show();
-                $('#site_igst').show();
-                $('#total').show();
-            });*/
 
             if(typeof ($("#assetType").val()) != 'undefined'){
                 var assetType = $("#assetType").val();
@@ -970,10 +1017,12 @@
                 });
             });
         }
+
         function projectChange(element){
             var projectId = $(element).val();
             getProjectSites(projectId);
         };
+
         function getProjectSites(projectId){
             $.ajax({
                 url: '/inventory/get-project-sites',
@@ -1032,6 +1081,7 @@
                 $('#site_form_quantity').prop('readonly',false);
             }
         }
+
         var  CreateInventoryComponentTransfer = function () {
             var handleCreate = function() {
                 var form = $('#addTransferForm');
@@ -1134,7 +1184,6 @@
             CreateInventoryComponentTransfer.init();
         })
 
-
         function calculateTaxes(element){
             var rate = parseFloat($(element).closest('.modal-body').find('.tax-modal-rate').val());
             if(typeof rate == 'undefined' || rate == '' || isNaN(rate)){
@@ -1165,6 +1214,26 @@
             $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
             var total = subtotal + cgstAmount + sgstAmount + igstAmount;
             $(element).closest('.modal-body').find('.tax-modal-total').val(total);
+        }
+
+        function getGRNDetails(){
+            $.ajax({
+                url: '/inventory/component/get-detail',
+                type: 'POST',
+                async: true,
+                data: {
+                    _token: $("input[name='_token']").val(),
+                    grn : $('#grn').val()
+                },
+                success: function(data,textStatus,xhr){
+                    unit_id = data.inventory_component_transfer['unit_id'];
+                    $('select[name="unit_id"]').find('option[value="'+unit_id+'"]').attr("selected",true);
+                    $('#site_form_quantity').val(data.inventory_component_transfer['quantity']);
+                },
+                error: function(errorData){
+                    alert('Something went wrong');
+                }
+            });
         }
 
     </script>
