@@ -432,23 +432,51 @@
                                                     </div>
                                                 </div>
                                                 <div id="site_form" hidden>
-                                                    <div class="form-group">
-                                                        <select class="form-control clientSelect" onchange="clientChange(this)">
-                                                            <option value="">--Select Client Name--</option>
-                                                            @foreach($clients as $client)
-                                                                <option value="{{$client['id']}}">{{$client['name']}}</option>
-                                                            @endforeach
-                                                        </select>
+                                                    <div class="row form-group" id="get_grn">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">GRN</label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" name="grn" id="grn" class="form-control" placeholder="Enter GRN">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <a href="javascript:void(0);" class="btn btn-primary pull-right" onclick="getGRNDetails()" id="get_grn_details">
+                                                                Get Details
+                                                            </a>
+                                                        </div>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <select class="form-control projectSelect" onchange="projectChange(this)">
-                                                            <option value="">--Select Project Name--</option>
-                                                        </select>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Client Name</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <select name="client_id" class="form-control clientSelect" onchange="clientChange(this)" id="client_id">
+                                                                <option value="">--Select Client Name--</option>
+                                                                @foreach($clients as $client)
+                                                                    <option value="{{$client['id']}}">{{$client['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <select name="project_site_id" class="form-control projectSiteSelect">
-                                                            <option value="">--Select Project Site Name--</option>
-                                                        </select>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Project Name</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <select name="project_id" class="form-control projectSelect" onchange="projectChange(this)" id="project_id">
+                                                                <option value="">--Select Project Name--</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Project Site</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <select name="project_site_id" class="form-control projectSiteSelect" id="project_site_id">
+                                                                <option value="">--Select Project Site Name--</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                     @if($isReadingApplicable)
                                                         <div class="form-group">
@@ -460,52 +488,40 @@
                                                             </select>
                                                         </div>
                                                     @endif
-                                                    <div class="row form-group" id="get_grn">
-                                                        <div class="col-md-2">
-                                                            <label class="control-label pull-right">GRN</label>
-                                                        </div>
-                                                        <div class="col-md-8">
-                                                            <input type="text" name="grn" id="grn" class="form-control" placeholder="Enter GRN">
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <a href="javascript:void(0);" class="btn btn-primary pull-right" onclick="getGRNDetails()" id="get_grn_details">
-                                                                Get Details
-                                                            </a>
-                                                        </div>
-                                                    </div>
+
                                                     @if($isReadingApplicable)
                                                         <div class="row form-group">
-                                                            <div class="col-md-2">
+                                                            <div class="col-md-3">
                                                                 <label class="control-label pull-right">Unit</label>
                                                             </div>
-                                                            <div class="col-md-10">
+                                                            <div class="col-md-9">
                                                                 <select class="form-control" id="unit" name="unit_id">
                                                                     <option value="{{$nosUnitId}}">Nos</option>
                                                                 </select>
                                                             </div>
                                                         </div>
                                                         <div class="row form-group" id="rent">
-                                                            <div class="col-md-2">
+                                                            <div class="col-md-3">
                                                                 <label class="control-label pull-right">Rent</label>
                                                             </div>
-                                                            <div class="col-md-10">
+                                                            <div class="col-md-9">
                                                                 <input type="text" name="rate_per_unit" id="rent_id" class="form-control" placeholder="Enter Rent" value="{!! $amount !!}">
                                                             </div>
                                                         </div>
                                                         <div class="row form-group">
-                                                            <div class="col-md-2">
+                                                            <div class="col-md-3">
                                                                 <label class="control-label pull-right">Quantity</label>
                                                             </div>
-                                                            <div class="col-md-10">
+                                                            <div class="col-md-9">
                                                                 <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity">
                                                             </div>
                                                         </div>
                                                     @else
                                                         <div class="row form-group">
-                                                            <div class="col-md-2">
+                                                            <div class="col-md-3">
                                                                 <label class="control-label pull-right">Unit</label>
                                                             </div>
-                                                            <div class="col-md-10">
+                                                            <div class="col-md-9">
                                                                 <select class="form-control" id="unit" name="unit_id">
                                                                     <option value=""> -- Unit -- </option>
                                                                     @foreach($units as $unit)
@@ -516,18 +532,18 @@
                                                         </div>
 
                                                         <div class="row form-group" id="site_out_rate">
-                                                            <div class="col-md-2">
+                                                            <div class="col-md-3">
                                                                 <label class="control-label pull-right">Rate</label>
                                                             </div>
-                                                            <div class="col-md-10">
+                                                            <div class="col-md-9">
                                                                 <input type="text" name="rate_per_unit" id="rate" class="form-control tax-modal-rate" placeholder="Enter Rate" value="{!! $amount['rate_per_unit'] !!}" onkeyup="calculateTaxes(this)">
                                                             </div>
                                                         </div>
                                                         <div class="row form-group">
-                                                            <div class="col-md-2">
+                                                            <div class="col-md-3">
                                                                 <label class="control-label pull-right">Quantity</label>
                                                             </div>
-                                                            <div class="col-md-10">
+                                                            <div class="col-md-9">
                                                                 <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity" onkeyup="calculateTaxes(this)">
                                                             </div>
                                                         </div>
@@ -1227,6 +1243,9 @@
                 },
                 success: function(data,textStatus,xhr){
                     unit_id = data.inventory_component_transfer['unit_id'];
+                    client_id = data.client_id;
+                    $('select[name="client_id"]').find('option[value="'+client_id+'"]').attr("selected",true);
+                    clientChange($('#client_id'));
                     $('select[name="unit_id"]').find('option[value="'+unit_id+'"]').attr("selected",true);
                     $('#site_form_quantity').val(data.inventory_component_transfer['quantity']);
                 },
