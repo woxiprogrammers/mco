@@ -488,7 +488,7 @@ class PurchaseRequestController extends Controller
                             'component_status_id' => $disapproveStatusId,
                             'quantity' => $materialRequestComponentData['quantity'],
                             'unit_id' => $materialRequestComponentData['unit_id'],
-                            'remark' => '',
+                            'remark' => $request->remark,
                         ];
                         $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
                     }
