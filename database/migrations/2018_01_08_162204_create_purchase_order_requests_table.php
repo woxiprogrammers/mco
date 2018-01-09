@@ -17,8 +17,8 @@ class CreatePurchaseOrderRequestsTable extends Migration
             $table->increments('id');
             $table->unsignedBigInteger('purchase_request_id');
             $table->unsignedBigInteger('user_id');
-            $table->foreign('purchase_request_id')->referecnes('id')->on('purchase_requests')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('user_id')->referecnes('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('purchase_request_id')->references('id')->on('purchase_requests')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }
