@@ -40,20 +40,18 @@
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="clientSearchbox" name="client_name" placeholder="Enter client name" >
-                                                            <div id="client-suggesstion-box"></div>
+                                                            <input type="text" class="form-control empty" id="clientSearchbox" value="{{$globalProjectSite->project->client->company}}" placeholder="Enter client name" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="projectSearchbox"  placeholder="Enter project site name" >
-                                                            <input type="hidden"  id="project_side_id" name="project_site_id">
-                                                            <div id="project-suggesstion-box"></div>
+                                                            <input type="text" class="form-control empty" id="projectSearchbox" value="{{$globalProjectSite->project->name}} - {{$globalProjectSite->name}}" placeholder="Enter project site name" readonly>
+                                                            <input type="hidden"  id="project_site_id" name="project_site_id" value="{{$globalProjectSite->id}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter username" >
+                                                            <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter username" name="user_name" >
                                                             <input type="hidden" name="user_id" id="user_id_">
                                                             <div id="user-suggesstion-box"></div>
                                                         </div>
@@ -84,48 +82,50 @@
                                         <div class="portlet-body-form">
                                             <div class="container">
                                                 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                                                    <div class="panel panel-default">
-                                                        <div class="panel-heading" role="tab" id="headingOne">
-                                                            <h4 class="panel-title" style="padding-bottom: 20px">
-                                                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                                    <i class="more-less glyphicon glyphicon-plus"></i>
-                                                                    <span style="float: left ;font-size: 20px">Added from indent</span>
-                                                                </a>
-                                                            </h4>
-                                                        </div>
-                                                        <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                                                            <div class="panel-body">
-                                                                <table class="table table-hover table-light">
-                                                                    <thead>
-                                                                    <tr>
-                                                                        <th> # </th>
-                                                                        <th> Material \ Asset Name </th>
-                                                                        <th> Quantity </th>
-                                                                        <th> Unit </th>
-                                                                        <th> Action </th>
-                                                                    </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                    @foreach($materialRequestList as $components)
-                                                                    <tr>
-                                                                        <td> <input type="checkbox"> <input type="hidden" name="material_request_component_ids[]" value="{{$components['material_request_component_id']}}"></td>
-                                                                        <td> <input type="text" value="{{$components['name']}}" readonly> </td>
-                                                                        <td> <input type="text" value="{{$components['quantity']}}" readonly> </td>
-                                                                        <td> <input type="text" value="{{$components['unit']}}" readonly> </td>
-                                                                        <td>
-                                                                            <div class="btn-group open">
-                                                                                <a class="btn btn-xs green dropdown-toggle deleteRowButton" href="javascript:void(0);" onclick="removeTableRow(this)">
-                                                                                    Remove
-                                                                                </a>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                        @endforeach
-                                                                    </tbody>
-                                                                </table>
+                                                    @if(count($materialRequestList) > 0)
+                                                        <div class="panel panel-default" id="indentPanel">
+                                                            <div class="panel-heading" role="tab" id="headingOne">
+                                                                <h4 class="panel-title" style="padding-bottom: 20px">
+                                                                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                                        <i class="more-less glyphicon glyphicon-plus"></i>
+                                                                        <span style="float: left ;font-size: 20px">Added from indent</span>
+                                                                    </a>
+                                                                </h4>
+                                                            </div>
+                                                            <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                                                <div class="panel-body">
+                                                                    <table class="table table-hover table-light">
+                                                                        <thead>
+                                                                        <tr>
+                                                                            <th> # </th>
+                                                                            <th> Material \ Asset Name </th>
+                                                                            <th> Quantity </th>
+                                                                            <th> Unit </th>
+                                                                            <th> Action </th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach($materialRequestList as $components)
+                                                                                <tr>
+                                                                                    <td> <input type="checkbox"> <input type="hidden" name="material_request_component_ids[]" value="{{$components['material_request_component_id']}}"></td>
+                                                                                    <td> <input type="text" value="{{$components['name']}}" readonly> </td>
+                                                                                    <td> <input type="text" value="{{$components['quantity']}}" readonly> </td>
+                                                                                    <td> <input type="text" value="{{$components['unit']}}" readonly> </td>
+                                                                                    <td>
+                                                                                        <div class="btn-group open">
+                                                                                            <a class="btn btn-xs green dropdown-toggle deleteRowButton" href="javascript:void(0);" onclick="removeTableRow(this)">
+                                                                                                Remove
+                                                                                            </a>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    @endif
                                                     <div class="panel panel-default">
                                                         <div class="panel-heading" role="tab" id="headingTwo">
                                                             <h4 class="panel-title" style="padding-bottom: 20px">
@@ -243,7 +243,6 @@
                                             <div class="form-group">
                                                 <input type="hidden" id="AssetUnitId" value="{{$nosUnitId}}">
                                                 <input type="text" class="form-control empty" id="AssetUnitsearchbox"  value="Nos" readonly >
-                                                <div id="asset_unit-suggesstion-box"></div>
                                             </div>
                                             <article>
                                                 <label for="filesAsset">Select multiple files:</label>
@@ -274,61 +273,58 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <link rel="stylesheet"  href="/assets/custom/purchase/material-request/material-request.css"/>
     <script src="/assets/custom/purchase/purchase-request/purchase-request-datatable.js" type="text/javascript"></script>
-            <script>
-                function handleFileSelect() {
-                    //Check File API support
-                    if (window.File && window.FileList && window.FileReader) {
-
-                        var files = event.target.files; //FileList object
-                        var output = document.getElementById("result");
-
-                        for (var i = 0; i < files.length; i++) {
-                            var file = files[i];
-                            //Only pics
-                            if (!file.type.match('image')) continue;
-
-                            var picReader = new FileReader();
-                            picReader.addEventListener("load", function (event) {
-                                var picFile = event.target;
-                                console.log(picFile);
-                                var div = document.createElement("div");
-                                div.innerHTML = "<img class='thumbnail img' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
-                                output.insertBefore(div, null);
-                            });
-                            //Read the image
-                            picReader.readAsDataURL(file);
-                        }
-                    } else {
-                        console.log("Your browser does not support File API");
-                    }
+    <script src="/assets/custom/purchase/validations.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function(){
+            CreatePurchaseRequest.init();
+        });
+        function handleFileSelect() {
+            //Check File API support
+            if (window.File && window.FileList && window.FileReader) {
+                var files = event.target.files; //FileList object
+                var output = document.getElementById("result");
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    //Only pics
+                    if (!file.type.match('image')) continue;
+                    var picReader = new FileReader();
+                    picReader.addEventListener("load", function (event) {
+                        var picFile = event.target;
+                        var div = document.createElement("div");
+                        div.innerHTML = "<img class='thumbnail img' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
+                        output.insertBefore(div, null);
+                    });
+                    //Read the image
+                    picReader.readAsDataURL(file);
                 }
-                document.getElementById('files').addEventListener('change', handleFileSelect, false);
-            </script>
-            <script>
-                function handleFileSelectForAsset() {
-                    //Check File API support
-                    if (window.File && window.FileList && window.FileReader) {
-                        var files = event.target.files; //FileList object
-                        var output = document.getElementById("resultAsset");
-                        for (var i = 0; i < files.length; i++) {
-                            var file = files[i];
-                            //Only pics
-                            if (!file.type.match('image')) continue;
-                            var picReader = new FileReader();
-                            picReader.addEventListener("load", function (event) {
-                                var picFiles = event.target;
-                                console.log(picFiles);
-                                var div = document.createElement("div");
-                                div.innerHTML = "<img class='thumbnail assetImg' src='" + picFiles.result + "'" + "title='" + picFiles.name + "'/>";
-                                output.insertBefore(div, null);
-                            });
-                            //Read the image
-                            picReader.readAsDataURL(file);
-                        }
-                    } else {
-                        console.log("Your browser does not support File API");
-                    }
+            } else {
+                alert("Your browser does not support File API");
+            }
+        }
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+        function handleFileSelectForAsset() {
+            //Check File API support
+            if (window.File && window.FileList && window.FileReader) {
+                var files = event.target.files; //FileList object
+                var output = document.getElementById("resultAsset");
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    //Only pics
+                    if (!file.type.match('image')) continue;
+                    var picReader = new FileReader();
+                    picReader.addEventListener("load", function (event) {
+                        var picFiles = event.target;
+                        var div = document.createElement("div");
+                        div.innerHTML = "<img class='thumbnail assetImg' src='" + picFiles.result + "'" + "title='" + picFiles.name + "'/>";
+                        output.insertBefore(div, null);
+                    });
+                    //Read the image
+                    picReader.readAsDataURL(file);
                 }
-                document.getElementById('filesAsset').addEventListener('change', handleFileSelectForAsset, false);
-            </script>
+            } else {
+                alert("Your browser does not support File API");
+            }
+        }
+        document.getElementById('filesAsset').addEventListener('change', handleFileSelectForAsset, false);
+    </script>
 @endsection

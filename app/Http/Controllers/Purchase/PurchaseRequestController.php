@@ -8,6 +8,8 @@ use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
+use App\MaterialRequestComponentVersion;
+use App\MaterialRequests;
 use App\Project;
 use App\ProjectSite;
 use App\PurchaseRequest;
@@ -29,6 +31,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
 
 class PurchaseRequestController extends Controller
 {
@@ -48,23 +51,32 @@ class PurchaseRequestController extends Controller
     }
     public function getCreateView(Request $request){
         try{
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+            }else{
+                $projectSiteId = null;
+            }
             $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
-            $materialRequestList = array();
+            $units = Unit::select('id','name')->get()->toArray();
             $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
             $iterator = 0;
-            $units = Unit::select('id','name')->get()->toArray();
-            $materialRequestComponents = MaterialRequestComponents::where('component_status_id',$inIndentStatusId)->get();
-            foreach($materialRequestComponents as $index => $materialRequestComponent){
-                $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
-                $materialRequestList[$iterator]['name'] = $materialRequestComponent->name;
-                $materialRequestList[$iterator]['quantity'] = $materialRequestComponent->quantity;
-                $materialRequestList[$iterator]['unit_id'] = $materialRequestComponent->unit_id;
-                $materialRequestList[$iterator]['unit'] = $materialRequestComponent->unit->name;
-                $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponent->component_type_id;
-                $materialRequestList[$iterator]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
-                $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponent->component_status_id;
-                $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
-                $iterator++;
+            $materialRequestList = array();
+            $materialRequestIds = MaterialRequests::where('project_site_id',$projectSiteId)->pluck('id');
+            if(count($materialRequestIds) > 0){
+                $materialRequestIds = $materialRequestIds->toArray();
+                $materialRequestComponents = MaterialRequestComponents::whereIn('material_request_id',$materialRequestIds)->where('component_status_id',$inIndentStatusId)->get();
+                foreach($materialRequestComponents as $index => $materialRequestComponent){
+                    $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponent->id;
+                    $materialRequestList[$iterator]['name'] = $materialRequestComponent->name;
+                    $materialRequestList[$iterator]['quantity'] = $materialRequestComponent->quantity;
+                    $materialRequestList[$iterator]['unit_id'] = $materialRequestComponent->unit_id;
+                    $materialRequestList[$iterator]['unit'] = $materialRequestComponent->unit->name;
+                    $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponent->component_type_id;
+                    $materialRequestList[$iterator]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
+                    $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponent->component_status_id;
+                    $materialRequestList[$iterator]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
+                    $iterator++;
+                }
             }
             return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId','units'));
         }catch(\Exception $e){
@@ -95,7 +107,7 @@ class PurchaseRequestController extends Controller
                                                                             ->where('material_request_components.id',$materialRequestComponent->id)
                                                                             ->pluck('purchase_request_component_vendor_relation.vendor_id')->toArray();
                     if($materialRequestComponentID == $materialRequestComponent->component_type_id){
-                        $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id');
+                        $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id')->first();
                         $vendorAssignedIds = VendorMaterialRelation::where('material_id',$material_id)->pluck('vendor_id');
                         if(count($vendorAssignedIds) > 0){
                             $materialRequestComponentDetails[$iterator]['vendors'] = Vendor::whereIn('id',$vendorAssignedIds)->select('id','company')->get()->toArray();
@@ -177,8 +189,18 @@ class PurchaseRequestController extends Controller
             $materialComponentHistoryData['component_status_id'] = $PRAssignedStatusId;
             if($request->has('material_request_component_ids')) {
                 foreach ($request['material_request_component_ids'] as $materialRequestComponentId) {
+                    $materialRequestComponent = MaterialRequestComponents::where('id',$materialRequestComponentId)->first();
                     $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentId;
                     MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                    $materialRequestComponentVersionData = [
+                        'material_request_component_id' => $materialRequestComponentId,
+                        'component_status_id' => $PRAssignedStatusId,
+                        'user_id' => $user['id'],
+                        'quantity' => $materialRequestComponent['quantity'],
+                        'unit_id' => $materialRequestComponent['unit_id'],
+                        'remark' => ''
+                    ];
+                    $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
                 }
             }
             $request->session()->flash('success', 'Purchase Request created successfully.');
@@ -196,14 +218,11 @@ class PurchaseRequestController extends Controller
     public function purchaseRequestListing(Request $request){
         try{
             $postdata = null;
-            $pr_name = "";
             $status = 0;
             $site_id = 0;
             $month = 0;
             $year = 0;
             $pr_count = 0;
-            $client_id = 0;
-            $project_id = 0;
             $postDataArray = array();
             if ($request->has('pr_name')) {
                 if ($request['pr_name'] != "") {
@@ -226,155 +245,158 @@ class PurchaseRequestController extends Controller
                         $postDataArray[$narr[0]] = $ytr[1];
                     }
                 }
-                $client_id = $postDataArray['client_id'];
-                $project_id = $postDataArray['project_id'];
                 $site_id = $postDataArray['site_id'];
                 $month = $postDataArray['month'];
                 $year = $postDataArray['year'];
                 $pr_count = $postDataArray['pr_count'];
             }
-
-
+            if($request->has('site_id')){
+                $site_id = $request->site_id;
+            }
             $response = array();
             $responseStatus = 200;
             $purchaseRequests = array();
-
             $ids = PurchaseRequest::all()->pluck('id');
             $filterFlag = true;
-
             if ($site_id != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($year != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($month != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($status != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->where('purchase_component_status_id', $status)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($pr_count != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->where('serial_no', $pr_count)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($filterFlag) {
                 $purchaseRequests = PurchaseRequest::whereIn('id',$ids)->orderBy('created_at','desc')->get()->toArray();
             }
-
             $iTotalRecords = count($purchaseRequests);
             $records = array();
             $records['data'] = array();
+            $user = Auth::user();
             $end = $request->length < 0 ? count($purchaseRequests) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseRequests); $iterator++,$pagination++ ){
-                $txnStatusSlug = PurchaseRequestComponentStatuses::findOrFail($purchaseRequests[$pagination]['purchase_component_status_id'])->toArray()['slug'];
-                $txnStatusName = PurchaseRequestComponentStatuses::findOrFail($purchaseRequests[$pagination]['purchase_component_status_id'])->toArray()['name'];
-                switch ($txnStatusSlug){
+                $txnInfo = PurchaseRequestComponentStatuses::where('id',$purchaseRequests[$pagination]['purchase_component_status_id'])->select('slug','name')->first()->toArray();
+                switch ($txnInfo['slug']){
                     case 'purchase-requested':
-                        $status = "<span class=\"btn btn-xs btn-warning\"> ".$txnStatusName." </span>";
+                        $status = "<span class=\"btn btn-xs btn-warning\"> ".$txnInfo['name']." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <!--<li>'
-                                    .'<a href="/purchase/purchase-request/edit/'.$txnStatusSlug.'/'.$purchaseRequests[$pagination]['id'].'">'.
-                                        '<i class="icon-docs"></i> Edit 
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
+                            $action .= '<!--<li>'
+                                .'<a href="/purchase/purchase-request/edit/'.$txnInfo['slug'].'/'.$purchaseRequests[$pagination]['id'].'">'.
+                                '<i class="icon-docs"></i> Edit 
                                     </a>
-                                </li>-->
-                                <li>
+                                </li>-->';
+                        }
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request')){
+                            $action .= '<li>
                                     <a href="javascript:void(0);" onclick="openApproveModal('.$purchaseRequests[$pagination]['id'].')">
                                         <i class="icon-tag"></i> Approve / Disapprove 
                                     </a>
-                                </li>
-                            </ul>
-                        </div>';
+                                </li>';
+                        }
+                        $action .='</ul>
+                            </div>';
                         break;
                     case 'p-r-admin-approved':
-                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$txnStatusSlug." </span>";
+                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$txnInfo['name']." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>'
-                                    .'<a href="/purchase/purchase-request/edit/'.$txnStatusSlug.'/'.$purchaseRequests[$pagination]['id'].'">'.
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
+                            $action .= '<li>'
+                                    .'<a href="/purchase/purchase-request/edit/'.$txnInfo['slug'].'/'.$purchaseRequests[$pagination]['id'].'">'.
                                     '<i class="icon-docs"></i> Edit
                                     </a>
-                                    </li>
-                            </ul>
+                                    </li>';
+                        }
+                        $action .='</ul>
                             </div>';
                         break;
                     case 'p-r-manager-approved':
-                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$txnStatusSlug." </span>";
+                        $status = "<span class=\"btn btn-xs green-meadow\"> ".$txnInfo['name']." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>'
-                            .'<a href="/purchase/purchase-request/edit/p-r-admin-approved/'.$purchaseRequests[$pagination]['id'].'">'.
-                                        '<i class="icon-docs"></i> Edit 
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
+                            $action .= '<li>'
+                                .'<a href="/purchase/purchase-request/edit/p-r-admin-approved/'.$purchaseRequests[$pagination]['id'].'">'.
+                                '<i class="icon-docs"></i> Edit
                                     </a>
-                                </li>
-                            </ul>
-                        </div>';
+                                    </li>';
+                        }
+                        $action .='</ul>
+                            </div>';
                         break;
 
                     case 'p-r-manager-disapproved':
                     case 'p-r-admin-disapproved':
-                        $status = "<span class=\"btn btn-xs btn-danger\"> ".$txnStatusName." </span>";
+                        $status = "<span class=\"btn btn-xs btn-danger\"> ".$txnInfo['name']." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <!--<li>'
-                            .'<a href="/purchase/purchase-request/edit/'.$txnStatusSlug.'">'.
-                                        '<i class="icon-docs"></i> Edit 
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
+                            $action .= '<!--<li>'
+                                .'<a href="/purchase/purchase-request/edit/'.$txnInfo['slug'].'">'.
+                                '<i class="icon-docs"></i> Edit 
                                     </a>
-                                </li>-->
-                            </ul>
+                                </li>-->';
+                        }
+                        $action .='</ul>
                         </div>';
                         break;
 
                     default:
-                        $status = "<span class=\"btn btn-xs btn-success\"> ".$txnStatusName." </span>";
+                        $status = "<span class=\"btn btn-xs btn-success\"> ".$txnInfo['name']." </span>";
                         $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <!--<li>'
-                            .'<a href="/purchase/purchase-request/edit/'.$txnStatusSlug.'">'.
-                                        '<i class="icon-docs"></i> Edit 
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('edit-purchase-request')){
+                            $action .= '<!--<li>'
+                                .'<a href="/purchase/purchase-request/edit/'.$txnInfo['slug'].'">'.
+                                '<i class="icon-docs"></i> Edit 
                                     </a>
-                                </li>-->
-                            </ul>
+                                </li>-->';
+                        }
+                        $action .='</ul>
                         </div>';
                         break;
                 }
@@ -430,8 +452,18 @@ class PurchaseRequestController extends Controller
                     MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $approveStatusId]);
                     $materialComponentHistoryData['component_status_id'] = $approveStatusId;
                     foreach($materialComponentIds as $materialComponentId) {
+                        $materialRequestComponentData = MaterialRequestComponents::where('id',$materialComponentId)->first();
                         $materialComponentHistoryData['material_request_component_id'] = $materialComponentId;
                         MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                        $materialRequestComponentVersionData = [
+                            'material_request_component_id' => $materialComponentId,
+                            'component_status_id' => $approveStatusId,
+                            'quantity' => $materialRequestComponentData['quantity'],
+                            'unit_id' => $materialRequestComponentData['unit_id'],
+                            'user_id' => $user['id'],
+                            'remark' => $request->remark
+                        ];
+                        $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
                     }
                     break;
 
@@ -448,8 +480,17 @@ class PurchaseRequestController extends Controller
                     MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $disapproveStatusId]);
                     $materialComponentHistoryData['component_status_id'] = $disapproveStatusId;
                     foreach($materialComponentIds as $materialComponentId) {
+                        $materialRequestComponentData = MaterialRequestComponents::where('id',$materialComponentId)->first();
                         $materialComponentHistoryData['material_request_component_id'] = $materialComponentId;
                         MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                        $materialRequestComponentVersionData = [
+                            'material_request_component_id' => $materialComponentId,
+                            'component_status_id' => $disapproveStatusId,
+                            'quantity' => $materialRequestComponentData['quantity'],
+                            'unit_id' => $materialRequestComponentData['unit_id'],
+                            'remark' => $request->remark,
+                        ];
+                        $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
                     }
                     break;
 
@@ -509,6 +550,7 @@ class PurchaseRequestController extends Controller
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
                             $mailInfoData[$jIterator] = [
                                 'user_id' => Auth::user()->id,
+                                'type_slug' => 'for-quotation',
                                 'created_at' => Carbon::now(),
                                 'updated_at' => Carbon::now()
                             ];

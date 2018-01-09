@@ -1,3 +1,4 @@
+@section('navBar')
 <div class="page-header">
     <div class="page-header-top">
         <div class="container">
@@ -8,6 +9,17 @@
                 </a>
             </div>
             <!-- END LOGO -->
+            <div class="col-md-3 col-md-offset-2 form-group globalSiteSelect">
+                <select class="bs-select form-control" data-style="btn-info" data-width="100%" id="globalProjectSite">
+                    @foreach($globalProjectSites as $projectSite)
+                        @if($projectSite->project_site_id == $selectGlobalProjectSite)
+                            <option value="{{$projectSite->project_site_id}}" selected>{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                        @else
+                            <option value="{{$projectSite->project_site_id}}">{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
             <!-- BEGIN RESPONSIVE MENU TOGGLER -->
             <a href="javascript:;" class="menu-toggler"></a>
             <!-- END RESPONSIVE MENU TOGGLER -->
@@ -207,7 +219,7 @@
                             </li>
                     @endif
                     <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
-                    @if($hasStructurePermission)
+                    @if($hasQuotationPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a href="/quotation/manage/status#2"> Quotations
                                 <span class="arrow"></span>
@@ -249,6 +261,11 @@
                                     <i class="fa fa-bars"></i> Purchase Order Billing
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/vendor-mail/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Vendor Mails
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     @endif
@@ -262,6 +279,11 @@
                                 <li aria-haspopup="true">
                                     <a href="/inventory/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Store Keeper
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Site Transfer
                                     </a>
                                 </li>
                             </ul>
@@ -280,6 +302,16 @@
                             <li aria-haspopup="true">
                                 <a href="/checklist/structure/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Checklist Structure
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/checklist/site-assignment/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Project Site Assignment
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/checklist/user-assignment/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> User Checklist Management
                                 </a>
                             </li>
                         </ul>
@@ -364,7 +396,7 @@
                         </ul>
                     </li>
                     @endif
-                <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Subcontractor
                             <span class="arrow"></span>
                         </a>
@@ -403,6 +435,30 @@
                             </li>
                         </ul>
                     </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> DPR
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/dpr/category_manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/dpr/manage_dpr" class="nav-link nav-toggle ">
+                                    <i class="fa fa-file" aria-hidden="true"></i> DPR Management
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @if(($user->roles[0]->role->slug == 'superadmin'))
+                    {{--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a href="/reports"> Reports
+                            <span class="arrow"></span>
+                        </a>
+                    </li>--}}
+                    @endif
                 </ul>
             </li>
         </div>
@@ -414,3 +470,4 @@
     <!-- END HEADER MENU -->
 </div>
 </div>
+@endsection

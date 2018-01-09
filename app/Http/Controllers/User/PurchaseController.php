@@ -9,10 +9,12 @@ use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
+use App\MaterialRequestComponentVersion;
 use App\MaterialRequests;
 use App\MaterialVersion;
 use App\Project;
 use App\ProjectSite;
+use App\PurchaseOrderComponent;
 use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use App\QuotationMaterial;
@@ -27,6 +29,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class PurchaseController extends Controller
 {
@@ -37,14 +40,9 @@ class PurchaseController extends Controller
     }
     public function getManageView(Request $request){
         try{
-            $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
-            $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
-            $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
-            $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
-            $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
             $purchaseStatus = PurchaseRequestComponentStatuses::get()->toArray();
             $units = Unit::where('is_active', true)->select('id','name')->get();
-            return view('purchase/material-request/manage')->with(compact('units','clients','purchaseStatus'));
+            return view('purchase/material-request/manage')->with(compact('units','purchaseStatus'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Material Request manage page',
@@ -68,15 +66,12 @@ class PurchaseController extends Controller
             $month = 0;
             $year = 0;
             $m_count = 0;
-            $client_id = 0;
-            $project_id = 0;
             $postDataArray = array();
             if ($request->has('m_name')) {
                 if ($request['m_name'] != "") {
                     $m_name = $request['m_name'];
                 }
             }
-
             if ($request->has('status')) {
                 $status = $request['status'];
             }
@@ -92,45 +87,41 @@ class PurchaseController extends Controller
                         $postDataArray[$narr[0]] = $ytr[1];
                     }
                 }
-                $client_id = $postDataArray['client_id'];
-                $project_id = $postDataArray['project_id'];
-                $site_id = $postDataArray['site_id'];
                 $month = $postDataArray['month'];
                 $year = $postDataArray['year'];
                 $m_count = $postDataArray['m_count'];
             }
+            if($request->has('site_id')){
+                $site_id = $request->site_id;
+            }
             $materialRequests = array();
             $ids = MaterialRequests::all()->pluck('id');
             $filterFlag = true;
-
             if ($site_id != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($year != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($month != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-           if ($status != 0 && $filterFlag == true) {
+            if ($status != 0 && $filterFlag == true) {
                $ids = MaterialRequests::join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                    ->where('material_request_components.component_status_id',$status)->distinct('material_requests.id')->pluck('material_requests.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
-
             if ($m_count != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->where('serial_no', $m_count)->pluck('id');
                 if(count($ids) <= 0) {
@@ -144,173 +135,162 @@ class PurchaseController extends Controller
             $materialRequestList = array();
             $iterator = 0;
             foreach($materialRequests as $key => $materialRequest){
-                foreach($materialRequest->materialRequestComponents as $key => $materialRequestComponents){
-                  $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponents->id;
-                  $materialRequestList[$iterator]['name'] = $materialRequestComponents->name;
-                  $materialRequestList[$iterator]['quantity'] = $materialRequestComponents->quantity;
-                  $materialRequestList[$iterator]['unit_id'] = $materialRequestComponents->unit_id;
-                  $materialRequestList[$iterator]['unit'] = $materialRequestComponents->unit->name;
-                  $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponents->component_type_id;
-                  $materialRequestList[$iterator]['component_type'] = $materialRequestComponents->materialRequestComponentTypes->name;
-                  $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponents->component_status_id;
-                  $materialRequestList[$iterator]['component_status'] = $materialRequestComponents->purchaseRequestComponentStatuses->slug;
-                  $materialRequestList[$iterator]['component_status_name'] = $materialRequestComponents->purchaseRequestComponentStatuses->name;
-                  $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
-                  $pro = $materialRequest->projectSite->project;
-                  $materialRequestList[$iterator]['project_name'] =$pro->name;
-                  $materialRequestList[$iterator]['client_name'] =$pro->client->company;
-                  $materialRequestList[$iterator]['site_name'] =$materialRequest->projectSite->name;
-                  $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
-                  $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request-component',$materialRequest['project_site_id'],$materialRequestComponents['created_at'],$materialRequestComponents->serial_no);
-                  $materialRequestList[$iterator]['mr_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequest->serial_no);
-                  $iterator++;
-              }
-          }
-          $iTotalRecords = count($materialRequestList);
-          $records = array();
-          $records['data'] = array();
-          $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
-          for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
-              switch(strtolower($materialRequestList[$pagination]['component_status'])){
-                  case 'pending':
-                      if(in_array($materialRequestList[$pagination]['component_type_id'],$assetComponentTypeIds)){
+                $materialRequestComponentArray = MaterialRequestComponents::where('material_request_id',$materialRequest->id)->orderBy('id','desc')->get();
+                foreach($materialRequestComponentArray as $key => $materialRequestComponents){
+                    $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponents->id;
+                    $materialRequestList[$iterator]['name'] = $materialRequestComponents->name;
+                    $materialRequestList[$iterator]['quantity'] = $materialRequestComponents->quantity;
+                    $materialRequestList[$iterator]['unit_id'] = $materialRequestComponents->unit_id;
+                    $materialRequestList[$iterator]['unit'] = $materialRequestComponents->unit->name;
+                    $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponents->component_type_id;
+                    $materialRequestList[$iterator]['component_type'] = $materialRequestComponents->materialRequestComponentTypes->name;
+                    $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponents->component_status_id;
+                    $materialRequestList[$iterator]['component_status'] = $materialRequestComponents->purchaseRequestComponentStatuses->slug;
+                    $materialRequestList[$iterator]['component_status_name'] = $materialRequestComponents->purchaseRequestComponentStatuses->name;
+                    $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
+                    $pro = $materialRequest->projectSite->project;
+                    $materialRequestList[$iterator]['project_name'] =$pro->name;
+                    $materialRequestList[$iterator]['client_name'] =$pro->client->company;
+                    $materialRequestList[$iterator]['site_name'] =$materialRequest->projectSite->name;
+                    $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
+                    $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request-component',$materialRequest['project_site_id'],$materialRequestComponents['created_at'],$materialRequestComponents->serial_no);
+                    $materialRequestList[$iterator]['mr_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequest->serial_no);
+                    $iterator++;
+                }
+            }
+            $iTotalRecords = count($materialRequestList);
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+
+            $records = array();
+            $user = Auth::user();
+            $records['data'] = array();
+            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+                switch(strtolower($materialRequestList[$pagination]['component_status'])){
+                    case 'pending':
+                        if(in_array($materialRequestList[$pagination]['component_type_id'],$assetComponentTypeIds)){
                           $unitEditable = 'false';
-                      }else{
+                        }else{
                             $unitEditable = 'true';
-                      }
-                      $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'">';
-                      $user_status = '<td><span class="label label-sm label-danger">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
-                      $actionDropDown = '<div class="btn-group">
+                        }
+                        $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'">';
+                        $user_status = '<td><span class="label label-sm label-danger">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
+                        $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
-                                    </a>
-                                </li>
-                                <li>
+                            </button>                      
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request')){
+                            $actionDropDown .= '<li>
                                     <a href="javascript:void(0);" onclick="openApproveModal('.$materialRequestList[$pagination]['material_request_component_id'].')">
                                         <i class="icon-tag"></i> Approve / Disapprove 
                                     </a>
-                                </li>
-                            </ul>
-                        </div>';
-                      break;
+                                </li>';
+                        }
+                        $actionDropDown .= '</ul>
+                            </div>';
+                        break;
 
-                  case 'admin-approved':
-                      $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
-                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
-                      $actionDropDown = '<div class="btn-group">
+                    case 'admin-approved':
+                        $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
+                        $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
+                        $actionDropDown = '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">';
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request')){
+                            $actionDropDown .= '<li>
+                                    <a href="javascript:void(0);" onclick="openIndentModal('.$materialRequestList[$pagination]['material_request_component_id'].')">
+                                        <i class="icon-tag"></i>  Move To indent
+                                    </a>
+                                </li>';
+                        }
+                        $actionDropDown .= '</ul>
+                            </div>';
+                        break;
+
+                    case 'admin-disapproved':
+                        $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
+                        $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
+                        $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
-                                    </a>
-                                </li>
-                                <li>
-                                    <form action="/purchase/material-request/change-status/in-indent/'.$materialRequestList[$pagination]['material_request_component_id'].'" method="post">
-                                        <a href="javascript:void(0);" onclick="submitIndentForm(this)">
-                                            <i class="icon-tag"></i> Move To indent 
-                                        </a>
-                                        <input type="hidden" name="_token">
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>';
-                      break;
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        $actionDropDown .= '</ul>
+                            </div>';
+                        break;
 
-                  case 'admin-disapproved':
-                      $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
-                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
-                      $actionDropDown = '<div class="btn-group">
+                    case 'in-indent':
+                        $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
+                        $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
+                        $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
-                                    </a>
-                                </li>
-                            </ul>
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        $actionDropDown .= '</ul>
                         </div>';
-                      break;
+                        break;
 
-                  case 'in-indent':
-                      $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
-                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
-                      $actionDropDown = '<div class="btn-group">
+                    default:
+                        $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
+                        $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
+                        $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>';
-                      break;
-
-                  default:
-                      $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
-                      $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
-                      $actionDropDown = '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit 
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>';
-                      break;
-              }
-              $records['data'][$iterator] = [
-                  $checkboxComponent,
-                  $materialRequestList[$pagination]['rm_id'],
-                  $materialRequestList[$pagination]['name'],
-                  $materialRequestList[$pagination]['client_name'],
-                  $materialRequestList[$pagination]['project_name']." - ".$materialRequestList[$pagination]['site_name'],
-                  $materialRequestList[$pagination]['mr_id'],
-                  date('d M Y',strtotime($materialRequestList[$pagination]['created_at'])),
-                  $user_status,
-                  $actionDropDown
-              ];
-          }
-          $records["draw"] = intval($request->draw);
-          $records["recordsTotal"] = $iTotalRecords;
-          $records["recordsFiltered"] = $iTotalRecords;
+                            <ul class="dropdown-menu pull-left" role="menu">';
+                        $actionDropDown .='</ul>
+                            </div>';
+                        break;
+                }
+                $records['data'][$iterator] = [
+                    $checkboxComponent,
+                    $materialRequestList[$pagination]['rm_id'],
+                    $materialRequestList[$pagination]['name'],
+                    $materialRequestList[$pagination]['client_name'],
+                    $materialRequestList[$pagination]['project_name']." - ".$materialRequestList[$pagination]['site_name'],
+                    $materialRequestList[$pagination]['mr_id'],
+                    date('d M Y',strtotime($materialRequestList[$pagination]['created_at'])),
+                    $user_status,
+                    $actionDropDown,
+                    '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$materialRequestList[$pagination]['material_request_component_id'].')">
+                                        Details
+                                    </a>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+            $status = 200;
         }catch(\Exception $e){
-          $records = array();
-          $data = [
+            $data = [
               'action' => 'Material Request listing',
               'params' => $request->all(),
               'exception'=> $e->getMessage()
-          ];
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = [];
         }
-        return response()->json($records,200);
+        return response()->json($records,$status);
     }
     public function editMaterialRequest(Request $request){
         return view('purchase/material-request/edit');
     }
     public function autoSuggest(Request $request){
         try{
-            $request['project_site_id'] = ProjectSite::where('name', $request['site'] )->pluck('id')->first();
             $message = "Success";
             $iterator = 0;
             $data = array();
@@ -393,7 +373,7 @@ class PurchaseController extends Controller
                         $materialList[$iterator]['material_request_component_type_id'] = $structureMaterialSlug->id;
                         $iterator++;
                     }*/
-                    if(count($materialList) == 0){
+                    /*if(count($materialList) == 0){
                         $materialList[$iterator]['material_name'] = null;
                         $systemUnits = Unit::where('is_active',true)->get();
                         $j = 0;
@@ -406,7 +386,7 @@ class PurchaseController extends Controller
                         $newMaterialSlug = MaterialRequestComponentTypes::where('slug','new-material')->first();
                         $materialList[$iterator]['material_request_component_type_slug'] = $newMaterialSlug->slug;
                         $materialList[$iterator]['material_request_component_type_id'] = $newMaterialSlug->id;
-                    }
+                    }*/
                     $data= $materialList;
                     break;
                 case "asset" :
@@ -422,14 +402,14 @@ class PurchaseController extends Controller
                         $assetList[$iterator]['material_request_component_type_id'] = $systemAssetStatus->id;
                         $iterator++;
                     }
-                    if(count($assetList) == 0){
+                    /*if(count($assetList) == 0){
                         $assetList[$iterator]['asset_id'] = null;
                         $assetList[$iterator]['asset_name'] = null;
                         $assetList[$iterator]['asset_unit'] = $assetUnit;
                         $newAssetSlug = MaterialRequestComponentTypes::where('slug','new-asset')->first();
                         $assetList[$iterator]['material_request_component_type_slug'] = $newAssetSlug->slug;
                         $assetList[$iterator]['material_request_component_type_id'] = $newAssetSlug->id;
-                    }
+                    }*/
                     $data = $assetList;
                     break;
             }
@@ -463,152 +443,60 @@ class PurchaseController extends Controller
         }
         return $data;
     }
-    public function getUnitsList(Request $request){
-        try{
-            $data = $request->all();
-            $units = Unit::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
-            $opt= '';
-            foreach ($units as $unit) {
-                $opt .= '<li onclick="selectUnit(\''.htmlspecialchars($unit['name'], ENT_QUOTES).'\')">'.$unit['name'].'</li>';
-            }
-            $abc = $opt;
-            $str3 = '<ul id="material-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
-            $units = $str3;
-            return ($units);
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'M.R. Get Unit List',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            $status = 500;
-            $units = null;
-        }
-        return response()->json($units,$status);
-    }
-    public function getAssetUnitsList(Request $request){
-        $data = $request->all();
-        $units = Unit::where('name','ilike','%'.$data['keyword'].'%')->select('name','id')->get()->toarray();
-        $opt= '';
-        foreach ($units as $unit) {
-            $opt .= '<li onclick="selectAssetUnit(\''.htmlspecialchars($unit['name'], ENT_QUOTES).'\')">'.$unit['name'].'</li>';
-        }
-        $abc = $opt;
-        $str3 = '<ul id="asset-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
-        $units = $str3;
-        return ($units);
-    }
 
-    public function getProjectsList(Request $request){
-        try{
-            $data = $request->all();
-            $user = Auth::user();
-            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
-                $projects = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                                    ->join('clients','clients.id','=','projects.client_id')
-                                    ->where('project_sites.name','ilike','%'.$data['keyword'].'%')
-                                    ->where('clients.company','ilike','%'.$data['client_name'].'%')
-                                    ->select('project_sites.name as name','project_sites.id as id')
-                                    ->get()
-                                    ->toarray();
-            }else{
-                $projects = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                    ->join('clients','clients.id','=','projects.client_id')
-                    ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','user_project_sites.id')
-                    ->where('project_sites.name','ilike','%'.$data['keyword'].'%')
-                    ->where('clients.company','ilike','%'.$data['client_name'].'%')
-                    ->where('user_project_site_relation.user_id',$user->id)
-                    ->select('project_sites.name as name','project_sites.id as id')
-                    ->get()
-                    ->toarray();
-            }
-            $opt= '';
-            foreach ($projects as $project) {
-                $opt .= '<li onclick="selectProject(\''.htmlspecialchars($project['name'], ENT_QUOTES).'\','.$project['id'].')">'.$project['name'].'</li>';
-            }
-            $abc = $opt;
-            $str3 = '<ul id="asset-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
-            $projects = $str3;
-            $status = 200;
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Get Project List',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            $status = 500;
-            $projects = '';
-        }
-        return response()->json($projects,$status);
-
-    }
-    public function  getClientsList(Request $request){
-        try{
-            $status = 200;
-            $data = $request->all();
-            $user = Auth::user();
-            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
-                $clients = Client::where('company','ilike','%'.$data['keyword'].'%')->select('company','id')->get()->toarray();
-            }else{
-                $clients = Client::join('projects','projects.client_id','=','clients.id')
-                    ->join('project_sites','project_sites.project_id','=','projects.id')
-                    ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','project_sites.id')
-                    ->where('clients.company','ilike','%'.$data['keyword'].'%')
-                    ->where('user_project_site_relation.user_id',$user->id)
-                    ->select('clients.company as company','clients.id as id')
-                    ->distinct('id')
-                    ->get();
-            }
-            $opt= '';
-            foreach ($clients as $client) {
-                $opt .= '<li onclick="selectClient(\''.htmlspecialchars($client['company'], ENT_QUOTES).'\')">'.$client['company'].'</li>';
-            }
-            $abc = $opt;
-            $str3 = '<ul id="client-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
-            $clients = $str3;
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Get Client List',
-                'params' => $request->all(),
-                'exception' => $request->all()
-            ];
-            Log::critical(json_encode($data));
-            $status = 500;
-            $clients = '';
-        }
-        return response()->json($clients,$status);
-
-    }
     public function getUsersList(Request $request){
         try{
             $data = $request->all();
-            $projectSite = ProjectSite::where('name','ilike',$data['project_site_name'])->pluck('id')->first();
-            $adminUsers = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
-                                ->join('roles','roles.id','=','user_has_roles.role_id')
-                                ->whereIn('roles.slug',['admin','superadmin'])
-                                ->where(function($query) use($data){
-                                    $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
-                                    $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
-                                })
-                                ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
-                                ->get()->toArray();
-            $users = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
-                        ->join('roles','roles.id','=','user_has_roles.role_id')
-                        ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
-                        ->whereNotIn('roles.slug',['admin','superadmin'])
-                        ->where(function($query) use($data){
-                            $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
-                            $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
-                        })
-                        ->where('user_project_site_relation.project_site_id',$projectSite)
-                        ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
-                        ->get()->toArray();
-            $users = array_merge($adminUsers,$users);
+            $projectSiteId = $request->project_site_id;
+            if($request->module == 'material-request'){
+                $users = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                    ->join('roles','roles.id','=','user_has_roles.role_id')
+                    ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
+                    ->join('user_has_permissions','user_has_permissions.user_id','=','users.id')
+                    ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                    ->whereNotIn('roles.slug',['admin','superadmin'])
+                    ->where(function($query) use($data){
+                        $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
+                        $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
+                    })
+                    ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                    ->whereIn('permissions.name',['create-material-request','approve-material-request'])
+                    ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
+                    ->distinct('id')
+                    ->get()->toArray();
+            }elseif ($request->module == 'purchase-request'){
+                $users = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                    ->join('roles','roles.id','=','user_has_roles.role_id')
+                    ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
+                    ->join('user_has_permissions','user_has_permissions.user_id','=','users.id')
+                    ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                    ->whereNotIn('roles.slug',['admin','superadmin'])
+                    ->where(function($query) use($data){
+                        $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
+                        $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
+                    })
+                    ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                    ->whereIn('permissions.name',['create-purchase-request','approve-purchase-request'])
+                    ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
+                    ->distinct('id')
+                    ->get()->toArray();
+            }else{
+                $users = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                    ->join('roles','roles.id','=','user_has_roles.role_id')
+                    ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
+                    ->whereNotIn('roles.slug',['admin','superadmin'])
+                    ->where(function($query) use($data){
+                        $query->where('users.first_name','ilike','%'.$data['keyword'].'%');
+                        $query->orWhere('users.last_name','ilike','%'.$data['keyword'].'%');
+                    })
+                    ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                    ->select('users.first_name as first_name','users.last_name as last_name','users.id as id')
+                    ->distinct('id')
+                    ->get()->toArray();
+            }
             $opt= '';
             foreach ($users as $user) {
-                $opt .= '<li onclick="selectUser(\''.htmlspecialchars($user['first_name'], ENT_QUOTES).'\','.$user['id'].')">'.$user['first_name'].' '.$user['last_name'].'</li>';
+                $opt .= '<li onclick="selectUser(\''.htmlspecialchars($user['first_name'].' '.$user['last_name'], ENT_QUOTES).'\','.$user['id'].')">'.$user['first_name'].' '.$user['last_name'].'</li>';
             }
             $abc = $opt;
             $str3 = '<ul id="asset-list" style="border: 1px solid;height: 100px;overflow-y: overlay">'.$abc.'</ul>';
@@ -648,111 +536,108 @@ class PurchaseController extends Controller
             abort(500);
         }
     }
-
     public function getMaterialRequestWiseListing(Request $request){
-          try{
-              $postdata = null;
-              $mr_name = "";
-              $status = 0;
-              $site_id = 0;
-              $month = 0;
-              $year = 0;
-              $mr_count = 0;
-              $client_id = 0;
-              $project_id = 0;
-              $postDataArray = array();
-              if ($request->has('mr_name')) {
-                  if ($request['mr_name'] != "") {
-                      $mr_name = $request['mr_name'];
-                  }
-              }
+        try{
+            $postdata = null;
+            $mr_name = "";
+            $status = 0;
+            $site_id = 0;
+            $month = 0;
+            $year = 0;
+            $mr_count = 0;
+            $postDataArray = array();
+            if ($request->has('mr_name')) {
+                if ($request['mr_name'] != "") {
+                  $mr_name = $request['mr_name'];
+                }
+            }
 
-              if ($request->has('status')) {
-                  $status = $request['status'];
-              }
-              if($request->has('postdata')) {
-                  $postdata = $request['postdata'];
-                  if($postdata != null) {
-                      $mstr = explode(",",$request['postdata']);
-                      foreach($mstr as $nstr)
-                      {
-                          $narr = explode("=>",$nstr);
-                          $narr[0] = str_replace("\x98","",$narr[0]);
-                          $ytr[1] = $narr[1];
-                          $postDataArray[$narr[0]] = $ytr[1];
-                      }
-                  }
-                  $client_id = $postDataArray['client_id'];
-                  $project_id = $postDataArray['project_id'];
-                  $site_id = $postDataArray['site_id'];
-                  $month = $postDataArray['month'];
-                  $year = $postDataArray['year'];
-                  $mr_count = $postDataArray['mr_count'];
-              }
-              $materialRequests = array();
-              $ids = MaterialRequests::all()->pluck('id');
-              $filterFlag = true;
-
-              if ($site_id != 0 && $filterFlag == true) {
-                  $ids = MaterialRequests::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
-                  if(count($ids) <= 0) {
-                      $filterFlag = false;
-                  }
-              }
-
-              if ($year != 0 && $filterFlag == true) {
-                  $ids = MaterialRequests::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
-                  if(count($ids) <= 0) {
-                      $filterFlag = false;
-                  }
-              }
-
-              if ($month != 0 && $filterFlag == true) {
-                  $ids = MaterialRequests::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
-                  if(count($ids) <= 0) {
-                      $filterFlag = false;
-                  }
-              }
-              if ($status != 0 && $filterFlag == true) {
-                  $ids = MaterialRequests::join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
-                      ->where('material_request_components.component_status_id',$status)->distinct('material_requests.id')->pluck('material_requests.id');
-                  if(count($ids) <= 0) {
-                      $filterFlag = false;
-                  }
-              }
-
-              if ($mr_count != 0 && $filterFlag == true) {
-                  $ids = MaterialRequests::whereIn('id',$ids)->where('serial_no', $mr_count)->pluck('id');
-                  if(count($ids) <= 0) {
-                      $filterFlag = false;
-                  }
-              }
-
-              if ($filterFlag) {
-                  $materialRequests = MaterialRequests::whereIn('id',$ids)->orderBy('id','desc')->get();
-              }
-              $materialRequestList = array();
-              $iterator = 0;
-              foreach($materialRequests as $key => $materialRequest){
-                  $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
-                  $pro = $materialRequest->projectSite->project;
-                  $materialRequestList[$iterator]['project_name'] =$pro->name;
-                  $materialRequestList[$iterator]['client_name'] =$pro->client->company;
-                  $materialRequestList[$iterator]['site_name'] = $materialRequest->projectSite->name;
-                  $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
-                  $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequest->serial_no);
-                  $iterator++;
-              }
-              $iTotalRecords = count($materialRequestList);
-              $records = array();
-              $iterator = 0;
-              $records['data'] = array();
-              for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
-                  $records['data'][$iterator] = [
-                      $materialRequestList[$pagination]['rm_id'],
-                      $materialRequestList[$pagination]['client_name'],
-                      $materialRequestList[$pagination]['project_name']." - ".$materialRequestList[$pagination]['site_name'],
-                      '<div class="btn-group">
+            if ($request->has('status')) {
+                $status = $request['status'];
+            }
+            if($request->has('postdata')) {
+                $postdata = $request['postdata'];
+                if($postdata != null) {
+                    $mstr = explode(",",$request['postdata']);
+                    foreach($mstr as $nstr)
+                    {
+                      $narr = explode("=>",$nstr);
+                      $narr[0] = str_replace("\x98","",$narr[0]);
+                      $ytr[1] = $narr[1];
+                      $postDataArray[$narr[0]] = $ytr[1];
+                    }
+                }
+                $site_id = $postDataArray['site_id'];
+                $month = $postDataArray['month'];
+                $year = $postDataArray['year'];
+                $mr_count = $postDataArray['mr_count'];
+            }
+            if($request->has('site_id')){
+                $site_id = $request->site_id;
+            }
+            $materialRequests = array();
+            $ids = MaterialRequests::all()->pluck('id');
+            $filterFlag = true;
+            if ($site_id != 0 && $filterFlag == true) {
+                $ids = MaterialRequests::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
+                if(count($ids) <= 0) {
+                  $filterFlag = false;
+                }
+            }
+            if ($year != 0 && $filterFlag == true) {
+                $ids = MaterialRequests::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
+                if(count($ids) <= 0) {
+                  $filterFlag = false;
+                }
+            }
+            if ($month != 0 && $filterFlag == true) {
+                $ids = MaterialRequests::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
+                if(count($ids) <= 0) {
+                  $filterFlag = false;
+                }
+            }
+            if ($status != 0 && $filterFlag == true) {
+                $ids = MaterialRequests::join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
+                  ->where('material_request_components.component_status_id',$status)->distinct('material_requests.id')->pluck('material_requests.id');
+                if(count($ids) <= 0) {
+                  $filterFlag = false;
+                }
+            }
+            if ($mr_count != 0 && $filterFlag == true) {
+                $ids = MaterialRequests::whereIn('id',$ids)->where('serial_no', $mr_count)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($filterFlag) {
+                $materialRequests = MaterialRequests::whereIn('id',$ids)->orderBy('id','desc')->get();
+            }
+            $materialRequestList = array();
+            $iterator = 0;
+            foreach($materialRequests as $key => $materialRequest){
+                $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
+                $pro = $materialRequest->projectSite->project;
+                $materialRequestList[$iterator]['project_name'] =$pro->name;
+                $materialRequestList[$iterator]['client_name'] =$pro->client->company;
+                $materialRequestList[$iterator]['site_name'] = $materialRequest->projectSite->name;
+                $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
+                $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequest->serial_no);
+                $iterator++;
+            }
+            $iTotalRecords = count($materialRequestList);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $materialRequestList[$pagination]['rm_id'],
+                    $materialRequestList[$pagination]['client_name'],
+                    $materialRequestList[$pagination]['project_name']." - ".$materialRequestList[$pagination]['site_name'],
+                    '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -765,19 +650,19 @@ class PurchaseController extends Controller
                             </li>-->
                         </ul>
                     </div>'
-                  ];
-              }
-              $records["draw"] = intval($request->draw);
-              $records["recordsTotal"] = $iTotalRecords;
-              $records["recordsFiltered"] = $iTotalRecords;
-          }catch(\Exception $e){
-              $records = array();
-              $data = [
-                  'action' => 'Material Request listing',
-                  'params' => $request->all(),
-                  'exception'=> $e->getMessage()
-              ];
-          }
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+              'action' => 'Material Request listing',
+              'params' => $request->all(),
+              'exception'=> $e->getMessage()
+            ];
+        }
         return response()->json($records,200);
     }
     public function getMaterialRequestWiseListingView(){
@@ -788,32 +673,45 @@ class PurchaseController extends Controller
         $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
         return view ('purchase/material-request/material-request-listing')->with(compact('clients'));
     }
-
     public function changeMaterialRequestComponentStatus(Request $request,$newStatus,$componentId = null){
         try{
+            $user = Auth::user();
             switch($newStatus){
                 case 'admin-approved':
                     $componentIds = $request->component_id;
-                    if($request->has('request')){
-                        $remark = $request->remark;
-                    }else{
-                        $remark = '';
-                    }
                     foreach($componentIds as $componentId){
                         $materialRequestComponent = MaterialRequestComponents::where('id',$componentId)->first();
+                        $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
                         if($materialRequestComponent->purchaseRequestComponentStatuses->slug == 'pending'){
                             if($request->has('quantity')){
+                                if($materialRequestComponent['quantity'] != $request->quantity){
+                                    $materialRequestComponentVersion['material_request_component_id'] = $materialRequestComponent['id'];
+                                    $materialRequestComponentVersion['component_status_id'] = $adminApproveComponentStatusId;
+                                    $materialRequestComponentVersion['user_id'] = $user['id'];
+                                    $materialRequestComponentVersion['quantity'] = $request->quantity;
+                                    $materialRequestComponentVersion['unit_id'] = $materialRequestComponent['unit_id'];
+                                    $materialRequestComponentVersion['remark'] = $request->remark;
+                                    MaterialRequestComponentVersion::create($materialRequestComponentVersion);
+                                }
                                 $materialRequestComponent->update(['quantity' => $request->quantity]);
                             }
                             if($request->has('unit_id')){
+                                if($materialRequestComponent['unit_id'] != $request->unit_id) {
+                                    $materialRequestComponentVersion['material_request_component_id'] = $materialRequestComponent['id'];
+                                    $materialRequestComponentVersion['component_status_id'] = $adminApproveComponentStatusId;
+                                    $materialRequestComponentVersion['user_id'] = $user['id'];
+                                    $materialRequestComponentVersion['quantity'] = $materialRequestComponent['quantity'];
+                                    $materialRequestComponentVersion['unit_id'] = $request->unit_id;
+                                    $materialRequestComponentVersion['remark'] = $request->remark;
+                                    MaterialRequestComponentVersion::create($materialRequestComponentVersion);
+                                }
                                 $materialRequestComponent->update(['unit_id' => $request->unit_id]);
                             }
                             $quotationMaterialType = MaterialRequestComponentTypes::where('slug','quotation-material')->first();
                             $projectSiteId = $materialRequestComponent->materialRequest->project_site_id;
-                            $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
                             $materialComponentHistoryData = array();
                             $materialComponentHistoryData['component_status_id'] = $adminApproveComponentStatusId;
-                            $materialComponentHistoryData['remark'] = $remark;
+                            $materialComponentHistoryData['remark'] = $request->remark;
                             $materialComponentHistoryData['user_id'] = Auth::user()->id;
                             $materialComponentHistoryData['material_request_component_id'] = $componentId;
                             if($materialRequestComponent['component_type_id'] == $quotationMaterialType->id){
@@ -836,13 +734,9 @@ class PurchaseController extends Controller
                                     ->whereIn('product_material_relation.material_version_id',$materialVersions)
                                     ->sum(DB::raw('quotation_products.quantity * product_material_relation.material_quantity'));
                                 $allowedQuantity = $material_quantity - $usedQuantity;
-                                if((int)$materialRequestComponent['quantity'] < $allowedQuantity){
-                                    MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
-                                    $message = "Status Updated Successfully";
-                                    MaterialRequestComponentHistory::create($materialComponentHistoryData);
-                                }else{
-                                    $message = "Allowed quantity is ".$allowedQuantity;
-                                }
+                                MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
+                                MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                                $message = "Status Updated Successfully";
                             }else{
                                 MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
                                 $message = "Status Updated Successfully";
@@ -873,15 +767,25 @@ class PurchaseController extends Controller
 
                 case 'in-indent':
                     $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug',$newStatus)->pluck('id')->first();
-                    MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $inIndentStatusId]);
-                    $materialComponentHistoryData['material_request_component_id'] = $componentId;
+                    $materialRequestComponent = MaterialRequestComponents::where('id',$request['component_id'])->first();
+                    if($materialRequestComponent['quantity'] != $request->quantity || $materialRequestComponent['unit_id'] != $request->unit_id){
+                        $materialRequestComponentVersion['material_request_component_id'] = $request['component_id'];
+                        $materialRequestComponentVersion['component_status_id'] = $inIndentStatusId;
+                        $materialRequestComponentVersion['user_id'] = $user['id'];
+                        $materialRequestComponentVersion['quantity'] = $request->quantity;
+                        $materialRequestComponentVersion['unit_id'] = $request->unit_id;
+                        $materialRequestComponentVersion['remark'] = $request->remark;
+                        MaterialRequestComponentVersion::create($materialRequestComponentVersion);
+                    }
+                    MaterialRequestComponents::where('id',$request['component_id'])->update(['component_status_id' => $inIndentStatusId,'quantity' => $request->quantity,'unit_id' => $request->unit_id]);
                     $materialComponentHistoryData = array();
                     $materialComponentHistoryData['component_status_id'] = $inIndentStatusId;
                     $materialComponentHistoryData['user_id'] = Auth::user()->id;
-                    $materialComponentHistoryData['material_request_component_id'] = $componentId;
+                    $materialComponentHistoryData['material_request_component_id'] = $request['component_id'];
                     MaterialRequestComponentHistory::create($materialComponentHistoryData);
                     break;
             }
+            $request->session()->flash('success', "Status updated successfully.");
             return redirect('/purchase/material-request/manage');
         }catch(\Exception $e){
             $data = [
@@ -892,7 +796,6 @@ class PurchaseController extends Controller
             Log::critical(json_encode($data));
         }
     }
-
     public function getMaterialRequestComponentDetail(Request $request,$materialRequestComponent)
     {
         try {
@@ -949,58 +852,87 @@ class PurchaseController extends Controller
         return response()->json($response, $status);
     }
 
-    public function getProjects(Request $request, $client){
+    public function getPurchaseDetails(Request $request,$materialRequestComponentId){
         try{
-            $status = 200;
-            if ($client == 0) {
-                $projectOptions[] = '<option value="0">ALL</option>';
-            } else {
-                $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
-                $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
-                $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
-                $projects = Project::where('client_id',$client)->whereIn('id',$projectIds)->get()->toArray();
-                $projectOptions = array();
-                for($i = 0 ; $i < count($projects); $i++){
-                    $projectOptions[] = '<option value="'.$projects[$i]['id'].'"> '.$projects[$i]['name'].' </option>';
-                }
-            }
-        }catch (\Exception $e){
-            $projectOptions = array();
-            $status = 500;
-            $data = [
-                'actions' => 'Get Project from client',
-                'params' => $request->all(),
-                'exception' => $e->getMessage(),
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
-        }
-        return response()->json($projectOptions,$status);
-    }
+            $data = array();
+            $materialRequestComponent = MaterialRequestComponents::where('id',$materialRequestComponentId)->first();
+            $materialComponentVersions = $materialRequestComponent->materialRequestComponentVersion;
+            $iterator = 0;
+            foreach($materialComponentVersions as $key => $materialComponentVersion){
+                $materialRequestComponentStatusSlug = $materialComponentVersion->purchaseRequestComponentStatuses->slug;
+                $user = $materialComponentVersion->user;
+                switch ($materialRequestComponentStatusSlug){
+                    case 'pending' :
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material requested by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
 
-    public function getProjectSites(Request $request,$project){
-        try{
-            $status = 200;
-            if ($project == 0) {
-                $projectSitesOptions[] = '<option value="0">ALL</option>';
-            } else {
-                $projectSites = ProjectSite::where('project_id', $project)->get()->toArray();
-                $projectSitesOptions = array();
-                for($i = 0 ; $i < count($projectSites); $i++){
-                    $projectSitesOptions[] = '<option value="'.$projectSites[$i]['id'].'"> '.$projectSites[$i]['name'].' </option>';
+                    case 'manager-approved' :
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material approved by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'manager-disapproved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material disapproved by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'admin-approved' :
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material approved by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'admin-disapproved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material disapproved by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'in-indent':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' material moved to Purchase by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-assigned':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. created by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-manager-approved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. approved by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-manager-disapproved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. disapproved by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-admin-approved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. approved by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'p-r-admin-disapproved':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' P. R. disapproved by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
+
+                    case 'purchase-requested':
+                        $data[$iterator]['display_message'] = date('l, d F Y',strtotime($materialComponentVersion['created_at'])).' '.$materialComponentVersion['quantity'].' '.$materialComponentVersion->unit->name.' purchase requested by '.$user->first_name.' '.$user->last_name.''.$materialComponentVersion->remark;
+                        break;
                 }
+                $iterator++;
             }
-        }catch (\Exception $e){
-            $projectSitesOptions = array();
-            $status = 500;
+            $purchaseOrderComponent = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                ->where('material_request_components.id',$materialRequestComponentId)
+                ->select('purchase_orders.user_id','purchase_orders.is_approved','purchase_orders.purchase_order_status_id','purchase_orders.created_at','purchase_order_components.quantity','purchase_order_components.unit_id','purchase_order_components.remark')
+                ->first();
+            if($purchaseOrderComponent != null){
+                $unitName = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                $user = User::where('id',$purchaseOrderComponent['user_id'])->first();
+                $data[$iterator]['display_message'] = date('l, d F Y',strtotime($purchaseOrderComponent['created_at'])).' '.$purchaseOrderComponent['quantity'].' '.$unitName.' purchase order created by '.$user->first_name.' '.$user->last_name.''.$purchaseOrderComponent['remark'];
+            }
+            return view('partials.purchase.purchase-detail')->with(compact('data'));
+        }catch(\Exception $e){
             $data = [
-                'actions' => 'Get Project Site',
+                'action' => 'Get Purchase Details',
                 'params' => $request->all(),
-                'exception' => $e->getMessage(),
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            abort(500);
+            return response()->json([],500);
         }
-        return response()->json($projectSitesOptions,$status);
     }
 }

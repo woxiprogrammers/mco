@@ -61,29 +61,11 @@
                                                         <fieldset>
                                                             <legend>Project</legend>
                                                             <div class="row">
-                                                                <div class="col-md-3 col-md-offset-0">
-                                                                    Client Name
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    Project Name
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    Project Site Name
-                                                                </div>
                                                                 <div class="col-md-3">
                                                                     Purchase Order
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3 form-group">
-                                                                    <input type="text" class="form-control" readonly value="{{$purchaseOrderBill->purchaseOrder->purchaseRequest->projectSite->project->client->company}}">
-                                                                </div>
-                                                                <div class="col-md-3 form-group">
-                                                                    <input readonly type="text" class="form-control" value="{{$purchaseOrderBill->purchaseOrder->purchaseRequest->projectSite->project->name}}">
-                                                                </div>
-                                                                <div class="col-md-3 form-group">
-                                                                    <input type="text" readonly class="form-control" value="{{$purchaseOrderBill->purchaseOrder->purchaseRequest->projectSite->name}}">
-                                                                </div>
                                                                 <div class="col-md-3 form-group">
                                                                     <input type="text" readonly class="form-control" value="{{$purchaseOrderBill->purchaseOrder->format_id}}">
                                                                 </div>
@@ -91,6 +73,14 @@
                                                         </fieldset>
                                                         <fieldset style="margin-top: 2%">
                                                             <legend> Bill Details </legend>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right"> GRN </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control calculate-amount" name="grn" id="subTotal" value="{{$grn}}" readonly>
+                                                                </div>
+                                                            </div>
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
                                                                     <label class="control-label pull-right">Sub-Total</label>
@@ -101,44 +91,10 @@
                                                             </div>
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
-                                                                    <label class="control-label pull-right">CGST</label>
+                                                                    <label class="control-label pull-right">Tax Amount</label>
                                                                 </div>
-                                                                <div class="col-md-3" id="inputGroup">
-                                                                    <div class="input-group">
-                                                                        <input type="number" class="form-control tax" id="cgstPercentage" name="cgst_percentage" value="{{$purchaseOrderBill->cgst_percentage}}">
-                                                                        <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <input type="text" class="form-control calculate-amount" placeholder="CGST Amount" name="cgst_amount" value="{{$purchaseOrderBill->cgst_amount}}">
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group row">
-                                                                <div class="col-md-2">
-                                                                    <label class="control-label pull-right">SGST</label>
-                                                                </div>
-                                                                <div class="col-md-3" id="inputGroup">
-                                                                    <div class="input-group">
-                                                                        <input type="number" class="form-control tax" id="cgstPercentage" name="sgst_percentage" value="{{$purchaseOrderBill->sgst_percentage}}">
-                                                                        <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <input type="text" class="form-control calculate-amount" placeholder="SGST Amount" name="sgst_amount" value="{{$purchaseOrderBill->sgst_amount}}">
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group row">
-                                                                <div class="col-md-2">
-                                                                    <label class="control-label pull-right">IGST</label>
-                                                                </div>
-                                                                <div class="col-md-3" id="inputGroup">
-                                                                    <div class="input-group">
-                                                                        <input type="number" class="form-control tax" id="cgstPercentage" name="igst_percentage" value="{{$purchaseOrderBill->igst_percentage}}">
-                                                                        <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <input type="text" class="form-control calculate-amount" name="igst_amount" placeholder="IGST Amount" value="{{$purchaseOrderBill->igst_amount}}">
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="tax_amount" id="taxAmount" value="{{$purchaseOrderBill->tax_amount}}" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group row">

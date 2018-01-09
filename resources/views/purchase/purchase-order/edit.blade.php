@@ -4,13 +4,7 @@
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
     <style>
-        .thumbimage {
-            float:left;
-            width:100%;
-            height: 200px;
-            position:relative;
-            padding:5px;
-        }
+
     </style>
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
@@ -28,11 +22,18 @@
                                 <div class="page-title">
                                     <h1>Edit Purchase Order</h1>
                                 </div>
-                                @if($isClosed != true)
+                                @if($purchaseOrderStatusSlug != 'close')
                                     <div class="form-group " style="text-align: center">
                                         <button id="poCloseBtn" type="submit" class="btn red pull-right margin-top-15">
                                             <i class="fa fa-close" style="font-size: large"></i>
-                                            Close this purchase order.
+                                            Close
+                                        </button>
+                                    </div>
+                                @elseif($purchaseOrderStatusSlug == 'close' && $userRole == 'superadmin')
+                                    <div class="form-group " style="text-align: center">
+                                        <button id="poReopenBtn" type="submit" class="btn red pull-right margin-top-15">
+                                            <i class="fa fa-open" style="font-size: large"></i>
+                                            Reopen
                                         </button>
                                     </div>
                                 @endif
@@ -58,20 +59,6 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label style="color: darkblue;">Client Name</label>
-                                                            <input type="text" class="form-control" name="client_name" value="{{$purchaseOrderList['client_name']}}" readonly tabindex="-1">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label style="color: darkblue;">Project Name</label>
-                                                            <input type="text" class="form-control" name="project_name" value="{{$purchaseOrderList['project']}}" readonly tabindex="-1">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
                                                             <label style="color: darkblue;">Purchase Request Id</label>
                                                             <input type="text" class="form-control" name="client_name"  value="{{$purchaseOrderList['purchase_request_format_id']}}" readonly tabindex="-1">
                                                         </div>
@@ -92,7 +79,7 @@
                                             <div class="portlet light ">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        @if($isClosed != true)
+                                                        @if($purchaseOrderStatusSlug == 'open' || $purchaseOrderStatusSlug == 're-open')
                                                             <div class="row">
                                                                 <div class="col-md-offset-9 col-md-3 ">
                                                                     <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
@@ -113,12 +100,11 @@
                                                             </thead>
                                                             <tbody>
                                                                 @foreach($materialList as $key => $materialData)
-
                                                                     <tr>
                                                                         <td> {{$materialData['material_component_name']}} </td>
                                                                         <td>  {{$materialData['material_component_quantity']}} </td>
                                                                         <td> {{$materialData['material_component_unit_name']}} </td>
-                                                                        <td><button class="image" value="{{$materialData['purchase_order_component_id']}}">View</button>
+                                                                        <td><button class="component-view" value="{{$materialData['purchase_order_component_id']}}">View</button>
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
@@ -126,8 +112,9 @@
                                                         </table>
                                                     </div>
                                                     <div class="modal fade" id="ImageUpload" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                                        <div class="modal-dialog">
+                                                        <div class="modal-dialog transaction-modal">
                                                             <div class="modal-content">
+
                                                                 <div class="modal-header" >
                                                                     <div class="row">
                                                                         <div class="col-md-4"></div>
@@ -135,84 +122,9 @@
                                                                         <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                                     </div>
                                                                 </div>
-                                                            <div class="modal-body">
-                                                                <form role="form" class="form-horizontal" method="post">
-                                                                    {!! csrf_field() !!}
-                                                                    <div class="form-body">
-                                                                        <div class="form-group row">
-                                                                            <div class="col-md-12" style="text-align: right">
-                                                                                <input type="text" class="form-control empty typeahead tt-input" id="material_name" placeholder="Enter material name" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="qty" placeholder="Enter Quantity" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="unit" placeholder="Enter Unit" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
-                                                                                <br><input type="hidden" class="form-control empty typeahead tt-input" id="searchbox" placeholder="Enter Rate" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" readonly>
-                                                                                <br><input type="text" class="form-control empty typeahead tt-input" id="hsn_code" placeholder="Enter HSNCODE" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;" >
-                                                                               <br>
-                                                                                <div class="form-group row">
-                                                                                    <div class="col-md-12">
-                                                                                        Vendor Quotation Image
-                                                                                        <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
-                                                                                            <!-- Indicators -->
-                                                                                            <ol class="carousel-indicators">
-                                                                                                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="1"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="2"></li>
-                                                                                            </ol>
+                                                                <div class="modal-body">
+                                                                    <form role="form" class="form-horizontal" method="post">
 
-                                                                                            <!-- Wrapper for slides -->
-                                                                                            <div class="carousel-inner">
-                                                                                                <div id ="imagecorousel">
-
-                                                                                                </div>
-
-                                                                                            </div>
-
-
-                                                                                            <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-                                                                                                <span class="glyphicon glyphicon-chevron-left"></span>
-                                                                                                <span class="sr-only">Previous</span>
-                                                                                            </a>
-                                                                                            <a class="right carousel-control" href="#myCarousel" data-slide="next">
-                                                                                                <span class="glyphicon glyphicon-chevron-right"></span>
-                                                                                                <span class="sr-only">Next</span>
-                                                                                            </a>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <br>
-                                                                                <div class="form-group row">
-                                                                                    <div class="col-md-12">
-                                                                                        Client Approval Note Image
-                                                                                        <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
-                                                                                            <!-- Indicators -->
-                                                                                            <ol class="carousel-indicators">
-                                                                                                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="1"></li>
-                                                                                                <li data-target="#myCarousel" data-slide-to="2"></li>
-                                                                                            </ol>
-
-                                                                                            <!-- Wrapper for slides -->
-                                                                                            <div class="carousel-inner">
-                                                                                                <div id ="imagecorouselForClientApproval">
-
-                                                                                                </div>
-
-                                                                                            </div>
-                                                                                                <!-- Left and right controls -->
-                                                                                                <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-                                                                                                    <span class="glyphicon glyphicon-chevron-left"></span>
-                                                                                                    <span class="sr-only">Previous</span>
-                                                                                                </a>
-                                                                                                <a class="right carousel-control" href="#myCarousel" data-slide="next">
-                                                                                                    <span class="glyphicon glyphicon-chevron-right"></span>
-                                                                                                    <span class="sr-only">Next</span>
-                                                                                                </a>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
                                                                     </form>
                                                                 </div>
                                                             </div>
@@ -345,7 +257,11 @@
                                                                                     <div class="form-control product-material-select" style="font-size: 14px; height: 200px !important;" >
                                                                                         <ul id="material_id" class="list-group">
                                                                                             @foreach($materialList as $key => $materialData)
-                                                                                                <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}"><label class="control-label">{{$materialData['material_component_name']}} </label></li>
+                                                                                                @if($materialData['material_component_remaining_quantity'] != 0.0)
+                                                                                                   <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}"><label class="control-label">{{$materialData['material_component_name']}} </label></li>
+                                                                                                @else
+                                                                                                    <li><input type="checkbox" class="component-select" value="{{$materialData['purchase_order_component_id']}}" disabled="disabled"><label class="control-label">{{$materialData['material_component_name']}} </label>&nbsp;&nbsp;&nbsp;(PO Complete)</li>
+                                                                                                @endif
                                                                                             @endforeach
                                                                                         </ul>
                                                                                     </div>
@@ -398,6 +314,23 @@
                                                                             </div>
                                                                         </div>
                                                                     </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal fade" id="editTransactionModal" role="dialog">
+                                                        <div class="modal-dialog transaction-modal" style="width: 90%; ">
+                                                            <!-- Modal content-->
+                                                            <div class="modal-content" style="overflow: scroll !important;">
+                                                                <div class="modal-header">
+                                                                    <div class="row">
+                                                                        <div class="col-md-4"></div>
+                                                                        <div class="col-md-4" style="font-size: 18px"> Purchase Order Transaction</div>
+                                                                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-body" style="padding:40px 50px;">
+
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -617,6 +550,21 @@
 
             $(".transaction-edit-btn").on('click', function(){
                var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
+               $.ajax({
+                    url:'/purchase/purchase-order/transaction/edit/'+transactionId+"?_token="+$('input[name="_token"]').val()+"&isShowTax=false",
+                    type: 'POST',
+                    data:{
+                        _token: $('input[name="_token"]').val(),
+                        isShowTax: false
+                    },
+                    success: function(data,textStatus,xhr){
+                        $("#editTransactionModal .modal-body").html(data);
+                        $("#editTransactionModal").modal('show');
+                    },
+                    error: function(errorStatus){
+
+                    }
+               });
             });
 
             $("#transactionButton").on('click',function(){

@@ -1,6 +1,10 @@
-var  CreateCheckListStructure = function () {
+/**
+ * Created by Ameya Joshi on 26/12/17.
+ */
+
+var  CreateMaterialRequest = function () {
     var handleCreate = function() {
-        var form = $('#create-user');
+        var form = $('#new_material_request');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -8,38 +12,16 @@ var  CreateCheckListStructure = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                main_cat: {
+                user_name: {
                     required: true
                 },
-                sub_cat:{
-                    required: true
-                },
-                title_name:{
-                    required: true
-                },
-                nochapter:{
-                    required: true,
-                    email: true
-                },
-                description:{
-                    required: true
+                user_id:{
+                    requried: true
                 }
             },
             messages: {
-                main_cat: {
-                    required: "Main Category Name is required."
-                },
-                sub_cat:{
-                    required: "Sub Category Name is required."
-                },
-                title_name:{
-                    required: "Title Name is required."
-                },
-                nochapter:{
-                    required: "Number of Images is required."
-                },
-                description:{
-                    required: "Description is required."
+                user_name:{
+                    required: 'Please select the user.'
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
@@ -73,9 +55,9 @@ var  CreateCheckListStructure = function () {
     };
 }();
 
-var  EditCheckListStructure = function () {
-    var handleEdit = function() {
-        var form = $('#edit-vendor');
+var  CreatePurchaseRequest = function () {
+    var handleCreate = function() {
+        var form = $('#new_purchase_request');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
         form.validate({
@@ -83,38 +65,16 @@ var  EditCheckListStructure = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                main_cat: {
+                user_name: {
                     required: true
                 },
-                sub_cat:{
-                    required: true
-                },
-                title_name:{
-                    required: true
-                },
-                nochapter:{
-                    required: true,
-                    email: true
-                },
-                description:{
-                    required: true
+                user_id:{
+                    requried: true
                 }
             },
             messages: {
-                main_cat: {
-                    required: "Main Category Name is required."
-                },
-                sub_cat:{
-                    required: "Sub Category Name is required."
-                },
-                title_name:{
-                    required: "Title Name is required."
-                },
-                nochapter:{
-                    required: "Number of Images is required."
-                },
-                description:{
-                    required: "Description is required."
+                user_name:{
+                    required: 'Please select the user.'
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
@@ -143,9 +103,7 @@ var  EditCheckListStructure = function () {
     }
     return {
         init: function () {
-            handleEdit();
+            handleCreate();
         }
-    }
-};
-
-
+    };
+}();

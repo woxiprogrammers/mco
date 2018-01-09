@@ -119,7 +119,7 @@
                                 Sr.no.
                             </th>
                             @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
-                                <th style="width: 250px">
+                                <th style="width: 250px;">
                                     Item Name - Description
                                 </th>
                                 <th>
@@ -153,7 +153,7 @@
                                 <td>
                                     {!! $iterator + 1 !!}
                                 </td>
-                                <td>
+                                <td style="text-align: left;padding-left: 5px" >
                                     {{$vendorInfo['materials'][$iterator]['item_name']}}
                                 </td>
                                 @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))

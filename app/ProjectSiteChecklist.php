@@ -14,11 +14,15 @@ class ProjectSiteChecklist extends Model
         return $this->belongsTo('App\QuotationFloor','quotation_floor_id');
     }
 
-    public function project_site(){
+    public function projectSite(){
         return $this->belongsTo('App\ProjectSite','project_site_id','id');
     }
 
     public function checklistCategory(){
         return $this->belongsTo('App\ChecklistCategory','checklist_category_id');
+    }
+
+    public function projectSiteChecklistCheckpoints(){
+        return $this->hasMany('App\ProjectSiteChecklistCheckpoint','project_site_checklist_id');
     }
 }

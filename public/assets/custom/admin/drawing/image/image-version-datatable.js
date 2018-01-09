@@ -3,7 +3,6 @@
  */
 
 var QuotationImageUpload = function() {
-    var quotationId = $("#quotationId").val();
     var e = function() {
         var e = new plupload.Uploader({
             max_files : 20,
@@ -17,7 +16,7 @@ var QuotationImageUpload = function() {
                 max_file_size: "1mb",
                 mime_types: [{
                     title: "Image files",
-                    extensions: "jpg,jpeg,png"
+                    extensions: "jpg,jpeg,png,dwg"
                 }]
             },
             flash_swf_url: "/assets/global/plugins/plupload/js/Moxie.swf",

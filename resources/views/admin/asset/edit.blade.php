@@ -129,6 +129,15 @@
                                                             <input type="number" class="form-control" id="price" name="price" value="{{$asset['price']}}">
                                                         </div>
                                                     </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="number" class="control-label">Rent</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="number" class="form-control" id="rent_per_day" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}">
+                                                        </div>
+                                                    </div>
                                                     <div class="form-group">
                                                         <div class="row">
                                                             <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>

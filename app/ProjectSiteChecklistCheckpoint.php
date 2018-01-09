@@ -17,4 +17,8 @@ class ProjectSiteChecklistCheckpoint extends Model
     public function checklistCategory(){
         return $this->belongsTo('App\ChecklistCategory','checklist_category_id');
     }
+
+    public function projectSiteChecklistCheckpointImages(){
+        return $this->hasMany('App\ProjectSiteChecklistCheckpointImages','project_site_checklist_checkpoint_id');
+    }
 }

@@ -28,6 +28,7 @@ use App\ProjectSite;
 use App\Quotation;
 use App\QuotationBankInfo;
 use App\QuotationExtraItem;
+use App\QuotationFloor;
 use App\QuotationMaterial;
 use App\QuotationProduct;
 use App\QuotationProfitMarginVersion;
@@ -749,7 +750,7 @@ trait QuotationTrait{
                 ->join('units','units.id','=','materials.unit_id')
                 ->join('category_material_relations','category_material_relations.material_id','=','materials.id')
                 ->join('categories','category_material_relations.category_id','=','categories.id')
-                ->select('categories.name as category_name','quotation_materials.id as quotation_material_id','quotation_materials.material_id as material_id','materials.name as material_name','quotation_materials.rate_per_unit as rate_per_unit','units.id as unit_id','units.name as unit_name','quotation_materials.quantity as quantity')
+                ->select('categories.name as category_name','quotation_materials.id as quotation_material_id','quotation_materials.material_id as material_id','materials.name as material_name','quotation_materials.rate_per_unit as rate_per_unit','units.id as unit_id','units.name as unit_name','quotation_materials.quantity as quantity','quotation_materials.is_client_supplied')
                 ->get();
             if($quotationMiscellaneousMaterials == null || count($quotationMiscellaneousMaterials) == 0){
                 $quotationMiscellaneousMaterials = Material::join('units','units.id','=','materials.unit_id')
@@ -1280,7 +1281,49 @@ trait QuotationTrait{
                 $quotationExtraItemData['rate'] = $extraItemValue;
                 QuotationExtraItem::create($quotationExtraItemData);
             }
+            if($request->has('bank')){
+                foreach($request->bank as $key => $bankID){
+                    $quotationBankInfoData['bank_info_id'] = $bankID;
+                    $quotationBankInfoData['quotation_id'] = $request->quotation_id;
+                    $quotationBankInfo = QuotationBankInfo::where('quotation_id',$request->quotation_id)->where('bank_info_id',$bankID)->first();
+                    if($quotationBankInfo != null){
+                        $quotationBankInfo->update($quotationBankInfoData);
+                    }else{
+                        QuotationBankInfo::create($quotationBankInfoData);
+                    }
+                }
+            }
+            if($request->has('miscellaneous_material_id')){
+                foreach ($request['miscellaneous_material_id'] as $material_id => $materialData){
+                    if(array_key_exists('is_client_supplied',$materialData)){
+                        $is_client_supplied = true;
+                    }else{
+                        $is_client_supplied = false;
+                    }
+                    if(array_key_exists('quotation_material_id',$materialData)){
+                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit'], 'is_client_supplied' => $is_client_supplied]);
+                    }else{
+                        QuotationMaterial::create([
+                            'material_id' => $material_id,
+                            'rate_per_unit' => $materialData['rate_per_unit'],
+                            'unit_id' => $materialData['unit_id'],
+                            'is_client_supplied' => $is_client_supplied,
+                            'quotation_id' => $request['quotation_id'],
+                            'quantity' => $materialData['quantity']
+                        ]);
+                    }
+                }
+            }
             $imagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$request->quotation_id,$workOrder['id']);
+            if($request->has('quotation_floor')){
+                $quotationFloorData = [
+                    'quotation_id' => $quotation->id
+                ];
+                foreach($request->quotation_floor as $quotationFloor){
+                    $quotationFloorData['name'] = $quotationFloor;
+                    QuotationFloor::create($quotationFloorData);
+                }
+            }
             $request->session()->flash('success','Quotation Approved Successfully');
             Quotation::where('id',$request->quotation_id)->update($quotationData);
             return redirect('/quotation/edit/'.$request->quotation_id);
@@ -1291,6 +1334,7 @@ trait QuotationTrait{
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+            abort(500);
         }
     }
 
@@ -1431,22 +1475,57 @@ trait QuotationTrait{
             }
             if($request->has('miscellaneous_material_id')){
                 foreach ($request['miscellaneous_material_id'] as $material_id => $materialData){
+                    if(array_key_exists('is_client_supplied',$materialData)){
+                        $is_client_supplied = true;
+                    }else{
+                        $is_client_supplied = false;
+                    }
                     if(array_key_exists('quotation_material_id',$materialData)){
-                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit']]);
+                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit'], 'is_client_supplied' => $is_client_supplied]);
                     }else{
                         QuotationMaterial::create([
                             'material_id' => $material_id,
                             'rate_per_unit' => $materialData['rate_per_unit'],
                             'unit_id' => $materialData['unit_id'],
-                            'is_client_supplied' => false,
+                            'is_client_supplied' => $is_client_supplied,
                             'quotation_id' => $request['quotation_id'],
                             'quantity' => $materialData['quantity']
                         ]);
                     }
                 }
             }
-
             $isImagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$workOrder->quotation_id,$workOrder['id']);
+            if($request->has('quotation_floor')){
+                $quotationFloors = QuotationFloor::where('quotation_id',$request->quotation_id)->orderBy('id')->get();
+                $quotationFloorData = [
+                    'quotation_id' => $request->quotation_id
+                ];
+                if($quotationFloors == null){
+                    foreach($request->quotation_floor as $quotationFloor){
+                        $quotationFloorData['name'] = $quotationFloor;
+                        QuotationFloor::create($quotationFloorData);
+                    }
+                }else{
+                    $jIterator = $iIterator = 0;
+                    while($jIterator < count($quotationFloors) && $iIterator < count($request->quotation_floor)){
+                        $quotationFloorData['name'] = $request->quotation_floor[$iIterator];
+                        $quotationFloors[$jIterator]->update($quotationFloorData);
+                        $iIterator++;
+                        $jIterator++;
+                    }
+                    while($jIterator < count($quotationFloors)){
+                        QuotationFloor::where('id',$quotationFloors[$jIterator]->id)->delete();
+                        $jIterator++;
+                    }
+                    while($iIterator < count($request->quotation_floor)){
+                        $quotationFloorData['name'] = $request->quotation_floor[$iIterator];
+                        QuotationFloor::create($quotationFloorData);
+                        $iIterator++;
+                    }
+                }
+            }else{
+                QuotationFloor::where('quotation_id',$request->quotation_id)->delete();
+            }
             $request->session()->flash('success','Work Order Updated Successfully');
             return redirect('/quotation/edit/'.$request->quotation_id);
         }catch(\Exception $e){
@@ -1456,6 +1535,7 @@ trait QuotationTrait{
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+            abort(500);
         }
     }
 

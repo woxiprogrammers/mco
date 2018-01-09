@@ -69,6 +69,7 @@ class AssetManagementController extends Controller
             $data['litre_per_unit'] = $request->litre_per_unit;
             $data['is_active'] = false;
             $data['quantity'] = $request->qty;
+            $data['rent_per_day'] = $request->rent_per_day;
             $asset = Asset::create($data);
             if($request->work_order_images != null) {
                 $assetId = $asset['id'];
@@ -115,6 +116,7 @@ class AssetManagementController extends Controller
             $assetData['electricity_per_unit'] = $data['electricity_per_unit'];
             $assetData['asset_types_id'] = $data['asset_type'];
             $assetData['price'] = $data['price'];
+            $assetData['rent_per_day'] = $data['rent_per_day'];
             $asset->update($assetData);
             $work_order_images = $request->work_order_images;
             $assetImages = $request->asset_images;

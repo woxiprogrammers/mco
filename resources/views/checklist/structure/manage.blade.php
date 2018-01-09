@@ -42,18 +42,17 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="checkListTable">
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="checklistStructureTable">
                                                     <thead>
                                                     <tr>
-                                                        <th style="width: 30%"> ID </th>
+                                                        <th style="width: 10%"> ID </th>
                                                         <th> Main-Category Name </th>
                                                         <th> Sub-Category Name </th>
                                                         <th> No. Of Checkpoints </th>
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
-                                                        <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_id"> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
+                                                        <th style="width: 10%"> <input type="text" class="form-control form-filter" name="search_id"> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_cub_category" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_no_of_checkpoints" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
@@ -87,10 +86,10 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-   {{-- <script src="/assets/custom/admin/checkliststructure/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/checklist/structure-manage-datatable.js" type="application/javascript"></script>
     <script>
         $(document).ready(function() {
-            $('#checkListTable').DataTable();
+            ChecklistStructureListing.init();
         });
-    </script>--}}
+    </script>
 @endsection

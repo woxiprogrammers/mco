@@ -1,6 +1,6 @@
 
 $(document).ready(function(){
-    $(".image").click(function(){
+    $(".component-view").click(function(){
         var component_id = $(this).val();
         $.ajax({
             type: "POST",
@@ -10,23 +10,11 @@ $(document).ready(function(){
                 $.LoadingOverlay("hide");
             },
             success: function(data){
-               $('#material_name').val(data.name);
-               $('#qty').val(data.quantity);
-               $('#unit').val(data.unit_name);
-               $('#hsn_code').val(data.hsn_code);
-               var abc = [];
-               $.each(data.material_component_images ,function(key,value){
-                 abc += '<div class="item"><img src="'+ value.name + '"alt="New york" style="width:100%;height: 170px"></div>';
-                });
-                $('#imagecorousel').html(abc);
-                $.each(data.client_approval_images ,function(key,value){
-                    abc += '<div class="item"><img id="image" src="'+ value.name + '"alt="New york" style="width:100%;height: 170px"></div>';
-                });
-                $('#imagecorouselForClientApproval').html(abc);
-
+                $("#ImageUpload .modal-body form").html(data);
+                $("#ImageUpload").modal();
             }
         });
-        $("#ImageUpload").modal();
+
     });
     $(".transaction").click(function(){
         var component_id = $(this).val();
@@ -90,9 +78,24 @@ $(document).ready(function(){
             beforeSend: function(){
             },
             success: function(data){
-              alert(data);
                 location.reload();
             }
         });
     });
+    $('#poReopenBtn').click(function (){
+        var po_id = $('#po_id').val();
+        var vendor_id = $('#vendor_id').val();
+        $.ajax({
+            type: "POST",
+            url: "/purchase/purchase-order/reopen",
+            data:{po_id : po_id , vendor_id:vendor_id},
+            beforeSend: function(){
+
+                },
+            success: function(data){
+                location.reload();
+            }
+        });
+    });
+
 });

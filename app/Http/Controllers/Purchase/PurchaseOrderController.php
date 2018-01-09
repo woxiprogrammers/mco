@@ -9,6 +9,7 @@ use App\CategoryMaterialRelation;
 use App\Client;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
+use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
@@ -23,12 +24,15 @@ use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillPayment;
+use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderComponent;
+use App\PurchaseOrderStatus;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionComponent;
 use App\PurchaseOrderTransactionImage;
 use App\PurchaseOrderTransactionStatus;
 use App\PurchaseRequest;
+use App\PurchaseRequestComponentVendorMailInfo;
 use App\Quotation;
 use App\QuotationStatus;
 use App\UnitConversion;
@@ -48,6 +52,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use App\Unit;
+use Illuminate\Support\Facades\Session;
 
 
 class PurchaseOrderController extends Controller
@@ -68,13 +73,27 @@ class PurchaseOrderController extends Controller
     public function getCreateView(Request $request){
         try{
             $purchaseOrderComponentPRIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
-            $adminApprovePurchaseRequestInfo = PurchaseRequestComponent::join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
-                                                ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
-                                                ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
-                                                ->whereNotIn('purchase_request_components.id',$purchaseOrderComponentPRIds)
-                                                ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
-                                                ->get()
-                                                ->toArray();
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $adminApprovePurchaseRequestInfo = PurchaseRequestComponent::join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                    ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
+                    ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
+                    ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
+                    ->whereNotIn('purchase_request_components.id',$purchaseOrderComponentPRIds)
+                    ->where('purchase_requests.project_site_id',$projectSiteId)
+                    ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
+                    ->get()
+                    ->toArray();
+            }else{
+                $adminApprovePurchaseRequestInfo = PurchaseRequestComponent::join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                    ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','purchase_requests.purchase_component_status_id')
+                    ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
+                    ->whereIn('purchase_request_component_statuses.slug',['p-r-admin-approved','p-r-manager-approved'])
+                    ->whereNotIn('purchase_request_components.id',$purchaseOrderComponentPRIds)
+                    ->select('purchase_requests.id as id','purchase_requests.project_site_id as project_site_id','purchase_requests.created_at as created_at','purchase_requests.serial_no as serial_no')
+                    ->get()
+                    ->toArray();
+            }
             $categories = Category::where('is_miscellaneous',true)->select('id','name')->get()->toArray();
             $purchaseRequests = array();
             foreach($adminApprovePurchaseRequestInfo as $purchaseRequest){
@@ -96,14 +115,11 @@ class PurchaseOrderController extends Controller
     public function getListing(Request $request){
         try{
             $postdata = null;
-            $po_name = "";
             $status = 0;
             $site_id = 0;
             $month = 0;
             $year = 0;
             $po_count = 0;
-            $client_id = 0;
-            $project_id = 0;
             $postDataArray = array();
             if ($request->has('po_name')) {
                 if ($request['po_name'] != "") {
@@ -126,18 +142,17 @@ class PurchaseOrderController extends Controller
                         $postDataArray[$narr[0]] = $ytr[1];
                     }
                 }
-                $client_id = $postDataArray['client_id'];
-                $project_id = $postDataArray['project_id'];
                 $site_id = $postDataArray['site_id'];
                 $month = $postDataArray['month'];
                 $year = $postDataArray['year'];
                 $po_count = $postDataArray['po_count'];
             }
             $purchaseOrderDetail = array();
-
+            if($request->has('site_id')){
+                $site_id = $request->site_id;
+            }
             $ids = PurchaseOrder::all()->pluck('id');
             $filterFlag = true;
-
             if ($site_id != 0 && $filterFlag == true) {
                 $ids = PurchaseOrder::join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                     ->where('purchase_requests.project_site_id',$site_id)->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
@@ -195,6 +210,7 @@ class PurchaseOrderController extends Controller
                      $project = $projectSite->project;
                      $purchaseOrderList[$iterator]['client_name'] = $project->client->company;
                      $purchaseOrderList[$iterator]['site_name'] = $projectSite->name;
+                     $purchaseOrderList[$iterator]['approved_quantity'] = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrder['id'])->sum('quantity');
                      $purchaseOrderList[$iterator]['project'] = $project->name;
                      $purchaseOrderList[$iterator]['chk_status'] = $purchaseOrder['is_approved'];
                      $purchaseOrderList[$iterator]['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
@@ -205,7 +221,12 @@ class PurchaseOrderController extends Controller
             $iTotalRecords = count($purchaseOrderList);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
                 $actionData = "";
                 if ($purchaseOrderList[$pagination]['chk_status'] == true) {
                     $actionData =  '<div id="sample_editable_1_new" class="btn btn-small blue" >
@@ -219,6 +240,7 @@ class PurchaseOrderController extends Controller
                     $purchaseOrderList[$pagination]['client_name'],
                     $purchaseOrderList[$pagination]['project']." - ".$purchaseOrderList[$pagination]['site_name'],
                     date('d M Y',strtotime($purchaseOrderList[$pagination]['created_at'])),
+                    $purchaseOrderList[$pagination]['approved_quantity'],
                     $purchaseOrderList[$pagination]['status'],
                     $actionData
                 ];
@@ -280,7 +302,7 @@ class PurchaseOrderController extends Controller
     public function closePurchaseOrder(Request $request){
         try{
             $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();
-            $purchase_order_data['is_closed'] = true;
+            $purchase_order_data['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','close')->pluck('id')->first();
             PurchaseOrder::where('id',$request['po_id'])->update($purchase_order_data);
             $mailData = ['toMail' => $mail_id];
             Mail::send('purchase.purchase-order.email.purchase-order-close', [], function($message) use ($mailData){
@@ -298,12 +320,27 @@ class PurchaseOrderController extends Controller
             $message = "Something went wrong" .$e->getMessage();
         }
         return response()->json($message);
-
-
     }
-    public function getEditView(Request $request,$id)
-    {
+
+    public function reopenPurchaseOrder(Request $request){
         try{
+            $purchase_order_data['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','re-open')->pluck('id')->first();
+            PurchaseOrder::where('id',$request['po_id'])->update($purchase_order_data);
+            $message = "Purchase order re-opened successfully !";
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Reopen Purchase Order',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $message = "Something went wrong" .$e->getMessage();
+        }
+        return response()->json($message);
+    }
+    public function getEditView(Request $request,$id){
+        try{
+            $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
             $purchaseOrder =PurchaseOrder::where('id',$id)->first();
             $purchaseOrderList = array();
             $iterator = 0;
@@ -331,6 +368,9 @@ class PurchaseOrderController extends Controller
                 $materialList[$iterator]['material_component_unit_id'] = $materialRequestComponent['unit_id'];
                 $materialList[$iterator]['material_component_unit_name'] = $materialRequestComponent->unit->name;
                 $materialList[$iterator]['material_component_quantity'] = $materialRequestComponent->quantity;
+                $quantityConsumed = $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
+                $quantityUnused = $purchaseOrderComponent['quantity'] - $quantityConsumed;
+                $materialList[$iterator]['material_component_remaining_quantity'] = (0.1 * ($quantityUnused)) + $quantityUnused;
                 $mainDirectoryName = sha1($id);
                 $componentDirectoryName = sha1($purchaseOrderComponent['id']);
                 $uploadPath = url('/').public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
@@ -371,67 +411,64 @@ class PurchaseOrderController extends Controller
                 ];
                 $iterator++;
             }
-
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
             $transaction_types = PaymentType::select('slug')->where('slug','!=','peticash')->get();
-            $isClosed = $purchaseOrder->is_closed;
-            return view('purchase/purchase-order/edit')->with(compact('isClosed','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName'));
+            $purchaseOrderStatusSlug = $purchaseOrder->purchaseOrderStatus->slug;
+            return view('purchase/purchase-order/edit')->with(compact('userRole','purchaseOrderStatusSlug','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName'));
         }catch (\Exception $e){
-            $data = [
-                'action' => 'Get Purchase Order Edit View',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            abort(500);
+                $data = [
+                    'action' => 'Get Purchase Order Edit View',
+                    'params' => $request->all(),
+                    'exception' => $e->getMessage()
+                ];
+                Log::critical(json_encode($data));
+                abort(500);
         }
     }
     public function getPurchaseOrderComponentDetails(Request $request){
-           $data = $request->all();
-           try{
-               $purchaseOrderComponent = PurchaseOrderComponent::where('id',$data['component_id'])->first();
-               $vendorName = $purchaseOrderComponent->purchaseOrder->vendor->name;
-               $purchaseOrderComponentData['purchase_order_component_id'] = $purchaseOrderComponent['id'];
-               $purchaseOrderComponentData['hsn_code'] = $purchaseOrderComponent['hsn_code'];
-               $purchaseOrderComponentData['rate_per_unit'] = $purchaseOrderComponent['rate_per_unit'];
-               $materialRequestComponent = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent;
-               //$purchaseOrderComponentData['quantity'] = $purchaseOrderComponent['quantity'];
-               $purchaseOrderComponentData['name'] = $materialRequestComponent['name'];
-               $purchaseOrderComponentData['quantity'] = $materialRequestComponent['quantity'];
-               $purchaseOrderComponentData['material_component_id'] = $materialRequestComponent['id'];
-               $purchaseOrderComponentData['unit_name'] = $materialRequestComponent->unit->name;
-               $purchaseOrderComponentData['unit_id'] = $materialRequestComponent['unit_id'];
-               $purchaseOrderComponentData['vendor_name'] = $vendorName;
-               $mainDirectoryName = sha1($purchaseOrderComponent->purchaseOrder->id);
-               $componentDirectoryName = sha1($purchaseOrderComponent['id']);
-               $uploadPath = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
-               $uploadPathForClientImages = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;;
-               $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
-               $imagesOfClient = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',false)->select('name')->get();
-               $j = 0;
-               $materialComponentImages = array();
-               if(count($images) > 0){
-                   foreach ($images as $image){
-                       $materialComponentImages[$j]['name'] = $uploadPath.'/'.$image['name'];
-                       $j++;
-                   }
-                   $purchaseOrderComponentData['material_component_images'] = $materialComponentImages;
-               }
-               $materialComponentImagesOfClientApproval = array();
-               if(count($imagesOfClient) > 0){
-                   foreach ($imagesOfClient as $image){
-                       $materialComponentImagesOfClientApproval[$j]['name'] = $uploadPathForClientImages.'/'.$image['name'];
-                       $j++;
-                   }
-                   $purchaseOrderComponentData['client_approval_images'] = $materialComponentImagesOfClientApproval;
-               }
-               $status = 200;
-               return response()->json($purchaseOrderComponentData,$status);
-           }catch(\Exception $e){
-                $message = $e->getMessage();
-                $status = 500;
-               return response()->json($message,$status);
-           }
+        try{
+            $data = $request->all();
+            $purchaseOrderComponent = PurchaseOrderComponent::where('id',$data['component_id'])->first();
+            $vendorName = $purchaseOrderComponent->purchaseOrder->vendor->name;
+            $purchaseOrderComponentData['purchase_order_component_id'] = $purchaseOrderComponent['id'];
+            $purchaseOrderComponentData['hsn_code'] = $purchaseOrderComponent['hsn_code'];
+            $purchaseOrderComponentData['rate_per_unit'] = $purchaseOrderComponent['rate_per_unit'];
+            $materialRequestComponent = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent;
+            $purchaseOrderComponentData['quantity'] = $purchaseOrderComponent['quantity'];
+            $purchaseOrderComponentData['name'] = $materialRequestComponent['name'];
+            $purchaseOrderComponentData['material_component_id'] = $materialRequestComponent['id'];
+            $purchaseOrderComponentData['unit_name'] = $materialRequestComponent->unit->name;
+            $purchaseOrderComponentData['unit_id'] = $materialRequestComponent['unit_id'];
+            $purchaseOrderComponentData['vendor_name'] = $vendorName;
+            $mainDirectoryName = sha1($purchaseOrderComponent->purchaseOrder->id);
+            $componentDirectoryName = sha1($purchaseOrderComponent['id']);
+            $uploadPath = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+            $uploadPathForClientImages = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;;
+            $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
+            $imagesOfClient = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',false)->select('name')->get();
+            $j = 0;
+            $materialComponentImages = array();
+            if(count($images) > 0){
+                foreach ($images as $image){
+                    $materialComponentImages[$j]['name'] = $uploadPath.'/'.$image['name'];
+                    $j++;
+                }
+                $purchaseOrderComponentData['material_component_images'] = $materialComponentImages;
+            }
+            $materialComponentImagesOfClientApproval = array();
+            if(count($imagesOfClient) > 0){
+                foreach ($imagesOfClient as $image){
+                    $materialComponentImagesOfClientApproval[$j]['name'] = $uploadPathForClientImages.'/'.$image['name'];
+                    $j++;
+                }
+                $purchaseOrderComponentData['client_approval_images'] = $materialComponentImagesOfClientApproval;
+            }
+            return view('partials.purchase.purchase-order.component-details')->with(compact('purchaseOrderComponentData','purchaseOrderComponent'));
+        }catch(\Exception $e){
+            $message = $e->getMessage();
+            $status = 500;
+           return response()->json($message,$status);
+        }
     }
     public function getPurchaseOrderBillDetails(Request $request){
         try{
@@ -513,6 +550,7 @@ class PurchaseOrderController extends Controller
                 ];
                 $inventoryComponentTransferData = array_merge($inventoryComponentTransferData,$request->except('type','component_data','material','unit_name','vendor_name','purchase_order_component_id'));
                 $inventoryComponentTransferData['source_name'] = $request->vendor_name;
+                $inventoryComponentTransferData['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                 $this->createInventoryComponentTransfer($inventoryComponentTransferData);
             }
             $request->session()->flash('success','Transaction added successfully');
@@ -527,7 +565,6 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
-
     public function createPayment(Request $request){
         try{
             $purchaseOrderBillPayment['purchase_order_bill_id'] = $request['purchase_order_bill_id'];
@@ -696,6 +733,7 @@ class PurchaseOrderController extends Controller
                             $approvePurchaseOrderData['user_id'] = Auth::user()->id;
                             $approvePurchaseOrderData['serial_no'] = ++$todaysCount;
                             $approvePurchaseOrderData['format_id'] = $this->getPurchaseIDFormat('purchase-order',$project_site_id,Carbon::now(),$approvePurchaseOrderData['serial_no']);
+                            $approvePurchaseOrderData['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','open')->pluck('id')->first();
                             $approvedPurchaseOrder = PurchaseOrder::create($approvePurchaseOrderData);
                         }
                         $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
@@ -719,6 +757,7 @@ class PurchaseOrderController extends Controller
                             $disapprovePurchaseOrderData['user_id'] = Auth::user()->id;
                             $disapprovePurchaseOrderData['serial_no'] = ++$todaysCount;
                             $disapprovePurchaseOrderData['format_id'] = $this->getPurchaseIDFormat('purchase-order',$project_site_id,Carbon::now(),$disapprovePurchaseOrderData['serial_no']);
+                            $disapprovePurchaseOrderData['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','close')->pluck('id')->first();
                             $disapprovePurchaseOrder = PurchaseOrder::create($disapprovePurchaseOrderData);
                         }
                         $purchaseOrderComponentData['purchase_order_id'] = $disapprovePurchaseOrder['id'];
@@ -730,6 +769,27 @@ class PurchaseOrderController extends Controller
                         $purchaseOrderComponentData['hsn_code'] = $component['hsn_code'];
                         $purchaseOrderComponentData['unit_id'] = $component['unit_id'];
                         $purchaseOrderComponentData['expected_delivery_date'] = $component['expected_delivery_date'];
+                        if($request->has('cgst_percentage')){
+                            $purchaseOrderComponentData['cgst_percentage'] = $component['cgst_percentage'];
+                        }
+                        if($request->has('sgst_percentage')){
+                            $purchaseOrderComponentData['sgst_percentage'] = $component['sgst_percentage'];
+                        }
+                        if($request->has('igst_percentage')){
+                            $purchaseOrderComponentData['igst_percentage'] = $component['igst_percentage'];
+                        }
+                        if($request->has('cgst_amount')){
+                            $purchaseOrderComponentData['cgst_amount'] = $component['cgst_amount'];
+                        }
+                        if($request->has('sgst_amount')){
+                            $purchaseOrderComponentData['sgst_amount'] = $component['sgst_amount'];
+                        }
+                        if($request->has('igst_amount')){
+                            $purchaseOrderComponentData['igst_amount'] = $component['igst_amount'];
+                        }
+                        if($request->has('total')){
+                            $purchaseOrderComponentData['total'] = $component['total'];
+                        }
                         $purchaseOrderComponent = PurchaseOrderComponent::create($purchaseOrderComponentData);
                         if(array_key_exists('vendor_quotation_images',$component) && (count($component['vendor_quotation_images']) > 0)){
                             /*move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)*/
@@ -795,6 +855,13 @@ class PurchaseOrderController extends Controller
                         $message->from(env('MAIL_USERNAME'));
                         $message->attach($mailData['path']);
                     });
+                    /*$mailInfoData = [
+                        'user_id' => Auth::user()->id,
+                        'type_slug' => 'for-purchase-order',
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ];
+                    PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);*/
                     unlink($pdfUploadPath);
                 }
             }
@@ -808,6 +875,82 @@ class PurchaseOrderController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+    public function getOrderDetails(Request $request,$purchaseRequestId){
+        try{
+            $purchaseOrderComponentIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
+            $purchaseRequestComponentData = PurchaseRequestComponent::where('purchase_request_id',$purchaseRequestId)
+                ->whereNotIn('id',$purchaseOrderComponentIds)
+                ->get();
+            $purchaseRequestComponents = array();
+            $iterator = 0;
+            foreach ($purchaseRequestComponentData as $purchaseRequestComponent){
+                $requestComponentVendors = PurchaseRequestComponentVendorRelation::where('purchase_request_component_id',$purchaseRequestComponent->id)->get();
+                foreach($requestComponentVendors as $vendorRelation){
+                    $purchaseRequestComponents[$iterator] = array();
+                    $materialRequest = $purchaseRequestComponent->materialRequestComponent;
+                    $materialRequestComponentSlug = $materialRequest->materialRequestComponentTypes->slug;
+                    $purchaseRequestComponents[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
+                    $purchaseRequestComponents[$iterator]['name'] = $materialRequest->name;
+                    $last_three_rates = PurchaseOrderComponent::join('purchase_request_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
+                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                        ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                        ->where('purchase_orders.is_approved',true)
+                        ->where('material_request_components.name','ilike',$materialRequest->name)
+                        ->orderBy('purchase_order_components.created_at','desc')
+                        ->select('purchase_order_components.rate_per_unit','purchase_request_components.id')
+                        ->take(3)->get()->toArray();
+                    $purchaseRequestComponents[$iterator]['last_three_rates'] = $last_three_rates;
+                    $purchaseRequestComponents[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
+                    $purchaseRequestComponents[$iterator]['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
+                    $purchaseRequestComponents[$iterator]['vendor'] = $vendorRelation->vendor->company;
+                    $purchaseRequestComponents[$iterator]['vendor_id'] = $vendorRelation->vendor_id;
+                    $purchaseRequestComponents[$iterator]['material_request_component_slug'] = $materialRequestComponentSlug;
+                    if($materialRequestComponentSlug == 'new-material'){
+                        $purchaseRequestComponents[$iterator]['categories'] = Category::where('is_miscellaneous', true)->where('is_active', true)->select('id','name')->get();
+                        if(count($purchaseRequestComponents[$iterator]['categories']) <= 0){
+                            $purchaseRequestComponents[$iterator]['categories'][] = [
+                                'id' => '',
+                                'name' => 'No special categories found'
+                            ];
+                        }
+                    }elseif($materialRequestComponentSlug == 'new-asset' || $materialRequestComponentSlug == 'system-asset'){
+                        $purchaseRequestComponents[$iterator]['categories'][] = [
+                            'id' => '',
+                            'name' => 'Asset'
+                        ];
+                    }else{
+                        $materialId = Material::where('name','ilike',$purchaseRequestComponents[$iterator]['name'])->pluck('id')->first();
+                        $purchaseRequestComponents[$iterator]['categories'] = CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
+                            ->where('category_material_relations.material_id', $materialId)
+                            ->select('categories.id as id','categories.name as name')
+                            ->get()
+                            ->toArray();
+                    }
+                    $materialInfo = Material::where('name','ilike',trim($purchaseRequestComponent->materialRequestComponent->name))->first();
+                    if($materialInfo == null){
+                        $purchaseRequestComponents[$iterator]['rate'] = '0';
+                        $purchaseRequestComponents[$iterator]['hsn_code'] = '0';
+                    }else{
+                        $purchaseRequestComponents[$iterator]['rate'] = UnitHelper::unitConversion($materialInfo['unit_id'],$purchaseRequestComponent->materialRequestComponent->unit_id,$materialInfo['rate_per_unit']);
+                        if(is_array($purchaseRequestComponents[$iterator]['rate'])){
+                            return response()->json(['message' => $purchaseRequestComponents[$iterator]['rate']['message']],203);
+                        }
+                        $purchaseRequestComponents[$iterator]['hsn_code'] = $materialInfo['hsn_code'];
+                    }
+                    $iterator++;
+                }
+            }
+            $unitInfo = Unit::where('is_active', true)->select('id','name')->get()->toArray();
+            return view('partials.purchase.purchase-order.details')->with(compact('purchaseRequestComponents','unitInfo'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get P.R. component listing in P.O.',
+                'P.R.Id' => $purchaseRequestId,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
         }
     }
 
@@ -1046,5 +1189,193 @@ class PurchaseOrderController extends Controller
             $status = 500;
         }
         return response()->json($response,$status);
+    }
+
+    public function getTransactionEditView(Request $request, $purchaseOrderTransaction){
+        try{
+            $purchaseOrder = $purchaseOrderTransaction->purchaseOrder;
+            $vendorName = $purchaseOrder->vendor->name;
+            $materialList = array();
+            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
+            $iterator = 0;
+            $purchaseOrderBill = PurchaseOrderBillTransactionRelation::where('purchase_order_transaction_id',$purchaseOrderTransaction->id)->first();
+            if($purchaseOrderBill == null){
+                $canEdit = true;
+            }else{
+                $canEdit = false;
+            }
+            $isShowTaxes = $request->isShowTax;
+            if($isShowTaxes == true || $isShowTaxes == 'true'){
+                $canEdit = false;
+            }
+            foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
+                $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
+                $materialRequestComponent = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent;
+                $materialList[$iterator]['purchase_order_component_id'] = $purchaseOrderComponent['id'];
+                $materialList[$iterator]['material_request_component_id'] = $materialRequestComponent['id'];
+                $materialList[$iterator]['name'] = $materialRequestComponent['name'];
+                $materialList[$iterator]['material_component_unit_id'] = $materialRequestComponent['unit_id'];
+                $materialList[$iterator]['material_component_unit_name'] = $materialRequestComponent->unit->name;
+                $materialList[$iterator]['material_component_quantity'] = $materialRequestComponent->quantity;
+                $materialList[$iterator]['unit_id'] = $purchaseOrderComponent->unit_id;
+                $materialList[$iterator]['quantity'] = $purchaseOrderTransactionComponent->quantity;
+                $materialList[$iterator]['units'] = array();
+                if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                    $materialList[$iterator]['units'] = Unit::where('slug','nos')->select('id','name')->get()->toArray();
+                    $asset = Asset::where('name','ilike',$materialList[$iterator]['name'])->first();
+                    $otherAssetTypeId = AssetType::where('slug','other')->pluck('id')->first();
+                    if($asset != null && $asset->asset_types_id != $otherAssetTypeId){
+                        $materialList[$iterator]['quantityIsFixed'] = true;
+                    }else{
+                        $materialList[$iterator]['quantityIsFixed'] = false;
+                    }
+                    $materialList[$iterator]['rate_per_unit'] = $purchaseOrderComponent->rate_per_unit;
+                }else{
+                    $materialList[$iterator]['quantityIsFixed'] = false;
+                    $materialList[$iterator]['rate_per_unit'] = UnitHelper::unitConversion($purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderComponent->rate_per_unit);
+                    $newMaterialTypeId = MaterialRequestComponentTypes::where('slug', 'new-material')->pluck('id')->first();
+                    if ($newMaterialTypeId == $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id) {
+                        $materialList[$iterator]['units'] = Unit::where('is_active', true)->select('id', 'name')->orderBy('name')->get()->toArray();
+                    } else {
+                        $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
+                        $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
+                            ->where('unit_conversions.unit_1_id', $material->unit_id)
+                            ->select('units.id as id', 'units.name as name')
+                            ->get()
+                            ->toArray();
+                        $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
+                            ->where('unit_conversions.unit_2_id', $material->unit_id)
+                            ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
+                            ->select('units.id as id', 'units.name as name')
+                            ->get()
+                            ->toArray();
+                        $materialList[$iterator]['units'] = array_merge($unit1Array, $units2Array);
+                        $materialList[$iterator]['units'][] = [
+                            'id' => $material->unit->id,
+                            'name' => $material->unit->name,
+                        ];
+                    }
+                }
+                if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
+                    $materialList[$iterator]['cgst_percentage'] = $purchaseOrderComponent->cgst_percent;
+                }else{
+                    $materialList[$iterator]['cgst_percentage'] = 0;
+                }
+                if($purchaseOrderComponent->sgst_percentage != null || $purchaseOrderComponent->sgst_percentage != ''){
+                    $materialList[$iterator]['sgst_percentage'] = $purchaseOrderComponent->sgst_percent;
+                }else{
+                    $materialList[$iterator]['sgst_percentage'] = 0;
+                }
+                if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
+                    $materialList[$iterator]['igst_percentage'] = $purchaseOrderComponent->igst_percent;
+                }else{
+                    $materialList[$iterator]['igst_percentage'] = 0;
+                }
+                $iterator++;
+            }
+            $preGrnImages = PurchaseOrderTransactionImage::where('purchase_order_transaction_id',$purchaseOrderTransaction->id)->where('is_pre_grn', true)->get();
+            $postGrnImages = PurchaseOrderTransactionImage::where('purchase_order_transaction_id',$purchaseOrderTransaction->id)->where('is_pre_grn', false)->get();
+            $purchaseOrderDirectoryName = sha1($purchaseOrderTransaction->purchase_order_id);
+            $purchaseTransactionDirectoryName = sha1($purchaseOrderTransaction->id);
+            $imageUploadPath = env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
+            $preGrnImagePaths = array();
+            $postGrnImagePaths = array();
+            $iterator = 0;
+            while($iterator < count($preGrnImages) && $iterator < count($postGrnImages)){
+                $preGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$preGrnImages[$iterator]->name;
+                $postGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$postGrnImages[$iterator]->name;
+                $iterator++;
+            }
+            while($iterator < count($postGrnImages)){
+                $postGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$postGrnImages[$iterator]->name;
+                $iterator++;
+            }
+            while($iterator < count($preGrnImages)){
+                $preGrnImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$preGrnImages[$iterator]->name;
+                $iterator++;
+            }
+
+            return view('partials.purchase.purchase-order.edit-transaction')->with(compact('purchaseOrderTransaction','preGrnImagePaths','postGrnImagePaths','materialList','vendorName','quantityIsFixed','canEdit','isShowTaxes'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Order Transaction Edit View',
+                'params' => $request->all(),
+                'transaction' => $purchaseOrderTransaction,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
+        }
+    }
+
+    public function transactionEdit(Request $request,$purchaseOrderTransaction){
+        try{
+            $purchaseOrderTransactionData = $request->except('_token','component_data','vendor_name','purchase_order_id');
+            $purchaseOrderTransaction->update($purchaseOrderTransactionData);
+            foreach($request->component_data as $purchaseOrderComponentId => $purchaseOrderComponentData) {
+                $purchaseOrderTransactionComponent = PurchaseOrderTransactionComponent::where('purchase_order_component_id',$purchaseOrderComponentId)->first();
+                $purchaseOrderTransactionComponentData = [
+                    'quantity' => $purchaseOrderComponentData['quantity'],
+                    'unit_id' => $purchaseOrderComponentData['unit_id'],
+                ];
+                $purchaseOrderTransactionComponent->update($purchaseOrderTransactionComponentData);
+            }
+            return redirect('/purchase/purchase-order/edit/'.$purchaseOrderTransaction->purchase_order_id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Purchase Order Transaction',
+                'params' => $request->all(),
+                'transaction' => $purchaseOrderTransaction,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getComponentTaxData(Request $request,$purchaseRequestComponent){
+        try{
+            $data = [
+                'purchase_request_component_id' => $purchaseRequestComponent->id,
+                'name' => $purchaseRequestComponent->materialRequestComponent->name,
+                'vendor_id' => $request->vendor_id
+            ];
+            if($request->has('rate') && $request->rate != null){
+                $data['rate'] = $request->rate;
+            }else{
+                $data['rate'] = '';
+            }
+            if($request->has('quantity') && $request->quantity != null){
+                $data['quantity'] = $request->quantity;
+            }else{
+                $data['quantity'] = '';
+            }
+            if($request->has('cgst_percentage') && $request->cgst_percentage != null){
+                $data['cgst_percentage'] = $request->cgst_percentage;
+            }else{
+                $data['cgst_percentage'] = '';
+            }
+            if($request->has('igst_percentage') && $request->igst_percentage != null){
+                $data['igst_percentage'] = $request->igst_percentage;
+            }else{
+                $data['igst_percentage'] = '';
+            }
+            if($request->has('sgst_percentage') && $request->sgst_percentage != null){
+                $data['sgst_percentage'] = $request->sgst_percentage;
+            }else{
+                $data['sgst_percentage'] = '';
+            }
+            return view('partials.purchase.purchase-order.component-tax-modal')->with(compact('data'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get purchase request component tax data',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = [];
+            return response()->json($response,$status);
+        }
     }
 }

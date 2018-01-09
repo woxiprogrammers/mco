@@ -19,11 +19,13 @@
                                 <div class="page-title">
                                     <h1>Manage Purchase Order</h1>
                                 </div>
-                                <div class="btn-group pull-right margin-top-15">
-                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order
-                                        </a>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-order'))
+                                    <div class="btn-group pull-right margin-top-15">
+                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
@@ -37,27 +39,6 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="row">
-                                                        <div class="col-md-2">
-                                                            <label>Select Client :</label>
-                                                            <select class="form-control" id="client_id" name="client_id">
-                                                                <option value="0">ALL</option>
-                                                                @foreach($clients as $client)
-                                                                <option value="{{$client['id']}}">{{$client['company']}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <label>Select Project :</label>
-                                                            <select class="form-control" id="project_id" name="project_id">
-                                                                <option value="0">ALL</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <label>Select Site :</label>
-                                                            <select class="form-control" id="site_id" name="site_id">
-                                                                <option value="0">ALL</option>
-                                                            </select>
-                                                        </div>
                                                         <div class="col-md-2">
                                                             <label>Select Year :</label>
                                                             <select class="form-control" id="year" name="year">
@@ -114,12 +95,14 @@
                                                                 <th> Client Name </th>
                                                                 <th> Project Name - Site Name</th>
                                                                 <th> Created At</th>
+                                                                <th> Approved Quantity</th>
                                                                 <th> Status </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th><input type="text" class="form-control form-filter" name="po_name" readonly></th>
                                                                 <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                <th></th>
                                                                 <th></th>
                                                                 <th></th>
                                                                 <th></th>
@@ -168,27 +151,14 @@
     <script>
         $(document).ready(function() {
             $('#purchaseOrder').DataTable();
-
-            $("#client_id").on('change', function(){
-                getProjects($('#client_id').val());
-            });
-            $("#project_id").on('change', function(){
-                getProjectSites($('#project_id').val());
-            });
-
             $("#status_id").on('change',function(){
-                var client_id = $('#client_id').val();
-                var project_id = $('#project_id').val();
-                var site_id = $('#site_id').val();
+                var site_id = $('#globalProjectSite').val();
                 var year = $('#year').val();
                 var month = $('#month').val();
                 var status_id = $('#status_id').val();
                 var po_name = $('#po_name').val();
                 var po_count = $('#po_count').val();
-
                 var postData =
-                    'client_id=>'+client_id+','+
-                        'project_id=>'+project_id+','+
                         'site_id=>'+site_id+','+
                         'year=>'+year+','+
                         'month=>'+month+','+
@@ -201,23 +171,17 @@
             });
 
             $("#search-withfilter").on('click',function(){
-                var client_id = $('#client_id').val();
-                var project_id = $('#project_id').val();
-                var site_id = $('#site_id').val();
+                var site_id = $('#globalProjectSite').val();
                 var year = $('#year').val();
                 var month = $('#month').val();
                 var status_id = $('#status_id').val();
                 var po_name = $('#po_name').val();
                 var po_count = $('#po_count').val();
-
                 var postData =
-                    'client_id=>'+client_id+','+
-                        'project_id=>'+project_id+','+
                         'site_id=>'+site_id+','+
                         'year=>'+year+','+
                         'month=>'+month+','+
                         'po_count=>'+po_count;
-
                 $("input[name='postdata']").val(postData);
                 $("input[name='po_name']").val(po_name);
                 $("input[name='status']").val(status_id);
@@ -225,39 +189,6 @@
             });
         });
 
-        function getProjects(client_id){
-            $.ajax({
-                url: '/purchase/projects/'+client_id,
-                type: 'GET',
-                async : false,
-                success: function(data,textStatus,xhr){
-                    if(xhr.status == 200){
-                        $('#project_id').html(data);
-                        $('#project_id').prop('disabled',false);
-                        getProjectSites($('#project_id').val());
-                    }
-                },
-                error: function(errorStatus,xhr){
 
-                }
-            });
-        }
-
-        function getProjectSites(project_id){
-            $.ajax({
-                url: '/purchase/project-sites/'+project_id,
-                type: 'GET',
-                async : false,
-                success: function(data,textStatus,xhr){
-                    if(xhr.status == 200){
-                        $('#site_id').html(data);
-                        $('#site_id').prop('disabled',false);
-                    }
-                },
-                error: function(errorStatus,xhr){
-
-                }
-            });
-        }
     </script>
 @endsection

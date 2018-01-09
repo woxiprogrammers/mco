@@ -43,46 +43,11 @@
                                             <div class="form-body">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Client Name</label>
-                                                        <span>*</span>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <select class="form-control" id="clientId" readonly="true">
-                                                                <option value="{{$client['id']}}">{{$client['company']}} </option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Project Name</label>
-                                                        <span>*</span>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" readonly="true">
-                                                            <option value="{{$project['id']}}">{{$project['name']}} </option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="name" class="control-label">Site Name</label>
-                                                        <span>*</span>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" readonly="true">
-                                                            <option value="{{$site['id']}}">{{$site['name']}} </option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
                                                         <label for="name" class="control-label">Main Category</label>
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" readonly="true">
-                                                            <option value="{{$main_category['id']}}">{{$main_category['name']}} </option>
-                                                        </select>
+                                                        <input type="text" value="{{$main_category['name']}}" class="form-control" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
@@ -91,9 +56,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" readonly="true">
-                                                            <option value="{{$sub_category['id']}}">{{$sub_category['name']}} </option>
-                                                        </select>
+                                                        <input type="text" value="{{$sub_category['name']}}" class="form-control" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
@@ -200,10 +163,11 @@
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/drawing/image/image-datatable.js"></script>
-    <script src="/assets/custom/admin/drawing/image/image-version-datatable.js"></script>
+    {{--<script src="/assets/custom/admin/drawing/image/image-version-datatable.js"></script>--}}
     <script src="/assets/custom/admin/drawing/image/image-upload.js"></script>
-    <script src="/assets/custom/admin/drawing/image/image-version-upload.js"></script>
+    {{--<script src="/assets/custom/admin/drawing/image/image-version-upload.js"></script>--}}
     <script src="/assets/custom/admin/drawing/image/validation.js" type="application/javascript"></script>
+    <script src="/assets/custom/Drawing/drawing.js" type="application/javascript"></script>
     <script>
         $(document).ready(function(){
             EditImage.init();

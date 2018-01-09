@@ -22,31 +22,37 @@
                                         <h1>Manage Material</h1>
                                     </div>
                                 </div>
-                                <div class="col-md-4" style="text-align: right">
-                                    <div class="table-actions-wrapper" style="margin-top: 12px;">
-                                        <span> </span>
-                                        <form role="form" method="POST">
-                                            {!! csrf_field() !!}
-                                            <label>For Bulk Approval : </label>
-                                            <select class="form-control input-inline" id="statusChangeDropdown">
-                                                <option value="">Select...</option>
-                                                <option value="approve">Approve</option>
-                                                <option value="disapprove">Disapprove</option>
-                                            </select>
-                                            <a href="javascript:void(0);" class="btn btn-sm green" id="multipleStatusChangeSubmit">
-                                                <i class="fa fa-check"></i> Submit
-                                            </a>
-                                        </form>
-                                    </div>
-                                </div>
-                                <div class="col-md-2" style="margin-top: 12px;">
-                                    <div class="btn-group"  style="float: right;margin-top:1%">
-                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                Material Request
-                                            </a>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request'))
+                                    <div class="col-md-4" style="text-align: right">
+                                        <div class="table-actions-wrapper" style="margin-top: 12px;">
+                                            <span> </span>
+                                            <form role="form" method="POST">
+                                                {!! csrf_field() !!}
+                                                <label>For Bulk Approval : </label>
+                                                <select class="form-control input-inline" id="statusChangeDropdown">
+                                                    <option value="">Select...</option>
+                                                    <option value="approve">Approve</option>
+                                                    <option value="disapprove">Disapprove</option>
+                                                </select>
+                                                <a href="javascript:void(0);" class="btn btn-sm green" id="multipleStatusChangeSubmit">
+                                                    <i class="fa fa-check"></i> Submit
+                                                </a>
+                                            </form>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request') || $user->customHasPermission('create-material-request'))
+                                    <div class="col-md-2" style="margin-top: 12px;">
+                                        <div class="btn-group"  style="float: right;margin-top:1%">
+                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/material-request/create" style="color: white">
+                                                    <i class="fa fa-plus"></i>
+                                                    Material Request
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
                             </div>
                         </div>
                     </div>
@@ -68,27 +74,6 @@
                                           <hr/>
                                           <div class="portlet-body">
                                               <div class="row">
-                                                  <div class="col-md-2">
-                                                      <label>Select Client :</label>
-                                                      <select class="form-control" id="client_id" name="client_id">
-                                                          <option value="0">ALL</option>
-                                                          @foreach($clients as $client)
-                                                          <option value="{{$client['id']}}">{{$client['company']}}</option>
-                                                          @endforeach
-                                                      </select>
-                                                  </div>
-                                                  <div class="col-md-2">
-                                                      <label>Select Project :</label>
-                                                      <select class="form-control" id="project_id" name="project_id">
-                                                          <option value="0">ALL</option>
-                                                      </select>
-                                                  </div>
-                                                  <div class="col-md-2">
-                                                      <label>Select Site :</label>
-                                                      <select class="form-control" id="site_id" name="site_id">
-                                                          <option value="0">ALL</option>
-                                                      </select>
-                                                  </div>
                                                   <div class="col-md-2">
                                                       <label>Select Year :</label>
                                                       <select class="form-control" id="year" name="year">
@@ -149,6 +134,7 @@
                                                   <th> Created At</th>
                                                   <th> Status </th>
                                                   <th> Action </th>
+                                                  <th> Detail </th>
                                               </tr>
                                               <tr class="filter">
                                                   <th></th>
@@ -171,6 +157,7 @@
                                                       <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                       <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                   </th>
+                                                  <th></th>
                                               </tr>
                                               </thead>
                                               <tbody>
@@ -229,11 +216,78 @@
                                                 </form>
                                             </div>
                                         </div>
+                                        <div class="modal fade" id="indentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                                  <div class="modal-dialog">
+                                                      <form class="modal-content" method="post">
+                                                          {!! csrf_field() !!}
+                                                          <input type="hidden" name="component_id" id="componentId">
+                                                          <div class="modal-header">
+                                                              <div class="row">
+                                                                  <div class="col-md-4"></div>
+                                                                  <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">REMARK</h4></center></div>
+                                                                  <div class="col-md-4"><button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="modal-body">
+                                                              <div class="form-body">
+                                                                  <div class="form-group row">
+                                                                      <div class="col-md-3" style="text-align: right">
+                                                                          <label for="company" class="control-label">Quantity</label>
+                                                                      </div>
+                                                                      <div class="col-md-6">
+                                                                          <input type="text" class="form-control" id="quantity" name="quantity">
+                                                                      </div>
+                                                                  </div>
+                                                                  <div class="form-group row">
+                                                                      <div class="col-md-3" style="text-align: right">
+                                                                          <label for="company" class="control-label">Unit</label>
+                                                                      </div>
+                                                                      <div class="col-md-6">
+                                                                          <select class="form-control" name="unit_id" id="unitId">
+                                                                              @foreach($units as $unit)
+                                                                                  <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                              @endforeach
+                                                                          </select>
+                                                                      </div>
+                                                                  </div>
+                                                                  <div class="form-group row">
+                                                                      <div class="col-md-3" style="text-align: right">
+                                                                          <label for="company" class="control-label">Remark</label>
+                                                                      </div>
+                                                                      <div class="col-md-6">
+                                                                          <input type="text" class="form-control" id="remark" name="remark">
+                                                                      </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="modal-footer">
+                                                              <a class="btn blue approve-modal-footer-buttons">Move to Indent</a>
+                                                          </div>
+                                                      </form>
+                                                  </div>
+                                          </div>
                                       </div>
                                   </div>
                               </div>
                           </div>
                         </div>
+                            <div class="modal fade" id="purchaseDetailModel" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="padding-bottom:10px">
+                                            <div class="row">
+                                                <div class="col-md-4"></div>
+                                                <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">Purchase Details</h4></center></div>
+                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                    </div>
                 </div>
            </div>
@@ -264,6 +318,10 @@
             }else{
                 if(buttonType == 'Disapprove'){
                     var action = "/purchase/material-request/change-status/admin-disapproved"
+                }else{
+                    if(buttonType == 'Move to Indent'){
+                        var action = "/purchase/material-request/change-status/in-indent"
+                    }
                 }
             }
             $(this).closest('form').attr('action',action);
@@ -296,17 +354,8 @@
             }
         });
 
-        $("#client_id").on('change', function(){
-            getProjects($('#client_id').val());
-        });
-        $("#project_id").on('change', function(){
-            getProjectSites($('#project_id').val());
-        });
-
         $("#status_id").on('change',function(){
-            var client_id = $('#client_id').val();
-            var project_id = $('#project_id').val();
-            var site_id = $('#site_id').val();
+            var site_id = $('#globalProjectSite').val();
             var year = $('#year').val();
             var month = $('#month').val();
             var status_id = $('#status_id').val();
@@ -314,8 +363,6 @@
             var m_count = $('#m_count').val();
 
             var postData =
-                'client_id=>'+client_id+','+
-                    'project_id=>'+project_id+','+
                     'site_id=>'+site_id+','+
                     'year=>'+year+','+
                     'month=>'+month+','+
@@ -352,41 +399,6 @@
         });
     });
 
-    function getProjects(client_id){
-        $.ajax({
-            url: '/purchase/projects/'+client_id,
-            type: 'GET',
-            async : false,
-            success: function(data,textStatus,xhr){
-                if(xhr.status == 200){
-                    $('#project_id').html(data);
-                    $('#project_id').prop('disabled',false);
-                    getProjectSites($('#project_id').val());
-                }
-            },
-            error: function(errorStatus,xhr){
-
-            }
-        });
-    }
-
-    function getProjectSites(project_id){
-        $.ajax({
-            url: '/purchase/project-sites/'+project_id,
-            type: 'GET',
-            async : false,
-            success: function(data,textStatus,xhr){
-                if(xhr.status == 200){
-                    $('#site_id').html(data);
-                    $('#site_id').prop('disabled',false);
-                }
-            },
-            error: function(errorStatus,xhr){
-
-            }
-        });
-    }
-
     function openApproveModal(componentId){
         $.ajax({
             url: '/purchase/material-request/get-material-request-component-details/'+componentId+'?_token='+$("input[name='_token']").val(),
@@ -394,7 +406,7 @@
             success: function(data,textStatus,xhr){
                 $("#remarkModal #unitId").html(data.units);
                 $("#remarkModal #quantity").val(data.quantity);
-                $("#componentId").val(componentId);
+                $("#remarkModal #componentId").val(componentId);
             },
             error: function(errorData){
 
@@ -408,6 +420,38 @@
         var token = $('input[name="_token"]').val();
         $(element).next('input[name="_token"]').val(token);
         $(element).closest('form').submit();
+    }
+
+    function openIndentModal(componentId){
+        $.ajax({
+            url: '/purchase/material-request/get-material-request-component-details/'+componentId+'?_token='+$("input[name='_token']").val(),
+            type: 'GET',
+            success: function(data,textStatus,xhr){
+                $("#indentModal #unitId").html(data.units);
+                $("#indentModal #quantity").val(data.quantity);
+                $("#indentModal #componentId").val(componentId);
+            },
+            error: function(errorData){
+
+            }
+        })
+        $("#indentModal").modal('show');
+    }
+
+    function openDetails(materialRequestComponentId){
+        $.ajax({
+            url: '/purchase/get-detail/'+materialRequestComponentId+'?_token='+$("input[name='_token']").val(),
+            type: 'GET',
+            async: true,
+            success: function(data,textStatus,xhr){
+                $("#purchaseDetailModel .modal-body").html(data);
+                $("#purchaseDetailModel").modal('show');
+            },
+            error:function(errorData){
+                alert('Something went wrong');
+            }
+
+        });
     }
 </script>
 @endsection
