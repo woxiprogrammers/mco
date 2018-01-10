@@ -367,6 +367,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('edit/{asset}',array('uses' => 'Admin\AssetManagementController@editAsset'));
         Route::post('create',array('uses' => 'Admin\AssetManagementController@createAsset'));
         Route::post('listing',array('uses'=> 'Admin\AssetManagementController@assetListing'));
+        Route::post('project-site-asset/listing/{assetId}',array('uses'=> 'Admin\AssetManagementController@projectSiteAssetListing'));
         Route::post('image-upload',array('uses'=>'Admin\AssetManagementController@uploadTempAssetImages'));
         Route::post('display-images',array('uses'=>'Admin\AssetManagementController@displayAssetImages'));
         Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));

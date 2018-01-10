@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Asset;
 use App\AssetImage;
 use App\AssetType;
+use App\InventoryComponent;
+use App\InventoryComponentTransfers;
 use App\ProjectSite;
+use Dompdf\Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
@@ -67,7 +70,7 @@ class AssetManagementController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
-        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types'));
+        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types','projectSiteData'));
     }
 
     public function createAsset(Request $request){
@@ -282,6 +285,28 @@ class AssetManagementController extends Controller
             $records = array();
             $data = [
                 'action' => 'Get Asset Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records);
+    }
+
+    public function projectSiteAssetListing(Request $request,$assetId){
+        try{
+            //dd($assetId);
+
+            $inventoryComponentTransfer = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                                                                        ->where('inventory_components.reference_id',$assetId)->orderBy('inventory_component_transfers.created_at','asc')->get();
+            $inventoryComponents = InventoryComponent::where('reference_id',$assetId)->get();
+            dd($inventoryComponentTransfer->toArray());
+            $records = array();
+        }catch (Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Project Site Asset Listing',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];

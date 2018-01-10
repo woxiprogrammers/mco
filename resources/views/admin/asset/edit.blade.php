@@ -27,7 +27,7 @@
                             <div class="container">
                                 <input type="hidden" id="path" name="path" value="">
                                 <input type="hidden" id="max_files_count" name="max_files_count" value="20">
-                                <input type="hidden" id="vendors_id" value="{{$asset['id']}}">
+                                <input type="hidden" id="asset_id" value="{{$asset['id']}}">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
                                         <a href="/asset/manage">Manage Asset</a>
@@ -51,7 +51,7 @@
                                                 </li>
                                             </ul>
                                             <div class="tab-content">
-                                                <div class="tab-pane fade in active" id="generalInfoTab">
+                                                <div class="tab-pane fade in active" id="editInfoTab">
                                                     <form role="form" id="edit-asset" class="form-horizontal" method="post" action="/asset/edit/{{$asset['id']}}">
                                                         {!! csrf_field() !!}
                                                         <div class="form-body">
@@ -81,6 +81,7 @@
                                                                 <div class="col-md-6">
                                                                     <select class="form-control" name="asset_type" id="select-type">
                                                                         <option value="">Select Option</option>
+
                                                                         @foreach($asset_types as $asset_type)
                                                                             @if(in_array($asset['asset_types_id'],$asset_type))
                                                                                 <option value="{{$asset_type['id']}}" selected>{{$asset_type['name']}}</option>
@@ -147,7 +148,7 @@
                                                                     <span>*</span>
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <input type="number" class="form-control" id="rent_per_day" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}">
+                                                                    <input type="number" class="form-control" id="rent_per_day" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}" onkeyup="assignRent(this)">
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
@@ -193,14 +194,57 @@
                                                     </form>
                                                 </div>
                                                 <div class="tab-pane fade in" id="projectSiteAssignmentTab">
-                                                    <div class="form-group">
-                                                        <select class="">
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right" for="project_site">Select Project Site</label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <select name="project_site_id" class="form-control">
+                                                                <option value=""> Select Project Site </option>
+                                                                @foreach($projectSiteData as $projectSite)
+                                                                    <option value="{{$projectSite['id']}}">{!! $projectSite['name'] !!}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3">
+                                                            <label for="rent" class="control-label pull-right">Rent</label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="number" class="form-control" id="rent" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3">
+                                                            <label for="rent" class="control-label pull-right">Quantity</label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            @if($asset['asset_types_id'] == 4)
+                                                                <input type="number" class="form-control" id="quantity" name="quantity">
+                                                            @else
+                                                                <input type="number" class="form-control" id="quantity" name="quantity" value="1" disabled>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-scrollable">
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="projectSiteAssetAssignmentTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th> Client-Project-Site </th>
+                                                                <th> Quantity </th>
+                                                                <th> Status </th>
+                                                                <th> Rent </th>
+                                                                <th> Date </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
 
-                                                        </select>
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -223,8 +267,14 @@
     <script src="/assets/custom/admin/asset/image-datatable.js"></script>
     <script src="/assets/custom/admin/asset/image-upload.js"></script>
     <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
+    <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+    <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+    <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+    <script src="/assets/custom/admin/asset/project-site-asset-assignment-datatable.js"></script>
     <script>
         $(document).ready(function(){
+            ProjectSiteAssetAssignment.init();
             if($('#litre_per_unit').val() != ""){
                 $('#lpu').show();
             }else{
@@ -246,9 +296,13 @@
             });
             $('#electricity_per_unit').rules('remove');
             $('#litre_per_unit').rules('remove');
+            $('#rent').val($('#rent_per_day').val());
         });
     </script>
     <script>
+        function assignRent(rent_per_day){
+            $('#rent').val($(rent_per_day).val());
+        }
         var date=new Date();
         $('#expiry_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
     </script>
@@ -263,6 +317,7 @@
                 });
                 $('#electricity_per_unit').rules('remove');
                 $('#qty').val(1);
+                $('#quantity').val(1);
                 $('#exp_date').show();
                 $('#exp_date').rules('add', {
                     required: true   // set a new rule
@@ -275,6 +330,7 @@
                 });
                 $('#litre_per_unit').rules('remove');
                 $('#qty').val(1);
+                $('#quantity').val(1);
                 $('#exp_date').show();
                 $('#exp_date').rules('add', {
                     required: true   // set a new rule
@@ -290,6 +346,7 @@
                 $('#lpu').show();
                 $('#exp_date').show();
                 $('#qty').val(1);
+                $('#quantity').val(1);
             }else if(asset_type == 4){
                 $('#espu').hide();
                 $('#electricity_per_unit').rules('remove');
