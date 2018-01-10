@@ -8,7 +8,8 @@ class PurchaseRequest extends Model
 {
     protected $table = 'purchase_requests';
 
-    protected $fillable = ['quotation_id','project_site_id','user_id','purchase_component_status_id','behalf_of_user_id','assigned_to','serial_no','format_id'];
+    protected $fillable = ['quotation_id','project_site_id','user_id','purchase_component_status_id',
+        'behalf_of_user_id','assigned_to','serial_no','format_id'];
 
     public function quotation(){
         return $this->belongsTo('App\Quotation','quotation_id');

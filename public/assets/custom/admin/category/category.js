@@ -69,8 +69,6 @@ var  CreateCategory = function () {
     };
 }();
 
-
-
 var  EditCategory = function () {
     var handleEdit = function() {
         var form = $('#edit-category');
