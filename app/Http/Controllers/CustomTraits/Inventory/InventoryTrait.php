@@ -30,6 +30,7 @@ trait InventoryTrait{
             if(!array_key_exists('grn',$data)){
                 $data['grn'] = $this->generateGRN();
             }
+            $data['in_time'] = $data['out_time'] = $data['date'] = Carbon::now();
             $inventoryComponentTransfer = InventoryComponentTransfers::create($data);
             return $inventoryComponentTransfer;
         }catch(\Exception $e){

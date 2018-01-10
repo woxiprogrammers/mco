@@ -67,7 +67,10 @@ table {
             <tr>
                 <td style="width: 50%;"><b>Component Name</b></td>
                 <td style="text-align: left;">{!! $component_name !!}</td>
-
+            </tr>
+            <tr>
+                <td style="width: 50%;"><b>GRN</b></td>
+                <td style="text-align: left;">{!! $grn !!}</td>
             </tr>
             <tr>
                 <td style="width: 50%;"><b>Quantity</b></td>
