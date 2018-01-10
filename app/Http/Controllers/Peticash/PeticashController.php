@@ -8,6 +8,7 @@ use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
 use App\Employee;
+use App\Helper\NumberHelper;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
@@ -38,6 +39,7 @@ use App\UserProjectSiteRelation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -530,6 +532,7 @@ class PeticashController extends Controller
     }
     public function salaryApprovalListing(Request $request){
         try{
+
             $postdata = null;
             $emp_id = "";
             $emp_name = null;
@@ -1525,6 +1528,18 @@ class PeticashController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
+                $actionDropDown =  '<button class="btn btn-xs blue"> 
+                                                <a href="/peticash/peticash-management/salary/payment-voucher-pdf/'.$salaryTransactionData[$pagination]->id.'" style="color: white">
+                                                     PDF 
+                                                </a>
+                                                <input type="hidden" name="_token">
+                                        </button>
+                                        <button class="btn btn-xs default "> 
+                                                <a href="javascript:void(0);" onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]->id.')" style="color: grey">
+                                                    Details 
+                                                </a>
+                                                <input type="hidden" name="_token">
+                                        </button>';
                 $records['data'][] = [
                     $salaryTransactionData[$pagination]->id,
                     $salaryTransactionData[$pagination]->employee->employee_id,
@@ -1535,7 +1550,7 @@ class PeticashController extends Controller
                     $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
                     date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
                     $salaryTransactionData[$pagination]->projectSite->project->name.' - '.$salaryTransactionData[$pagination]->projectSite->name,
-                    '<a class="btn blue" href="javascript:void(0)" onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]->id.')">Details</a>'
+                    $actionDropDown
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -1552,5 +1567,30 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($records,$status);
+    }
+
+    public function getPaymentVoucherPdf(Request $request,$salaryTransactionId){
+        try{
+            $peticashSalaryTransaction = PeticashSalaryTransaction::where('id',$salaryTransactionId)->first();
+            $data['project_site'] = $peticashSalaryTransaction->projectSite->name;
+            $data['date'] = date('d/m/Y',strtotime($peticashSalaryTransaction->date));
+            $data['paid_to'] = $peticashSalaryTransaction->employee->name;
+            $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($peticashSalaryTransaction->amount));;
+            $data['particulars'] = $peticashSalaryTransaction->remark;
+            $data['amount'] = $peticashSalaryTransaction->amount;
+            $data['approved_by'] = $peticashSalaryTransaction->referenceUser->first_name.' '.$peticashSalaryTransaction->referenceUser->last_name;
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('peticash.peticash-management.salary.payment-voucher',$data));
+            return $pdf->stream();
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Payment Voucher PDF',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+        }
+        Log::critical(json_encode($data));
+        abort(500,$e->getMessage());
+
     }
 }
