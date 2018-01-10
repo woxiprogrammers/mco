@@ -25,6 +25,9 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <input type="hidden" id="path" name="path" value="">
+                                <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+                                <input type="hidden" id="vendors_id" value="{{$asset['id']}}">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
                                         <a href="/asset/manage">Manage Asset</a>
@@ -39,148 +42,165 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
-                                            <input type="hidden" id="vendors_id" value="{{$asset['id']}}">
-                                            <form role="form" id="edit-asset" class="form-horizontal" method="post" action="/asset/edit/{{$asset['id']}}">
-                                                {!! csrf_field() !!}
-                                                <div class="form-body">
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="model_number" class="control-label">Model Number</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" value="{{$asset['model_number']}}" id="model_number" name="model_number">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="asset_name" class="control-label">Asset Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="name" name="name" value="{{$asset['name']}}">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row" >
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="diesel" class="control-label">Asset type</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" name="asset_type" id="select-type">
-                                                                <option value="">Select Option</option>
-                                                                @foreach($asset_types as $asset_type)
-                                                                    @if(in_array($asset['asset_types_id'],$asset_type))
-                                                                    <option value="{{$asset_type['id']}}" selected>{{$asset_type['name']}}</option>
-                                                                     @else
-                                                                        <option value="{{$asset_type['id']}}">{{$asset_type['name']}}</option>
-                                                                    @endif
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row" id="espu">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="espu" class="control-label">Electricity per unit</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="electricity_per_unit" name="electricity_per_unit"  value="{{$asset['electricity_per_unit']}}">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row"  id="lpu">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="lpu" class="control-label">Litre per unit</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="litre_per_unit" name="litre_per_unit" value="{{$asset['litre_per_unit']}}">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row" >
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="qty" class="control-label">Quantity</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="text" class="form-control" name="qty" id="qty" value="{{$asset['quantity']}}">
-                                                        </div>
-                                                    </div>
-                                                    @if($asset->assetTypes->slug != 'other')
-                                                        <div class="form-group row">
-                                                            <div class="col-md-3" style="text-align: right">
-                                                                <label for="expiry_date" class="control-label ">Expiry Date</label>
-                                                                <span>*</span>
+                                            <ul class="nav nav-tabs nav-tabs-lg">
+                                                <li class="active">
+                                                    <a href="#editInfoTab" data-toggle="tab"> Edit Asset </a>
+                                                </li>
+                                                <li>
+                                                    <a href="#projectSiteAssignmentTab" data-toggle="tab"> Assign Project Sites </a>
+                                                </li>
+                                            </ul>
+                                            <div class="tab-content">
+                                                <div class="tab-pane fade in active" id="generalInfoTab">
+                                                    <form role="form" id="edit-asset" class="form-horizontal" method="post" action="/asset/edit/{{$asset['id']}}">
+                                                        {!! csrf_field() !!}
+                                                        <div class="form-body">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="model_number" class="control-label">Model Number</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" value="{{$asset['model_number']}}" id="model_number" name="model_number">
+                                                                </div>
                                                             </div>
-                                                            <div class="col-md-6 date date-picker">
-                                                                <input type="text"  style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date" value="{{$asset['expiry_date']}}">
-                                                                <button class="btn btn-sm default" type="button">
-                                                                    <i class="fa fa-calendar"></i>
-                                                                </button>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="asset_name" class="control-label">Asset Name</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="name" name="name" value="{{$asset['name']}}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row" >
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="diesel" class="control-label">Asset type</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <select class="form-control" name="asset_type" id="select-type">
+                                                                        <option value="">Select Option</option>
+                                                                        @foreach($asset_types as $asset_type)
+                                                                            @if(in_array($asset['asset_types_id'],$asset_type))
+                                                                                <option value="{{$asset_type['id']}}" selected>{{$asset_type['name']}}</option>
+                                                                            @else
+                                                                                <option value="{{$asset_type['id']}}">{{$asset_type['name']}}</option>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row" id="espu">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="espu" class="control-label">Electricity per unit</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="electricity_per_unit" name="electricity_per_unit"  value="{{$asset['electricity_per_unit']}}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row"  id="lpu">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="lpu" class="control-label">Litre per unit</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="litre_per_unit" name="litre_per_unit" value="{{$asset['litre_per_unit']}}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row" >
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="qty" class="control-label">Quantity</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="qty" id="qty" value="{{$asset['quantity']}}">
+                                                                </div>
+                                                            </div>
+                                                            @if($asset->assetTypes->slug != 'other')
+                                                                <div class="form-group row">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="expiry_date" class="control-label ">Expiry Date</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-6 date date-picker">
+                                                                        <input type="text"  style="width: fit-content" name="expiry_date" placeholder="Select Expiry Date" id="date" value="{{$asset['expiry_date']}}">
+                                                                        <button class="btn btn-sm default" type="button">
+                                                                            <i class="fa fa-calendar"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="price" class="control-label">Price</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="price" name="price" value="{{$asset['price']}}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="number" class="control-label">Rent</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="rent_per_day" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div class="row">
+                                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
+                                                                </div>
+                                                                <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: 26%">
+                                                                        Browse</a>
+                                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                        <i class="fa fa-share"></i> Upload Files </a>
+                                                                </div>
+                                                                <table class="table table-bordered table-hover" style="width: 554px; margin-left: 26%; margin-top: 1%">
+                                                                    <thead>
+                                                                    <tr role="row" class="heading">
+                                                                        <th> Image </th>
+                                                                        <th> Action </th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody id="show-product-images">
+                                                                    @foreach($assetImage as $image)
+                                                                        <tr id="image-{{$image['id']}}">
+                                                                            <td>
+                                                                                <a href="{{$image['path']}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                                                                                    <img class="img-responsive" src="{{$image['path']}}" alt="" style="width:100px; height:100px;"> </a>
+                                                                                <input type="hidden" class="work-order-image-name" name="asset_images[{{$image['id']}}][image_name]" id="work-order-image-{{$image['id']}}" value="{{$image['path']}}"/>
+                                                                            </td>
+                                                                            <td>
+                                                                                <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeAssetImage("#image-{{$image['id']}}","{{$image['path']}}",0);'>
+                                                                                    <i class="fa fa-times"></i> Remove </a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <div class="form-actions noborder row">
+                                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                                    <button type="submit" class="btn red" style=" padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    @endif
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="price" class="control-label">Price</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="price" name="price" value="{{$asset['price']}}">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="number" class="control-label">Rent</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="rent_per_day" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}">
-                                                        </div>
-                                                    </div>
+                                                    </form>
+                                                </div>
+                                                <div class="tab-pane fade in" id="projectSiteAssignmentTab">
                                                     <div class="form-group">
-                                                        <div class="row">
-                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
-                                                        </div>
-                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: 26%">
-                                                                Browse</a>
-                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                <i class="fa fa-share"></i> Upload Files </a>
-                                                        </div>
-                                                        <table class="table table-bordered table-hover" style="width: 554px; margin-left: 26%; margin-top: 1%">
-                                                            <thead>
-                                                            <tr role="row" class="heading">
-                                                                <th> Image </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody id="show-product-images">
-                                                            @foreach($assetImage as $image)
-                                                                <tr id="image-{{$image['id']}}">
-                                                                    <td>
-                                                                        <a href="{{$image['path']}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
-                                                                            <img class="img-responsive" src="{{$image['path']}}" alt="" style="width:100px; height:100px;"> </a>
-                                                                        <input type="hidden" class="work-order-image-name" name="asset_images[{{$image['id']}}][image_name]" id="work-order-image-{{$image['id']}}" value="{{$image['path']}}"/>
-                                                                    </td>
-                                                                    <td>
-                                                                        <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeAssetImage("#image-{{$image['id']}}","{{$image['path']}}",0);'>
-                                                                            <i class="fa fa-times"></i> Remove </a>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                    <div class="form-actions noborder row">
-                                                        <div class="col-md-offset-3" style="margin-left: 26%">
-                                                            <button type="submit" class="btn red" style=" padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
-                                                        </div>
+                                                        <select class="">
+
+                                                        </select>
                                                     </div>
                                                 </div>
-                                            </form>
-                                            <input type="hidden" id="path" name="path" value="">
-                                            <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Asset;
 use App\AssetImage;
 use App\AssetType;
+use App\ProjectSite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
@@ -39,6 +40,18 @@ class AssetManagementController extends Controller
     }
     public function getEditView(Request $request,$asset){
         try{
+            $projectSiteData = array();
+            $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                                            ->join('clients','clients.id','=','projects.client_id')
+                                            ->where('projects.is_active',true)
+                                            ->select('project_sites.id','project_sites.name as project_site_name','projects.name as project_name','clients.company')->get()->toArray();
+            //dd($projectSites);
+            $iterator = 0;
+            foreach($projectSites as $key => $projectSite){
+                $projectSiteData[$iterator]['id'] = $projectSite['id'];
+                $projectSiteData[$iterator]['name'] = $projectSite['company'].'-'.$projectSite['project_name'].'-'.$projectSite['project_site_name'];
+                $iterator++;
+            }
             $asset_types = AssetType::select('id','name')->get()->toArray();
             $assetId = $asset['id'];
             $assetImages = AssetImage::where('asset_id',$assetId)->select('id','name')->get();
