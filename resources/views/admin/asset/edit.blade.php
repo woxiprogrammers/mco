@@ -194,39 +194,46 @@
                                                     </form>
                                                 </div>
                                                 <div class="tab-pane fade in" id="projectSiteAssignmentTab">
-                                                    <div class="row form-group">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label pull-right" for="project_site">Select Project Site</label>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select name="project_site_id" class="form-control">
-                                                                <option value=""> Select Project Site </option>
-                                                                @foreach($projectSiteData as $projectSite)
-                                                                    <option value="{{$projectSite['id']}}">{!! $projectSite['name'] !!}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3">
-                                                            <label for="rent" class="control-label pull-right">Rent</label>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="rent" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3">
-                                                            <label for="rent" class="control-label pull-right">Quantity</label>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            @if($asset['asset_types_id'] == 4)
-                                                                <input type="number" class="form-control" id="quantity" name="quantity">
-                                                            @else
-                                                                <input type="number" class="form-control" id="quantity" name="quantity" value="1" disabled>
-                                                            @endif
-                                                        </div>
-                                                    </div>
+                                                    <input type="hidden" id="remainingQuantity" value="{!! $remainingQuantity !!}">
+                                                    @if($isAssigned == false && $remainingQuantity > 0)
+                                                        <form role="form" id="project_site_asset_assignment_form" class="form-horizontal" method="post" action="/asset/edit/assign-project-site/{{$asset['id']}}">
+                                                            {!! csrf_field() !!}
+                                                            <div class="row form-group">
+                                                                <div class="col-md-3">
+                                                                    <label class="control-label pull-right" for="project_site">Select Project Site</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <select name="project_site_id" class="form-control">
+                                                                        <option value=""> Select Project Site </option>
+                                                                        @foreach($projectSiteData as $projectSite)
+                                                                            <option value="{{$projectSite['id']}}">{!! $projectSite['name'] !!}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3">
+                                                                    <label for="rent" class="control-label pull-right">Rent</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="rent" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3">
+                                                                    <label for="rent" class="control-label pull-right">Quantity</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="quantity" name="quantity" value="{!! $remainingQuantity !!}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-actions noborder row">
+                                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                                    <button type="submit" class="btn red" style=" padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    @endif
                                                     <div class="table-scrollable">
                                                         <table class="table table-striped table-bordered table-hover order-column" id="projectSiteAssetAssignmentTable">
                                                             <thead>
@@ -275,6 +282,7 @@
     <script>
         $(document).ready(function(){
             ProjectSiteAssetAssignment.init();
+            CreateInventoryComponentTransfer.init();
             if($('#litre_per_unit').val() != ""){
                 $('#lpu').show();
             }else{
@@ -298,11 +306,13 @@
             $('#litre_per_unit').rules('remove');
             $('#rent').val($('#rent_per_day').val());
         });
+        if($('#select-type').val() == 4){
+            $('#quantity').prop('readonly',false);
+        }else{
+            $('#quantity').prop('readonly',true);
+        }
     </script>
     <script>
-        function assignRent(rent_per_day){
-            $('#rent').val($(rent_per_day).val());
-        }
         var date=new Date();
         $('#expiry_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
     </script>
@@ -363,6 +373,56 @@
                 $('#exp_date').hide();
                 $('#exp_date').rules('remove');
             }
-        })
+        });
+        var  CreateInventoryComponentTransfer = function () {
+            var handleCreate = function() {
+                var form = $('#project_site_asset_assignment_form');
+                var error = $('.alert-danger', form);
+                var success = $('.alert-success', form);
+                form.validate({
+                    errorElement: 'span', //default input error message container
+                    errorClass: 'help-block', // default input error message class
+                    focusInvalid: false, // do not focus the last invalid input
+                    rules: {
+                        quantity: {
+                            required: true,
+                            max : $('#remainingQuantity').val()
+                        }
+                    },
+                    messages: {
+                        quantity: {
+                            required: "Quantity is required."
+                        }
+                    },
+                    invalidHandler: function (event, validator) { //display error alert on form submit
+                        success.hide();
+                        error.show();
+                    },
+                    highlight: function (element) { // hightlight error inputs
+                        $(element)
+                            .closest('.form-group').addClass('has-error'); // set error class to the control group
+                    },
+                    unhighlight: function (element) { // revert the change done by hightlight
+                        $(element)
+                            .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                    },
+                    success: function (label) {
+                        label
+                            .closest('.form-group').addClass('has-success');
+                    },
+                    submitHandler: function (form) {
+                        $("button[type='submit']").prop('disabled', true);
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }
+                });
+            };
+            return {
+                init: function () {
+                    handleCreate();
+                }
+            };
+        }();
     </script>
 @endsection

@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Asset;
 use App\AssetImage;
 use App\AssetType;
+use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
+use App\InventoryTransferTypes;
 use App\ProjectSite;
+use App\Unit;
 use Dompdf\Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -21,6 +25,7 @@ use PhpParser\Node\Expr\Array_;
 
 class AssetManagementController extends Controller
 {
+use InventoryTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -43,12 +48,31 @@ class AssetManagementController extends Controller
     }
     public function getEditView(Request $request,$asset){
         try{
+            $inventoryComponentTransfers = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                ->where('inventory_components.reference_id',$asset['id'])
+                ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                ->orderBy('inventory_component_transfers.created_at','asc')->select('inventory_component_transfers.id','inventory_component_transfers.transfer_type_id','inventory_component_transfers.quantity')->get();
+            $isAssigned = false;
+            $quantityAssigned = $jIterator = 0;
+            foreach($inventoryComponentTransfers as $key => $inventoryComponentTransfer){
+                if($inventoryComponentTransfer->transferType->type == 'IN'){
+                    $isAssigned = true;
+                    $quantityAssigned = $quantityAssigned + $inventoryComponentTransfer['quantity'];
+                }else{
+                    $isAssigned = false;
+                    $quantityAssigned = 0;
+                }
+            }
+            if($asset->assetTypes->slug == 'other'){
+                $remainingQuantity = $asset['quantity'] - $quantityAssigned;
+            }else{
+                $remainingQuantity = 1;
+            }
             $projectSiteData = array();
             $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                             ->join('clients','clients.id','=','projects.client_id')
                                             ->where('projects.is_active',true)
                                             ->select('project_sites.id','project_sites.name as project_site_name','projects.name as project_name','clients.company')->get()->toArray();
-            //dd($projectSites);
             $iterator = 0;
             foreach($projectSites as $key => $projectSite){
                 $projectSiteData[$iterator]['id'] = $projectSite['id'];
@@ -70,7 +94,7 @@ class AssetManagementController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
-        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types','projectSiteData'));
+        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types','projectSiteData','isAssigned','quantityAssigned','remainingQuantity'));
     }
 
     public function createAsset(Request $request){
@@ -125,14 +149,10 @@ class AssetManagementController extends Controller
     public function editAsset(Request $request,$asset){
         try{
             $data = $request->all();
+            $assetData = $request->except('_token','name','asset_type','qty');
             $assetData['name'] = ucwords(trim($data['name']));
-            $assetData['model_number'] = $data['model_number'];
-            $assetData['expiry_date'] = $data['expiry_date'];
-            $assetData['litre_per_unit'] = $data['litre_per_unit'];
-            $assetData['electricity_per_unit'] = $data['electricity_per_unit'];
             $assetData['asset_types_id'] = $data['asset_type'];
-            $assetData['price'] = $data['price'];
-            $assetData['rent_per_day'] = $data['rent_per_day'];
+            $assetData['quantity'] = $data['qty'];
             $asset->update($assetData);
             $work_order_images = $request->work_order_images;
             $assetImages = $request->asset_images;
@@ -188,6 +208,46 @@ class AssetManagementController extends Controller
         }catch (Exception $e){
             $data = [
                 'action' => 'Edit Asset',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function assignProjectSite(Request $request,$asset){
+        try{
+            $user = Auth::user();
+            $inventoryComponentId = InventoryComponent::where('project_site_id',$request['project_site_id'])->where('reference_id',$asset['id'])->pluck('id')->first();
+            if($inventoryComponentId == null){
+                $inventoryComponentData['name'] = $asset['name'];
+                $inventoryComponentData['is_material'] = false;
+                $inventoryComponentData['project_site_id'] = $request->project_site_id;
+                $inventoryComponentData['opening_stock'] = 0;
+                $inventoryComponentData['reference_id'] = $asset['id'];
+                $inventoryComponent = InventoryComponent::create($inventoryComponentData);
+                $inventoryComponentId = $inventoryComponent['id'];
+            }
+            $inventoryComponentTransferData = [
+                'inventory_component_id' => $inventoryComponentId,
+                'transfer_type_id' => InventoryTransferTypes::where('type','ilike','IN')->where('slug','office')->pluck('id')->first(),
+                'quantity' => $request['quantity'],
+                'unit_id' => Unit::where('slug','nos')->pluck('id')->first(),
+                'user_id' => $user['id'],
+                'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first(),
+                'rate_per_unit' => $request['rent_per_day']
+            ];
+            $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentTransferData);
+            if(count($inventoryComponentTransfer) > 0){
+                $request->session()->flash('success', 'Project Site assigned successfully.');
+            }else{
+                $request->session()->flash('success', 'Something went wrong.');
+            }
+            return redirect('/asset/edit/'.$asset->id);
+        }catch (Exception $e){
+            $data = [
+                'action' => 'Assign Asset to Project Site',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
@@ -296,14 +356,38 @@ class AssetManagementController extends Controller
 
     public function projectSiteAssetListing(Request $request,$assetId){
         try{
-            //dd($assetId);
-
             $inventoryComponentTransfer = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
-                                                                        ->where('inventory_components.reference_id',$assetId)->orderBy('inventory_component_transfers.created_at','asc')->get();
-            $inventoryComponents = InventoryComponent::where('reference_id',$assetId)->get();
-            dd($inventoryComponentTransfer->toArray());
+                                                                        ->where('inventory_components.reference_id',$assetId)
+                                                                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                                                                        ->orderBy('inventory_component_transfers.created_at','desc')->get();
+            $status = 200;
+            $iTotalRecords = count($inventoryComponentTransfer);
             $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($inventoryComponentTransfer) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentTransfer); $iterator++,$pagination++ ){
+                if($inventoryComponentTransfer[$pagination]->transferType->type == 'IN'){
+                    $assetStatus = 'Assigned';
+                }else{
+                    $assetStatus = 'Released';
+                }
+                $projectSite = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                    ->join('clients','clients.id','=','projects.client_id')
+                    ->where('project_sites.id',$inventoryComponentTransfer[$pagination]->inventoryComponent->project_site_id)
+                    ->select('project_sites.id','project_sites.name as project_site_name','projects.name as project_name','clients.company')->first();
+                $records['data'][$iterator] = [
+                    $projectSite['company'].' - '.$projectSite['project_name'].' - '.$projectSite['project_site_name'],
+                    $inventoryComponentTransfer[$pagination]->quantity,
+                    $assetStatus,
+                    $inventoryComponentTransfer[$pagination]->rate_per_unit,
+                    $inventoryComponentTransfer[$pagination]->date,
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
         }catch (Exception $e){
+            $status = 500;
             $records = array();
             $data = [
                 'action' => 'Get Project Site Asset Listing',
@@ -313,7 +397,7 @@ class AssetManagementController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
-        return response()->json($records);
+        return response()->json($records,$status);
     }
 
     public function displayAssetImages(Request $request){

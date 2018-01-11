@@ -365,6 +365,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses'=> 'Admin\AssetManagementController@getCreateView'));
         Route::get('edit/{asset}',array('uses'=> 'Admin\AssetManagementController@getEditView'));
         Route::post('edit/{asset}',array('uses' => 'Admin\AssetManagementController@editAsset'));
+        Route::post('edit/assign-project-site/{asset}',array('uses' => 'Admin\AssetManagementController@assignProjectSite'));
         Route::post('create',array('uses' => 'Admin\AssetManagementController@createAsset'));
         Route::post('listing',array('uses'=> 'Admin\AssetManagementController@assetListing'));
         Route::post('project-site-asset/listing/{assetId}',array('uses'=> 'Admin\AssetManagementController@projectSiteAssetListing'));
