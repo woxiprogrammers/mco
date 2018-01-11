@@ -24,6 +24,7 @@
 
             </div>
         </div>
+        {!! csrf_field() !!}
         <!-- END PAGE HEAD-->
         <!-- BEGIN PAGE CONTENT BODY -->
         <div class="page-content content-full-height">

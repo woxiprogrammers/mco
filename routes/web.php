@@ -485,7 +485,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
         Route::get('projects/{client_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjects'));
         Route::get('project-sites/{project_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjectSites'));
-
+        Route::group(['prefix' => 'dpr'], function(){
+            Route::get('auto-suggest/{keyword}',array('uses' => 'Subcontractor\SubcontractorController@dprAutoSuggest'));
+            Route::post('assign-categories/{subcontractor}',array('uses' => 'Subcontractor\SubcontractorController@assignDprCategories'));
+        });
         Route::group(['prefix' => 'subcontractor-structure'], function(){
             Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
             Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorStructure'));
@@ -553,6 +556,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::group(['prefix' => 'salary'], function(){
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
                 Route::post('listing',array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
+                Route::get('payment-voucher-pdf/{salaryTransactionId}',array('uses' => 'Peticash\PeticashController@getPaymentVoucherPdf'));
             });
         });
     });
@@ -605,6 +609,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix'=>'reports'],function (){
         Route::get('/',array('uses' => 'Report\ReportController@reportsRoute'));
         Route::post('download',array('uses' => 'Report\ReportController@downloadReports'));
+    });
+
+    Route::group(['prefix' => 'notification'], function(){
+        Route::post('store-fcm-token',array('uses' => 'Notification\NotificationController@storeFcmToken'));
     });
 
 });

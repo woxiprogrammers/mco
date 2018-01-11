@@ -14,4 +14,8 @@ class Subcontractor extends Model
         'sc_pancard_no','sc_service_no','sc_vat_no',
         'is_active','created_at','updated_at','subcontractor_name'
     ];
+
+    public function dprCategoryRelations(){
+        return $this->hasMany('App\SubcontractorDPRCategoryRelation','subcontractor_id');
+    }
 }
