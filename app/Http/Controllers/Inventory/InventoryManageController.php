@@ -527,6 +527,9 @@ class InventoryManageController extends Controller
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
                     $data['rate_per_unit'] = $request['rate_per_unit'];
                 }
+            }elseif($request->transfer_type =='user'){
+                $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+                $data['rate_per_unit'] = $request['rent'];
             }else{
                 $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
             }
