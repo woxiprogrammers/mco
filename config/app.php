@@ -187,6 +187,7 @@ return [
          */
         ConsoleTVs\Charts\ChartsServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
+        LaravelFCM\FCMServiceProvider::class,
     ],
 
     /*
@@ -240,6 +241,8 @@ return [
         'PDF' => Barryvdh\DomPDF\Facade::class,
         'Charts' => ConsoleTVs\Charts\Facades\Charts::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'FCM'      => LaravelFCM\Facades\FCM::class,
+        'FCMGroup' => LaravelFCM\Facades\FCMGroup::class,
     ],
 
 ];

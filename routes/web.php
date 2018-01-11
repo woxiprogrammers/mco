@@ -609,4 +609,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('download',array('uses' => 'Report\ReportController@downloadReports'));
     });
 
+    Route::group(['prefix' => 'notification'], function(){
+        Route::post('store-fcm-token',array('uses' => 'Notification\NotificationController@storeFcmToken'));
+    });
+
 });
