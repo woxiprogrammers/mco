@@ -51,4 +51,8 @@ class User extends Authenticatable
             return true;
         }
     }
+
+    public function lastLogins(){
+        return $this->hasMany('App\UserLastLogin','user_id');
+    }
 }
