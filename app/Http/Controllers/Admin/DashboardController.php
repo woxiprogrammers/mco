@@ -8,6 +8,8 @@ use App\Helper\MaterialProductHelper;
 use App\Quotation;
 use App\Http\Controllers\Controller;
 use ConsoleTVs\Charts\Facades\Charts;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class DashboardController extends Controller
 {

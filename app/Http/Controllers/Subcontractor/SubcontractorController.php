@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Subcontractor;
 
+use App\DprMainCategory;
 use App\Employee;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
 use App\QuotationStatus;
 use App\Subcontractor;
+use App\SubcontractorDPRCategoryRelation;
 use App\SubcontractorStructure;
 use App\SubcontractorStructureType;
 use App\Summary;
@@ -404,5 +406,55 @@ class SubcontractorController extends Controller
             abort(500);
         }
         return response()->json($projectSitesOptions,$status);
+    }
+
+    public function dprAutoSuggest(Request $request,$keyword){
+        try{
+            $status = 200;
+            $response = array();
+            $dprCategories = DprMainCategory::where('name','ilike','%'.$keyword.'%')->where('status', true)->get();
+            $iterator = 0;
+            foreach ($dprCategories as $dprCategory){
+                $response[$iterator]['dpr_category_id'] = $dprCategory['id'];
+                $response[$iterator]['dpr_category_name'] = $dprCategory['name'];
+                $iterator++;
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Dpr category auto suggest',
+                'keyword' => $keyword,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = array();
+        }
+        return response()->json($response,$status);
+    }
+
+    public function assignDprCategories(Request $request,$subcontractor){
+        try{
+            SubcontractorDPRCategoryRelation::where('subcontractor_id',$subcontractor->id)->whereNotIn('dpr_main_category_id',$request->dpr_categories)->delete();
+            foreach ($request->dpr_categories as $dprCateogoryId){
+                $subcontractorDprCategoryRelation = SubcontractorDPRCategoryRelation::where('subcontractor_id',$subcontractor->id)->where('dpr_main_category_id',$dprCateogoryId)->first();
+                if($subcontractorDprCategoryRelation == null){
+                    $subcontractorDprCategoryRelationData = [
+                        'subcontractor_id' => $subcontractor->id,
+                        'dpr_main_category_id' => $dprCateogoryId
+                    ];
+                    SubcontractorDPRCategoryRelation::create($subcontractorDprCategoryRelationData);
+                }
+            }
+            $request->session()->flash('success','DPR categories assinged to subcontractor');
+            return redirect('/subcontractor/edit/'.$subcontractor->id);
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Assign DPR categories to subcontractor',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }
