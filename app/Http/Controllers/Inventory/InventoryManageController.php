@@ -248,8 +248,9 @@ class InventoryManageController extends Controller
             foreach($outTransfers as $transfer){
                 $outTransferTypes .= '<option value="'.$transfer->slug.'">'.$transfer->name.'</option>';
             }
-            $asset_types = AssetType::select('slug','name')->get()->toArray();
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_types','amount'));
+            $asset_type = Asset::join('asset_types','assets.asset_types_id','=','asset_types.id')
+                            ->where('assets.id',$inventoryComponent['reference_id'])->select('assets.asset_types_id','asset_types.name','asset_types.slug')->first();
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_type','amount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',

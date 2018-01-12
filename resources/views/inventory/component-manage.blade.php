@@ -479,14 +479,15 @@
                                                         </div>
                                                     </div>
                                                     @if($isReadingApplicable)
-                                                        <div class="form-group">
-                                                            <select class="form-control assetTypeSelect" onchange="assetTypeSelect(this)">
-                                                                <option value="">--Select Asset Type--</option>
-                                                                @foreach($asset_types as $asset_type)
-                                                                    <option value="{{$asset_type['slug']}}">{{$asset_type['name']}}</option>
-                                                                @endforeach
-                                                            </select>
+                                                        <div class="row form-group" id="rent">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Asset Type</label>
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                <input type="text" id="asset_type" name="asset_type_id" class="form-control" value="{!! $asset_type['name'] !!}" readonly>
+                                                            </div>
                                                         </div>
+
                                                     @endif
 
                                                     @if($isReadingApplicable)
@@ -512,9 +513,15 @@
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right">Quantity</label>
                                                             </div>
-                                                            <div class="col-md-9">
-                                                                <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity">
-                                                            </div>
+                                                            @if($asset_type['slug'] == 'other')
+                                                                <div class="col-md-9">
+                                                                    <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity">
+                                                                </div>
+                                                            @else
+                                                                <div class="col-md-9">
+                                                                    <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity" value="1" readonly>
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                     @else
                                                         <div class="row form-group">
@@ -1086,16 +1093,6 @@
                 }
 
             });
-        }
-
-        function assetTypeSelect(assetSlug){
-            if($(assetSlug).val() == 'fuel_dependent' || $(assetSlug).val() == 'electricity_dependent' || $(assetSlug).val() == 'fuel_and_electricity_dependent'){
-                $('#site_form_quantity').val(1);
-                $('#site_form_quantity').prop('readonly',true);
-            }else{
-                $('#site_form_quantity').val('');
-                $('#site_form_quantity').prop('readonly',false);
-            }
         }
 
         var  CreateInventoryComponentTransfer = function () {
