@@ -144,7 +144,7 @@
                                                             </div>
                                                             <div class="form-group row">
                                                                 <div class="col-md-3" style="text-align: right">
-                                                                    <label for="number" class="control-label">Rent</label>
+                                                                    <label for="number" class="control-label">Rent Per Day</label>
                                                                     <span>*</span>
                                                                 </div>
                                                                 <div class="col-md-6">
@@ -195,7 +195,7 @@
                                                 </div>
                                                 <div class="tab-pane fade in" id="projectSiteAssignmentTab">
                                                     <input type="hidden" id="remainingQuantity" value="{!! $remainingQuantity !!}">
-                                                    @if($isAssigned == false && $remainingQuantity > 0)
+                                                    @if($isAssigned == false)
                                                         <form role="form" id="project_site_asset_assignment_form" class="form-horizontal" method="post" action="/asset/edit/assign-project-site/{{$asset['id']}}">
                                                             {!! csrf_field() !!}
                                                             <div class="row form-group">
@@ -203,7 +203,7 @@
                                                                     <label class="control-label pull-right" for="project_site">Select Project Site</label>
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <select name="project_site_id" class="form-control">
+                                                                    <select name="project_site_id" class="form-control" id="project_site">
                                                                         <option value=""> Select Project Site </option>
                                                                         @foreach($projectSiteData as $projectSite)
                                                                             <option value="{{$projectSite['id']}}">{!! $projectSite['name'] !!}</option>
@@ -213,7 +213,7 @@
                                                             </div>
                                                             <div class="form-group row">
                                                                 <div class="col-md-3">
-                                                                    <label for="rent" class="control-label pull-right">Rent</label>
+                                                                    <label for="rent" class="control-label pull-right">Rent Per Day</label>
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <input type="number" class="form-control" id="rent" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}">
@@ -384,14 +384,26 @@
                     errorClass: 'help-block', // default input error message class
                     focusInvalid: false, // do not focus the last invalid input
                     rules: {
+                        project_site_id: {
+                            required : true
+                        },
                         quantity: {
                             required: true,
                             max : $('#remainingQuantity').val()
+                        },
+                        rent_per_day: {
+                            required: true
                         }
                     },
                     messages: {
+                        project_site_id : {
+                            required : 'Please select Project Site'
+                        },
                         quantity: {
                             required: "Quantity is required."
+                        },
+                        rent_per_day: {
+                            required: "Rent is required."
                         }
                     },
                     invalidHandler: function (event, validator) { //display error alert on form submit

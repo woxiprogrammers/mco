@@ -65,6 +65,7 @@ use InventoryTrait;
             }
             if($asset->assetTypes->slug == 'other'){
                 $remainingQuantity = $asset['quantity'] - $quantityAssigned;
+                $isAssigned = ($remainingQuantity > 0) ? false : true;
             }else{
                 $remainingQuantity = 1;
             }
