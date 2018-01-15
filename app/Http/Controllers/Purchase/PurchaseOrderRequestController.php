@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Purchase;
 
 use App\PurchaseOrderRequest;
+use App\PurchaseOrderRequestComponent;
 use App\PurchaseRequest;
 use App\User;
 use Illuminate\Http\Request;
@@ -120,5 +121,47 @@ class PurchaseOrderRequestController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function purchaseRequestAutoSuggest(Request $request,$keyword){
+        try{
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $purchaseOrderCreatedComponentIds = PurchaseOrderRequestComponent::join('purchase_order_requests','purchase_order_requests.id','=','purchase_order_request_components.purchase_order_request_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
+                    ->where('purchase_requests.project_site_id',$projectSiteId)
+                    ->pluck('purchase_order_request_components.purchase_request_component_id')
+                    ->toArray();
+                $purchaseRequestIds = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                    ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
+                    ->whereNotIn('purchase_request_components.id',$purchaseOrderCreatedComponentIds)
+                    ->where('purchase_requests.format_id','ilike','%'.$keyword.'%')
+                    ->where('purchase_requests.project_site_id',$projectSiteId)
+                    ->pluck('purchase_requests.id')
+                    ->toArray();
+            }else{
+                $purchaseOrderCreatedComponentIds = PurchaseOrderRequestComponent::join('purchase_order_requests','purchase_order_requests.id','=','purchase_order_request_components.purchase_order_request_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
+                    ->pluck('purchase_order_request_components.purchase_request_component_id')
+                    ->toArray();
+                $purchaseRequestIds = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                    ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
+                    ->whereNotIn('purchase_request_components.id',$purchaseOrderCreatedComponentIds)
+                    ->where('purchase_requests.format_id','ilike','%'.$keyword.'%')
+                    ->pluck('purchase_requests.id')
+                    ->toArray();
+            }
+            dd($purchaseRequestIds);
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Purchase Request Auto Suggest',
+                'keyword' => $keyword,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = array();
+        }
+        return response()->json($response,$status);
     }
 }

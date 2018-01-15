@@ -296,6 +296,8 @@
 </div>
 @endsection
 @section('javascript')
+    <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+    <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function(){
             $("#imageupload").on('change', function () {
@@ -323,6 +325,61 @@
                     alert("Select Only images");
                 }
             });
+
+            var citiList = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: "/purchase/purchase-order-request/purchase-request-auto-suggest/%QUERY",
+                    filter: function(x) {
+                        if($(window).width()<420){
+                            $("#header").addClass("fixed");
+                        }
+                        return $.map(x, function (data) {
+                            return {
+                                id:data.id,
+                                name:data.name,
+                                material_version_id:data.material_version_id,
+                                unit_id:data.unit_id,
+                                unit:data.unit,
+                                rate_per_unit:data.rate_per_unit
+                            };
+                        });
+                    },
+                    wildcard: "%QUERY"
+                }
+            });
+            citiList.initialize();
+            $('.typeahead').typeahead(null, {
+                displayKey: 'name',
+                engine: Handlebars,
+                source: citiList.ttAdapter(),
+                limit: 30,
+                templates: {
+                    empty: [
+                        '<div class="empty-suggest">',
+                        'Unable to find any Result that match the current query',
+                        '</div>'
+                    ].join('\n'),
+                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+                },
+            }).on('typeahead:selected', function (obj, datum) {
+                var POData = $.parseJSON(JSON.stringify(datum));
+                POData.name = POData.name.replace(/\&/g,'%26');
+                $("#rate_per_unit").val(POData.rate_per_unit);
+                $("#rate_per_unit").prop('disabled', true);
+                $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
+                $("#unit").prop('disabled', true);
+                $("#name").val(POData.name);
+                $("#name").prop('disabled', true);
+                $("#create-material .form-body").append($("<input>", {'id': "material_id",
+                    'type': 'hidden',
+                    'value': POData.id,
+                    'name': "material_id"
+                }));
+            })
+                .on('typeahead:open', function (obj, datum) {
+                });
         });
     </script>
 @endsection

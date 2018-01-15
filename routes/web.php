@@ -318,6 +318,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses' => 'Purchase\PurchaseOrderRequestController@createPurchaseOrderRequest'));
             Route::post('listing',array('uses' => 'Purchase\PurchaseOrderRequestController@listing'));
             Route::get('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@getEditView'));
+            Route::get('purchase-request-auto-suggest/{keyword}',array('uses' => 'Purchase\PurchaseOrderRequestController@purchaseRequestAutoSuggest'));
         });
     });
 
