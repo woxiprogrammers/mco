@@ -17,7 +17,9 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'first_name', 'email', 'password','last_name','is_active','mobile','dob','gender','purchase_order_amount_limit','purchase_peticash_amount_limit'
+        'first_name', 'email', 'password','last_name','is_active','mobile','dob',
+        'gender','purchase_order_amount_limit','purchase_peticash_amount_limit',
+        'web_fcm_token','mobile_fcm_token'
     ];
 
     /**
@@ -48,5 +50,9 @@ class User extends Authenticatable
         }else{
             return true;
         }
+    }
+
+    public function lastLogins(){
+        return $this->hasMany('App\UserLastLogin','user_id');
     }
 }

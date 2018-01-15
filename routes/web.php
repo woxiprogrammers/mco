@@ -371,8 +371,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses'=> 'Admin\AssetManagementController@getCreateView'));
         Route::get('edit/{asset}',array('uses'=> 'Admin\AssetManagementController@getEditView'));
         Route::post('edit/{asset}',array('uses' => 'Admin\AssetManagementController@editAsset'));
+        Route::post('edit/assign-project-site/{asset}',array('uses' => 'Admin\AssetManagementController@assignProjectSite'));
         Route::post('create',array('uses' => 'Admin\AssetManagementController@createAsset'));
         Route::post('listing',array('uses'=> 'Admin\AssetManagementController@assetListing'));
+        Route::post('project-site-asset/listing/{assetId}',array('uses'=> 'Admin\AssetManagementController@projectSiteAssetListing'));
         Route::post('image-upload',array('uses'=>'Admin\AssetManagementController@uploadTempAssetImages'));
         Route::post('display-images',array('uses'=>'Admin\AssetManagementController@displayAssetImages'));
         Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
@@ -613,6 +615,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix'=>'reports'],function (){
         Route::get('/',array('uses' => 'Report\ReportController@reportsRoute'));
         Route::post('download',array('uses' => 'Report\ReportController@downloadReports'));
+    });
+
+    Route::group(['prefix' => 'notification'], function(){
+        Route::post('store-fcm-token',array('uses' => 'Notification\NotificationController@storeFcmToken'));
     });
 
 });
