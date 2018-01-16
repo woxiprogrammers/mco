@@ -40,6 +40,7 @@
                                     <div class="portlet-body form">
                                         <form role="form" id="createPurchaseOrderRequest" class="form-horizontal" method="post" action="/purchase/purchase-order-request/create">
                                             {!! csrf_field() !!}
+                                            <input type="hidden" name="purchase_request_id" id="purchaseRequestId">
                                             <div class="form-actions noborder row">
                                                 <div class="form-group">
                                                     <div class="col-md-3">
@@ -52,7 +53,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="table-scrollable" style="overflow: scroll !important;">
-                                                    <table class="table table-striped table-bordered table-hover" id="purchaseRequest" style="overflow: scroll; table-layout: fixed">
+                                                    <table class="table table-striped table-bordered table-hover" id="purchaseRequestComponentTable" style="overflow: scroll; table-layout: fixed">
                                                         <thead>
                                                         <tr>
                                                             <th style="width: 12%"> Vendor </th>
@@ -61,41 +62,14 @@
                                                             <th style="width: 10%;"> Unit </th>
                                                             <th style="width: 10%"> Rate w/o Tax </th>
                                                             <th style="width: 10%"> Rate w/ Tax </th>
-                                                            <th style="width: 10%"> Tax Amount </th>
+                                                            <th style="width: 10%"> Total Amount w/ Tax </th>
                                                             <th style="width: 10%">
                                                                 Action
                                                             </th>
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <tr>
-                                                                <td style="width: 12%"> Manisha Construction </td>
-                                                                <td style="width: 15%"> Cement </td>
-                                                                <td style="width: 10%"> 10 </td>
-                                                                <td style="width: 10%;"> Bags </td>
-                                                                <td style="width: 10%"> 100 </td>
-                                                                <td style="width: 10%"> 120 </td>
-                                                                <td style="width: 10%"> 200 </td>
-                                                                <td style="width: 10%">
-                                                                    <a class="btn blue" href="#detailsModal" data-toggle="modal">
-                                                                        Add Details
-                                                                    </a>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td style="width: 12%"> Karia </td>
-                                                                <td style="width: 15%"> Cement </td>
-                                                                <td style="width: 10%"> 10 </td>
-                                                                <td style="width: 10%;"> Bags </td>
-                                                                <td style="width: 10%"> 110 </td>
-                                                                <td style="width: 10%"> 140 </td>
-                                                                <td style="width: 10%"> 300 </td>
-                                                                <td style="width: 10%">
-                                                                    <a class="btn blue" href="javascript:void(0);">
-                                                                        Add Details
-                                                                    </a>
-                                                                </td>
-                                                            </tr>
+
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -124,7 +98,8 @@
                     <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                 </div>
             </div>
-            <form>
+            <input type="hidden" id="modalComponentID">
+            <form id="componentDetailForm">
                 {!! csrf_field() !!}
                 <div class="modal-body">
                 <div class="row" style="height: 800px">
@@ -146,7 +121,7 @@
                                 <label class="control-label pull-right">Name :</label>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" class="form-control" name="Material / Asset Name" readonly>
+                                <input type="text" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="row form-group">
@@ -154,7 +129,7 @@
                                 <label class="control-label pull-right">Rate</label>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" class="form-control tax-modal-rate">
+                                <input type="text" class="form-control tax-modal-rate" name="rate_per_unit">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -162,7 +137,7 @@
                                 <label class="control-label pull-right">Quantity</label>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" class="form-control tax-modal-quantity">
+                                <input type="text" class="form-control tax-modal-quantity" name="quantity">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -170,7 +145,7 @@
                                 <label class="control-label pull-right">Subtotal</label>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" class="form-control tax-modal-subtotal" readonly>
+                                <input type="text" class="form-control tax-modal-subtotal" name="subtotal" readonly>
                             </div>
                         </div>
                         <div class="row form-group">
@@ -178,7 +153,7 @@
                                 <label class="control-label pull-right">HSN Code :</label>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" class="form-control tax-modal-subtotal" value="HSN1234">
+                                <input type="text" class="form-control tax-modal-subtotal" value="HSN1234" name="hsn_code">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -187,12 +162,12 @@
                             </div>
                             <div class="col-md-5">
                                 <div class="input-group" >
-                                    <input type="text" class="form-control tax-modal-cgst-percentage">
+                                    <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage">
                                     <span class="input-group-addon">%</span>
                                 </div>
                             </div>
                             <div class="col-md-5">
-                                <input type="text" class="form-control tax-modal-cgst-amount" readonly>
+                                <input type="text" class="form-control tax-modal-cgst-amount" readonly name="cgst_amount">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -201,12 +176,12 @@
                             </div>
                             <div class="col-md-5">
                                 <div class="input-group" >
-                                    <input type="text" class="form-control tax-modal-sgst-percentage">
+                                    <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage">
                                     <span class="input-group-addon">%</span>
                                 </div>
                             </div>
                             <div class="col-md-5">
-                                <input type="text" class="form-control tax-modal-sgst-amount" readonly>
+                                <input type="text" class="form-control tax-modal-sgst-amount" readonly name="sgst_amount">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -215,12 +190,12 @@
                             </div>
                             <div class="col-md-5">
                                 <div class="input-group" >
-                                    <input type="text" class="form-control tax-modal-igst-percentage">
+                                    <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage">
                                     <span class="input-group-addon">%</span>
                                 </div>
                             </div>
                             <div class="col-md-5">
-                                <input type="text" class="form-control tax-modal-igst-amount" readonly>
+                                <input type="text" class="form-control tax-modal-igst-amount" readonly name="igst_amount">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -228,7 +203,7 @@
                                 <label class="control-label pull-right">Total</label>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" class="form-control tax-modal-total" readonly>
+                                <input type="text" class="form-control tax-modal-total" readonly name="total">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -241,7 +216,7 @@
                         </div>
                         <div class="row form-group">
                             <div class="col-md-5">
-                                <a href="javascript:void(0)" class="btn red pull-right">Submit</a>
+                                <a href="javascript:void(0)" class="btn red pull-right" id="detailModalSubmit">Submit</a>
                             </div>
                         </div>
                     </div>
@@ -280,9 +255,16 @@
                                 </div>
                                 <div id="collapse_3_2" class="panel-collapse collapse">
                                     <div class="panel-body" style="overflow-y:auto;">
-                                        Second Accordion
-                                        Second Accordion
-                                        Second Accordion
+                                        <div class="form-group">
+                                            <label class="control-label">Select Client Approval Images  :</label>
+                                            <input id="clientImageUpload" type="file" class="btn green" multiple />
+                                            <br />
+                                            <div class="row">
+                                                <div id="client-preview-image" class="row">
+
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -300,6 +282,23 @@
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function(){
+            $("#detailModalSubmit").on('click',function(){
+                var formData = $("#componentDetailForm").serializeArray();
+                var componentId = $("#modalComponentID").val();
+                $("#componentRow-"+componentId+" #hiddenInputs").remove();
+                $("<div id='hiddenInputs'></div>").insertAfter("#componentRow-"+componentId+" .component-vendor-relation");
+                $.each(formData, function(key, value){
+                    if(value.name != 'vendor_images[]' && value.name != 'client_images[]'){
+                        $("#componentRow-"+componentId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentId+"]["+value.name+"]'>");
+                    }else{
+                        if(value.name != 'vendor_images[]'){
+                            $("#componentRow-"+componentId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentId+"][vendor_images][]'>");
+                        }else{
+                            $("#componentRow-"+componentId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentId+"][client_images][]'>");
+                        }
+                    }
+                });
+            });
             $("#imageupload").on('change', function () {
                 var countFiles = $(this)[0].files.length;
                 var imgPath = $(this)[0].value;
@@ -311,12 +310,36 @@
                         for (var i = 0; i < countFiles; i++) {
                             var reader = new FileReader()
                             reader.onload = function (e) {
-                                var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
+                                var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="vendor_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
                                 image_holder.append(imagePreview);
                             };
                             image_holder.show();
                             reader.readAsDataURL($(this)[0].files[i]);
-                            $("#grnImageUplaodButton").show();
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
+            });
+
+            $("#clientImageUpload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#client-preview-image");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="client_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
                         }
                     } else {
                         alert("It doesn't supports");
@@ -338,11 +361,7 @@
                         return $.map(x, function (data) {
                             return {
                                 id:data.id,
-                                name:data.name,
-                                material_version_id:data.material_version_id,
-                                unit_id:data.unit_id,
-                                unit:data.unit,
-                                rate_per_unit:data.rate_per_unit
+                                format_id: data.format_id
                             };
                         });
                     },
@@ -361,25 +380,36 @@
                         'Unable to find any Result that match the current query',
                         '</div>'
                     ].join('\n'),
-                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{format_id}}</strong></div>')
                 },
             }).on('typeahead:selected', function (obj, datum) {
                 var POData = $.parseJSON(JSON.stringify(datum));
-                POData.name = POData.name.replace(/\&/g,'%26');
-                $("#rate_per_unit").val(POData.rate_per_unit);
-                $("#rate_per_unit").prop('disabled', true);
-                $("#unit option[value='"+POData.unit_id+"']").prop('selected', true);
-                $("#unit").prop('disabled', true);
-                $("#name").val(POData.name);
-                $("#name").prop('disabled', true);
-                $("#create-material .form-body").append($("<input>", {'id': "material_id",
-                    'type': 'hidden',
-                    'value': POData.id,
-                    'name': "material_id"
-                }));
-            })
-                .on('typeahead:open', function (obj, datum) {
+                $('.typeahead').typeahead('val',POData.format_id);
+                var purchaseRequestId = POData.id;
+                $("#purchaseRequestId").val(purchaseRequestId);
+                $.ajax({
+                    url: '/purchase/purchase-order-request/get-purchase-request-component-details',
+                    type:'POST',
+                    data:{
+                        _token: $("input[name='_token']").val(),
+                        purchase_request_id: purchaseRequestId
+                    },
+                    success: function(data, textStatus, xhr){
+                        $("#purchaseRequestComponentTable tbody").html(data);
+                    },
+                    error: function(errorData){
+
+                    }
                 });
+            })
+            .on('typeahead:open', function (obj, datum) {
+                console.log(' in open function');
+            });
         });
+
+        function openDetailsModal(elements, purchaseRequestComponentId){
+            $("#modalComponentID").val(purchaseRequestComponentId);
+            $("#detailsModal").modal('show');
+        }
     </script>
 @endsection
