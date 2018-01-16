@@ -612,6 +612,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('category-listing',array('uses' => 'Dpr\DprController@categoryListing'));
         Route::post('dpr-listing',array('uses' => 'Dpr\DprController@dprListing'));
         Route::get('change-status/{id}/{status}',array('uses'=> 'Dpr\DprController@changeStatus'));
+        Route::group(['prefix' => 'subcontractor'], function(){
+            Route::post('get-category',array('uses'=> 'Dpr\DprController@getSubcontractorsCategories'));
+        });
     });
 
     Route::group(['prefix'=>'reports'],function (){
