@@ -189,22 +189,31 @@ class DprController extends Controller
         try{
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
-                $dprDetails = DprDetail::where('project_site_id',$projectSiteId)->get();
+                $dprDetails = DprDetail::where('project_site_id',$projectSiteId)->orderBy('created_at','desc')->get();
             }else{
-                $dprDetails = DprDetail::get();
+                $dprDetails = DprDetail::orderBy('created_at','desc')->get();
             }
-            $iTotalRecords = count($dprDetails);
             $records = array();
             $records['data'] = array();
-            $end = $request->length < 0 ? count($dprDetails) : $request->length;
-            $categories = array();
+            $dprListingData = array();
+            foreach($dprDetails as $dprDetail){
+                $date = date('j-n-Y',strtotime($dprDetail['created_at']));
+                if(!array_key_exists($date,$dprListingData)){
+                    $dprListingData[$date] = [
+                        'subcontractor_name' => $dprDetail->subcontractorDprCategoryRelation->subcontractor->company_name,
+                        'subcontractor_id' => $dprDetail->subcontractorDprCategoryRelation->subcontractor->id,
+                        'date' => date('j F Y', strtotime($dprDetail['created_at'])),
+                        'param_date' => $dprDetail['created_at']
+                    ];
+                }
+            }
+            $dprListingData = array_values($dprListingData);
+            $iTotalRecords = count($dprListingData);
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($dprDetails); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
-                    $dprDetails[$pagination]->projectSite->project->name.'-'.$dprDetails[$pagination]->projectSite->name,
-                    $dprDetails[$pagination]->subcontractorDprCategoryRelation->subcontractor->company_name,
-                    $dprDetails[$pagination]->subcontractorDprCategoryRelation->dprMainCategory->name,
-                    $dprDetails[$pagination]['number_of_users'],
-                    date('d-m-Y',strtotime($dprDetails[$pagination]['created_at'])),
+                    $pagination+1,
+                    $dprListingData[$pagination]['subcontractor_name'],
+                    $dprListingData[$pagination]['date'],
                     '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -213,8 +222,14 @@ class DprController extends Controller
                             <ul class="dropdown-menu pull-left" role="menu">'
 
                     .'<li>'
-                    .'<a href="/dpr/dpr-edit/'.$dprDetails[$pagination]['id'].'">'
-                    .'    <i class="icon-tag"></i> Edit </a>'
+
+                    .'<form action="/dpr/dpr-edit-view" method="POST">
+                            <input type="hidden" name="_token" value="'.$request->_token.'">
+                            <input type="hidden" name="subcontractor_id" value="'.$dprDetails[$pagination]->subcontractorDprCategoryRelation->subcontractor_id.'">
+                            <input type="hidden" name="date" value="'.$date.'">'
+                            .'<a href="javascript:void(0);" onclick="submitEditForm(this)">'
+                            .'    <i class="icon-tag"></i> Edit </a>'
+                    .'</form>'
                     .'</li>'
                     .'</ul>'
                     .'</div>'
@@ -236,19 +251,19 @@ class DprController extends Controller
         }
         return response()->json($records,$status);
     }
-    public function getDprEditView(Request $request,$id){
+    public function getDprEditView(Request $request){
         try{
-            $subCategories = DprDetail::where('id',$id)->select('id','project_site_id','subcontractor_id','dpr_main_category_id','number_of_users','created_at')->get()->toArray();
-            $dprData = array();
-            foreach ($subCategories as $subCategory){
-                $dprData['project_site_id'] = ProjectSite::where('id',$subCategory['project_site_id'])->pluck('name')->first();
-                $dprData['subcontractor_id'] = Subcontractor::where('id',$subCategory['subcontractor_id'])->pluck('company_name')->first();
-                $dprData['dpr_main_category_id'] = DprMainCategory::where('id',$subCategory['dpr_main_category_id'])->pluck('name')->first();
-                $dprData['number_of_users'] = $subCategory['number_of_users'];
-                $dprData['date'] = date('d-m-Y',strtotime($subCategory['created_at']));
-                $dprData['id'] =$subCategory['id'];
-            }
-            return view('dpr.edit-dpr')->with(compact('dprData'));
+            $date = date('Y-m-j', strtotime($request->date));
+            $projectSiteId = Session::get('global_project_site');
+            $subcontractorDprDetailData = DprDetail::join('subcontractor_dpr_category_relations','subcontractor_dpr_category_relations.id','=','dpr_details.subcontractor_dpr_category_relation_id')
+                                            ->join('dpr_main_categories','dpr_main_categories.id','=','subcontractor_dpr_category_relations.dpr_main_category_id')
+                                            ->where('subcontractor_dpr_category_relations.subcontractor_id', $request->subcontractor_id)
+                                            ->whereDate('dpr_details.created_at', $date)
+                                            ->where('dpr_details.project_site_id', $projectSiteId)
+                                            ->select('dpr_details.project_site_id','dpr_details.number_of_users as number_of_users','dpr_main_categories.name as category_name','dpr_details.id as dpr_detail_id')
+                                            ->get();
+            $subcontractorName = Subcontractor::where('id',$request->subcontractor_id)->pluck('company_name')->first();
+            return view('dpr.edit-dpr')->with(compact('subcontractorDprDetailData','subcontractorName'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'DPR create',
@@ -275,10 +290,11 @@ class DprController extends Controller
     }
     public function dprEdit(Request $request){
         try{
-            $dprData['number_of_users'] = $request->number_of_users;
-            $query = DprDetail::where('id',$request->id)->update($dprData);
+            foreach ($request->number_of_users as $dprDetailId => $numberOfUsers){
+                DprDetail::where('id',$dprDetailId)->update(['number_of_users' => $numberOfUsers]);
+            }
             $request->session()->flash('success', 'DPR edited successfully.');
-            return redirect('dpr/dpr-edit/'.$request->id);
+            return redirect('dpr/manage_dpr');
         }catch(\Exception $e){
             $data = [
                 'action' => 'DPR create',
