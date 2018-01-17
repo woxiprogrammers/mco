@@ -13,6 +13,7 @@ use App\SubcontractorDPRCategoryRelation;
 use App\SubcontractorStructure;
 use App\SubcontractorStructureType;
 use App\Summary;
+use App\Tax;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -207,7 +208,8 @@ class SubcontractorController extends Controller
             $subcontractor = Subcontractor::where('is_active',true)->orderBy('id','asc')->get(['id','subcontractor_name'])->toArray();
             $summary = Summary::where('is_active',true)->orderBy('id','asc')->get(['id','name'])->toArray();
             $ScStrutureTypes = SubcontractorStructureType::orderBy('id','asc')->get(['id','name','slug'])->toArray();
-            return view('subcontractor.structure.create')->with(compact('projectSites','clients','subcontractor','summary','ScStrutureTypes'));
+            $taxes = Tax::whereNotIn('slug',['vat'])->where('is_active',true)->where('is_special',false)->select('id','name','slug','base_percentage')->get();
+            return view('subcontractor.structure.create')->with(compact('projectSites','clients','subcontractor','summary','ScStrutureTypes','taxes'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Structure Create View',
@@ -221,6 +223,7 @@ class SubcontractorController extends Controller
 
     public function createSubcontractorStructure(Request $request) {
         try{
+            dd($request->all());
             $now = Carbon::now();
             $selectGlobalProjectSite = 0;
             if(Session::has('global_project_site')){

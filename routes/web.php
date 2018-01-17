@@ -500,6 +500,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
         Route::group(['prefix' => 'subcontractor-bills'], function(){
             Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageBillsView'));
+            Route::post('get-tax-details',array('uses' => 'Subcontractor\SubcontractorController@getTaxDetails'));
         });
     });
 
