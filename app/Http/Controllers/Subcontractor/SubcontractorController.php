@@ -9,6 +9,8 @@ use App\ProjectSite;
 use App\Quotation;
 use App\QuotationStatus;
 use App\Subcontractor;
+use App\SubcontractorBill;
+use App\SubcontractorBillTax;
 use App\SubcontractorDPRCategoryRelation;
 use App\SubcontractorStructure;
 use App\SubcontractorStructureType;
@@ -223,27 +225,49 @@ class SubcontractorController extends Controller
 
     public function createSubcontractorStructure(Request $request) {
         try{
-            dd($request->all());
-            $now = Carbon::now();
-            $selectGlobalProjectSite = 0;
             if(Session::has('global_project_site')){
-                $selectGlobalProjectSite = Session::get('global_project_site');
+                $selectedGlobalProjectSiteID = Session::get('global_project_site');
+            }else{
+                $selectedGlobalProjectSiteID = 0;
             }
-            $ScStrutureData = null;
-            if($request->structure_type == 'areawise') {
-                $structure_type_id = SubcontractorStructureType::where('slug',$request->structure_type)->pluck('id')->toArray()[0];
-                $ScStrutureData['project_site_id'] = $selectGlobalProjectSite;
-                $ScStrutureData['subcontractor_id'] = $request->subcontractor_id;
-                $ScStrutureData['summary_id'] = $request->summary_id;
-                $ScStrutureData['sc_structure_type_id'] = $structure_type_id;
-                $ScStrutureData['rate'] = $request->rate;
-                $ScStrutureData['total_work_area'] = $request->total_work_area;
-                $ScStrutureData['description'] = $request->description;
-                $ScStrutureData['created_at'] = $now;
-                $ScStrutureData['updated_at'] = $now;
-                SubcontractorStructure::create($ScStrutureData);
-            } else {
-                // here we have to do logic of amountwise
+            switch($request['structure_type']){
+                case 'amountwise' :
+                        $subcontractorStructure = SubcontractorStructure::create([
+                                                    'project_site_id' => $selectedGlobalProjectSiteID,
+                                                    'subcontractor_id' => $request['subcontractor_id'],
+                                                    'summary_id' => $request['summary_id'],
+                                                    'sc_structure_type_id' => SubcontractorStructureType::where('slug',$request['structure_type'])->pluck('id')->first(),
+                                                    'rate' => $request['rate'],
+                                                    'total_work_area' => $request['total_work_area'],
+                                                    'description' => $request['description'],
+                                                ]);
+                        foreach($request['bills'] as $key => $billData){
+                            $subcontractorBill = SubcontractorBill::create([
+                                'sc_structure_id' => $subcontractorStructure['id'],
+                                'subcontractor_bill_status_id' => 1,
+                                'qty' => $billData['quantity'],
+                                'description' => $billData['description'],
+                            ]);
+                            foreach ($billData['taxes'] as $taxID => $taxData){
+                                SubcontractorBillTax::create([
+                                    'subcontractor_bills_id' => $subcontractorBill['id'],
+                                    'tax_id' => $taxID,
+                                    'percentage' => $taxData['percentage'],
+                                ]);
+                            }
+                        }
+                    break;
+
+                case 'areawise' :
+                    $subcontractorStructure = SubcontractorStructure::create([
+                                                'project_site_id' => $selectedGlobalProjectSiteID,
+                                                'subcontractor_id' => $request['subcontractor_id'],
+                                                'summary_id' => $request['summary_id'],
+                                                'sc_structure_type_id' => SubcontractorStructureType::where('slug',$request['structure_type'])->pluck('id')->first(),
+                                                'rate' => $request['rate'],
+                                                'total_work_area' => $request['total_work_area'],
+                                                'description' => $request['description'],
+                                            ]);
             }
             $request->session()->flash('success', 'Subcontractor Structured Created successfully.');
             return redirect('/subcontractor/subcontractor-structure/create');

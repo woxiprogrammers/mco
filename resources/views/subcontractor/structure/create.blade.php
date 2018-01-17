@@ -86,7 +86,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-3">
-                                                            <input type="text" class="form-control" id="rate" name="rate" value="0">
+                                                            <input type="text" class="form-control" id="rate" name="rate" onchange="calculateBillAmounts(this)">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -158,21 +158,21 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody>
-                                                                <tr id="tableData">
+                                                                <tr id="tableData" class="billRow">
                                                                     <td>
-                                                                        <input type="text" class="form-control bill_no" name="bills[0][bill_no]" value="R.A.1" disabled>
+                                                                        <input type="text" class="form-control bill_no" name="bills[0][bill_no]" id="bill_no_0" value="R.A.1" disabled>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control description" name="bills[0][description]">
+                                                                        <input type="text" class="form-control description" name="bills[0][description]" id="description_0">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control quantity" name="bills[0][quantity]" onchange="calculateSubTotal()">
+                                                                        <input type="text" class="form-control quantity" name="bills[0][quantity]" id="quantity_0" onkeyup="calculateSubtotal(this)">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control rate" name="bills[0][rate]">
+                                                                        <input type="text" class="form-control rate" name="bills[0][rate]" id="rate_0" disabled>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control amount" name="bills[0][amount]">
+                                                                        <input type="text" class="form-control amount" name="bills[0][amount]" id="amount_0">
                                                                     </td>
                                                                     <td>
                                                                         <a class="btn btn-xs blue tax-button" onclick="addTax(this)">Add Tax</a>
@@ -371,13 +371,14 @@
             var newClone = $("#tableData").clone().show().attr('id', 'id_'+ iterator);
             $(newClone).find('.bill_no').attr("id","bill_no_"+iterator);
             $(newClone).find('.bill_no').attr("name","bills["+iterator+"][bill_no]");
-            $(newClone).find('.bill_no').attr("value","R.A. "+iterator);
+            $(newClone).find('.bill_no').attr("value","R.A. "+(iterator+1));
             $(newClone).find('.description').attr("id","description_"+iterator);
             $(newClone).find('.description').attr("name","bills["+iterator+"][description]");
             $(newClone).find('.quantity').attr("id","quantity_"+iterator);
             $(newClone).find('.quantity').attr("name","bills["+iterator+"][quantity]");
             $(newClone).find('.rate').attr("id","rate_"+iterator);
             $(newClone).find('.rate').attr("name","bills["+iterator+"][rate]");
+            $(newClone).find('.rate').attr("value",$('#rate').val());
             $(newClone).find('.amount').attr("id","amount_"+iterator);
             $(newClone).find('.amount').attr("name","bills["+iterator+"][amount]");
             $("#billTable tbody").append(newClone);
@@ -428,6 +429,30 @@
         });
         $("#addTaxForm .modal-body").html('');
         $("#taxModal").modal('toggle');
+    }
+
+    function calculateSubtotal(element){
+       // console.log(element);
+        var rowId = $(element).attr('id');
+        var row = rowId.match(/\d+/)[0];
+        var quantity = $('#quantity_'+row).val();
+        var rate = $('#rate').val();
+        var amount = parseFloat(quantity) * parseFloat(rate);
+        if(isNaN(amount)){
+            $('#amount_'+row).val(0);
+        }else{
+            $('#amount_'+row).val(customRound(amount));
+        }
+
+    }
+
+    function calculateBillAmounts(element){
+        var rate = $(element).val();
+        $(".billRow").each(function(){
+            $(this).find('.rate').val(rate);
+            var quantityElement = $(this).find('.quantity');
+            calculateSubtotal(quantityElement);
+        });
     }
 
 </script>
