@@ -385,7 +385,6 @@
         }
 
         function calculateTaxes(element){
-            console.log(element);
             var rate = parseFloat($(element).closest('.modal-body').find('.tax-modal-rate').val());
             if(typeof rate == 'undefined' || rate == '' || isNaN(rate)){
                 rate = 0;
