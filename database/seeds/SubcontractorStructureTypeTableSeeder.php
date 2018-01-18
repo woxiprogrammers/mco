@@ -14,8 +14,8 @@ class SubcontractorStructureTypeTableSeeder extends Seeder
         $now = \Carbon\Carbon::now();
         \Illuminate\Support\Facades\DB::table('subcontractor_structure_types')->insert([
             [
-                'name' => 'Areawise',
-                'slug' => 'areawise',
+                'name' => 'SQFT',
+                'slug' => 'sqft',
                 'created_at' => $now,
                 'updated_at' => $now
             ],

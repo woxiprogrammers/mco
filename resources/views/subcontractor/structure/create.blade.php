@@ -95,7 +95,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-3">
-                                                            <input type="text" class="form-control" id="total_work_area" name="total_work_area" value="0">
+                                                            <input type="text" class="form-control" id="total_work_area" name="total_work_area" value="0" onchange="calculateBillAmounts(this)">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -140,9 +140,6 @@
                                                         <div class="col-md-2">
                                                             <input type="text" class="form-control" id="no_of_floors" name="no_of_floors" onkeyup="getBillTable()">
                                                         </div>
-                                                        {{--<div class="col-md-2">
-                                                            <a id="next_btn" class="btn blue">Next</a>
-                                                        </div>--}}
                                                     </div>
                                                     <hr/>
                                                     <div id="billTable">
@@ -363,7 +360,13 @@
     }
 
     function getBillTable(){
+        var total_amount = $('#total_amount').val();
         var noOfFloor = parseInt($('#no_of_floors').val());
+        var quantity = parseFloat(1 / noOfFloor);
+        var amount = quantity * parseFloat(total_amount);
+        $('#quantity_0').val(quantity);
+        $('#amount_0').val(amount);
+
         $("#billTable table tbody tr:not('#tableData')").each(function(){
            $(this).remove();
         });
@@ -376,14 +379,62 @@
             $(newClone).find('.description').attr("name","bills["+iterator+"][description]");
             $(newClone).find('.quantity').attr("id","quantity_"+iterator);
             $(newClone).find('.quantity').attr("name","bills["+iterator+"][quantity]");
+            $(newClone).find('.quantity').attr("value",quantity);
             $(newClone).find('.rate').attr("id","rate_"+iterator);
             $(newClone).find('.rate').attr("name","bills["+iterator+"][rate]");
             $(newClone).find('.rate').attr("value",$('#rate').val());
             $(newClone).find('.amount').attr("id","amount_"+iterator);
             $(newClone).find('.amount').attr("name","bills["+iterator+"][amount]");
+            $(newClone).find('.amount').attr("value",amount);
             $("#billTable tbody").append(newClone);
         }
         $("#billTable table").show();
+    }
+
+    function calculateSubtotal(element){
+        var total_amount = $('#total_amount').val();
+        var noOfFloor = parseInt($('#no_of_floors').val());
+        var rowId = $(element).attr('id');
+        var row = rowId.match(/\d+/)[0];
+        var currentRow = parseInt(row) + 1;
+        var quantity = $('#quantity_'+row).val();
+        var belowRowCount = noOfFloor - (currentRow);
+        var aboveRowCount =  noOfFloor - (belowRowCount + 1);
+        var aboveRowQuantityAssigned = 0;
+        for(var aboveRowId = 0 ; aboveRowId < aboveRowCount ; aboveRowId++){
+            aboveRowQuantityAssigned += parseFloat($('#quantity_'+aboveRowId).val());
+        }
+        var remainingQuantity = 1 - (aboveRowQuantityAssigned + parseFloat(quantity));
+        var quantityToBeAssigned = remainingQuantity / belowRowCount;
+
+        for(var iterator = 0 ; iterator <= belowRowCount ; iterator++){
+            $('#quantity_'+currentRow).val(quantityToBeAssigned);
+            var currentAmount = parseFloat(quantityToBeAssigned) * parseFloat(total_amount);
+            if(isNaN(currentAmount)){
+                console.log(3);
+                $('#amount_'+currentRow).val(0);
+            }else{
+                console.log(4);
+                $('#amount_'+currentRow).val(currentAmount);
+            }
+            currentRow++;
+        }
+        var amount = parseFloat(quantity) * parseFloat(total_amount);
+        if(isNaN(amount)){
+            $('#amount_'+row).val(0);
+        }else{
+            $('#amount_'+row).val(amount);
+        }
+
+    }
+
+    function calculateBillAmounts(element){
+        var total_amount = $('#total_amount').val();
+        $(".billRow").each(function(){
+            $(this).find('.rate').val(total_amount);
+            var quantityElement = $(this).find('.quantity');
+            calculateSubtotal(quantityElement);
+        });
     }
 
     function addTax(element){
@@ -429,30 +480,6 @@
         });
         $("#addTaxForm .modal-body").html('');
         $("#taxModal").modal('toggle');
-    }
-
-    function calculateSubtotal(element){
-       // console.log(element);
-        var rowId = $(element).attr('id');
-        var row = rowId.match(/\d+/)[0];
-        var quantity = $('#quantity_'+row).val();
-        var rate = $('#rate').val();
-        var amount = parseFloat(quantity) * parseFloat(rate);
-        if(isNaN(amount)){
-            $('#amount_'+row).val(0);
-        }else{
-            $('#amount_'+row).val(customRound(amount));
-        }
-
-    }
-
-    function calculateBillAmounts(element){
-        var rate = $(element).val();
-        $(".billRow").each(function(){
-            $(this).find('.rate').val(rate);
-            var quantityElement = $(this).find('.quantity');
-            calculateSubtotal(quantityElement);
-        });
     }
 
 </script>
