@@ -112,7 +112,7 @@
                     <span></span>
                 </label>
                 <label class="mt-radio">
-                    <input type="radio" name="structure_type" id="areawise" value="2"> Areawise
+                    <input type="radio" name="structure_type" id="sqft" value="2"> SQFT
                     <span></span>
                 </label>
             </div>
