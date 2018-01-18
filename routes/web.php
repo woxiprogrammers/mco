@@ -318,7 +318,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses' => 'Purchase\PurchaseOrderRequestController@createPurchaseOrderRequest'));
             Route::post('listing',array('uses' => 'Purchase\PurchaseOrderRequestController@listing'));
             Route::post('get-purchase-request-component-details',array('uses' => 'Purchase\PurchaseOrderRequestController@getPurchaseRequestComponentDetails'));
-            Route::post('get-component-tax-details/{purchaseRequestComponent}',array('uses' => 'Purchase\PurchaseOrderRequestController@getComponentTaxDetails'));
+            Route::post('get-component-tax-details/{purchaseComponentVendorRelation}',array('uses' => 'Purchase\PurchaseOrderRequestController@getComponentTaxDetails'));
             Route::get('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@getEditView'));
             Route::get('purchase-request-auto-suggest/{keyword}',array('uses' => 'Purchase\PurchaseOrderRequestController@purchaseRequestAutoSuggest'));
         });
