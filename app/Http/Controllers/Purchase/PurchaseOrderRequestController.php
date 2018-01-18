@@ -62,10 +62,10 @@ class PurchaseOrderRequestController extends Controller
                 'user_id' => $user->id
             ];
             $purchaseOrderRequest = PurchaseOrderRequest::create($purchaseOrderRequestData);
-            foreach($request['data'] as $purchaseRequestComponentId => $componentData){
+            foreach($request['data'] as $purchaseRequestComponentVendorRelationId => $componentData){
                 $purchaseOrderRequestComponentData = [
                     'purchase_order_request_id' => $purchaseOrderRequest->id,
-                    'purchase_request_component_id' => $purchaseRequestComponentId,
+                    'purchase_request_component_vendor_relation_id' => $purchaseRequestComponentVendorRelationId,
                     'rate_per_unit' => $componentData['rate_per_unit'],
                     'quantity' => $componentData['quantity'],
                     'unit_id' => $componentData['unit_id'],
@@ -216,8 +216,9 @@ class PurchaseOrderRequestController extends Controller
                 $projectSiteId = Session::get('global_project_site');
                 $purchaseOrderCreatedComponentIds = PurchaseOrderRequestComponent::join('purchase_order_requests','purchase_order_requests.id','=','purchase_order_request_components.purchase_order_request_id')
                     ->join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
+                    ->join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
                     ->where('purchase_requests.project_site_id',$projectSiteId)
-                    ->pluck('purchase_order_request_components.purchase_request_component_id')
+                    ->pluck('purchase_request_components.id')
                     ->toArray();
                 $purchaseRequests = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
                     ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
@@ -308,9 +309,10 @@ class PurchaseOrderRequestController extends Controller
         }
     }
 
-    public function getComponentTaxDetails(Request $request, $purchaseRequestComponent){
+    public function getComponentTaxDetails(Request $request, $purchaseRequestComponentVendorRelation){
         try{
             $purchaseRequestComponentData = array();
+            $purchaseRequestComponent = $purchaseRequestComponentVendorRelation->purchaseRequestComponent;
             $systemAssetTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
             $systemMaterialIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material'])->pluck('id')->toArray();
             if(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$systemAssetTypeIds)){
