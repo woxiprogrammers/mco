@@ -252,6 +252,11 @@
                                 </a>
                             </li>
                             <li aria-haspopup="true">
+                                <a href="/purchase/purchase-order-request/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Purchase Order Request
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Purchase Order
                                 </a>
