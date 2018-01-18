@@ -13,13 +13,12 @@
                 <div class="page-container">
                     <form role="form" id="create-image" class="form-horizontal" method="post" action="/dpr/dpr-edit">
                         <!-- BEGIN CONTENT -->
-                       <input type="hidden" value="{{$dprData['id']}}" name="id">
                         <div class="page-content-wrapper">
                             <div class="page-head">
                                 <div class="container">
                                     <!-- BEGIN PAGE TITLE -->
                                     <div class="page-title">
-                                        <h1>Add Image</h1>
+                                        <h1>Edit DPR Detail</h1>
                                     </div>
                                     <div class="col-md-6" style="margin-top: 12px;float: right">
                                         <button type="submit" class="btn btn-set red pull-right">
@@ -41,53 +40,39 @@
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Client Name</label>
+                                                            <label for="name" class="control-label">Sub Contractor</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="clientId" required readonly>
-                                                                    <option selected>{{$dprData['project_site_id']}} </option>
-                                                            </select>
+                                                            <input type="text" value="{{$subcontractorName}}" class="form-control" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Subcontractor Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="projectId" required readonly>
-                                                                <option selected>{{$dprData['subcontractor_id']}} </option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Category Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="projectId" required readonly>
-                                                                <option selected>{{$dprData['dpr_main_category_id']}} </option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Date</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="dateID"  value="{{$dprData['date']}}" required readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Number Of Labours</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="number_of_users" name="number_of_users" value="{{$dprData['number_of_users']}}" required>
+                                                        <div class="col-md-6 col-md-offset-3" style="text-align: right">
+                                                            <table class="table table-bordered" id="categoryTable">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th style="width: 50%">
+                                                                        Category
+                                                                    </th>
+                                                                    <th>
+                                                                        Number of labours
+                                                                    </th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach($subcontractorDprDetailData as $subcontractorDprDetail)
+                                                                        <tr>
+                                                                            <td>
+                                                                                {{$subcontractorDprDetail['category_name']}}
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control" name="number_of_users[{{$subcontractorDprDetail['dpr_detail_id']}}]" value="{{$subcontractorDprDetail['number_of_users']}}">
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
                                                         </div>
                                                     </div>
                                                 </div>

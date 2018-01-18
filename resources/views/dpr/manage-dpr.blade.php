@@ -39,17 +39,13 @@
                                                     <table class="table table-striped table-bordered table-hover table-checkable order-column" id="dprTable">
                                                         <thead>
                                                         <tr>
-                                                            <th style="width: 30%"> Project Site </th>
+                                                            <th style="width: 10%"> No. </th>
                                                             <th> Subcontractor </th>
-                                                            <th> Dpr Category </th>
-                                                            <th> Number OF Labours </th>
                                                             <th> Date </th>
                                                             <th> Action </th>
                                                         </tr>
                                                         <tr class="filter">
-                                                            <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_sr" readonly> </th>
-                                                            <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
-                                                            <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
+                                                            <th style="width: 10%">  </th>
                                                             <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
                                                             <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
                                                             <th>
@@ -87,5 +83,8 @@
         $(document).ready(function() {
             $('#dprTable').DataTable();
         });
+        function submitEditForm(element){
+            $(element).closest("form").submit();
+        }
     </script>
 @endsection
