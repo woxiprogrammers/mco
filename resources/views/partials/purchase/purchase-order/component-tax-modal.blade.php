@@ -16,18 +16,19 @@
 </div>
 <div class="row form-group">
     <div class="col-md-2">
-        <label class="control-label pull-right">Rate</label>
-    </div>
-    <div class="col-md-6">
-        <input type="text" class="form-control tax-modal-rate" value="{{$data['rate']}}" onkeyup="calculateTaxes(this)">
-    </div>
-</div>
-<div class="row form-group">
-    <div class="col-md-2">
         <label class="control-label pull-right">Quantity</label>
     </div>
     <div class="col-md-6">
         <input type="text" class="form-control tax-modal-quantity" value="{{$data['quantity']}}" onkeyup="calculateTaxes(this)">
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col-md-2">
+        <label class="control-label pull-right">Rate</label>
+    </div>
+    <div class="col-md-6">
+        <input type="text" class="form-control tax-modal-rate" value="{{$data['rate']}}" onkeyup="calculateTaxes(this)">
     </div>
 </div>
 <div class="row form-group">

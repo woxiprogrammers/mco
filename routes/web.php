@@ -293,7 +293,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@transactionEdit'));
             });
         });
-
         Route::group(['prefix' => 'purchase-order-bill'],function(){
             Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
             Route::get('create',array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
@@ -312,6 +311,16 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'vendor-mail'],function(){
             Route::get('manage',array('uses' => 'Purchase\VendorMailController@getManageView'));
             Route::post('listing',array('uses' => 'Purchase\VendorMailController@listing'));
+        });
+        Route::group(['prefix' => 'purchase-order-request'], function(){
+            Route::get('manage',array('uses' => 'Purchase\PurchaseOrderRequestController@getManageView'));
+            Route::get('create',array('uses' => 'Purchase\PurchaseOrderRequestController@getCreateView'));
+            Route::post('create',array('uses' => 'Purchase\PurchaseOrderRequestController@createPurchaseOrderRequest'));
+            Route::post('listing',array('uses' => 'Purchase\PurchaseOrderRequestController@listing'));
+            Route::post('get-purchase-request-component-details',array('uses' => 'Purchase\PurchaseOrderRequestController@getPurchaseRequestComponentDetails'));
+            Route::post('get-component-tax-details/{purchaseRequestComponent}',array('uses' => 'Purchase\PurchaseOrderRequestController@getComponentTaxDetails'));
+            Route::get('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@getEditView'));
+            Route::get('purchase-request-auto-suggest/{keyword}',array('uses' => 'Purchase\PurchaseOrderRequestController@purchaseRequestAutoSuggest'));
         });
     });
 
