@@ -503,7 +503,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorStructure'));
             Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureCreateView'));
             Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorStructureListing'));
-
+            Route::get('view/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureView'));
             Route::get('edit/{subcontractor_struct}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
             Route::post('edit/{subcontractor_struct}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
         });

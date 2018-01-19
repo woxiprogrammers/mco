@@ -30,7 +30,7 @@
                             <div class="container" style="width: 100%">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/subcontractor/subcontractor-structure/manage">Manage Subcontractor Structure</a>
+                                        <a href="/subcontractor/subcontractor-bills/manage/{!! $subcontractorStructure['id'] !!}">Manage Subcontractor Bills</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
@@ -58,72 +58,6 @@
                                             @endif
 
                                             <div class="form-body">
-                                                <div class="row form-group">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="description" class="control-label">Subcontractor : </label>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <span>{!! $subcontractorStructure->subcontractor->subcontractor_name !!}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="description" class="control-label">Description : </label>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <span>{!! $subcontractorStructure->description !!}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="summary_id" class="control-label">Summary : </label>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <span>{!! $subcontractorStructure->summary->name !!}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="rate" class="control-label">Rate :</label>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <span>{!! $subcontractorStructure->rate !!}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="total_work_area" class="control-label">Total Work Area (Sq.Ft) :</label>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <span>{!! $subcontractorStructure->total_work_area !!}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="total_amount" class="control-label">Total Amount : </label>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <span>{!! $subcontractorStructure->total_work_area * $subcontractorStructure->rate !!}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label for="structure_type" class="control-label">Structure Type :</label>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <span>{!! $subcontractorStructure->contractType->name !!}</span>
-                                                    </div>
-                                                </div>
-                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
-                                                    <div class="form-group row" id="no_of_floor">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="no_of_floors" class="control-label">No of Floors : </label>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <span>{!! $noOfFloors !!}</span>
-                                                        </div>
-                                                    </div>
-                                                @endif
                                                 <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="parentBillTable">
                                                     <thead>
                                                     <tr id="tableHeader">

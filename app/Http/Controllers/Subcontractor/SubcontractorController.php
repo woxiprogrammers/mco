@@ -297,7 +297,12 @@ class SubcontractorController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                //$projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
+                $action = '<a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                        <i class="icon-docs"></i> Manage
+                                    </a>
+                                    <a href="/subcontractor/subcontractor-structure/view/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                         <i class="icon-docs"></i>View
+                                    </a>';
                 $total_amount = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
                 $records['data'][$iterator] = [
                     $listingData[$pagination]->subcontractor->subcontractor_name,
@@ -306,20 +311,8 @@ class SubcontractorController extends Controller
                     $listingData[$pagination]['rate'],
                     $listingData[$pagination]['total_work_area'],
                     $total_amount,
-                    //$projectSiteName,
                     date('d M Y',strtotime($listingData[$pagination]['created_at'])),
-                    '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'">
-                                    <i class="icon-docs"></i> Manage </a>
-                            </li>
-                        </ul>
-                    </div>'
+                    $action
                     // need to replece for edit functionality : <a href="/subcontractor/subcontractor-structure/edit/'.$listingData[$pagination]['id'].'">
                 ];
             }
@@ -528,7 +521,6 @@ class SubcontractorController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-
                 $action = '<div class="btn btn-xs green">
                         <a href="/subcontractor/subcontractor-bills/view/'.$listingData[$pagination]->id.'" style="color: white">
                              View Bill
@@ -604,9 +596,25 @@ class SubcontractorController extends Controller
             return view('subcontractor.structure.bill.view')->with(compact('subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal'));
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get Subcontractor Structure View',
+                'action' => 'Get Subcontractor Bill View',
                 'exception' => $e->getMessage(),
                 'data' => $subcontractorStructureBillId
+            ];
+            Log::Critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getSubcontractorStructureView(Request $request,$subcontractorStructureId){
+        try{
+            $subcontractorStructure = SubcontractorStructure::where('id',$subcontractorStructureId)->first();
+            $noOfFloors = $subcontractorStructure->subcontractorBill->count();
+            return view('subcontractor.structure.view')->with(compact('subcontractorStructure','noOfFloors'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Subcontractor Structure View',
+                'exception' => $e->getMessage(),
+                'data' => $subcontractorStructureId
             ];
             Log::Critical(json_encode($data));
             abort(500);
