@@ -511,8 +511,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'subcontractor-bills'], function(){
             Route::get('manage/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@getBillManageView'));
             Route::post('listing/{subcontractorStructureId}/{billStatusSlug}',array('uses' => 'Subcontractor\SubcontractorController@getBillListing'));
-            //Route::post('get-tax-details',array('uses' => 'Subcontractor\SubcontractorController@getTaxDetails'));
             Route::get('view/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureBillView'));
+            Route::get('edit/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureBillEditView'));
+            Route::post('edit/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructureBill'));
             Route::get('change-status/{statusSlug}/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@changeBillStatus'));
         });
     });
