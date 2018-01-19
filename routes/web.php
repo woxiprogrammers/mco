@@ -320,6 +320,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('get-purchase-request-component-details',array('uses' => 'Purchase\PurchaseOrderRequestController@getPurchaseRequestComponentDetails'));
             Route::post('get-component-tax-details/{purchaseComponentVendorRelation}',array('uses' => 'Purchase\PurchaseOrderRequestController@getComponentTaxDetails'));
             Route::get('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@getEditView'));
+            Route::post('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@approvePurchaseOrderRequest'));
             Route::get('purchase-request-auto-suggest/{keyword}',array('uses' => 'Purchase\PurchaseOrderRequestController@purchaseRequestAutoSuggest'));
         });
     });

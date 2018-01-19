@@ -5,16 +5,20 @@ namespace App\Http\Controllers\Purchase;
 use App\Asset;
 use App\Category;
 use App\Helper\UnitHelper;
+use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentTypes;
 use App\PurchaseOrder;
 use App\PurchaseOrderComponent;
+use App\PurchaseOrderComponentImage;
 use App\PurchaseOrderRequest;
 use App\PurchaseOrderRequestComponent;
 use App\PurchaseOrderRequestComponentImage;
+use App\PurchaseOrderStatus;
 use App\PurchaseRequest;
 use App\PurchaseRequestComponent;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -83,7 +87,7 @@ class PurchaseOrderRequestController extends Controller
                 if(array_key_exists('client_images',$componentData)){
                     $mainDirectoryName = sha1($purchaseOrderRequest->id);
                     $componentDirectoryName = sha1($purchaseOrderRequestComponent->id);
-                    $uploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                    $uploadPath = public_path().env('PURCHASE_ORDER_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
                     if (!file_exists($uploadPath)) {
                         File::makeDirectory($uploadPath, $mode = 0777, true, true);
                     }
@@ -108,7 +112,7 @@ class PurchaseOrderRequestController extends Controller
                 if(array_key_exists('vendor_images',$componentData)){
                     $mainDirectoryName = sha1($purchaseOrderRequest->id);
                     $componentDirectoryName = sha1($purchaseOrderRequestComponent->id);
-                    $uploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                    $uploadPath = public_path().env('PURCHASE_ORDER_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
                     if (!file_exists($uploadPath)) {
                         File::makeDirectory($uploadPath, $mode = 0777, true, true);
                     }
@@ -197,7 +201,30 @@ class PurchaseOrderRequestController extends Controller
 
     public function getEditView(Request $request,$purchaseOrderRequest){
         try{
-            return view('purchase.purchase-order-request.edit');
+            $purchaseOrderRequestComponents = array();
+            $draftPurchaseOrderRequestComponents = PurchaseOrderRequestComponent::where('purchase_order_request_id',$purchaseOrderRequest->id)->whereNull('is_approved')->get();
+            foreach($draftPurchaseOrderRequestComponents as $purchaseOrderRequestComponent){
+                $purchaseRequestComponentId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
+                if(!array_key_exists($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id,$purchaseOrderRequestComponents)){
+                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->name;
+                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'] = $purchaseOrderRequestComponent->quantity;
+                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['unit'] = $purchaseOrderRequestComponent->unit->name;
+                }
+                $rateWithTax = $purchaseOrderRequestComponent->rate_per_unit;
+                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
+                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->sgst_percentage / 100));
+                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->igst_percentage / 100));
+                $purchaseOrderRequestComponents[$purchaseRequestComponentId]['vendor_relations'][] = [
+                    'component_vendor_relation_id' => $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id,
+                    'purchase_order_request_component_id' => $purchaseOrderRequestComponent->id,
+                    'vendor_name' => $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->company,
+                    'vendor_id' => $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor_id,
+                    'rate_without_tax' => $purchaseOrderRequestComponent->rate_per_unit,
+                    'rate_with_tax' => $rateWithTax,
+                    'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity']
+                ];
+            }
+            return view('purchase.purchase-order-request.approve')->with(compact('purchaseOrderRequest','purchaseOrderRequestComponents'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit purchase order request',
@@ -349,6 +376,97 @@ class PurchaseOrderRequestController extends Controller
             ];
             Log::critical(json_encode($data));
             return response()->json([], 500);
+        }
+    }
+
+    use MaterialRequestTrait;
+    public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
+        try{
+            if($request->has('approved_purchase_order_request_relation')){
+                if(Session::has('global_project_site')){
+                    $projectSiteId = Session::get('global_project_site');
+                }else{
+                    $projectSiteId = $purchaseOrderRequest->purchaseOrderRequest->purchaseRequest->project_site_id;
+                }
+                foreach($request->approved_purchase_order_request_relation as $vendorId => $purchaseOrderRequestComponentArray){
+                    $purchaseOrderCount = PurchaseOrder::whereDate('created_at', Carbon::now())->count();
+                    $purchaseOrderCount++;
+                    $purchaseOrderFormatID = $this->getPurchaseIDFormat('purchase-order',Carbon::now(),$purchaseOrderCount);
+                    $purchaseOrderData = [
+                        'user_id' => Auth::user()->id,
+                        'vendor_id' => $vendorId,
+                        'is_approved' => true,
+                        'purchase_request_id' => $purchaseOrderRequest->purchase_request_id,
+                        'purchase_order_status_id' => PurchaseOrderStatus::where('slug','open')->pluck('id')->first(),
+                        'is_client_order' => false,
+                        'purchase_order_request_id' => $purchaseOrderRequest->id,
+                        'format_id' => $purchaseOrderFormatID,
+                        'serial_no' => $purchaseOrderCount
+                    ];
+                    $purchaseOrder = PurchaseOrder::create($purchaseOrderData);
+                    foreach($purchaseOrderRequestComponentArray as $purchaseOrderRequestComponentId){
+                        $purchaseOrderRequestComponent = PurchaseOrderRequestComponent::findOrFail($purchaseOrderRequestComponentId);
+                        $purchaseOrderComponentData = PurchaseOrderRequestComponent::where('id', $purchaseOrderRequestComponentId)
+                                                                ->select('id as purchase_order_request_component_id','rate_per_unit','gst','hsn_code','expected_delivery_date','remark','credited_days',
+                                                                    'quantity','unit_id','cgst_percentage','sgst_percentage','igst_percentage','cgst_amount',
+                                                                    'sgst_amount','igst_amount','total')
+                                                                ->first()->toArray();
+                        $purchaseOrderComponentData['purchase_order_id'] = $purchaseOrder->id;
+                        $purchaseOrderComponentData['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
+                        $purchaseOrderComponent = PurchaseOrderComponent::create($purchaseOrderComponentData);
+                        $purchaseOrderRequestComponent->update(['is_approved' => true]);
+                        $disapprovedPurchaseOrderRequestComponentIds = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
+                                ->where('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseOrderRequestComponent->purchase_request_component_id)
+                                ->where('purchase_order_request_components.id','!=',$purchaseOrderRequestComponent->id)
+                                ->pluck('purchase_order_request_components.id')
+                                ->toArray();
+                        PurchaseOrderRequestComponent::whereIn('id', $disapprovedPurchaseOrderRequestComponentIds)->update(['is_approved' => false]);
+                        if(count($purchaseOrderRequestComponent->purchaseOrderRequestComponentImages) > 0){
+                            $purchaseOrderMainDirectoryName = sha1($purchaseOrderComponent['purchase_order_id']);
+                            $purchaseOrderComponentDirectoryName = sha1($purchaseOrderComponent['id']);
+                            $mainDirectoryName = sha1($purchaseOrderRequest->id);
+                            $componentDirectoryName = sha1($purchaseOrderRequestComponent->id);
+                            foreach ($purchaseOrderRequestComponent->purchaseOrderRequestComponentImages as $purchaseOrderRequestComponentImage){
+                                if($purchaseOrderRequestComponentImage->is_vendor_approval == true){
+                                    $toUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderMainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$purchaseOrderComponentDirectoryName;
+                                    $fromUploadPath = public_path().env('PURCHASE_ORDER_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                                }else{
+                                    $toUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderMainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$purchaseOrderComponentDirectoryName;
+                                    $fromUploadPath = public_path().env('PURCHASE_ORDER_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+                                }
+                                if (!file_exists($toUploadPath)) {
+                                    File::makeDirectory($toUploadPath, $mode = 0777, true, true);
+                                }
+                                $fromUploadPath = $fromUploadPath.DIRECTORY_SEPARATOR.$purchaseOrderRequestComponentImage->name;
+                                $toUploadPath = $toUploadPath.DIRECTORY_SEPARATOR.$purchaseOrderRequestComponentImage->name;
+                                if(file_exists($fromUploadPath)){
+                                    $imageData = [
+                                        'purchase_order_component_id' => $purchaseOrderComponent['id'] ,
+                                        'name' => $purchaseOrderRequestComponentImage->name,
+                                        'caption' => $purchaseOrderRequestComponentImage->caption,
+                                        'is_vendor_approval' => $purchaseOrderRequestComponentImage->is_vendor_approval
+                                    ];
+                                    File::move($fromUploadPath, $toUploadPath);
+                                    PurchaseOrderComponentImage::create($imageData);
+                                }
+                            }
+                        }
+                    }
+                }
+                $request->session()->flash('success','Purchase Orders Created Successfully !');
+                return redirect('/purchase/purchase-order/manage');
+            }else{
+                $request->session()->flash('error','Please select at least one material/asset.');
+                return redirect('/purchase/purchase-order-request/edit/'.$purchaseOrderRequest->id);
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Approve Purchase Order Request',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }
