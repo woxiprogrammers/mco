@@ -3,6 +3,7 @@ var BillListing = function () {
 
         var grid = new Datatable();
         var subcontractorStructureId = $('#subcontractorStructureId').val();
+        var bill_status = $('#bill_status').val();
         grid.init({
             src: $("#billTable"),
             onSuccess: function (grid) {
@@ -24,7 +25,7 @@ var BillListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/subcontractor/subcontractor-bills/listing/"+subcontractorStructureId, // ajax source
+                    "url": "/subcontractor/subcontractor-bills/listing/"+subcontractorStructureId+"/"+bill_status, // ajax source
                     "data" :{
                         '_token' : $("input[name='_token']").val()
                     }
@@ -78,7 +79,24 @@ var BillListing = function () {
 }();
 
 jQuery(document).ready(function() {
+    var hash = window.location.hash;
+    var selectDropDown = $('<select />',{id:"bill_status",class:"form-control", name:"bill_status"});
+    if (hash == "#disapproved") { // CANCELLED STATUS
+        $('<option />', {value:'disapproved',text:'Disapproved'}).appendTo(selectDropDown);
+        $('<option />', {value:'approved&draft',text:'Approved & Draft'}).appendTo(selectDropDown);
+    } else { //Approved Status by default
+        $('<option />', {value:'approved&draft',text:'Approved & Draft'}).appendTo(selectDropDown);
+        $('<option />', {value:'disapproved',text:'Disapproved'}).appendTo(selectDropDown);
+    }
+    selectDropDown.appendTo('#bill_status_dropdown');
+
     BillListing.init();
+
+    $('#bill_status').on('change',function(e) {
+        window.location.href = "#" + $('#bill_status').val();
+        location.reload();
+    });
 });
+
 
 

@@ -502,16 +502,19 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'subcontractor-structure'], function(){
             Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
             Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorStructure'));
-            Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureView'));
+            Route::get('create',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureCreateView'));
             Route::post('listing',array('uses' => 'Subcontractor\SubcontractorController@subcontractorStructureListing'));
+            Route::get('view/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureView'));
             Route::get('edit/{subcontractor_struct}', array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureEditView'));
             Route::post('edit/{subcontractor_struct}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructure'));
         });
 
         Route::group(['prefix' => 'subcontractor-bills'], function(){
             Route::get('manage/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@getBillManageView'));
-            Route::post('listing/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@getBillListing'));
-            Route::post('get-tax-details',array('uses' => 'Subcontractor\SubcontractorController@getTaxDetails'));
+            Route::post('listing/{subcontractorStructureId}/{billStatusSlug}',array('uses' => 'Subcontractor\SubcontractorController@getBillListing'));
+            //Route::post('get-tax-details',array('uses' => 'Subcontractor\SubcontractorController@getTaxDetails'));
+            Route::get('view/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureBillView'));
+            Route::get('change-status/{statusSlug}/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@changeBillStatus'));
         });
     });
 
