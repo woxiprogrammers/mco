@@ -27,4 +27,8 @@ class SubcontractorStructure extends Model
     public function subcontractor() {
         return $this->belongsTo('App\Subcontractor','subcontractor_id');
     }
+
+    public function subcontractorBill() {
+        return $this->belongsTo('App\SubcontractorBill','subcontractor_id');
+    }
 }

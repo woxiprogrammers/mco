@@ -10,6 +10,7 @@ use App\Quotation;
 use App\QuotationStatus;
 use App\Subcontractor;
 use App\SubcontractorBill;
+use App\SubcontractorBillStatus;
 use App\SubcontractorBillTax;
 use App\SubcontractorDPRCategoryRelation;
 use App\SubcontractorStructure;
@@ -199,7 +200,7 @@ class SubcontractorController extends Controller
         }
     }
 
-    public function getSubcontractorStructureView(Request $request) {
+    public function getSubcontractorStructureCreateView(Request $request) {
         try{
             $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
             $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
@@ -244,7 +245,7 @@ class SubcontractorController extends Controller
                         foreach($request['bills'] as $key => $billData){
                             $subcontractorBill = SubcontractorBill::create([
                                 'sc_structure_id' => $subcontractorStructure['id'],
-                                'subcontractor_bill_status_id' => 1,
+                                'subcontractor_bill_status_id' => SubcontractorBillStatus::where('slug','draft')->pluck('id')->first(),
                                 'qty' => $billData['quantity'],
                                 'description' => $billData['description'],
                             ]);
@@ -507,15 +508,32 @@ class SubcontractorController extends Controller
         }
     }
 
-    public function getBillListing(Request $request,$subcontractorStructureId){
+    public function getBillListing(Request $request,$subcontractorStructureId,$billStatusSlug){
         try{
-            $listingData = SubcontractorBill::join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
-                ->where('subcontractor_structure.id',$subcontractorStructureId)->select('subcontractor_bills.id','subcontractor_bills.qty','subcontractor_bills.subcontractor_bill_status_id')->get();
+            if($billStatusSlug == "disapproved"){
+                $listingData = SubcontractorBill::join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                    ->where('subcontractor_structure.id',$subcontractorStructureId)
+                    ->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug',$billStatusSlug)->pluck('id')->first())
+                    ->orderBy('subcontractor_bills.created_at','asc')
+                    ->select('subcontractor_bills.id','subcontractor_bills.qty','subcontractor_bills.subcontractor_bill_status_id')->get();
+            }else{
+                $listingData = SubcontractorBill::join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                    ->where('subcontractor_structure.id',$subcontractorStructureId)
+                    ->whereIn('subcontractor_bill_status_id',SubcontractorBillStatus::whereIn('slug',['approved','draft'])->pluck('id'))
+                    ->orderBy('subcontractor_bills.created_at','asc')
+                    ->select('subcontractor_bills.id','subcontractor_bills.qty','subcontractor_bills.subcontractor_bill_status_id')->get();
+            }
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+
+                $action = '<div class="btn btn-xs green">
+                        <a href="/subcontractor/subcontractor-bills/view/'.$listingData[$pagination]->id.'" style="color: white">
+                             View Bill
+                        </a>
+                    </div>';
                 $billStatus = $listingData[$pagination]->subcontractorBillStatus->name;
                 $taxIds = SubcontractorBillTax::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_taxes.subcontractor_bills_id')
                     ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
@@ -541,6 +559,7 @@ class SubcontractorController extends Controller
                     array_push($records['data'][$iterator],$taxAmount['tax_percentage']);
                 }
                 array_push($records['data'][$iterator],$billStatus);
+                array_push($records['data'][$iterator],$action);
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -556,6 +575,60 @@ class SubcontractorController extends Controller
             abort(500);
         }
         return response()->json($records,200);
+    }
+
+    public function getSubcontractorStructureBillView(Request $request,$subcontractorStructureBillId){
+        try{
+            $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
+            $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+            $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+
+            $totalBills = $subcontractorStructure->subcontractorBill->orderBy('created_at','asc')->pluck('id');
+            $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
+            $subTotal = $subcontractorBill['qty'] * $rate;
+            $taxTotal = 0;
+            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+            }
+            $finalTotal = $subTotal + $taxTotal;
+
+            $billNo = 1;
+            foreach($totalBills as $billId){
+                if($billId == $subcontractorStructureBillId){
+                    $billName = "R.A. ".$billNo;
+                    break;
+                }
+                $billNo++;
+            }
+            $noOfFloors = $totalBills->count();
+            return view('subcontractor.structure.bill.view')->with(compact('subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Subcontractor Structure View',
+                'exception' => $e->getMessage(),
+                'data' => $subcontractorStructureBillId
+            ];
+            Log::Critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function changeBillStatus(Request $request,$statusSlug,$subcontractorStructureBillId){
+        try{
+            $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->update([
+                'subcontractor_bill_status_id' => SubcontractorBillStatus::where('slug',$statusSlug)->pluck('id')->first()
+            ]);
+            $request->session()->flash('success', 'Bill Status changed successfully.');
+            return redirect('/subcontractor/subcontractor-bills/view/'.$subcontractorStructureBillId);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Change Subcontractor Structure Bill View',
+                'exception' => $e->getMessage(),
+                'data' => $subcontractorStructureBillId
+            ];
+            Log::Critical(json_encode($data));
+            abort(500);
+        }
     }
 
 }
