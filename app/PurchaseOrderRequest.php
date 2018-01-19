@@ -19,7 +19,7 @@ class PurchaseOrderRequest extends Model
     }
 
     public function purchaseOrderRequestComponents(){
-        return $this->hasMany('App\PurchaseOrderRequestComponents','purchase_order_request_id');
+        return $this->hasMany('App\PurchaseOrderRequestComponent','purchase_order_request_id');
     }
 }
 
