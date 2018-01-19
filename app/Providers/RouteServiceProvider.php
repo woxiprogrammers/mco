@@ -26,6 +26,7 @@ use App\PurchaseOrderBill;
 use App\PurchaseOrderRequest;
 use App\PurchaseOrderTransaction;
 use App\PurchaseRequestComponent;
+use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
 use App\QuotationWorkOrder;
 use App\Role;
@@ -97,6 +98,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('subcontractor_struct',SubcontractorStructure::class);
         Route::model('purchaseRequestComponent',PurchaseRequestComponent::class);
         Route::model('purchaseOrderRequest',PurchaseOrderRequest::class);
+        Route::model('purchaseComponentVendorRelation',PurchaseRequestComponentVendorRelation::class);
     }
 
     /**
