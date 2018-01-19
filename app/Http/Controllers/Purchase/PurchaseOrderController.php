@@ -22,6 +22,7 @@ use App\PurchaseOrder;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
+use App\PurchaseOrderAdvancePayment;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillPayment;
 use App\PurchaseOrderBillTransactionRelation;
@@ -1377,5 +1378,40 @@ class PurchaseOrderController extends Controller
             $response = [];
             return response()->json($response,$status);
         }
+    }
+
+    public function getAdvancePaymentListing(Request $request){
+        try{
+            $status = 200;
+            $paymentData = PurchaseOrderAdvancePayment::where('purchase_order_id',$request->purchase_order_id)->get();
+            $iTotalRecords = count($paymentData);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    $paymentData[$pagination]['amount'],
+                    $paymentData[$pagination]->paymentType->name,
+                    $paymentData[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Order Advance Payment Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = [];
+        }
+        return response()->json($records,$status);
     }
 }

@@ -292,6 +292,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::get('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionEditView'));
                 Route::post('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@transactionEdit'));
             });
+            Route::group(['prefix' => 'advance-payment'], function(){
+                Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getAdvancePaymentListing'));
+            });
         });
         Route::group(['prefix' => 'purchase-order-bill'],function(){
             Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
