@@ -23,6 +23,10 @@ class PurchaseOrderRequestComponent extends Model
     }
 
     public function purchaseOrderRequestComponentImages(){
-        return $this->hasMany('App\PurchaseRequestComponentImage','purchase_order_request_component_id');
+        return $this->hasMany('App\PurchaseOrderRequestComponentImage','purchase_order_request_component_id');
+    }
+
+    public function unit(){
+        return $this->belongsTo('App\Unit','unit_id');
     }
 }
