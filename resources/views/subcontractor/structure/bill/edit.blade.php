@@ -62,7 +62,6 @@
                                                             </td>
                                                             <td>
                                                                 <input type="text" class="form-control" name="description" id="description" value="{!! $subcontractorBill['description'] !!}">
-                                                                {{--{!! $subcontractorBill['description'] !!}--}}
                                                             </td>
                                                             <td>
                                                                 {!! $subcontractorBill['qty'] !!}
