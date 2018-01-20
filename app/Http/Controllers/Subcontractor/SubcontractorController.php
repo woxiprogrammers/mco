@@ -12,6 +12,7 @@ use App\Subcontractor;
 use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
 use App\SubcontractorBillTax;
+use App\SubcontractorBillTransaction;
 use App\SubcontractorDPRCategoryRelation;
 use App\SubcontractorStructure;
 use App\SubcontractorStructureType;
@@ -788,6 +789,78 @@ class SubcontractorController extends Controller
             Log::Critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function createTransaction(Request $request){
+        try{
+            $subcontractorBillTransaction = SubcontractorBillTransaction::create([
+                'subcontractor_bills_id' => $request['bill_id'],
+                'subtotal' => $request['total']  + $request['other_recovery'] - ($request['debit'] + $request['hold'] + $request['retention_tax_amount'] + $request['tds_tax_amount']),
+                'total' => $request['total'],
+                'debit' => $request['debit'],
+                'hold' => $request['hold'],
+                'retention_percent' => $request['retention_tax_percent'],
+                'retention_amount' => $request['retention_tax_amount'],
+                'tds_percent' => $request['tds_tax_percent'],
+                'tds_amount' => $request['tds_tax_amount'],
+                'other_recovery' => $request['other_recovery'],
+                'remark' => $request['remark']
+            ]);
+            if($request->has('is_advance')){
+
+            }
+            if($subcontractorBillTransaction != null){
+                $request->session()->flash('success','Transaction created successfully');
+            }else{
+                $request->session()->flash('error','Cannot create transaction');
+            }
+            return redirect('/subcontractor/subcontractor-bills/view/'.$request['bill_id']);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Subcontractor Bill Transaction',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::Critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getTransactionListing(Request $request,$subcontractorBillId){
+        try{
+
+            $listingData = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBillId)->get();
+            $iTotalRecords = count($listingData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($listingData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $iterator+1,
+                    $listingData[$pagination]['subtotal'],
+                    $listingData[$pagination]['debit'],
+                    $listingData[$pagination]['hold'],
+                    $listingData[$pagination]['retention_amount'],
+                    $listingData[$pagination]['tds_amount'],
+                    $listingData[$pagination]['other_recovery'],
+                    $listingData[$pagination]['total'],
+                    date('d M Y',strtotime($listingData[$pagination]['created_at'])),
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Subcontractor Listing',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records,200);
     }
 
 }
