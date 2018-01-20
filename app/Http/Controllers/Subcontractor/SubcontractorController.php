@@ -605,6 +605,42 @@ class SubcontractorController extends Controller
         }
     }
 
+    public function getSubcontractorStructureBillEditView(Request $request,$subcontractorStructureBillId){
+        try{
+            $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
+            $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+            $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+
+            $totalBills = $subcontractorStructure->subcontractorBill->orderBy('created_at','asc')->pluck('id');
+            $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
+            $subTotal = $subcontractorBill['qty'] * $rate;
+            $taxTotal = 0;
+            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+            }
+            $finalTotal = $subTotal + $taxTotal;
+
+            $billNo = 1;
+            foreach($totalBills as $billId){
+                if($billId == $subcontractorStructureBillId){
+                    $billName = "R.A. ".$billNo;
+                    break;
+                }
+                $billNo++;
+            }
+            $noOfFloors = $totalBills->count();
+            return view('subcontractor.structure.bill.edit')->with(compact('subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Subcontractor Bill View',
+                'exception' => $e->getMessage(),
+                'data' => $subcontractorStructureBillId
+            ];
+            Log::Critical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function getSubcontractorStructureView(Request $request,$subcontractorStructureId){
         try{
             $subcontractorStructure = SubcontractorStructure::where('id',$subcontractorStructureId)->first();
@@ -631,6 +667,26 @@ class SubcontractorController extends Controller
         }catch(\Exception $e){
             $data = [
                 'action' => 'Change Subcontractor Structure Bill View',
+                'exception' => $e->getMessage(),
+                'data' => $subcontractorStructureBillId
+            ];
+            Log::Critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editSubcontractorStructureBill(Request $request,$subcontractorStructureBillId){
+        try{
+            foreach ($request['taxes'] as $taxId => $taxPercentage){
+                SubcontractorBillTax::where('id',$taxId)->where('subcontractor_bills_id',$subcontractorStructureBillId)->update([
+                    'percentage' => $taxPercentage
+                ]);
+            }
+            $request->session()->flash('success', 'Bill Edited successfully.');
+            return redirect('/subcontractor/subcontractor-bills/edit/'.$subcontractorStructureBillId);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Subcontractor Bill',
                 'exception' => $e->getMessage(),
                 'data' => $subcontractorStructureBillId
             ];
