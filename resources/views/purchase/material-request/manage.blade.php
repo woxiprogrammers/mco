@@ -138,11 +138,11 @@
                                               </tr>
                                               <tr class="filter">
                                                   <th></th>
-                                                  <th></th>
-                                                  <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                  <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                  <th><input type="text" class="form-control form-filter" name="m_name" id="m_name" ></th>
                                                   <th> </th>
                                                   <th> </th>
-                                                  <th> <input type="text" class="form-control form-filter" name="m_name" id="m_name" readonly></th>
+                                                  <th> <input type="text" class="form-control form-filter" name="m_id" id="m_id" ></th>
                                                   <th> </th>
                                                   <th>
                                                       <select class="form-control" id="status_id" name="status_id">

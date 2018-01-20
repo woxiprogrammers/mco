@@ -61,6 +61,7 @@ class PurchaseController extends Controller
         try{
             $postdata = null;
             $m_name = "";
+            $m_id = "";
             $status = 0;
             $site_id = 0;
             $month = 0;
@@ -72,6 +73,13 @@ class PurchaseController extends Controller
                     $m_name = $request['m_name'];
                 }
             }
+
+            if ($request->has('m_id')) {
+                if ($request['m_id'] != "") {
+                    $m_id = $request['m_id'];
+                }
+            }
+
             if ($request->has('status')) {
                 $status = $request['status'];
             }
@@ -122,6 +130,13 @@ class PurchaseController extends Controller
                     $filterFlag = false;
                 }
             }
+            if ($m_id != "" && $filterFlag == true) {
+                $ids = MaterialRequests::whereIn('id',$ids)->where('format_id','ilike','%'.$m_id.'%')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             if ($m_count != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->where('serial_no', $m_count)->pluck('id');
                 if(count($ids) <= 0) {
