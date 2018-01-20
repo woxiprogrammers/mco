@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Edit Subcontractor Structure Bill')
+@section('title','Constro | Create Subcontractor Structure Bill')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -21,7 +21,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Edit Subcontractor Structure Bill</h1>
+                                    <h1>Create Subcontractor Structure Bill</h1>
                                 </div>
                             </div>
                         </div>
@@ -34,7 +34,7 @@
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);">Edit Subcontractor Structure Bill</a>
+                                        <a href="javascript:void(0);">Create Subcontractor Structure Bill</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
@@ -43,7 +43,7 @@
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
                                             <div class="form-body">
-                                                <form role="form" id="edit_bill" class="form-horizontal" action="/subcontractor/subcontractor-bills/edit/{!! $subcontractorBill['id'] !!}" method="post">
+                                                <form role="form" id="create_bill" class="form-horizontal" action="/subcontractor/subcontractor-bills/create/{!! $subcontractorStructure['id'] !!}" method="post">
                                                     {!! csrf_field() !!}
                                                     <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="parentBillTable">
                                                         <thead>
@@ -61,19 +61,21 @@
                                                                 {!! $billName !!}
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control" name="description" id="description" value="{!! $subcontractorBill['description'] !!}">
+                                                                <input type="text" class="form-control description" name="description" id="description">
+                                                                {{--{!! $subcontractorBill['description'] !!}--}}
                                                             </td>
                                                             <td>
-                                                                {!! $subcontractorBill['qty'] !!}
+                                                                <input type="text" class="form-control" name="qty" id="quantity" onkeyup="calculateSubTotal(this)">
+                                                                {{--{!! $subcontractorBill['qty'] !!}--}}
                                                             </td>
                                                             <td>
-                                                                {!! $rate !!}
+                                                                <span id="rate">{!! $subcontractorStructure['rate'] !!}</span>
                                                             </td>
                                                             <td>
-                                                                <span id="subtotal">{!! $subTotal!!}</span>
+                                                                <span id="subtotal"></span>
                                                             </td>
                                                         </tr>
-                                                        @if(count($subcontractorBillTaxes) > 0)
+                                                        @if(count($taxes) > 0)
                                                             <tr>
                                                                 <td colspan="2">
                                                                     <b>Tax Name</b>
@@ -85,16 +87,16 @@
 
                                                                 </td>
                                                             </tr>
-                                                            @foreach($subcontractorBillTaxes as $key => $billTaxData)
+                                                            @foreach($taxes as $key => $taxData)
                                                                 <tr>
                                                                     <td colspan="2">
-                                                                        {!! $billTaxData->taxes->name !!}
+                                                                        {!! $taxData->name !!}
                                                                     </td>
                                                                     <td colspan="2">
-                                                                        <input type="text" class="form-control percentage" name="taxes[{!! $billTaxData->id !!}]" id="percentage_{!! $billTaxData->id !!}" value="{!! $billTaxData->percentage !!}" onkeyup="calculateTaxAmount(this)">
+                                                                        <input type="text" class="form-control percentage" name="taxes[{!! $taxData->id !!}]" id="percentage_{!! $taxData->id !!}" value="{!! $taxData->base_percentage !!}" onkeyup="calculateTaxAmount(this)">
                                                                     </td>
                                                                     <td colspan="1">
-                                                                        <span class="tax_amount" id="tax_amount_{!! $billTaxData->id !!}">{!! ($billTaxData->percentage * $subTotal) / 100 !!}</span>
+                                                                        <span class="tax_amount" id="tax_amount_{!! $taxData->id !!}"></span>
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -104,7 +106,7 @@
                                                                 <b>Final Total</b>
                                                             </td>
                                                             <td colspan="1">
-                                                                <span id="finalTotal">{!! $finalTotal !!}</span>
+                                                                <span id="finalTotal"></span>
                                                             </td>
                                                         </tr>
 
@@ -138,6 +140,17 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script>
+        function calculateSubTotal(element){
+            var quantity = parseFloat($(element).val());
+            var rate = parseFloat($('#rate').text());
+            var subTotal = quantity * rate;
+            $('#subtotal').text(subTotal);
+            $('.percentage').each(function(){
+                calculateTaxAmount($(this));
+            });
+        }
+
+
         function calculateTaxAmount(element){
             var percentage = $(element).val();
             var taxId = $(element).attr('id').match(/\d+/)[0];

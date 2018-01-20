@@ -515,6 +515,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('view/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureBillView'));
             Route::get('edit/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureBillEditView'));
             Route::post('edit/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructureBill'));
+            Route::get('create/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorBillCreateView'));
+            Route::post('create/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorBill'));
             Route::get('change-status/{statusSlug}/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@changeBillStatus'));
         });
     });

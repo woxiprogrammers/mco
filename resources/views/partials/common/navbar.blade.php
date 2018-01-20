@@ -402,21 +402,9 @@
                     </li>
                     @endif
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> Subcontractor
+                        <a href="/subcontractor/subcontractor-structure/manage"> Subcontractor
                             <span class="arrow"></span>
                         </a>
-                        <ul class="dropdown-menu pull-left">
-                            <li aria-haspopup="true">
-                                <a href="/subcontractor/subcontractor-structure/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Manage Structure
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/subcontractor/subcontractor-bills/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Subcontrator Bills
-                                </a>
-                            </li>
-                        </ul>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> General Awareness

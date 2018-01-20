@@ -29,6 +29,6 @@ class SubcontractorStructure extends Model
     }
 
     public function subcontractorBill() {
-        return $this->belongsTo('App\SubcontractorBill','subcontractor_id');
+        return $this->hasMany('App\SubcontractorBill','sc_structure_id');
     }
 }
