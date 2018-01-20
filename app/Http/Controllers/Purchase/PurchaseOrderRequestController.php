@@ -68,7 +68,6 @@ class PurchaseOrderRequestController extends Controller
                 'purchase_request_id' => $request->purchase_request_id,
                 'user_id' => $user->id
             ];
-            dd($request->all());
             $purchaseOrderRequest = PurchaseOrderRequest::create($purchaseOrderRequestData);
             foreach($request['data'] as $purchaseRequestComponentVendorRelationId => $componentData){
                 $purchaseOrderRequestComponentData = [
