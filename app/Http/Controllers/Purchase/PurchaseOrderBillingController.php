@@ -330,9 +330,15 @@ class PurchaseOrderBillingController extends Controller
             $purchaseOrderPaymentData = PurchaseOrderPayment::where('purchase_order_bill_id',$purchaseOrderBillId)->orderBy('created_at','desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderPaymentData);
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderPaymentData); $iterator++,$pagination++ ){
+                if($purchaseOrderPaymentData[$pagination]->paymentType == null){
+                    $paymentType = 'Advance';
+                }else{
+                    $paymentType = $purchaseOrderPaymentData[$pagination]->paymentType->name;
+                }
                 $records['data'][] = [
+                    date('d M Y',strtotime($purchaseOrderPaymentData[$pagination]['created_at'])),
                     $purchaseOrderPaymentData[$pagination]['amount'],
-                    $purchaseOrderPaymentData[$pagination]->paymentType->name,
+                    $paymentType,
                     $purchaseOrderPaymentData[$pagination]['reference_number'],
                 ];
             }
@@ -351,7 +357,25 @@ class PurchaseOrderBillingController extends Controller
 
     public function createPayment(Request $request){
         try{
-            $purchaseOrderPaymentData = $request->except('_token');
+            $purchaseOrderPaymentData = $request->except('_token','is_advance','payment_id');
+            if($request->has('is_advance')){
+                $purchaseOrderPaymentData['is_advance'] = true;
+                $purchaseOrderId =PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                        ->where('purchase_order_bills.id', $request->purchase_order_bill_id)
+                                        ->pluck('purchase_orders.id as id')
+                                        ->first();
+                $purchaseOrder = PurchaseOrder::findOrFail($purchaseOrderId);
+                if($purchaseOrder->balance_advance_amount >= $request->amount){
+                    $balanceAdvanceAmount = $purchaseOrder->balance_advance_amount - $request->amount;
+                    $purchaseOrder->update(['balance_advance_amount' => $balanceAdvanceAmount]);
+                }else{
+                    $request->session()->flash('error','Payment Amount is greater than balance advance amount');
+                    return redirect('/purchase/purchase-order-bill/edit/'.$request->purchase_order_bill_id);
+                }
+            }else{
+                $purchaseOrderPaymentData['is_advance'] = false;
+                $purchaseOrderPaymentData['payment_id'] = $request->payment_id;
+            }
             $purchaseOrderPayment = PurchaseOrderPayment::create($purchaseOrderPaymentData);
             $request->session()->flash('success','Purchase Order Payment Created Successfully');
             return redirect('/purchase/purchase-order-bill/edit/'.$request->purchase_order_bill_id);

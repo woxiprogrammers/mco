@@ -358,6 +358,8 @@ class PurchaseOrderController extends Controller
                     $purchaseOrderList['project'] = $project->name.'  '.'-'.'  '.$projectSite->name;
                     $purchaseOrderList['vendor_name'] = $purchaseOrder->vendor->name;
                     $purchaseOrderList['vendor_id'] = $purchaseOrder->vendor->id;
+                    $purchaseOrderList['total_advance_amount'] = $purchaseOrder->total_advance_amount;
+                    $purchaseOrderList['balance_advance_amount'] = $purchaseOrder->balance_advance_amount;
                     $purchaseOrderList['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
             }
             $materialList = array();
@@ -413,7 +415,7 @@ class PurchaseOrderController extends Controller
                 $iterator++;
             }
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
-            $transaction_types = PaymentType::select('slug')->where('slug','!=','peticash')->get();
+            $transaction_types = PaymentType::select('id','name')->where('slug','!=','peticash')->get();
             $purchaseOrderStatusSlug = $purchaseOrder->purchaseOrderStatus->slug;
             return view('purchase/purchase-order/edit')->with(compact('userRole','purchaseOrderStatusSlug','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName'));
         }catch (\Exception $e){
@@ -566,26 +568,27 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
-    public function createPayment(Request $request){
+    public function createAdvancePayment(Request $request){
         try{
-            $purchaseOrderBillPayment['purchase_order_bill_id'] = $request['purchase_order_bill_id'];
-            $purchaseOrderBillPayment['payment_id'] = PaymentType::where('slug',$request['payment_slug'])->pluck('id')->first();
-            $purchaseOrderBillPayment['amount'] = $request['amount'];
-            $purchaseOrderBillPayment['reference_number'] = $request['reference_number'];
-            $purchaseOrderBillPayment['remark'] = $request['remark'];
-            $purchaseOrderBillPayment['created_at'] = $purchaseOrderBillPayment['updated_at'] = Carbon::now();
-            $purchaseOrderBillPaymentId = PurchaseOrderBillPayment::insertGetId($purchaseOrderBillPayment);
-            PurchaseOrderBill::where('id',$request['purchase_order_bill_id'])->update(['is_paid' => true, 'is_amendment' => false]);
-            $request->session()->flash('success','Payment added successfully');
-            return Redirect::Back();
+            $advancePaymentData = $request->except('_token');
+            PurchaseOrderAdvancePayment::create($advancePaymentData);
+            $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
+            $newAdvancePaymentAmount = $purchaseOrder->total_advance_amount + $request->amount;
+            $balanceAdvanceAmount = $purchaseOrder->balance_advance_amount + $request->amount;
+            $purchaseOrder->update([
+                'total_advance_amount' => $newAdvancePaymentAmount,
+                'balance_advance_amount' => $balanceAdvanceAmount
+            ]);
+            $request->session()->flash('success','Advance Payment added successfully');
+            return redirect('/purchase/purchase-order/edit/'.$purchaseOrder->id);
        }catch (\Exception $e){
             $data = [
                 'action' => 'Create Bill Payment',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];
-            $request->session()->flash('danger','Something went wrong');
-            return Redirect::Back();
+            Log::critical($data);
+            abort(500);
         }
     }
 
@@ -1383,7 +1386,7 @@ class PurchaseOrderController extends Controller
     public function getAdvancePaymentListing(Request $request){
         try{
             $status = 200;
-            $paymentData = PurchaseOrderAdvancePayment::where('purchase_order_id',$request->purchase_order_id)->get();
+            $paymentData = PurchaseOrderAdvancePayment::where('purchase_order_id',$request->purchase_order_id)->orderBy('created_at','desc')->get();
             $iTotalRecords = count($paymentData);
             $records = array();
             $records['data'] = array();
@@ -1394,6 +1397,7 @@ class PurchaseOrderController extends Controller
             }
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
                 $records['data'][] = [
+                    date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]['amount'],
                     $paymentData[$pagination]->paymentType->name,
                     $paymentData[$pagination]['reference_number']

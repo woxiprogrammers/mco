@@ -177,17 +177,32 @@
                                                             </div>
                                                         </div>
                                                         <div class="tab-pane fade in" id="advancePaymentTab">
+                                                            <div class="row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Total Advance Paid Amount</label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control" value="{{$purchaseOrderList['total_advance_amount']}}" readonly>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Balance Advance Paid Amount</label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control" value="{{$purchaseOrderList['balance_advance_amount']}}" readonly>
+                                                                </div>
+                                                            </div>
                                                             <div class="btn-group pull-right margin-top-15">
                                                                 <a id="sample_editable_1_new" class="btn yellow" href="#paymentModal" data-toggle="modal" >
-                                                                    <i class="fa fa-plus"></i>  &nbsp; Purchase Order Advance Payment
+                                                                    <i class="fa fa-plus"></i>  &nbsp; Advance Payment
                                                                 </a>
                                                             </div>
                                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseOrderAdvancePaymentTable">
                                                                 <thead>
                                                                 <tr>
-                                                                    <th> Amount </th>
-                                                                    <th> Payment Method </th>
-                                                                    <th> Reference Number </th>
+                                                                    <th style="width: 25%"> Date </th>
+                                                                    <th style="width: 25%"> Amount </th>
+                                                                    <th style="width: 25%"> Payment Method </th>
+                                                                    <th style="width: 25%"> Reference Number </th>
                                                                 </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -223,7 +238,9 @@
                                         <div class="modal-dialog">
                                             <!-- Modal content-->
                                             <div class="modal-content">
-                                                <form id="add_payment_form" action="/purchase/purchase-order/add-payment" method="post">
+                                                <form id="add_payment_form" action="/purchase/purchase-order/add-advance-payment" method="post">
+                                                    {!! csrf_field() !!}
+                                                    <input type="hidden" name="purchase_order_id" value="{{$purchaseOrderList['purchase_order_id']}}">
                                                     <div class="modal-header">
                                                         <div class="row">
                                                             <div class="col-md-4"></div>
@@ -233,9 +250,9 @@
                                                     </div>
                                                     <div class="modal-body" style="padding:40px 50px;">
                                                         <div class="form-group row">
-                                                            <select class="form-control" name="payment_slug">
+                                                            <select class="form-control" name="payment_id">
                                                                 @foreach($transaction_types as $type)
-                                                                    <option value="{{$type['slug']}}">{{$type['slug']}}</option>
+                                                                    <option value="{{$type['id']}}">{{$type['name']}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -245,44 +262,6 @@
                                                         <div class="form-group row">
                                                             <input type="number" class="form-control"  name="reference_number" placeholder="Enter Reference Number" >
                                                         </div>
-                                                        <div class="form-group row">
-                                                            <input type="text" class="form-control" name="remark"  placeholder="Enter Transaction details">
-                                                        </div>
-                                                        {{--<div class="form-group row">Quotation images
-                                                            <div id="myCarousel" class="carousel slide" style="height: 150px" data-ride="carousel">
-                                                                <!-- Indicators -->
-                                                                <ol class="carousel-indicators">
-                                                                    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                                                                    <li data-target="#myCarousel" data-slide-to="1"></li>
-                                                                    <li data-target="#myCarousel" data-slide-to="2"></li>
-                                                                </ol>
-
-                                                                <!-- Wrapper for slides -->
-                                                                <div class="carousel-inner">
-                                                                    <div class="item active">
-                                                                        <img src="la.jpg" alt="Los Angeles" style="width:100%;">
-                                                                    </div>
-
-                                                                    <div class="item">
-                                                                        <img src="chicago.jpg" alt="Chicago" style="width:100%;">
-                                                                    </div>
-
-                                                                    <div class="item">
-                                                                        <img src="ny.jpg" alt="New york" style="width:100%;">
-                                                                    </div>
-                                                                </div>
-
-                                                                <!-- Left and right controls -->
-                                                                <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-                                                                    <span class="glyphicon glyphicon-chevron-left"></span>
-                                                                    <span class="sr-only">Previous</span>
-                                                                </a>
-                                                                <a class="right carousel-control" href="#myCarousel" data-slide="next">
-                                                                    <span class="glyphicon glyphicon-chevron-right"></span>
-                                                                    <span class="sr-only">Next</span>
-                                                                </a>
-                                                            </div>
-                                                        </div>--}}
                                                         <button class="btn btn-set red pull-right" type="submit">
                                                             <i class="fa fa-check" style="font-size: large"></i>
                                                             Add &nbsp; &nbsp; &nbsp;
