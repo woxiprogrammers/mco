@@ -13,7 +13,7 @@
                 <label class="control-label pull-right">Category :</label>
             </div>
             <div class="col-md-6">
-                <select class="form-control">
+                <select class="form-control" name="category_id">
                     @foreach($purchaseRequestComponentData['categories'] as $category)
                         <option value="{{$category['id']}}">
                             {{$category['name']}}

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Purchase;
 
 use App\Asset;
+use App\AssetType;
 use App\Category;
+use App\CategoryMaterialRelation;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentTypes;
+use App\MaterialVersion;
 use App\PurchaseOrder;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderComponentImage;
@@ -81,7 +84,8 @@ class PurchaseOrderRequestController extends Controller
                     'cgst_amount' => $componentData['cgst_amount'],
                     'sgst_amount' => $componentData['sgst_amount'],
                     'igst_amount' => $componentData['igst_amount'],
-                    'total' => $componentData['total']
+                    'total' => $componentData['total'],
+                    'category_id' => $componentData['category_id']
                 ];
                 $purchaseOrderRequestComponent = PurchaseOrderRequestComponent::create($purchaseOrderRequestComponentData);
                 if(array_key_exists('client_images',$componentData)){
@@ -391,7 +395,7 @@ class PurchaseOrderRequestController extends Controller
                 foreach($request->approved_purchase_order_request_relation as $vendorId => $purchaseOrderRequestComponentArray){
                     $purchaseOrderCount = PurchaseOrder::whereDate('created_at', Carbon::now())->count();
                     $purchaseOrderCount++;
-                    $purchaseOrderFormatID = $this->getPurchaseIDFormat('purchase-order',Carbon::now(),$purchaseOrderCount);
+                    $purchaseOrderFormatID = $this->getPurchaseIDFormat('purchase-order',$projectSiteId,Carbon::now(),$purchaseOrderCount);
                     $purchaseOrderData = [
                         'user_id' => Auth::user()->id,
                         'vendor_id' => $vendorId,
@@ -414,6 +418,47 @@ class PurchaseOrderRequestController extends Controller
                         $purchaseOrderComponentData['purchase_order_id'] = $purchaseOrder->id;
                         $purchaseOrderComponentData['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
                         $purchaseOrderComponent = PurchaseOrderComponent::create($purchaseOrderComponentData);
+                        $newAssetTypeId = MaterialRequestComponentTypes::where('slug','new-asset')->pluck('id')->first();
+                        $newMaterialTypeId = MaterialRequestComponentTypes::where('slug','new-material')->pluck('id')->first();
+                        $componentTypeId = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id;
+                        if($newMaterialTypeId == $componentTypeId){
+                            $materialName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
+                            $isMaterialExists = Material::where('name','ilike',$materialName)->first();
+                            if($isMaterialExists == null){
+                                $materialData = [
+                                    'name' => $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name,
+                                    'is_active' => true,
+                                    'rate_per_unit' => $purchaseOrderComponent->rate_per_unit,
+                                    'unit_id' => $purchaseOrderComponent->unit_id,
+                                    'hsn_code' => $purchaseOrderComponent->hsn_code,
+                                    'gst' => $purchaseOrderComponent->gst
+                                ];
+                                $material = Material::create($materialData);
+                                $categoryMaterialData = [
+                                    'material_id' => $material->id,
+                                    'category_id' => $purchaseOrderRequestComponent->category_id
+                                ];
+                                CategoryMaterialRelation::create($categoryMaterialData);
+                                $materialVersionData = [
+                                    'material_id' => $material->id,
+                                    'rate_per_unit' => $material->rate_per_unit,
+                                    'unit_id' => $material->unit_id
+                                ];
+                                MaterialVersion::create($materialVersionData);
+                            }
+                        }elseif ($newAssetTypeId == $componentTypeId){
+                            $assetName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
+                            $is_present = Asset::where('name','ilike',$assetName)->pluck('id')->toArray();
+                            if($is_present == null){
+                                $asset_type = AssetType::where('slug','other')->pluck('id')->first();
+                                $categoryAssetData = array();
+                                $categoryAssetData['asset_types_id'] = $asset_type;
+                                $categoryAssetData['name'] = $assetName;
+                                $categoryAssetData['quantity'] = 1;
+                                $categoryAssetData['is_fuel_dependent'] = false;
+                                Asset::create($categoryAssetData);
+                            }
+                        }
                         $purchaseOrderRequestComponent->update(['is_approved' => true]);
                         $disapprovedPurchaseOrderRequestComponentIds = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                                 ->where('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseOrderRequestComponent->purchase_request_component_id)
