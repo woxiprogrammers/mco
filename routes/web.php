@@ -271,7 +271,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getListing'));
             Route::post('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderComponentDetails'));
             //Route::post('get-bill-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderBillDetails'));
-            Route::post('add-payment',array('uses'=> 'Purchase\PurchaseOrderController@createPayment'));
+            Route::post('add-advance-payment',array('uses'=> 'Purchase\PurchaseOrderController@createAdvancePayment'));
             Route::post('change-status',array('uses'=> 'Purchase\PurchaseOrderController@changeStatus'));
             Route::post('create-material',array('uses'=> 'Purchase\PurchaseOrderController@createMaterial'));
             Route::post('create-asset',array('uses'=> 'Purchase\PurchaseOrderController@createAsset'));
@@ -291,6 +291,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::get('check-generated-grn/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@checkGeneratedGRN'));
                 Route::get('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionEditView'));
                 Route::post('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@transactionEdit'));
+            });
+            Route::group(['prefix' => 'advance-payment'], function(){
+                Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getAdvancePaymentListing'));
             });
         });
         Route::group(['prefix' => 'purchase-order-bill'],function(){

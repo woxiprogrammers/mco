@@ -128,27 +128,7 @@
 
                                                                     </div>
                                                                 </div>
-                                                                {{--<div class="row" style="margin-top: 2%">
-                                                                    <div class="col-md-2 col-md-offset-1">
-                                                                        <input id="imageupload" type="file" class="btn blue" multiple />
-                                                                    </div>
-                                                                </div>
-                                                                <div class="row">
-                                                                    <div class="col-md-offset-1">
-                                                                        <div id="preview-image" class="row">
-
-                                                                        </div>
-                                                                    </div>
-                                                                </div>--}}
                                                             </div>
-                                                            {{--<div class="form-group row">
-                                                                <div class="col-md-3">
-                                                                    <button type="submit" class="btn red pull-right">
-                                                                        <i class="fa fa-check" style="font-size: large"></i>
-                                                                        Submit
-                                                                    </button>
-                                                                </div>
-                                                            </div>--}}
                                                         </fieldset>
                                                     </div>
                                                     <div class="tab-pane fade in" id="paymentTab">
@@ -160,9 +140,10 @@
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseOrderPaymentTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th> Amount </th>
-                                                                    <th> Payment Method </th>
-                                                                    <th> Reference Number </th>
+                                                                    <th style="width: 25%"> Date </th>
+                                                                    <th style="width: 25%"> Amount </th>
+                                                                    <th style="width: 25%"> Payment Method </th>
+                                                                    <th style="width: 25%"> Reference Number </th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -189,6 +170,17 @@
                                                                     <br>
                                                                     <div class="form-group row">
                                                                         <div class="col-md-4">
+
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="checkbox" name="is_advance" id="isAdvanceCheckbox">
+                                                                            <label class="control-label" style="margin-left: 1%">
+                                                                                Is Advance Payment
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-4">
                                                                             <label class="pull-right control-label">
                                                                                 Amount
                                                                             </label>
@@ -197,14 +189,14 @@
                                                                             <input type="text" class="form-control" name="amount" placeholder="Enter Amount">
                                                                         </div>
                                                                     </div>
-                                                                    <div class="form-group row">
+                                                                    <div class="form-group row"id="paymentSelect">
                                                                         <div class="col-md-4">
                                                                             <label class="pull-right control-label">
                                                                                 Payment Mode:
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <select class="form-control" name="payment_id">
+                                                                            <select class="form-control" name="payment_id" >
                                                                                 @foreach($paymentTypes as $paymentType)
                                                                                     <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
                                                                                 @endforeach
@@ -234,11 +226,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
-
-
-
-
                                             </div>
                                         </div>
                                     </div>
@@ -261,5 +248,17 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order-billing/payment-manage-datatable.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#isAdvanceCheckbox").on('click', function(){
+                console.log();
+                if($(this).is(':checked') == true){
+                    $("#paymentSelect").hide();
+                }else{
+                    $("#paymentSelect").show();
+                }
+            });
+        });
+    </script>
 @endsection
 
