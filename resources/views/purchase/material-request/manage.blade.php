@@ -105,7 +105,7 @@
                                                           <option value="12">Dec</option>
                                                       </select>
                                                   </div>
-                                                  <div class="col-md-1">
+                                                  <div class="col-md-1" style="display: show">
                                                       <label>MR Id :</label>
                                                       <input  class="form-control" type="number" id="m_count" name="m_count"/>
                                                   </div>
@@ -126,23 +126,21 @@
                                               <thead>
                                               <tr>
                                                   <th></th>
-                                                  <th> M Id </th>
-                                                  <th> Material Name </th>
-                                                  <th> Client Name </th>
-                                                  <th> Project Name  </th>
                                                   <th> MR Id </th>
+                                                  <th> Material Name </th>
+                                                  <th> Quantity</th>
+                                                  <th> Unit </th>
                                                   <th> Created At</th>
                                                   <th> Status </th>
                                                   <th> Action </th>
                                                   <th> Detail </th>
                                               </tr>
                                               <tr class="filter">
-                                                  <th></th>
                                                   <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
-                                                  <th><input type="text" class="form-control form-filter" name="m_name" id="m_name" ></th>
+                                                  <th><input type="text" class="form-control form-filter custom_filter" name="m_id" id="m_id" ></th>
+                                                  <th><input type="text" class="form-control form-filter custom_filter" name="m_name" id="m_name" ></th>
                                                   <th> </th>
                                                   <th> </th>
-                                                  <th> <input type="text" class="form-control form-filter" name="m_id" id="m_id" ></th>
                                                   <th> </th>
                                                   <th>
                                                       <select class="form-control" id="status_id" name="status_id">
@@ -360,6 +358,7 @@
             var month = $('#month').val();
             var status_id = $('#status_id').val();
             var m_name = $('#m_name').val();
+            var m_id = $('#m_id').val();
             var m_count = $('#m_count').val();
 
             var postData =
@@ -370,9 +369,33 @@
 
             $("input[name='postdata']").val(postData);
             $("input[name='m_name']").val(m_name);
+            $("input[name='m_id']").val(m_id);
             $("input[name='status']").val(status_id);
             $(".filter-submit").trigger('click');
         });
+
+        $(".custom_filter").on('keyup',function(){
+            var site_id = $('#globalProjectSite').val();
+            var year = $('#year').val();
+            var month = $('#month').val();
+            var status_id = $('#status_id').val();
+            var m_name = $('#m_name').val();
+            var m_id = $('#m_id').val();
+            var m_count = $('#m_count').val();
+
+            var postData =
+                'site_id=>'+site_id+','+
+                    'year=>'+year+','+
+                    'month=>'+month+','+
+                    'm_count=>'+m_count;
+
+            $("input[name='postdata']").val(postData);
+            $("input[name='m_name']").val(m_name);
+            $("input[name='m_id']").val(m_id);
+            $("input[name='status']").val(status_id);
+            $(".filter-submit").trigger('click');
+        });
+
 
         $("#search-withfilter").on('click',function(){
             var client_id = $('#client_id').val();
@@ -381,6 +404,7 @@
             var year = $('#year').val();
             var month = $('#month').val();
             var status_id = $('#status_id').val();
+            var m_id = $('#m_id').val();
             var m_name = $('#m_name').val();
             var m_count = $('#m_count').val();
 
@@ -393,6 +417,7 @@
                     'm_count=>'+m_count;
 
             $("input[name='postdata']").val(postData);
+            $("input[name='m_id']").val(m_id);
             $("input[name='m_name']").val(m_name);
             $("input[name='status']").val(status_id);
             $(".filter-submit").trigger('click');
