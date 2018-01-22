@@ -20,13 +20,18 @@ use App\PurchaseOrderRequestComponentImage;
 use App\PurchaseOrderStatus;
 use App\PurchaseRequest;
 use App\PurchaseRequestComponent;
+use App\PurchaseRequestComponentVendorMailInfo;
+use App\Unit;
 use App\User;
+use App\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 
 class PurchaseOrderRequestController extends Controller
@@ -386,6 +391,7 @@ class PurchaseOrderRequestController extends Controller
     use MaterialRequestTrait;
     public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
         try{
+            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
             if($request->has('approved_purchase_order_request_relation')){
                 if(Session::has('global_project_site')){
                     $projectSiteId = Session::get('global_project_site');
@@ -393,6 +399,8 @@ class PurchaseOrderRequestController extends Controller
                     $projectSiteId = $purchaseOrderRequest->purchaseOrderRequest->purchaseRequest->project_site_id;
                 }
                 foreach($request->approved_purchase_order_request_relation as $vendorId => $purchaseOrderRequestComponentArray){
+                    $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
+                    $vendorInfo['materials'] = array();
                     $purchaseOrderCount = PurchaseOrder::whereDate('created_at', Carbon::now())->count();
                     $purchaseOrderCount++;
                     $purchaseOrderFormatID = $this->getPurchaseIDFormat('purchase-order',$projectSiteId,Carbon::now(),$purchaseOrderCount);
@@ -408,6 +416,7 @@ class PurchaseOrderRequestController extends Controller
                         'serial_no' => $purchaseOrderCount
                     ];
                     $purchaseOrder = PurchaseOrder::create($purchaseOrderData);
+                    $iterator = 0;
                     foreach($purchaseOrderRequestComponentArray as $purchaseOrderRequestComponentId){
                         $purchaseOrderRequestComponent = PurchaseOrderRequestComponent::findOrFail($purchaseOrderRequestComponentId);
                         $purchaseOrderComponentData = PurchaseOrderRequestComponent::where('id', $purchaseOrderRequestComponentId)
@@ -421,6 +430,11 @@ class PurchaseOrderRequestController extends Controller
                         $newAssetTypeId = MaterialRequestComponentTypes::where('slug','new-asset')->pluck('id')->first();
                         $newMaterialTypeId = MaterialRequestComponentTypes::where('slug','new-material')->pluck('id')->first();
                         $componentTypeId = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id;
+                        $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
+                        $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
+                        $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                        $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
+                        $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
                         if($newMaterialTypeId == $componentTypeId){
                             $materialName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                             $isMaterialExists = Material::where('name','ilike',$materialName)->first();
@@ -457,6 +471,14 @@ class PurchaseOrderRequestController extends Controller
                                 $categoryAssetData['quantity'] = 1;
                                 $categoryAssetData['is_fuel_dependent'] = false;
                                 Asset::create($categoryAssetData);
+                            }
+                        }
+                        if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                            $vendorInfo['materials'][$iterator]['gst'] = '-';
+                        }else{
+                            $vendorInfo['materials'][$iterator]['gst'] = Material::where('name','ilike',$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->pluck('gst')->first();
+                            if($vendorInfo['materials'][$iterator]['gst'] == null){
+                                $vendorInfo['materials'][$iterator]['gst'] = '-';
                             }
                         }
                         $purchaseOrderRequestComponent->update(['is_approved' => true]);
@@ -496,6 +518,37 @@ class PurchaseOrderRequestController extends Controller
                                 }
                             }
                         }
+                    }
+                    if(count($vendorInfo['materials']) > 0){
+                        $pdf = App::make('dompdf.wrapper');
+                        $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
+                        $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
+                        $pdfFileName = sha1($vendorId).'.pdf';
+                        $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
+                        $pdfContent = $pdf->stream();
+                        if(file_exists($pdfUploadPath)){
+                            unlink($pdfUploadPath);
+                        }
+                        if (!file_exists($pdfDirectoryPath)) {
+                            File::makeDirectory(public_path().$pdfDirectoryPath, $mode = 0777, true, true);
+                        }
+                        file_put_contents($pdfUploadPath,$pdfContent);
+                        $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
+                        Mail::send('purchase.purchase-request.email.vendor-quotation', [], function($message) use ($mailData){
+                            $message->subject('Testing with attachment');
+                            $message->to($mailData['toMail']);
+                            $message->from(env('MAIL_USERNAME'));
+                            $message->attach($mailData['path']);
+                        });
+                        $mailInfoData = [
+                            'user_id' => Auth::user()->id,
+                            'type_slug' => 'for-purchase-order',
+                            'vendor_id' => $purchaseOrder->vendor_id,
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now()
+                        ];
+                        PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
+                        unlink($pdfUploadPath);
                     }
                 }
                 $request->session()->flash('success','Purchase Orders Created Successfully !');
