@@ -521,6 +521,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorBillCreateView'));
             Route::post('create/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorBill'));
             Route::get('change-status/{statusSlug}/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@changeBillStatus'));
+            Route::group(['prefix' => 'transaction'], function(){
+                Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createTransaction'));
+                Route::post('listing/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getTransactionListing'));
+            });
+
         });
     });
 
