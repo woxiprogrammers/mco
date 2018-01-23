@@ -61,6 +61,7 @@ class PurchaseController extends Controller
         try{
             $postdata = null;
             $m_name = "";
+            $m_id = "";
             $status = 0;
             $site_id = 0;
             $month = 0;
@@ -72,6 +73,13 @@ class PurchaseController extends Controller
                     $m_name = $request['m_name'];
                 }
             }
+
+            if ($request->has('m_id')) {
+                if ($request['m_id'] != "") {
+                    $m_id = $request['m_id'];
+                }
+            }
+
             if ($request->has('status')) {
                 $status = $request['status'];
             }
@@ -115,13 +123,31 @@ class PurchaseController extends Controller
                     $filterFlag = false;
                 }
             }
+
             if ($status != 0 && $filterFlag == true) {
                $ids = MaterialRequests::join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
-                   ->where('material_request_components.component_status_id',$status)->distinct('material_requests.id')->pluck('material_requests.id');
+                   ->where('material_request_components.component_status_id',$status)
+                   ->whereIn('material_requests.id',$ids)->distinct('material_requests.id')->pluck('material_requests.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
             }
+            if ($m_name != "" && $filterFlag == true) {
+                $ids = MaterialRequests::join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
+                    ->where('material_request_components.name','ilike','%'.$m_name.'%')
+                    ->whereIn('material_requests.id',$ids)->distinct('material_requests.id')->pluck('material_requests.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($m_id != "" && $filterFlag == true) {
+                $ids = MaterialRequests::whereIn('id',$ids)->where('format_id','ilike','%'.$m_id.'%')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             if ($m_count != 0 && $filterFlag == true) {
                 $ids = MaterialRequests::whereIn('id',$ids)->where('serial_no', $m_count)->pluck('id');
                 if(count($ids) <= 0) {
@@ -132,30 +158,34 @@ class PurchaseController extends Controller
             if ($filterFlag) {
                 $materialRequests = MaterialRequests::whereIn('id',$ids)->orderBy('id','desc')->get();
             }
+
             $materialRequestList = array();
             $iterator = 0;
             foreach($materialRequests as $key => $materialRequest){
                 $materialRequestComponentArray = MaterialRequestComponents::where('material_request_id',$materialRequest->id)->orderBy('id','desc')->get();
                 foreach($materialRequestComponentArray as $key => $materialRequestComponents){
-                    $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponents->id;
-                    $materialRequestList[$iterator]['name'] = $materialRequestComponents->name;
-                    $materialRequestList[$iterator]['quantity'] = $materialRequestComponents->quantity;
-                    $materialRequestList[$iterator]['unit_id'] = $materialRequestComponents->unit_id;
-                    $materialRequestList[$iterator]['unit'] = $materialRequestComponents->unit->name;
-                    $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponents->component_type_id;
-                    $materialRequestList[$iterator]['component_type'] = $materialRequestComponents->materialRequestComponentTypes->name;
-                    $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponents->component_status_id;
-                    $materialRequestList[$iterator]['component_status'] = $materialRequestComponents->purchaseRequestComponentStatuses->slug;
-                    $materialRequestList[$iterator]['component_status_name'] = $materialRequestComponents->purchaseRequestComponentStatuses->name;
-                    $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
-                    $pro = $materialRequest->projectSite->project;
-                    $materialRequestList[$iterator]['project_name'] =$pro->name;
-                    $materialRequestList[$iterator]['client_name'] =$pro->client->company;
-                    $materialRequestList[$iterator]['site_name'] =$materialRequest->projectSite->name;
-                    $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
-                    $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request-component',$materialRequest['project_site_id'],$materialRequestComponents['created_at'],$materialRequestComponents->serial_no);
-                    $materialRequestList[$iterator]['mr_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequest->serial_no);
-                    $iterator++;
+                    if($materialRequestComponents->component_status_id == $status || $status == 0) {
+                        $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponents->id;
+                        $materialRequestList[$iterator]['name'] = $materialRequestComponents->name;
+                        $materialRequestList[$iterator]['quantity'] = $materialRequestComponents->quantity;
+                        $materialRequestList[$iterator]['unit_id'] = $materialRequestComponents->unit_id;
+                        $materialRequestList[$iterator]['unit'] = $materialRequestComponents->unit->name;
+                        $materialRequestList[$iterator]['component_type_id'] = $materialRequestComponents->component_type_id;
+                        $materialRequestList[$iterator]['component_type'] = $materialRequestComponents->materialRequestComponentTypes->name;
+                        $materialRequestList[$iterator]['component_status_id'] = $materialRequestComponents->component_status_id;
+                        $materialRequestList[$iterator]['component_status'] = $materialRequestComponents->purchaseRequestComponentStatuses->slug;
+                        $materialRequestList[$iterator]['component_status_name'] = $materialRequestComponents->purchaseRequestComponentStatuses->name;
+                        $materialRequestList[$iterator]['project_site_id'] =$materialRequest['project_site_id'];
+                        $pro = $materialRequest->projectSite->project;
+                        $materialRequestList[$iterator]['project_name'] =$pro->name;
+                        $materialRequestList[$iterator]['client_name'] =$pro->client->company;
+                        $materialRequestList[$iterator]['site_name'] =$materialRequest->projectSite->name;
+                        $materialRequestList[$iterator]['created_at'] =$materialRequest['created_at'];
+                        $materialRequestList[$iterator]['rm_id'] = $this->getPurchaseIDFormat('material-request-component',$materialRequest['project_site_id'],$materialRequestComponents['created_at'],$materialRequestComponents->serial_no);
+                        $materialRequestList[$iterator]['mr_id'] = $this->getPurchaseIDFormat('material-request',$materialRequest['project_site_id'],$materialRequest['created_at'],$materialRequest->serial_no);
+                        $iterator++;
+
+                    }
                 }
             }
             $iTotalRecords = count($materialRequestList);
@@ -257,11 +287,10 @@ class PurchaseController extends Controller
                 }
                 $records['data'][$iterator] = [
                     $checkboxComponent,
-                    $materialRequestList[$pagination]['rm_id'],
-                    $materialRequestList[$pagination]['name'],
-                    $materialRequestList[$pagination]['client_name'],
-                    $materialRequestList[$pagination]['project_name']." - ".$materialRequestList[$pagination]['site_name'],
                     $materialRequestList[$pagination]['mr_id'],
+                    $materialRequestList[$pagination]['name'],
+                    $materialRequestList[$pagination]['quantity'],
+                    Unit::where('id', $materialRequestList[$pagination]['unit_id'])->pluck('name')    ,
                     date('d M Y',strtotime($materialRequestList[$pagination]['created_at'])),
                     $user_status,
                     $actionDropDown,
