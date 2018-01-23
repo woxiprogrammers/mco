@@ -520,7 +520,17 @@ class PurchaseOrderRequestController extends Controller
                         }
                     }
                     if(count($vendorInfo['materials']) > 0){
+                        $projectSiteInfo = array();
+                        $projectSiteInfo['project_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;
+                        $projectSiteInfo['project_site_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->name;
+                        $projectSiteInfo['project_site_address'] = $purchaseOrderRequest->purchaseRequest->projectSite->address;
+                        if($purchaseOrderRequest->purchaseRequest->projectSite->city_id == null){
+                            $projectSiteInfo['project_site_city'] = '';
+                        }else{
+                            $projectSiteInfo['project_site_city'] = $purchaseOrderRequest->purchaseRequest->projectSite->city->name;
+                        }
                         $pdf = App::make('dompdf.wrapper');
+                        $pdfFlag = "purchase-order-listing-download";
                         $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
                         $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                         $pdfFileName = sha1($vendorId).'.pdf';
