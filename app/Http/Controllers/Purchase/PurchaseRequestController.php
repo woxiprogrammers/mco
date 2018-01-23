@@ -551,11 +551,11 @@ class PurchaseRequestController extends Controller
                             $mailInfoData[$jIterator] = [
                                 'user_id' => Auth::user()->id,
                                 'type_slug' => 'for-quotation',
+                                'vendor_id' => $vendorId,
                                 'created_at' => Carbon::now(),
                                 'updated_at' => Carbon::now()
                             ];
                             if(in_array($materialRequestComponentId,$data['checked_vendor_materials'][$vendorId])){
-                                $mailInfoData[$jIterator]['purchase_request_component_vendor_relation_id'] = $purchaseComponentVendorRelation->id;
                                 $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
                                 $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
                                 $vendorInfo['materials'][$iterator]['unit'] = $materialRequestComponent->unit->name;
