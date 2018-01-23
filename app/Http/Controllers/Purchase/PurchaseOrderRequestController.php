@@ -353,8 +353,10 @@ class PurchaseOrderRequestController extends Controller
             $systemMaterialIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material'])->pluck('id')->toArray();
             if(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$systemAssetTypeIds)){
                 $purchaseRequestComponentData['categories'] = [
-                    'id' => '',
-                    'name' => 'Asset'
+                    [
+                        'id' => '',
+                        'name' => 'Asset'
+                    ]
                 ];
                 $purchaseRequestComponentData['hsn_code'] = '';
             }elseif(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$systemMaterialIds)){
