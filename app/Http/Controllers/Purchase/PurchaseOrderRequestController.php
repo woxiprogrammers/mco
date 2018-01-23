@@ -7,6 +7,7 @@ use App\AssetType;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Helper\UnitHelper;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentTypes;
@@ -391,6 +392,7 @@ class PurchaseOrderRequestController extends Controller
     }
 
     use MaterialRequestTrait;
+    use NotificationTrait;
     public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
         try{
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
@@ -406,8 +408,9 @@ class PurchaseOrderRequestController extends Controller
                     $purchaseOrderCount = PurchaseOrder::whereDate('created_at', Carbon::now())->count();
                     $purchaseOrderCount++;
                     $purchaseOrderFormatID = $this->getPurchaseIDFormat('purchase-order',$projectSiteId,Carbon::now(),$purchaseOrderCount);
+                    $user = Auth::user();
                     $purchaseOrderData = [
-                        'user_id' => Auth::user()->id,
+                        'user_id' => $user->id,
                         'vendor_id' => $vendorId,
                         'is_approved' => true,
                         'purchase_request_id' => $purchaseOrderRequest->purchase_request_id,
@@ -521,6 +524,28 @@ class PurchaseOrderRequestController extends Controller
                             }
                         }
                     }
+                    $tokens = array();
+                    $tokens[] = $purchaseOrder->purchaseRequest->user->web_fcm_token;
+                    $tokens[] = $purchaseOrder->purchaseRequest->user->mobile_fcm_token;
+                    $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
+                        ->join('material_request_components','material_request_components.material_id','=','material_requests.id')
+                        ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                        ->join('purchase_order_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
+                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                        ->where('purchase_orders.id', $purchaseOrder->id)
+                        ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
+                        ->first();
+                    $tokens = array_merge($tokens,array_column($materialRequestUserToken,'web_fcm_token'),array_column($materialRequestUserToken,'mobile_fcm_token'));
+                    $purchaseRequestUserTokens = User::join('purchase_requests','purchase_requests.behalf_of_user_id','=','users.id')
+                        ->join('purchase_orders','purchase_orders.purchase_request_id','=','purchase_requests.id')
+                        ->where('purchase_orders.id', $purchaseOrder->id)
+                        ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
+                        ->first();
+                    $tokens = array_merge($tokens,array_column($purchaseRequestUserTokens,'web_fcm_token'), array_column($purchaseRequestUserTokens,'mobile_fcm_token'));
+                    $notificationString = '3 -'.$purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
+                    $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Order Created.';
+                    $notificationString .= 'PO number: '.$purchaseOrder->format_id;
+                    $this->sendPushNotification('',$notificationString,$tokens);
                     if(count($vendorInfo['materials']) > 0){
                         $projectSiteInfo = array();
                         $projectSiteInfo['project_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;

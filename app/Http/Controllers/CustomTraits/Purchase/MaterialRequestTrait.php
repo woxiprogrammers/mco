@@ -14,6 +14,7 @@ use App\MaterialRequestComponentVersion;
 use App\MaterialRequests;
 use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
+use App\Unit;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
@@ -43,11 +44,29 @@ trait MaterialRequestTrait{
             $materialComponentHistoryData['remark'] = $materialRequestComponentVersionData['remark'] = '';
             $materialComponentHistoryData['user_id'] = $materialRequestComponentVersionData['user_id'] = $user['id'];
             $materialRequestComponent = array();
+            $mobileTokens = User::join('user_has_permissions','users.id','=','user_has_permissions.user_id')
+                ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                ->join('user_project_site_relation','users.id','=','user_project_site_relation.user_id')
+                ->where('permissions.name','approve-material-request')
+                ->whereNotNull('users.mobile_fcm_token')
+                ->where('user_project_site_relation.project_site_id',$data['project_site_id'])
+                ->pluck('users.mobile_fcm_token')
+                ->toArray();
+            $webTokens = User::join('user_has_permissions','users.id','=','user_has_permissions.user_id')
+                ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                ->join('user_project_site_relation','users.id','=','user_project_site_relation.user_id')
+                ->where('permissions.name','approve-material-request')
+                ->whereNotNull('users.web_fcm_token')
+                ->where('user_project_site_relation.project_site_id',$data['project_site_id'])
+                ->pluck('users.web_fcm_token')
+                ->toArray();
+            $tokens = array_merge($mobileTokens,$webTokens);
             foreach($data['item_list'] as $key => $itemData){
                 $materialRequestComponentData['material_request_id'] = $materialRequest['id'];
                 $materialRequestComponentData['name'] = $itemData['name'];
                 $materialRequestComponentData['quantity'] = $materialRequestComponentVersionData['quantity'] = $itemData['quantity_id'];
                 $materialRequestComponentData['unit_id'] = $materialRequestComponentVersionData['unit_id'] = $itemData['unit_id'];
+                $unitName = Unit::where('id',$materialRequestComponentData['unit_id'])->pluck('name')->first();
                 if($is_purchase_request == true){
                     $materialRequestComponentData['component_status_id'] = $prAssignedStatusId;
                     $materialComponentHistoryData['component_status_id'] = $materialRequestComponentVersionData['component_status_id'] = $prAssignedStatusId;
@@ -63,6 +82,10 @@ trait MaterialRequestTrait{
                 $materialRequestComponentData['serial_no'] = ($materialRequestComponentCount+1);
                 $materialRequestComponentData['format_id'] =  $this->getPurchaseIDFormat('material-request-component',$data['project_site_id'],$materialRequestComponentData['created_at'],$materialRequestComponentData['serial_no']);
                 $materialRequestComponent[$iterator] = MaterialRequestComponents::insertGetId($materialRequestComponentData);
+                $notificationString = '1 -'.$materialRequest->projectSite->project->name.' '.$materialRequest->projectSite->name;
+                $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Material Request Created.';
+                $notificationString .= ' '.$itemData['name'].' '.$materialRequestComponentData['quantity'].' '.$unitName;
+                $this->sendPushNotification('',$notificationString,$tokens);
                 $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentVersionData['material_request_component_id'] = $materialRequestComponent[$iterator];
                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
                 $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
@@ -82,24 +105,6 @@ trait MaterialRequestTrait{
                 }
                 $iterator++;
             }
-            $mobileTokens = User::join('user_has_permissions','users.id','=','user_has_permissions.user_id')
-                ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
-                ->join('user_project_site_relation','users.id','=','user_project_site_relation.user_id')
-                ->where('permissions.name','approve-material-request')
-                ->whereNotNull('users.mobile_fcm_token')
-                ->where('user_project_site_relation.project_site_id',$data['project_site_id'])
-                ->pluck('users.mobile_fcm_token')
-                ->toArray();
-            $webTokens = User::join('user_has_permissions','users.id','=','user_has_permissions.user_id')
-                ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
-                ->join('user_project_site_relation','users.id','=','user_project_site_relation.user_id')
-                ->where('permissions.name','approve-material-request')
-                ->whereNotNull('users.web_fcm_token')
-                ->where('user_project_site_relation.project_site_id',$data['project_site_id'])
-                ->pluck('users.web_fcm_token')
-                ->toArray();
-            $tokens = array_merge($mobileTokens,$webTokens);
-            $this->sendPushNotification('Material Request Created','New Material Request is created',$tokens);
         }catch(\Exception $e){
             $materialRequestComponent = null;
             $errorData = [

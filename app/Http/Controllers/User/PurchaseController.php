@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 use App\Asset;
 use App\Client;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Http\Requests\MaterialRequest;
 use App\Material;
@@ -702,6 +703,7 @@ class PurchaseController extends Controller
         $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
         return view ('purchase/material-request/material-request-listing')->with(compact('clients'));
     }
+    use NotificationTrait;
     public function changeMaterialRequestComponentStatus(Request $request,$newStatus,$componentId = null){
         try{
             $user = Auth::user();
@@ -788,9 +790,20 @@ class PurchaseController extends Controller
                     $materialComponentHistoryData['remark'] = $remark;
                     $materialComponentHistoryData['user_id'] = Auth::user()->id;
                     foreach($componentIds as $componentId){
-                        MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminDisapproveStatusId]);
+                        $materialRequestComponent = MaterialRequestComponents::findOrFail($componentId);
+                        $materialRequestComponent->update(['component_status_id' => $adminDisapproveStatusId]);
                         $materialComponentHistoryData['material_request_component_id'] = $componentId;
                         MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                        $userTokens = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
+                                        ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
+                                        ->where('material_request_components.id', $componentId)
+                                        ->select('users.mobile_fcm_token','users.web_fcm_token')
+                                        ->first();
+                        $tokens = array_merge(array_column($userTokens,'web_fcm_token'), array_column($userTokens,'mobile_fcm_token'));
+                        $notificationString = '1D -'.$materialRequestComponent->materialRequest->projectSite->project->name.' '.$materialRequestComponent->materialRequest->projectSite->name;
+                        $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Material Disapproved.';
+                        $notificationString .= ' '.$remark;
+                        $this->sendPushNotification('',$notificationString,$tokens);
                     }
                     break;
 
