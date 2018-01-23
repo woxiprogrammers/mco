@@ -124,7 +124,7 @@
                                                                                 @foreach($purchaseOrderRequestComponentData['vendor_relations'] as $vendorRelation)
                                                                                     <tr>
                                                                                         <td>
-                                                                                            <input type="radio" name="approved_purchase_order_request_relation[{{$vendorRelation['vendor_id']}}][]" value="{{$vendorRelation['purchase_order_request_component_id']}}">
+                                                                                            <input type="radio" class="radio-buttons-{{$purchaseOrderRequestComponentId}}" name="approved_purchase_order_request_relation[{{$vendorRelation['vendor_id']}}][]" value="{{$vendorRelation['purchase_order_request_component_id']}}" onclick="radioClickEvent(this)">
                                                                                         </td>
                                                                                         <td>
                                                                                             {{$vendorRelation['vendor_name']}}
@@ -179,10 +179,15 @@
                 });
             }
         }
-
-        $(document).ready(function(){
-
-        });
+        function radioClickEvent(element){
+            if($(element).prop('checked') == true){
+                var name = $(element).attr('name');
+                var classname = $(element).attr('class');
+                $("."+classname+":not([name='"+name+"'])").each(function(){
+                    $(this).attr('checked', false)
+                });
+            }
+        }
     </script>
 @endsection
 
