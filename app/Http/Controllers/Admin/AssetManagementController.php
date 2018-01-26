@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Asset;
 use App\AssetImage;
 use App\AssetType;
+use App\AssetVendorRelation;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransfers;
@@ -12,6 +13,7 @@ use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\ProjectSite;
 use App\Unit;
+use App\Vendor;
 use Dompdf\Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -86,6 +88,7 @@ use InventoryTrait;
             if($assetImages != null){
                 $assetImage = $this->getImagePath($assetId,$assetImages);
             }
+            $vendorsAssigned = AssetVendorRelation::where('asset_id',$asset['id'])->get();
         }catch (\Exception $e){
             $data = [
                 'action' => "Get asset edit view",
@@ -95,7 +98,7 @@ use InventoryTrait;
             Log::critical(json_encode($data));
             abort(500);
         }
-        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types','projectSiteData','isAssigned','quantityAssigned','remainingQuantity'));
+        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types','projectSiteData','isAssigned','quantityAssigned','remainingQuantity','vendorsAssigned'));
     }
 
     public function createAsset(Request $request){
@@ -150,7 +153,8 @@ use InventoryTrait;
     public function editAsset(Request $request,$asset){
         try{
             $data = $request->all();
-            $assetData = $request->except('_token','name','asset_type','qty');
+            $assetData = $request->except('_token','name','asset_type','qty','maintenance_period_type');
+            $assetData['is_day_wise'] = ($request->has('maintenance_period_type') && $request['maintenance_period_type'] == 'day_wise' && $request['maintenance_period_type'] != null) ? true : false;
             $assetData['name'] = ucwords(trim($data['name']));
             $assetData['asset_types_id'] = $data['asset_type'];
             $assetData['quantity'] = $data['qty'];
@@ -476,5 +480,36 @@ use InventoryTrait;
             $iterator++;
         }
         return $imagePaths;
+    }
+
+    public function getVendorAutoSuggest(Request $request,$keyword){
+        try{
+            $vendorList = array();
+            $vendorList = Vendor::where('name','ilike','%'.$keyword.'%')->where('is_active',true)->select('id','name')->get();
+        }catch(\Exception $e){
+            $vendorList = array();
+            $data = [
+                'action' => 'Auto-Suggest Vendor',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response($vendorList,200);
+    }
+
+    public function assignVendors(Request $request,$asset){
+        try{
+            dd($request->all());
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Assign Vendor',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }

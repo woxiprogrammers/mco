@@ -49,6 +49,9 @@
                                                 <li>
                                                     <a href="#projectSiteAssignmentTab" data-toggle="tab"> Assign Project Sites </a>
                                                 </li>
+                                                <li>
+                                                    <a href="#vendorAssignmentTab" data-toggle="tab"> Assign Vendors</a>
+                                                </li>
                                             </ul>
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="editInfoTab">
@@ -151,6 +154,22 @@
                                                                     <input type="number" class="form-control" id="rent_per_day" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}" onkeyup="assignRent(this)">
                                                                 </div>
                                                             </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="number" class="control-label">Maintenance Period</label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <input type="number" class="form-control" id="maintenance_period" name="maintenance_period" value="{!! $asset['maintenance_period'] !!}">
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <select class="form-control" id="maintenance_period_type" name="maintenance_period_type">
+                                                                        <option value=""> Select type </option>
+                                                                        <option value="day_wise">Day</option>
+                                                                        <option value="hour_wise">Hrs</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
                                                             <div class="form-group">
                                                                 <div class="row">
                                                                     <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
@@ -251,6 +270,65 @@
                                                         </table>
                                                     </div>
                                                 </div>
+                                                <div class="tab-pane fade in" id="vendorAssignmentTab">
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right" for="project_site">Search Vendor</label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control empty typeahead" id="vendorList" name="vendorList" placeholder="Enter vendor name">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row"  style="margin-top: 2%" hidden>
+                                                        <div class="col-md-3">
+                                                            <a class="btn blue pull-right" id="removeButton" >Remove Project Site</a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row"  style="margin-top: 0.5%">
+                                                        <div class="col-md-8 col-md-offset-2">
+                                                            <form role="form" id="assignVendorForm" action="/asset/vendor/assign/{{$asset['id']}}" method="POST">
+                                                        {{csrf_field()}}
+
+                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assignVendorTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th style="width: 10%;">Remove</th>
+                                                                <th> Vendor Information</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {{--@foreach($vendorsAssigned as $vendor)
+                                                            dd($vendor);
+                                                                <tr>
+                                                                    <td style="width: 10%;">
+                                                                        <input type="checkbox" class="project-row-checkbox">
+                                                                    </td>
+                                                                    <td>
+                                                                        <input name="project_sites[]" type="hidden" value="{{$vendor['id']}}">
+                                                                        <div class="row">
+                                                                            <div class="col-md-3">
+                                                                                <label class="control-label pull-right">
+                                                                                    <b>Name</b>
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-9"  style="text-align: left">
+                                                                                <label class="control-label">{{$vendor['name']}}</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach--}}
+                                                            </tbody>
+                                                        </table>
+                                                        <div class="form-actions noborder row">
+                                                            <div class="col-md-offset-3" style="margin-left: 26%">
+                                                                <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -279,8 +357,79 @@
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/asset/project-site-asset-assignment-datatable.js"></script>
+    <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+    <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
+        $('#vendorList').addClass('typeahead');
+        var citiList = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                url: "/asset/vendor/auto-suggest/%QUERY",
+                filter: function(x) {
+                    if($(window).width()<420){
+                        $("#header").addClass("fixed");
+                    }
+                    return $.map(x, function (data) {
+                        return {
+                            vendorList:data.name,
+                        };
+                    });
+                },
+                wildcard: "%QUERY"
+            }
+        });
+        citiList.initialize();
+        $('.typeahead').typeahead(null, {
+            displayKey: 'name',
+            engine: Handlebars,
+            source: citiList.ttAdapter(),
+            limit: 30,
+            templates: {
+                empty: [
+                    '<div class="empty-suggest">',
+                    'Unable to find any Result that match the current query',
+                    '</div>'
+                ].join('\n'),
+                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{vendorList}}</strong></div>')
+            },
+
+        }).on('typeahead:selected', function (obj, datum) {
+            var POData = $.parseJSON(JSON.stringify(datum));
+            var trString = '<tr>' +
+                '           <th style="width: 10%;"><input type="checkbox" class="vendor-row-checkbox"></th>\n' +
+                '           <th>'+POData.vendorList+'</th></tr>';
+            $("#assignVendorTable tbody").append(trString);
+            $("#removeButton").closest('.row').show();
+            $("#assignVendorTable").show();
+        })
+            .on('typeahead:open', function (obj, datum) {
+
+            });
+        var maintenance_type;
+        if($('#id_day_wise').val() == true){
+            maintenance_type = 'day_wise';
+        }else if($('#id_day_wise').val() == false){
+            maintenance_type = 'hour_wise';
+        }else{
+            maintenance_type = '';
+        }
+        $('select[name="maintenance_period_type"]').find('option[value=maintenance_type]').attr("selected",true);
         $(document).ready(function(){
+
+            $("#removeButton").on('click',function(){
+                if($("#assignVendorTable tbody input:checkbox:checked").length > 0){
+                    $("#assignVendorTable tbody input:checkbox:checked").each(function(){
+                        $(this).closest('tr').remove();
+                    });
+                }
+                if($("#assignVendorTable tbody input:checkbox").length <= 0){
+                    $("#removeButton").closest('.row').hide();
+                    $("#assignVendorTable").hide();
+                }
+            });
+
+
             ProjectSiteAssetAssignment.init();
             CreateInventoryComponentTransfer.init();
             if($('#litre_per_unit').val() != ""){

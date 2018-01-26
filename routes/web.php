@@ -387,6 +387,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
         Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkModel'));
         Route::get('change-status/{asset}',array('uses' => 'Admin\AssetManagementController@changeAssetStatus'));
+        Route::group(['prefix' => 'vendor'], function(){
+            Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\AssetManagementController@getVendorAutoSuggest'));
+            Route::post('assign/{asset}',array('uses' => 'Admin\AssetManagementController@assignVendors'));
+        });
+
     });
 
     Route::group(['prefix'=>'bank'],function() {
