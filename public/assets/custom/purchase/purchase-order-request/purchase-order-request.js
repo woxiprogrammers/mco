@@ -77,13 +77,20 @@ function componentTaxDetailSubmit(){
         }
     });
     var rate = $("input[name='data["+componentRelationId+"][rate_per_unit]'").val();
-    var cgst_percentage = $("input[name='data["+componentRelationId+"][cgst_percentage]'").val();
-    var sgst_percentage = $("input[name='data["+componentRelationId+"][sgst_percentage]'").val();
-    var igst_percentage = $("input[name='data["+componentRelationId+"][igst_percentage]'").val();
-    var rate_with_tax = parseFloat(rate) + parseFloat(rate * (cgst_percentage/100)) + parseFloat(rate * (sgst_percentage/100)) + parseFloat(rate * (igst_percentage/100));
-    $("#componentRow-"+componentRelationId+" .rate-without-tax").text(rate);
-    $("#componentRow-"+componentRelationId+" .rate-with-tax").text(rate_with_tax);
-    $("#componentRow-"+componentRelationId+" .total-with-tax").text($("input[name='data["+componentRelationId+"][total]'").val());
+    if(rate == '-'){
+        $("#componentRow-"+componentRelationId+" .rate-without-tax").text('-');
+        $("#componentRow-"+componentRelationId+" .rate-with-tax").text('-');
+        $("#componentRow-"+componentRelationId+" .total-with-tax").text('-');
+    }else{
+        var cgst_percentage = $("input[name='data["+componentRelationId+"][cgst_percentage]'").val();
+        var sgst_percentage = $("input[name='data["+componentRelationId+"][sgst_percentage]'").val();
+        var igst_percentage = $("input[name='data["+componentRelationId+"][igst_percentage]'").val();
+        var rate_with_tax = parseFloat(rate) + parseFloat(rate * (cgst_percentage/100)) + parseFloat(rate * (sgst_percentage/100)) + parseFloat(rate * (igst_percentage/100));
+        $("#componentRow-"+componentRelationId+" .rate-without-tax").text(rate);
+        $("#componentRow-"+componentRelationId+" .rate-with-tax").text(rate_with_tax);
+        $("#componentRow-"+componentRelationId+" .total-with-tax").text($("input[name='data["+componentRelationId+"][total]'").val());
+    }
+
     $('#detailsModal').modal('toggle');
 }
 function openDetailsModal(element, purchaseRequestComponentVendorRelationId){

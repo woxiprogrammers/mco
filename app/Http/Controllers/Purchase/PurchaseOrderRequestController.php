@@ -68,6 +68,7 @@ class PurchaseOrderRequestController extends Controller
 
     public function createPurchaseOrderRequest(Request $request){
         try{
+            dd($request->all());
             $user = Auth::user();
             $purchaseOrderRequestData = [
                 'purchase_request_id' => $request->purchase_request_id,
@@ -302,7 +303,6 @@ class PurchaseOrderRequestController extends Controller
                 foreach ($purchaseRequestComponent->vendorRelations as $vendorRelation){
                     $purchaseRequestComponentData[$iterator]['vendor_relation_id'] = $vendorRelation->id;
                     $purchaseRequestComponentData[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
-
                     $purchaseRequestComponentData[$iterator]['name'] = $purchaseRequestComponent->materialRequestComponent->name;
                     $purchaseRequestComponentData[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
                     $purchaseRequestComponentData[$iterator]['unit'] = $purchaseRequestComponent->materialRequestComponent->unit->name;
@@ -341,7 +341,6 @@ class PurchaseOrderRequestController extends Controller
                     $iterator++;
                 }
             }
-            dd($purchaseRequestComponentData);
             return view('partials.purchase.purchase-order-request.component-listing')->with(compact('purchaseRequestComponentData'));
         }catch (\Exception $e){
             $data = [
@@ -357,6 +356,7 @@ class PurchaseOrderRequestController extends Controller
     public function getComponentTaxDetails(Request $request, $purchaseRequestComponentVendorRelation){
         try{
             $purchaseRequestComponentData = array();
+            $purchaseRequestComponentData['is_client'] = $purchaseRequestComponentVendorRelation->is_client;
             $purchaseRequestComponent = $purchaseRequestComponentVendorRelation->purchaseRequestComponent;
             $systemAssetTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
             $systemMaterialIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material'])->pluck('id')->toArray();
