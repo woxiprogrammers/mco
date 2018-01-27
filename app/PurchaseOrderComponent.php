@@ -29,4 +29,8 @@ class PurchaseOrderComponent extends Model
     public function purchaseOrderTransactionComponent(){
         return $this->hasMany('App\PurchaseOrderTransactionComponent','purchase_order_component_id');
     }
+
+    public function unit(){
+        return $this->belongsTo('App\Unit','unit_id');
+    }
 }

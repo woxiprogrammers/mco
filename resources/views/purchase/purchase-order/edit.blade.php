@@ -233,7 +233,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form role="form" class="form-horizontal" method="post">
+                                                    <form role="form" class="form-horizontal" id="PurchaseOrderComponentEditForm" method="post" action="/purchase/purchase-order/edit/{{$purchaseOrderList['purchase_order_id']}}">
 
                                                     </form>
                                                 </div>
@@ -477,6 +477,7 @@
     </style>
     <script>
         $(document).ready(function(){
+            EditPurchaseOrder.init();
             $("#componentSelectButton").on('click',function(){
                 if($(".component-select:checkbox:checked").length > 0){
                     var componentIds = [];
@@ -615,5 +616,24 @@
                 });
             });
         });
+
+        function submitComponentForm(){
+            var minQuantity = $("#ImageUpload .modal-body #minQuantity").val();
+            var quantity = $("#ImageUpload .modal-body .quantity").val();
+            if($.isNumeric(quantity) == true){
+                minQuantity = parseFloat(minQuantity);
+                quantity = parseFloat(quantity);
+                if(minQuantity > quantity){
+                    $("#ImageUpload .modal-body .quantity").closest('.form-group').addClass('has-error').removeClass('has-success');
+                    alert('Minimum allowed quantity is '+ minQuantity);
+                }else{
+                    $("#ImageUpload .modal-body .quantity").closest('.form-group').removeClass('has-error').addClass('has-success');
+                    $("#PurchaseOrderComponentEditForm").submit();
+                }
+            }else{
+                $("#ImageUpload .modal-body .quantity").closest('.form-group').addClass('has-error').removeClass('has-success');
+                alert('Please Enter digit only.');
+            }
+        }
     </script>
 @endsection
