@@ -88,6 +88,13 @@ use InventoryTrait;
             if($assetImages != null){
                 $assetImage = $this->getImagePath($assetId,$assetImages);
             }
+            if ($asset['is_day_wise'] == true){
+                $maintenancePeriodType = 'day_wise';
+             }elseif ($asset['is_day_wise'] == false){
+                $maintenancePeriodType = 'hour_wise';
+            }else{
+                $maintenancePeriodType = '';
+            }
             $vendorsAssigned = AssetVendorRelation::where('asset_id',$asset['id'])->get();
         }catch (\Exception $e){
             $data = [
@@ -98,7 +105,7 @@ use InventoryTrait;
             Log::critical(json_encode($data));
             abort(500);
         }
-        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types','projectSiteData','isAssigned','quantityAssigned','remainingQuantity','vendorsAssigned'));
+        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types','projectSiteData','isAssigned','quantityAssigned','remainingQuantity','vendorsAssigned','maintenancePeriodType'));
     }
 
     public function createAsset(Request $request){

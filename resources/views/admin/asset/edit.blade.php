@@ -287,9 +287,8 @@
                                                     <div class="row"  style="margin-top: 0.5%">
                                                         <div class="col-md-8 col-md-offset-2">
                                                             <form role="form" id="assignVendorForm" action="/asset/vendor/assign/{{$asset['id']}}" method="POST">
-                                                        {{csrf_field()}}
-
-                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assignVendorTable">
+                                                                {{csrf_field()}}
+                                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assignVendorTable">
                                                             <thead>
                                                             <tr>
                                                                 <th style="width: 10%;">Remove</th>
@@ -320,12 +319,12 @@
                                                             @endforeach--}}
                                                             </tbody>
                                                         </table>
-                                                        <div class="form-actions noborder row">
-                                                            <div class="col-md-offset-3" style="margin-left: 26%">
-                                                                <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
-                                                            </div>
-                                                        </div>
-                                                    </form>
+                                                                <div class="form-actions noborder row">
+                                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -393,7 +392,6 @@
                 ].join('\n'),
                 suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{vendorList}}</strong></div>')
             },
-
         }).on('typeahead:selected', function (obj, datum) {
             var POData = $.parseJSON(JSON.stringify(datum));
             var trString = '<tr>' +
@@ -402,19 +400,10 @@
             $("#assignVendorTable tbody").append(trString);
             $("#removeButton").closest('.row').show();
             $("#assignVendorTable").show();
-        })
-            .on('typeahead:open', function (obj, datum) {
+        }).on('typeahead:open', function (obj, datum) {
 
-            });
-        var maintenance_type;
-        if($('#id_day_wise').val() == true){
-            maintenance_type = 'day_wise';
-        }else if($('#id_day_wise').val() == false){
-            maintenance_type = 'hour_wise';
-        }else{
-            maintenance_type = '';
-        }
-        $('select[name="maintenance_period_type"]').find('option[value=maintenance_type]').attr("selected",true);
+        });
+        $('select[name="maintenance_period_type"]').find('option[value={{$maintenancePeriodType}}]').attr("selected",true);
         $(document).ready(function(){
 
             $("#removeButton").on('click',function(){
