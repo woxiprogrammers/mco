@@ -75,6 +75,7 @@ class PurchaseOrderBillingController extends Controller
                     ->where('purchase_order_transaction_statuses.slug','bill-pending')
                     ->where('purchase_requests.project_site_id',$projectSiteId)
                     ->where('purchase_orders.format_id','ilike','%'.$request->keyword.'%')
+                    ->where('purchase_orders.is_client_order','!=', true)
                     ->select('purchase_orders.id as id','purchase_orders.format_id as format_id','purchase_order_transactions.id as purchase_order_transaction_id','purchase_order_transactions.grn as grn')
                     ->distinct('format_id')
                     ->get();
@@ -107,11 +108,26 @@ class PurchaseOrderBillingController extends Controller
         try{
             $status = 200;
             $response = array();
-            $billPendingTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_statuses','purchase_order_transactions.purchase_order_transaction_status_id','=','purchase_order_transaction_statuses.id')
-                                                ->where('purchase_order_transaction_statuses.slug','bill-pending')
-                                                ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
-                                                ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
-                                                ->get();
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $billPendingTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_statuses','purchase_order_transactions.purchase_order_transaction_status_id','=','purchase_order_transaction_statuses.id')
+                    ->join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->where('purchase_requests.project_site_id', $projectSiteId)
+                    ->where('purchase_orders.is_client_order','!=', true)
+                    ->where('purchase_order_transaction_statuses.slug','bill-pending')
+                    ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
+                    ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
+                    ->get();
+            }else{
+                $billPendingTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_statuses','purchase_order_transactions.purchase_order_transaction_status_id','=','purchase_order_transaction_statuses.id')
+                    ->join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
+                    ->where('purchase_orders.is_client_order','!=', true)
+                    ->where('purchase_order_transaction_statuses.slug','bill-pending')
+                    ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
+                    ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
+                    ->get();
+            }
             if(count($billPendingTransactions) > 0){
                 $iterator = 0;
                 foreach($billPendingTransactions as $purchaseOrderTransaction){

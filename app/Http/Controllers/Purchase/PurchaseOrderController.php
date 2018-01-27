@@ -345,7 +345,11 @@ class PurchaseOrderController extends Controller
             $purchaseOrder =PurchaseOrder::where('id',$id)->first();
             $purchaseOrderList = array();
             $iterator = 0;
-            $vendorName = $purchaseOrder->vendor->company;
+            if($purchaseOrder->is_client_order == true){
+                $vendorName = $purchaseOrder->client->company;
+            }else{
+                $vendorName = $purchaseOrder->vendor->company;
+            }
             if(($purchaseOrder) != null){
                     $purchaseOrderList['purchase_order_id'] = $purchaseOrder['id'];
                     $projectSite = $purchaseOrder->purchaseRequest->projectSite;
@@ -356,8 +360,15 @@ class PurchaseOrderController extends Controller
                     $project = $projectSite->project;
                     $purchaseOrderList['client_name'] = $project->client->company;
                     $purchaseOrderList['project'] = $project->name.'  '.'-'.'  '.$projectSite->name;
-                    $purchaseOrderList['vendor_name'] = $purchaseOrder->vendor->name;
-                    $purchaseOrderList['vendor_id'] = $purchaseOrder->vendor->id;
+                    if($purchaseOrder->is_client_order == true){
+                        $purchaseOrderList['vendor_name'] = $purchaseOrder->client->company;
+                        $purchaseOrderList['vendor_id'] = $purchaseOrder->client->id;
+                        $purchaseOrderList['is_client_order'] = true;
+                    }else{
+                        $purchaseOrderList['vendor_name'] = $purchaseOrder->vendor->company;
+                        $purchaseOrderList['vendor_id'] = $purchaseOrder->vendor->id;
+                        $purchaseOrderList['is_client_order'] = false;
+                    }
                     $purchaseOrderList['total_advance_amount'] = $purchaseOrder->total_advance_amount;
                     $purchaseOrderList['balance_advance_amount'] = $purchaseOrder->balance_advance_amount;
                     $purchaseOrderList['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
@@ -432,7 +443,11 @@ class PurchaseOrderController extends Controller
         try{
             $data = $request->all();
             $purchaseOrderComponent = PurchaseOrderComponent::where('id',$data['component_id'])->first();
-            $vendorName = $purchaseOrderComponent->purchaseOrder->vendor->name;
+            if($purchaseOrderComponent->purchaseOrder->is_client_order == true){
+                $vendorName = $purchaseOrderComponent->purchaseOrder->client->company;
+            }else{
+                $vendorName = $purchaseOrderComponent->purchaseOrder->vendor->name;
+            }
             $purchaseOrderComponentData['purchase_order_component_id'] = $purchaseOrderComponent['id'];
             $purchaseOrderComponentData['hsn_code'] = $purchaseOrderComponent['hsn_code'];
             $purchaseOrderComponentData['rate_per_unit'] = $purchaseOrderComponent['rate_per_unit'];
@@ -466,6 +481,11 @@ class PurchaseOrderController extends Controller
                 }
                 $purchaseOrderComponentData['client_approval_images'] = $materialComponentImagesOfClientApproval;
             }
+            $transactionQuantity = 0;
+            foreach($purchaseOrderComponent->purchaseOrderTransactionComponent as $purchaseOrderTransactionComponent){
+                $transactionQuantity += UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent->unit_id, $purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->quantity);
+            }
+            $purchaseOrderComponentData['transaction_quantity'] = $transactionQuantity;
             return view('partials.purchase.purchase-order.component-details')->with(compact('purchaseOrderComponentData','purchaseOrderComponent'));
         }catch(\Exception $e){
             $message = $e->getMessage();
@@ -1417,5 +1437,98 @@ class PurchaseOrderController extends Controller
             $records = [];
         }
         return response()->json($records,$status);
+    }
+
+    public function editPurchaseOrder(Request $request,$purchaseOrder){
+        try{
+            $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($request->purchase_order_component_id);
+            $purchaseOrderComponent->update(['quantity' => $request->quantity]);
+            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
+            $projectSiteInfo = array();
+            $projectSiteInfo['project_name'] = $purchaseOrder->purchaseRequest->projectSite->project->name;
+            $projectSiteInfo['project_site_name'] = $purchaseOrder->purchaseRequest->projectSite->name;
+            $projectSiteInfo['project_site_address'] = $purchaseOrder->purchaseRequest->projectSite->address;
+            $pdfFlag = 'after-purchase-order-create';
+            if($purchaseOrder->purchaseRequest->projectSite->city_id == null){
+                $projectSiteInfo['project_site_city'] = '';
+            }else{
+                $projectSiteInfo['project_site_city'] = $purchaseOrder->purchaseRequest->projectSite->city->name;
+            }
+            if($purchaseOrder->is_client_order == true){
+                $vendorInfo = Client::findOrFail($purchaseOrder->client_id)->toArray();
+            }else{
+                $vendorInfo = Vendor::findOrFail($purchaseOrder->vendor_id)->toArray();
+            }
+            $vendorInfo['materials'][] = [
+                'item_name' => $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name,
+                'quantity' => $purchaseOrderComponent['quantity'],
+                'unit' => $purchaseOrderComponent->unit->name,
+                'hsn_code' => $purchaseOrderComponent->hsn_code,
+                'rate' => $purchaseOrderComponent->rate_per_unit
+            ];
+            if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                $vendorInfo['materials'][0]['gst'] = '-';
+            }else{
+                $vendorInfo['materials'][0]['gst'] = Material::where('name','ilike',$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->pluck('gst')->first();
+                if($vendorInfo['materials'][0]['gst'] == null){
+                    $vendorInfo['materials'][0]['gst'] = '-';
+                }
+            }
+            if($vendorInfo['email'] != null){
+                $pdf = App::make('dompdf.wrapper');
+                $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
+                $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
+                $pdfFileName = sha1($vendorInfo['id']).'.pdf';
+                $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
+                $pdfContent = $pdf->stream();
+                if(file_exists($pdfUploadPath)){
+                    unlink($pdfUploadPath);
+                }
+                if (!file_exists($pdfDirectoryPath)) {
+                    File::makeDirectory(public_path().$pdfDirectoryPath, $mode = 0777, true, true);
+                }
+                file_put_contents($pdfUploadPath,$pdfContent);
+                $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
+                Mail::send('purchase.purchase-request.email.vendor-quotation', [], function($message) use ($mailData){
+                    $message->subject('Testing with attachment');
+                    $message->to($mailData['toMail']);
+                    $message->from(env('MAIL_USERNAME'));
+                    $message->attach($mailData['path']);
+                });
+                if($purchaseOrder->is_client_order == true){
+                    $mailInfoData = [
+                        'user_id' => Auth::user()->id,
+                        'type_slug' => 'for-purchase-order',
+                        'is_client' => true,
+                        'reference_id' => $purchaseOrder->id,
+                        'client_id' => $vendorInfo['id'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ];
+                }else{
+                    $mailInfoData = [
+                        'user_id' => Auth::user()->id,
+                        'type_slug' => 'for-purchase-order',
+                        'is_client' => false,
+                        'reference_id' => $purchaseOrder->id,
+                        'client_id' => $vendorInfo['id'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ];
+                }
+                PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
+                unlink($pdfUploadPath);
+            }
+            $request->session()->flash('success', 'Purchase Order Edited Successfully.');
+            return \redirect('/purchase/purchase-order/edit/'.$purchaseOrder->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Purchase Orders',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }

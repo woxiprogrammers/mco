@@ -6,6 +6,7 @@ use App\Asset;
 use App\AssetType;
 use App\Category;
 use App\CategoryMaterialRelation;
+use App\Client;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
@@ -76,6 +77,9 @@ class PurchaseOrderRequestController extends Controller
             ];
             $purchaseOrderRequest = PurchaseOrderRequest::create($purchaseOrderRequestData);
             foreach($request['data'] as $purchaseRequestComponentVendorRelationId => $componentData){
+                if($componentData['rate_per_unit'] == '-'){
+                    $componentData['rate_per_unit'] = 0;
+                }
                 $purchaseOrderRequestComponentData = [
                     'purchase_order_request_id' => $purchaseOrderRequest->id,
                     'purchase_request_component_vendor_relation_id' => $purchaseRequestComponentVendorRelationId,
@@ -165,9 +169,10 @@ class PurchaseOrderRequestController extends Controller
                 $purchaseOrderRequestsData = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
                                                         ->where('purchase_requests.project_site_id', $projectSiteId)
                                                         ->select('purchase_order_requests.id as id','purchase_order_requests.purchase_request_id as purchase_request_id','purchase_order_requests.user_id as user_id')
+                                                        ->orderBy('id','desc')
                                                         ->get();
             }else{
-                $purchaseOrderRequestsData = PurchaseOrderRequest::get();
+                $purchaseOrderRequestsData = PurchaseOrderRequest::orderBy('id','desc')->get();
             }
             $records = array();
             $records['data'] = array();
@@ -224,11 +229,18 @@ class PurchaseOrderRequestController extends Controller
                 $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
                 $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->sgst_percentage / 100));
                 $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->igst_percentage / 100));
+                if($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->is_client == true){
+                    $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->company;
+                    $vendorId = 'client_'.$purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->id;
+                }else{
+                    $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->company;
+                    $vendorId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->id;
+                }
                 $purchaseOrderRequestComponents[$purchaseRequestComponentId]['vendor_relations'][] = [
                     'component_vendor_relation_id' => $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id,
                     'purchase_order_request_component_id' => $purchaseOrderRequestComponent->id,
-                    'vendor_name' => $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->company,
-                    'vendor_id' => $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor_id,
+                    'vendor_name' => $vendorName,
+                    'vendor_id' => $vendorId,
                     'rate_without_tax' => $purchaseOrderRequestComponent->rate_per_unit,
                     'rate_with_tax' => $rateWithTax,
                     'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity']
@@ -303,34 +315,41 @@ class PurchaseOrderRequestController extends Controller
                 foreach ($purchaseRequestComponent->vendorRelations as $vendorRelation){
                     $purchaseRequestComponentData[$iterator]['vendor_relation_id'] = $vendorRelation->id;
                     $purchaseRequestComponentData[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
-                    $purchaseRequestComponentData[$iterator]['vendor_name'] = $vendorRelation->vendor->company;
                     $purchaseRequestComponentData[$iterator]['name'] = $purchaseRequestComponent->materialRequestComponent->name;
                     $purchaseRequestComponentData[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
                     $purchaseRequestComponentData[$iterator]['unit'] = $purchaseRequestComponent->materialRequestComponent->unit->name;
                     $purchaseRequestComponentData[$iterator]['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
-                    $lastPurchaseOrderRateInfo = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
-                                                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
-                                                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
-                                                            ->where('material_request_components.name','ilike', $purchaseRequestComponentData[$iterator]['name'])
-                                                            ->where('purchase_orders.is_approved', true)
-                                                            ->orderBy('purchase_orders.created_at','desc')
-                                                            ->select('purchase_order_components.rate_per_unit as rate_per_unit','purchase_order_components.unit_id as unit_id')
-                                                            ->first();
-                    if($lastPurchaseOrderRateInfo == null){
-                        $systemAssetTypeId = MaterialRequestComponentTypes::where('slug','system-asset')->pluck('id')->first();
-                        $materialTypeIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material'])->pluck('id')->toArray();
-                        if($purchaseRequestComponent->materialRequestComponent->component_type_id == $systemAssetTypeId){
-                            $lastPurchaseOrderRate = Asset::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->pluck('price')->first();
-                        }elseif(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$materialTypeIds)){
-                            $materialInfo = Material::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->select('id','rate_per_unit','unit_id')->first();
-                            $lastPurchaseOrderRate = UnitHelper::unitConversion($materialInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$materialInfo['rate_per_unit']);
-                        }else{
-                            $lastPurchaseOrderRate = 0;
-                        }
+                    if($vendorRelation['is_client'] == true){
+                        $purchaseRequestComponentData[$iterator]['vendor_name'] = $vendorRelation->client->company;
+                        $purchaseRequestComponentData[$iterator]['is_client'] = true;
+                        $purchaseRequestComponentData[$iterator]['rate_per_unit'] = '-';
                     }else{
-                        $lastPurchaseOrderRate = UnitHelper::unitConversion($lastPurchaseOrderRateInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$lastPurchaseOrderRateInfo['rate_per_unit']);
+                        $purchaseRequestComponentData[$iterator]['vendor_name'] = $vendorRelation->vendor->company;
+                        $purchaseRequestComponentData[$iterator]['is_client'] = false;
+                        $lastPurchaseOrderRateInfo = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                            ->where('material_request_components.name','ilike', $purchaseRequestComponentData[$iterator]['name'])
+                            ->where('purchase_orders.is_approved', true)
+                            ->orderBy('purchase_orders.created_at','desc')
+                            ->select('purchase_order_components.rate_per_unit as rate_per_unit','purchase_order_components.unit_id as unit_id')
+                            ->first();
+                        if($lastPurchaseOrderRateInfo == null){
+                            $systemAssetTypeId = MaterialRequestComponentTypes::where('slug','system-asset')->pluck('id')->first();
+                            $materialTypeIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material'])->pluck('id')->toArray();
+                            if($purchaseRequestComponent->materialRequestComponent->component_type_id == $systemAssetTypeId){
+                                $lastPurchaseOrderRate = Asset::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->pluck('price')->first();
+                            }elseif(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$materialTypeIds)){
+                                $materialInfo = Material::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->select('id','rate_per_unit','unit_id')->first();
+                                $lastPurchaseOrderRate = UnitHelper::unitConversion($materialInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$materialInfo['rate_per_unit']);
+                            }else{
+                                $lastPurchaseOrderRate = 0;
+                            }
+                        }else{
+                            $lastPurchaseOrderRate = UnitHelper::unitConversion($lastPurchaseOrderRateInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$lastPurchaseOrderRateInfo['rate_per_unit']);
+                        }
+                        $purchaseRequestComponentData[$iterator]['rate_per_unit'] = $lastPurchaseOrderRate;
                     }
-                    $purchaseRequestComponentData[$iterator]['rate_per_unit'] = $lastPurchaseOrderRate;
                     $iterator++;
                 }
             }
@@ -349,6 +368,7 @@ class PurchaseOrderRequestController extends Controller
     public function getComponentTaxDetails(Request $request, $purchaseRequestComponentVendorRelation){
         try{
             $purchaseRequestComponentData = array();
+            $purchaseRequestComponentData['is_client'] = $purchaseRequestComponentVendorRelation->is_client;
             $purchaseRequestComponent = $purchaseRequestComponentVendorRelation->purchaseRequestComponent;
             $systemAssetTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
             $systemMaterialIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material'])->pluck('id')->toArray();
@@ -402,27 +422,47 @@ class PurchaseOrderRequestController extends Controller
                 }else{
                     $projectSiteId = $purchaseOrderRequest->purchaseOrderRequest->purchaseRequest->project_site_id;
                 }
+                $user = Auth::user();
                 foreach($request->approved_purchase_order_request_relation as $vendorId => $purchaseOrderRequestComponentArray){
-                    $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
-                    $vendorInfo['materials'] = array();
                     $purchaseOrderCount = PurchaseOrder::whereDate('created_at', Carbon::now())->count();
                     $purchaseOrderCount++;
                     $purchaseOrderFormatID = $this->getPurchaseIDFormat('purchase-order',$projectSiteId,Carbon::now(),$purchaseOrderCount);
-                    $user = Auth::user();
-                    $purchaseOrderData = [
-                        'user_id' => $user->id,
-                        'vendor_id' => $vendorId,
-                        'is_approved' => true,
-                        'purchase_request_id' => $purchaseOrderRequest->purchase_request_id,
-                        'purchase_order_status_id' => PurchaseOrderStatus::where('slug','open')->pluck('id')->first(),
-                        'is_client_order' => false,
-                        'purchase_order_request_id' => $purchaseOrderRequest->id,
-                        'format_id' => $purchaseOrderFormatID,
-                        'serial_no' => $purchaseOrderCount
-                    ];
+                    $vendorIdArray = explode('_',$vendorId);
+                    if(count($vendorIdArray) == 2){
+                        /*Client Supplied*/
+                        $vendorId = $vendorIdArray[1];
+                        $vendorInfo = Client::findOrFail($vendorId)->toArray();
+                        $purchaseOrderData = [
+                            'user_id' => Auth::user()->id,
+                            'client_id' => $vendorId,
+                            'is_approved' => true,
+                            'purchase_request_id' => $purchaseOrderRequest->purchase_request_id,
+                            'purchase_order_status_id' => PurchaseOrderStatus::where('slug','open')->pluck('id')->first(),
+                            'is_client_order' => true,
+                            'purchase_order_request_id' => $purchaseOrderRequest->id,
+                            'format_id' => $purchaseOrderFormatID,
+                            'serial_no' => $purchaseOrderCount
+                        ];
+                    }else{
+                        $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
+                        $purchaseOrderData = [
+                            'user_id' => Auth::user()->id,
+                            'vendor_id' => $vendorId,
+                            'is_approved' => true,
+                            'purchase_request_id' => $purchaseOrderRequest->purchase_request_id,
+                            'purchase_order_status_id' => PurchaseOrderStatus::where('slug','open')->pluck('id')->first(),
+                            'is_client_order' => false,
+                            'purchase_order_request_id' => $purchaseOrderRequest->id,
+                            'format_id' => $purchaseOrderFormatID,
+                            'serial_no' => $purchaseOrderCount
+                        ];
+
+                    }
+                    $vendorInfo['materials'] = array();
                     $purchaseOrder = PurchaseOrder::create($purchaseOrderData);
                     $iterator = 0;
                     foreach($purchaseOrderRequestComponentArray as $purchaseOrderRequestComponentId){
+                        $vendorInfo['materials'][$iterator] = array();
                         $purchaseOrderRequestComponent = PurchaseOrderRequestComponent::findOrFail($purchaseOrderRequestComponentId);
                         $purchaseOrderComponentData = PurchaseOrderRequestComponent::where('id', $purchaseOrderRequestComponentId)
                                                                 ->select('id as purchase_order_request_component_id','rate_per_unit','gst','hsn_code','expected_delivery_date','remark','credited_days',
@@ -492,7 +532,9 @@ class PurchaseOrderRequestController extends Controller
                                 ->where('purchase_order_request_components.id','!=',$purchaseOrderRequestComponent->id)
                                 ->pluck('purchase_order_request_components.id')
                                 ->toArray();
-                        PurchaseOrderRequestComponent::whereIn('id', $disapprovedPurchaseOrderRequestComponentIds)->update(['is_approved' => false]);
+                        if(count($disapprovedPurchaseOrderRequestComponentIds) > 0){
+                            PurchaseOrderRequestComponent::whereIn('id', $disapprovedPurchaseOrderRequestComponentIds)->update(['is_approved' => false]);
+                        }
                         if(count($purchaseOrderRequestComponent->purchaseOrderRequestComponentImages) > 0){
                             $purchaseOrderMainDirectoryName = sha1($purchaseOrderComponent['purchase_order_id']);
                             $purchaseOrderComponentDirectoryName = sha1($purchaseOrderComponent['id']);
@@ -523,6 +565,7 @@ class PurchaseOrderRequestController extends Controller
                                 }
                             }
                         }
+                        $iterator++;
                     }
                     $tokens = array();
                     $tokens[] = $purchaseOrder->purchaseRequest->user->web_fcm_token;
@@ -577,13 +620,24 @@ class PurchaseOrderRequestController extends Controller
                             $message->from(env('MAIL_USERNAME'));
                             $message->attach($mailData['path']);
                         });
-                        $mailInfoData = [
-                            'user_id' => Auth::user()->id,
-                            'type_slug' => 'for-purchase-order',
-                            'vendor_id' => $purchaseOrder->vendor_id,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
-                        ];
+                        if($purchaseOrder->is_client_order == true){
+                            $mailInfoData = [
+                                'user_id' => Auth::user()->id,
+                                'type_slug' => 'for-purchase-order',
+                                'client_id' => $purchaseOrder->client_id,
+                                'created_at' => Carbon::now(),
+                                'updated_at' => Carbon::now()
+                            ];
+                        }else{
+                            $mailInfoData = [
+                                'user_id' => Auth::user()->id,
+                                'type_slug' => 'for-purchase-order',
+                                'vendor_id' => $purchaseOrder->vendor_id,
+                                'created_at' => Carbon::now(),
+                                'updated_at' => Carbon::now()
+                            ];
+                        }
+
                         PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
                         unlink($pdfUploadPath);
                     }

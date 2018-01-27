@@ -7,11 +7,14 @@
 ?>
 
 <div class="form-body">
+    {!! csrf_field() !!}
+    <input type="hidden" id="minQuantity" value="{{$purchaseOrderComponentData['transaction_quantity']}}">
     <div class="form-group">
         <div class="col-md-3">
             <label class="pull-right control-label"> Name :</label>
         </div>
         <div class="col-md-6">
+            <input type="hidden" name="purchase_order_component_id" value="{{$purchaseOrderComponentData['purchase_order_component_id']}}">
             <input type="text" class="form-control" value="{{$purchaseOrderComponentData['name']}}" readonly>
         </div>
     </div>
@@ -28,7 +31,7 @@
             <label class="pull-right control-label"> Quantity :</label>
         </div>
         <div class="col-md-6">
-            <input type="text" class="form-control" value="{{$purchaseOrderComponentData['quantity']}}" readonly>
+            <input type="text" class="form-control quantity" name="quantity" value="{{$purchaseOrderComponentData['quantity']}}">
         </div>
     </div>
     <div class="form-group">
@@ -152,4 +155,9 @@
             </div>
         </div>
     @endif
+    <div class="form-group">
+        <div class="col-md-offset-3 col-md-3">
+            <a class="btn red" href="javascript:void(0)" onclick="submitComponentForm()">Submit</a>
+        </div>
+    </div>
 </div>

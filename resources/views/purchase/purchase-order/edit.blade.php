@@ -75,7 +75,11 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label style="color: darkblue;">Vendor Name</label>
+                                                            @if($purchaseOrderList['is_client_order'] == true)
+                                                                <label style="color: darkblue;">Client Name</label>
+                                                            @else
+                                                                <label style="color: darkblue;">Vendor Name</label>
+                                                            @endif
                                                             <input type="text" class="form-control" name="client_name"  value="{{$purchaseOrderList['vendor_name']}}" readonly tabindex="-1">
                                                         </div>
                                                     </div>
@@ -88,14 +92,16 @@
                                             <!-- BEGIN VALIDATION STATES-->
                                             <div class="portlet light ">
                                                 <div class="portlet-body">
-                                                    <ul class="nav nav-tabs nav-tabs-lg">
-                                                        <li class="active">
-                                                            <a href="#generalInfoTab" data-toggle="tab"> General Information </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="#advancePaymentTab" data-toggle="tab"> Advance Payment </a>
-                                                        </li>
-                                                    </ul>
+                                                    @if($purchaseOrderList['is_client_order'] == false)
+                                                        <ul class="nav nav-tabs nav-tabs-lg">
+                                                            <li class="active">
+                                                                <a href="#generalInfoTab" data-toggle="tab"> General Information </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#advancePaymentTab" data-toggle="tab"> Advance Payment </a>
+                                                            </li>
+                                                        </ul>
+                                                    @endif
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="generalInfoTab">
                                                             <div class="table-container">
@@ -227,7 +233,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form role="form" class="form-horizontal" method="post">
+                                                    <form role="form" class="form-horizontal" id="PurchaseOrderComponentEditForm" method="post" action="/purchase/purchase-order/edit/{{$purchaseOrderList['purchase_order_id']}}">
 
                                                     </form>
                                                 </div>
@@ -471,6 +477,7 @@
     </style>
     <script>
         $(document).ready(function(){
+            EditPurchaseOrder.init();
             $("#componentSelectButton").on('click',function(){
                 if($(".component-select:checkbox:checked").length > 0){
                     var componentIds = [];
@@ -609,5 +616,24 @@
                 });
             });
         });
+
+        function submitComponentForm(){
+            var minQuantity = $("#ImageUpload .modal-body #minQuantity").val();
+            var quantity = $("#ImageUpload .modal-body .quantity").val();
+            if($.isNumeric(quantity) == true){
+                minQuantity = parseFloat(minQuantity);
+                quantity = parseFloat(quantity);
+                if(minQuantity > quantity){
+                    $("#ImageUpload .modal-body .quantity").closest('.form-group').addClass('has-error').removeClass('has-success');
+                    alert('Minimum allowed quantity is '+ minQuantity);
+                }else{
+                    $("#ImageUpload .modal-body .quantity").closest('.form-group').removeClass('has-error').addClass('has-success');
+                    $("#PurchaseOrderComponentEditForm").submit();
+                }
+            }else{
+                $("#ImageUpload .modal-body .quantity").closest('.form-group').addClass('has-error').removeClass('has-success');
+                alert('Please Enter digit only.');
+            }
+        }
     </script>
 @endsection
