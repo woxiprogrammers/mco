@@ -18,6 +18,7 @@ use App\PurchaseRequestComponentStatuses;
 use App\PurchaseRequestComponentVendorMailInfo;
 use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
+use App\QuotationMaterial;
 use App\QuotationStatus;
 use App\Role;
 use App\Unit;
@@ -106,6 +107,11 @@ class PurchaseRequestController extends Controller
                                                                             ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
                                                                             ->where('material_request_components.id',$materialRequestComponent->id)
                                                                             ->pluck('purchase_request_component_vendor_relation.vendor_id')->toArray();
+                    $assignedClientData[$materialRequestComponent->id] = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                                                                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                                                                            ->where('material_request_components.id',$materialRequestComponent->id)
+                                                                            ->whereNotNull('purchase_request_component_vendor_relation.client_id')
+                                                                            ->pluck('purchase_request_component_vendor_relation.client_id')->toArray();
                     if($materialRequestComponentID == $materialRequestComponent->component_type_id){
                         $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id')->first();
                         $vendorAssignedIds = VendorMaterialRelation::where('material_id',$material_id)->pluck('vendor_id');
@@ -114,12 +120,20 @@ class PurchaseRequestController extends Controller
                         }else{
                             $materialRequestComponentDetails[$iterator]['vendors'] = $allVendors;
                         }
+                        $isClientSupplied = QuotationMaterial::where('quotation_id',$purchaseRequest->quotation_id)->where('material_id',$material_id)->where('is_client_supplied', true)->first();
+                        if($isClientSupplied != null){
+                            $materialRequestComponentDetails[$iterator]['vendors'] = array_merge($materialRequestComponentDetails[$iterator]['vendors'],[[
+                                'id' => $purchaseRequest->projectSite->project->client_id,
+                                'company' => $purchaseRequest->projectSite->project->client->company,
+                                'is_client' => true
+                            ]]);
+                        }
                     }else{
                         $materialRequestComponentDetails[$iterator]['vendors'] = $allVendors;
                     }
                     $iterator++;
                 }
-                return view('purchase/purchase-request/edit-approved')->with(compact('purchaseRequest','materialRequestComponentDetails','userRole','assignedVendorData'));
+                return view('purchase/purchase-request/edit-approved')->with(compact('purchaseRequest','materialRequestComponentDetails','userRole','assignedVendorData','assignedClientData'));
             }else{
                 return view('purchase/purchase-request/edit-draft');
             }
@@ -515,56 +529,114 @@ class PurchaseRequestController extends Controller
         try{
             $data = $request->all();
             foreach($data['vendor_materials'] as $vendorId => $materialRequestComponentIds){
-                $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
-                PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
-                if(array_key_exists('checked_vendor_materials',$data)){
-                    if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
-                        $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
-                        $vendorInfo['materials'] = array();
-                    }
-                }
-                $purchaseVendorAssignData = array();
-                $purchaseVendorAssignData['vendor_id'] = $vendorId;
-                $iterator = 0;
-                $jIterator = 0;
-                $mailInfoData = array();
-                foreach($materialRequestComponentIds as $materialRequestComponentId){
-                    $materialRequestComponent = MaterialRequestComponents::findOrFail($materialRequestComponentId);
-                    $purchaseVendorAssignData['is_email_sent'] = false;
-                    $purchaseVendorAssignData['purchase_request_component_id'] = $materialRequestComponent->purchaseRequestComponent->id;
-                    // create
-                    $purchaseComponentVendorRelation = PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->where('purchase_request_component_id',$purchaseVendorAssignData['purchase_request_component_id'])->first();
-                    if($purchaseComponentVendorRelation == null){
-                        $purchaseComponentVendorRelation = PurchaseRequestComponentVendorRelation::create($purchaseVendorAssignData);
-                    }
-                    $projectSiteInfo = array();
-                    $projectSiteInfo['project_name'] = $materialRequestComponent->materialRequest->projectSite->project->name;
-                    $projectSiteInfo['project_site_name'] = $materialRequestComponent->materialRequest->projectSite->name;
-                    $projectSiteInfo['project_site_address'] = $materialRequestComponent->materialRequest->projectSite->address;
-                    if($materialRequestComponent->materialRequest->projectSite->city_id == null){
-                        $projectSiteInfo['project_site_city'] = '';
-                    }else{
-                        $projectSiteInfo['project_site_city'] = $materialRequestComponent->materialRequest->projectSite->city->name;
-                    }
+                $vendorIdArray = explode('_',$vendorId);
+                if(count($vendorIdArray) == 2){
+                    /*client Supplied*/
+                    $clientId = $vendorIdArray[1];
+                    $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
+                    PurchaseRequestComponentVendorRelation::where('client_id',$clientId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
                     if(array_key_exists('checked_vendor_materials',$data)){
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
-                            $mailInfoData[$jIterator] = [
-                                'user_id' => Auth::user()->id,
-                                'type_slug' => 'for-quotation',
-                                'vendor_id' => $vendorId,
-                                'created_at' => Carbon::now(),
-                                'updated_at' => Carbon::now()
-                            ];
-                            if(in_array($materialRequestComponentId,$data['checked_vendor_materials'][$vendorId])){
-                                $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
-                                $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
-                                $vendorInfo['materials'][$iterator]['unit'] = $materialRequestComponent->unit->name;
-                                $iterator++;
-                                $jIterator++;
+                            $vendorInfo = Client::findOrFail($clientId)->toArray();
+                            $vendorInfo['materials'] = array();
+                        }
+                    }
+                    $purchaseVendorAssignData = array();
+                    $purchaseVendorAssignData['client_id'] = $clientId;
+                    $purchaseVendorAssignData['is_client'] = true;
+                    $iterator = 0;
+                    $jIterator = 0;
+                    $mailInfoData = array();
+                    foreach($materialRequestComponentIds as $materialRequestComponentId){
+                        $materialRequestComponent = MaterialRequestComponents::findOrFail($materialRequestComponentId);
+                        $purchaseVendorAssignData['is_email_sent'] = false;
+                        $purchaseVendorAssignData['purchase_request_component_id'] = $materialRequestComponent->purchaseRequestComponent->id;
+                        // create
+                        $purchaseComponentVendorRelation = PurchaseRequestComponentVendorRelation::where('client_id',$clientId)->where('is_client', true)->where('purchase_request_component_id',$purchaseVendorAssignData['purchase_request_component_id'])->first();
+                        if($purchaseComponentVendorRelation == null){
+                            $purchaseComponentVendorRelation = PurchaseRequestComponentVendorRelation::create($purchaseVendorAssignData);
+                        }
+                        $projectSiteInfo = array();
+                        $projectSiteInfo['project_name'] = $materialRequestComponent->materialRequest->projectSite->project->name;
+                        $projectSiteInfo['project_site_name'] = $materialRequestComponent->materialRequest->projectSite->name;
+                        $projectSiteInfo['project_site_address'] = $materialRequestComponent->materialRequest->projectSite->address;
+                        if($materialRequestComponent->materialRequest->projectSite->city_id == null){
+                            $projectSiteInfo['project_site_city'] = '';
+                        }else{
+                            $projectSiteInfo['project_site_city'] = $materialRequestComponent->materialRequest->projectSite->city->name;
+                        }
+                        if(array_key_exists('checked_vendor_materials',$data)){
+                            if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
+                                $mailInfoData[$jIterator] = [
+                                    'user_id' => Auth::user()->id,
+                                    'type_slug' => 'for-quotation',
+                                    'is_client' => true,
+                                    'client_id' => $clientId,
+                                    'created_at' => Carbon::now(),
+                                    'updated_at' => Carbon::now()
+                                ];
+                                if(in_array($materialRequestComponentId,$data['checked_vendor_materials'][$vendorId])){
+                                    $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
+                                    $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
+                                    $vendorInfo['materials'][$iterator]['unit'] = $materialRequestComponent->unit->name;
+                                    $iterator++;
+                                    $jIterator++;
+                                }
                             }
                         }
                     }
-
+                }else{
+                    $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
+                    PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
+                    if(array_key_exists('checked_vendor_materials',$data)){
+                        if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
+                            $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
+                            $vendorInfo['materials'] = array();
+                        }
+                    }
+                    $purchaseVendorAssignData = array();
+                    $purchaseVendorAssignData['vendor_id'] = $vendorId;
+                    $iterator = 0;
+                    $jIterator = 0;
+                    $mailInfoData = array();
+                    foreach($materialRequestComponentIds as $materialRequestComponentId){
+                        $materialRequestComponent = MaterialRequestComponents::findOrFail($materialRequestComponentId);
+                        $purchaseVendorAssignData['is_email_sent'] = false;
+                        $purchaseVendorAssignData['purchase_request_component_id'] = $materialRequestComponent->purchaseRequestComponent->id;
+                        // create
+                        $purchaseComponentVendorRelation = PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->where('purchase_request_component_id',$purchaseVendorAssignData['purchase_request_component_id'])->first();
+                        if($purchaseComponentVendorRelation == null){
+                            $purchaseComponentVendorRelation = PurchaseRequestComponentVendorRelation::create($purchaseVendorAssignData);
+                        }
+                        $projectSiteInfo = array();
+                        $projectSiteInfo['project_name'] = $materialRequestComponent->materialRequest->projectSite->project->name;
+                        $projectSiteInfo['project_site_name'] = $materialRequestComponent->materialRequest->projectSite->name;
+                        $projectSiteInfo['project_site_address'] = $materialRequestComponent->materialRequest->projectSite->address;
+                        if($materialRequestComponent->materialRequest->projectSite->city_id == null){
+                            $projectSiteInfo['project_site_city'] = '';
+                        }else{
+                            $projectSiteInfo['project_site_city'] = $materialRequestComponent->materialRequest->projectSite->city->name;
+                        }
+                        if(array_key_exists('checked_vendor_materials',$data)){
+                            if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
+                                $mailInfoData[$jIterator] = [
+                                    'user_id' => Auth::user()->id,
+                                    'type_slug' => 'for-quotation',
+                                    'vendor_id' => $vendorId,
+                                    'is_client' => false,
+                                    'created_at' => Carbon::now(),
+                                    'updated_at' => Carbon::now()
+                                ];
+                                if(in_array($materialRequestComponentId,$data['checked_vendor_materials'][$vendorId])){
+                                    $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
+                                    $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
+                                    $vendorInfo['materials'][$iterator]['unit'] = $materialRequestComponent->unit->name;
+                                    $iterator++;
+                                    $jIterator++;
+                                }
+                            }
+                        }
+                    }
                 }
                 if(isset($vendorInfo)){
                     $pdf = App::make('dompdf.wrapper');
@@ -594,7 +666,6 @@ class PurchaseRequestController extends Controller
                     }else{
                         return $pdf->stream();
                     }
-
                 }
             }
             $request->session()->flash('success','Vendors assigned successfully');

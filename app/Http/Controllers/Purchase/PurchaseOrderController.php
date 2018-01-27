@@ -345,7 +345,11 @@ class PurchaseOrderController extends Controller
             $purchaseOrder =PurchaseOrder::where('id',$id)->first();
             $purchaseOrderList = array();
             $iterator = 0;
-            $vendorName = $purchaseOrder->vendor->company;
+            if($purchaseOrder->is_client_order == true){
+                $vendorName = $purchaseOrder->client->company;
+            }else{
+                $vendorName = $purchaseOrder->vendor->company;
+            }
             if(($purchaseOrder) != null){
                     $purchaseOrderList['purchase_order_id'] = $purchaseOrder['id'];
                     $projectSite = $purchaseOrder->purchaseRequest->projectSite;
@@ -356,8 +360,15 @@ class PurchaseOrderController extends Controller
                     $project = $projectSite->project;
                     $purchaseOrderList['client_name'] = $project->client->company;
                     $purchaseOrderList['project'] = $project->name.'  '.'-'.'  '.$projectSite->name;
-                    $purchaseOrderList['vendor_name'] = $purchaseOrder->vendor->name;
-                    $purchaseOrderList['vendor_id'] = $purchaseOrder->vendor->id;
+                    if($purchaseOrder->is_client_order == true){
+                        $purchaseOrderList['vendor_name'] = $purchaseOrder->client->company;
+                        $purchaseOrderList['vendor_id'] = $purchaseOrder->client->id;
+                        $purchaseOrderList['is_client_order'] = true;
+                    }else{
+                        $purchaseOrderList['vendor_name'] = $purchaseOrder->vendor->company;
+                        $purchaseOrderList['vendor_id'] = $purchaseOrder->vendor->id;
+                        $purchaseOrderList['is_client_order'] = false;
+                    }
                     $purchaseOrderList['total_advance_amount'] = $purchaseOrder->total_advance_amount;
                     $purchaseOrderList['balance_advance_amount'] = $purchaseOrder->balance_advance_amount;
                     $purchaseOrderList['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
@@ -432,7 +443,11 @@ class PurchaseOrderController extends Controller
         try{
             $data = $request->all();
             $purchaseOrderComponent = PurchaseOrderComponent::where('id',$data['component_id'])->first();
-            $vendorName = $purchaseOrderComponent->purchaseOrder->vendor->name;
+            if($purchaseOrderComponent->purchaseOrder->is_client_order == true){
+                $vendorName = $purchaseOrderComponent->purchaseOrder->client->company;
+            }else{
+                $vendorName = $purchaseOrderComponent->purchaseOrder->vendor->name;
+            }
             $purchaseOrderComponentData['purchase_order_component_id'] = $purchaseOrderComponent['id'];
             $purchaseOrderComponentData['hsn_code'] = $purchaseOrderComponent['hsn_code'];
             $purchaseOrderComponentData['rate_per_unit'] = $purchaseOrderComponent['rate_per_unit'];

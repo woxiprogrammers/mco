@@ -8,7 +8,7 @@ class PurchaseRequestComponentVendorRelation extends Model
 {
     protected $table = 'purchase_request_component_vendor_relation';
 
-    protected $fillable = ['purchase_request_component_id','vendor_id','is_email_sent'];
+    protected $fillable = ['purchase_request_component_id','vendor_id','is_email_sent','client_id','is_client'];
 
     public function mailInfo(){
         return $this->hasMany('App\PurchaseRequestComponentVendorMailInfo','purchase_request_component_vendor_relation_id');
@@ -20,5 +20,9 @@ class PurchaseRequestComponentVendorRelation extends Model
 
     public function purchaseRequestComponent(){
         return $this->belongsTo('App\PurchaseRequestComponent','purchase_request_component_id');
+    }
+
+    public function client(){
+        return $this->belongsTo('App\Client','client_id');
     }
 }
