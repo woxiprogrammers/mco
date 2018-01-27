@@ -238,7 +238,7 @@
                     @if($hasPurchasePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Purchase
-                            <span class="arrow"></span>
+                            <span class="badge badge-success">6</span>
                         </a>
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
