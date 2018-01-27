@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AssetMaintenance extends Model
 {
-    protected $table = 'assets';
+    protected $table = 'asset_maintenance';
 
     protected $fillable = ['asset_id','project_site_id', 'asset_maintenance_status_id', 'user_id', 'remark'];
 
