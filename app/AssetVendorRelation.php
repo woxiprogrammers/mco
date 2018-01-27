@@ -11,10 +11,10 @@ class AssetVendorRelation extends Model
     protected $fillable = ['asset_id','vendor_id'];
 
     public function vendor(){
-        return $this->belongsTo('App/Vendor','vendor_id');
+        return $this->belongsTo('App\Vendor','vendor_id');
     }
 
     public function asset(){
-        return $this->belongsTo('App/Asset','asset_id');
+        return $this->belongsTo('App\Asset','asset_id');
     }
 }

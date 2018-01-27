@@ -279,9 +279,9 @@
                                                             <input type="text" class="form-control empty typeahead" id="vendorList" name="vendorList" placeholder="Enter vendor name">
                                                         </div>
                                                     </div>
-                                                    <div class="row"  style="margin-top: 2%" hidden>
+                                                    <div class="row"  style="margin-top: 2%">
                                                         <div class="col-md-3">
-                                                            <a class="btn blue pull-right" id="removeButton" >Remove Project Site</a>
+                                                            <a class="btn blue pull-right" id="removeButton" >Remove</a>
                                                         </div>
                                                     </div>
                                                     <div class="row"  style="margin-top: 0.5%">
@@ -289,36 +289,30 @@
                                                             <form role="form" id="assignVendorForm" action="/asset/vendor/assign/{{$asset['id']}}" method="POST">
                                                                 {{csrf_field()}}
                                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assignVendorTable">
-                                                            <thead>
-                                                            <tr>
-                                                                <th style="width: 10%;">Remove</th>
-                                                                <th> Vendor Information</th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                            {{--@foreach($vendorsAssigned as $vendor)
-                                                            dd($vendor);
-                                                                <tr>
-                                                                    <td style="width: 10%;">
-                                                                        <input type="checkbox" class="project-row-checkbox">
-                                                                    </td>
-                                                                    <td>
-                                                                        <input name="project_sites[]" type="hidden" value="{{$vendor['id']}}">
-                                                                        <div class="row">
-                                                                            <div class="col-md-3">
-                                                                                <label class="control-label pull-right">
-                                                                                    <b>Name</b>
-                                                                                </label>
-                                                                            </div>
-                                                                            <div class="col-md-9"  style="text-align: left">
-                                                                                <label class="control-label">{{$vendor['name']}}</label>
-                                                                            </div>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach--}}
-                                                            </tbody>
-                                                        </table>
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th style="width: 10%;">Remove</th>
+                                                                        <th> Vendor Information</th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach($vendorsAssigned as $vendor)
+                                                                            <tr>
+                                                                                <td style="width: 10%;">
+                                                                                    <input type="checkbox" class="vendor-row-checkbox">
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input name="vendors[]" type="hidden" value="{{$vendor['vendor_id']}}">
+                                                                                    <div class="row">
+                                                                                        <div class="col-md-9"  style="text-align: left">
+                                                                                            <label class="control-label">{{$vendor->vendor->name}}</label>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                </table>
                                                                 <div class="form-actions noborder row">
                                                                     <div class="col-md-offset-3" style="margin-left: 26%">
                                                                         <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
@@ -372,6 +366,7 @@
                     return $.map(x, function (data) {
                         return {
                             vendorList:data.name,
+                            tr_view:data.tr_view
                         };
                     });
                 },
@@ -396,14 +391,17 @@
             var POData = $.parseJSON(JSON.stringify(datum));
             var trString = '<tr>' +
                 '           <th style="width: 10%;"><input type="checkbox" class="vendor-row-checkbox"></th>\n' +
-                '           <th>'+POData.vendorList+'</th></tr>';
+                '           <th>'+POData.tr_view+'</th></tr>';
             $("#assignVendorTable tbody").append(trString);
             $("#removeButton").closest('.row').show();
             $("#assignVendorTable").show();
         }).on('typeahead:open', function (obj, datum) {
 
         });
+
         $('select[name="maintenance_period_type"]').find('option[value={{$maintenancePeriodType}}]').attr("selected",true);
+
+
         $(document).ready(function(){
 
             $("#removeButton").on('click',function(){

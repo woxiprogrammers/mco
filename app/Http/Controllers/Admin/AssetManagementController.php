@@ -268,7 +268,6 @@ use InventoryTrait;
         }
     }
 
-
     public function uploadTempAssetImages(Request $request){
         try {
             $user = Auth::user();
@@ -491,8 +490,21 @@ use InventoryTrait;
 
     public function getVendorAutoSuggest(Request $request,$keyword){
         try{
-            $vendorList = array();
             $vendorList = Vendor::where('name','ilike','%'.$keyword.'%')->where('is_active',true)->select('id','name')->get();
+            $response = array();
+            if(count($vendorList) > 0){
+                $response = $vendorList->toArray();
+                $iterator = 0;
+                foreach($response as $vendorList){
+                    $response[$iterator]['tr_view'] = '<input name="vendors[]" type="hidden" value="'.$vendorList['id'].'">
+                                                        <div class="row">
+                                                            <div class="col-md-9"  style="text-align: left">
+                                                                <label class="control-label">'.$vendorList['name'].'</label>
+                                                            </div>
+                                                        </div>';
+                    $iterator++;
+                }
+            }
         }catch(\Exception $e){
             $vendorList = array();
             $data = [
@@ -503,12 +515,33 @@ use InventoryTrait;
             Log::critical(json_encode($data));
             abort(500);
         }
-        return response($vendorList,200);
+        return response($response,200);
     }
 
     public function assignVendors(Request $request,$asset){
         try{
-            dd($request->all());
+            if($request->has('vendors')){
+                $assetVendorRelationData = array();
+                foreach($request->vendors as $vendorID){
+                    $check = AssetVendorRelation::where('vendor_id',$vendorID)->where('asset_id',$asset->id)->first();
+                    if($check == null){
+                        $assetVendorRelationData['vendor_id'] = $vendorID;
+                        $assetVendorRelationData['asset_id'] = $asset->id;
+                        AssetVendorRelation::create($assetVendorRelationData);
+                    }
+                }
+                $assetVendors = AssetVendorRelation::where('asset_id',$asset->id)->whereNotIn('vendor_id',$request->vendors)->get();
+                foreach ($assetVendors as $assetVendor){
+                    $assetVendor->delete();
+                }
+            }else{
+                $assetVendors = AssetVendorRelation::where('asset_id',$asset->id)->get();
+                foreach ($assetVendors as $assetVendor){
+                    $assetVendor->delete();
+                }
+            }
+            $request->session()->flash('success', 'Vendors assigned to asset successfully.');
+            return redirect('/asset/edit/'.$asset->id);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Assign Vendor',
