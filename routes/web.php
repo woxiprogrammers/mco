@@ -268,6 +268,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
             Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
             Route::get('edit/{id}',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));
+            Route::post('edit/{purchaseOrder}', array('uses' => 'Purchase\PurchaseOrderController@editPurchaseOrder'));
             Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getListing'));
             Route::post('get-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderComponentDetails'));
             //Route::post('get-bill-details',array('uses'=> 'Purchase\PurchaseOrderController@getPurchaseOrderBillDetails'));
