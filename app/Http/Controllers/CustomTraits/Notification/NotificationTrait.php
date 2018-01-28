@@ -16,6 +16,7 @@ use LaravelFCM\Message\PayloadNotificationBuilder;
 trait NotificationTrait{
     public function sendPushNotification($title,$body,$tokens){
         try{
+            Log::info('in send push notification');
             $optionBuilder = new OptionsBuilder();
             $optionBuilder->setTimeToLive(60*20);
             $notificationBuilder = new PayloadNotificationBuilder($title);

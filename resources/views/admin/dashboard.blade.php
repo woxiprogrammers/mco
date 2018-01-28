@@ -34,7 +34,7 @@
                 <!-- END PAGE BREADCRUMBS -->
                 <!-- BEGIN PAGE CONTENT INNER -->
                 <div class="page-content-inner">
-                    <div class="row">
+                    {{--<div class="row">
                         <fieldset>
                             <legend>
                                 <label style="margin-left: 1%">
@@ -187,7 +187,7 @@
                                 </div>
                             </div>
                         </fieldset>
-                    </div>
+                    </div>--}}
                     <div class="row" style="margin-top: 3%">
                         <div class="col-md-4">
                             {!! $quotationStatus->render() !!}

@@ -5,7 +5,6 @@ use App\Asset;
 use App\Client;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
-use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
@@ -798,12 +797,13 @@ class PurchaseController extends Controller
                                         ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                                         ->where('material_request_components.id', $componentId)
                                         ->select('users.mobile_fcm_token','users.web_fcm_token')
-                                        ->first();
+                                        ->get()
+                                        ->toArray();
                         $tokens = array_merge(array_column($userTokens,'web_fcm_token'), array_column($userTokens,'mobile_fcm_token'));
                         $notificationString = '1D -'.$materialRequestComponent->materialRequest->projectSite->project->name.' '.$materialRequestComponent->materialRequest->projectSite->name;
                         $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Material Disapproved.';
                         $notificationString .= ' '.$remark;
-                        $this->sendPushNotification('',$notificationString,$tokens);
+                        $this->sendPushNotification('Manisha Construction',$notificationString,$tokens);
                     }
                     break;
 

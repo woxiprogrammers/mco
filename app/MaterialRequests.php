@@ -17,4 +17,20 @@ class MaterialRequests extends Model
     public function materialRequestComponents(){
         return $this->hasMany('App\MaterialRequestComponents','material_request_id');
     }
+
+    public function onBehalfOf(){
+        return $this->belongsTo('App\User','on_behalf_of');
+    }
+
+    public function assignedToUser(){
+        return $this->belongsTo('App\User','assigned_to');
+    }
+
+    public function user(){
+        return $this->belongsTo('App\User','user_id');
+    }
+
+    public function quotation(){
+        return $this->belongsTo('App\Quotation','quotation_id');
+    }
 }
