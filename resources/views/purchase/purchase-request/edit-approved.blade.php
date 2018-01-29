@@ -120,10 +120,19 @@
                                                                             <div>
                                                                                 <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
                                                                                     @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
-                                                                                        @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedVendorData[$materialRequestComponentDetails[$iterator]['id']]))
-                                                                                            <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                        @if(array_key_exists('is_client',$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]) && $materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['is_client'] == true)
+
+                                                                                            @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedClientData[$materialRequestComponentDetails[$iterator]['id']]))
+                                                                                                <option value="client_{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @else
+                                                                                                <option value="client_{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @endif
                                                                                         @else
-                                                                                            <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedVendorData[$materialRequestComponentDetails[$iterator]['id']]))
+                                                                                                <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @else
+                                                                                                <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @endif
                                                                                         @endif
                                                                                     @endfor
                                                                                 </select>

@@ -12,6 +12,7 @@
             <div class="col-md-2">
                 <label class="control-label pull-right">Category :</label>
             </div>
+            <input type="hidden" name="is_client" value="{{$purchaseRequestComponentData['is_client']}}">
             <div class="col-md-6">
                 <select class="form-control" name="category_id">
                     @foreach($purchaseRequestComponentData['categories'] as $category)
@@ -35,7 +36,11 @@
                 <label class="control-label pull-right">Quantity</label>
             </div>
             <div class="col-md-6">
-                <input type="text" class="form-control tax-modal-quantity" name="quantity" value="{{$purchaseRequestComponentData['quantity']}}" onkeyup="calculateTaxes(this)">
+                @if($purchaseRequestComponentData['is_client'] == true)
+                    <input type="text" class="form-control tax-modal-quantity" name="quantity" value="{{$purchaseRequestComponentData['quantity']}}" onkeyup="calculateTaxes(this)" readonly>
+                @else
+                    <input type="text" class="form-control tax-modal-quantity" name="quantity" value="{{$purchaseRequestComponentData['quantity']}}" onkeyup="calculateTaxes(this)">
+                @endif
             </div>
         </div>
         <div class="row form-group">
@@ -51,7 +56,11 @@
                 <label class="control-label pull-right">Rate</label>
             </div>
             <div class="col-md-6">
-                <input type="text" class="form-control tax-modal-rate" name="rate_per_unit" value="{{$purchaseRequestComponentData['rate']}}" onkeyup="calculateTaxes(this)">
+                @if($purchaseRequestComponentData['is_client'] == true)
+                    <input type="text" class="form-control tax-modal-rate" name="rate_per_unit" value="{{$purchaseRequestComponentData['rate']}}" onkeyup="calculateTaxes(this)" readonly>
+                @else
+                    <input type="text" class="form-control tax-modal-rate" name="rate_per_unit" value="{{$purchaseRequestComponentData['rate']}}" onkeyup="calculateTaxes(this)">
+                @endif
             </div>
         </div>
         <div class="row form-group">
@@ -67,7 +76,11 @@
                 <label class="control-label pull-right">HSN Code :</label>
             </div>
             <div class="col-md-6">
-                <input type="text" class="form-control tax-modal-hsn-code" value="{{$purchaseRequestComponentData['hsn_code']}}" name="hsn_code">
+                @if($purchaseRequestComponentData['is_client'] == true)
+                    <input type="text" class="form-control tax-modal-hsn-code" value="{{$purchaseRequestComponentData['hsn_code']}}" name="hsn_code" readonly>
+                @else
+                    <input type="text" class="form-control tax-modal-hsn-code" value="{{$purchaseRequestComponentData['hsn_code']}}" name="hsn_code">
+                @endif
             </div>
         </div>
         <div class="row form-group">
@@ -76,7 +89,11 @@
             </div>
             <div class="col-md-5">
                 <div class="input-group" >
-                    <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage" value="0" onkeyup="calculateTaxes(this)">
+                    @if($purchaseRequestComponentData['is_client'] == true)
+                        <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage" value="0" onkeyup="calculateTaxes(this)" readonly>
+                    @else
+                        <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage" value="0" onkeyup="calculateTaxes(this)">
+                    @endif
                     <span class="input-group-addon">%</span>
                 </div>
             </div>
@@ -90,7 +107,11 @@
             </div>
             <div class="col-md-5">
                 <div class="input-group" >
-                    <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage" value="0" onkeyup="calculateTaxes(this)">
+                    @if($purchaseRequestComponentData['is_client'] == true)
+                        <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage" value="0" onkeyup="calculateTaxes(this)" readonly>
+                    @else
+                        <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage" value="0" onkeyup="calculateTaxes(this)">
+                    @endif
                     <span class="input-group-addon">%</span>
                 </div>
             </div>
@@ -104,7 +125,11 @@
             </div>
             <div class="col-md-5">
                 <div class="input-group" >
-                    <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage" value="0" onkeyup="calculateTaxes(this)">
+                    @if($purchaseRequestComponentData['is_client'] == true)
+                        <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage" value="0" onkeyup="calculateTaxes(this)" readonly>
+                    @else
+                        <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage" value="0" onkeyup="calculateTaxes(this)">
+                    @endif
                     <span class="input-group-addon">%</span>
                 </div>
             </div>

@@ -56,9 +56,23 @@ class VendorMailController extends Controller
                     default:
                         $slug = '';
                 }
+
+                if($vendorMailData[$pagination]['is_client'] == true){
+                    if($vendorMailData[$pagination]['client_id'] == null){
+                        $name = '';
+                    }else{
+                        $name = $vendorMailData[$pagination]->client->company;
+                    }
+                }else{
+                    if($vendorMailData[$pagination]['vendor_id'] == null){
+                        $name = '';
+                    }else{
+                        $name = $vendorMailData[$pagination]->vendor->company;
+                    }
+                }
                 $records['data'][] = [
-                    ($iterator+1),
-                    $vendorMailData[$pagination]->componentVendorRelation->vendor->name,
+                    ($pagination+1),
+                    $name,
                     $slug
                 ];
             }
