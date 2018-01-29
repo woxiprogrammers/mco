@@ -388,6 +388,21 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
         Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkModel'));
         Route::get('change-status/{asset}',array('uses' => 'Admin\AssetManagementController@changeAssetStatus'));
+        Route::group(['prefix' => 'vendor'], function(){
+            Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\AssetManagementController@getVendorAutoSuggest'));
+            Route::post('assign/{asset}',array('uses' => 'Admin\AssetManagementController@assignVendors'));
+        });
+        Route::group(['prefix' => "maintenance"], function (){
+            Route::group(['prefix' => 'request'], function (){
+                Route::get('create',array('uses' => 'Admin\AssetMaintenanceController@getCreateView'));
+                Route::post('create',array('uses' => 'Admin\AssetMaintenanceController@createAssetMaintenanceRequest'));
+                Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\AssetMaintenanceController@autoSuggest'));
+                Route::post('image-upload',array('uses'=>'Admin\AssetMaintenanceController@uploadTempAssetMaintenanceImages'));
+                Route::post('display-images',array('uses'=>'Admin\AssetMaintenanceController@displayAssetMaintenanceImages'));
+                Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetMaintenanceController@removeAssetMaintenanceImage'));
+            });
+        });
+
     });
 
     Route::group(['prefix'=>'bank'],function() {

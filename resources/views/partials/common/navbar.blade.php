@@ -291,6 +291,11 @@
                                         <i class="fa fa-sitemap"></i> Site Transfer
                                     </a>
                                 </li>
+                                <li aria-haspopup="true">
+                                    <a href="/asset/maintenance/request/create" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Asset Maintenance
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     @endif
