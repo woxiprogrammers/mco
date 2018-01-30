@@ -24,7 +24,8 @@ class VerifyCsrfToken extends BaseVerifier
         '/subcontractor/subcontractor-structure/listing','/awareness/file-management/file-upload','/awareness/file-management/get-files','/awareness/category-management/main-category-listing','/awareness/file-management/get-subcategories',
         '/awareness/file-management/get-subcategories-details','/checklist/category-management/change-status/*','/drawing/images/get-projects/','/drawing/images/get-project-sites/','/drawing/images/get-sub-categories/','/drawing/images/display-images/*','/drawing/images/delete-temp-product-image/'
         ,'/drawing/images/get-data/','/drawing/images/get-versions/','/awareness/file-management/get-subcategories-details','/checklist/category-management/change-status/*','/drawing/images/get-projects/','/drawing/images/get-project-sites/','/drawing/images/get-sub-categories/','/drawing/images/image-upload/*',
-        '/drawing/images/display-images/*','/drawing/images/delete-temp-product-image/','/drawing/images/get-data/','/user/get-permission','/peticash/salary-request/get-labours','/purchase/purchase-order/reopen','/change-project-site','/asset/maintenance/request/display-images','/asset/maintenance/request/delete-temp-product-image'
+        '/drawing/images/display-images/*','/drawing/images/delete-temp-product-image/','/drawing/images/get-data/','/user/get-permission','/peticash/salary-request/get-labours','/purchase/purchase-order/reopen','/change-project-site','/asset/maintenance/request/display-images','/asset/maintenance/request/delete-temp-product-image',
+        '/asset/maintenance/request/listing','/asset/maintenance/request/approval/listing'
 
     ];
 }
