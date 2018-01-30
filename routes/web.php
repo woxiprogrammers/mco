@@ -403,6 +403,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('image-upload',array('uses'=>'Admin\AssetMaintenanceController@uploadTempAssetMaintenanceImages'));
                 Route::post('display-images',array('uses'=>'Admin\AssetMaintenanceController@displayAssetMaintenanceImages'));
                 Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetMaintenanceController@removeAssetMaintenanceImage'));
+                Route::group(['prefix' => 'vendor'], function(){
+                    Route::get('auto-suggest/{keyword}/{assetMaintenanceId}',array('uses' => 'Admin\AssetMaintenanceController@getAssetVendorAutoSuggest'));
+                    Route::post('assign/{assetMaintenanceId}',array('uses' => 'Admin\AssetMaintenanceController@assetMaintenanceVendorAssign'));
+                });
                 Route::group(['prefix' => 'approval'], function (){
                     Route::post('change-status/{status}/{assetMaintenanceVendorID}',array('uses' => 'Admin\AssetMaintenanceController@changeMaintenanceRequestStatus'));
                     Route::get('manage',array('uses' => 'Admin\AssetMaintenanceController@getApprovalManageView'));
