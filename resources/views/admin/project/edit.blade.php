@@ -251,7 +251,7 @@
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/custom/admin/project/project.js" type="application/javascript"></script>
-<script src="/assets/custom/admin/project/project-site-advance-payment-datatable2.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/project/project-site-advance-payment-datatable.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
         EditProject.init();
