@@ -11,6 +11,7 @@ use App\Asset;
 use App\AssetMaintenance;
 use App\AssetMaintenanceImage;
 use App\AssetMaintenanceStatus;
+use App\AssetMaintenanceVendorRelation;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
@@ -154,6 +155,166 @@ class AssetMaintenanceController extends Controller{
             abort(500);
         }
         return response($assetList,200);
+    }
+
+    public function getManageView(Request $request){
+        try{
+            return view('asset-maintenance.request.manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get maintenance request manage view',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getMaintenanceRequestListing(Request $request){
+        try{
+            $projectSiteId = Session::get('global_project_site');
+            $listingData = AssetMaintenance::where('project_site_id',$projectSiteId)->get();
+            $status = 200;
+            $iTotalRecords = count($listingData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($listingData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    $listingData[$pagination]->asset->name,
+                    date('d M Y',strtotime($listingData[$pagination]['created_at'])),
+                    '<div class="btn btn-small blue">
+                                            <a href="/asset/maintenance/request/view/'.$listingData[$pagination]['id'].'" style="color: white"> 
+                                                View
+                                            </a>
+                                        </div>',
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $status = 500;
+            $data = [
+                'action' => 'Get maintenance request listing',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+        }
+        return response()->json($records,$status);
+    }
+
+    public function getDetailView(Request $request,$assetMaintenanceId){
+        try{
+            $assetMaintenance = AssetMaintenance::where('id',$assetMaintenanceId)->first();
+            return view('asset-maintenance.request.view')->with(compact('assetMaintenance'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Asset Maintenance Request View',
+                'exception' => $e->getMessage(),
+                'asset_maintenance_id' => $assetMaintenanceId
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getApprovalManageView(Request $request){
+        try{
+            return view('asset-maintenance.request.approval.manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Request Maintenance Approval Manage view',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getMaintenanceRequestApprovalListing(Request $request){
+        try{
+            $projectSiteId = Session::get('global_project_site');
+            $vendorAssignedAssetMaintenance = AssetMaintenanceVendorRelation::join('asset_maintenance','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
+                                                                            ->where('asset_maintenance.project_site_id',$projectSiteId)
+                                                                            ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','vendor-assigned')->pluck('id')->first())
+                                                                            ->select('asset_maintenance_vendor_relation.id','asset_maintenance_vendor_relation.asset_maintenance_id','asset_maintenance_vendor_relation.vendor_id','asset_maintenance_vendor_relation.quotation_amount','asset_maintenance_vendor_relation.user_id')
+                                                                            ->get();
+            $status = 200;
+            $iTotalRecords = count($vendorAssignedAssetMaintenance);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($vendorAssignedAssetMaintenance) : $request->length;
+
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($vendorAssignedAssetMaintenance); $iterator++,$pagination++ ){
+                $actionDropDown =  '<button class="btn btn-xs blue"> 
+                                            <form action="/asset/maintenance/request/approval/change-status/approve/'.$vendorAssignedAssetMaintenance[$pagination]->id.'" method="post">
+                                                <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: white">
+                                                     Approve 
+                                                </a>
+                                                <input type="hidden" name="_token">
+                                            </form> 
+                                        </button>
+                                        <button class="btn btn-xs default "> 
+                                            <form action="/asset/maintenance/request/approval/change-status/disapprove/'.$vendorAssignedAssetMaintenance[$pagination]->id.'" method="post">
+                                                <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: grey">
+                                                    Disapprove 
+                                                </a>
+                                                <input type="hidden" name="_token">
+                                            </form>
+                                        </button>';
+                $records['data'][$iterator] = [
+                    $vendorAssignedAssetMaintenance[$pagination]->assetMaintenance->asset->name,
+                    date('d M Y',strtotime($vendorAssignedAssetMaintenance[$pagination]->assetMaintenance['created_at'])),
+                    $vendorAssignedAssetMaintenance[$pagination]->vendor->name,
+                    $vendorAssignedAssetMaintenance[$pagination]->quotation_amount,
+                    $actionDropDown
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $status = 500;
+            $data =[
+                'action' => 'Get Request Maintenance Approval Manage view',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records,$status);
+    }
+
+    public function changeMaintenanceRequestStatus(Request $request,$status,$assetMaintenanceVendorID){
+        try{
+            $assetMaintenanceVendor = AssetMaintenanceVendorRelation::where('id',$assetMaintenanceVendorID)->first();
+            if($status == 'approve'){
+                $assetMaintenanceVendor->update(['is_approved' => true]);
+                if($assetMaintenanceVendor->assetMaintenance->assetMaintenanceStatus->slug != 'vendor-approved'){
+                    $vendorAssignedStatusId = AssetMaintenanceStatus::where('slug','vendor-approved')->pluck('id')->first();
+                    $assetMaintenanceVendor->assetMaintenance->update([
+                        'asset_maintenance_status_id' => $vendorAssignedStatusId
+                    ]);
+                }
+            }else{
+                $assetMaintenanceVendor->update(['is_approved' => false]);
+            }
+            return view('/asset/maintenance/request/approval/manage');
+        }catch(\Exception $e){
+            $data =[
+                'action' => 'Change Request Maintenance Vendor Status',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 
 }
