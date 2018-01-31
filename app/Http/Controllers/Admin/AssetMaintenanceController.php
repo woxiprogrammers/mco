@@ -13,6 +13,7 @@ use App\AssetMaintenanceImage;
 use App\AssetMaintenanceStatus;
 use App\AssetMaintenanceVendorRelation;
 use App\Http\Controllers\Controller;
+use App\Vendor;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -305,12 +306,77 @@ class AssetMaintenanceController extends Controller{
             }else{
                 $assetMaintenanceVendor->update(['is_approved' => false]);
             }
-            return view('/asset/maintenance/request/approval/manage');
+            return redirect('/asset/maintenance/request/approval/manage');
         }catch(\Exception $e){
             $data =[
                 'action' => 'Change Request Maintenance Vendor Status',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getAssetVendorAutoSuggest(Request $request,$keyword,$assetMaintenanceId){
+        try{
+            $assetMaintenance = AssetMaintenance::where('id',$assetMaintenanceId)->first();
+            $alreadyAssignedVendorId = $assetMaintenance->assetMaintenanceVendorRelation->pluck('vendor_id');
+            $vendorList = Vendor::join('asset_vendor_relation','asset_vendor_relation.vendor_id','=','vendors.id')
+                            ->where('asset_vendor_relation.asset_id',$assetMaintenance['asset_id'])
+                            ->whereNotIn('vendors.id',$alreadyAssignedVendorId)
+                            ->where('vendors.name','ilike','%'.$keyword.'%')->where('vendors.is_active',true)->select('vendors.id','vendors.name')->get();
+            $response = array();
+            if(count($vendorList) > 0){
+                $response = $vendorList->toArray();
+                $iterator = 0;
+                foreach($response as $vendorList){
+                    $response[$iterator]['vendor_id'] = $vendorList['id'];
+                    $response[$iterator]['tr_view'] = '<input name="vendors[]" type="hidden" value="'.$vendorList['id'].'">
+                                                        <div class="row">
+                                                            <div class="col-md-9"  style="text-align: left">
+                                                                <label class="control-label">'.$vendorList['name'].'</label>
+                                                            </div>
+                                                        </div>';
+                    $iterator++;
+                }
+            }
+        }catch(\Exception $e){
+            $response = array();
+            $data = [
+                'action' => 'Auto-Suggest Vendor',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response($response,200);
+    }
+
+    public function assetMaintenanceVendorAssign(Request $request,$assetMaintenanceId){
+        try{
+            $user = Auth::user();
+            if($request->has('vendor_data')){
+                foreach($request['vendor_data'] as $vendorId => $quotationAmount){
+                    AssetMaintenanceVendorRelation::create([
+                        'asset_maintenance_id' => $assetMaintenanceId,
+                        'vendor_id' => $vendorId,
+                        'quotation_amount' => $quotationAmount,
+                        'user_id' => $user['id']
+                    ]);
+                }
+                AssetMaintenance::where('id',$assetMaintenanceId)->update(['asset_maintenance_status_id' => AssetMaintenanceStatus::where('slug','vendor-assigned')->pluck('id')->first()]);
+            }
+
+            $request->session()->flash('success','Vendors assigned successfully');
+            return redirect('/asset/maintenance/request/view/'.$assetMaintenanceId);
+        }catch(\Exception $e){
+            $response = array();
+            $data = [
+                'action' => 'Auto-Suggest Vendor',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
