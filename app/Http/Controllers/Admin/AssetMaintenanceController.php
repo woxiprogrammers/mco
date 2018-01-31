@@ -11,8 +11,14 @@ use App\Asset;
 use App\AssetMaintenance;
 use App\AssetMaintenanceImage;
 use App\AssetMaintenanceStatus;
+use App\AssetMaintenanceTransaction;
+use App\AssetMaintenanceTransactionImages;
+use App\AssetMaintenanceTransactionStatuses;
 use App\AssetMaintenanceVendorRelation;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
+use App\Vendor;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
 class AssetMaintenanceController extends Controller{
-
+    use InventoryTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -209,7 +215,18 @@ class AssetMaintenanceController extends Controller{
     public function getDetailView(Request $request,$assetMaintenanceId){
         try{
             $assetMaintenance = AssetMaintenance::where('id',$assetMaintenanceId)->first();
-            return view('asset-maintenance.request.view')->with(compact('assetMaintenance'));
+            $vendorApproved = $assetMaintenance->assetMaintenanceVendorRelation->where('is_approved',true)->first();
+            if(count($assetMaintenance->assetMaintenanceImage) > 0){
+                $assetDirectoryName = sha1($assetMaintenanceId);
+                $imageData = array();
+                $iterator = 0;
+                foreach($assetMaintenance->assetMaintenanceImage as $key => $assetMaintenanceImageData){
+                    $imageData[$iterator]['id'] = $assetMaintenanceImageData['id'];
+                    $imageData[$iterator]['upload_path'] = url('/').env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $assetDirectoryName . DIRECTORY_SEPARATOR . $assetMaintenanceImageData['name'];
+                    $iterator++;
+                }
+            }
+            return view('asset-maintenance.request.view')->with(compact('assetMaintenance','imageData','vendorApproved'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Asset Maintenance Request View',
@@ -305,12 +322,231 @@ class AssetMaintenanceController extends Controller{
             }else{
                 $assetMaintenanceVendor->update(['is_approved' => false]);
             }
-            return view('/asset/maintenance/request/approval/manage');
+            return redirect('/asset/maintenance/request/approval/manage');
         }catch(\Exception $e){
             $data =[
                 'action' => 'Change Request Maintenance Vendor Status',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getAssetVendorAutoSuggest(Request $request,$keyword,$assetMaintenanceId){
+        try{
+            $assetMaintenance = AssetMaintenance::where('id',$assetMaintenanceId)->first();
+            $alreadyAssignedVendorId = $assetMaintenance->assetMaintenanceVendorRelation->pluck('vendor_id');
+            $vendorList = Vendor::join('asset_vendor_relation','asset_vendor_relation.vendor_id','=','vendors.id')
+                            ->where('asset_vendor_relation.asset_id',$assetMaintenance['asset_id'])
+                            ->whereNotIn('vendors.id',$alreadyAssignedVendorId)
+                            ->where('vendors.name','ilike','%'.$keyword.'%')->where('vendors.is_active',true)->select('vendors.id','vendors.name')->get();
+            $response = array();
+            if(count($vendorList) > 0){
+                $response = $vendorList->toArray();
+                $iterator = 0;
+                foreach($response as $vendorList){
+                    $response[$iterator]['vendor_id'] = $vendorList['id'];
+                    $response[$iterator]['tr_view'] = '<input name="vendors[]" type="hidden" value="'.$vendorList['id'].'">
+                                                        <div class="row">
+                                                            <div class="col-md-9"  style="text-align: left">
+                                                                <label class="control-label">'.$vendorList['name'].'</label>
+                                                            </div>
+                                                        </div>';
+                    $iterator++;
+                }
+            }
+        }catch(\Exception $e){
+            $response = array();
+            $data = [
+                'action' => 'Auto-Suggest Vendor',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response($response,200);
+    }
+
+    public function assetMaintenanceVendorAssign(Request $request,$assetMaintenanceId){
+        try{
+            $user = Auth::user();
+            if($request->has('vendor_data')){
+                foreach($request['vendor_data'] as $vendorId => $quotationAmount){
+                    AssetMaintenanceVendorRelation::create([
+                        'asset_maintenance_id' => $assetMaintenanceId,
+                        'vendor_id' => $vendorId,
+                        'quotation_amount' => $quotationAmount,
+                        'user_id' => $user['id']
+                    ]);
+                }
+                AssetMaintenance::where('id',$assetMaintenanceId)->update(['asset_maintenance_status_id' => AssetMaintenanceStatus::where('slug','vendor-assigned')->pluck('id')->first()]);
+            }
+
+            $request->session()->flash('success','Vendors assigned successfully');
+            return redirect('/asset/maintenance/request/view/'.$assetMaintenanceId);
+        }catch(\Exception $e){
+            $response = array();
+            $data = [
+                'action' => 'Auto-Suggest Vendor',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function preGrnImageUpload(Request $request){
+        try{
+            $generatedGrn = $this->generateGRN();
+            $assetMaintenance = AssetMaintenance::findOrFail($request->assetMaintenanceId);
+            $grnGeneratedStatusId = AssetMaintenanceTransactionStatuses::where('slug','grn-generated')->pluck('id')->first();
+            $assetMaintenanceTransactionData = [
+                'asset_maintenance_id' => $assetMaintenance->id,
+                'asset_maintenance_transaction_status_id' => $grnGeneratedStatusId,
+                'grn' => $generatedGrn
+            ];
+            $assetMaintenanceTransaction = AssetMaintenanceTransaction::create($assetMaintenanceTransactionData);
+            $assetMaintenanceDirectoryName = sha1($assetMaintenance->id);
+            $assetMaintenanceTransactionDirectoryName = sha1($assetMaintenanceTransaction->id);
+            $imageUploadPath = public_path().env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetMaintenanceDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$assetMaintenanceTransactionDirectoryName;
+            if (!file_exists($imageUploadPath)) {
+                File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            }
+            foreach($request->pre_grn_image as $preGrnImage){
+                $imageArray = explode(';',$preGrnImage);
+                $image = explode(',',$imageArray[1])[1];
+                $pos  = strpos($preGrnImage, ';');
+                $type = explode(':', substr($preGrnImage, 0, $pos))[1];
+                $extension = explode('/',$type)[1];
+                $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                $transactionImageData = [
+                    'asset_maintenance_transaction_id' => $assetMaintenanceTransaction->id,
+                    'name' => $filename,
+                    'is_pre_grn' => true
+                ];
+                file_put_contents($fileFullPath,base64_decode($image));
+                AssetMaintenanceTransactionImages::create($transactionImageData);
+            }
+            $response = [
+                'asset_maintenance_transaction_id' => $assetMaintenanceTransaction->id,
+                'grn' => $generatedGrn
+            ];
+            $status = 200;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Upload Pre GRN images for Asset Maintenance Request',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            $response = array();
+            $status = 500;
+        }
+        return response()->json($response,$status);
+    }
+
+    public function checkGeneratedGRN(Request $request,$assetMaintenanceId){
+        try{
+            $response = array();
+            $grnGeneratedId = AssetMaintenanceTransactionStatuses::where('slug','grn-generated')->pluck('id')->first();
+            $grnGeneratedTransaction = AssetMaintenanceTransaction::where('asset_maintenance_transaction_status_id',$grnGeneratedId)->where('asset_maintenance_id',$assetMaintenanceId)->orderBy('created_at','desc')->first();
+            if($grnGeneratedTransaction != null){
+                $response['grn'] = $grnGeneratedTransaction->grn;
+                $response['asset_maintenance_transaction_id'] = $grnGeneratedTransaction->id;
+                $transactionImages = AssetMaintenanceTransactionImages::where('asset_maintenance_transaction_id',$grnGeneratedTransaction->id)->where('is_pre_grn', true)->get();
+                $response['images'] = array();
+                $assetMaintenanceDirectoryName = sha1($assetMaintenanceId);
+                $assetMaintenanceTransactionDirectoryName = sha1($grnGeneratedTransaction->id);
+                $imagePath = env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetMaintenanceDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$assetMaintenanceTransactionDirectoryName;
+                foreach ($transactionImages as $image){
+                    $response['images'][] = $imagePath.DIRECTORY_SEPARATOR.$image['name'];
+                }
+                $status = 200;
+            }else{
+                $status = 204;
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check GRN Generated Asset Maintenance transaction',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $response = array();
+            $status = 500;
+        }
+        return response()->json($response,$status);
+    }
+
+    public function createTransaction(Request $request){
+        try{
+            $assetMaintenanceTransactionData = $request->except('_token','pre_grn_image','post_grn_image','component_data','vendor_name','purchase_order_id','purchase_order_transaction_id');
+            $assetMaintenanceTransaction = AssetMaintenanceTransaction::findOrFail($request->asset_maintenance_transaction_id);
+            $assetMaintenanceTransactionData['asset_maintenance_transaction_status_id'] = AssetMaintenanceTransactionStatuses::where('slug','bill-pending')->pluck('id')->first();
+            $assetMaintenanceTransactionData['in_time'] = $assetMaintenanceTransactionData['out_time'] = Carbon::now();
+            $assetMaintenanceTransaction->update($assetMaintenanceTransactionData);
+            $assetMaintenanceDirectoryName = sha1($request->assetMaintenanceId);
+            $assetMaintenanceTransactionDirectoryName = sha1($assetMaintenanceTransaction->id);
+            $imageUploadPath = public_path().env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetMaintenanceDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$assetMaintenanceTransactionDirectoryName;
+            if (!file_exists($imageUploadPath)) {
+                File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            }
+            if($request->has('post_grn_image') && count($request->post_grn_image) > 0){
+                foreach($request->post_grn_image as $postGrnImage){
+                    $imageArray = explode(';',$postGrnImage);
+                    $image = explode(',',$imageArray[1])[1];
+                    $pos  = strpos($postGrnImage, ';');
+                    $type = explode(':', substr($postGrnImage, 0, $pos))[1];
+                    $extension = explode('/',$type)[1];
+                    $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                    $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                    $transactionImageData = [
+                        'asset_maintenance_transaction_id' => $assetMaintenanceTransaction->id,
+                        'name' => $filename,
+                        'is_pre_grn' => false
+                    ];
+                    file_put_contents($fileFullPath,base64_decode($image));
+                    AssetMaintenanceTransactionImages::create($transactionImageData);
+                }
+            }
+            $request->session()->flash('success','Transaction added successfully');
+            return redirect('/asset/maintenance/request/view/'.$request->assetMaintenanceId);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Asset Maintenance Transaction',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function viewTransaction(Request $request,$assetMaintenanceTransactionId){
+        try{
+                $assetMaintenanceTransaction = AssetMaintenanceTransaction::where('id',$assetMaintenanceTransactionId)->first();
+                if(count($assetMaintenanceTransaction->assetMaintenanceTransactionImage) > 0){
+                    $assetMaintenanceDirectoryName = sha1($assetMaintenanceTransaction['asset_maintenance_id']);
+                    $assetMaintenanceTransactionDirectoryName = sha1($assetMaintenanceTransaction['id']);
+                    $imageData = array();
+                    $iterator = 0;
+                    foreach($assetMaintenanceTransaction->assetMaintenanceTransactionImage as $key => $assetMaintenanceTransactionImageData){
+                        $imageData[$iterator]['id'] = $assetMaintenanceTransactionImageData['id'];
+                        $imageData[$iterator]['upload_path'] = url('/').env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD') .DIRECTORY_SEPARATOR.$assetMaintenanceDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$assetMaintenanceTransactionDirectoryName. DIRECTORY_SEPARATOR . $assetMaintenanceTransactionImageData['name'];
+                        $iterator++;
+                    }
+                }
+            return view('partials.asset-maintenance.view-transaction')->with(compact('assetMaintenanceTransaction','imageData'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'View Asset Maintenance Transaction Detail',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);

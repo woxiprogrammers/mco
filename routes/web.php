@@ -412,10 +412,20 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('image-upload',array('uses'=>'Admin\AssetMaintenanceController@uploadTempAssetMaintenanceImages'));
                 Route::post('display-images',array('uses'=>'Admin\AssetMaintenanceController@displayAssetMaintenanceImages'));
                 Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetMaintenanceController@removeAssetMaintenanceImage'));
+                Route::group(['prefix' => 'vendor'], function(){
+                    Route::get('auto-suggest/{keyword}/{assetMaintenanceId}',array('uses' => 'Admin\AssetMaintenanceController@getAssetVendorAutoSuggest'));
+                    Route::post('assign/{assetMaintenanceId}',array('uses' => 'Admin\AssetMaintenanceController@assetMaintenanceVendorAssign'));
+                });
                 Route::group(['prefix' => 'approval'], function (){
                     Route::post('change-status/{status}/{assetMaintenanceVendorID}',array('uses' => 'Admin\AssetMaintenanceController@changeMaintenanceRequestStatus'));
                     Route::get('manage',array('uses' => 'Admin\AssetMaintenanceController@getApprovalManageView'));
                     Route::post('listing',array('uses' => 'Admin\AssetMaintenanceController@getMaintenanceRequestApprovalListing'));
+                });
+                Route::group(['prefix' => 'transaction'], function(){
+                    Route::post('create',array('uses'=> 'Admin\AssetMaintenanceController@createTransaction'));
+                    Route::post('upload-pre-grn-images',array('uses'=> 'Admin\AssetMaintenanceController@preGrnImageUpload'));
+                    Route::get('check-generated-grn/{assetMaintenanceId}',array('uses'=> 'Admin\AssetMaintenanceController@checkGeneratedGRN'));
+                    Route::get('view/{assetMaintenanceTransactionId}',array('uses'=> 'Admin\AssetMaintenanceController@viewTransaction'));
                 });
             });
         });
