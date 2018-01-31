@@ -292,8 +292,13 @@
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
-                                    <a href="/asset/maintenance/request/create" class="nav-link nav-toggle ">
+                                    <a href="/asset/maintenance/request/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Asset Maintenance
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/asset/maintenance/request/approval/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Asset Maintenance Approval
                                     </a>
                                 </li>
                             </ul>

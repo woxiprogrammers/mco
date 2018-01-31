@@ -400,10 +400,18 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::group(['prefix' => 'request'], function (){
                 Route::get('create',array('uses' => 'Admin\AssetMaintenanceController@getCreateView'));
                 Route::post('create',array('uses' => 'Admin\AssetMaintenanceController@createAssetMaintenanceRequest'));
+                Route::get('manage',array('uses' => 'Admin\AssetMaintenanceController@getManageView'));
+                Route::post('listing',array('uses' => 'Admin\AssetMaintenanceController@getMaintenanceRequestListing'));
                 Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\AssetMaintenanceController@autoSuggest'));
+                Route::get('view/{assetMaintenanceId}',array('uses' => 'Admin\AssetMaintenanceController@getDetailView'));
                 Route::post('image-upload',array('uses'=>'Admin\AssetMaintenanceController@uploadTempAssetMaintenanceImages'));
                 Route::post('display-images',array('uses'=>'Admin\AssetMaintenanceController@displayAssetMaintenanceImages'));
                 Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetMaintenanceController@removeAssetMaintenanceImage'));
+                Route::group(['prefix' => 'approval'], function (){
+                    Route::post('change-status/{status}/{assetMaintenanceVendorID}',array('uses' => 'Admin\AssetMaintenanceController@changeMaintenanceRequestStatus'));
+                    Route::get('manage',array('uses' => 'Admin\AssetMaintenanceController@getApprovalManageView'));
+                    Route::post('listing',array('uses' => 'Admin\AssetMaintenanceController@getMaintenanceRequestApprovalListing'));
+                });
             });
         });
 
