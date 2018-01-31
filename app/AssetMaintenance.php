@@ -34,4 +34,8 @@ class AssetMaintenance extends Model
         return $this->hasMany('App\AssetMaintenanceVendorRelation','asset_maintenance_id');
     }
 
+    public function assetMaintenanceTransaction(){
+        return $this->hasMany('App\AssetMaintenanceTransaction','asset_maintenance_id');
+    }
+
 }

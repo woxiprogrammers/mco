@@ -416,6 +416,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                     Route::get('manage',array('uses' => 'Admin\AssetMaintenanceController@getApprovalManageView'));
                     Route::post('listing',array('uses' => 'Admin\AssetMaintenanceController@getMaintenanceRequestApprovalListing'));
                 });
+                Route::group(['prefix' => 'transaction'], function(){
+                    Route::post('create',array('uses'=> 'Admin\AssetMaintenanceController@createTransaction'));
+                    Route::post('upload-pre-grn-images',array('uses'=> 'Admin\AssetMaintenanceController@preGrnImageUpload'));
+                    Route::get('check-generated-grn/{assetMaintenanceId}',array('uses'=> 'Admin\AssetMaintenanceController@checkGeneratedGRN'));
+                    Route::get('view/{assetMaintenanceTransactionId}',array('uses'=> 'Admin\AssetMaintenanceController@viewTransaction'));
+                });
             });
         });
 

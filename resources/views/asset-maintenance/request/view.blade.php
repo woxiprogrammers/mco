@@ -57,10 +57,23 @@
                                                 <li>
                                                     <a href="#vendorAssignmentTab" data-toggle="tab"> Assign Vendors</a>
                                                 </li>
+                                                <li>
+                                                    <a href="#transactionTab" data-toggle="tab"> Transactions </a>
+                                                </li>
                                             </ul>
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="viewInfoTab">
                                                     <div class="form-body">
+                                                        @if($assetMaintenance->assetMaintenanceStatus->slug == 'vendor-approved')
+                                                            <div class="row">
+                                                                <div class="col-md-offset-9 col-md-3 ">
+                                                                    <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
+                                                                        <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                                                        Transaction
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        @endif
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
                                                                 <label for="asset_name" class="control-label">Asset</label>
@@ -78,6 +91,22 @@
                                                                 <span>{!! $assetMaintenance->remark !!}</span>
                                                             </div>
                                                         </div>
+                                                        @if(count($assetMaintenance->assetMaintenanceImage) > 0)
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="remark" class="control-label">Images</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div id ="imagecorouselForAssetMaintenanceRequest">
+                                                                        @foreach($imageData as $key => $image)
+                                                                            <a href="{{$image['upload_path']}}">
+                                                                                <img id="image" src="{{$image['upload_path']}}" style="text-align:left;height: 170px">
+                                                                            </a>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                 </div>
                                                 <div class="tab-pane fade in" id="vendorAssignmentTab">
@@ -145,8 +174,138 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                <div class="tab-pane fade in" id="transactionTab">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            @if(count($assetMaintenance->assetMaintenanceTransaction) > 0)
+                                                                <table class="table table-striped table-bordered table-hover order-column" id="assetMaintenanceTransaction">
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th>Vendor Name</th>
+                                                                        <th style="width: 40%"> GRN</th>
+                                                                        <th>Status</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    @foreach($assetMaintenance->assetMaintenanceTransaction as $assetMaintenanceTransaction)
+                                                                        <tr>
+                                                                            <td>
+                                                                                {!! $vendorApproved->vendor->name !!}
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="hidden" value="{{$assetMaintenanceTransaction['id']}}">
+                                                                                {{$assetMaintenanceTransaction['grn']}}
+                                                                            </td>
+                                                                            <td>
+                                                                                {!! $assetMaintenanceTransaction->assetMaintenanceTransactionStatus->name !!}
+                                                                            </td>
+                                                                            <td>
+                                                                                <a href="javascript:void(0);" class="btn blue transaction-view-btn">
+                                                                                    View
+                                                                                </a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal fade" id="transactionModal" role="dialog">
+                                                    <div class="modal-dialog transaction-modal" style="width: 90%; ">
+                                                        <!-- Modal content-->
+                                                        <div class="modal-content" style="overflow: scroll !important;">
+                                                            <div class="modal-header">
+                                                                <div class="row">
+                                                                    <div class="col-md-4"></div>
+                                                                    <div class="col-md-4" style="font-size: 18px"> Asset Maintenance Transaction</div>
+                                                                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-body" style="padding:40px 50px;">
+                                                                <form id="transactionForm" action="/asset/maintenance/request/transaction/create" method="POST">
+                                                                    {!! csrf_field() !!}
+                                                                    <input type="hidden" name="assetMaintenanceId" value="{{$assetMaintenance->id}}">
+                                                                    <input type="hidden" id="assetMaintenanceTransactionId" name="asset_maintenance_transaction_id">
+                                                                    <input type="hidden" id="type" value="upload_bill">
+                                                                    <div class="form-body">
+                                                                        <div class="form-group">
+                                                                            <label class="control-label">Select Images For Generating GRN :</label>
+                                                                            <input id="imageupload" type="file" class="btn blue" multiple />
+                                                                            <br />
+                                                                            <div class="row">
+                                                                                <div id="preview-image" class="row">
 
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="row">
+                                                                                <div class="col-md-3" id="grnImageUplaodButton" style="margin-top: 1%;" hidden>
+                                                                                    <a href="javascript:void(0);" class="btn blue" > Upload Images</a>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div id="afterImageUploadDiv" hidden>
+
+                                                                            <div class="form-group">
+                                                                                <div class="col-md-3">
+                                                                                    <label class="control-label pull-right"> GRN :</label>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input class="form-control" name="grn" readonly>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div id="transactionCommonFieldDiv" >
+                                                                                <div class="form-group row">
+                                                                                    <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number">
+                                                                                </div>
+                                                                                <div class="form-group row">
+                                                                                    <input type="text" class="form-control" name="bill_amount" placeholder="Enter Bill Amount">
+                                                                                </div>
+                                                                                <div class="form-group row">
+                                                                                    <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
+                                                                                </div>
+                                                                                <div class="form-group">
+                                                                                    <label class="control-label">Select Images :</label>
+                                                                                    <input id="postImageUpload" type="file" class="btn blue" multiple />
+                                                                                    <br />
+                                                                                    <div class="row">
+                                                                                        <div id="postPreviewImage" class="row">
+
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <button type="submit" class="btn btn-set red pull-right">
+                                                                                    <i class="fa fa-check" style="font-size: large"></i>
+                                                                                    Save&nbsp; &nbsp; &nbsp;
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal fade" id="viewTransactionModal" role="dialog">
+                                                    <div class="modal-dialog transaction-modal" style="width: 90%; ">
+                                                        <!-- Modal content-->
+                                                        <div class="modal-content" style="overflow: scroll !important;">
+                                                            <div class="modal-header">
+                                                                <div class="row">
+                                                                    <div class="col-md-4"></div>
+                                                                    <div class="col-md-4" style="font-size: 18px"> Asset Maintenance Transaction Detail</div>
+                                                                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-body" style="padding:40px 50px;">
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -236,6 +395,119 @@
                     $("#removeButton").closest('.row').hide();
                     $("#assignVendorTable").hide();
                 }
+            });
+
+
+            $("#imageupload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#preview-image");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-2"><input type="hidden" name="pre_grn_image[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                            $("#grnImageUplaodButton").show();
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
+            });
+
+            $("#grnImageUplaodButton a").on('click',function(){
+                var imageArray = $("#transactionForm").serializeArray();
+                $.ajax({
+                    url: '/asset/maintenance/request/transaction/upload-pre-grn-images',
+                    type: 'POST',
+                    data: imageArray,
+                    success: function(data, textStatus, xhr){
+                        $("#imageupload").hide();
+                        $("#grnImageUplaodButton").hide();
+                        $("#assetMaintenanceTransactionId").val(data.asset_maintenance_transaction_id);
+                        $("#transactionForm input[name='grn']").val(data.grn);
+                        $("#afterImageUploadDiv").show();
+                    },
+                    error: function(errorData){
+
+                    }
+                });
+            });
+
+            $("#postImageUpload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#postPreviewImage");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-2"><input type="hidden" name="post_grn_image[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
+            });
+
+            $("#transactionButton").on('click',function(){
+                var assetMaintenanceId = $("#assetMaintenanceId").val();
+                $.ajax({
+                    url:'/asset/maintenance/request/transaction/check-generated-grn/'+assetMaintenanceId+'?_token='+$("input[name='_token']").val(),
+                    type: 'GET',
+                    success: function(data,textStatus,xhr){
+                        console.log(data);
+                        if(xhr.status == 200){
+                            $.each(data.images, function(k ,v){
+                                var imagePreview = '<div class="col-md-2"><img src="'+v+'" class="thumbimage" /></div>';
+                                $("#preview-image").append(imagePreview);
+                            });
+                            $("#imageupload").hide();
+                            $("#grnImageUplaodButton").hide();
+                            $("#assetMaintenanceTransactionId").val(data.asset_maintenance_transaction_id);
+                            $("#transactionForm input[name='grn']").val(data.grn);
+                            $("#afterImageUploadDiv").show();
+                        }
+                        $("#transactionModal").modal('show');
+                    },
+                    error: function(errorData){
+
+                    }
+                });
+            });
+
+            $(".transaction-view-btn").on('click', function(){
+                var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
+                console.log(transactionId);
+                $.ajax({
+                    url:'/asset/maintenance/request/transaction/view/'+transactionId+"?_token="+$('input[name="_token"]').val(),
+                    type: 'GET',
+                    success: function(data,textStatus,xhr){
+                        $("#viewTransactionModal .modal-body").html(data);
+                        $("#viewTransactionModal").modal('show');
+                    },
+                    error: function(errorStatus){
+
+                    }
+                });
             });
 
         });
