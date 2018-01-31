@@ -306,7 +306,7 @@ class AssetMaintenanceController extends Controller{
             }else{
                 $assetMaintenanceVendor->update(['is_approved' => false]);
             }
-            return view('/asset/maintenance/request/approval/manage');
+            return redirect('/asset/maintenance/request/approval/manage');
         }catch(\Exception $e){
             $data =[
                 'action' => 'Change Request Maintenance Vendor Status',
