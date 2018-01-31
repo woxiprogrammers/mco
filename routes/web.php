@@ -186,6 +186,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing/{billId}', array('uses' => 'Admin\BillController@billTransactionListing'));
             Route::get('detail/{bill_transaction}', array('uses' => 'Admin\BillController@billTransactionDetail'));
         });
+        Route::group(['prefix' => 'reconcile'], function(){
+            Route::post('add-transaction', array('uses' => 'Admin\BillController@addReconcileTransaction'));
+            Route::post('hold-listing', array('uses' => 'Admin\BillController@getHoldReconcileListing'));
+            Route::post('retention-listing', array('uses' => 'Admin\BillController@getRetentionReconcileListing'));
+        });
     });
 
     Route::group(['prefix' => 'quotation'], function(){
