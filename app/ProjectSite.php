@@ -8,7 +8,7 @@ class ProjectSite extends Model
 {
     protected $table = 'project_sites';
 
-    protected $fillable = ['name','project_id','address','city_id'];
+    protected $fillable = ['name','project_id','address','city_id','advanced_amount','advanced_balance'];
 
     public function project(){
         return $this->belongsTo('App\Project','project_id','id');
