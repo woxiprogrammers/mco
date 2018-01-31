@@ -10,8 +10,10 @@ namespace App\Http\Controllers\CustomTraits;
 
 use App\Client;
 use App\HsnCode;
+use App\PaymentType;
 use App\Project;
 use App\ProjectSite;
+use App\ProjectSiteAdvancePayment;
 use Illuminate\Http\Request;
 use App\City;
 use Illuminate\Support\Facades\Auth;
@@ -223,8 +225,8 @@ trait ProjectTrait{
             $projectData['id'] = $project->id;
             $projectData['project'] = $project->name;
             $projectData['project_hsn_code'] = $project->hsn_code_id;
-
             $project->project_site = $project->project_site->toArray();
+            $projectData['project_site_id'] = $project->project_site[0]['id'];
             $projectData['project_site'] = $project->project_site[0]['name'];
             $projectData['project_site_address'] = $project->project_site[0]['address'];
             $projectData['project_city_id'] = $project->project_site[0]['city_id'];
@@ -237,7 +239,8 @@ trait ProjectTrait{
                 $cityArray[$iterator]['name'] = $city->name.", ".$city->state->name.', '.$city->state->country->name;
                 $iterator++;
             }
-            return view('admin.project.edit')->with(compact('projectData','hsnCodes','cityArray'));
+            $paymentTypes = PaymentType::orderBy('id')->get();
+            return view('admin.project.edit')->with(compact('projectData','hsnCodes','cityArray','paymentTypes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'change Project status',
@@ -271,5 +274,73 @@ trait ProjectTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function addAdvancePayment(Request $request){
+        try{
+            $advancePaymentData = $request->except('_token');
+            $advancePayment = ProjectSiteAdvancePayment::create($advancePaymentData);
+            $projectSite = ProjectSite::findOrFail($request['project_site_id']);
+            if($projectSite->advanced_amount == null){
+                $advanceAmount = $request['amount'];
+            }else{
+                $advanceAmount = ((float)$projectSite->advanced_amount) + $request['amount'];
+            }
+            if($projectSite->advanced_balance == null){
+                $advanceBalance = $request['amount'];
+            }else{
+                $advanceBalance = ((float)$projectSite->advanced_balance) + $request['amount'];
+            }
+            $projectSite->update([
+                'advanced_balance' => $advanceBalance,
+                'advanced_amount' => $advanceAmount
+            ]);
+            $request->session()->flash('success','Advance Payment Added Successfully.');
+            return redirect('/project/edit/'.$projectSite->project_id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add project site advance payment',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function advancePaymentListing(Request $request){
+        try{
+            $status = 200;
+            $paymentData = ProjectSiteAdvancePayment::where('project_site_id',$request->project_site_id)->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($paymentData);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]['amount'],
+                    $paymentData[$pagination]->paymentType->name,
+                    $paymentData[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Project Site Advance Payment Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = [];
+        }
+        return response()->json($records,$status);
     }
 }

@@ -235,6 +235,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{project}',array('uses' => 'Admin\ProjectController@changeProjectStatus'));
         Route::get('edit/{project}',array('uses' => 'Admin\ProjectController@getEditView'));
         Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
+        Route::group(['prefix' => 'advance-payment'], function(){
+            Route::post('create',array('uses'=> 'Admin\ProjectController@addAdvancePayment'));
+            Route::post('listing',array('uses'=> 'Admin\ProjectController@advancePaymentListing'));
+        });
     });
     Route::group(['prefix' => 'purchase'], function(){
         Route::get('get-detail/{materialRequestComponentID}',array('uses' => 'User\PurchaseController@getPurchaseDetails'));
