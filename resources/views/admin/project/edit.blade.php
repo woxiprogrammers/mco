@@ -53,6 +53,9 @@
                                             <li>
                                                 <a href="#advancePaymentTab" data-toggle="tab"> Advance Payments </a>
                                             </li>
+                                            <li>
+                                                <a href="#indirectExpenseTab" data-toggle="tab"> Indirect Expenses </a>
+                                            </li>
                                         </ul>
                                         <div class="tab-content">
                                             <div class="tab-pane fade in active" id="generalInfoTab">
@@ -172,6 +175,25 @@
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            <div class="tab-pane fade in" id="indirectExpenseTab">
+                                                <div class="btn-group pull-right margin-top-15">
+                                                    <a id="sample_editable_1_new" class="btn yellow" href="#indirectExpenseModal" data-toggle="modal" >
+                                                        <i class="fa fa-plus"></i>  &nbsp; Indirect Expense
+                                                    </a>
+                                                </div>
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="indirectExpenseTable">
+                                                    <thead>
+                                                    <tr>
+                                                        <th style="width: 33%"> Date </th>
+                                                        <th style="width: 33%"> GST </th>
+                                                        <th style="width: 33%"> TDS </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -245,6 +267,54 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="indirectExpenseModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding-bottom:10px">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-6"><h4><b>Add Indirect Expense</b></h4></div>
+                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                </div>
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+                <form method="post" action="/project/indirect-expense/create">
+                    <input type="hidden" name="project_site_id" value="{{$projectData['project_site_id']}}">
+                    {!! csrf_field() !!}
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">GST</label>
+                                <span>*</span>
+                            </div>
+                            <div class="col-md-6">
+                                <input name="gst" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">TDS</label>
+                                <span>*</span>
+                            </div>
+                            <div class="col-md-6">
+                                <input name="tds" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row" style="margin-top: 5%">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn red pull-right">
+                                    <i class="fa fa-check" style="font-size: large"></i>
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('javascript')
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
@@ -252,6 +322,7 @@
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/custom/admin/project/project.js" type="application/javascript"></script>
 <script src="/assets/custom/admin/project/project-site-advance-payment-datatable.js" type="application/javascript"></script>
+<script src="/assets/custom/admin/project/indirect-expenses-datatable.js" type="application/javascript"></script>
 <script>
     $(document).ready(function() {
         EditProject.init();
