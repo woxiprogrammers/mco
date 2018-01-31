@@ -413,7 +413,6 @@ class AssetMaintenanceController extends Controller{
             $assetMaintenanceDirectoryName = sha1($assetMaintenance->id);
             $assetMaintenanceTransactionDirectoryName = sha1($assetMaintenanceTransaction->id);
             $imageUploadPath = public_path().env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetMaintenanceDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$assetMaintenanceTransactionDirectoryName;
-                Log::info($imageUploadPath);
             if (!file_exists($imageUploadPath)) {
                 File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
             }
