@@ -83,7 +83,8 @@ class ImagesController extends Controller
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
             }
             $extension = $request->file('file')->getClientOriginalExtension();
-            $filename = explode(".",$request->name)[0].'#'.mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $filename = preg_replace('/\s+/', '', explode(".",$request->name)[0]);
+            $filename = $filename.'#'.mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
             $path = env('DRAWING_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$drawingDirectoryName.DIRECTORY_SEPARATOR.urlencode($filename);
             $response = [
@@ -207,14 +208,15 @@ class ImagesController extends Controller
             if(Session::has('global_project_site')){
                 $subCategories = DrawingCategorySiteRelation::join('drawing_categories','drawing_categories.id','=','drawing_category_site_relations.drawing_category_id')
                     ->where('drawing_category_site_relations.project_site_id', Session::get('global_project_site'))
+                    ->orderBy('drawing_category_site_relations.created_at', 'desc')
                     ->select('drawing_categories.name','drawing_categories.id','drawing_categories.drawing_category_id','drawing_category_site_relations.project_site_id')
                     ->get();
             }else{
                 $subCategories = DrawingCategorySiteRelation::join('drawing_categories','drawing_categories.id','=','drawing_category_site_relations.drawing_category_id')
+                    ->orderBy('drawing_category_site_relations.created_at', 'desc')
                     ->select('drawing_categories.name','drawing_categories.id','drawing_categories.drawing_category_id','drawing_category_site_relations.project_site_id')
                     ->get();
             }
-
             $iTotalRecords = count($subCategories);
             $records = array();
             $records['data'] = array();
@@ -250,7 +252,8 @@ class ImagesController extends Controller
         try{
             $tempImageUploadPath = public_path().env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.sha1($request->site_id).DIRECTORY_SEPARATOR.sha1($request->sub_category_id);
             $extension = $request->file('file')->getClientOriginalExtension();
-            $filename = explode(".",$request->file('file')->getClientOriginalName())[0].'#'.mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $filename = preg_replace('/\s+/', '', explode(".",$request->file('file')->getClientOriginalName())[0]);
+            $filename = $filename.'#'.mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
             $data['drawing_image_id'] = $request->drawing_images_id;
             $data['title'] = $request->title;
