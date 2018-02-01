@@ -1,54 +1,47 @@
 $(document).ready(function (){
     ViewBill.init();
-    $("#billTransactionCreateButton").on('click',function(e){
-        e.stopPropagation();
-        $("#billTransactionListingTab").removeClass('active');
-        $("#billTransactionCreateTab").addClass('active');
-        CKEDITOR.replace("transactionRemark",{
-            extraPlugins:"imageuploader"
-        });
-    });
-
-    $("#transactionSubmit").on('click',function(e){
-        e.stopPropagation();
-        var remark = CKEDITOR.instances["transactionRemark"].getData();
-        $("#transactionRemark").val(remark);
-        var formData = $("#createTransactionForm").serializeArray();
-        $.ajax({
-            url: '/bill/transaction/create',
-            type: 'POST',
-            async: false,
-            data: formData,
-            success: function(data,textStatus,xhr){
-                $("#billTransactionCreateTab").removeClass('active');
-                $("#billTransactionListingTab").addClass('active');
-                $("#billTransactionListingTab .filter-submit").trigger('click');
-            },
-            error: function(data){
-
-            }
-        });
-    });
-
     typingTimer = 0;
     doneTypingInterval = 1000;
     var total = $('#remainingTotal').val();
-    $('#transactionTotal').rules('add',{
-        max: total
+    $(".calculatable-field").on('keyup', function(){
+        var amount = $(".calculatable-field:input[name='amount']").val();
+        if(typeof amount == 'undefined' || amount == ''){
+            amount = 0;
+            $(".calculatable-field:input[name='amount']").val(0);
+        }
+        var debit = $(".calculatable-field:input[name='debit']").val();
+        if(typeof debit == 'undefined' || debit == ''){
+            debit = 0;
+            $(".calculatable-field:input[name='debit']").val(0);
+        }
+        var hold = $(".calculatable-field:input[name='hold']").val();
+        if(typeof hold == 'undefined' || hold == ''){
+            hold = 0;
+            $(".calculatable-field:input[name='hold']").val(0);
+        }
+        var retention_percent = $(".calculatable-field:input[name='retention_percent']").val();
+        if(typeof retention_percent == 'undefined' || retention_percent == ''){
+            retention_percent = 0;
+            $(".calculatable-field:input[name='retention_percent']").val(0);
+        }
+        var retentionAmount = (parseFloat(amount)) * (parseFloat(retention_percent)/100);
+        $(".calculatable-field:input[name='retention_amount']").val(retentionAmount);
+        var tds_percent = $(".calculatable-field:input[name='tds_percent']").val();
+        if(typeof tds_percent == 'undefined' || tds_percent == ''){
+            tds_percent = 0;
+            $(".calculatable-field:input[name='tds_percent']").val(0);
+        }
+        var tdsAmount = (parseFloat(amount)) * (parseFloat(tds_percent)/100);
+        $(".calculatable-field:input[name='tds_amount']").val(tdsAmount);
+        var other_recovery_value = $(".calculatable-field:input[name='other_recovery_value']").val();
+        if(typeof other_recovery_value == 'undefined' || other_recovery_value == ''){
+            other_recovery_value = 0;
+            $(".calculatable-field:input[name='other_recovery_value']").val(0);
+        }
+        var total = (parseFloat(amount)) + (parseFloat(other_recovery_value)) - ((parseFloat(hold)) + (parseFloat(debit)) + (parseFloat(retentionAmount)) + (parseFloat(tdsAmount)));
+        $(".calculatable-field:input[name='total']").val(total)
     });
-    $("#transactionTotal").on('keyup', function () {
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(calculateTransactionDetails, doneTypingInterval);
-    });
-    $("#transactionTotal").on('keydown', function () {
-        clearTimeout(typingTimer);
-    });
-
-
 });
-
-
-
 function calculateTransactionDetails(){
     var billId = $("#billId").val();
     var total = $("#transactionTotal").val();

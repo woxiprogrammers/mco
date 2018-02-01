@@ -6,6 +6,7 @@ use App\Bill;
 use App\BillImage;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
+use App\BillReconcileTransaction;
 use App\BillStatus;
 use App\BillTax;
 use App\BillTransaction;
@@ -13,6 +14,7 @@ use App\Category;
 use App\Client;
 use App\Helper\MaterialProductHelper;
 use App\Helper\NumberHelper;
+use App\PaymentType;
 use App\Product;
 use App\ProductDescription;
 use App\Project;
@@ -582,7 +584,14 @@ trait BillTrait{
 
             $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('total')->toArray();
             $remainingAmount = $final['current_bill_gross_total_amount'] - array_sum($BillTransactionTotals);
-            return view('admin.bill.view')->with(compact('extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount'));
+            $paymentTypes = PaymentType::orderBy('id')->get();
+            $totalBillHoldAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('hold');
+            $reconciledHoldAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','hold')->sum('amount');
+            $remainingHoldAmount = $reconciledHoldAmount - $totalBillHoldAmount;
+            $totalBillRetentionAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('retention_amount');
+            $reconciledRetentionAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','retention')->sum('amount');
+            $remainingRetentionAmount = $reconciledRetentionAmount - $totalBillRetentionAmount;
+            return view('admin.bill.view')->with(compact('extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -1589,10 +1598,109 @@ trait BillTrait{
 
     public function saveTransactionDetails(Request $request){
         try{
-            $transactionData = $request->only('bill_id','total','subtotal','remark');
-            $status = 200;
-            $response['message'] = "Transaction Saved Successfully";
-            BillTransaction::create($transactionData);
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $transactionData = $request->except('_token');
+            $projectSiteId = Quotation::join('bills','bills.quotation_id','=','quotations.id')
+                                ->where('bills.id',$request->bill_id)
+                                ->pluck('quotations.project_site_id')->first();
+            $projectSite = ProjectSite::findOrFail($projectSiteId);
+            $bill = Bill::findOrFail($request->bill_id);
+            $bills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
+            $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
+            $total['previous_bill_amount'] = $total['current_bill_subtotal'] = $total['cumulative_bill_amount'] = $total_extra_item =  0;
+            for($iterator = 0 ; $iterator < count($billQuotationProducts) ; $iterator++){
+                $billQuotationProducts[$iterator]['previous_quantity'] = 0;
+                $billQuotationProducts[$iterator]['quotationProducts'] = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->where('quotation_id',$bill['quotation_id'])->first();
+                $billQuotationProducts[$iterator]['productDetail'] = Product::where('id',$billQuotationProducts[$iterator]['quotationProducts']['product_id'])->first();
+                $billQuotationProducts[$iterator]['product_description'] = ProductDescription::where('id',$billQuotationProducts[$iterator]['product_description_id'])->where('quotation_id',$bill['quotation_id'])->first();
+                $billQuotationProducts[$iterator]['unit'] = Unit::where('id',$billQuotationProducts[$iterator]['productDetail']['unit_id'])->pluck('name')->first();
+                $quotation_id = Bill::where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
+                $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
+                $rate_per_unit = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
+                $billQuotationProducts[$iterator]['rate'] = MaterialProductHelper::customRound(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                $billQuotationProducts[$iterator]['current_bill_subtotal'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                $billWithoutCancelStatus = Bill::where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
+                $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get();
+                foreach($previousBills as $key => $previousBill){
+                    if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
+                        $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
+                    }
+                }
+                $billQuotationProducts[$iterator]['cumulative_quantity'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
+                $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
+            }
+            $extraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
+            if(count($extraItems) > 0){
+                $total_extra_item = 0;
+                foreach($extraItems as $key => $extraItem){
+                    $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',array_column($bills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
+                    $total_extra_item = $total_extra_item + $extraItem['rate'];
+                }
+                $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $total_extra_item),3);
+            }
+            $total_rounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
+            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
+            $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->where('bill_taxes.bill_id','=',$bill['id'])
+                ->where('taxes.is_special','=', false)
+                ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
+                ->get();
+            $taxes = array();
+            if($billTaxes != null){
+                $billTaxes = $billTaxes->toArray();
+            }
+            for($j = 0 ; $j < count($billTaxes) ; $j++){
+                $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
+                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = MaterialProductHelper::customRound($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
+                $final['current_bill_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
+            }
+            $specialTaxes= BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->where('bill_taxes.bill_id','=',$bill['id'])
+                ->where('taxes.is_special','=', true)
+                ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
+                ->get();
+            if($specialTaxes != null){
+                $specialTaxes = $specialTaxes->toArray();
+            }else{
+                $specialTaxes = array();
+            }
+            if(count($specialTaxes) > 0){
+                for($j = 0 ; $j < count($specialTaxes) ; $j++){
+                    $specialTaxes[$j]['applied_on'] = json_decode($specialTaxes[$j]['applied_on']);
+                    $specialTaxAmount = 0;
+                    foreach($specialTaxes[$j]['applied_on'] as $appliedOnTaxId){
+                        if($appliedOnTaxId == 0){
+                            $specialTaxAmount = $specialTaxAmount + ($total['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+                        }else{
+                            $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+                        }
+                    }
+                    $specialTaxes[$j]['current_bill_amount'] = MaterialProductHelper::customRound($specialTaxAmount , 3);
+                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
+                }
+            }else{
+                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount']);
+            }
+            $totalTransactionAmount = BillTransaction::where('bill_id')->sum('amount');
+            if(($totalTransactionAmount + $request->amount) > $final['current_bill_gross_total_amount']){
+                $request->session()->flash('error','Total Payment amount is greater than total bill amount');
+            }else{
+                if($transactionData['paid_from_advanced'] == 'true'){
+                    $transactionData['paid_from_advanced'] = true;
+                    $advanceBalanceAmount = $projectSite->advanced_balance;
+                    if($advanceBalanceAmount < $request->amount){
+                        $request->session()->flash('error','Transaction amount is greater that advance balance amount. Advance balance amount is '.$advanceBalanceAmount);
+                    }else{
+                        $newAdvanceBalanceAmount = $advanceBalanceAmount - $request->amount;
+                        $projectSite->update(['advanced_balance' => $newAdvanceBalanceAmount]);
+                    }
+                }else{
+                    $transactionData['paid_from_advanced'] = false;
+                }
+                BillTransaction::create($transactionData);
+                $request->session()->flash('success','Bill Transaction added successfully.');
+            }
+            return redirect('/bill/view/'.$request->bill_id);
         }catch (\Exception $e){
             $status = 500;
             $data = [
@@ -1600,29 +1708,15 @@ trait BillTrait{
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            $response['message'] = "Something went Wrong";
             Log::critical(json_encode($data));
             abort(500);
         }
-        return response()->json($response,$status);
     }
 
     public function billTransactionListing(Request $request, $billId){
         try{
             $status = 200;
-            $transactionDetails = BillTransaction::where('bill_id', $billId)->get();
-            $taxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
-                            ->where('taxes.is_special','=', false)
-                            ->where('bill_taxes.bill_id','=', $billId)
-                            ->orderBy('taxes.id','asc')
-                            ->select('bill_taxes.percentage as percentage','taxes.name as tax_name','taxes.id as id','bill_taxes.applied_on as applied_on')
-                            ->get()->toArray();
-            $specialTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
-                ->where('taxes.is_special','=', true)
-                ->where('bill_taxes.bill_id','=', $billId)
-                ->orderBy('taxes.id','asc')
-                ->select('bill_taxes.percentage as percentage','taxes.name as tax_name','taxes.id as id','bill_taxes.applied_on as applied_on')
-                ->get()->toArray();
+            $transactionDetails = BillTransaction::where('bill_id', $billId)->orderBy('id','desc')->get();
             $records = array();
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = count($transactionDetails);
@@ -1630,29 +1724,23 @@ trait BillTrait{
             $records['data'] = array();
             $end = $request->length < 0 ? count($transactionDetails) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($transactionDetails); $iterator++,$pagination++ ){
-                $taxAmounts = array();
-                foreach($taxes as $tax){
-                    $taxAmounts[$tax['id']] = MaterialProductHelper::customRound(($transactionDetails[$pagination]['subtotal'] * ($tax['percentage'] / 100)),3);
+                if($transactionDetails[$pagination]['paid_from_advanced'] == true){
+                    $paidFrom = 'Advance Payment';
+                }else{
+                    $paidFrom = 'Cheque';
                 }
-                foreach($specialTaxes as $specialTax){
-                    $taxAmount = 0;
-                    $appliedOn = json_decode($specialTax['applied_on']);
-                    foreach($appliedOn as $onTaxId){
-                        if($onTaxId == 0){                        // On subtotal
-                            $taxAmount = MaterialProductHelper::customRound(($taxAmount + ($transactionDetails[$pagination]['subtotal'] * ($specialTax['percentage'] / 100))),3);
-                        }else{
-                            $taxAmount = MaterialProductHelper::customRound(($taxAmount + ($taxAmounts[$onTaxId] * ($specialTax['percentage'] / 100))),3);
-                        }
-                    }
-                    $taxAmounts[$specialTax['id']] = $taxAmount;
-                }
-                $records['data'][$iterator][] = $pagination + 1;
-                $records['data'][$iterator][] = $transactionDetails[$pagination]['subtotal'];
-                foreach($taxAmounts as $taxAmnt){
-                    $records['data'][$iterator][] = $taxAmnt;
-                }
-                $records['data'][$iterator][] = MaterialProductHelper::customRound($transactionDetails[$pagination]['subtotal'] + array_sum($taxAmounts));
-                $records['data'][$iterator][] = "<a class=\"btn btn-xs green dropdown-toggle transaction-details\" onclick=\"getTransactionDetails(".$transactionDetails[$pagination]['id'].")\">Detail</a>";
+                $records['data'][] = [
+                    $pagination+1,
+                    date('j M Y',strtotime($transactionDetails[$pagination]['created_at'])),
+                    $paidFrom,
+                    $transactionDetails[$pagination]['amount'],
+                    $transactionDetails[$pagination]['debit'],
+                    $transactionDetails[$pagination]['hold'],
+                    $transactionDetails[$pagination]['retention_amount'],
+                    $transactionDetails[$pagination]['tds_amount'],
+                    $transactionDetails[$pagination]['other_recovery_value'],
+                    $transactionDetails[$pagination]['total'],
+                ];
             }
         }catch(\Exception $e){
             $status = 500;
@@ -1717,6 +1805,96 @@ trait BillTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function addReconcileTransaction(Request $request){
+        try{
+            $reconcileTransactionData = $request->except('_token');
+            $billReconcileTransaction = BillReconcileTransaction::create($reconcileTransactionData);
+            $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
+            return redirect('/bill/view/'.$request->bill_id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add Reconcile Transactions',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getHoldReconcileListing(Request $request){
+        try{
+            $status = 200;
+            $paymentData = BillReconcileTransaction::where('bill_id',$request->bill_id)->where('transaction_slug','hold')->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($paymentData);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]['amount'],
+                    $paymentData[$pagination]->paymentType->name,
+                    $paymentData[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Retention Reconcile Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 200;
+        }
+        return response()->json($records,$status);
+    }
+
+    public function getRetentionReconcileListing(Request $request){
+        try{
+            $records = array();
+            $status = 200;
+            $paymentData = BillReconcileTransaction::where('bill_id',$request->bill_id)->where('transaction_slug','retention')->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($paymentData);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]['amount'],
+                    $paymentData[$pagination]->paymentType->name,
+                    $paymentData[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Retention Reconcile Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
+        return response()->json($records,$status);
     }
 }
 

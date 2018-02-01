@@ -186,6 +186,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing/{billId}', array('uses' => 'Admin\BillController@billTransactionListing'));
             Route::get('detail/{bill_transaction}', array('uses' => 'Admin\BillController@billTransactionDetail'));
         });
+        Route::group(['prefix' => 'reconcile'], function(){
+            Route::post('add-transaction', array('uses' => 'Admin\BillController@addReconcileTransaction'));
+            Route::post('hold-listing', array('uses' => 'Admin\BillController@getHoldReconcileListing'));
+            Route::post('retention-listing', array('uses' => 'Admin\BillController@getRetentionReconcileListing'));
+        });
     });
 
     Route::group(['prefix' => 'quotation'], function(){
@@ -235,6 +240,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{project}',array('uses' => 'Admin\ProjectController@changeProjectStatus'));
         Route::get('edit/{project}',array('uses' => 'Admin\ProjectController@getEditView'));
         Route::put('edit/{project}',array('uses' => 'Admin\ProjectController@editProject'));
+        Route::group(['prefix' => 'advance-payment'], function(){
+            Route::post('create',array('uses'=> 'Admin\ProjectController@addAdvancePayment'));
+            Route::post('listing',array('uses'=> 'Admin\ProjectController@advancePaymentListing'));
+        });
+        Route::group(['prefix' => 'indirect-expense'], function(){
+            Route::post('create',array('uses'=> 'Admin\ProjectController@addIndirectExpense'));
+            Route::post('listing',array('uses'=> 'Admin\ProjectController@indirectExpenseListing'));
+        });
     });
     Route::group(['prefix' => 'purchase'], function(){
         Route::get('get-detail/{materialRequestComponentID}',array('uses' => 'User\PurchaseController@getPurchaseDetails'));
@@ -388,6 +401,39 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetManagementController@removeAssetImage'));
         Route::post('check-name',array('uses'=> 'Admin\AssetManagementController@checkModel'));
         Route::get('change-status/{asset}',array('uses' => 'Admin\AssetManagementController@changeAssetStatus'));
+        Route::group(['prefix' => 'vendor'], function(){
+            Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\AssetManagementController@getVendorAutoSuggest'));
+            Route::post('assign/{asset}',array('uses' => 'Admin\AssetManagementController@assignVendors'));
+        });
+        Route::group(['prefix' => "maintenance"], function (){
+            Route::group(['prefix' => 'request'], function (){
+                Route::get('create',array('uses' => 'Admin\AssetMaintenanceController@getCreateView'));
+                Route::post('create',array('uses' => 'Admin\AssetMaintenanceController@createAssetMaintenanceRequest'));
+                Route::get('manage',array('uses' => 'Admin\AssetMaintenanceController@getManageView'));
+                Route::post('listing',array('uses' => 'Admin\AssetMaintenanceController@getMaintenanceRequestListing'));
+                Route::get('auto-suggest/{keyword}',array('uses' => 'Admin\AssetMaintenanceController@autoSuggest'));
+                Route::get('view/{assetMaintenanceId}',array('uses' => 'Admin\AssetMaintenanceController@getDetailView'));
+                Route::post('image-upload',array('uses'=>'Admin\AssetMaintenanceController@uploadTempAssetMaintenanceImages'));
+                Route::post('display-images',array('uses'=>'Admin\AssetMaintenanceController@displayAssetMaintenanceImages'));
+                Route::post('delete-temp-product-image',array('uses'=>'Admin\AssetMaintenanceController@removeAssetMaintenanceImage'));
+                Route::group(['prefix' => 'vendor'], function(){
+                    Route::get('auto-suggest/{keyword}/{assetMaintenanceId}',array('uses' => 'Admin\AssetMaintenanceController@getAssetVendorAutoSuggest'));
+                    Route::post('assign/{assetMaintenanceId}',array('uses' => 'Admin\AssetMaintenanceController@assetMaintenanceVendorAssign'));
+                });
+                Route::group(['prefix' => 'approval'], function (){
+                    Route::post('change-status/{status}/{assetMaintenanceVendorID}',array('uses' => 'Admin\AssetMaintenanceController@changeMaintenanceRequestStatus'));
+                    Route::get('manage',array('uses' => 'Admin\AssetMaintenanceController@getApprovalManageView'));
+                    Route::post('listing',array('uses' => 'Admin\AssetMaintenanceController@getMaintenanceRequestApprovalListing'));
+                });
+                Route::group(['prefix' => 'transaction'], function(){
+                    Route::post('create',array('uses'=> 'Admin\AssetMaintenanceController@createTransaction'));
+                    Route::post('upload-pre-grn-images',array('uses'=> 'Admin\AssetMaintenanceController@preGrnImageUpload'));
+                    Route::get('check-generated-grn/{assetMaintenanceId}',array('uses'=> 'Admin\AssetMaintenanceController@checkGeneratedGRN'));
+                    Route::get('view/{assetMaintenanceTransactionId}',array('uses'=> 'Admin\AssetMaintenanceController@viewTransaction'));
+                });
+            });
+        });
+
     });
 
     Route::group(['prefix'=>'bank'],function() {
