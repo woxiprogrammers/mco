@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Purchase;
 
 use App\Client;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentHistory;
@@ -22,6 +23,7 @@ use App\QuotationMaterial;
 use App\QuotationStatus;
 use App\Role;
 use App\Unit;
+use App\User;
 use App\Vendor;
 use App\VendorMaterialRelation;
 use Carbon\Carbon;
@@ -149,6 +151,7 @@ class PurchaseRequestController extends Controller
         }
     }
 
+    use NotificationTrait;
     public function create(Request $request){
         try{
             $user = Auth::user();
@@ -187,6 +190,20 @@ class PurchaseRequestController extends Controller
             $purchaseRequestData['serial_no'] = ($purchaseRequestCount+1);
             $purchaseRequestData['format_id'] = $this->getPurchaseIDFormat('purchase-request',$requestData['project_site_id'],Carbon::now(),$purchaseRequestData['serial_no']);
             $purchaseRequest = PurchaseRequest::create($purchaseRequestData);
+            $userTokens = User::join('user_has_permissions','users.id','=','user_has_permissions.user_id')
+                ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                ->join('user_project_site_relation','users.id','=','user_project_site_relation.user_id')
+                ->whereIn('permissions.name',['approve-purchase-request','create-purchase-order'])
+                ->whereNotNull('users.web_fcm_token')
+                ->where('user_project_site_relation.project_site_id',$request['project_site_id'])
+                ->select('users.web_fcm_token as web_fcm_token', 'users.mobile_fcm_token as mobile_fcm_token')
+                ->get()
+                ->toArray();
+            $webTokens = array_column($userTokens,'web_fcm_token');
+            $mobileTokens = array_column($userTokens,'mobile_fcm_token');
+            $notificationString = '2 -'.$purchaseRequest->projectSite->project->name.' '.$purchaseRequest->projectSite->name;
+            $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Request Created.';
+            $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-r');
             foreach ($materialRequestComponentIds as $materialRequestComponentId) {
                 PurchaseRequestComponent::create([
                     'purchase_request_id' => $purchaseRequest['id'],
@@ -490,6 +507,23 @@ class PurchaseRequestController extends Controller
                     PurchaseRequest::where('id',$purchaseRequestId)->update([
                         'purchase_component_status_id' => $disapproveStatusId
                     ]);
+                    $purchaseRequest = PurchaseRequest::findOrFail($purchaseRequestId);
+                    $webTokens = [$purchaseRequest->onBehalfOfUser->web_fcm_token];
+                    $mobileTokens = [$purchaseRequest->onBehalfOfUser->mobile_fcm_token];
+                    $MRcreatedUsersTokens = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
+                                            ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
+                                            ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                                            ->where('purchase_requests.id', $purchaseRequest->id)
+                                            ->select('users.mobile_fcm_token','users.web_fcm_token')
+                                            ->get()
+                                            ->toArray();
+                    $webTokens = array_merge($webTokens,array_column($MRcreatedUsersTokens,'web_fcm_token'));
+                    $mobileTokens = array_merge($mobileTokens,array_column($MRcreatedUsersTokens,'mobile_fcm_token'));
+                    $notificationString = '2D -'.$purchaseRequest->projectSite->project->name.' '.$purchaseRequest->projectSite->name;
+                    $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Material Disapproved.';
+                    $notificationString .= ' '.$request->remark;
+                    $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'d-p-r');
                     $materialComponentIds = PurchaseRequestComponent::where('purchase_request_id',$purchaseRequestId)->pluck('material_request_component_id')->toArray();
                     MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $disapproveStatusId]);
                     $materialComponentHistoryData['component_status_id'] = $disapproveStatusId;

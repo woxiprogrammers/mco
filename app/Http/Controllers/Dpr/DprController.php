@@ -220,7 +220,7 @@ class DprController extends Controller
             }
             $dprListingData = array_values($dprListingData);
             $iTotalRecords = count($dprListingData);
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($dprDetails); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($dprListingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
                     $pagination+1,
                     $dprListingData[$pagination]['subcontractor_name'],
@@ -233,14 +233,13 @@ class DprController extends Controller
                             <ul class="dropdown-menu pull-left" role="menu">'
 
                     .'<li>'
-
-                    .'<form action="/dpr/dpr-edit-view" method="POST">
-                            <input type="hidden" name="_token" value="'.$request->_token.'">
-                            <input type="hidden" name="subcontractor_id" value="'.$dprDetails[$pagination]->subcontractorDprCategoryRelation->subcontractor_id.'">
-                            <input type="hidden" name="date" value="'.$date.'">'
-                            .'<a href="javascript:void(0);" onclick="submitEditForm(this)">'
-                            .'    <i class="icon-tag"></i> Edit </a>'
-                    .'</form>'
+                        .'<form action="/dpr/dpr-edit-view" method="POST">
+                                <input type="hidden" name="_token" value="'.$request->_token.'">
+                                <input type="hidden" name="subcontractor_id" value="'.$dprListingData[$pagination]['subcontractor_id'].'">
+                                <input type="hidden" name="date" value="'.$date.'">'
+                                .'<a href="javascript:void(0);" onclick="submitEditForm(this)">'
+                                .'    <i class="icon-tag"></i> Edit </a>'
+                        .'</form>'
                     .'</li>'
                     .'</ul>'
                     .'</div>'
