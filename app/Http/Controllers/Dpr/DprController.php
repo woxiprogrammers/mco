@@ -161,14 +161,25 @@ class DprController extends Controller
     }
     public function createDpr(Request $request){
         try{
+            $today = Carbon::now();
             if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
                 $dprDetailData = [
-                    'project_site_id' => Session::get('global_project_site')
+                    'project_site_id' => $projectSiteId
                 ];
                 foreach ($request->number_of_users as $relationId => $numberOfUser){
-                    $dprDetailData['subcontractor_dpr_category_relation_id'] = $relationId;
-                    $dprDetailData['number_of_users'] = $numberOfUser;
-                    DprDetail::create($dprDetailData);
+                    $dprDetail = DprDetail::where('project_site_id', $projectSiteId)
+                                        ->where('subcontractor_dpr_category_relation_id', $relationId)
+                                        ->whereDate('created_at',$today)
+                                        ->first();
+                    if($dprDetail == null){
+                        $dprDetailData['subcontractor_dpr_category_relation_id'] = $relationId;
+                        $dprDetailData['number_of_users'] = $numberOfUser;
+                        DprDetail::create($dprDetailData);
+                    }else{
+                        $dprDetail->update(['number_of_users' => $numberOfUser]);
+                    }
+
                 }
                 $request->session()->flash('success','Data saved successfully !');
             }else{
@@ -324,8 +335,26 @@ class DprController extends Controller
 
     public function getSubcontractorsCategories(Request $request){
         try{
-            $subcontractorDprCategoryRelations = SubcontractorDPRCategoryRelation::where('subcontractor_id',$request->subcontractor_id)->get();
-            return view('partials.dpr.category-table')->with(compact('subcontractorDprCategoryRelations'));
+            $today = Carbon::now();
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $subcontractorCategoryData = DprDetail::join('subcontractor_dpr_category_relations','subcontractor_dpr_category_relations.id','=','dpr_details.subcontractor_dpr_category_relation_id')
+                    ->join('dpr_main_categories','dpr_main_categories.id','=','subcontractor_dpr_category_relations.dpr_main_category_id')
+                    ->where('subcontractor_dpr_category_relations.subcontractor_id', $request->subcontractor_id)
+                    ->whereDate('dpr_details.created_at', $today)
+                    ->where('dpr_details.project_site_id', $projectSiteId)
+                    ->select('dpr_details.id as dpr_detail_id','subcontractor_dpr_category_relations.id as subcontractor_dpr_category_relation_id','dpr_details.number_of_users as number_of_users','dpr_main_categories.name as dpr_main_category_name')
+                    ->get()->toArray();
+                if(count($subcontractorCategoryData) <= 0){
+                    $subcontractorCategoryData = SubcontractorDPRCategoryRelation::join('dpr_main_categories','dpr_main_categories.id','=','subcontractor_dpr_category_relations.dpr_main_category_id')
+                        ->where('subcontractor_dpr_category_relations.subcontractor_id', $request->subcontractor_id)
+                        ->select('subcontractor_dpr_category_relations.id as subcontractor_dpr_category_relation_id','dpr_main_categories.name as dpr_main_category_name')
+                        ->get()->toArray();
+                }
+            }else{
+                $subcontractorCategoryData = array();
+            }
+            return view('partials.dpr.category-table')->with(compact('subcontractorCategoryData'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor\'s DPR categories',
