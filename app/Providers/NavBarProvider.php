@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Http\Requests\MaterialRequest;
 use App\MaterialRequests;
 use App\PurchaseRequest;
 use App\UserLastLogin;
@@ -25,14 +24,16 @@ class NavBarProvider extends ServiceProvider
                 $loggedInUser = Auth::user();
                 $materialRequestCreateCount = $materialRequestDisapprovedCount = 0;
                 $purchaseRequestCreateCount = $purchaseRequestDisapprovedCount = 0;
+
                 if(Session::has('global_project_site')){
                     $projectSiteId = Session::get('global_project_site');
                     if(!in_array($loggedInUser->roles[0]->role->slug, ['admin','superadmin'])){
                         if($loggedInUser->customHasPermission('approve-material-request')){
                             $materialRequestCreateCount = MaterialRequests::join('material_request_components','material_requests.id','=','material_request_components.material_request_id')
                                 ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','material_request_components.component_status_id')
+                                ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','material_requests.project_site_id')
+                                ->where('user_project_site_relation.user_id',$loggedInUser->id)
                                 ->where('purchase_request_component_statuses.slug','pending')
-                                ->where('material_requests.assigned_to',$loggedInUser->id)
                                 ->where('material_requests.project_site_id', $projectSiteId)
                                 ->count();
                         }
@@ -40,8 +41,9 @@ class NavBarProvider extends ServiceProvider
                             $purchaseRequestCreateCount = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
                                 ->join('material_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
                                 ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','material_request_components.component_status_id')
+                                ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','purchase_requests.project_site_id')
+                                ->where('user_project_site_relation.user_id',$loggedInUser->id)
                                 ->where('purchase_request_component_statuses.slug','pending')
-                                ->where('purchase_requests.assigned_to',$loggedInUser->id)
                                 ->where('purchase_requests.project_site_id', $projectSiteId)
                                 ->count();
                         }
@@ -90,7 +92,7 @@ class NavBarProvider extends ServiceProvider
                                     ->where('material_requests.project_site_id', $projectSiteId)
                                     ->count('purchase_request_components.id');
                             }else{
-                                $purchaseRequestDisapprovedCount = MaterialRequest::join('material_request_components','material_requests.id','=','material_request_components.material_request_id')
+                                $purchaseRequestDisapprovedCount = MaterialRequests::join('material_request_components','material_requests.id','=','material_request_components.material_request_id')
                                     ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
                                     ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
                                     ->join('material_request_component_history_table','material_request_component_history_table.material_request_component_id','=','material_request_components.id')

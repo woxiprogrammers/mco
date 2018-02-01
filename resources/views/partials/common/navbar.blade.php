@@ -251,7 +251,7 @@
                                 <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Material Request
                                     @if(($materialRequestNotificationCount) > 0)
-                                        <span class="badge badge-success"><b>6</b></span>
+                                        <span class="badge badge-success"><b>{{$materialRequestNotificationCount}}</b></span>
                                     @endif
                                 </a>
                             </li>
@@ -259,7 +259,7 @@
                                 <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Purchase Request
                                     @if(($purchaseRequestNotificationCount) > 0)
-                                        <span class="badge badge-success"><b>6</b></span>
+                                        <span class="badge badge-success"><b>{{$purchaseRequestNotificationCount}}</b></span>
                                     @endif
                                 </a>
                             </li>

@@ -199,10 +199,11 @@ class PurchaseRequestController extends Controller
                 ->select('users.web_fcm_token as web_fcm_token', 'users.mobile_fcm_token as mobile_fcm_token')
                 ->get()
                 ->toArray();
-            $tokens = array_merge(array_column($userTokens,'web_fcm_token'),array_column($userTokens,'mobile_fcm_token'));
+            $webTokens = array_column($userTokens,'web_fcm_token');
+            $mobileTokens = array_column($userTokens,'mobile_fcm_token');
             $notificationString = '2 -'.$purchaseRequest->projectSite->project->name.' '.$purchaseRequest->projectSite->name;
             $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Request Created.';
-            $this->sendPushNotification('Manisha Construction',$notificationString,$tokens);
+            $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-r');
             foreach ($materialRequestComponentIds as $materialRequestComponentId) {
                 PurchaseRequestComponent::create([
                     'purchase_request_id' => $purchaseRequest['id'],
@@ -507,7 +508,8 @@ class PurchaseRequestController extends Controller
                         'purchase_component_status_id' => $disapproveStatusId
                     ]);
                     $purchaseRequest = PurchaseRequest::findOrFail($purchaseRequestId);
-                    $tokens = [$purchaseRequest->onBehalfOfUser->web_fcm_token, $purchaseRequest->onBehalfOfUser->mobile_fcm_token];
+                    $webTokens = [$purchaseRequest->onBehalfOfUser->web_fcm_token];
+                    $mobileTokens = [$purchaseRequest->onBehalfOfUser->mobile_fcm_token];
                     $MRcreatedUsersTokens = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
                                             ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                                             ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
@@ -516,11 +518,12 @@ class PurchaseRequestController extends Controller
                                             ->select('users.mobile_fcm_token','users.web_fcm_token')
                                             ->get()
                                             ->toArray();
-                    $tokens = array_merge($tokens, array_column($MRcreatedUsersTokens,'web_fcm_token'), array_column($MRcreatedUsersTokens,'mobile_fcm_token'));
+                    $webTokens = array_merge($webTokens,array_column($MRcreatedUsersTokens,'web_fcm_token'));
+                    $mobileTokens = array_merge($mobileTokens,array_column($MRcreatedUsersTokens,'mobile_fcm_token'));
                     $notificationString = '2D -'.$purchaseRequest->projectSite->project->name.' '.$purchaseRequest->projectSite->name;
                     $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Material Disapproved.';
                     $notificationString .= ' '.$request->remark;
-                    $this->sendPushNotification('Manisha Construction',$notificationString,$tokens);
+                    $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'d-p-r');
                     $materialComponentIds = PurchaseRequestComponent::where('purchase_request_id',$purchaseRequestId)->pluck('material_request_component_id')->toArray();
                     MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $disapproveStatusId]);
                     $materialComponentHistoryData['component_status_id'] = $disapproveStatusId;

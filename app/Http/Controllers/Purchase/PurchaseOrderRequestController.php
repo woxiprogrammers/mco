@@ -566,7 +566,8 @@ class PurchaseOrderRequestController extends Controller
                         }
                         $iterator++;
                     }
-                    $tokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token, $purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
+                    $webTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token];
+                    $mobileTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
                     $purchaseRequestComponentIds = array_column($purchaseOrder->purchase_order_component->toArray(),'purchase_request_component_id');
                     $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
                         ->join('material_request_components','material_request_components.material_id','=','material_requests.id')
@@ -577,11 +578,12 @@ class PurchaseOrderRequestController extends Controller
                         ->whereIn('purchase_request_components.id', $purchaseRequestComponentIds)
                         ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
                         ->first();
-                    $tokens = array_merge($tokens,array_column($materialRequestUserToken,'web_fcm_token'),array_column($materialRequestUserToken,'mobile_fcm_token'));
+                    $webTokens = array_merge($webTokens, array_column($materialRequestUserToken,'web_fcm_token'));
+                    $mobileTokens = array_merge($mobileTokens, array_column($materialRequestUserToken,'mobile_fcm_token'));
                     $notificationString = '3 -'.$purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
                     $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Order Created.';
                     $notificationString .= 'PO number: '.$purchaseOrder->format_id;
-                    $this->sendPushNotification('Manisha Construction',$notificationString,$tokens);
+                    $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-o');
                     if(count($vendorInfo['materials']) > 0){
                         $projectSiteInfo = array();
                         $projectSiteInfo['project_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;

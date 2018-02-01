@@ -2,7 +2,7 @@
  * Created by Ameya Joshi on 1/2/18.
  */
 
-var ProjectSiteAdvancePaymentListing = function () {
+var ProjectSiteIndirectExpensesListing = function () {
     var handleOrders = function () {
         var grid = new Datatable();
         var projectSiteId = $("#projectSiteId").val();
@@ -72,5 +72,5 @@ var ProjectSiteAdvancePaymentListing = function () {
     };
 }();
 jQuery(document).ready(function() {
-    ProjectSiteAdvancePaymentListing.init();
+    ProjectSiteIndirectExpensesListing.init();
 });

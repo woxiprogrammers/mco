@@ -799,11 +799,12 @@ class PurchaseController extends Controller
                                         ->select('users.mobile_fcm_token','users.web_fcm_token')
                                         ->get()
                                         ->toArray();
-                        $tokens = array_merge(array_column($userTokens,'web_fcm_token'), array_column($userTokens,'mobile_fcm_token'));
+                        $webTokens = array_column($userTokens,'web_fcm_token');
+                        $mobileTokens = array_column($userTokens,'mobile_fcm_token');
                         $notificationString = '1D -'.$materialRequestComponent->materialRequest->projectSite->project->name.' '.$materialRequestComponent->materialRequest->projectSite->name;
                         $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Material Disapproved.';
                         $notificationString .= ' '.$remark;
-                        $this->sendPushNotification('Manisha Construction',$notificationString,$tokens);
+                        $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'d-m-r');
                     }
                     break;
 
