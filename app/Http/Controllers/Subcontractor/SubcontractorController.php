@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Subcontractor;
 
 use App\DprMainCategory;
 use App\Employee;
+use App\PaymentType;
 use App\Project;
 use App\ProjectSite;
 use App\Quotation;
 use App\QuotationStatus;
 use App\Subcontractor;
 use App\SubcontractorBill;
+use App\SubcontractorBillReconcileTransaction;
 use App\SubcontractorBillStatus;
 use App\SubcontractorBillTax;
 use App\SubcontractorBillTransaction;
@@ -624,7 +626,16 @@ class SubcontractorController extends Controller
                 $billNo++;
             }
             $noOfFloors = $totalBills->count();
-            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal'));
+            $BillTransactionTotals = SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorBill->id)->pluck('total')->toArray();
+            $remainingAmount = $finalTotal - array_sum($BillTransactionTotals);
+            $paymentTypes = PaymentType::orderBy('id')->get();
+            $totalBillHoldAmount = SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('hold');
+            $reconciledHoldAmount = SubcontractorBillReconcileTransaction::where('subcontractor_bill_id',$subcontractorStructureBillId)->where('transaction_slug','hold')->sum('amount');
+            $remainingHoldAmount = $reconciledHoldAmount - $totalBillHoldAmount;
+            $totalBillRetentionAmount = SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('retention_amount');
+            $reconciledRetentionAmount = SubcontractorBillReconcileTransaction::where('subcontractor_bill_id',$subcontractorStructureBillId)->where('transaction_slug','retention')->sum('amount');
+            $remainingRetentionAmount = $reconciledRetentionAmount - $totalBillRetentionAmount;
+            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Bill View',
@@ -861,6 +872,96 @@ class SubcontractorController extends Controller
             abort(500);
         }
         return response()->json($records,200);
+    }
+
+    public function addReconcileTransaction(Request $request){
+        try{
+            $reconcileTransactionData = $request->except('_token');
+            $billReconcileTransaction = SubcontractorBillReconcileTransaction::create($reconcileTransactionData);
+            $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
+            return redirect('/subcontractor/subcontractor-bills/view/'.$request->subcontractor_bill_id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add Subcontractor Reconcile Transactions',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getHoldReconcileListing(Request $request){
+        try{
+            $status = 200;
+            $billReconcileTransaction = SubcontractorBillReconcileTransaction::where('subcontractor_bill_id',$request->bill_id)->where('transaction_slug','hold')->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($billReconcileTransaction);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($billReconcileTransaction); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($billReconcileTransaction[$pagination]['created_at'])),
+                    $billReconcileTransaction[$pagination]['amount'],
+                    $billReconcileTransaction[$pagination]->paymentType->name,
+                    $billReconcileTransaction[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Subcontractor Hold Reconcile Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 200;
+        }
+        return response()->json($records,$status);
+    }
+
+    public function getRetentionReconcileListing(Request $request){
+        try{
+            $records = array();
+            $status = 200;
+            $billReconcileTransaction = SubcontractorBillReconcileTransaction::where('subcontractor_bill_id',$request->bill_id)->where('transaction_slug','retention')->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($billReconcileTransaction);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($billReconcileTransaction); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($billReconcileTransaction[$pagination]['created_at'])),
+                    $billReconcileTransaction[$pagination]['amount'],
+                    $billReconcileTransaction[$pagination]->paymentType->name,
+                    $billReconcileTransaction[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Subcontractor Retention Reconcile Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
+        return response()->json($records,$status);
     }
 
 }
