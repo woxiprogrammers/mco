@@ -431,6 +431,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                     Route::get('check-generated-grn/{assetMaintenanceId}',array('uses'=> 'Admin\AssetMaintenanceController@checkGeneratedGRN'));
                     Route::get('view/{assetMaintenanceTransactionId}',array('uses'=> 'Admin\AssetMaintenanceController@viewTransaction'));
                 });
+                Route::group(['prefix' => 'bill'], function(){
+                    Route::get('manage',array('uses' => 'Admin\AssetMaintenanceController@getBillManageView'));
+                    Route::post('listing',array('uses' => 'Admin\AssetMaintenanceController@getBillListing'));
+                    Route::get('create',array('uses' => 'Admin\AssetMaintenanceController@getBillCreateView'));
+                    Route::post('create',array('uses' => 'Admin\AssetMaintenanceController@createBill'));
+                    Route::get('get-asset-maintenance',array('uses' => 'Admin\AssetMaintenanceController@getAssetMaintenance'));
+                });
             });
         });
 

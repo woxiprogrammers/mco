@@ -553,4 +553,131 @@ class AssetMaintenanceController extends Controller{
         }
     }
 
+    public function getBillManageView(Request $request){
+        try{
+            return view('asset-maintenance.bill.manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Asset Maintenance billing Manage View',
+                'exception' => $e->getMessage()
+            ];
+            Log::cirtical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getBillListing(Request $request){
+        try{
+            $records = array();
+            $status = 200;
+            /*$records['data'] = array();
+            $records["draw"] = intval($request->draw);
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->where('purchase_requests.project_site_id', $projectSiteId)
+                    ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as bill_number','purchase_order_bills.amount as amount','purchase_orders.format_id as format_id')
+                    ->orderBy('id','desc')
+                    ->get();
+            }else{
+                $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as bill_number','purchase_order_bills.amount as amount','purchase_orders.format_id as format_id')
+                    ->orderBy('id','desc')
+                    ->get();
+            }
+            $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
+            if($request->length == -1){
+                $length = $records["recordsTotal"];
+            }else{
+                $length = $request->length;
+            }
+            $user = Auth::user();
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill') || $user->customHasPermission('edit-purchase-bill')){
+                    $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                        <a href="/purchase/purchase-order-bill/edit/'.$purchaseOrderBillData[$pagination]['id'].'" style="color: white"> Edit
+                    </div>';
+                }else{
+                    $editButton = '';
+                }
+                $records['data'][] = [
+                    $purchaseOrderBillData[$pagination]['bill_number'],
+                    $purchaseOrderBillData[$pagination]['format_id'],
+                    $purchaseOrderBillData[$pagination]['amount'],
+                    $editButton
+                ];
+            }*/
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get Asset Maintenance billing listings',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::cirtical(json_encode($data));
+            $records = array();
+            $status = 500;
+        }
+        return response()->json($records,$status);
+    }
+
+    public function getBillCreateView(Request $request){
+        try{
+            /*$clients = Client::join('projects','projects.client_id','=','clients.id')
+                ->join('project_sites','project_sites.project_id','=','projects.id')
+                ->join('quotations','quotations.project_site_id','=','project_sites.id')
+                ->where('clients.is_active', true)
+                ->select('clients.id as id','clients.company as company')
+                ->distinct('id')
+                ->get()
+                ->toArray();
+            $purchaseOrderTransactionDetails = PurchaseOrderTransaction::join('purchase_order_transaction_statuses','purchase_order_transaction_statuses.id','=','purchase_order_transactions.purchase_order_transaction_status_id')
+                ->where('purchase_order_transaction_statuses.slug','bill-pending')
+                ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn')
+                ->get();*/
+            return view('asset-maintenance.bill.create')->with(compact('purchaseOrderTransactionDetails','clients'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Asset Maintenance billing Create View',
+                'exception' => $e->getMessage()
+            ];
+            Log::cirtical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getAssetMaintenance(Request $request){
+        try{
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $assetMaintenanceData = AssetMaintenance::join('asset_maintenance_transactions','asset_maintenance.id','=','asset_maintenance_transactions.asset_maintenance_id')
+                                        ->where('asset_maintenance_transactions.asset_maintenance_transaction_status_id',AssetMaintenanceTransactionStatuses::where('slug','bill-pending')->pluck('id')->first())
+                                        ->where('asset_maintenance.project_site_id',$projectSiteId)
+                                        ->where('asset_maintenance.id',$request->keyword)
+                                        ->select('asset_maintenance.id as id','asset_maintenance_transactions.id as asset_maintenance_transaction_id','asset_maintenance_transactions.grn as grn')
+                                        ->get();
+            }else{
+                $assetMaintenanceData = [];
+            }
+
+            $response = array();
+            $status = 200;
+            $iterator = 0;
+            foreach ($assetMaintenanceData as $assetMaintenance){
+                $response[$iterator]['id'] = $assetMaintenance['id'];
+                $response[$iterator]['grn'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$assetMaintenance['asset_maintenance_transaction_id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $assetMaintenance['grn'].' </label> <a href="javascript:void(0);" onclick="viewTransactionDetails('.$assetMaintenance['asset_maintenance_transaction_id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
+                $iterator++;
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get PO billing Purchase orders',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::cirtical(json_encode($data));
+            $response = array();
+            $status = 500;
+        }
+        return response()->json($response,$status);
+    }
 }
