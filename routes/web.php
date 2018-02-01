@@ -244,6 +244,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses'=> 'Admin\ProjectController@addAdvancePayment'));
             Route::post('listing',array('uses'=> 'Admin\ProjectController@advancePaymentListing'));
         });
+        Route::group(['prefix' => 'indirect-expense'], function(){
+            Route::post('create',array('uses'=> 'Admin\ProjectController@addIndirectExpense'));
+            Route::post('listing',array('uses'=> 'Admin\ProjectController@indirectExpenseListing'));
+        });
     });
     Route::group(['prefix' => 'purchase'], function(){
         Route::get('get-detail/{materialRequestComponentID}',array('uses' => 'User\PurchaseController@getPurchaseDetails'));

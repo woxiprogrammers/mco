@@ -14,6 +14,7 @@ use App\PaymentType;
 use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteIndirectExpense;
 use Illuminate\Http\Request;
 use App\City;
 use Illuminate\Support\Facades\Auth;
@@ -342,5 +343,58 @@ trait ProjectTrait{
             $records = [];
         }
         return response()->json($records,$status);
+    }
+
+    public function addIndirectExpense(Request $request){
+        try{
+            $projectId = ProjectSite::where('id', $request->project_site_id)->pluck('project_id')->first();
+            $projectSiteIndirectExpensesData = $request->except('_token');
+            ProjectSiteIndirectExpense::create($projectSiteIndirectExpensesData);
+            $request->session()->flash('success',"Indirect Expenses added successfully.");
+            return redirect('/project/edit/'.$projectId);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add Project Site Indirect Expense',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function indirectExpenseListing(Request $request){
+        try{
+            $status = 200;
+            $paymentData = ProjectSiteIndirectExpense::where('project_site_id',$request->project_site_id)->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($paymentData);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]['gst'],
+                    $paymentData[$pagination]['tds'],
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Project Site Advance Payment Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = [];
+        }
+        return response()->json($records, $status);
     }
 }
