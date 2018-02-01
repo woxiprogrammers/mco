@@ -8,6 +8,7 @@ use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
 use App\Helper\UnitHelper;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentTypes;
@@ -411,6 +412,7 @@ class PurchaseOrderRequestController extends Controller
     }
 
     use MaterialRequestTrait;
+    use NotificationTrait;
     public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
         try{
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
@@ -420,8 +422,8 @@ class PurchaseOrderRequestController extends Controller
                 }else{
                     $projectSiteId = $purchaseOrderRequest->purchaseOrderRequest->purchaseRequest->project_site_id;
                 }
+                $user = Auth::user();
                 foreach($request->approved_purchase_order_request_relation as $vendorId => $purchaseOrderRequestComponentArray){
-
                     $purchaseOrderCount = PurchaseOrder::whereDate('created_at', Carbon::now())->count();
                     $purchaseOrderCount++;
                     $purchaseOrderFormatID = $this->getPurchaseIDFormat('purchase-order',$projectSiteId,Carbon::now(),$purchaseOrderCount);
@@ -454,7 +456,6 @@ class PurchaseOrderRequestController extends Controller
                             'format_id' => $purchaseOrderFormatID,
                             'serial_no' => $purchaseOrderCount
                         ];
-
                     }
                     $vendorInfo['materials'] = array();
                     $purchaseOrder = PurchaseOrder::create($purchaseOrderData);
@@ -478,7 +479,6 @@ class PurchaseOrderRequestController extends Controller
                         $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
                         $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
                         $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
-//                        dd($vendorInfo);
                         if($newMaterialTypeId == $componentTypeId){
                             $materialName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                             $isMaterialExists = Material::where('name','ilike',$materialName)->first();
@@ -517,7 +517,6 @@ class PurchaseOrderRequestController extends Controller
                                 Asset::create($categoryAssetData);
                             }
                         }
-//                        dd($vendorInfo);
                         if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
                             $vendorInfo['materials'][$iterator]['gst'] = '-';
                         }else{
@@ -526,7 +525,6 @@ class PurchaseOrderRequestController extends Controller
                                 $vendorInfo['materials'][$iterator]['gst'] = '-';
                             }
                         }
-//                        dd($vendorInfo);
                         $purchaseOrderRequestComponent->update(['is_approved' => true]);
                         $disapprovedPurchaseOrderRequestComponentIds = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                                 ->where('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseOrderRequestComponent->purchase_request_component_id)
@@ -568,6 +566,24 @@ class PurchaseOrderRequestController extends Controller
                         }
                         $iterator++;
                     }
+                    $webTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token];
+                    $mobileTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
+                    $purchaseRequestComponentIds = array_column($purchaseOrder->purchase_order_component->toArray(),'purchase_request_component_id');
+                    $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
+                        ->join('material_request_components','material_request_components.material_id','=','material_requests.id')
+                        ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                        ->join('purchase_order_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
+                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                        ->where('purchase_orders.id', $purchaseOrder->id)
+                        ->whereIn('purchase_request_components.id', $purchaseRequestComponentIds)
+                        ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
+                        ->first();
+                    $webTokens = array_merge($webTokens, array_column($materialRequestUserToken,'web_fcm_token'));
+                    $mobileTokens = array_merge($mobileTokens, array_column($materialRequestUserToken,'mobile_fcm_token'));
+                    $notificationString = '3 -'.$purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
+                    $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Order Created.';
+                    $notificationString .= 'PO number: '.$purchaseOrder->format_id;
+                    $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-o');
                     if(count($vendorInfo['materials']) > 0){
                         $projectSiteInfo = array();
                         $projectSiteInfo['project_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;

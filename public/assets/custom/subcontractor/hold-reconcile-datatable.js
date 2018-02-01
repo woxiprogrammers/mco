@@ -1,13 +1,9 @@
-/**
- * Created by Ameya Joshi on 1/2/18.
- */
-
-var ProjectSiteIndirectExpensesListing = function () {
+var BillHoldReconcileListing = function () {
     var handleOrders = function () {
         var grid = new Datatable();
-        var projectSiteId = $("#projectSiteId").val();
+        var billId = $("#subcontractorBillId").val();
         grid.init({
-            src: $("#indirectExpenseTable"),
+            src: $("#holdReconcileTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -27,13 +23,18 @@ var ProjectSiteIndirectExpensesListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/project/indirect-expense/listing?project_site_id="+projectSiteId+"&_token="+$("input[name='_token']").val(), // ajax source
+                    "url": "/subcontractor/subcontractor-bills/reconcile/hold-listing", // ajax source
+                    "data" :{
+                        '_token' : $("input[name='_token']").val(),
+                        'bill_id' : billId
+                    }
                 },
                 "order": [
                     [1, "asc"]
                 ] // set first column as a default sort by asc
             }
         });
+
         // handle group actionsubmit button click
         grid.getTableWrapper().on('click', '.table-group-action-submit', function (e) {
             e.preventDefault();
@@ -62,15 +63,18 @@ var ProjectSiteIndirectExpensesListing = function () {
                 });
             }
         });
-    }
-    return {
 
+    }
+
+    return {
         //main function to initiate the module
         init: function () {
             handleOrders();
         }
     };
 }();
+
 jQuery(document).ready(function() {
-    ProjectSiteIndirectExpensesListing.init();
+    BillHoldReconcileListing.init();
 });
+

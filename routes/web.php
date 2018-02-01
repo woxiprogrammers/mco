@@ -580,6 +580,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createTransaction'));
                 Route::post('listing/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getTransactionListing'));
             });
+            Route::group(['prefix' => 'reconcile'], function(){
+                Route::post('add-transaction', array('uses' => 'Subcontractor\SubcontractorController@addReconcileTransaction'));
+                Route::post('hold-listing', array('uses' => 'Subcontractor\SubcontractorController@getHoldReconcileListing'));
+                Route::post('retention-listing', array('uses' => 'Subcontractor\SubcontractorController@getRetentionReconcileListing'));
+            });
 
         });
     });

@@ -237,18 +237,30 @@
                     <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?>
                     @if($hasPurchasePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> Purchase
-                            <span class="arrow"></span>
-                        </a>
+                        @if(($purchaseRequestNotificationCount + $materialRequestNotificationCount) > 0)
+                            <a> Purchase
+                                <span class="badge badge-success">{!! $purchaseRequestNotificationCount + $materialRequestNotificationCount !!}</span>
+                            </a>
+                        @else
+                            <a> Purchase
+
+                            </a>
+                        @endif
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Material Request
+                                    @if(($materialRequestNotificationCount) > 0)
+                                        <span class="badge badge-success"><b>{{$materialRequestNotificationCount}}</b></span>
+                                    @endif
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Purchase Request
+                                    @if(($purchaseRequestNotificationCount) > 0)
+                                        <span class="badge badge-success"><b>{{$purchaseRequestNotificationCount}}</b></span>
+                                    @endif
                                 </a>
                             </li>
                             <li aria-haspopup="true">
