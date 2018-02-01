@@ -300,7 +300,7 @@
                                             </table>
                                         </div>
                                             <div class="tab-pane fade in" id="billApproveTab">
-                                            <form id="approve" action="/bill/approve" method="post">
+                                                <form id="approve" action="/bill/approve" method="post">
                                                 {!! csrf_field() !!}
                                                 <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
                                                 <div class="col-md-offset-2">
@@ -345,9 +345,9 @@
                                                     </div>
                                                 </div>
                                             </form>
-                                        </div>
+                                            </div>
                                             <div class="tab-pane fade in" id="billTransactionTab">
-                                            <div class="tab-content">
+                                                <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="billTransactionListingTab">
                                                     <div class="table-toolbar">
                                                         <div class="row" style="text-align: right">
@@ -385,7 +385,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                            </div>
                                             <div class="tab-pane fade in" id="reconcileTab">
                                                 <ul class="nav nav-tabs nav-tabs-lg">
                                                     <li class="active">
@@ -400,7 +400,7 @@
                                                         <div class="form-group row">
                                                             <div class="col-md-3">
                                                                 <label class="pull-right control-label">
-                                                                    Remaining Hold Amount :
+                                                                    Reconcile Hold Amount :
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-3">
@@ -434,7 +434,7 @@
                                                         <div class="form-group row">
                                                             <div class="col-md-3">
                                                                 <label class="pull-right control-label">
-                                                                    Remaining Retention Amount :
+                                                                    Reconcile Retention Amount :
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-3">

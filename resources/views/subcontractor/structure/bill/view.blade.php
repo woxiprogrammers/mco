@@ -51,6 +51,9 @@
                                                     <li>
                                                         <a href="#billTransactionTab" data-toggle="tab"> Transactions </a>
                                                     </li>
+                                                    <li>
+                                                        <a href="#reconcileTab" data-toggle="tab"> Reconcile </a>
+                                                    </li>
                                                 </ul>
                                             @endif
                                             <div class="tab-content">
@@ -295,6 +298,124 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="tab-pane fade in" id="reconcileTab">
+                                                    <ul class="nav nav-tabs nav-tabs-lg">
+                                                        <li class="active">
+                                                            <a href="#holdReconcileTab" data-toggle="tab"> Hold </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#retentionReconcileTab" data-toggle="tab"> Retention </a>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                        <div class="tab-pane fade in active" id="holdReconcileTab">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3">
+                                                                    <label class="pull-right control-label">
+                                                                        Reconcile Hold Amount :
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control" readonly value="{{$remainingHoldAmount}}">
+                                                                </div>
+                                                                @if($remainingHoldAmount < 0)
+                                                                    <div class="col-md-6">
+                                                                        <a class="btn yellow pull-right" href="javascript:void(0);" onclick="openReconcilePaymentModal('hold')">
+                                                                            <i class="fa fa-plus"></i>Reconcile Hold
+                                                                        </a>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                            <div class="table-scrollable">
+                                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="holdReconcileTable">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="width: 25%"> Date </th>
+                                                                            <th style="width: 25%"> Amount </th>
+                                                                            <th style="width: 25%"> Payment Method </th>
+                                                                            <th style="width: 25%"> Reference Number </th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tab-pane fade in" id="retentionReconcileTab">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3">
+                                                                    <label class="pull-right control-label">
+                                                                        Reconcile Retention Amount :
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control" readonly value="{{$remainingRetentionAmount}}">
+                                                                </div>
+                                                                @if($remainingRetentionAmount < 0)
+                                                                    <div class="col-md-6">
+                                                                        <a class="btn yellow pull-right" href="javascript:void(0);" onclick="openReconcilePaymentModal('retention')">
+                                                                            <i class="fa fa-plus"></i>Reconcile Retention
+                                                                        </a>
+                                                                    </div>
+                                                                @endif
+                                                                <div class="table-scrollable">
+                                                                    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="retentionReconcileTable">
+                                                                        <thead>
+                                                                        <tr>
+                                                                            <th style="width: 25%"> Date </th>
+                                                                            <th style="width: 25%"> Amount </th>
+                                                                            <th style="width: 25%"> Payment Method </th>
+                                                                            <th style="width: 25%"> Reference Number </th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody>
+
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal fade " id="reconcilePaymentModal"  role="dialog">
+                                                            <div class="modal-dialog">
+                                                                <!-- Modal content-->
+                                                                <div class="modal-content">
+                                                                    <form id="add_payment_form" action="/subcontractor/subcontractor-bills/reconcile/add-transaction" method="post">
+                                                                        {!! csrf_field() !!}
+                                                                        <input type="hidden" name="subcontractor_bill_id" value="{{$subcontractorBill['id']}}">
+                                                                        <input name="transaction_slug" id="reconcileTransactionSlug" type="hidden">
+                                                                        <div class="modal-header">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4"></div>
+                                                                                <div class="col-md-4" style="font-size: 18px"> Payment</div>
+                                                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-body" style="padding:40px 50px;">
+                                                                            <div class="form-group row">
+                                                                                <select class="form-control" name="payment_type_id">
+                                                                                    @foreach($paymentTypes as $type)
+                                                                                        <option value="{{$type['id']}}">{{$type['name']}}</option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount">
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <input type="text" class="form-control"  name="reference_number" placeholder="Enter Reference Number" >
+                                                                            </div>
+                                                                            <button class="btn btn-set red pull-right" type="submit">
+                                                                                <i class="fa fa-check" style="font-size: large"></i>
+                                                                                Add &nbsp; &nbsp; &nbsp;
+                                                                            </button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -317,6 +438,8 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/bill-transaction-manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/subcontractor/hold-reconcile-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
         $(document).ready(function (){
             $('#billTransactionCreateButton').on('click',function(){
@@ -340,6 +463,11 @@
             $('.tax_percent').each(function(){
                 calculateTaxAmount($(this));
             });
+        }
+
+        function openReconcilePaymentModal(transactionSlug){
+            $("#reconcileTransactionSlug").val(transactionSlug);
+            $("#reconcilePaymentModal").modal('show');
         }
     </script>
 @endsection
