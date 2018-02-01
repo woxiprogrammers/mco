@@ -137,8 +137,6 @@
 <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
 <script>
     function switchProjectSiteModule(projectSiteId, moduleSlug){
-        console.log(projectSiteId);
-        console.log(moduleSlug);
         var redirectionUrl = '';
         switch(moduleSlug){
             case 'purchase':
