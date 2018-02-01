@@ -9,6 +9,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Asset;
 use App\AssetMaintenance;
+use App\AssetMaintenanceBill;
+use App\AssetMaintenanceBillImage;
+use App\AssetMaintenanceBillTransaction;
 use App\AssetMaintenanceImage;
 use App\AssetMaintenanceStatus;
 use App\AssetMaintenanceTransaction;
@@ -679,5 +682,97 @@ class AssetMaintenanceController extends Controller{
             $status = 500;
         }
         return response()->json($response,$status);
+    }
+
+    public function getBillPendingTransactions(Request $request){
+        try{
+            $status = 200;
+            $response = array();
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $billPendingTransactions = AssetMaintenance::join('asset_maintenance_transactions','asset_maintenance.id','=','asset_maintenance_transactions.asset_maintenance_id')
+                    ->where('asset_maintenance_transactions.asset_maintenance_transaction_status_id',AssetMaintenanceTransactionStatuses::where('slug','bill-pending')->pluck('id')->first())
+                    ->where('asset_maintenance.project_site_id',$projectSiteId)
+                    ->where('asset_maintenance_transactions.grn','ilike','%'.$request->keyword.'%')
+                    ->select('asset_maintenance.id as id','asset_maintenance_transactions.id as asset_maintenance_transaction_id','asset_maintenance_transactions.grn as grn')
+                    ->get();
+            }else{
+                $billPendingTransactions = AssetMaintenance::join('asset_maintenance_transactions','asset_maintenance.id','=','asset_maintenance_transactions.asset_maintenance_id')
+                    ->where('asset_maintenance_transactions.asset_maintenance_transaction_status_id',AssetMaintenanceTransactionStatuses::where('slug','bill-pending')->pluck('id')->first())
+                    ->where('asset_maintenance_transactions.grn','ilike','%'.$request->keyword.'%')
+                    ->select('asset_maintenance.id as id','asset_maintenance_transactions.id as asset_maintenance_transaction_id','asset_maintenance_transactions.grn as grn')
+                    ->get();
+            }
+            if(count($billPendingTransactions) > 0){
+                $iterator = 0;
+                foreach($billPendingTransactions as $assetMaintenanceTransaction){
+                    $response[$iterator]['list'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$assetMaintenanceTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $assetMaintenanceTransaction['grn'].' </label><a href="javascript:void(0);" onclick="viewTransactionDetails('.$assetMaintenanceTransaction['id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
+                    $response[$iterator]['asset_maintenance_id'] = $assetMaintenanceTransaction['asset_maintenance_id'];
+                    $response[$iterator]['id'] = $assetMaintenanceTransaction['id'];
+                    $response[$iterator]['grn'] = $assetMaintenanceTransaction['grn'];
+                    $iterator++;
+                }
+            }else{
+                $status = 204;
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get Asset Maintenance billing pending bill transactions',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::cirtical(json_encode($data));
+            $response = array();
+            $status = 500;
+        }
+        return response()->json($response,$status);
+    }
+
+    public function createBill(Request $request){
+        try{
+            $assetMaintenanceBillData = $request->only('asset_maintenance_id','cgst_percentage','cgst_amount','sgst_percentage','sgst_amount','igst_percentage','igst_amount','extra_amount');
+            $assetMaintenanceBillData['amount'] = $request['sub_total'];
+            $assetMaintenanceBill = AssetMaintenanceBill::create($assetMaintenanceBillData);
+            if($request->has('bill_images')){
+                $assetMaintenanceDirectoryName = sha1($request->asset_maintenance_id);
+                $assetMaintenanceBillDirectoryName = sha1($assetMaintenanceBill->id);
+                $imageUploadPath = public_path().env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetMaintenanceDirectoryName.DIRECTORY_SEPARATOR.'bills'.DIRECTORY_SEPARATOR.$assetMaintenanceBillDirectoryName;
+                if (!file_exists($imageUploadPath)) {
+                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                }
+                foreach($request->bill_images as $billImage){
+                    $imageArray = explode(';',$billImage);
+                    $image = explode(',',$imageArray[1])[1];
+                    $pos  = strpos($billImage, ';');
+                    $type = explode(':', substr($billImage, 0, $pos))[1];
+                    $extension = explode('/',$type)[1];
+                    $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                    $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                    $billImageData = [
+                        'asset_maintenance_bill_id' => $assetMaintenanceBill->id,
+                        'name' => $filename,
+                    ];
+                    file_put_contents($fileFullPath,base64_decode($image));
+                    AssetMaintenanceBillImage::create($billImageData);
+                }
+            }
+            $purchaseOrderBillTransactionRelationData = [
+                'asset_maintenance_bill_id' => $assetMaintenanceBill->id
+            ];
+            foreach($request->transaction_id as $transactionId){
+                $purchaseOrderBillTransactionRelationData['asset_maintenance_transaction_id'] = $transactionId;
+                AssetMaintenanceBillTransaction::create($purchaseOrderBillTransactionRelationData);
+            }
+            $request->session()->flash('success','Asset Maintenance Bill Created Successfully');
+            return redirect('/asset/maintenance/request/bill/create');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Asset Maintenance bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::cirtical(json_encode($data));
+            $status = 500;
+        }
     }
 }

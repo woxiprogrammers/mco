@@ -62,8 +62,8 @@
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-md-4 form-group">
-                                                                <input type="text" class="form-control asset-maintenance-typeahead" name="purchase_order_format">
-                                                                <input type="hidden" name="purchase_order_id" id="assetMaintenanceId">
+                                                                <input type="text" class="form-control asset-maintenance-typeahead" name="asset_maintenance_id">
+                                                                <input type="hidden" name="asset_maintenance_id" id="assetMaintenanceId">
                                                             </div>
                                                             <div class="col-md-4 form-group">
                                                                 <input type="text" class="form-control transaction-grn-typeahead" name="transaction_grn">
@@ -89,7 +89,7 @@
                                                                 <label class="control-label pull-right">Sub-Total</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control calculate-amount" name="sub_total" id="subTotal">
+                                                                <input type="text" class="form-control calculatable-field calculate-amount" name="sub_total" id="subTotal">
                                                             </div>
                                                         </div>
                                                         <div class="row form-group">
@@ -98,12 +98,12 @@
                                                             </div>
                                                             <div class="col-md-5">
                                                                 <div class="input-group" >
-                                                                    <input type="text" class="form-control tax-modal-cgst-percentage" name="cgst_percentage" onkeyup="calculateTaxes(this)">
+                                                                    <input type="text" class="form-control calculatable-field cgst-percentage" name="cgst_percentage">
                                                                     <span class="input-group-addon">%</span>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-5">
-                                                                <input type="text" class="form-control tax-modal-cgst-amount" name="cgst_amount" readonly>
+                                                                <input type="text" class="form-control calculatable-field cgst-amount" name="cgst_amount" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="row form-group">
@@ -112,12 +112,12 @@
                                                             </div>
                                                             <div class="col-md-5">
                                                                 <div class="input-group" >
-                                                                    <input type="text" class="form-control tax-modal-sgst-percentage" name="sgst_percentage" onkeyup="calculateTaxes(this)" >
+                                                                    <input type="text" class="form-control calculatable-field sgst-percentage" name="sgst_percentage">
                                                                     <span class="input-group-addon">%</span>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-5">
-                                                                <input type="text" class="form-control tax-modal-sgst-amount" name="sgst_amount" readonly>
+                                                                <input type="text" class="form-control calculatable-field sgst-amount" name="sgst_amount" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="row form-group">
@@ -126,20 +126,12 @@
                                                             </div>
                                                             <div class="col-md-5">
                                                                 <div class="input-group" >
-                                                                    <input type="text" class="form-control tax-modal-igst-percentage" name="igst_percentage" onkeyup="calculateTaxes(this)" >
+                                                                    <input type="text" class="form-control calculatable-field igst-percentage" name="igst_percentage">
                                                                     <span class="input-group-addon">%</span>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-5">
-                                                                <input type="text" class="form-control tax-modal-igst-amount" name="igst_amount" readonly>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row">
-                                                            <div class="col-md-2">
-                                                                <label class="control-label pull-right">Tax Amount</label>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <input type="number" class="form-control tax" id="taxAmount" name="tax_amount" readonly>
+                                                                <input type="text" class="form-control calculatable-field igst-amount" name="igst_amount" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -147,7 +139,7 @@
                                                                 <label class="control-label pull-right">Extra Amount</label>
                                                             </div>
                                                             <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" name="extra_amount">
+                                                                <input type="text" class="form-control calculatable-field" name="extra_amount">
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -155,7 +147,7 @@
                                                                 <label class="control-label pull-right">Total Amount</label>
                                                             </div>
                                                             <div class="col-md-3">
-                                                                <input type="text" class="form-control" id="totalAmount" readonly>
+                                                                <input type="text" class="form-control calculatable-field" id="totalAmount" name="total" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -192,14 +184,14 @@
                                 </div>
                             </div>
                         </form>
-                        <div class="modal fade" id="editTransactionModal" role="dialog">
+                        <div class="modal fade" id="viewTransactionModal" role="dialog">
                             <div class="modal-dialog transaction-modal" style="width: 90%; ">
                                 <!-- Modal content-->
                                 <div class="modal-content" style="overflow: scroll !important;">
                                     <div class="modal-header">
                                         <div class="row">
                                             <div class="col-md-4"></div>
-                                            <div class="col-md-4" style="font-size: 18px"> Purchase Order Transaction</div>
+                                            <div class="col-md-4" style="font-size: 18px"> Asset Maintenance Transaction</div>
                                             <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                         </div>
                                     </div>
@@ -230,6 +222,45 @@
     <script>
         $(document).ready(function(){
             CreatePurchaseOrderBill.init();
+            $(".calculatable-field").on('keyup', function(){
+                var subTotal = $(".calculatable-field:input[name='sub_total']").val();
+                if(typeof subTotal == 'undefined' || subTotal == ''){
+                    subTotal = 0;
+                    $(".calculatable-field:input[name='sub_total']").val(0);
+                }
+                var cgst_percentage = $(".calculatable-field:input[name='cgst_percentage']").val();
+                if(typeof cgst_percentage == 'undefined' || cgst_percentage == ''){
+                    cgst_percentage = 0;
+                    $(".calculatable-field:input[name='cgst_percentage']").val(0);
+                }
+                var cgst_amount = (parseFloat(subTotal)) * (parseFloat(cgst_percentage)/100);
+                $(".calculatable-field:input[name='cgst_amount']").val(cgst_amount);
+
+                var sgst_percentage = $(".calculatable-field:input[name='sgst_percentage']").val();
+                if(typeof sgst_percentage == 'undefined' || sgst_percentage == ''){
+                    sgst_percentage = 0;
+                    $(".calculatable-field:input[name='sgst_percentage']").val(0);
+                }
+                var sgst_amount = (parseFloat(subTotal)) * (parseFloat(sgst_percentage)/100);
+                $(".calculatable-field:input[name='sgst_amount']").val(sgst_amount);
+
+                var igst_percentage = $(".calculatable-field:input[name='igst_percentage']").val();
+                if(typeof igst_percentage == 'undefined' || igst_percentage == ''){
+                    igst_percentage = 0;
+                    $(".calculatable-field:input[name='igst_percentage']").val(0);
+                }
+                var igst_amount = (parseFloat(subTotal)) * (parseFloat(igst_percentage)/100);
+                $(".calculatable-field:input[name='igst_amount']").val(igst_amount);
+
+                var extra_amount = $(".calculatable-field:input[name='extra_amount']").val();
+                if(typeof extra_amount == 'undefined' || extra_amount == ''){
+                    extra_amount = 0;
+                    $(".calculatable-field:input[name='extra_amount']").val(0);
+                }
+                var total = (parseFloat(subTotal) + parseFloat(cgst_amount) +parseFloat(sgst_amount) +parseFloat(igst_amount) +parseFloat(extra_amount));
+                $(".calculatable-field:input[name='total']").val(total)
+            });
+
             $("#transactionSelectButton").on('click', function(event){
                 event.stopPropagation();
                 if($(".transaction-select:checkbox:checked").length > 0 ){
@@ -237,36 +268,9 @@
                     $(".transaction-select:checkbox:checked").each(function(){
                         transaction_id.push($(this).val());
                     });
-                    $.ajax({
-                        url: '/purchase/purchase-order-bill/get-transaction-subtotal',
-                        type: "POST",
-                        data:{
-                            _token: $("input[name='_token']").val(),
-                            transaction_id: transaction_id
-                        },
-                        success: function(data,textStatus, xhr){
-                            $("#subTotal").val(data.sub_total);
-                            $("#totalAmount").val(data.sub_total);
-                            $("#taxAmount").val(data.tax_amount);
-                            $("#billData").show();
-                        },
-                        error: function(errorData){
-
-                        }
-                    });
                 }
             });
 
-            $(".tax").on('keyup',function(){
-                var subtotal = $("#subTotal").val();
-                var percentage = $(this).val();
-                var amount = subtotal * (percentage / 100);
-                $(this).closest('#inputGroup').next().find("input[type='text']").val(amount);
-                calculateTotal();
-            });
-            $(".calculate-amount").on('keyup',function(){
-                calculateTotal();
-            });
             $("#imageupload").on('change', function () {
                 var countFiles = $(this)[0].files.length;
                 var imgPath = $(this)[0].value;
@@ -292,7 +296,7 @@
                 }
             });
 
-            var citiList = new Bloodhound({
+           /* var citiList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
                 remote: {
@@ -311,12 +315,12 @@
                     },
                     wildcard: "%QUERY"
                 }
-            });
+            });*/
             var transactionGrnList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
                 remote: {
-                    url: "/purchase/purchase-order-bill/get-bill-pending-transactions?keyword=%QUERY",
+                    url: "/asset/maintenance/request/bill/get-bill-pending-transactions?keyword=%QUERY",
                     filter: function(x) {
                         if($(window).width()<420){
                             $("#header").addClass("fixed");
@@ -333,8 +337,8 @@
                 }
             });
             transactionGrnList.initialize();
-            citiList.initialize();
-            $('.asset-maintenance-typeahead').typeahead(null, {
+            /*citiList.initialize();*/
+            /*$('.asset-maintenance-typeahead').typeahead(null, {
                 displayKey: 'name',
                 engine: Handlebars,
                 source: citiList.ttAdapter(),
@@ -351,7 +355,6 @@
                 $(".transaction-grn-typeahead").attr('readonly', true);
                 var POData = $.parseJSON(JSON.stringify(datum));
                 console.log(POData);
-                $("input[name='purchase_order_format']").val(POData.id);
                 $("#assetMaintenanceId").val(POData.id);
                 $("#grnSelectionDiv .list-group").html(POData.grns);
                 $("#grnSelectionDiv").show();
@@ -363,7 +366,7 @@
                     $("#grnSelectionDiv .list-group").html('');
                     $("#grnSelectionDiv").hide();
                     $("#billData").hide();
-                });
+                });*/
 
 
             $('.transaction-grn-typeahead').typeahead(null, {
@@ -380,19 +383,19 @@
                     suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{grn}}</strong></div>')
                 },
             }).on('typeahead:selected', function (obj, datum) {
-                $("input[name='purchase_order_format']").attr('readonly', true);
                 var POData = $.parseJSON(JSON.stringify(datum));
+                console.log(POData.grn);
                 $("input[name='transaction_grn']").val(POData.grn);
                 $("#grnSelectionDiv .list-group").html(POData.list);
-                $("#assetMaintenanceId").val(POData.purchase_order_id);
+                $("#assetMaintenanceId").val(POData.id);
                 $("#grnSelectionDiv").show();
                 $("#grnSelectionDiv .list-group input:checkbox").each(function(){
                     $(this).attr('checked', true);
                 });
                 $("#transactionSelectButton").trigger('click');
+                $('#billData').show();
             })
                 .on('typeahead:open', function (obj, datum) {
-                    $("input[name='purchase_order_format']").attr('readonly', false);
                     $(".transaction-grn-typeahead").val('');
                     $(".asset-maintenance-typeahead").val('');
                     $("#grnSelectionDiv .list-group").html('');
@@ -400,23 +403,15 @@
                     $("#billData").hide();
                 });
         });
-        function calculateTotal(){
-            var total = 0;
-            $(".calculate-amount").each(function(){
-                var amount = $(this).val();
-                if(typeof amount != 'undefined' && amount != '' && amount != null){
-                    total += parseFloat($(this).val());
-                }
-            });
-            $("#totalAmount").val(total);
-        }
+
         function viewTransactionDetails(transactionId){
+            alert(1);
             $.ajax({
-                url:'/asset/maintenance/request/transaction/edit/'+transactionId+"?_token="+$('input[name="_token"]').val()+"&isShowTax=true",
+                url:'/asset/maintenance/request/transaction/view/'+transactionId+"?_token="+$('input[name="_token"]').val()+"&isShowTax=true",
                 type: 'GET',
                 success: function(data,textStatus,xhr){
-                    $("#editTransactionModal .modal-body").html(data);
-                    $("#editTransactionModal").modal('show');
+                    $("#viewTransactionModal .modal-body").html(data);
+                    $("#viewTransactionModal").modal('show');
                 },
                 error: function(errorStatus){
 
