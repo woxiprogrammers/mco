@@ -213,6 +213,8 @@ class AssetMaintenanceController extends Controller{
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
         return response()->json($records,$status);
     }
@@ -566,7 +568,7 @@ class AssetMaintenanceController extends Controller{
                 'action' => 'Get Asset Maintenance billing Manage View',
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
     }
@@ -614,7 +616,7 @@ class AssetMaintenanceController extends Controller{
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             $records = array();
             $status = 500;
         }
@@ -630,44 +632,10 @@ class AssetMaintenanceController extends Controller{
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
     }
-
-    /*public function getAssetMaintenance(Request $request){
-        try{
-            if(Session::has('global_project_site')){
-                $projectSiteId = Session::get('global_project_site');
-                $assetMaintenanceData = AssetMaintenance::join('asset_maintenance_transactions','asset_maintenance.id','=','asset_maintenance_transactions.asset_maintenance_id')
-                                        ->where('asset_maintenance_transactions.asset_maintenance_transaction_status_id',AssetMaintenanceTransactionStatuses::where('slug','bill-pending')->pluck('id')->first())
-                                        ->where('asset_maintenance.project_site_id',$projectSiteId)
-                                        ->where('asset_maintenance.id',$request->keyword)
-                                        ->select('asset_maintenance.id as id','asset_maintenance_transactions.id as asset_maintenance_transaction_id','asset_maintenance_transactions.grn as grn')
-                                        ->get();
-            }else{
-                $assetMaintenanceData = [];
-            }
-            $response = array();
-            $status = 200;
-            $iterator = 0;
-            foreach ($assetMaintenanceData as $assetMaintenance){
-                $response[$iterator]['id'] = $assetMaintenance['id'];
-                $response[$iterator]['grn'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$assetMaintenance['asset_maintenance_transaction_id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $assetMaintenance['grn'].' </label> <a href="javascript:void(0);" onclick="viewTransactionDetails('.$assetMaintenance['asset_maintenance_transaction_id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
-                $iterator++;
-            }
-        }catch (\Exception $e){
-            $data = [
-                'action' => 'Get Asset Maintenance billing Asset Maintenance',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::cirtical(json_encode($data));
-            $response = array();
-            $status = 500;
-        }
-        return response()->json($response,$status);
-    }*/
 
     public function getBillPendingTransactions(Request $request){
         try{
@@ -706,7 +674,7 @@ class AssetMaintenanceController extends Controller{
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             $response = array();
             $status = 500;
         }
