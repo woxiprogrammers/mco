@@ -509,6 +509,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('get-details/{id}',array('uses'=> 'Drawing\ImagesController@getDetails'));
             Route::get('manage-drawings',array('uses'=> 'Drawing\ImagesController@getManageDrawingsView'));
             Route::get('edit/{id}/{site_id}',array('uses'=> 'Drawing\ImagesController@getEditView'));
+            Route::post('edit/{id}/{site_id}',array('uses'=> 'Drawing\ImagesController@editImages'));
             Route::post('image-upload',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
             Route::post('get-projects',array('uses'=>'Drawing\ImagesController@getProjects'));
             Route::post('get-project-sites',array('uses'=>'Drawing\ImagesController@getProjectSites'));

@@ -3,6 +3,16 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <style>
+        .thumbimage {
+            float:left;
+            width:100%;
+            height: 200px;
+            position:relative;
+            padding:5px;
+        }
+    </style>
+
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -12,12 +22,20 @@
                 <!-- BEGIN CONTAINER -->
                 <div class="page-container">
                     <!-- BEGIN CONTENT -->
-                    <div class="page-content-wrapper">
+                    <!--action="/drawing/images/edit"-->
+                    <form role="form" id="create-image" class="form-horizontal" method="post" action="/drawing/images/edit/{{$sub_category['id']}}/{{$site['id']}}">
+                        <div class="page-content-wrapper">
                         <div class="page-head">
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
                                     <h1>Edit Image</h1>
+                                </div>
+                                <div class="col-md-6" style="margin-top: 12px;float: right">
+                                    <button type="submit" class="btn btn-set red pull-right">
+                                        <i class="fa fa-check"></i>
+                                        Submit
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -37,7 +55,6 @@
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
-
                                         <div class="portlet-body form">
                                             {!! csrf_field() !!}
                                             <div class="form-body">
@@ -105,13 +122,13 @@
                                             </div>
                                             <input type="hidden" id="path" name="path" value="">
                                             <input type="hidden" id="max_files_count" name="max_files_count" value="20">
-
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -134,12 +151,13 @@
                         <input type="hidden"  name="site_id" value="{{$site_id}}">
                         <input type="hidden"  name="sub_category_id" value="{{$id}}">
                         <div class="form-group row">
-                            <div class="col-md-3" style="text-align: right">
-                                <label for="name" class="control-label">Browse File</label>
-                                <span>*</span>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="file" name="file" required>
+                            <label class="control-label">Select Images For Generating GRN :</label>
+                            <input id="imageupload" type="file" class="btn blue" multiple />
+                            <br />
+                            <div class="row">
+                                <div id="preview-image" class="row">
+
+                                </div>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -176,6 +194,31 @@
                 var id = $(this).val();
                 $('#drawing-images-id').val(id);
                 $("#myModal").modal();
+            });
+
+            $("#imageupload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#preview-image");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-4"><input type="hidden" name="file" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
             });
         });
     </script>

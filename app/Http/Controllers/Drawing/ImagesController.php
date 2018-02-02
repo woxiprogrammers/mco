@@ -10,6 +10,7 @@ use App\DrawingImageComment;
 use App\DrawingImageVersion;
 use App\Project;
 use App\ProjectSite;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -41,35 +42,35 @@ class ImagesController extends Controller
     }
     public function getEditView(Request $request,$id,$site_id){
         try{
-               $site = ProjectSite::where('id',$site_id)->select('id','project_id','name')->first()->toArray();
-               $project = Project::where('id',$site['project_id'])->select('id','name','client_id')->first()->toArray();
-               $client = Client::where('id',$project['client_id'])->select('id','company')->first()->toArray();
-               $main_category_id = DrawingCategory::where('id',$id)->pluck('drawing_category_id')->first();
-               $main_category = DrawingCategory::where('id',$main_category_id)->select('id','name')->first()->toArray();
-               $sub_category = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
-               $drawing_category_site_relation_id = DrawingCategorySiteRelation::where('drawing_category_id',$id)
-                                                    ->where('project_site_id',$site_id)
-                                                    ->pluck('id')->toArray();
-               $drawing_images_id = DrawingImage::whereIn('drawing_category_site_relation_id',$drawing_category_site_relation_id)->pluck('id')->toArray();
-               $iterator = 0;
-               $drawing_image_latest_version = array();
-               $path = env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.sha1($site_id).DIRECTORY_SEPARATOR.sha1($id);
-               foreach ($drawing_images_id as $value){
-                   $drawing_image_latest_version[$iterator] =DrawingImageVersion:: where('drawing_image_id',$value)->orderBy('id','desc')->select('id','title','name')->first()->toArray();
-                   $drawing_image_latest_version[$iterator]['encoded_name'] = $path.DIRECTORY_SEPARATOR.urlencode($drawing_image_latest_version[$iterator]['name']);
-                   $drawing_image_latest_version[$iterator]['original_id'] = $value;
-                   $iterator++;
-               }
+            $site = ProjectSite::where('id',$site_id)->select('id','project_id','name')->first()->toArray();
+            $project = Project::where('id',$site['project_id'])->select('id','name','client_id')->first()->toArray();
+            $client = Client::where('id',$project['client_id'])->select('id','company')->first()->toArray();
+            $main_category_id = DrawingCategory::where('id',$id)->pluck('drawing_category_id')->first();
+            $main_category = DrawingCategory::where('id',$main_category_id)->select('id','name')->first()->toArray();
+            $sub_category = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
+            $drawing_category_site_relation_id = DrawingCategorySiteRelation::where('drawing_category_id',$id)
+                                                ->where('project_site_id',$site_id)
+                                                ->pluck('id')->toArray();
+            $drawing_images_id = DrawingImage::whereIn('drawing_category_site_relation_id',$drawing_category_site_relation_id)->pluck('id')->toArray();
+            $iterator = 0;
+            $drawing_image_latest_version = array();
+            $path = env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.sha1($site_id).DIRECTORY_SEPARATOR.sha1($id);
+            foreach ($drawing_images_id as $value){
+               $drawing_image_latest_version[$iterator] =DrawingImageVersion:: where('drawing_image_id',$value)->orderBy('id','desc')->select('id','title','name')->first()->toArray();
+               $drawing_image_latest_version[$iterator]['encoded_name'] = $path.DIRECTORY_SEPARATOR.urlencode($drawing_image_latest_version[$iterator]['name']);
+               $drawing_image_latest_version[$iterator]['original_id'] = $value;
+               $iterator++;
+            }
+            return view('drawing/images/edit')->with(compact('site','project','client','main_category','sub_category','project_site','path','drawing_image_latest_version','clients','site_id','id'));
         }catch(\Exception $e){
             $data = [
-                'action' => 'Edit',
+                'action' => 'Get Drawing Images Edit View',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
             abort(500);
         }
-        return view('drawing/images/edit')->with(compact('site','project','client','main_category','sub_category','project_site','path','drawing_image_latest_version','clients','site_id','id'));
     }
 
     public function uploadTempDrawingImages(Request $request){
@@ -160,6 +161,7 @@ class ImagesController extends Controller
                     $files = $request->work_order_images;
                     $workOrderImagesData['project_site_id'] = $siteId;
                     $workOrderImagesData['drawing_category_id'] = $request->drawing_category_id;
+                    $workOrderImagesData['created_at'] = $workOrderImagesData['updated_at'] = Carbon::now();
                     $drawing_categories_site_relation_id = DrawingCategorySiteRelation::insertGetId($workOrderImagesData);
                     foreach($files as $image){
                         $imageName = urldecode(basename($image['image_name']));
@@ -250,11 +252,20 @@ class ImagesController extends Controller
     }
     public function createVersion(Request $request){
         try{
+            $file = $request->file;
             $tempImageUploadPath = public_path().env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.sha1($request->site_id).DIRECTORY_SEPARATOR.sha1($request->sub_category_id);
-            $extension = $request->file('file')->getClientOriginalExtension();
-            $filename = preg_replace('/\s+/', '', explode(".",$request->file('file')->getClientOriginalName())[0]);
+            $imageArray = explode(';',$file);
+            $image = explode(',',$imageArray[1])[1];
+            $pos  = strpos($file, ';');
+            $type = explode(':', substr($file, 0, $pos))[1];
+            $extension = explode('/',$type)[1];
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $filename = $filename.'#'.mt_rand(1,10000000000).sha1(time()).".{$extension}";
-            $request->file('file')->move($tempImageUploadPath,$filename);
+            if (!file_exists($tempImageUploadPath)) {
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            }
+            $fullFilePath = $tempImageUploadPath.DIRECTORY_SEPARATOR.$filename;
+            file_put_contents($fullFilePath,base64_decode($image));
             $data['drawing_image_id'] = $request->drawing_images_id;
             $data['title'] = $request->title;
             $data['name'] = $filename;
@@ -263,7 +274,7 @@ class ImagesController extends Controller
         }catch(\Exception $e){
             $data = [
                 'action' => 'Version create',
-                'params' => $request->all(),
+                'params' => $request->except('file'),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
@@ -356,6 +367,50 @@ class ImagesController extends Controller
         }catch(\Exception $e){
             $data = [
                 'action' => 'Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editImages(Request $request,$drawingCategoryId,$projectSiteId){
+        try{
+            $user = Auth::user();
+            $directoryName = sha1($projectSiteId).DIRECTORY_SEPARATOR.sha1($request->drawing_category_id);
+            $tempImageUploadPath = public_path().env('DRAWING_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user->id);
+            $imageUploadPath = public_path().env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.$directoryName;
+            $drawingCategorySiteRelation = DrawingCategorySiteRelation::where('project_site_id', $projectSiteId)->where('drawing_category_id',$drawingCategoryId)->first();
+            if(count($request->work_order_images) > 0){
+                $files = $request->work_order_images;
+                foreach($files as $image){
+                    $imageName = urldecode(basename($image['image_name']));
+                    $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
+                    $imageData['random_string'] = rand(10,100).sha1(time());
+                    $imageData['drawing_category_site_relation_id'] = $drawingCategorySiteRelation->id;
+                    $drawing_image_id = DrawingImage::insertGetId($imageData);
+                    $imageVersionData['title'] = $image['title'];
+                    $imageVersionData['name'] = $imageName;
+                    $imageVersionData['drawing_image_id'] =$drawing_image_id;
+                    $drawing_image_version_id = DrawingImageVersion::insertGetId($imageVersionData);
+                    if (!file_exists($imageUploadPath)) {
+                        File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                    }
+                    if(File::exists($newTempImageUploadPath)){
+                        $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
+                        File::move($newTempImageUploadPath,$imageUploadNewPath);
+                    }
+                }
+                if(count(scandir($tempImageUploadPath)) <= 2){
+                    rmdir($tempImageUploadPath);
+                }
+            }
+            $request->session()->flash('success','Drawing Images Edit Successfully.!');
+            return redirect('/drawing/images/edit/'.$drawingCategoryId.'/'.$projectSiteId);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Edit Drawing Images',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
