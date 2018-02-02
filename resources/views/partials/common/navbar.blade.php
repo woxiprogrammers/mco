@@ -313,6 +313,11 @@
                                         <i class="fa fa-sitemap"></i> Asset Maintenance Approval
                                     </a>
                                 </li>
+                                <li aria-haspopup="true">
+                                    <a href="/asset/maintenance/request/bill/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-bars"></i> Asset Maintenance Billing
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     @endif
