@@ -86,6 +86,14 @@
                                                     <div id="billData" hidden>
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
+                                                                <label class="control-label pull-right">Bil Number</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" name="bill_number" id="bill_number">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
                                                                 <label class="control-label pull-right">Sub-Total</label>
                                                             </div>
                                                             <div class="col-md-6">

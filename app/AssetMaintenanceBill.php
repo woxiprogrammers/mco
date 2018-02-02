@@ -13,4 +13,8 @@ class AssetMaintenanceBill extends Model
     public function assetMaintenance(){
         return $this->belongsTo('App\AssetMaintenance','asset_maintenance_id');
     }
+
+    public function assetMaintenanceTransactionRelation(){
+        return $this->hasMany('App\AssetMaintenanceBillTransaction','asset_maintenance_bill_id');
+    }
 }
