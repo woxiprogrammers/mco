@@ -57,9 +57,11 @@
                                                 <li>
                                                     <a href="#vendorAssignmentTab" data-toggle="tab"> Assign Vendors</a>
                                                 </li>
-                                                <li>
-                                                    <a href="#transactionTab" data-toggle="tab"> Transactions </a>
-                                                </li>
+                                                @if($assetMaintenance->assetMaintenanceStatus->slug == 'vendor-approved')
+                                                    <li>
+                                                        <a href="#transactionTab" data-toggle="tab"> Transactions </a>
+                                                    </li>
+                                                @endif
                                             </ul>
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="viewInfoTab">
@@ -324,8 +326,6 @@
     <script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-    {{--<script src="/assets/custom/admin/asset/image-datatable.js"></script>
-    <script src="/assets/custom/admin/asset/image-upload.js"></script>--}}
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>

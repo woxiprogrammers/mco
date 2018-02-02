@@ -437,7 +437,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                     Route::get('create',array('uses' => 'Admin\AssetMaintenanceController@getBillCreateView'));
                     Route::post('create',array('uses' => 'Admin\AssetMaintenanceController@createBill'));
                     Route::get('view/{assetMaintenanceBillId}',array('uses' => 'Admin\AssetMaintenanceController@viewBill'));
-                    Route::get('get-asset-maintenance',array('uses' => 'Admin\AssetMaintenanceController@getAssetMaintenance'));
                     Route::get('get-bill-pending-transactions',array('uses' => 'Admin\AssetMaintenanceController@getBillPendingTransactions'));
                     Route::group(['prefix' => 'payment'], function(){
                         Route::post('create',array('uses' => 'Admin\AssetMaintenanceController@createPayment'));

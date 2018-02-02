@@ -635,7 +635,7 @@ class AssetMaintenanceController extends Controller{
         }
     }
 
-    public function getAssetMaintenance(Request $request){
+    /*public function getAssetMaintenance(Request $request){
         try{
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
@@ -667,7 +667,7 @@ class AssetMaintenanceController extends Controller{
             $status = 500;
         }
         return response()->json($response,$status);
-    }
+    }*/
 
     public function getBillPendingTransactions(Request $request){
         try{
@@ -691,7 +691,7 @@ class AssetMaintenanceController extends Controller{
             if(count($billPendingTransactions) > 0){
                 $iterator = 0;
                 foreach($billPendingTransactions as $assetMaintenanceTransaction){
-                    $response[$iterator]['list'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$assetMaintenanceTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $assetMaintenanceTransaction['grn'].' </label><a href="javascript:void(0);" onclick="viewTransactionDetails('.$assetMaintenanceTransaction['id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
+                    $response[$iterator]['list'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$assetMaintenanceTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $assetMaintenanceTransaction['grn'].' </label><a href="javascript:void(0);" onclick="viewTransactionDetails('.$assetMaintenanceTransaction['asset_maintenance_transaction_id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
                     $response[$iterator]['asset_maintenance_id'] = $assetMaintenanceTransaction['asset_maintenance_id'];
                     $response[$iterator]['id'] = $assetMaintenanceTransaction['id'];
                     $response[$iterator]['grn'] = $assetMaintenanceTransaction['grn'];
@@ -759,7 +759,7 @@ class AssetMaintenanceController extends Controller{
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             $status = 500;
         }
     }

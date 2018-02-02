@@ -54,18 +54,12 @@
                                                         <legend>Asset Maintenance</legend>
                                                         <div class="row">
                                                             <div class="col-md-4">
-                                                                Asset Maintenance Id
-                                                            </div>
-                                                            <div class="col-md-4">
                                                                 Transaction GRN
                                                             </div>
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-md-4 form-group">
-                                                                <input type="text" class="form-control asset-maintenance-typeahead" name="asset_maintenance_id">
                                                                 <input type="hidden" name="asset_maintenance_id" id="assetMaintenanceId">
-                                                            </div>
-                                                            <div class="col-md-4 form-group">
                                                                 <input type="text" class="form-control transaction-grn-typeahead" name="transaction_grn">
                                                             </div>
                                                         </div>
@@ -304,26 +298,6 @@
                 }
             });
 
-           /* var citiList = new Bloodhound({
-                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
-                queryTokenizer: Bloodhound.tokenizers.whitespace,
-                remote: {
-                    url: "/asset/maintenance/request/bill/get-asset-maintenance?keyword=%QUERY",
-                    filter: function(x) {
-                        if($(window).width()<420){
-                            $("#header").addClass("fixed");
-                        }
-                        return $.map(x, function (data) {
-                            return {
-                                id: data.id,
-                                //format: data.format,
-                                grns:data.grn
-                            };
-                        });
-                    },
-                    wildcard: "%QUERY"
-                }
-            });*/
             var transactionGrnList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -345,37 +319,6 @@
                 }
             });
             transactionGrnList.initialize();
-            /*citiList.initialize();*/
-            /*$('.asset-maintenance-typeahead').typeahead(null, {
-                displayKey: 'name',
-                engine: Handlebars,
-                source: citiList.ttAdapter(),
-                limit: 30,
-                templates: {
-                    empty: [
-                        '<div class="empty-suggest">',
-                        'Unable to find any Result that match the current query',
-                        '</div>'
-                    ].join('\n'),
-                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{id}}</strong></div>')
-                },
-            }).on('typeahead:selected', function (obj, datum) {
-                $(".transaction-grn-typeahead").attr('readonly', true);
-                var POData = $.parseJSON(JSON.stringify(datum));
-                console.log(POData);
-                $("#assetMaintenanceId").val(POData.id);
-                $("#grnSelectionDiv .list-group").html(POData.grns);
-                $("#grnSelectionDiv").show();
-            })
-                .on('typeahead:open', function (obj, datum) {
-                    $(".transaction-grn-typeahead").attr('readonly', false);
-                    $(".transaction-grn-typeahead").val('');
-                    $(".asset-maintenance-typeahead").val('');
-                    $("#grnSelectionDiv .list-group").html('');
-                    $("#grnSelectionDiv").hide();
-                    $("#billData").hide();
-                });*/
-
 
             $('.transaction-grn-typeahead').typeahead(null, {
                 displayKey: 'name',
@@ -392,7 +335,6 @@
                 },
             }).on('typeahead:selected', function (obj, datum) {
                 var POData = $.parseJSON(JSON.stringify(datum));
-                console.log(POData.grn);
                 $("input[name='transaction_grn']").val(POData.grn);
                 $("#grnSelectionDiv .list-group").html(POData.list);
                 $("#assetMaintenanceId").val(POData.id);
@@ -413,7 +355,6 @@
         });
 
         function viewTransactionDetails(transactionId){
-            alert(1);
             $.ajax({
                 url:'/asset/maintenance/request/transaction/view/'+transactionId+"?_token="+$('input[name="_token"]').val()+"&isShowTax=true",
                 type: 'GET',
