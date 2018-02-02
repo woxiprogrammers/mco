@@ -60,7 +60,7 @@ class PurchaseOrderBillingController extends Controller
                 'action' => 'Get PO billing Create View',
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
     }
@@ -98,7 +98,7 @@ class PurchaseOrderBillingController extends Controller
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             $response = array();
             $status = 500;
         }
@@ -146,7 +146,7 @@ class PurchaseOrderBillingController extends Controller
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             $response = array();
             $status = 500;
         }
@@ -188,7 +188,7 @@ class PurchaseOrderBillingController extends Controller
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             $response = array();
             $status = 500;
         }
@@ -294,7 +294,7 @@ class PurchaseOrderBillingController extends Controller
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             $records = array();
             $status = 500;
         }
@@ -332,7 +332,7 @@ class PurchaseOrderBillingController extends Controller
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
     }
@@ -364,7 +364,7 @@ class PurchaseOrderBillingController extends Controller
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             $status = 500;
             $records = array();
         }
@@ -401,7 +401,7 @@ class PurchaseOrderBillingController extends Controller
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            Log::cirtical(json_encode($data));
+            Log::critical(json_encode($data));
             abort(500);
         }
     }
