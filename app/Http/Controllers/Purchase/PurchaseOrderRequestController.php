@@ -619,6 +619,8 @@ class PurchaseOrderRequestController extends Controller
                             $mailInfoData = [
                                 'user_id' => Auth::user()->id,
                                 'type_slug' => 'for-purchase-order',
+                                'is_client' => true,
+                                'reference_id' => $purchaseOrder->id,
                                 'client_id' => $purchaseOrder->client_id,
                                 'created_at' => Carbon::now(),
                                 'updated_at' => Carbon::now()
@@ -627,6 +629,8 @@ class PurchaseOrderRequestController extends Controller
                             $mailInfoData = [
                                 'user_id' => Auth::user()->id,
                                 'type_slug' => 'for-purchase-order',
+                                'is_client' => false,
+                                'reference_id' => $purchaseOrder->id,
                                 'vendor_id' => $purchaseOrder->vendor_id,
                                 'created_at' => Carbon::now(),
                                 'updated_at' => Carbon::now()

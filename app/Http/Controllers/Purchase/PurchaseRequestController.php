@@ -635,6 +635,7 @@ class PurchaseRequestController extends Controller
                     $mailInfoData = array();
                     foreach($materialRequestComponentIds as $materialRequestComponentId){
                         $materialRequestComponent = MaterialRequestComponents::findOrFail($materialRequestComponentId);
+                        $purchaseRequestId = $materialRequestComponent->purchaseRequestComponent->purchaseRequest->id;
                         $purchaseVendorAssignData['is_email_sent'] = false;
                         $purchaseVendorAssignData['purchase_request_component_id'] = $materialRequestComponent->purchaseRequestComponent->id;
                         // create
@@ -658,6 +659,7 @@ class PurchaseRequestController extends Controller
                                     'type_slug' => 'for-quotation',
                                     'vendor_id' => $vendorId,
                                     'is_client' => false,
+                                    'reference_id' => $purchaseRequestId,
                                     'created_at' => Carbon::now(),
                                     'updated_at' => Carbon::now()
                                 ];
