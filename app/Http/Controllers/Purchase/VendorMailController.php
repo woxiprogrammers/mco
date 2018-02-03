@@ -2,9 +2,19 @@
 
 namespace App\Http\Controllers\Purchase;
 
+use App\Client;
+use App\Material;
+use App\MaterialRequestComponents;
+use App\MaterialRequestComponentTypes;
+use App\PurchaseOrder;
+use App\PurchaseRequest;
 use App\PurchaseRequestComponentVendorMailInfo;
+use App\PurchaseRequestComponentVendorRelation;
+use App\Unit;
+use App\Vendor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 
 class VendorMailController extends Controller
@@ -73,7 +83,12 @@ class VendorMailController extends Controller
                 $records['data'][] = [
                     ($pagination+1),
                     $name,
-                    $slug
+                    $slug,
+                    '<div id="sample_editable_1_new" class="btn btn-small blue">
+                                            <a href="/purchase/vendor-mail/pdf/'.$vendorMailData[$pagination]['id'].'/'.$vendorMailData[$pagination]['type_slug'].'" style="color: white">
+                                                PDF <i class="fa fa-download" aria-hidden="true"></i>
+                                            </a>
+                                        </div>'
                 ];
             }
         }catch (\Exception $e){
@@ -87,5 +102,99 @@ class VendorMailController extends Controller
             $records = [];
         }
         return response()->json($records,$status);
+    }
+
+    public function getPDF(Request $request,$purchaseRequestComponentVendorMailId,$slug){
+        try{
+            $purchaseRequestComponentVendorMailInfo = PurchaseRequestComponentVendorMailInfo::where('id',$purchaseRequestComponentVendorMailId)->first();
+            if($slug == 'for-quotation'){
+                $vendorInfo = array();
+                $purchaseRequest = PurchaseRequest::where('id',$purchaseRequestComponentVendorMailInfo['reference_id'])->first();
+                $materialRequestComponents = MaterialRequestComponents::join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                                                ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
+                                                ->where('purchase_request_component_vendor_relation.vendor_id',$purchaseRequestComponentVendorMailInfo['vendor_id'])
+                                                ->where('purchase_request_components.purchase_request_id',$purchaseRequest['id'])
+                                                ->select('material_request_components.material_request_id','material_request_components.id','material_request_components.name','material_request_components.quantity','material_request_components.unit_id')
+                                                ->get();
+                $iterator = 0;
+                $client = $purchaseRequest->projectSite->project->client;
+                $vendorInfo['company'] = $client['company'];
+                $vendorInfo['mobile'] = $client['mobile'];
+                $vendorInfo['email'] = $client['email'];
+                $vendorInfo['gstin'] = $client['gstin'];
+                $vendorInfo['materials'] = array();
+                $projectSiteInfo = array();
+                $projectSiteInfo['project_name'] = $purchaseRequest->projectSite->project->name;
+                $projectSiteInfo['project_site_name'] = $purchaseRequest->projectSite->name;
+                $projectSiteInfo['project_site_address'] = $purchaseRequest->projectSite->address;
+                if($purchaseRequest->projectSite->city_id == null){
+                    $projectSiteInfo['project_site_city'] = '';
+                }else{
+                    $projectSiteInfo['project_site_city'] = $purchaseRequest->projectSite->city->name;
+                }
+                foreach($materialRequestComponents as $key => $materialRequestComponent){
+                    $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
+                    $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
+                    $vendorInfo['materials'][$iterator]['unit'] = $materialRequestComponent->unit->name;
+                    $iterator++;
+                }
+                $pdf = App::make('dompdf.wrapper');
+                $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo')));
+                return $pdf->stream();
+            }elseif($slug == 'for-purchase-order'){
+                $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
+                $pdfFlag = 'after-purchase-order-create';
+                $purchaseOrder = PurchaseOrder::where('id',$purchaseRequestComponentVendorMailInfo['reference_id'])->first();
+                if($purchaseOrder != null){
+                    if($purchaseOrder->is_client_order == true){
+                        $vendorInfo = Client::findOrFail($purchaseOrder->client_id)->toArray();
+                    }else{
+                        $vendorInfo = Vendor::findOrFail($purchaseOrder->vendor_id)->toArray();
+                    }
+                    $vendorInfo['materials'] = array();
+                    $iterator = 0;
+                    $projectSiteInfo = array();
+                    $projectSiteInfo['project_name'] = $purchaseOrder->purchaseRequest->projectSite->project->name;
+                    $projectSiteInfo['project_site_name'] = $purchaseOrder->purchaseRequest->projectSite->name;
+                    $projectSiteInfo['project_site_address'] = $purchaseOrder->purchaseRequest->projectSite->address;
+                    if($purchaseOrder->purchaseRequest->projectSite->city_id == null){
+                        $projectSiteInfo['project_site_city'] = '';
+                    }else{
+                        $projectSiteInfo['project_site_city'] = $purchaseOrder->purchaseRequest->projectSite->city->name;
+                    }
+                    foreach($purchaseOrder->purchaseOrderComponent as $purchaseOrderComponent){
+                        $vendorInfo['materials'][$iterator] = array();
+                        $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
+                        $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
+                        $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                        $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
+                        $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
+                        if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                            $vendorInfo['materials'][$iterator]['gst'] = '-';
+                        }else{
+                            $vendorInfo['materials'][$iterator]['gst'] = Material::where('name','ilike',$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->pluck('gst')->first();
+                            if($vendorInfo['materials'][$iterator]['gst'] == null){
+                                $vendorInfo['materials'][$iterator]['gst'] = '-';
+                            }
+                        }
+                        $iterator++;
+                    }
+                    $pdf = App::make('dompdf.wrapper');
+                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
+                    return $pdf->stream();
+                }else{
+
+                }
+
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Vendor Email listing PDF',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
     }
 }
