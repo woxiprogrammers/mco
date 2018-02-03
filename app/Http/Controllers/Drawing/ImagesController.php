@@ -283,9 +283,10 @@ class ImagesController extends Controller
     }
     public function getManageDrawingsView(Request $request){
         try{
+            $projectSiteId = Session::get('global_project_site');
+            $projectSite = ProjectSite::findOrFail($projectSiteId);
             $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
-            $clients = Client::select('id','company')->get();
-            return view('drawing/images/manage-drawings')->with(compact('clients','categories'));
+            return view('drawing/images/manage-drawings')->with(compact('clients','categories','projectSite'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Listing',

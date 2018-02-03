@@ -54,12 +54,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="clientId">
-                                                            <option value="">Select Client name from here </option>
-                                                            @foreach($clients as $client)
-                                                            <option value="{{$client['id']}}">{{$client['company']}} </option>
-                                                            @endforeach
-                                                        </select>
+                                                        <input type="text" readonly class="form-control" value="{{$projectSite->project->client->company}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
@@ -68,9 +63,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectId" >
-                                                            <option value="">Select Project Name from here</option>
-                                                        </select>
+                                                        <input type="text" readonly class="form-control" value="{{$projectSite->project->name}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
@@ -79,9 +72,7 @@
                                                         <span>*</span>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <select class="form-control" id="projectSiteId" name="site_id">
-                                                            <option value="">Select Site Name from here</option>
-                                                        </select>
+                                                        <input type="text" readonly class="form-control" value="{{$projectSite->name}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
