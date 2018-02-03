@@ -328,6 +328,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'vendor-mail'],function(){
             Route::get('manage',array('uses' => 'Purchase\VendorMailController@getManageView'));
             Route::post('listing',array('uses' => 'Purchase\VendorMailController@listing'));
+            Route::get('pdf/{VendorMailInfoId}/{slug}',array('uses' => 'Purchase\VendorMailController@getPDF'));
         });
         Route::group(['prefix' => 'purchase-order-request'], function(){
             Route::get('manage',array('uses' => 'Purchase\PurchaseOrderRequestController@getManageView'));
