@@ -272,7 +272,7 @@
                         }
                         return $.map(x, function (data) {
                             return {
-                                id: data.id,
+                                id: data.purchase_order_id,
                                 list: data.list,
                                 grn: data.grn
                             };
@@ -332,7 +332,7 @@
                 var POData = $.parseJSON(JSON.stringify(datum));
                 $("input[name='transaction_grn']").val(POData.grn);
                 $("#grnSelectionDiv .list-group").html(POData.list);
-                $("#purchaseOrderId").val(POData.purchase_order_id);
+                $("#purchaseOrderId").val(POData.id);
                 $("#grnSelectionDiv").show();
                 $("#grnSelectionDiv .list-group input:checkbox").each(function(){
                     $(this).attr('checked', true);
