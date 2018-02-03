@@ -130,10 +130,10 @@
                     <input type="text" class="form-control" name="vehicle_number" placeholder="Enter Vehicle Number"  value="{{$purchaseOrderTransaction->vehicle_number}}">
                 </div>
                 <div class="form-group row">
-                    <input type="datetime-local"   class="form-control" name="in_time" placeholder="Enter In Time"  value="{{$purchaseOrderTransaction->in_time}}">
+                    <input type="text"   class="form-control" name="in_time" placeholder="Enter In Time"  value="{!! date('d-m-Y H:i:s', strtotime($purchaseOrderTransaction->in_time)) !!}">
                 </div>
                 <div class="form-group row">
-                    <input type="datetime-local" class="form-control" name="out_time" placeholder="Enter Out Time"  value="{{$purchaseOrderTransaction->out_time}}">
+                    <input type="text" class="form-control" name="out_time" placeholder="Enter Out Time"  value="{!! date('d-m-Y H:i:s',strtotime($purchaseOrderTransaction->out_time)) !!}">
                 </div>
                 <div class="form-group row">
                     <input type="text" class="form-control" name="remark" placeholder="Enter Remark"  value="{{$purchaseOrderTransaction->remark}}">

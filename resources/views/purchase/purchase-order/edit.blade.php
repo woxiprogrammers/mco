@@ -355,12 +355,6 @@
                                                                         <input type="text" class="form-control" name="vehicle_number" placeholder="Enter Vehicle Number">
                                                                     </div>
                                                                     <div class="form-group row">
-                                                                        <input type="datetime-local"   class="form-control" name="in_time" placeholder="Enter In Time">
-                                                                    </div>
-                                                                    <div class="form-group row">
-                                                                        <input type="datetime-local" class="form-control" name="out_time" placeholder="Enter Out Time">
-                                                                    </div>
-                                                                    <div class="form-group row">
                                                                         <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
                                                                     </div>
                                                                     <div class="form-group">
@@ -575,11 +569,7 @@
                var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
                $.ajax({
                     url:'/purchase/purchase-order/transaction/edit/'+transactionId+"?_token="+$('input[name="_token"]').val()+"&isShowTax=false",
-                    type: 'POST',
-                    data:{
-                        _token: $('input[name="_token"]').val(),
-                        isShowTax: false
-                    },
+                    type: 'GET',
                     success: function(data,textStatus,xhr){
                         $("#editTransactionModal .modal-body").html(data);
                         $("#editTransactionModal").modal('show');

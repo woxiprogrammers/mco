@@ -413,6 +413,8 @@ class PurchaseOrderRequestController extends Controller
 
     use MaterialRequestTrait;
     use NotificationTrait;
+
+
     public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
         try{
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
@@ -568,16 +570,16 @@ class PurchaseOrderRequestController extends Controller
                     }
                     $webTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token];
                     $mobileTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
-                    $purchaseRequestComponentIds = array_column($purchaseOrder->purchase_order_component->toArray(),'purchase_request_component_id');
+                    $purchaseRequestComponentIds = array_column($purchaseOrder->purchaseOrderComponent->toArray(),'purchase_request_component_id');
                     $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
-                        ->join('material_request_components','material_request_components.material_id','=','material_requests.id')
+                        ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                         ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
                         ->join('purchase_order_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
                         ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
                         ->where('purchase_orders.id', $purchaseOrder->id)
                         ->whereIn('purchase_request_components.id', $purchaseRequestComponentIds)
                         ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
-                        ->first();
+                        ->get()->toArray();
                     $webTokens = array_merge($webTokens, array_column($materialRequestUserToken,'web_fcm_token'));
                     $mobileTokens = array_merge($mobileTokens, array_column($materialRequestUserToken,'mobile_fcm_token'));
                     $notificationString = '3 -'.$purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
