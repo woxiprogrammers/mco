@@ -740,10 +740,12 @@ class PurchaseController extends Controller
                             $quotationMaterialType = MaterialRequestComponentTypes::where('slug','quotation-material')->first();
                             $projectSiteId = $materialRequestComponent->materialRequest->project_site_id;
                             $materialComponentHistoryData = array();
-                            $materialComponentHistoryData['component_status_id'] = $adminApproveComponentStatusId;
-                            $materialComponentHistoryData['remark'] = $request->remark;
-                            $materialComponentHistoryData['user_id'] = Auth::user()->id;
-                            $materialComponentHistoryData['material_request_component_id'] = $componentId;
+                            $materialComponentHistoryData['component_status_id'] = $materialRequestComponentVersion['component_status_id'] = $adminApproveComponentStatusId;
+                            $materialComponentHistoryData['remark'] = $materialRequestComponentVersion['remark'] = $request->remark;
+                            $materialComponentHistoryData['user_id'] = $materialRequestComponentVersion['user_id'] = Auth::user()->id;
+                            $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentVersion['material_request_component_id'] = $componentId;
+                            $materialRequestComponentVersion['quantity'] = $materialRequestComponent['quantity'];
+                            $materialRequestComponentVersion['unit_id'] = $materialRequestComponent['unit_id'];
                             if($materialRequestComponent['component_type_id'] == $quotationMaterialType->id){
                                 $usedQuantity = MaterialRequestComponents::join('material_requests','material_requests.id','=','material_request_components.material_request_id')
                                     ->where('material_request_components.id','!=',$materialRequestComponent->id)
@@ -766,11 +768,13 @@ class PurchaseController extends Controller
                                 $allowedQuantity = $material_quantity - $usedQuantity;
                                 MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
                                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                                MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                                 $message = "Status Updated Successfully";
                             }else{
                                 MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $adminApproveComponentStatusId]);
                                 $message = "Status Updated Successfully";
                                 MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                                MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                             }
                         }
                     }
@@ -785,14 +789,17 @@ class PurchaseController extends Controller
                     }
                     $adminDisapproveStatusId = PurchaseRequestComponentStatuses::where('slug',$newStatus)->pluck('id')->first();
                     $materialComponentHistoryData = array();
-                    $materialComponentHistoryData['component_status_id'] = $adminDisapproveStatusId;
-                    $materialComponentHistoryData['remark'] = $remark;
-                    $materialComponentHistoryData['user_id'] = Auth::user()->id;
+                    $materialRequestComponentVersion['component_status_id'] = $materialComponentHistoryData['component_status_id'] = $adminDisapproveStatusId;
+                    $materialRequestComponentVersion['remark'] = $materialComponentHistoryData['remark'] = $remark;
+                    $materialRequestComponentVersion['user_id'] = $materialComponentHistoryData['user_id'] = Auth::user()->id;
                     foreach($componentIds as $componentId){
                         $materialRequestComponent = MaterialRequestComponents::findOrFail($componentId);
                         $materialRequestComponent->update(['component_status_id' => $adminDisapproveStatusId]);
-                        $materialComponentHistoryData['material_request_component_id'] = $componentId;
+                        $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentVersion['material_request_component_id'] = $componentId;
+                        $materialRequestComponentVersion['quantity'] = $materialRequestComponent['quantity'];
+                        $materialRequestComponentVersion['user_id'] = $materialRequestComponent['user_id'];
                         MaterialRequestComponentHistory::create($materialComponentHistoryData);
+                        MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                         $userTokens = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
                                         ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                                         ->where('material_request_components.id', $componentId)
@@ -811,15 +818,13 @@ class PurchaseController extends Controller
                 case 'in-indent':
                     $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug',$newStatus)->pluck('id')->first();
                     $materialRequestComponent = MaterialRequestComponents::where('id',$request['component_id'])->first();
-                    if($materialRequestComponent['quantity'] != $request->quantity || $materialRequestComponent['unit_id'] != $request->unit_id){
-                        $materialRequestComponentVersion['material_request_component_id'] = $request['component_id'];
-                        $materialRequestComponentVersion['component_status_id'] = $inIndentStatusId;
-                        $materialRequestComponentVersion['user_id'] = $user['id'];
-                        $materialRequestComponentVersion['quantity'] = $request->quantity;
-                        $materialRequestComponentVersion['unit_id'] = $request->unit_id;
-                        $materialRequestComponentVersion['remark'] = $request->remark;
-                        MaterialRequestComponentVersion::create($materialRequestComponentVersion);
-                    }
+                    $materialRequestComponentVersion['material_request_component_id'] = $request['component_id'];
+                    $materialRequestComponentVersion['component_status_id'] = $inIndentStatusId;
+                    $materialRequestComponentVersion['user_id'] = $user['id'];
+                    $materialRequestComponentVersion['quantity'] = ($request->has('quantity')) ? $request->quantity : $materialRequestComponent['quantity'];
+                    $materialRequestComponentVersion['unit_id'] = ($request->has('unit_id')) ? $request->unit_id : $materialRequestComponent['unit'];
+                    $materialRequestComponentVersion['remark'] = $request->remark;
+                    MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                     MaterialRequestComponents::where('id',$request['component_id'])->update(['component_status_id' => $inIndentStatusId,'quantity' => $request->quantity,'unit_id' => $request->unit_id]);
                     $materialComponentHistoryData = array();
                     $materialComponentHistoryData['component_status_id'] = $inIndentStatusId;
@@ -839,8 +844,7 @@ class PurchaseController extends Controller
             Log::critical(json_encode($data));
         }
     }
-    public function getMaterialRequestComponentDetail(Request $request,$materialRequestComponent)
-    {
+    public function getMaterialRequestComponentDetail(Request $request,$materialRequestComponent){
         try {
             $assetComponentTypes = MaterialRequestComponentTypes::whereIn('slug', ['system-asset', 'new-asset'])->pluck('id')->toArray();
             if (in_array($materialRequestComponent->component_type_id, $assetComponentTypes)) {
