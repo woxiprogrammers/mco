@@ -14,6 +14,8 @@ use App\Helper\MaterialProductHelper;
 use App\PeticashSalaryTransaction;
 use App\PeticashTransactionType;
 use App\ProjectSite;
+use App\PurchaseOrderTransaction;
+use App\PurchaseOrderTransactionStatus;
 use App\Quotation;
 use App\Subcontractor;
 use App\Tax;
@@ -72,16 +74,53 @@ class ReportController extends Controller
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
             $endDate = explode('/',$request->end_date);
             $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 24:00:00';
+            $data = $header = array();
             switch($report_type) {
                 case 'materialwise_purchase_report':
                     $header = array(
-                        'Sr. No', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
+                        'Sr. No', 'Date', 'Category Name', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
                         'Total Amount', 'Average Amount'
                     );
+                    $materialWisePurchaseOrderTransactionData = array();
+                    foreach ($request['material_id'] as $materialId){
+                        $materialName = Material::where('id',$materialId)->pluck('name')->first();
+                        $materialWisePurchaseOrderTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_components','purchase_order_transaction_components.purchase_order_transaction_id','=','purchase_order_transactions.id')
+                            //->join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
+                            ->join('purchase_order_components','purchase_order_components.id','=','purchase_order_transaction_components.purchase_order_component_id')
+                            ->join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                            ->where('purchase_order_transactions.purchase_order_transaction_status_id',PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first())
+                            ->where('material_request_components.name','ilike',$materialName)
+                            ->whereBetween('purchase_order_transactions.created_at', [$start_date, $end_date])
+                            ->select('purchase_order_transactions.id as purchase_order_transaction_id','purchase_order_transactions.created_at','material_request_components.name','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')->get()->toArray();
+                        //dd($materialWisePurchaseOrderTransactions);
+                        $materialWisePurchaseOrderTransactionData = array_merge($materialWisePurchaseOrderTransactionData,$materialWisePurchaseOrderTransactions);
+                    }
+                    $row = 0;$data = array();
+                    foreach ($materialWisePurchaseOrderTransactionData as $key => $materialWisePurchaseOrderTransaction){
+                        $data[$row]['sr_no'] = $row+1;
+                        $data[$row]['created_at'] = $materialWisePurchaseOrderTransaction['created_at'];
+                        $data[$row]['material_name'] = $materialWisePurchaseOrderTransaction['name'];
+                        $data[$row]['quantity'] = $materialWisePurchaseOrderTransaction['quantity'];
+                        $data[$row]['unit_id'] = $materialWisePurchaseOrderTransaction['unit_id'];
+                    }
+
+                    //dd($materialNames);
+                    dd($materialWisePurchaseOrderTransactionData);
+                     $materials = Material::take(1)->get();
+                    //dd($materials);
+
+                    foreach ($materials as $key => $material){
+                        $data[$row]['id'] = $material['id'];
+                        $data[$row]['Material Name'] = $material['name'];
+                        $data[$row]['Quantity'] = $material['rate_per_unit'];
+                        $data[$row]['unit_id'] = $material['unit_id'];
+                    }
+/*
                     $data = array(
                         array('data1', 'data2'),
                         array('data3', 'data4')
-                    );
+                    );*/
                     break;
                 case 'receiptwise_p_and_l_report':
                     $header = array(null, null);
@@ -342,7 +381,7 @@ class ReportController extends Controller
                     $downloadSheetFlag = false;
                     break;
             }
-            if ($downloadSheetFlag) {
+            /*if ($downloadSheetFlag) {
                 Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
                     $excel->sheet($report_type, function($sheet) use($data, $header) {
                         $sheet->setOrientation('landscape');
@@ -357,6 +396,7 @@ class ReportController extends Controller
                         // Set black background
                         $sheet->row(1, function($row) {
                             // call cell manipulation methods
+                            $row->setAlignment('center')->setValignment('center');
                             $row->setBackground('#f2f2f2');
                         });
                         // Freeze first row
@@ -366,13 +406,34 @@ class ReportController extends Controller
 
                     });
                 })->export('xls');
+            }*/
+
+            if ($downloadSheetFlag) {
+                Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                       $excel->sheet($report_type, function($sheet) use($data, $header) {
+                        $sheet->setOrientation('landscape');
+                        $sheet->setPageMargin(0.25);
+                        $sheet->row(1, $header);
+                        $next_column = 'A';
+                        $row = 1;
+                        foreach($data as $key => $rowData){
+                            foreach($rowData as $key1 => $cellData){
+                                $current_column = $next_column++;
+                                $sheet->cell($current_column.($row+1), function($cell) use($cellData) {
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($cellData);
+                                });
+                            }
+                        }
+                    });
+                })->export('xls');
             }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Download Report',
+                'exception' => $e->getMessage(),
                 'params' => $request->all(),
-                'type' => $request->report_type,
-                'exception' => $e->getMessage()
+                'type' => $request->report_type
             ];
             Log::critical(json_encode($data));
         }
