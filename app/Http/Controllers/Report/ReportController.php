@@ -14,6 +14,7 @@ use App\Helper\MaterialProductHelper;
 use App\PeticashSalaryTransaction;
 use App\PeticashTransactionType;
 use App\ProjectSite;
+use App\PurchaseOrderComponent;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionStatus;
 use App\Quotation;
@@ -81,32 +82,28 @@ class ReportController extends Controller
                         'Sr. No', 'Date', 'Category Name', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
                         'Total Amount', 'Average Amount'
                     );
-                    $materialWisePurchaseOrderTransactionData = array();
+                    $purchaseOrderComponent = array();
                     foreach ($request['material_id'] as $materialId){
                         $materialName = Material::where('id',$materialId)->pluck('name')->first();
-                        $materialWisePurchaseOrderTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_components','purchase_order_transaction_components.purchase_order_transaction_id','=','purchase_order_transactions.id')
-                            //->join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
-                            ->join('purchase_order_components','purchase_order_components.id','=','purchase_order_transaction_components.purchase_order_component_id')
-                            ->join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
-                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
-                            ->where('purchase_order_transactions.purchase_order_transaction_status_id',PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first())
-                            ->where('material_request_components.name','ilike',$materialName)
-                            ->whereBetween('purchase_order_transactions.created_at', [$start_date, $end_date])
-                            ->select('purchase_order_transactions.id as purchase_order_transaction_id','purchase_order_transactions.created_at','material_request_components.name','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')->get()->toArray();
-                        //dd($materialWisePurchaseOrderTransactions);
-                        $materialWisePurchaseOrderTransactionData = array_merge($materialWisePurchaseOrderTransactionData,$materialWisePurchaseOrderTransactions);
+                        $purchaseOrderComponent[] = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                                                    ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                                                    ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                                                    ->where('material_request_components.name','ilike',$materialName)
+                                                    ->whereBetween('purchase_orders.created_at', [$start_date, $end_date])
+                                                    ->select('purchase_orders.id','purchase_order_components.created_at','purchase_order_components.id as purchase_order_component_id','purchase_order_components.rate_per_unit','purchase_order_components.cgst_percentage','purchase_order_components.sgst_percentage','purchase_order_components.igst_percentage')
+                                                    ->get();
                     }
+                    dd($purchaseOrderComponent);
                     $row = 0;$data = array();
-                    foreach ($materialWisePurchaseOrderTransactionData as $key => $materialWisePurchaseOrderTransaction){
+                    /*foreach ($materialWisePurchaseOrderTransactionData as $key => $materialWisePurchaseOrderTransaction){
                         $data[$row]['sr_no'] = $row+1;
                         $data[$row]['created_at'] = $materialWisePurchaseOrderTransaction['created_at'];
                         $data[$row]['material_name'] = $materialWisePurchaseOrderTransaction['name'];
                         $data[$row]['quantity'] = $materialWisePurchaseOrderTransaction['quantity'];
                         $data[$row]['unit_id'] = $materialWisePurchaseOrderTransaction['unit_id'];
-                    }
+                    }*/
 
                     //dd($materialNames);
-                    dd($materialWisePurchaseOrderTransactionData);
                      $materials = Material::take(1)->get();
                     //dd($materials);
 
