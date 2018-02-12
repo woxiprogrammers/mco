@@ -13,6 +13,7 @@ use App\PurchaseOrderBillImage;
 use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderPayment;
 use App\PurchaseOrderTransaction;
+use App\PurchaseOrderTransactionStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -232,6 +233,9 @@ class PurchaseOrderBillingController extends Controller
             foreach($request->transaction_id as $transactionId){
                 $purchaseOrderBillTransactionRelationData['purchase_order_transaction_id'] = $transactionId;
                 PurchaseOrderBillTransactionRelation::create($purchaseOrderBillTransactionRelationData);
+                PurchaseOrderTransaction::where('id',$transactionId)->update([
+                    'purchase_order_transaction_status_id' => PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first()
+                ]);
             }
             $request->session()->flash('success','Purchase Order Bill Created Successfully');
             return redirect('/purchase/purchase-order-bill/create');
