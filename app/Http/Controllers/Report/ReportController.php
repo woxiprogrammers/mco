@@ -172,9 +172,9 @@ class ReportController extends Controller
                                         $cell->setValue($cellData);
                                     });
                                 }
-                                $row++;
+                                /*$row++;
 
-                                /*$sheet->cell('C'.($row), function($cell) {
+                                $sheet->cell('C'.($row), function($cell) {
                                     $cell->setAlignment('center')->setValignment('center');
                                     $cell->setValue('Total');
                                 });
