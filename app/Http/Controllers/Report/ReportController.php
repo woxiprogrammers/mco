@@ -13,6 +13,7 @@ use App\Http\Controllers\CustomTraits\BillTrait;
 use App\Material;
 use App\Helper\MaterialProductHelper;
 use App\PeticashSalaryTransaction;
+use App\PeticashStatus;
 use App\PeticashTransactionType;
 use App\ProjectSite;
 use App\PurchaseOrderComponent;
@@ -45,7 +46,7 @@ class ReportController extends Controller
             $last_date = Carbon::now();
             $start_date = date('d/m/Y',strtotime($curr_date));
             $end_date = date('d/m/Y',strtotime($last_date));
-            $sites = ProjectSite::get(['id','name','address'])->toArray();
+            $sites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
             $billIds = Bill::where('bill_status_id',BillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
             $billProjectSites = Quotation::join('bills','quotations.id','=','bills.quotation_id')
                                     ->join('project_sites','quotations.project_site_id','=','project_sites.id')
@@ -183,6 +184,102 @@ class ReportController extends Controller
                         });
                     })->export('xls');
                     break;
+
+
+                case 'labour_specific_report':
+                    $header = array(
+                        'Date', 'Payment Type', 'Gross Salary', '-PT', '-PF', '-ESIC', '-TDS',
+                        '-ADVANCE', 'Net Payment', 'Balance'
+                    );
+                    $approvedStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+                    $paymentSlug = PeticashTransactionType::where('type','PAYMENT')->select('id','slug')->get();
+                    $salaryTransactionData = array();
+                    if($request['labour_specific_report_site_id'] == 'all'){
+                        $salaryTransactionData = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
+                            ->where('peticash_status_id',$approvedStatusId)
+                            ->whereBetween('date', [$start_date, $end_date])
+                            ->orderBy('date','desc')
+                            ->get();
+                    }else{
+                        $salaryTransactionData = PeticashSalaryTransaction::where('project_site_id',$request['labour_specific_report_site_id'])
+                            ->where('employee_id',$request['labour_id'])
+                            ->where('peticash_status_id',$approvedStatusId)
+                            ->whereBetween('date', [$start_date, $end_date])
+                            ->orderBy('date','desc')
+                            ->get();
+                    }
+
+                    $row = 0;
+                    $data = array();
+                    foreach($salaryTransactionData as $key => $salaryTransaction){
+                        $peticashTransactionTypeSlug = $salaryTransaction->peticashTransactionType->slug;
+                        $data[$row]['date'] = date('d/m/y',strtotime($salaryTransaction['date']));;
+                        $data[$row]['payment_type'] = $salaryTransaction->peticashTransactionType->name;
+                        $data[$row]['gross_salary'] = ($peticashTransactionTypeSlug == 'salary') ? ($salaryTransaction->employee->per_day_wages * $salaryTransaction['days']) : 0;
+                        $data[$row]['pt'] = $salaryTransaction['pt'];
+                        $data[$row]['pf'] = $salaryTransaction['pf'];
+                        $data[$row]['esic'] = $salaryTransaction['esic'];
+                        $data[$row]['tds'] = $salaryTransaction['tds'];
+                        $data[$row]['advance'] = ($peticashTransactionTypeSlug == 'salary') ? 0 : $salaryTransaction['amount'];
+                        $data[$row]['net_payment'] = ($peticashTransactionTypeSlug == 'salary') ? $salaryTransaction['payable_amount'] : $salaryTransaction['amount'];
+                        $lastSalaryTransactionId = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
+                            ->where('project_site_id',$salaryTransaction['project_site_id'])
+                            ->where('peticash_status_id',$approvedStatusId)
+                            ->where('id','<',$salaryTransaction['id'])
+                            ->where('peticash_transaction_type_id',$paymentSlug->where('slug','salary')->pluck('id')->first())
+                            ->orderBy('date','desc')
+                            ->pluck('id')->first();
+
+                        if($peticashTransactionTypeSlug == 'salary'){
+                            if($lastSalaryTransactionId == null){
+                                $advancesAfterLastSalary = -1;
+                            }else{
+                                $advancesAfterLastSalary = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
+                                    ->where('project_site_id',$salaryTransaction['project_site_id'])
+                                    ->where('peticash_status_id',$approvedStatusId)
+                                    ->where('peticash_transaction_type_id',$paymentSlug->where('slug','advance')->pluck('id')->first())
+                                    ->where('id','>',$lastSalaryTransactionId)
+                                    ->where('id','<=',$salaryTransaction['id'])
+                                    ->orderBy('date','desc')
+                                    ->sum('amount');
+                            }
+                            $balance = $data[$row]['gross_salary'] - $salaryTransaction['pt'] - $salaryTransaction['pf'] - $salaryTransaction['esic'] - $salaryTransaction['tds'] + $advancesAfterLastSalary;
+                            $data[$row]['balance'] = ($balance > 0) ? 0 : $balance;
+                        }else{
+                            if($lastSalaryTransactionId == null){
+                                $data[$row]['balance'] = 0;
+                            }else{
+                                $advancesAfterLastSalary = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
+                                    ->where('project_site_id',$salaryTransaction['project_site_id'])
+                                    ->where('peticash_status_id',$approvedStatusId)
+                                    ->where('peticash_transaction_type_id',$paymentSlug->where('slug','advance')->pluck('id')->first())
+                                    ->where('id','>',$lastSalaryTransactionId)
+                                    ->where('id','<=',$salaryTransaction['id'])
+                                    ->orderBy('date','desc')
+                                    ->sum('amount');
+                                $data[$row]['balance'] = -$advancesAfterLastSalary;
+                            }
+                        }
+                        $row ++;
+                    }
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                            }
+                        });
+                    })->export('xls');
+                    break;
                 case 'receiptwise_p_and_l_report':
                     $header = array(null, null);
                     $data = array(
@@ -209,68 +306,6 @@ class ReportController extends Controller
                         array('data1', 'data2'),
                         array('data3', 'data4')
                     );
-                    break;
-                case 'labour_specific_report':
-                    $site_id = $request->labour_specific_report_site_id;
-                    $emp_id = $request->labour_id;
-
-                    if($site_id == 'all') {
-                        $salaryData = PeticashSalaryTransaction::where('employee_id',$emp_id)
-                            ->where('peticash_transaction_type_id', PeticashTransactionType::where('slug','salary')->get()->pluck(['id']))
-                            ->select('employee_id', DB::raw('SUM(amount) as salary, SUM(tds) as tds, SUM(pt) as pt, SUM(pf) as pf, SUM(esic) as esic'))
-                            ->whereBetween('created_at', array($start_date, $end_date))
-                            ->groupBy('employee_id')
-                            ->first();
-                    } else {
-                        $salaryData = PeticashSalaryTransaction::where('employee_id',$emp_id)
-                            ->where('project_site_id', $site_id)
-                            ->where('peticash_transaction_type_id', PeticashTransactionType::where('slug','salary')->get()->pluck(['id']))
-                            ->select('employee_id', DB::raw('SUM(amount) as salary, SUM(tds) as tds, SUM(pt) as pt, SUM(pf) as pf, SUM(esic) as esic'))
-                            ->whereBetween('created_at', array($start_date, $end_date))
-                            ->groupBy('employee_id')
-                            ->first();
-                    }
-                    if($site_id == 'all') {
-                        $advanceData = PeticashSalaryTransaction::where('employee_id',$emp_id)
-                            ->where('peticash_transaction_type_id', PeticashTransactionType::where('slug','advance')->get()->pluck(['id']))
-                            ->select('employee_id', DB::raw('SUM(amount) as salary, SUM(tds) as tds, SUM(pt) as pt, SUM(pf) as pf, SUM(esic) as esic'))
-                            ->whereBetween('created_at', array($start_date, $end_date))
-                            ->groupBy('employee_id')
-                            ->first();
-                    } else {
-                        $advanceData = PeticashSalaryTransaction::where('employee_id',$emp_id)
-                            ->where('project_site_id', $site_id)
-                            ->where('peticash_transaction_type_id', PeticashTransactionType::where('slug','advance')->get()->pluck(['id']))
-                            ->select('employee_id', DB::raw('SUM(amount) as salary, SUM(tds) as tds, SUM(pt) as pt, SUM(pf) as pf, SUM(esic) as esic'))
-                            ->whereBetween('created_at', array($start_date, $end_date))
-                            ->groupBy('employee_id')
-                            ->first();
-                    }
-
-                    $header = array(
-                        'Sr. No', 'Gross Salary', 'PT', 'PF', 'ESIC',
-                        'TDS', 'ADVANCE', 'Net Payment'
-                    );
-
-                    if (count($salaryData) == 0) {
-                        $data = array(
-                            array(null, null)
-                        );
-                    } else {
-                        $net_payable = $salaryData['salary']-$salaryData['pt']-$salaryData['pf']
-                            -$salaryData['esic']-$salaryData['tds']-$advanceData['salary'];
-                        $data = array(
-                            array (1,
-                                $salaryData['salary'],
-                                $salaryData['pt'],
-                                $salaryData['pf'],
-                                $salaryData['esic'],
-                                $salaryData['tds'],
-                                $advanceData['salary'],
-                                $net_payable
-                            ),
-                        );
-                    }
                     break;
                 case 'purchase_bill_tax_report':
                     $header = array(
