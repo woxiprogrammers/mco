@@ -76,7 +76,10 @@ class PurchaseOrderBillingController extends Controller
                     ->where('purchase_order_transaction_statuses.slug','bill-pending')
                     ->where('purchase_requests.project_site_id',$projectSiteId)
                     ->where('purchase_orders.format_id','ilike','%'.$request->keyword.'%')
-                    ->where('purchase_orders.is_client_order','!=', true)
+                    ->where(function($query){
+                        $query->where('purchase_orders.is_client_order','=',null)
+                              ->orWhere('purchase_orders.is_client_order','=',false);
+                    })
                     ->select('purchase_orders.id as id','purchase_orders.format_id as format_id','purchase_order_transactions.id as purchase_order_transaction_id','purchase_order_transactions.grn as grn')
                     ->distinct('format_id')
                     ->get();
@@ -88,9 +91,12 @@ class PurchaseOrderBillingController extends Controller
             $status = 200;
             $iterator = 0;
             foreach ($purchaseOrders as $purchaseOrder){
-                $response[$iterator]['format'] = $purchaseOrder['format_id'];
-                $response[$iterator]['id'] = $purchaseOrder['id'];
-                $response[$iterator]['grn'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrder['purchase_order_transaction_id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrder['grn'].' </label> <a href="javascript:void(0);" onclick="viewTransactionDetails('.$purchaseOrder['purchase_order_transaction_id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
+                if(!array_key_exists($purchaseOrder['id'], $response)){
+                    $response[$purchaseOrder['id']]['format'] = $purchaseOrder['format_id'];
+                    $response[$purchaseOrder['id']]['id'] = $purchaseOrder['id'];
+                    $response[$purchaseOrder['id']]['grn'] = '';
+                }
+                $response[$purchaseOrder['id']]['grn'] .= '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrder['purchase_order_transaction_id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrder['grn'].' </label> <a href="javascript:void(0);" onclick="viewTransactionDetails('.$purchaseOrder['purchase_order_transaction_id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
                 $iterator++;
             }
         }catch (\Exception $e){
@@ -115,7 +121,10 @@ class PurchaseOrderBillingController extends Controller
                     ->join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
                     ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                     ->where('purchase_requests.project_site_id', $projectSiteId)
-                    ->where('purchase_orders.is_client_order','!=', true)
+                    ->where(function($query){
+                        $query->where('purchase_orders.is_client_order','=',null)
+                            ->orWhere('purchase_orders.is_client_order','=',false);
+                    })
                     ->where('purchase_order_transaction_statuses.slug','bill-pending')
                     ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
                     ->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
