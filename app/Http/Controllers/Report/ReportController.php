@@ -22,6 +22,10 @@ use App\PurchaseOrderTransactionComponent;
 use App\PurchaseOrderTransactionStatus;
 use App\Quotation;
 use App\Subcontractor;
+use App\SubcontractorBill;
+use App\SubcontractorBillStatus;
+use App\SubcontractorBillTransaction;
+use App\Summary;
 use App\Tax;
 use App\Unit;
 use App\Vendor;
@@ -213,7 +217,7 @@ class ReportController extends Controller
                     $data = array();
                     foreach($salaryTransactionData as $key => $salaryTransaction){
                         $peticashTransactionTypeSlug = $salaryTransaction->peticashTransactionType->slug;
-                        $data[$row]['date'] = date('d/m/y',strtotime($salaryTransaction['date']));;
+                        $data[$row]['date'] = date('d/m/y',strtotime($salaryTransaction['date']));
                         $data[$row]['payment_type'] = $salaryTransaction->peticashTransactionType->name;
                         $data[$row]['gross_salary'] = ($peticashTransactionTypeSlug == 'salary') ? ($salaryTransaction->employee->per_day_wages * $salaryTransaction['days']) : 0;
                         $data[$row]['pt'] = $salaryTransaction['pt'];
@@ -280,6 +284,77 @@ class ReportController extends Controller
                         });
                     })->export('xls');
                     break;
+
+                case 'subcontractor_report':
+                    //dd($request->all());
+                    $header = array(
+                        'Date', 'Summary Type', 'Bill No', 'Basic amount', 'Total tax', 'Total Bill Amount', 'Advance' ,'Debit', 'Hold', 'Retention',
+                        'TDS', 'Other Recovery', 'Payable Amount', 'Check amount', 'Balance'
+                    );
+                    $subContractorBillTransactionList = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                                                        ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                                                        ->whereBetween('subcontractor_bill_transactions.created_at',[$start_date, $end_date])
+                                                        ->where('subcontractor_bills.subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())
+                                                        ->where('subcontractor_structure.subcontractor_id',$request['subcontractor_id'])
+                                                        ->where('subcontractor_structure.project_site_id',$request['subcontractor_report_site_id'])
+                                                        ->orderBy('subcontractor_bill_transactions.created_at')
+                                                        ->select('subcontractor_structure.summary_id','subcontractor_bill_transactions.id as subcontractor_bill_transaction_id','subcontractor_bill_transactions.subcontractor_bills_id as subcontractor_bill_id','subcontractor_bill_transactions.subtotal','subcontractor_bill_transactions.total','subcontractor_bill_transactions.debit','subcontractor_bill_transactions.hold',
+                                                            'subcontractor_bill_transactions.retention_percent','subcontractor_bill_transactions.retention_amount','subcontractor_bill_transactions.tds_percent','subcontractor_bill_transactions.tds_amount','subcontractor_bill_transactions.other_recovery','subcontractor_bill_transactions.created_at')->get();
+
+                    $subContractorBillTransactions = $subContractorBillTransactionList->groupBy('subcontractor_bill_id')->toArray();
+                    $row = 0;
+                    $data = array();
+                    foreach ($subContractorBillTransactions as $subcontractorBillId => $subContractorBillTransactionData){
+                        foreach ($subContractorBillTransactionData as $key =>$subContractorBillTransaction){
+                            dd($subContractorBillTransaction);
+                            $data[$row]['date'] = date('d/m/y',strtotime($subContractorBillTransaction['date']));;
+                            $data[$row]['summary_type'] = Summary::where('id',$subContractorBillTransaction['summary_id'])->pluck('name')->first();
+                            $data[$row]['bill_no'] = $subcontractorBillId;
+                            $data[$row]['basic_amount'] = $subContractorBillTransaction[''];
+                            $data[$row]['total_tax'] = $subContractorBillTransaction[''];
+                            $data[$row]['total_bill_amount'] = $subContractorBillTransaction[''];
+                            $data[$row]['advance'] = $subContractorBillTransaction[''];
+                            $data[$row]['debit'] = $subContractorBillTransaction[''];
+                            $data[$row]['hold'] = $subContractorBillTransaction[''];
+                            $data[$row]['retention'] = $subContractorBillTransaction[''];
+                            $data[$row]['tds'] = $subContractorBillTransaction[''];
+                            $data[$row]['other_recovery'] = $subContractorBillTransaction[''];
+                            $data[$row]['payable_amount'] = $subContractorBillTransaction[''];
+                            $data[$row]['check_amount'] = $subContractorBillTransaction[''];
+                            $data[$row]['balance'] = $subContractorBillTransaction[''];
+                        }
+                        //$data[$row]
+                    }
+
+
+
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                                /*$row++;
+
+                                $sheet->cell('C'.($row), function($cell) {
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue('Total');
+                                });
+                                $row++;*/
+                            }
+                        });
+                    })->export('xls');
+
+                    break;
+
                 case 'receiptwise_p_and_l_report':
                     $header = array(null, null);
                     $data = array(
@@ -297,16 +372,7 @@ class ReportController extends Controller
                         array(1, 1),
                     );
                     break;
-                case 'subcontractor_report':
-                    $header = array(
-                        'Sr. No', 'Summary Type', 'Bill No', 'Total Bill Amount', 'TDS',
-                        'Retention', 'Total Bill Amount', 'Total Pay Amount', 'Balance'
-                    );
-                    $data = array(
-                        array('data1', 'data2'),
-                        array('data3', 'data4')
-                    );
-                    break;
+
                 case 'purchase_bill_tax_report':
                     $header = array(
                         'Sr. No', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
