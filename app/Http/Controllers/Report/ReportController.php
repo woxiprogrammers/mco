@@ -340,7 +340,7 @@ class ReportController extends Controller
                             $finalTotal = $subTotal + $taxTotal;
                         }
                         foreach ($subContractorBillTransactionData as $key =>$subContractorBillTransaction){
-                            $data[$row]['date'] = date('d/m/y',strtotime($subContractorBillTransaction['created_at']));;
+                            $data[$row]['date'] = date('d/m/y',strtotime($subContractorBillTransaction['created_at']));
                             $data[$row]['summary_type'] = Summary::where('id',$subContractorBillTransaction['summary_id'])->pluck('name')->first();
                             $data[$row]['bill_no'] = $billName;
                             $data[$row]['basic_amount'] = $rate;
@@ -385,22 +385,86 @@ class ReportController extends Controller
 
                     break;
 
-                case 'receiptwise_p_and_l_report':
-                    $header = array(null, null);
-                    $data = array(
-                        array('Total Sale Entry', 1),
-                        array('Total receipt entry', 1),
-                        array(null, null),
-                        array('Labour + Staff Salary', null),
-                        array('Total Purchase', null),
-                        array('Total Miscellaneous Purchase', null),
-                        array('Subcontractor', null),
-                        array('Indirect Expences (GST,TDS Paid to government from manisha)', null),
-                        array('Total Expence', null),
-                        array(null, null),
-                        array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
-                        array(1, 1),
+                case 'sales_bill_tax_report':
+                    $header = array(
+                        'Date', 'RA Bill Number', 'Basic Amount', 'Tax Amount', 'Total Amount',
+                        'Mobilise Advance', 'Debit', 'Hold', 'Retention',
+                        'TDS', 'Other Recovery', 'Payable Amount', 'Check Amount',
+                        'Balance'
                     );
+                    $quotationId = Quotation::where('project_site_id',$request['sales_bill_tax_report_site_id'])->pluck('id')->first();
+                    $billTransactionsList = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
+                                            ->whereBetween('bill_transactions.created_at',[$start_date, $end_date])
+                                            ->where('bills.quotation_id',$quotationId)
+                                            ->where('bills.bill_status_id',BillStatus::where('slug','approved')->pluck('id')->first())
+                                            ->orderBy('bills.created_at')
+                                            ->select('bill_transactions.id as bill_transaction_id','bill_transactions.bill_id as bill_id','bill_transactions.total','bill_transactions.remark','bill_transactions.debit','bill_transactions.hold','bill_transactions.paid_from_advanced','bill_transactions.retention_percent','bill_transactions.retention_amount',
+                                                'bill_transactions.tds_percent','bill_transactions.tds_amount','bill_transactions.amount','bill_transactions.other_recovery_value','bill_transactions.created_at')->get();
+                    $billTransactions = $billTransactionsList->groupBy('bill_id')->toArray();
+                    $row = 0;
+                    $data = array();
+                    $statusId = BillStatus::whereIn('slug',['approved','draft'])->get()->toArray();
+                    $totalBillIds = Bill::where('quotation_id',$quotationId)->whereIn('bill_status_id',array_column($statusId,'id'))->orderBy('id')->pluck('id');
+                    foreach ($billTransactions as $billId => $billTransactionData){
+                        $billNo = 1;
+                        $billName = '-';
+                        foreach($totalBillIds as $thisbillId){
+                            $status = SubcontractorBill::join('subcontractor_bill_status','subcontractor_bill_status.id','=','subcontractor_bills.subcontractor_bill_status_id')
+                                ->where('subcontractor_bills.id',$billId)->pluck('subcontractor_bill_status.slug')->first();
+                            if($status != 'disapproved'){
+                                if($thisbillId == $billId){
+                                    $billName = "R.A. ".$billNo;
+                                    break;
+                                }
+                            }
+                            $billNo++;
+                        }
+
+                        foreach($billTransactionData as $billTransaction){
+                            $data[$row]['date'] = date('d/m/y',strtotime($billTransaction['created_at']));;;
+                            $data[$row]['bill_number'] = $billName;
+                            $data[$row]['basic_amount'] = '-';
+                            $data[$row]['tax_amount'] = '-';
+                            $data[$row]['total_amount'] = '-';
+                            $data[$row]['mobilise'] = ($billTransaction['paid_from_advanced'] == true) ? $billTransaction['amount'] : 0;
+                            $data[$row]['debit'] = $billTransaction['debit'];
+                            $data[$row]['hold'] = $billTransaction['hold'];
+                            $data[$row]['retention'] = $billTransaction['retention_amount'];
+                            $data[$row]['tds'] = $billTransaction['tds_amount'];
+                            $data[$row]['other_recovery'] = $billTransaction['other_recovery_value'];
+                            $data[$row]['payable_amount'] = $data[$row]['total_amount'] + $data[$row]['mobilise'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
+                            $data[$row]['check_amount'] = ($billTransaction['paid_from_advanced'] == false) ? $billTransaction['amount'] : 0;
+                            $data[$row]['balance'] = '-';
+                            $row++;
+                        }
+                    }
+                    dd($data);
+
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                                /*$row++;
+
+                                $sheet->cell('C'.($row), function($cell) {
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue('Total');
+                                });
+                                $row++;*/
+                            }
+                        });
+                    })->export('xls');
+
                     break;
 
                 case 'purchase_bill_tax_report':
@@ -413,7 +477,8 @@ class ReportController extends Controller
                         array('data3', 'data4')
                     );
                     break;
-                case 'sales_bill_tax_report':
+
+                /*case 'sales_bill_tax_report':
                     $site_id = $request->sales_bill_tax_report_site_id;
                     $array_no = 1;
                     $iterator = $i= 0;
@@ -582,18 +647,12 @@ class ReportController extends Controller
                                         $cell->setValue($cellData);
                                     });
                                 }
-                                /*$row++;
 
-                                $sheet->cell('C'.($row), function($cell) {
-                                    $cell->setAlignment('center')->setValignment('center');
-                                    $cell->setValue('Total');
-                                });
-                                $row++;*/
                             }
                         });
                     })->export('xls');
 
-                    break;
+                    break;*/
 
                 case 'receiptwise_p_and_l_report':
                     $header = array(null, null);
@@ -610,16 +669,6 @@ class ReportController extends Controller
                         array(null, null),
                         array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
                         array(1, 1),
-                    );
-                    break;
-                case 'purchase_bill_tax_report':
-                    $header = array(
-                        'Sr. No', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
-                        'With Tax Amount'
-                    );
-                    $data = array(
-                        array('data1', 'data2'),
-                        array('data3', 'data4')
                     );
                     break;
 
