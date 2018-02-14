@@ -8,17 +8,24 @@ use App\BillTax;
 use App\BillTransaction;
 use App\Category;
 use App\Employee;
+use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\BillTrait;
 use App\Material;
 use App\Helper\MaterialProductHelper;
 use App\PeticashSalaryTransaction;
 use App\PeticashTransactionType;
 use App\ProjectSite;
+use App\PurchaseOrderComponent;
+use App\PurchaseOrderTransaction;
+use App\PurchaseOrderTransactionComponent;
+use App\PurchaseOrderTransactionStatus;
 use App\Quotation;
 use App\Subcontractor;
 use App\Tax;
+use App\Unit;
 use App\Vendor;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -72,16 +79,109 @@ class ReportController extends Controller
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
             $endDate = explode('/',$request->end_date);
             $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 24:00:00';
+            $data = $header = array();
             switch($report_type) {
                 case 'materialwise_purchase_report':
                     $header = array(
-                        'Sr. No', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
+                        'Sr. No', 'Date', 'Category Name', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
                         'Total Amount', 'Average Amount'
                     );
-                    $data = array(
-                        array('data1', 'data2'),
-                        array('data3', 'data4')
-                    );
+                    $row = 0;
+                    $data = $purchaseOrderComponents = array();
+                    if(!$request->has('material_id')){
+                        $materialNames = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                            ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                            ->where('material_requests.project_site_id',$request['materialwise_purchase_report_site_id'])
+                            ->whereBetween('purchase_orders.created_at', [$start_date, $end_date])
+                            ->distinct('material_request_components.name')
+                            ->pluck('material_request_components.name')
+                            ->toArray();
+                    }else{
+                        $materialNames = Material::whereIn('id',$request['material_id'])->pluck('name')->toArray();
+                    }
+                    foreach ($materialNames as $materialName){
+                        $purchaseOrderComponents[] = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                            ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                            ->where('material_request_components.name','ilike',$materialName)
+                            ->where('material_requests.project_site_id',$request['materialwise_purchase_report_site_id'])
+                            ->whereBetween('purchase_orders.created_at', [$start_date, $end_date])
+                            ->select('purchase_orders.id as purchase_order_id','purchase_order_components.created_at','purchase_order_components.id as purchase_order_component_id','purchase_order_components.rate_per_unit'
+                                ,'purchase_order_components.unit_id','purchase_order_components.cgst_percentage','purchase_order_components.sgst_percentage','purchase_order_components.igst_percentage','material_request_components.name as material_request_component_name')
+                            ->get()->toArray();
+                    }
+
+                    $billGeneratedPOTransactionStatusId = PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first();
+                    foreach ($purchaseOrderComponents as $key => $purchaseOrderComponentArray){
+                        foreach ($purchaseOrderComponentArray as $key2 => $purchaseOrderComponent){
+                            $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
+                                ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
+                                ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
+                                ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
+                                ->get();
+                            $quantity = $taxAmount = 0;
+                            if($purchaseOrderTransactionComponents != null){
+                                foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
+                                    if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
+                                        $quantity += $purchaseOrderTransactionComponent['quantity'];
+                                    }else{
+                                        $unitConvertedQuantity = UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent['unit_id'],$purchaseOrderComponent['unit_id'],$purchaseOrderTransactionComponent['quantity']);
+                                        $quantity += $unitConvertedQuantity;
+                                    }
+                                    $subTotal = $purchaseOrderTransactionComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'];
+                                    $cgstAmount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
+                                    $sgstAmount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
+                                    $igstAmount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
+                                    $taxAmount += ($cgstAmount + $sgstAmount + $igstAmount);
+                                }
+                                $data[$row]['sr_no'] = $row+1;
+                                $data[$row]['created_at'] = $purchaseOrderComponent['created_at'];
+                                if($request['category_id'] == 0){
+                                    $data[$row]['category_name'] = Category::join('category_material_relations','category_material_relations.category_id','=','categories.id')
+                                        ->join('materials','materials.id','=','category_material_relations.material_id')
+                                        ->where('materials.name','ilike',$purchaseOrderComponent['material_request_component_name'])
+                                        ->pluck('categories.name')->first();
+                                }else{
+                                    $data[$row]['category_name'] = Category::where('id',$request['category_id'])->pluck('name')->first();
+                                }
+                                $data[$row]['material_name'] = $purchaseOrderComponent['material_request_component_name'];
+                                $data[$row]['quantity'] = $quantity;
+                                $data[$row]['unit_id'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                                $data[$row]['rate'] = $purchaseOrderComponent['rate_per_unit'] * $quantity;
+                                $data[$row]['tax_amount'] = $taxAmount;
+                                $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
+                                $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
+                            }
+                            $row++;
+                        }
+                    }
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                                /*$row++;
+
+                                $sheet->cell('C'.($row), function($cell) {
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue('Total');
+                                });
+                                $row++;*/
+                            }
+                        });
+                    })->export('xls');
                     break;
                 case 'receiptwise_p_and_l_report':
                     $header = array(null, null);
@@ -342,37 +442,15 @@ class ReportController extends Controller
                     $downloadSheetFlag = false;
                     break;
             }
-            if ($downloadSheetFlag) {
-                Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
-                    $excel->sheet($report_type, function($sheet) use($data, $header) {
-                        $sheet->setOrientation('landscape');
-                        $sheet->setPageMargin(0.25);
-                        $sheet->protect('constro');
-                        // Manipulate first row
-                        $sheet->fromArray($data, null, 'A1', false, false);
 
-                        // Add before first row
-                        $sheet->prependRow(1, $header);
 
-                        // Set black background
-                        $sheet->row(1, function($row) {
-                            // call cell manipulation methods
-                            $row->setBackground('#f2f2f2');
-                        });
-                        // Freeze first row
-                        $sheet->freezeFirstRow();
-                        // Set auto size for sheet
-                        $sheet->setAutoSize(true);
-
-                    });
-                })->export('xls');
-            }
+            //"=SUM($columnForTotal$rowForDiscountSubtotal:$columnForTotal$beforeTotalRowNumber)"
         }catch(\Exception $e){
             $data = [
                 'action' => 'Download Report',
+                'exception' => $e->getMessage(),
                 'params' => $request->all(),
-                'type' => $request->report_type,
-                'exception' => $e->getMessage()
+                'type' => $request->report_type
             ];
             Log::critical(json_encode($data));
         }
