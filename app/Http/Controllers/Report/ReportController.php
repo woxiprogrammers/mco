@@ -297,7 +297,7 @@ class ReportController extends Controller
                                                         ->where('subcontractor_bills.subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())
                                                         ->where('subcontractor_structure.subcontractor_id',$request['subcontractor_id'])
                                                         ->where('subcontractor_structure.project_site_id',$request['subcontractor_report_site_id'])
-                                                        ->orderBy('subcontractor_bill_transactions.created_at')
+                                                        ->orderBy('subcontractor_bills.created_at')
                                                         ->select('subcontractor_structure.summary_id','subcontractor_bill_transactions.id as subcontractor_bill_transaction_id','subcontractor_bill_transactions.subcontractor_bills_id as subcontractor_bill_id','subcontractor_bill_transactions.subtotal','subcontractor_bill_transactions.total','subcontractor_bill_transactions.debit','subcontractor_bill_transactions.hold',
                                                             'subcontractor_bill_transactions.retention_percent','subcontractor_bill_transactions.retention_amount','subcontractor_bill_transactions.tds_percent','subcontractor_bill_transactions.tds_amount','subcontractor_bill_transactions.other_recovery','subcontractor_bill_transactions.created_at')->get();
 
@@ -305,29 +305,59 @@ class ReportController extends Controller
                     $row = 0;
                     $data = array();
                     foreach ($subContractorBillTransactions as $subcontractorBillId => $subContractorBillTransactionData){
-                        foreach ($subContractorBillTransactionData as $key =>$subContractorBillTransaction){
-                            dd($subContractorBillTransaction);
-                            $data[$row]['date'] = date('d/m/y',strtotime($subContractorBillTransaction['date']));;
-                            $data[$row]['summary_type'] = Summary::where('id',$subContractorBillTransaction['summary_id'])->pluck('name')->first();
-                            $data[$row]['bill_no'] = $subcontractorBillId;
-                            $data[$row]['basic_amount'] = $subContractorBillTransaction[''];
-                            $data[$row]['total_tax'] = $subContractorBillTransaction[''];
-                            $data[$row]['total_bill_amount'] = $subContractorBillTransaction[''];
-                            $data[$row]['advance'] = $subContractorBillTransaction[''];
-                            $data[$row]['debit'] = $subContractorBillTransaction[''];
-                            $data[$row]['hold'] = $subContractorBillTransaction[''];
-                            $data[$row]['retention'] = $subContractorBillTransaction[''];
-                            $data[$row]['tds'] = $subContractorBillTransaction[''];
-                            $data[$row]['other_recovery'] = $subContractorBillTransaction[''];
-                            $data[$row]['payable_amount'] = $subContractorBillTransaction[''];
-                            $data[$row]['check_amount'] = $subContractorBillTransaction[''];
-                            $data[$row]['balance'] = $subContractorBillTransaction[''];
+                        $subcontractorBill = SubcontractorBill::where('id',$subcontractorBillId)->first();
+                        $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                        $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+                        $totalBills = $subcontractorStructure->subcontractorBill->sortBy('id')->pluck('id');
+                        $billNo = 1;
+                        $taxTotal = 0;
+                        $billName = '-';
+                        foreach($totalBills as $billId){
+                            $status = SubcontractorBill::join('subcontractor_bill_status','subcontractor_bill_status.id','=','subcontractor_bills.subcontractor_bill_status_id')
+                                ->where('subcontractor_bills.id',$billId)->pluck('subcontractor_bill_status.slug')->first();
+                            if($status != 'disapproved'){
+                                if($billId == $subcontractorBillId){
+                                    $billName = "R.A. ".$billNo;
+                                    break;
+                                }
+                            }
+                            $billNo++;
                         }
-                        //$data[$row]
+                        $structureSlug = $subcontractorStructure->contractType->slug;
+                        if($structureSlug == 'sqft'){
+                            $rate = $subcontractorStructure['rate'];
+                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                            }
+                            $finalTotal = $subTotal + $taxTotal;
+                        }else{
+                            $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
+                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                            }
+                            $finalTotal = $subTotal + $taxTotal;
+                        }
+                        foreach ($subContractorBillTransactionData as $key =>$subContractorBillTransaction){
+                            $data[$row]['date'] = date('d/m/y',strtotime($subContractorBillTransaction['created_at']));;
+                            $data[$row]['summary_type'] = Summary::where('id',$subContractorBillTransaction['summary_id'])->pluck('name')->first();
+                            $data[$row]['bill_no'] = $billName;
+                            $data[$row]['basic_amount'] = $rate;
+                            $data[$row]['total_tax'] = $taxTotal;
+                            $data[$row]['total_bill_amount'] = $finalTotal;
+                            $data[$row]['advance'] = '-';
+                            $data[$row]['debit'] = (-$subContractorBillTransaction['debit'] !=0 ) ? -$subContractorBillTransaction['debit'] : $subContractorBillTransaction['debit'];
+                            $data[$row]['hold'] = ($subContractorBillTransaction['hold'] != 0) ? -$subContractorBillTransaction['hold'] : $subContractorBillTransaction['hold'];
+                            $data[$row]['retention'] = ($subContractorBillTransaction['retention_amount'] != 0) ? -$subContractorBillTransaction['retention_amount'] : $subContractorBillTransaction['retention_amount'];
+                            $data[$row]['tds'] = ($subContractorBillTransaction['tds_amount'] != 0) ? -$subContractorBillTransaction['tds_amount'] : $subContractorBillTransaction['tds_amount'];
+                            $data[$row]['other_recovery'] = $subContractorBillTransaction['other_recovery'];
+                            $data[$row]['payable_amount'] = $data[$row]['total_bill_amount'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
+                            $data[$row]['check_amount'] = $subContractorBillTransaction['total'];
+                            $data[$row]['balance'] = '-';
+                            $row++;
+                        }
                     }
-
-
-
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
                         $excel->sheet($report_type, function($sheet) use($data, $header) {
                             $sheet->row(1, $header);
