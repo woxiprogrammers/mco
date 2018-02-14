@@ -619,7 +619,6 @@ class PurchaseOrderRequestController extends Controller
                         $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                         $pdfFileName = sha1($vendorId).'.pdf';
                         $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
-                        return $pdf->stream();
                         $pdfContent = $pdf->stream();
                         if(file_exists($pdfUploadPath)){
                             unlink($pdfUploadPath);
