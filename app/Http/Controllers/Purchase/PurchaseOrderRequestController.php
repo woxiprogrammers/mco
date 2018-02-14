@@ -7,6 +7,7 @@ use App\AssetType;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
+use App\Helper\MaterialProductHelper;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
@@ -417,7 +418,6 @@ class PurchaseOrderRequestController extends Controller
 
     public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
         try{
-            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
             if($request->has('approved_purchase_order_request_relation')){
                 if(Session::has('global_project_site')){
                     $projectSiteId = Session::get('global_project_site');
@@ -479,11 +479,32 @@ class PurchaseOrderRequestController extends Controller
                         $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                         $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
                         $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
-                        $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
                         $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
-                        $vendorInfo['materials'][$iterator]['cgst'] = $purchaseOrderComponent['cgst_percentage'];
-                        $vendorInfo['materials'][$iterator]['sgst'] = $purchaseOrderComponent['sgst_percentage'];
-                        $vendorInfo['materials'][$iterator]['igst'] = $purchaseOrderComponent['igst_percentage'];
+                        $vendorInfo['materials'][$iterator]['subtotal'] = MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate']));
+                        if($purchaseOrderComponent['cgst_percentage'] == null || $purchaseOrderComponent['cgst_percentage'] == ''){
+                            $vendorInfo['materials'][$iterator]['cgst_percentage'] = 0;
+                        }else{
+                            $vendorInfo['materials'][$iterator]['cgst_percentage'] = $purchaseOrderComponent['cgst_percentage'];
+                        }
+                        $vendorInfo['materials'][$iterator]['cgst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['cgst_percentage']/100);
+                        if($purchaseOrderComponent['sgst_percentage'] == null || $purchaseOrderComponent['sgst_percentage'] == ''){
+                            $vendorInfo['materials'][$iterator]['sgst_percentage'] = 0;
+                        }else{
+                            $vendorInfo['materials'][$iterator]['sgst_percentage'] = $purchaseOrderComponent['sgst_percentage'];
+                        }
+                        $vendorInfo['materials'][$iterator]['sgst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['sgst_percentage']/100);
+                        if($purchaseOrderComponent['igst_percentage'] == null || $purchaseOrderComponent['igst_percentage'] == ''){
+                            $vendorInfo['materials'][$iterator]['igst_percentage'] = 0;
+                        }else{
+                            $vendorInfo['materials'][$iterator]['igst_percentage'] = $purchaseOrderComponent['igst_percentage'];
+                        }
+                        $vendorInfo['materials'][$iterator]['igst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['igst_percentage']/100);
+                        $vendorInfo['materials'][$iterator]['total'] = $vendorInfo['materials'][$iterator]['subtotal'] + $vendorInfo['materials'][$iterator]['cgst_amount'] + $vendorInfo['materials'][$iterator]['sgst_amount'] + $vendorInfo['materials'][$iterator]['igst_amount'];
+                        if($purchaseOrderComponent['expected_delivery_date'] == null || $purchaseOrderComponent['expected_delivery_date'] == ''){
+                            $vendorInfo['materials'][$iterator]['due_date'] = '';
+                        }else{
+                            $vendorInfo['materials'][$iterator]['due_date'] = 'Due on '.date('j/n/Y',strtotime($purchaseOrderComponent['expected_delivery_date']));
+                        }
                         if($newMaterialTypeId == $componentTypeId){
                             $materialName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                             $isMaterialExists = Material::where('name','ilike',$materialName)->first();
@@ -522,14 +543,6 @@ class PurchaseOrderRequestController extends Controller
                                 Asset::create($categoryAssetData);
                             }
                         }
-                        /*if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
-                            $vendorInfo['materials'][$iterator]['gst'] = '-';
-                        }else{
-                            $vendorInfo['materials'][$iterator]['gst'] = Material::where('name','ilike',$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->pluck('gst')->first();
-                            if($vendorInfo['materials'][$iterator]['gst'] == null){
-                                $vendorInfo['materials'][$iterator]['gst'] = '-';
-                            }
-                        }*/
                         $purchaseOrderRequestComponent->update(['is_approved' => true]);
                         $disapprovedPurchaseOrderRequestComponentIds = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                                 ->where('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseOrderRequestComponent->purchase_request_component_id)
@@ -606,6 +619,7 @@ class PurchaseOrderRequestController extends Controller
                         $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                         $pdfFileName = sha1($vendorId).'.pdf';
                         $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
+                        return $pdf->stream();
                         $pdfContent = $pdf->stream();
                         if(file_exists($pdfUploadPath)){
                             unlink($pdfUploadPath);
