@@ -176,7 +176,7 @@
             }else{
                 $(element).closest('.panel-heading').find('.accordion-toggle').removeAttr('data-toggle');
                 $(element).closest('.panel-default').find('.panel-collapse').removeClass('in');
-                $(element).closest('.panel-default').find('.panel-collapse input[type="radio"]').each(function(){
+                $(element).closest('.panel-default').find('.panel-collapse input[type="checkbox"]').each(function(){
                     $(this).prop('checked', false);
                 });
             }

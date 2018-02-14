@@ -24,10 +24,13 @@
                                 <div class="page-title">
                                     <h1>Create Purchase Request</h1>
                                 </div>
-                                <button type="submit"  class="btn red pull-right margin-top-15">
-                                    <i class="fa fa-check" style="font-size: large"></i>
-                                    Submit
-                                </button>
+                                <div class="pull-right">
+                                    <a href="/purchase/purchase-request/manage/" class="btn btn-secondary-outline margin-top-15">Back</a>
+                                    <button type="submit"  class="btn red margin-top-15">
+                                        <i class="fa fa-check" style="font-size: large"></i>
+                                        Submit
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">
