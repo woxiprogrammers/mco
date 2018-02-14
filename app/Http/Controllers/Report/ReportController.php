@@ -50,6 +50,7 @@ class ReportController extends Controller
             $billProjectSites = Quotation::join('bills','quotations.id','=','bills.quotation_id')
                                     ->join('project_sites','quotations.project_site_id','=','project_sites.id')
                                     ->whereIn('bills.id',$billIds)
+                                    ->distinct('project_sites.id')
                 ->select('project_sites.id','project_sites.name','project_sites.address')->get()->toArray();
             $categories = Category::where('is_active', true)->get(['id','name','slug'])->toArray();
             $materials = Material::get(['id','name'])->toArray();
@@ -183,23 +184,7 @@ class ReportController extends Controller
                         });
                     })->export('xls');
                     break;
-                case 'receiptwise_p_and_l_report':
-                    $header = array(null, null);
-                    $data = array(
-                        array('Total Sale Entry', 1),
-                        array('Total receipt entry', 1),
-                        array(null, null),
-                        array('Labour + Staff Salary', null),
-                        array('Total Purchase', null),
-                        array('Total Miscellaneous Purchase', null),
-                        array('Subcontractor', null),
-                        array('Indirect Expences (GST,TDS Paid to government from manisha)', null),
-                        array('Total Expence', null),
-                        array(null, null),
-                        array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
-                        array(1, 1),
-                    );
-                    break;
+
                 case 'subcontractor_report':
                     $header = array(
                         'Sr. No', 'Summary Type', 'Bill No', 'Total Bill Amount', 'TDS',
@@ -210,6 +195,7 @@ class ReportController extends Controller
                         array('data3', 'data4')
                     );
                     break;
+
                 case 'labour_specific_report':
                     $site_id = $request->labour_specific_report_site_id;
                     $emp_id = $request->labour_id;
@@ -272,16 +258,7 @@ class ReportController extends Controller
                         );
                     }
                     break;
-                case 'purchase_bill_tax_report':
-                    $header = array(
-                        'Sr. No', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
-                        'With Tax Amount'
-                    );
-                    $data = array(
-                        array('data1', 'data2'),
-                        array('data3', 'data4')
-                    );
-                    break;
+
                 case 'sales_bill_tax_report':
                     $site_id = $request->sales_bill_tax_report_site_id;
                     $array_no = 1;
@@ -289,8 +266,8 @@ class ReportController extends Controller
                     $data = $currentTaxes = $listingData = array();
                     $quotation = Quotation::where('project_site_id',$site_id)->first();
                     $allBills = Bill::where('quotation_id',$quotation->id)->get();
-                    $statusId = BillStatus::whereIn('slug',['approved'])->get()->toArray();
-                    $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->whereBetween('created_at', array($start_date, $end_date))->orderBy('created_at','asc')->get();
+                    $statusId = BillStatus::where('slug','approved')->pluck('id')->first();
+                    $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->whereBetween('created_at', array($start_date, $end_date))->orderBy('created_at','asc')->get();
                     $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
                     $taxesAppliedToBills = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                         ->whereIn('bill_taxes.bill_id',array_column($allBills->toArray(),'id'))
@@ -428,8 +405,8 @@ class ReportController extends Controller
                         $data[$jIterator]['payable_amount'] = $billData['final_total'];
                         $data[$jIterator]['check_amount'] = $bllTransactions->sum('total');
                         $data[$jIterator]['balance'] = $data[$jIterator]['payable_amount'] - $data[$jIterator]['check_amount'];
+                        $jIterator++;
                     }
-
                     $header = array(
                         'RA Bill Number', 'Basic Amount', 'Tax Amount', 'Total Amount',
                         'Mobilise Advance', 'Debit', 'Hold', 'Retention',
@@ -437,7 +414,61 @@ class ReportController extends Controller
                         'Balance'
                     );
 
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                                /*$row++;
+
+                                $sheet->cell('C'.($row), function($cell) {
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue('Total');
+                                });
+                                $row++;*/
+                            }
+                        });
+                    })->export('xls');
+
                     break;
+
+                case 'receiptwise_p_and_l_report':
+                    $header = array(null, null);
+                    $data = array(
+                        array('Total Sale Entry', 1),
+                        array('Total receipt entry', 1),
+                        array(null, null),
+                        array('Labour + Staff Salary', null),
+                        array('Total Purchase', null),
+                        array('Total Miscellaneous Purchase', null),
+                        array('Subcontractor', null),
+                        array('Indirect Expences (GST,TDS Paid to government from manisha)', null),
+                        array('Total Expence', null),
+                        array(null, null),
+                        array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
+                        array(1, 1),
+                    );
+                    break;
+                case 'purchase_bill_tax_report':
+                    $header = array(
+                        'Sr. No', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
+                        'With Tax Amount'
+                    );
+                    $data = array(
+                        array('data1', 'data2'),
+                        array('data3', 'data4')
+                    );
+                    break;
+
                 default :
                     $downloadSheetFlag = false;
                     break;
