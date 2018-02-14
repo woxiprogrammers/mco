@@ -82,7 +82,7 @@
                                                         <input type="text" value="{{$purchaseOrderRequest->purchaseRequest->format_id}}" class="form-control" readonly>
                                                     </div>
                                                 </div>
-                                                @if(count($purchaseOrderRequestComponents) > 0)
+                                                @if(count($purchaseOrderRequestComponents) > 0 && false)
                                                     @foreach($purchaseOrderRequestComponents as $purchaseOrderRequestComponentId => $purchaseOrderRequestComponentData)
                                                         <div class="panel-group accordion" id="accordion_{{$purchaseOrderRequestComponentId}}">
                                                             <div class="panel panel-default">
@@ -148,13 +148,17 @@
                                                             </div>
                                                         </div>
                                                     @endforeach
-                                                        <div class="form-actions noborder row">
-                                                            <div class="col-md-offset-3" style="margin-left: 26%">
-                                                                <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
-                                                            </div>
+                                                    <div class="form-actions noborder row">
+                                                        <div class="col-md-offset-3" style="margin-left: 26%">
+                                                            <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                         </div>
+                                                    </div>
                                                 @else
-
+                                                    <div class="row" style="margin-top: 10%; margin-bottom: 10%">
+                                                        <div class="col-md-8 col-md-offset-3">
+                                                            <span style="font-size: 20px; font-weight: bold"> Purchase Orders are created for all the materials and assets . </span>
+                                                        </div>
+                                                    </div>
                                                 @endif
                                             </form>
                                         </div>
