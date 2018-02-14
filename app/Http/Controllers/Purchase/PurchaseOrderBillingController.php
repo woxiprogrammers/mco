@@ -176,13 +176,13 @@ class PurchaseOrderBillingController extends Controller
                         $tempAmount = $purchaseOrderTransactionComponent->quantity * $unitConversionRate;
                         $amount += $tempAmount;
                         if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->cgst_percent/100);
+                            $taxAmount += $tempAmount * ($purchaseOrderComponent->cgst_percentage/100);
                         }
                         if($purchaseOrderComponent->sgst_percentage != null || $purchaseOrderComponent->sgst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->sgst_percent/100);
+                            $taxAmount += $tempAmount * ($purchaseOrderComponent->sgst_percentage/100);
                         }
                         if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->igst_percent/100);
+                            $taxAmount += $tempAmount * ($purchaseOrderComponent->igst_percentage/100);
                         }
                     }
                 }

@@ -88,7 +88,7 @@
                                                                 <label class="control-label pull-right">Tax Amount</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" class="form-control tax" id="taxAmount" name="tax_amount" readonly>
+                                                                <input type="number" class="form-control tax calculate-amount" id="taxAmount" name="tax_amount" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -195,7 +195,7 @@
                        },
                         success: function(data,textStatus, xhr){
                             $("#subTotal").val(data.sub_total);
-                            $("#totalAmount").val(data.sub_total);
+                            $("#totalAmount").val(data.tax_amount + data.sub_total);
                             $("#taxAmount").val(data.tax_amount);
                             $("#billData").show();
                         },

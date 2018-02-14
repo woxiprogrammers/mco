@@ -81,7 +81,11 @@ class PurchaseRequestController extends Controller
                     $iterator++;
                 }
             }
-            return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId','units'));
+            $unitOptions = '';
+            foreach($units as $unit){
+                $unitOptions .= '<option value="'.$unit['id'].'">'.$unit['name'].'</option>';
+            }
+            return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId','units','unitOptions'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Request create view',
@@ -194,7 +198,6 @@ class PurchaseRequestController extends Controller
                 ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
                 ->join('user_project_site_relation','users.id','=','user_project_site_relation.user_id')
                 ->whereIn('permissions.name',['approve-purchase-request','create-purchase-order'])
-                ->whereNotNull('users.web_fcm_token')
                 ->where('user_project_site_relation.project_site_id',$request['project_site_id'])
                 ->select('users.web_fcm_token as web_fcm_token', 'users.mobile_fcm_token as mobile_fcm_token')
                 ->get()
@@ -675,8 +678,9 @@ class PurchaseRequestController extends Controller
                     }
                 }
                 if(isset($vendorInfo)){
+                    $pdfTitle = "Purchase Request";
                     $pdf = App::make('dompdf.wrapper');
-                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo')));
+                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle')));
                     $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                     $pdfFileName = sha1($vendorId).'.pdf';
                     $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
@@ -690,7 +694,8 @@ class PurchaseRequestController extends Controller
                         }
                         file_put_contents($pdfUploadPath,$pdfContent);
                         $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        Mail::send('purchase.purchase-request.email.vendor-quotation', [], function($message) use ($mailData){
+                        $message = 'Please check the P.R. attached herewith';
+                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['message' => $message], function($message) use ($mailData){
                             $message->subject('Testing with attachment');
                             $message->to($mailData['toMail']);
                             $message->from(env('MAIL_USERNAME'));

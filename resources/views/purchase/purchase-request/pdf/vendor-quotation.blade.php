@@ -26,7 +26,7 @@
         </style>
     </head>
     <body>
-        <span style="text-align: center"></span>
+        <span style="text-align: center; margin-left: 40%; font-size: 19px; font-weight: bold">{{$pdfTitle}}</span>
         <table border="1" id="mainTable">
             <tr style="height: 100px">
                 <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
@@ -119,32 +119,42 @@
                                 Sr.no.
                             </th>
                             @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
-                                <th style="width: 250px;">
+                                <th style="width: 150px;">
                                     Item Name - Description
                                 </th>
                                 <th>
-                                    GST
+                                    Quantity
                                 </th>
                                 <th>
-                                    HSN Code
+                                    Unit
                                 </th>
                                 <th>
                                     Rate
+                                </th>
+                                <th>
+                                    Subtotal
+                                </th>
+                                <th>
+                                    CGST
+                                </th>
+                                <th>
+                                    SGST
+                                </th>
+                                <th>
+                                    IGST
+                                </th>
+                                <th>
+                                    Total
                                 </th>
                             @else
                                 <th style="width: 450px">
                                     Item Name - Description
                                 </th>
-                            @endif
-                            <th>
-                                Quantity
-                            </th>
-                            <th>
-                                Unit
-                            </th>
-                            @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                                 <th>
-                                    Amount
+                                    Quantity
+                                </th>
+                                <th>
+                                    Unit
                                 </th>
                             @endif
                         </tr>
@@ -153,29 +163,45 @@
                                 <td>
                                     {!! $iterator + 1 !!}
                                 </td>
-                                <td style="text-align: left;padding-left: 5px" >
-                                    {{$vendorInfo['materials'][$iterator]['item_name']}}
-                                </td>
                                 @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
-                                    <td>
-                                        {{$vendorInfo['materials'][$iterator]['gst']}}
+                                    <td style="text-align: left;padding-left: 5px" >
+                                        {{$vendorInfo['materials'][$iterator]['item_name']}}
+                                        <br>
+                                        <span style="font-size: 12px"> {{$vendorInfo['materials'][$iterator]['due_date']}} </span>
                                     </td>
                                     <td>
-                                        {{$vendorInfo['materials'][$iterator]['hsn_code']}}
+                                        {{$vendorInfo['materials'][$iterator]['quantity']}}
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['unit']}}
                                     </td>
                                     <td>
                                         {{$vendorInfo['materials'][$iterator]['rate']}}
                                     </td>
-                                @endif
-                                <td>
-                                    {{$vendorInfo['materials'][$iterator]['quantity']}}
-                                </td>
-                                <td>
-                                    {{$vendorInfo['materials'][$iterator]['unit']}}
-                                </td>
-                                @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                                     <td>
-                                        {!! $vendorInfo['materials'][$iterator]['rate']*$vendorInfo['materials'][$iterator]['quantity'] !!}
+                                        {{$vendorInfo['materials'][$iterator]['subtotal']}}
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['cgst_amount']}}({{$vendorInfo['materials'][$iterator]['cgst_percentage']}}%)
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['sgst_amount']}}({{$vendorInfo['materials'][$iterator]['sgst_percentage']}}%)
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['igst_amount']}}({{$vendorInfo['materials'][$iterator]['igst_percentage']}}%)
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['total']}}
+                                    </td>
+                                @else
+                                    <td style="text-align: left;padding-left: 5px" >
+                                        {{$vendorInfo['materials'][$iterator]['item_name']}}
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['quantity']}}
+                                    </td>
+                                    <td>
+                                        {{$vendorInfo['materials'][$iterator]['unit']}}
                                     </td>
                                 @endif
                             </tr>
@@ -183,12 +209,17 @@
                         @for($i = 0;$i < (12-(count($vendorInfo['materials'])));$i++)
                             <tr style="text-align: center">
                                 <td>
-
-                                </td>
-                                <td>
-
                                 </td>
                                 @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
+                                    <td style="text-align: left;padding-left: 5px" >
+
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+
+                                    </td>
                                     <td>
 
                                     </td>
@@ -198,14 +229,22 @@
                                     <td>
 
                                     </td>
-                                @endif
-                                <td>
+                                    <td>
 
-                                </td>
-                                <td>
+                                    </td>
+                                    <td>
 
-                                </td>
-                                @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                @else
+                                    <td style="text-align: left;padding-left: 5px" >
+
+                                    </td>
+                                    <td>
+
+                                    </td>
                                     <td>
 
                                     </td>

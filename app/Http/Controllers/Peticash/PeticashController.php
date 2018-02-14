@@ -532,7 +532,6 @@ class PeticashController extends Controller
     }
     public function salaryApprovalListing(Request $request){
         try{
-
             $postdata = null;
             $emp_id = "";
             $emp_name = null;
@@ -704,7 +703,7 @@ class PeticashController extends Controller
         }catch(\Exception $e){
             $records = array();
             $data = [
-                'action' => 'Get Master Account Listing',
+                'action' => 'Get Salary Approval Listing',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];
@@ -911,7 +910,7 @@ class PeticashController extends Controller
         }catch(\Exception $e){
             $records = array();
             $data = [
-                'action' => 'Get Master Account Listing',
+                'action' => 'Get Sitewise Account Listing',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];

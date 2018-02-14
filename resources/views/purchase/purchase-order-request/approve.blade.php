@@ -124,7 +124,7 @@
                                                                                 @foreach($purchaseOrderRequestComponentData['vendor_relations'] as $vendorRelation)
                                                                                     <tr>
                                                                                         <td>
-                                                                                            <input type="radio" class="radio-buttons-{{$purchaseOrderRequestComponentId}}" name="approved_purchase_order_request_relation[{{$vendorRelation['vendor_id']}}][]" value="{{$vendorRelation['purchase_order_request_component_id']}}" onclick="radioClickEvent(this)">
+                                                                                            <input type="checkbox" class="radio-buttons-{{$purchaseOrderRequestComponentId}}" name="approved_purchase_order_request_relation[{{$vendorRelation['vendor_id']}}][]" value="{{$vendorRelation['purchase_order_request_component_id']}}" onclick="radioClickEvent(this)">
                                                                                         </td>
                                                                                         <td>
                                                                                             {{$vendorRelation['vendor_name']}}
@@ -148,12 +148,14 @@
                                                             </div>
                                                         </div>
                                                     @endforeach
+                                                        <div class="form-actions noborder row">
+                                                            <div class="col-md-offset-3" style="margin-left: 26%">
+                                                                <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                            </div>
+                                                        </div>
+                                                @else
+
                                                 @endif
-                                                <div class="form-actions noborder row">
-                                                    <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
-                                                    </div>
-                                                </div>
                                             </form>
                                         </div>
                                     </div>

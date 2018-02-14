@@ -6,6 +6,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="unitOptions" value="{{$unitOptions}}">
     <input type="hidden" id="iterator" value="0">
     <input type="hidden" id="component_id">
     <form role="form" id="new_purchase_request" class="form-horizontal" action="/purchase/purchase-request/create" method="post">
