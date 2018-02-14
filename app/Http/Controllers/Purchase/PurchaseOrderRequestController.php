@@ -481,6 +481,9 @@ class PurchaseOrderRequestController extends Controller
                         $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
                         $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
                         $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
+                        $vendorInfo['materials'][$iterator]['cgst'] = $purchaseOrderComponent['cgst_percentage'];
+                        $vendorInfo['materials'][$iterator]['sgst'] = $purchaseOrderComponent['sgst_percentage'];
+                        $vendorInfo['materials'][$iterator]['igst'] = $purchaseOrderComponent['igst_percentage'];
                         if($newMaterialTypeId == $componentTypeId){
                             $materialName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                             $isMaterialExists = Material::where('name','ilike',$materialName)->first();
@@ -519,14 +522,14 @@ class PurchaseOrderRequestController extends Controller
                                 Asset::create($categoryAssetData);
                             }
                         }
-                        if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                        /*if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
                             $vendorInfo['materials'][$iterator]['gst'] = '-';
                         }else{
                             $vendorInfo['materials'][$iterator]['gst'] = Material::where('name','ilike',$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->pluck('gst')->first();
                             if($vendorInfo['materials'][$iterator]['gst'] == null){
                                 $vendorInfo['materials'][$iterator]['gst'] = '-';
                             }
-                        }
+                        }*/
                         $purchaseOrderRequestComponent->update(['is_approved' => true]);
                         $disapprovedPurchaseOrderRequestComponentIds = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                                 ->where('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseOrderRequestComponent->purchase_request_component_id)
@@ -598,7 +601,8 @@ class PurchaseOrderRequestController extends Controller
                         }
                         $pdf = App::make('dompdf.wrapper');
                         $pdfFlag = "purchase-order-listing-download";
-                        $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
+                        $pdfTitle = 'Purchase Order';
+                        $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle')));
                         $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                         $pdfFileName = sha1($vendorId).'.pdf';
                         $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
@@ -611,7 +615,8 @@ class PurchaseOrderRequestController extends Controller
                         }
                         file_put_contents($pdfUploadPath,$pdfContent);
                         $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        Mail::send('purchase.purchase-request.email.vendor-quotation', [], function($message) use ($mailData){
+                        $message = 'Please check the P.O. attached herewith';
+                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['message' => $message], function($message) use ($mailData){
                             $message->subject('Testing with attachment');
                             $message->to($mailData['toMail']);
                             $message->from(env('MAIL_USERNAME'));

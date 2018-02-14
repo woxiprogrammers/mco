@@ -41,11 +41,6 @@ $(document).ready(function(){
             source: materialList.ttAdapter(),
             limit: 30,
             templates: {
-                /*empty: [
-                    '<div class="empty-suggest">',
-                    'Unable to find any Result that match the current query',
-                    '</div>'
-                ].join('\n'),*/
                 suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
             },
         }).on('typeahead:selected', function (obj, datum) {
@@ -62,6 +57,7 @@ $(document).ready(function(){
         })
             .on('typeahead:open', function (obj, datum) {
                 $('#component_id').val(4);
+                $("#materialUnit").html($("#unitOptions").val());
             });
         $("#myModal").modal();
     });

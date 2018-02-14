@@ -108,6 +108,7 @@ class VendorMailController extends Controller
         try{
             $purchaseRequestComponentVendorMailInfo = PurchaseRequestComponentVendorMailInfo::where('id',$purchaseRequestComponentVendorMailId)->first();
             if($slug == 'for-quotation'){
+                $pdfTitle = 'Purchase Request';
                 $vendorInfo = array();
                 $purchaseRequest = PurchaseRequest::where('id',$purchaseRequestComponentVendorMailInfo['reference_id'])->first();
                 $materialRequestComponents = MaterialRequestComponents::join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
@@ -139,9 +140,10 @@ class VendorMailController extends Controller
                     $iterator++;
                 }
                 $pdf = App::make('dompdf.wrapper');
-                $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo')));
+                $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle')));
                 return $pdf->stream();
             }elseif($slug == 'for-purchase-order'){
+                $pdfTitle = 'Purchase Order';
                 $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
                 $pdfFlag = 'after-purchase-order-create';
                 $purchaseOrder = PurchaseOrder::where('id',$purchaseRequestComponentVendorMailInfo['reference_id'])->first();
@@ -180,7 +182,7 @@ class VendorMailController extends Controller
                         $iterator++;
                     }
                     $pdf = App::make('dompdf.wrapper');
-                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
+                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle')));
                     return $pdf->stream();
                 }else{
 

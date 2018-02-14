@@ -26,7 +26,7 @@
         </style>
     </head>
     <body>
-        <span style="text-align: center"></span>
+        <span style="text-align: center; margin-left: 40%; font-size: 19px; font-weight: bold">{{$pdfTitle}}</span>
         <table border="1" id="mainTable">
             <tr style="height: 100px">
                 <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
@@ -121,9 +121,6 @@
                             @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                                 <th style="width: 250px;">
                                     Item Name - Description
-                                </th>
-                                <th>
-                                    GST
                                 </th>
                                 <th>
                                     HSN Code
