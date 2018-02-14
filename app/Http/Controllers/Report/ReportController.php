@@ -8,17 +8,29 @@ use App\BillTax;
 use App\BillTransaction;
 use App\Category;
 use App\Employee;
+use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\BillTrait;
 use App\Material;
 use App\Helper\MaterialProductHelper;
 use App\PeticashSalaryTransaction;
+use App\PeticashStatus;
 use App\PeticashTransactionType;
 use App\ProjectSite;
+use App\PurchaseOrderComponent;
+use App\PurchaseOrderTransaction;
+use App\PurchaseOrderTransactionComponent;
+use App\PurchaseOrderTransactionStatus;
 use App\Quotation;
 use App\Subcontractor;
+use App\SubcontractorBill;
+use App\SubcontractorBillStatus;
+use App\SubcontractorBillTransaction;
+use App\Summary;
 use App\Tax;
+use App\Unit;
 use App\Vendor;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +50,7 @@ class ReportController extends Controller
             $last_date = Carbon::now();
             $start_date = date('d/m/Y',strtotime($curr_date));
             $end_date = date('d/m/Y',strtotime($last_date));
-            $sites = ProjectSite::get(['id','name','address'])->toArray();
+            $sites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
             $billIds = Bill::where('bill_status_id',BillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
             $billProjectSites = Quotation::join('bills','quotations.id','=','bills.quotation_id')
                                     ->join('project_sites','quotations.project_site_id','=','project_sites.id')
@@ -72,17 +84,307 @@ class ReportController extends Controller
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
             $endDate = explode('/',$request->end_date);
             $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 24:00:00';
+            $data = $header = array();
             switch($report_type) {
                 case 'materialwise_purchase_report':
                     $header = array(
-                        'Sr. No', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
+                        'Sr. No', 'Date', 'Category Name', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
                         'Total Amount', 'Average Amount'
                     );
-                    $data = array(
-                        array('data1', 'data2'),
-                        array('data3', 'data4')
-                    );
+                    $row = 0;
+                    $data = $purchaseOrderComponents = array();
+                    if(!$request->has('material_id')){
+                        $materialNames = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                            ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                            ->where('material_requests.project_site_id',$request['materialwise_purchase_report_site_id'])
+                            ->whereBetween('purchase_orders.created_at', [$start_date, $end_date])
+                            ->distinct('material_request_components.name')
+                            ->pluck('material_request_components.name')
+                            ->toArray();
+                    }else{
+                        $materialNames = Material::whereIn('id',$request['material_id'])->pluck('name')->toArray();
+                    }
+                    foreach ($materialNames as $materialName){
+                        $purchaseOrderComponents[] = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                            ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                            ->where('material_request_components.name','ilike',$materialName)
+                            ->where('material_requests.project_site_id',$request['materialwise_purchase_report_site_id'])
+                            ->whereBetween('purchase_orders.created_at', [$start_date, $end_date])
+                            ->select('purchase_orders.id as purchase_order_id','purchase_order_components.created_at','purchase_order_components.id as purchase_order_component_id','purchase_order_components.rate_per_unit'
+                                ,'purchase_order_components.unit_id','purchase_order_components.cgst_percentage','purchase_order_components.sgst_percentage','purchase_order_components.igst_percentage','material_request_components.name as material_request_component_name')
+                            ->get()->toArray();
+                    }
+
+                    $billGeneratedPOTransactionStatusId = PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first();
+                    foreach ($purchaseOrderComponents as $key => $purchaseOrderComponentArray){
+                        foreach ($purchaseOrderComponentArray as $key2 => $purchaseOrderComponent){
+                            $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
+                                ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
+                                ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
+                                ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
+                                ->get();
+                            $quantity = $taxAmount = 0;
+                            if($purchaseOrderTransactionComponents != null){
+                                foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
+                                    if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
+                                        $quantity += $purchaseOrderTransactionComponent['quantity'];
+                                    }else{
+                                        $unitConvertedQuantity = UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent['unit_id'],$purchaseOrderComponent['unit_id'],$purchaseOrderTransactionComponent['quantity']);
+                                        $quantity += $unitConvertedQuantity;
+                                    }
+                                    $subTotal = $purchaseOrderTransactionComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'];
+                                    $cgstAmount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
+                                    $sgstAmount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
+                                    $igstAmount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
+                                    $taxAmount += ($cgstAmount + $sgstAmount + $igstAmount);
+                                }
+                                $data[$row]['sr_no'] = $row+1;
+                                $data[$row]['created_at'] = $purchaseOrderComponent['created_at'];
+                                if($request['category_id'] == 0){
+                                    $data[$row]['category_name'] = Category::join('category_material_relations','category_material_relations.category_id','=','categories.id')
+                                        ->join('materials','materials.id','=','category_material_relations.material_id')
+                                        ->where('materials.name','ilike',$purchaseOrderComponent['material_request_component_name'])
+                                        ->pluck('categories.name')->first();
+                                }else{
+                                    $data[$row]['category_name'] = Category::where('id',$request['category_id'])->pluck('name')->first();
+                                }
+                                $data[$row]['material_name'] = $purchaseOrderComponent['material_request_component_name'];
+                                $data[$row]['quantity'] = $quantity;
+                                $data[$row]['unit_id'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                                $data[$row]['rate'] = $purchaseOrderComponent['rate_per_unit'] * $quantity;
+                                $data[$row]['tax_amount'] = $taxAmount;
+                                $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
+                                $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
+                            }
+                            $row++;
+                        }
+                    }
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                                /*$row++;
+
+                                $sheet->cell('C'.($row), function($cell) {
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue('Total');
+                                });
+                                $row++;*/
+                            }
+                        });
+                    })->export('xls');
                     break;
+
+
+                case 'labour_specific_report':
+                    $header = array(
+                        'Date', 'Payment Type', 'Gross Salary', '-PT', '-PF', '-ESIC', '-TDS',
+                        '-ADVANCE', 'Net Payment', 'Balance'
+                    );
+                    $approvedStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+                    $paymentSlug = PeticashTransactionType::where('type','PAYMENT')->select('id','slug')->get();
+                    $salaryTransactionData = array();
+                    if($request['labour_specific_report_site_id'] == 'all'){
+                        $salaryTransactionData = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
+                            ->where('peticash_status_id',$approvedStatusId)
+                            ->whereBetween('date', [$start_date, $end_date])
+                            ->orderBy('date','desc')
+                            ->get();
+                    }else{
+                        $salaryTransactionData = PeticashSalaryTransaction::where('project_site_id',$request['labour_specific_report_site_id'])
+                            ->where('employee_id',$request['labour_id'])
+                            ->where('peticash_status_id',$approvedStatusId)
+                            ->whereBetween('date', [$start_date, $end_date])
+                            ->orderBy('date','desc')
+                            ->get();
+                    }
+
+                    $row = 0;
+                    $data = array();
+                    foreach($salaryTransactionData as $key => $salaryTransaction){
+                        $peticashTransactionTypeSlug = $salaryTransaction->peticashTransactionType->slug;
+                        $data[$row]['date'] = date('d/m/y',strtotime($salaryTransaction['date']));
+                        $data[$row]['payment_type'] = $salaryTransaction->peticashTransactionType->name;
+                        $data[$row]['gross_salary'] = ($peticashTransactionTypeSlug == 'salary') ? ($salaryTransaction->employee->per_day_wages * $salaryTransaction['days']) : 0;
+                        $data[$row]['pt'] = $salaryTransaction['pt'];
+                        $data[$row]['pf'] = $salaryTransaction['pf'];
+                        $data[$row]['esic'] = $salaryTransaction['esic'];
+                        $data[$row]['tds'] = $salaryTransaction['tds'];
+                        $data[$row]['advance'] = ($peticashTransactionTypeSlug == 'salary') ? 0 : $salaryTransaction['amount'];
+                        $data[$row]['net_payment'] = ($peticashTransactionTypeSlug == 'salary') ? $salaryTransaction['payable_amount'] : $salaryTransaction['amount'];
+                        $lastSalaryTransactionId = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
+                            ->where('project_site_id',$salaryTransaction['project_site_id'])
+                            ->where('peticash_status_id',$approvedStatusId)
+                            ->where('id','<',$salaryTransaction['id'])
+                            ->where('peticash_transaction_type_id',$paymentSlug->where('slug','salary')->pluck('id')->first())
+                            ->orderBy('date','desc')
+                            ->pluck('id')->first();
+
+                        if($peticashTransactionTypeSlug == 'salary'){
+                            if($lastSalaryTransactionId == null){
+                                $advancesAfterLastSalary = -1;
+                            }else{
+                                $advancesAfterLastSalary = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
+                                    ->where('project_site_id',$salaryTransaction['project_site_id'])
+                                    ->where('peticash_status_id',$approvedStatusId)
+                                    ->where('peticash_transaction_type_id',$paymentSlug->where('slug','advance')->pluck('id')->first())
+                                    ->where('id','>',$lastSalaryTransactionId)
+                                    ->where('id','<=',$salaryTransaction['id'])
+                                    ->orderBy('date','desc')
+                                    ->sum('amount');
+                            }
+                            $balance = $data[$row]['gross_salary'] - $salaryTransaction['pt'] - $salaryTransaction['pf'] - $salaryTransaction['esic'] - $salaryTransaction['tds'] + $advancesAfterLastSalary;
+                            $data[$row]['balance'] = ($balance > 0) ? 0 : $balance;
+                        }else{
+                            if($lastSalaryTransactionId == null){
+                                $data[$row]['balance'] = 0;
+                            }else{
+                                $advancesAfterLastSalary = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
+                                    ->where('project_site_id',$salaryTransaction['project_site_id'])
+                                    ->where('peticash_status_id',$approvedStatusId)
+                                    ->where('peticash_transaction_type_id',$paymentSlug->where('slug','advance')->pluck('id')->first())
+                                    ->where('id','>',$lastSalaryTransactionId)
+                                    ->where('id','<=',$salaryTransaction['id'])
+                                    ->orderBy('date','desc')
+                                    ->sum('amount');
+                                $data[$row]['balance'] = -$advancesAfterLastSalary;
+                            }
+                        }
+                        $row ++;
+                    }
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                            }
+                        });
+                    })->export('xls');
+                    break;
+
+                case 'subcontractor_report':
+                    //dd($request->all());
+                    $header = array(
+                        'Date', 'Summary Type', 'Bill No', 'Basic amount', 'Total tax', 'Total Bill Amount', 'Advance' ,'Debit', 'Hold', 'Retention',
+                        'TDS', 'Other Recovery', 'Payable Amount', 'Check amount', 'Balance'
+                    );
+                    $subContractorBillTransactionList = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                                                        ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                                                        ->whereBetween('subcontractor_bill_transactions.created_at',[$start_date, $end_date])
+                                                        ->where('subcontractor_bills.subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())
+                                                        ->where('subcontractor_structure.subcontractor_id',$request['subcontractor_id'])
+                                                        ->where('subcontractor_structure.project_site_id',$request['subcontractor_report_site_id'])
+                                                        ->orderBy('subcontractor_bills.created_at')
+                                                        ->select('subcontractor_structure.summary_id','subcontractor_bill_transactions.id as subcontractor_bill_transaction_id','subcontractor_bill_transactions.subcontractor_bills_id as subcontractor_bill_id','subcontractor_bill_transactions.subtotal','subcontractor_bill_transactions.total','subcontractor_bill_transactions.debit','subcontractor_bill_transactions.hold',
+                                                            'subcontractor_bill_transactions.retention_percent','subcontractor_bill_transactions.retention_amount','subcontractor_bill_transactions.tds_percent','subcontractor_bill_transactions.tds_amount','subcontractor_bill_transactions.other_recovery','subcontractor_bill_transactions.created_at')->get();
+
+                    $subContractorBillTransactions = $subContractorBillTransactionList->groupBy('subcontractor_bill_id')->toArray();
+                    $row = 0;
+                    $data = array();
+                    foreach ($subContractorBillTransactions as $subcontractorBillId => $subContractorBillTransactionData){
+                        $subcontractorBill = SubcontractorBill::where('id',$subcontractorBillId)->first();
+                        $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                        $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+                        $totalBills = $subcontractorStructure->subcontractorBill->sortBy('id')->pluck('id');
+                        $billNo = 1;
+                        $taxTotal = 0;
+                        $billName = '-';
+                        foreach($totalBills as $billId){
+                            $status = SubcontractorBill::join('subcontractor_bill_status','subcontractor_bill_status.id','=','subcontractor_bills.subcontractor_bill_status_id')
+                                ->where('subcontractor_bills.id',$billId)->pluck('subcontractor_bill_status.slug')->first();
+                            if($status != 'disapproved'){
+                                if($billId == $subcontractorBillId){
+                                    $billName = "R.A. ".$billNo;
+                                    break;
+                                }
+                            }
+                            $billNo++;
+                        }
+                        $structureSlug = $subcontractorStructure->contractType->slug;
+                        if($structureSlug == 'sqft'){
+                            $rate = $subcontractorStructure['rate'];
+                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                            }
+                            $finalTotal = $subTotal + $taxTotal;
+                        }else{
+                            $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
+                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                            }
+                            $finalTotal = $subTotal + $taxTotal;
+                        }
+                        foreach ($subContractorBillTransactionData as $key =>$subContractorBillTransaction){
+                            $data[$row]['date'] = date('d/m/y',strtotime($subContractorBillTransaction['created_at']));;
+                            $data[$row]['summary_type'] = Summary::where('id',$subContractorBillTransaction['summary_id'])->pluck('name')->first();
+                            $data[$row]['bill_no'] = $billName;
+                            $data[$row]['basic_amount'] = $rate;
+                            $data[$row]['total_tax'] = $taxTotal;
+                            $data[$row]['total_bill_amount'] = $finalTotal;
+                            $data[$row]['advance'] = '-';
+                            $data[$row]['debit'] = (-$subContractorBillTransaction['debit'] !=0 ) ? -$subContractorBillTransaction['debit'] : $subContractorBillTransaction['debit'];
+                            $data[$row]['hold'] = ($subContractorBillTransaction['hold'] != 0) ? -$subContractorBillTransaction['hold'] : $subContractorBillTransaction['hold'];
+                            $data[$row]['retention'] = ($subContractorBillTransaction['retention_amount'] != 0) ? -$subContractorBillTransaction['retention_amount'] : $subContractorBillTransaction['retention_amount'];
+                            $data[$row]['tds'] = ($subContractorBillTransaction['tds_amount'] != 0) ? -$subContractorBillTransaction['tds_amount'] : $subContractorBillTransaction['tds_amount'];
+                            $data[$row]['other_recovery'] = $subContractorBillTransaction['other_recovery'];
+                            $data[$row]['payable_amount'] = $data[$row]['total_bill_amount'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
+                            $data[$row]['check_amount'] = $subContractorBillTransaction['total'];
+                            $data[$row]['balance'] = '-';
+                            $row++;
+                        }
+                    }
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                                /*$row++;
+
+                                $sheet->cell('C'.($row), function($cell) {
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue('Total');
+                                });
+                                $row++;*/
+                            }
+                        });
+                    })->export('xls');
+
+                    break;
+
                 case 'receiptwise_p_and_l_report':
                     $header = array(null, null);
                     $data = array(
@@ -100,78 +402,7 @@ class ReportController extends Controller
                         array(1, 1),
                     );
                     break;
-                case 'subcontractor_report':
-                    $header = array(
-                        'Sr. No', 'Summary Type', 'Bill No', 'Total Bill Amount', 'TDS',
-                        'Retention', 'Total Bill Amount', 'Total Pay Amount', 'Balance'
-                    );
-                    $data = array(
-                        array('data1', 'data2'),
-                        array('data3', 'data4')
-                    );
-                    break;
-                case 'labour_specific_report':
-                    $site_id = $request->labour_specific_report_site_id;
-                    $emp_id = $request->labour_id;
 
-                    if($site_id == 'all') {
-                        $salaryData = PeticashSalaryTransaction::where('employee_id',$emp_id)
-                            ->where('peticash_transaction_type_id', PeticashTransactionType::where('slug','salary')->get()->pluck(['id']))
-                            ->select('employee_id', DB::raw('SUM(amount) as salary, SUM(tds) as tds, SUM(pt) as pt, SUM(pf) as pf, SUM(esic) as esic'))
-                            ->whereBetween('created_at', array($start_date, $end_date))
-                            ->groupBy('employee_id')
-                            ->first();
-                    } else {
-                        $salaryData = PeticashSalaryTransaction::where('employee_id',$emp_id)
-                            ->where('project_site_id', $site_id)
-                            ->where('peticash_transaction_type_id', PeticashTransactionType::where('slug','salary')->get()->pluck(['id']))
-                            ->select('employee_id', DB::raw('SUM(amount) as salary, SUM(tds) as tds, SUM(pt) as pt, SUM(pf) as pf, SUM(esic) as esic'))
-                            ->whereBetween('created_at', array($start_date, $end_date))
-                            ->groupBy('employee_id')
-                            ->first();
-                    }
-                    if($site_id == 'all') {
-                        $advanceData = PeticashSalaryTransaction::where('employee_id',$emp_id)
-                            ->where('peticash_transaction_type_id', PeticashTransactionType::where('slug','advance')->get()->pluck(['id']))
-                            ->select('employee_id', DB::raw('SUM(amount) as salary, SUM(tds) as tds, SUM(pt) as pt, SUM(pf) as pf, SUM(esic) as esic'))
-                            ->whereBetween('created_at', array($start_date, $end_date))
-                            ->groupBy('employee_id')
-                            ->first();
-                    } else {
-                        $advanceData = PeticashSalaryTransaction::where('employee_id',$emp_id)
-                            ->where('project_site_id', $site_id)
-                            ->where('peticash_transaction_type_id', PeticashTransactionType::where('slug','advance')->get()->pluck(['id']))
-                            ->select('employee_id', DB::raw('SUM(amount) as salary, SUM(tds) as tds, SUM(pt) as pt, SUM(pf) as pf, SUM(esic) as esic'))
-                            ->whereBetween('created_at', array($start_date, $end_date))
-                            ->groupBy('employee_id')
-                            ->first();
-                    }
-
-                    $header = array(
-                        'Sr. No', 'Gross Salary', 'PT', 'PF', 'ESIC',
-                        'TDS', 'ADVANCE', 'Net Payment'
-                    );
-
-                    if (count($salaryData) == 0) {
-                        $data = array(
-                            array(null, null)
-                        );
-                    } else {
-                        $net_payable = $salaryData['salary']-$salaryData['pt']-$salaryData['pf']
-                            -$salaryData['esic']-$salaryData['tds']-$advanceData['salary'];
-                        $data = array(
-                            array (1,
-                                $salaryData['salary'],
-                                $salaryData['pt'],
-                                $salaryData['pf'],
-                                $salaryData['esic'],
-                                $salaryData['tds'],
-                                $advanceData['salary'],
-                                $net_payable
-                            ),
-                        );
-                    }
-                    break;
                 case 'purchase_bill_tax_report':
                     $header = array(
                         'Sr. No', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
@@ -342,37 +573,15 @@ class ReportController extends Controller
                     $downloadSheetFlag = false;
                     break;
             }
-            if ($downloadSheetFlag) {
-                Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
-                    $excel->sheet($report_type, function($sheet) use($data, $header) {
-                        $sheet->setOrientation('landscape');
-                        $sheet->setPageMargin(0.25);
-                        $sheet->protect('constro');
-                        // Manipulate first row
-                        $sheet->fromArray($data, null, 'A1', false, false);
 
-                        // Add before first row
-                        $sheet->prependRow(1, $header);
 
-                        // Set black background
-                        $sheet->row(1, function($row) {
-                            // call cell manipulation methods
-                            $row->setBackground('#f2f2f2');
-                        });
-                        // Freeze first row
-                        $sheet->freezeFirstRow();
-                        // Set auto size for sheet
-                        $sheet->setAutoSize(true);
-
-                    });
-                })->export('xls');
-            }
+            //"=SUM($columnForTotal$rowForDiscountSubtotal:$columnForTotal$beforeTotalRowNumber)"
         }catch(\Exception $e){
             $data = [
                 'action' => 'Download Report',
+                'exception' => $e->getMessage(),
                 'params' => $request->all(),
-                'type' => $request->report_type,
-                'exception' => $e->getMessage()
+                'type' => $request->report_type
             ];
             Log::critical(json_encode($data));
         }

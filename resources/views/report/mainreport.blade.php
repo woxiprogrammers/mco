@@ -202,7 +202,7 @@
                                                         <select class="form-control" id="labour_specific_report_site_id" name="labour_specific_report_site_id">
                                                             <option value="all">All</option>
                                                             @foreach($sites as $site)
-                                                            <option value="{{$site['id']}}">{{$site['name']}}</option>
+                                                            <option value="{{$site['id']}}">{{$site['name']}} - {{$site['project_name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>

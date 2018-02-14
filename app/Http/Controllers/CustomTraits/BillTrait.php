@@ -1448,7 +1448,7 @@ trait BillTrait{
                         }
                         $productRow = $productRow + 1;
                         $productRow++;
-                        $serialNumber++;
+                    $serialNumber++;
                     }
                     foreach ($billQuotationExtraItems as $key => $extraItem){
                         $amountColumn = $totalAmountColumn;

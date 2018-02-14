@@ -341,11 +341,11 @@
                                     <i class="fa fa-sitemap"></i> Project Site Assignment
                                 </a>
                             </li>
-                            <li aria-haspopup="true">
+                            <!--<li aria-haspopup="true">
                                 <a href="/checklist/user-assignment/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> User Checklist Management
                                 </a>
-                            </li>
+                            </li>-->
                         </ul>
                     </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -468,11 +468,11 @@
                         </ul>
                     </li>
                     @if(($user->roles[0]->role->slug == 'superadmin'))
-                    {{--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/reports"> Reports
                             <span class="arrow"></span>
                         </a>
-                    </li>--}}
+                    </li>
                     @endif
                 </ul>
             </li>
