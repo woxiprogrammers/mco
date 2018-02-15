@@ -7,6 +7,7 @@ use App\AssetType;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
+use App\Helper\MaterialProductHelper;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferStatus;
@@ -805,22 +806,39 @@ class PurchaseOrderController extends Controller
 
     public function downloadPoPDF(Request $request, $purchaseOrder) {
         try {
+            $pdfTitle = 'Purchase Order';
             $vendorInfo = $purchaseOrder->vendor->toArray();
             $vendorInfo['materials'] = array();
             $iterator = 0;
-            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
             $projectSiteInfo = array();
             foreach($purchaseOrder->purchaseOrderComponent as $purchaseOrderComponent){
                 $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                 $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
                 $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
-                if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
-                    $vendorInfo['materials'][$iterator]['gst'] = '-';
+                $vendorInfo['materials'][$iterator]['subtotal'] = MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']));
+                if($purchaseOrderComponent['cgst_percentage'] == null || $purchaseOrderComponent['cgst_percentage'] == ''){
+                    $vendorInfo['materials'][$iterator]['cgst_percentage'] = 0;
                 }else{
-                    $vendorInfo['materials'][$iterator]['gst'] = Material::where('name','ilike',$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->pluck('gst')->first();
-                    if($vendorInfo['materials'][$iterator]['gst'] == null){
-                        $vendorInfo['materials'][$iterator]['gst'] = '-';
-                    }
+                    $vendorInfo['materials'][$iterator]['cgst_percentage'] = $purchaseOrderComponent['cgst_percentage'];
+                }
+                $vendorInfo['materials'][$iterator]['cgst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['cgst_percentage']/100);
+                if($purchaseOrderComponent['sgst_percentage'] == null || $purchaseOrderComponent['sgst_percentage'] == ''){
+                    $vendorInfo['materials'][$iterator]['sgst_percentage'] = 0;
+                }else{
+                    $vendorInfo['materials'][$iterator]['sgst_percentage'] = $purchaseOrderComponent['sgst_percentage'];
+                }
+                $vendorInfo['materials'][$iterator]['sgst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['sgst_percentage']/100);
+                if($purchaseOrderComponent['igst_percentage'] == null || $purchaseOrderComponent['igst_percentage'] == ''){
+                    $vendorInfo['materials'][$iterator]['igst_percentage'] = 0;
+                }else{
+                    $vendorInfo['materials'][$iterator]['igst_percentage'] = $purchaseOrderComponent['igst_percentage'];
+                }
+                $vendorInfo['materials'][$iterator]['igst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['igst_percentage']/100);
+                $vendorInfo['materials'][$iterator]['total'] = $vendorInfo['materials'][$iterator]['subtotal'] + $vendorInfo['materials'][$iterator]['cgst_amount'] + $vendorInfo['materials'][$iterator]['sgst_amount'] + $vendorInfo['materials'][$iterator]['igst_amount'];
+                if($purchaseOrderComponent['expected_delivery_date'] == null || $purchaseOrderComponent['expected_delivery_date'] == ''){
+                    $vendorInfo['materials'][$iterator]['due_date'] = '';
+                }else{
+                    $vendorInfo['materials'][$iterator]['due_date'] = 'Due on '.date('j/n/Y',strtotime($purchaseOrderComponent['expected_delivery_date']));
                 }
                 $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
                 $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate_per_unit'];
@@ -838,7 +856,7 @@ class PurchaseOrderController extends Controller
             }
             $pdf = App::make('dompdf.wrapper');
             $pdfFlag = "purchase-order-listing-download";
-            $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
+            $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle')));
             if($purchaseOrder['format_id'] == null){
                 return $pdf->download('PO.pdf');
             }else{

@@ -148,13 +148,17 @@
                                                             </div>
                                                         </div>
                                                     @endforeach
-                                                        <div class="form-actions noborder row">
-                                                            <div class="col-md-offset-3" style="margin-left: 26%">
-                                                                <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
-                                                            </div>
+                                                    <div class="form-actions noborder row">
+                                                        <div class="col-md-offset-3" style="margin-left: 26%">
+                                                            <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                         </div>
+                                                    </div>
                                                 @else
-
+                                                    <div class="row" style="margin-top: 10%; margin-bottom: 10%">
+                                                        <div class="col-md-8 col-md-offset-3">
+                                                            <span style="font-size: 20px; font-weight: bold"> Purchase Orders are created for all the materials and assets . </span>
+                                                        </div>
+                                                    </div>
                                                 @endif
                                             </form>
                                         </div>
@@ -176,7 +180,7 @@
             }else{
                 $(element).closest('.panel-heading').find('.accordion-toggle').removeAttr('data-toggle');
                 $(element).closest('.panel-default').find('.panel-collapse').removeClass('in');
-                $(element).closest('.panel-default').find('.panel-collapse input[type="radio"]').each(function(){
+                $(element).closest('.panel-default').find('.panel-collapse input[type="checkbox"]').each(function(){
                     $(this).prop('checked', false);
                 });
             }
