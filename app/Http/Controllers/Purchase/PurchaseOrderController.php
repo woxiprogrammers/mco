@@ -1106,17 +1106,17 @@ class PurchaseOrderController extends Controller
                     }
                 }
                 if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
-                    $materialList[$iterator]['cgst_percentage'] = $purchaseOrderComponent->cgst_percent;
+                    $materialList[$iterator]['cgst_percentage'] = $purchaseOrderComponent->cgst_percentage;
                 }else{
                     $materialList[$iterator]['cgst_percentage'] = 0;
                 }
                 if($purchaseOrderComponent->sgst_percentage != null || $purchaseOrderComponent->sgst_percentage != ''){
-                    $materialList[$iterator]['sgst_percentage'] = $purchaseOrderComponent->sgst_percent;
+                    $materialList[$iterator]['sgst_percentage'] = $purchaseOrderComponent->sgst_percentage;
                 }else{
                     $materialList[$iterator]['sgst_percentage'] = 0;
                 }
                 if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
-                    $materialList[$iterator]['igst_percentage'] = $purchaseOrderComponent->igst_percent;
+                    $materialList[$iterator]['igst_percentage'] = $purchaseOrderComponent->igst_percentage;
                 }else{
                     $materialList[$iterator]['igst_percentage'] = 0;
                 }

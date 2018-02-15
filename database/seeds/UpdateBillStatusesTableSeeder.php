@@ -22,7 +22,7 @@ class UpdateBillStatusesTableSeeder extends Seeder
                 'updated_at' => $now
             ],
             [
-                'name' => 'Approve',
+                'name' => 'Approved',
                 'slug' => 'approved',
                 'created_at' => $now,
                 'updated_at' => $now

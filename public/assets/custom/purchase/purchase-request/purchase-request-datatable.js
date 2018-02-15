@@ -56,6 +56,9 @@ $(document).ready(function(){
         })
             .on('typeahead:open', function (obj, datum) {
                 $('#component_id').val(4);
+                var options = $("#unitOptions").val();
+                var str1 = '<select id="materialUnit" style="width: 80%;height: 20px;text-align: center"><option>Select Unit</option>'+options+ '</select>';
+                $('#unitDrpdn').html(str1);
             });
         $("#myModal").modal();
     });
