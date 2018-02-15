@@ -169,8 +169,8 @@ class VendorMailController extends Controller
                         $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                         $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
                         $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
-                        $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate'];
-                        $vendorInfo['materials'][$iterator]['subtotal'] = MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate']));
+                        $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate_per_unit'];
+                        $vendorInfo['materials'][$iterator]['subtotal'] = MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']));
                         if($purchaseOrderComponent['cgst_percentage'] == null || $purchaseOrderComponent['cgst_percentage'] == ''){
                             $vendorInfo['materials'][$iterator]['cgst_percentage'] = 0;
                         }else{
