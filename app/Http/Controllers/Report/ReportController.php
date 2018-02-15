@@ -20,6 +20,7 @@ use App\PeticashTransactionType;
 use App\Product;
 use App\ProductDescription;
 use App\ProjectSite;
+use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderPayment;
 use App\PurchaseOrderTransaction;
@@ -465,21 +466,81 @@ class ReportController extends Controller
 
                 case 'purchase_bill_tax_report':
                     $header = array(
-                        'Sr. No', 'Bill Number', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
+                        'Date', 'Bill Number', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
                         'With Tax Amount', 'Total Amount', 'Paid Amount', 'Balance'
                     );
-        $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
-                                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                                        ->where('purchase_requests.project_site_id',$request['purchase_bill_tax_report_site_id'])
-                                        ->whereBetween('purchase_order_payments.created_at',[$start_date, $end_date])
-                                        ->where('purchase_orders.vendor_id',$request['vendor_id'])
-                                        ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
-                                            ,'purchase_order_payments.amount','purchase_order_payments.reference_number','purchase_order_payments.is_advance'
-                                            ,'purchase_order_payments.created_at')->get();
-
-        dd($purchaseOrderBillPayments);
-        break;
+                    $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                                                    ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                                    ->where('purchase_requests.project_site_id',$request['purchase_bill_tax_report_site_id'])
+                                                    ->whereBetween('purchase_order_payments.created_at',[$start_date, $end_date])
+                                                    ->where('purchase_orders.vendor_id',$request['vendor_id'])
+                                                    ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
+                                                        ,'purchase_order_payments.amount','purchase_order_payments.reference_number','purchase_order_payments.is_advance'
+                                                        ,'purchase_order_payments.created_at','purchase_order_bills.amount as bill_amount','purchase_order_bills.tax_amount'
+                                                        ,'purchase_order_bills.bill_number','purchase_order_bills.extra_amount')->get()->toArray();
+                    $total['basicAmount'] = $total['igstAmount'] = $total['sgstAmount'] = $total['cgstAmount'] = $total['paidAmount'] = $total['amount'] = $total['amountWithTax'] = $total['balance'] = 0;
+                    foreach($purchaseOrderBillPayments as $key => $purchaseOrderBillPayment){
+                        $transactionIds = PurchaseOrderBillTransactionRelation::where('purchase_order_bill_id',$purchaseOrderBillPayment['purchase_order_bill_id'])->pluck('purchase_order_transaction_id');
+                        $purchaseOrderTransactions = PurchaseOrderTransaction::whereIn('id',$transactionIds)->get();
+                        $cgstAmount = $sgstAmount = $igstAmount = 0;
+                        foreach($purchaseOrderTransactions as $purchaseOrderTransaction){
+                            foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
+                                $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
+                                $unitConversionRate = UnitHelper::unitConversion($purchaseOrderTransactionComponent->purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderTransactionComponent->purchaseOrderComponent->rate_per_unit);
+                                if(!is_array($unitConversionRate)){
+                                    $tempAmount = $purchaseOrderTransactionComponent->quantity * $unitConversionRate;
+                                    if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
+                                        $cgstAmount += $tempAmount * ($purchaseOrderComponent->cgst_percentage/100);
+                                    }
+                                    if($purchaseOrderComponent->sgst_percentage != null || $purchaseOrderComponent->sgst_percentage != ''){
+                                        $sgstAmount += $tempAmount * ($purchaseOrderComponent->sgst_percentage/100);
+                                    }
+                                    if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
+                                        $igstAmount += $tempAmount * ($purchaseOrderComponent->igst_percentage/100);
+                                    }
+                                }
+                            }
+                        }
+                        $data[$row]['date'] = $purchaseOrderBillPayment['created_at'];
+                        $data[$row]['bill_number'] = $purchaseOrderBillPayment['bill_number'];
+                        $data[$row]['basic_amount'] = $purchaseOrderBillPayment['bill_amount'] - $purchaseOrderBillPayment['extra_amount'] - $purchaseOrderBillPayment['tax_amount'];
+                        $data[$row]['igst_amount'] = $igstAmount;
+                        $data[$row]['sgst_amount'] = $sgstAmount;
+                        $data[$row]['cgst_amount'] = $cgstAmount;
+                        $data[$row]['amount_with_tax'] = $purchaseOrderBillPayment['bill_amount'] - $purchaseOrderBillPayment['extra_amount'];
+                        $data[$row]['total_amount'] = $purchaseOrderBillPayment['bill_amount'];
+                        $data[$row]['paid_amount'] = $purchaseOrderBillPayment['amount'];
+                        $data[$row]['balance'] = $data[$row]['amount_with_tax'] - $data[$row]['paid_amount'];
+                        $total['basicAmount'] += $data[$row]['basic_amount'];
+                        $total['igstAmount'] += $data[$row]['igst_amount'];
+                        $total['sgstAmount'] += $data[$row]['sgst_amount'];
+                        $total['cgstAmount'] += $data[$row]['cgst_amount'];
+                        $total['amountWithTax'] += $data[$row]['amount_with_tax'];
+                        $total['amount'] += $data[$row]['total_amount'];
+                        $total['paidAmount'] += $data[$row]['paid_amount'];
+                        $total['balance'] += $data[$row]['balance'];
+                        $row++;
+                    }
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $total) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $total) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                            }
+                            $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['amount'],$total['paidAmount'],$total['balance']));
+                        });
+                    })->export('xls');
+                break;
 
 
                 case 'receiptwise_p_and_l_report':
