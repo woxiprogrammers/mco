@@ -694,8 +694,8 @@ class PurchaseRequestController extends Controller
                         }
                         file_put_contents($pdfUploadPath,$pdfContent);
                         $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        $message = 'Please check the P.R. attached herewith';
-                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['message' => $message], function($message) use ($mailData){
+                        $mailMessage = 'Please check the P.R. attached herewith';
+                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
                             $message->subject('Testing with attachment');
                             $message->to($mailData['toMail']);
                             $message->from(env('MAIL_USERNAME'));

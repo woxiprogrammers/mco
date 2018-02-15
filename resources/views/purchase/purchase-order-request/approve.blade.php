@@ -82,7 +82,7 @@
                                                         <input type="text" value="{{$purchaseOrderRequest->purchaseRequest->format_id}}" class="form-control" readonly>
                                                     </div>
                                                 </div>
-                                                @if(count($purchaseOrderRequestComponents) > 0 && false)
+                                                @if(count($purchaseOrderRequestComponents) > 0)
                                                     @foreach($purchaseOrderRequestComponents as $purchaseOrderRequestComponentId => $purchaseOrderRequestComponentData)
                                                         <div class="panel-group accordion" id="accordion_{{$purchaseOrderRequestComponentId}}">
                                                             <div class="panel panel-default">
