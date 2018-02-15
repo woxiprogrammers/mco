@@ -21,6 +21,7 @@ use App\Product;
 use App\ProductDescription;
 use App\ProjectSite;
 use App\PurchaseOrderComponent;
+use App\PurchaseOrderPayment;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionComponent;
 use App\PurchaseOrderTransactionStatus;
@@ -93,6 +94,7 @@ class ReportController extends Controller
             $row = 0;
             $data = $header = array();
             switch($report_type) {
+
                 case 'materialwise_purchase_report':
                     $header = array(
                         'Sr. No', 'Date', 'Category Name', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
@@ -463,14 +465,21 @@ class ReportController extends Controller
 
                 case 'purchase_bill_tax_report':
                     $header = array(
-                        'Sr. No', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
-                        'With Tax Amount'
+                        'Sr. No', 'Bill Number', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
+                        'With Tax Amount', 'Total Amount', 'Paid Amount', 'Balance'
                     );
-                    $data = array(
-                        array('data1', 'data2'),
-                        array('data3', 'data4')
-                    );
-                    break;
+        $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                        ->where('purchase_requests.project_site_id',$request['purchase_bill_tax_report_site_id'])
+                                        ->whereBetween('purchase_order_payments.created_at',[$start_date, $end_date])
+                                        ->where('purchase_orders.vendor_id',$request['vendor_id'])
+                                        ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
+                                            ,'purchase_order_payments.amount','purchase_order_payments.reference_number','purchase_order_payments.is_advance'
+                                            ,'purchase_order_payments.created_at')->get();
+
+        dd($purchaseOrderBillPayments);
+        break;
 
 
                 case 'receiptwise_p_and_l_report':
