@@ -531,7 +531,9 @@ class ReportController extends Controller
                                     });
                                 }
                             }
-                            $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['amount'],$total['paidAmount'],$total['balance']));
+                            if($row > 2){
+                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['amount'],$total['paidAmount'],$total['balance']));
+                            }
                         });
                     })->export('xls');
                 break;
