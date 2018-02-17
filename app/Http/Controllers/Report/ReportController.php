@@ -61,9 +61,10 @@ class ReportController extends Controller
             $billIds = Bill::where('bill_status_id',BillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
             $billProjectSites = Quotation::join('bills','quotations.id','=','bills.quotation_id')
                                     ->join('project_sites','quotations.project_site_id','=','project_sites.id')
+                                    ->join('projects','projects.id','=','project_sites.project_id')
                                     ->whereIn('bills.id',$billIds)
                                     ->distinct('project_sites.id')
-                ->select('project_sites.id','project_sites.name','project_sites.address')->get()->toArray();
+                ->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
             $categories = Category::where('is_active', true)->get(['id','name','slug'])->toArray();
             $materials = Material::get(['id','name'])->toArray();
             $subcontractors = Subcontractor::get(['id','company_name'])->toArray();
@@ -139,8 +140,9 @@ class ReportController extends Controller
                                     ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
                                     ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
                                     ->get();
-                                $quantity = $taxAmount = 0;
-                                if($purchaseOrderTransactionComponents != null){
+
+                                if(count($purchaseOrderTransactionComponents) > 0){
+                                    $quantity = $taxAmount = 0;
                                     foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
                                         if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
                                             $quantity += $purchaseOrderTransactionComponent['quantity'];
@@ -164,16 +166,16 @@ class ReportController extends Controller
                                     $data[$row]['tax_amount'] = $taxAmount;
                                     $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
                                     $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
+                                    $row++;
                                 }
-                                $row++;
                             }elseif($request['category_id'] == $categoryDetails['id']){
                                 $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
                                     ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
                                     ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
                                     ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
                                     ->get();
-                                $quantity = $taxAmount = 0;
-                                if($purchaseOrderTransactionComponents != null){
+                                if(count($purchaseOrderTransactionComponents) > 0){
+                                    $quantity = $taxAmount = 0;
                                     foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
                                         if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
                                             $quantity += $purchaseOrderTransactionComponent['quantity'];
@@ -197,8 +199,8 @@ class ReportController extends Controller
                                     $data[$row]['tax_amount'] = $taxAmount;
                                     $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
                                     $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
+                                    $row++;
                                 }
-                                $row++;
                             }
                         }
                     }
