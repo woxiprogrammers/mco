@@ -61,9 +61,10 @@ class ReportController extends Controller
             $billIds = Bill::where('bill_status_id',BillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
             $billProjectSites = Quotation::join('bills','quotations.id','=','bills.quotation_id')
                                     ->join('project_sites','quotations.project_site_id','=','project_sites.id')
+                                    ->join('projects','projects.id','=','project_sites.project_id')
                                     ->whereIn('bills.id',$billIds)
                                     ->distinct('project_sites.id')
-                ->select('project_sites.id','project_sites.name','project_sites.address')->get()->toArray();
+                ->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
             $categories = Category::where('is_active', true)->get(['id','name','slug'])->toArray();
             $materials = Material::get(['id','name'])->toArray();
             $subcontractors = Subcontractor::get(['id','company_name'])->toArray();
@@ -120,56 +121,87 @@ class ReportController extends Controller
                             ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
                             ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
                             ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                            ->join('purchase_order_request_components','purchase_order_request_components.id','=','purchase_order_components.purchase_order_request_component_id')
                             ->where('material_request_components.name','ilike',$materialName)
                             ->where('material_requests.project_site_id',$request['materialwise_purchase_report_site_id'])
                             ->whereBetween('purchase_orders.created_at', [$start_date, $end_date])
                             ->select('purchase_orders.id as purchase_order_id','purchase_order_components.created_at','purchase_order_components.id as purchase_order_component_id','purchase_order_components.rate_per_unit'
-                                ,'purchase_order_components.unit_id','purchase_order_components.cgst_percentage','purchase_order_components.sgst_percentage','purchase_order_components.igst_percentage','material_request_components.name as material_request_component_name')
+                                ,'purchase_order_components.unit_id','purchase_order_components.cgst_percentage','purchase_order_components.sgst_percentage','purchase_order_components.igst_percentage',
+                                'material_request_components.name as material_request_component_name','purchase_order_request_components.category_id')
                             ->get()->toArray();
                     }
-
                     $billGeneratedPOTransactionStatusId = PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first();
                     foreach ($purchaseOrderComponents as $key => $purchaseOrderComponentArray){
                         foreach ($purchaseOrderComponentArray as $key2 => $purchaseOrderComponent){
-                            $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
-                                ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
-                                ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
-                                ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
-                                ->get();
-                            $quantity = $taxAmount = 0;
-                            if($purchaseOrderTransactionComponents != null){
-                                foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
-                                    if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
-                                        $quantity += $purchaseOrderTransactionComponent['quantity'];
-                                    }else{
-                                        $unitConvertedQuantity = UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent['unit_id'],$purchaseOrderComponent['unit_id'],$purchaseOrderTransactionComponent['quantity']);
-                                        $quantity += $unitConvertedQuantity;
+                            $categoryDetails = Category::where('id',$purchaseOrderComponent['category_id'])->select('id','name')->first();
+                            if($request['category_id'] == 0){
+                                $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
+                                    ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
+                                    ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
+                                    ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
+                                    ->get();
+
+                                if(count($purchaseOrderTransactionComponents) > 0){
+                                    $quantity = $taxAmount = 0;
+                                    foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
+                                        if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
+                                            $quantity += $purchaseOrderTransactionComponent['quantity'];
+                                        }else{
+                                            $unitConvertedQuantity = UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent['unit_id'],$purchaseOrderComponent['unit_id'],$purchaseOrderTransactionComponent['quantity']);
+                                            $quantity += $unitConvertedQuantity;
+                                        }
+                                        $subTotal = $purchaseOrderTransactionComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'];
+                                        $cgstAmount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
+                                        $sgstAmount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
+                                        $igstAmount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
+                                        $taxAmount += ($cgstAmount + $sgstAmount + $igstAmount);
                                     }
-                                    $subTotal = $purchaseOrderTransactionComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'];
-                                    $cgstAmount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
-                                    $sgstAmount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
-                                    $igstAmount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
-                                    $taxAmount += ($cgstAmount + $sgstAmount + $igstAmount);
+                                    $data[$row]['sr_no'] = $row+1;
+                                    $data[$row]['created_at'] = $purchaseOrderComponent['created_at'];
+                                    $data[$row]['category_name'] = $categoryDetails['name'];
+                                    $data[$row]['material_name'] = $purchaseOrderComponent['material_request_component_name'];
+                                    $data[$row]['quantity'] = $quantity;
+                                    $data[$row]['unit_id'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                                    $data[$row]['rate'] = $purchaseOrderComponent['rate_per_unit'] * $quantity;
+                                    $data[$row]['tax_amount'] = $taxAmount;
+                                    $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
+                                    $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
+                                    $row++;
                                 }
-                                $data[$row]['sr_no'] = $row+1;
-                                $data[$row]['created_at'] = $purchaseOrderComponent['created_at'];
-                                if($request['category_id'] == 0){
-                                    $data[$row]['category_name'] = Category::join('category_material_relations','category_material_relations.category_id','=','categories.id')
-                                        ->join('materials','materials.id','=','category_material_relations.material_id')
-                                        ->where('materials.name','ilike',$purchaseOrderComponent['material_request_component_name'])
-                                        ->pluck('categories.name')->first();
-                                }else{
-                                    $data[$row]['category_name'] = Category::where('id',$request['category_id'])->pluck('name')->first();
+                            }elseif($request['category_id'] == $categoryDetails['id']){
+                                $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
+                                    ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
+                                    ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
+                                    ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
+                                    ->get();
+                                if(count($purchaseOrderTransactionComponents) > 0){
+                                    $quantity = $taxAmount = 0;
+                                    foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
+                                        if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
+                                            $quantity += $purchaseOrderTransactionComponent['quantity'];
+                                        }else{
+                                            $unitConvertedQuantity = UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent['unit_id'],$purchaseOrderComponent['unit_id'],$purchaseOrderTransactionComponent['quantity']);
+                                            $quantity += $unitConvertedQuantity;
+                                        }
+                                        $subTotal = $purchaseOrderTransactionComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'];
+                                        $cgstAmount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
+                                        $sgstAmount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
+                                        $igstAmount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
+                                        $taxAmount += ($cgstAmount + $sgstAmount + $igstAmount);
+                                    }
+                                    $data[$row]['sr_no'] = $row+1;
+                                    $data[$row]['created_at'] = $purchaseOrderComponent['created_at'];
+                                    $data[$row]['category_name'] = $categoryDetails['name'];
+                                    $data[$row]['material_name'] = $purchaseOrderComponent['material_request_component_name'];
+                                    $data[$row]['quantity'] = $quantity;
+                                    $data[$row]['unit_id'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                                    $data[$row]['rate'] = $purchaseOrderComponent['rate_per_unit'] * $quantity;
+                                    $data[$row]['tax_amount'] = $taxAmount;
+                                    $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
+                                    $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
+                                    $row++;
                                 }
-                                $data[$row]['material_name'] = $purchaseOrderComponent['material_request_component_name'];
-                                $data[$row]['quantity'] = $quantity;
-                                $data[$row]['unit_id'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
-                                $data[$row]['rate'] = $purchaseOrderComponent['rate_per_unit'] * $quantity;
-                                $data[$row]['tax_amount'] = $taxAmount;
-                                $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
-                                $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
                             }
-                            $row++;
                         }
                     }
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
@@ -209,14 +241,14 @@ class ReportController extends Controller
                         $salaryTransactionData = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
                             ->where('peticash_status_id',$approvedStatusId)
                             ->whereBetween('date', [$start_date, $end_date])
-                            ->orderBy('date','desc')
+                            ->orderBy('id','asc')
                             ->get();
                     }else{
                         $salaryTransactionData = PeticashSalaryTransaction::where('project_site_id',$request['labour_specific_report_site_id'])
                             ->where('employee_id',$request['labour_id'])
                             ->where('peticash_status_id',$approvedStatusId)
                             ->whereBetween('date', [$start_date, $end_date])
-                            ->orderBy('date','desc')
+                            ->orderBy('id','asc')
                             ->get();
                     }
 
@@ -225,10 +257,10 @@ class ReportController extends Controller
                         $data[$row]['date'] = date('d/m/y',strtotime($salaryTransaction['date']));
                         $data[$row]['payment_type'] = $salaryTransaction->peticashTransactionType->name;
                         $data[$row]['gross_salary'] = ($peticashTransactionTypeSlug == 'salary') ? ($salaryTransaction->employee->per_day_wages * $salaryTransaction['days']) : 0;
-                        $data[$row]['pt'] = $salaryTransaction['pt'];
-                        $data[$row]['pf'] = $salaryTransaction['pf'];
-                        $data[$row]['esic'] = $salaryTransaction['esic'];
-                        $data[$row]['tds'] = $salaryTransaction['tds'];
+                        $data[$row]['pt'] = ($salaryTransaction['pt'] != 0) ? -$salaryTransaction['pt'] : $salaryTransaction['pt'];
+                        $data[$row]['pf'] = ($salaryTransaction['pf'] != 0) ? -$salaryTransaction['pf'] : $salaryTransaction['pf'];
+                        $data[$row]['esic'] = ($salaryTransaction['esic'] != 0) ? -$salaryTransaction['esic'] : $salaryTransaction['esic'];
+                        $data[$row]['tds'] = ($salaryTransaction['tds'] != 0) ? -$salaryTransaction['tds'] : $salaryTransaction['tds'];
                         $data[$row]['advance'] = ($peticashTransactionTypeSlug == 'salary') ? 0 : $salaryTransaction['amount'];
                         $data[$row]['net_payment'] = ($peticashTransactionTypeSlug == 'salary') ? $salaryTransaction['payable_amount'] : $salaryTransaction['amount'];
                         $lastSalaryTransactionId = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
@@ -236,7 +268,7 @@ class ReportController extends Controller
                             ->where('peticash_status_id',$approvedStatusId)
                             ->where('id','<',$salaryTransaction['id'])
                             ->where('peticash_transaction_type_id',$paymentSlug->where('slug','salary')->pluck('id')->first())
-                            ->orderBy('date','desc')
+                            ->orderBy('id','desc')
                             ->pluck('id')->first();
 
                         if($peticashTransactionTypeSlug == 'salary'){
@@ -249,10 +281,10 @@ class ReportController extends Controller
                                     ->where('peticash_transaction_type_id',$paymentSlug->where('slug','advance')->pluck('id')->first())
                                     ->where('id','>',$lastSalaryTransactionId)
                                     ->where('id','<=',$salaryTransaction['id'])
-                                    ->orderBy('date','desc')
+                                    ->orderBy('id','desc')
                                     ->sum('amount');
                             }
-                            $balance = $data[$row]['gross_salary'] - $salaryTransaction['pt'] - $salaryTransaction['pf'] - $salaryTransaction['esic'] - $salaryTransaction['tds'] + $advancesAfterLastSalary;
+                            $balance = $data[$row]['gross_salary'] - $salaryTransaction['pt'] - $salaryTransaction['pf'] - $salaryTransaction['esic'] - $salaryTransaction['tds'] - $advancesAfterLastSalary;
                             $data[$row]['balance'] = ($balance > 0) ? 0 : $balance;
                         }else{
                             if($lastSalaryTransactionId == null){
@@ -264,7 +296,7 @@ class ReportController extends Controller
                                     ->where('peticash_transaction_type_id',$paymentSlug->where('slug','advance')->pluck('id')->first())
                                     ->where('id','>',$lastSalaryTransactionId)
                                     ->where('id','<=',$salaryTransaction['id'])
-                                    ->orderBy('date','desc')
+                                    ->orderBy('id','desc')
                                     ->sum('amount');
                                 $data[$row]['balance'] = -$advancesAfterLastSalary;
                             }
@@ -537,7 +569,9 @@ class ReportController extends Controller
                                     });
                                 }
                             }
-                            $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['amount'],$total['paidAmount'],$total['balance']));
+                            if($row > 2){
+                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['amount'],$total['paidAmount'],$total['balance']));
+                            }
                         });
                     })->export('xls');
                 break;
