@@ -132,38 +132,74 @@ class ReportController extends Controller
                     $billGeneratedPOTransactionStatusId = PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first();
                     foreach ($purchaseOrderComponents as $key => $purchaseOrderComponentArray){
                         foreach ($purchaseOrderComponentArray as $key2 => $purchaseOrderComponent){
-                            $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
-                                ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
-                                ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
-                                ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
-                                ->get();
-                            $quantity = $taxAmount = 0;
-                            if($purchaseOrderTransactionComponents != null){
-                                foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
-                                    if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
-                                        $quantity += $purchaseOrderTransactionComponent['quantity'];
-                                    }else{
-                                        $unitConvertedQuantity = UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent['unit_id'],$purchaseOrderComponent['unit_id'],$purchaseOrderTransactionComponent['quantity']);
-                                        $quantity += $unitConvertedQuantity;
+                            $categoryDetails = Category::where('id',$purchaseOrderComponent['category_id'])->select('id','name')->first();
+                            if($request['category_id'] == 0){
+                                $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
+                                    ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
+                                    ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
+                                    ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
+                                    ->get();
+                                $quantity = $taxAmount = 0;
+                                if($purchaseOrderTransactionComponents != null){
+                                    foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
+                                        if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
+                                            $quantity += $purchaseOrderTransactionComponent['quantity'];
+                                        }else{
+                                            $unitConvertedQuantity = UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent['unit_id'],$purchaseOrderComponent['unit_id'],$purchaseOrderTransactionComponent['quantity']);
+                                            $quantity += $unitConvertedQuantity;
+                                        }
+                                        $subTotal = $purchaseOrderTransactionComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'];
+                                        $cgstAmount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
+                                        $sgstAmount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
+                                        $igstAmount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
+                                        $taxAmount += ($cgstAmount + $sgstAmount + $igstAmount);
                                     }
-                                    $subTotal = $purchaseOrderTransactionComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'];
-                                    $cgstAmount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
-                                    $sgstAmount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
-                                    $igstAmount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
-                                    $taxAmount += ($cgstAmount + $sgstAmount + $igstAmount);
+                                    $data[$row]['sr_no'] = $row+1;
+                                    $data[$row]['created_at'] = $purchaseOrderComponent['created_at'];
+                                    $data[$row]['category_name'] = $categoryDetails['name'];
+                                    $data[$row]['material_name'] = $purchaseOrderComponent['material_request_component_name'];
+                                    $data[$row]['quantity'] = $quantity;
+                                    $data[$row]['unit_id'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                                    $data[$row]['rate'] = $purchaseOrderComponent['rate_per_unit'] * $quantity;
+                                    $data[$row]['tax_amount'] = $taxAmount;
+                                    $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
+                                    $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
                                 }
-                                $data[$row]['sr_no'] = $row+1;
-                                $data[$row]['created_at'] = $purchaseOrderComponent['created_at'];
-                                $data[$row]['category_name'] = Category::where('id',$purchaseOrderComponent['category_id'])->pluck('name')->first();
-                                $data[$row]['material_name'] = $purchaseOrderComponent['material_request_component_name'];
-                                $data[$row]['quantity'] = $quantity;
-                                $data[$row]['unit_id'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
-                                $data[$row]['rate'] = $purchaseOrderComponent['rate_per_unit'] * $quantity;
-                                $data[$row]['tax_amount'] = $taxAmount;
-                                $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
-                                $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
+                                $row++;
+                            }elseif($request['category_id'] == $categoryDetails['id']){
+                                $purchaseOrderTransactionComponents = PurchaseOrderTransactionComponent::join('purchase_order_transactions','purchase_order_transactions.id','=','purchase_order_transaction_components.purchase_order_transaction_id')
+                                    ->where('purchase_order_transaction_components.purchase_order_component_id',$purchaseOrderComponent['purchase_order_component_id'])
+                                    ->where('purchase_order_transactions.purchase_order_transaction_status_id',$billGeneratedPOTransactionStatusId)
+                                    ->select('purchase_order_transaction_components.id as purchase_order_transaction_component_id','purchase_order_transaction_components.quantity','purchase_order_transaction_components.unit_id')
+                                    ->get();
+                                $quantity = $taxAmount = 0;
+                                if($purchaseOrderTransactionComponents != null){
+                                    foreach ($purchaseOrderTransactionComponents as $key1 => $purchaseOrderTransactionComponent){
+                                        if($purchaseOrderTransactionComponent['unit_id'] == $purchaseOrderComponent['unit_id']){
+                                            $quantity += $purchaseOrderTransactionComponent['quantity'];
+                                        }else{
+                                            $unitConvertedQuantity = UnitHelper::unitQuantityConversion($purchaseOrderTransactionComponent['unit_id'],$purchaseOrderComponent['unit_id'],$purchaseOrderTransactionComponent['quantity']);
+                                            $quantity += $unitConvertedQuantity;
+                                        }
+                                        $subTotal = $purchaseOrderTransactionComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'];
+                                        $cgstAmount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
+                                        $sgstAmount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
+                                        $igstAmount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
+                                        $taxAmount += ($cgstAmount + $sgstAmount + $igstAmount);
+                                    }
+                                    $data[$row]['sr_no'] = $row+1;
+                                    $data[$row]['created_at'] = $purchaseOrderComponent['created_at'];
+                                    $data[$row]['category_name'] = $categoryDetails['name'];
+                                    $data[$row]['material_name'] = $purchaseOrderComponent['material_request_component_name'];
+                                    $data[$row]['quantity'] = $quantity;
+                                    $data[$row]['unit_id'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
+                                    $data[$row]['rate'] = $purchaseOrderComponent['rate_per_unit'] * $quantity;
+                                    $data[$row]['tax_amount'] = $taxAmount;
+                                    $data[$row]['total_amount'] = $taxAmount + $data[$row]['rate'];
+                                    $data[$row]['average_amount'] = $data[$row]['total_amount'] / $data[$row]['quantity'];
+                                }
+                                $row++;
                             }
-                            $row++;
                         }
                     }
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
