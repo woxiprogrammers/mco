@@ -6,7 +6,7 @@
  */
 ?>
 
-<div class="row" style="height: 800px">
+<div class="row" style="height: 1000px">
     <div class="col-md-6" style="border-right: 1px solid grey;height: 100%;padding-top: 3%">
         <div class="row form-group">
             <div class="col-md-2">
@@ -153,6 +153,66 @@
                 <input type="date" class="form-control tax-modal-total" name="expected_delivery_date">
             </div>
         </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label class="control-label pull-right">Transportation Amount</label>
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control calculate-transportation-amount" name="transportation_amount" value="0" onkeyup="calculateTransportationTaxes(this)">
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label class="control-label pull-right">CGST</label>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group" >
+                    <input type="text" class="form-control calculate-transportation-cgst-percentage" name="transportation_cgst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
+                    <span class="input-group-addon">%</span>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <input type="text" class="form-control calculate-transportation-cgst-amount" readonly name="transportation_cgst_amount">
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label class="control-label pull-right">SGST</label>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group" >
+                    <input type="text" class="form-control calculate-transportation-sgst-percentage" name="transportation_sgst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
+                    <span class="input-group-addon">%</span>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <input type="text" class="form-control calculate-transportation-sgst-amount" readonly name="transportation_sgst_amount">
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label class="control-label pull-right">IGST</label>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group" >
+                    <input type="text" class="form-control calculate-transportation-igst-percentage" name="transportation_igst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
+                    <span class="input-group-addon">%</span>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <input type="text" class="form-control calculate-transportation-igst-amount" readonly name="transportation_igst_amount">
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label class="control-label pull-right">Total</label>
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control calculate-transportation-total" readonly name="transportation_total">
+            </div>
+        </div>
+
+
         <div class="row form-group">
             <div class="col-md-5">
                 <a href="javascript:void(0)" class="btn red pull-right" id="detailModalSubmit" onclick="componentTaxDetailSubmit()">Submit</a>
