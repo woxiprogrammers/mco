@@ -118,6 +118,12 @@
                                                                                     <th>
                                                                                         Total w/ Tax
                                                                                     </th>
+                                                                                    <th>
+                                                                                        Transportation w/o Tax
+                                                                                    </th>
+                                                                                    <th>
+                                                                                        Transportation w/ Tax
+                                                                                    </th>
                                                                                 </tr>
                                                                                 </thead>
                                                                                 <tbody>
@@ -137,6 +143,12 @@
                                                                                         </td>
                                                                                         <td>
                                                                                             {{$vendorRelation['total_with_tax']}}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            {{$vendorRelation['transportation_without_tax']}}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            {{$vendorRelation['transportation_with_tax']}}
                                                                                         </td>
                                                                                     </tr>
                                                                                 @endforeach

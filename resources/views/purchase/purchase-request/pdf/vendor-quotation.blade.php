@@ -205,6 +205,40 @@
                                     </td>
                                 @endif
                             </tr>
+                            @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
+                                <tr style="text-align: center">
+                                <td>
+
+                                </td>
+                                <td>
+                                    Transportation
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+                                    {{$vendorInfo['materials'][$iterator]['transportation_amount']}}
+                                </td>
+                                <td>
+                                    {{$vendorInfo['materials'][$iterator]['transportation_cgst_amount']}} ({{$vendorInfo['materials'][$iterator]['transportation_cgst_percentage']}}%)
+                                </td>
+                                <td>
+                                    {{$vendorInfo['materials'][$iterator]['transportation_sgst_amount']}} ({{$vendorInfo['materials'][$iterator]['transportation_sgst_percentage']}}%)
+                                </td>
+                                <td>
+                                    {{$vendorInfo['materials'][$iterator]['transportation_igst_amount']}} ({{$vendorInfo['materials'][$iterator]['transportation_igst_percentage']}}%)
+                                </td>
+                                <td>
+                                    {{$vendorInfo['materials'][$iterator]['transportation_total_amount']}}
+                                </td>
+                            </tr>
+                            @endif
                         @endfor
                         @for($i = 0;$i < (12-(count($vendorInfo['materials'])));$i++)
                             <tr style="text-align: center">
