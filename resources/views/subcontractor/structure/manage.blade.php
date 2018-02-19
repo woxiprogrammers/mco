@@ -48,6 +48,8 @@
                                                     <th> Rate </th>
                                                     <th> Total Work Area </th>
                                                     <th> Total Amount </th>
+                                                    <th> Bill Amount </th>
+                                                    <th> Paid Amount </th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
