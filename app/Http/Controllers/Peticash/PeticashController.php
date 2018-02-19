@@ -1183,7 +1183,7 @@ class PeticashController extends Controller
             $purchaseTxnData = PurcahsePeticashTransaction::findOrFail($request->txn_id)->toArray();
             $project_site_id = $purchaseTxnData['project_site_id'];
             $materialComponentSlug = MaterialRequestComponentTypes::where('id',$purchaseTxnData['component_type_id'])->pluck('slug')->first();
-            $alreadyPresent = InventoryComponent::where('name',$purchaseTxnData['name'])->where('project_site_id',$project_site_id)->first();
+            $alreadyPresent = InventoryComponent::where('name','ilike',$purchaseTxnData['name'])->where('project_site_id',$project_site_id)->first();
             if($alreadyPresent != null){
                 $inventoryComponentId = $alreadyPresent['id'];
             } else {
