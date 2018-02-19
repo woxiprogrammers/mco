@@ -173,7 +173,6 @@ class InventoryManageController extends Controller
 
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
-
             $projectInfo = [
                 'project' => $inventoryComponent->projectSite->project->name,
                 'client' => $inventoryComponent->projectSite->project->client->company,
@@ -189,7 +188,6 @@ class InventoryManageController extends Controller
                     $isReadingApplicable = false;
                 }
             }
-
             if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
                 $clients = Client::join('projects','projects.client_id','=','clients.id')
                     ->join('project_sites','project_sites.project_id','=','projects.id')
@@ -229,7 +227,7 @@ class InventoryManageController extends Controller
                     ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
                     ->join('material_requests','material_requests.id','=','material_request_components.material_request_id')
                     ->where('material_requests.project_site_id',$inventoryComponent['project_site_id'])
-                    ->where('material_request_components.name',$inventoryComponent['name'])
+                    ->where('material_request_components.name','ilike',$inventoryComponent['name'])
                     ->orderBy('purchase_order_components.id','desc')
                     ->select('purchase_order_components.rate_per_unit','purchase_order_components.cgst_percentage as cgst_percentage','purchase_order_components.cgst_amount as cgst_amount','purchase_order_components.sgst_percentage as sgst_percentage','purchase_order_components.sgst_amount as sgst_amount','purchase_order_components.igst_percentage as igst_percentage','purchase_order_components.igst_amount as igst_amount')
                     ->first();
@@ -278,6 +276,9 @@ class InventoryManageController extends Controller
                 $projectName = $inventoryData[$pagination]->projectSite->project->name.' - '.$inventoryData[$pagination]->projectSite->name.' ('.$inventoryData[$pagination]->projectSite->project->client->company.')';
                 if($inventoryData[$pagination]->is_material == true){
                     $materialUnit = Material::where('id',$inventoryData[$iterator]['reference_id'])->pluck('unit_id')->first();
+                    if($materialUnit == null){
+                        $materialUnit = Material::where('name','ilike',$inventoryData[$iterator]['name'])->pluck('unit_id')->first();
+                    }
                     $unitName = Unit::where('id',$materialUnit)->pluck('name')->first();
                     $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')

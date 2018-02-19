@@ -8,7 +8,8 @@ class InventoryComponent extends Model {
 
     protected $table = 'inventory_components';
 
-    protected $fillable = ['name', 'project_site_id', 'purchase_order_component_id' , 'is_material','reference_id','opening_stock'];
+    protected $fillable = ['name', 'project_site_id', 'purchase_order_component_id' , 'is_material',
+        'reference_id','opening_stock'];
 
     public function projectSite(){
         return $this->belongsTo('App\ProjectSite','project_site_id');
