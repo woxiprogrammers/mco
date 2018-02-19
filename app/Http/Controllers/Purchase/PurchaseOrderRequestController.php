@@ -96,7 +96,11 @@ class PurchaseOrderRequestController extends Controller
                     'sgst_amount' => $componentData['sgst_amount'],
                     'igst_amount' => $componentData['igst_amount'],
                     'total' => $componentData['total'],
-                    'category_id' => $componentData['category_id']
+                    'category_id' => $componentData['category_id'],
+                    'transportation_amount' => $componentData['transportation_amount'],
+                    'transportation_cgst_percentage' => $componentData['transportation_cgst_percentage'],
+                    'transportation_sgst_percentage' => $componentData['transportation_sgst_percentage'],
+                    'transportation_igst_percentage' => $componentData['transportation_igst_percentage']
                 ];
                 $purchaseOrderRequestComponent = PurchaseOrderRequestComponent::create($purchaseOrderRequestComponentData);
                 if(array_key_exists('client_images',$componentData)){
@@ -237,6 +241,10 @@ class PurchaseOrderRequestController extends Controller
                     $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->company;
                     $vendorId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->id;
                 }
+                $transportationWithTax = $purchaseOrderRequestComponent->transportation_amount;
+                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_cgst_percentage / 100));
+                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_sgst_percentage / 100));
+                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_igst_percentage / 100));
                 $purchaseOrderRequestComponents[$purchaseRequestComponentId]['vendor_relations'][] = [
                     'component_vendor_relation_id' => $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id,
                     'purchase_order_request_component_id' => $purchaseOrderRequestComponent->id,
@@ -244,7 +252,9 @@ class PurchaseOrderRequestController extends Controller
                     'vendor_id' => $vendorId,
                     'rate_without_tax' => $purchaseOrderRequestComponent->rate_per_unit,
                     'rate_with_tax' => $rateWithTax,
-                    'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity']
+                    'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'],
+                    'transportation_without_tax' => $purchaseOrderRequestComponent->transportation_amount,
+                    'transportation_with_tax' => $transportationWithTax
                 ];
             }
             return view('purchase.purchase-order-request.approve')->with(compact('purchaseOrderRequest','purchaseOrderRequestComponents'));
@@ -505,6 +515,31 @@ class PurchaseOrderRequestController extends Controller
                         }else{
                             $vendorInfo['materials'][$iterator]['due_date'] = 'Due on '.date('j/n/Y',strtotime($purchaseOrderComponent['expected_delivery_date']));
                         }
+                        $purchaseOrderRequestComponent = $purchaseOrderComponent->purchaseOrderRequestComponent;
+                        if($purchaseOrderRequestComponent['transportation_amount'] == null || $purchaseOrderRequestComponent['transportation_amount'] == ''){
+                            $vendorInfo['materials'][$iterator]['transportation_amount'] = 0;
+                        }else{
+                            $vendorInfo['materials'][$iterator]['transportation_amount'] = $purchaseOrderRequestComponent['transportation_amount'];
+                        }
+                        if($purchaseOrderRequestComponent['transportation_cgst_percentage'] == null || $purchaseOrderRequestComponent['transportation_cgst_percentage'] == ''){
+                            $vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] = 0;
+                        }else{
+                            $vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] = $purchaseOrderRequestComponent['transportation_cgst_percentage'];
+                        }
+                        if($purchaseOrderRequestComponent['transportation_sgst_percentage'] == null || $purchaseOrderRequestComponent['transportation_sgst_percentage'] == ''){
+                            $vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] = 0;
+                        }else{
+                            $vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] = $purchaseOrderRequestComponent['transportation_sgst_percentage'];
+                        }
+                        if($purchaseOrderRequestComponent['transportation_igst_percentage'] == null || $purchaseOrderRequestComponent['transportation_igst_percentage'] == ''){
+                            $vendorInfo['materials'][$iterator]['transportation_igst_percentage'] = 0;
+                        }else{
+                            $vendorInfo['materials'][$iterator]['transportation_igst_percentage'] = $purchaseOrderRequestComponent['transportation_igst_percentage'];
+                        }
+                        $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
+                        $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
+                        $vendorInfo['materials'][$iterator]['transportation_igst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_igst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
+                        $vendorInfo['materials'][$iterator]['transportation_total_amount'] = $vendorInfo['materials'][$iterator]['transportation_amount'] + $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_igst_amount'];
                         if($newMaterialTypeId == $componentTypeId){
                             $materialName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                             $isMaterialExists = Material::where('name','ilike',$materialName)->first();

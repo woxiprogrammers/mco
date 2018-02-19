@@ -144,3 +144,34 @@ function calculateTaxes(element){
     var total = subtotal + cgstAmount + sgstAmount + igstAmount;
     $(element).closest('.modal-body').find('.tax-modal-total').val(total);
 }
+
+function calculateTransportationTaxes(element){
+    var transportation_amount = parseFloat($(element).closest('.modal-body').find('.calculate-transportation-amount').val());
+    if(typeof transportation_amount == 'undefined' || transportation_amount == '' || isNaN(transportation_amount)){
+        transportation_amount = 0;
+    }
+    var quantity = parseFloat($(element).closest('.modal-body').find('.tax-modal-quantity').val());
+    if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
+        quantity = 0;
+    }
+    var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.calculate-transportation-cgst-percentage').val());
+    if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
+        cgstPercentage = 0;
+    }
+    var sgstPercentage = parseFloat($(element).closest('.modal-body').find('.calculate-transportation-sgst-percentage').val());
+    if(typeof sgstPercentage == 'undefined' || sgstPercentage == '' || isNaN(sgstPercentage)){
+        sgstPercentage = 0;
+    }
+    var igstPercentage = parseFloat($(element).closest('.modal-body').find('.calculate-transportation-igst-percentage').val());
+    if(typeof igstPercentage == 'undefined' || igstPercentage == '' || isNaN(igstPercentage)){
+        igstPercentage = 0;
+    }
+    var cgstAmount = transportation_amount * (cgstPercentage / 100);
+    var sgstAmount = transportation_amount * (sgstPercentage / 100);
+    var igstAmount = transportation_amount * (igstPercentage / 100);
+    $(element).closest('.modal-body').find('.calculate-transportation-cgst-amount').val(cgstAmount);
+    $(element).closest('.modal-body').find('.calculate-transportation-sgst-amount').val(sgstAmount);
+    $(element).closest('.modal-body').find('.calculate-transportation-igst-amount').val(igstAmount);
+    var total = transportation_amount + cgstAmount + sgstAmount + igstAmount;
+    $(element).closest('.modal-body').find('.calculate-transportation-total').val(total);
+}
