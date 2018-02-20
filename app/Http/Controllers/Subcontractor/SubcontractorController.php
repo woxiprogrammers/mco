@@ -300,6 +300,33 @@ class SubcontractorController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                $subcontractorBillIds = $listingData[$pagination]->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
+                $billTotals = 0;
+                $billPaidAmount = 0;
+                foreach ($subcontractorBillIds as $subcontractorStructureBillId){
+                    $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
+                    $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+                    $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                    $taxTotal = 0;
+                    $structureSlug = $subcontractorStructure->contractType->slug;
+                    if($structureSlug == 'sqft'){
+                        $rate = $subcontractorStructure['rate'];
+                        $subTotal = $subcontractorBill['qty'] * $rate;
+                        foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                            $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                        }
+                        $finalTotal = $subTotal + $taxTotal;
+                    }else{
+                        $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
+                        $subTotal = $subcontractorBill['qty'] * $rate;
+                        foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                            $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                        }
+                        $finalTotal = $subTotal + $taxTotal;
+                    }
+                    $billTotals += $finalTotal;
+                    $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+                }
                 $action = '<a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
                                         <i class="icon-docs"></i> Manage
                                     </a>
@@ -314,9 +341,10 @@ class SubcontractorController extends Controller
                     $listingData[$pagination]['rate'],
                     $listingData[$pagination]['total_work_area'],
                     $total_amount,
+                    $billTotals,
+                    $billPaidAmount,
                     date('d M Y',strtotime($listingData[$pagination]['created_at'])),
                     $action
-                    // need to replece for edit functionality : <a href="/subcontractor/subcontractor-structure/edit/'.$listingData[$pagination]['id'].'">
                 ];
             }
             $records["draw"] = intval($request->draw);
