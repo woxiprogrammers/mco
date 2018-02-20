@@ -8,7 +8,18 @@ class PurchaseOrder extends Model
 {
     protected $table = 'purchase_orders';
 
-    protected $fillable = ['user_id','vendor_id','is_approved','purchase_request_id','serial_no'];
+    protected $fillable = ['user_id','vendor_id','is_approved','purchase_request_id','serial_no',
+        'format_id','purchase_order_status_id','client_id','is_client_order','purchase_order_request_id',
+        'total_advance_amount','balance_advance_amount'
+    ];
+
+    public function client(){
+        return $this->belongsTo('App\Client','client_id');
+    }
+
+    public function purchaseOrderRequest(){
+        return $this->belongsTo('App\PurchaseOrderRequest','purchase_order_request_id');
+    }
 
     public function purchaseRequest(){
         return $this->belongsTo('App\PurchaseRequest' , 'purchase_request_id');
@@ -22,4 +33,7 @@ class PurchaseOrder extends Model
         return $this->belongsTo('App\Vendor' ,'vendor_id');
     }
 
+    public function purchaseOrderStatus(){
+        return $this->belongsTo('App\PurchaseOrderStatus','purchase_order_status_id');
+    }
 }

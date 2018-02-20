@@ -1,6 +1,6 @@
 
 $(document).ready(function(){
-    $(".image").click(function(){
+    $(".component-view").click(function(){
         var component_id = $(this).val();
         $.ajax({
             type: "POST",
@@ -10,13 +10,11 @@ $(document).ready(function(){
                 $.LoadingOverlay("hide");
             },
             success: function(data){
-               $('#material_name').val(data.name);
-               $('#qty').val(data.quantity);
-               $('#unit').val(data.unit_name);
-               $('#hsn_code').val(data.hsn_code);
+                $("#ImageUpload .modal-body form").html(data);
+                $("#ImageUpload").modal();
             }
         });
-        $("#ImageUpload").modal();
+
     });
     $(".transaction").click(function(){
         var component_id = $(this).val();
@@ -46,4 +44,58 @@ $(document).ready(function(){
         $('#po_bill_id').val(po_id);
         $('#bilAmount').val(bill_amount);
     });
+    $(".amendment_status_change").click(function(){
+        var po_id = $(this).val();
+        $("#amendmentModal").modal();
+        $('#purchase_order_bill_id').val(po_id);
+    });
+    $(".view_details").click(function(){
+        var po_id = $(this).val();
+        $.ajax({
+            type: "POST",
+            url: "/purchase/purchase-order/get-bill-details",
+            data:{po_id : po_id},
+            beforeSend: function(){
+                $.LoadingOverlay("hide");
+            },
+            success: function(data){
+                $('#grn').val(data.grn);
+                $('#amount').val(data.bill_amount);
+                $('#bill_quantity').val(data.quantity);
+                $('#bill_unit').val(data.unit);
+                $('#remark').val(data.remark);
+            }
+        });
+        $("#viewDetailModal").modal();
+    });
+    $('#poCloseBtn').click(function (){
+        var po_id = $('#po_id').val();
+        var vendor_id = $('#vendor_id').val();
+        $.ajax({
+            type: "POST",
+            url: "/purchase/purchase-order/close-purchase-order",
+            data:{po_id : po_id , vendor_id:vendor_id},
+            beforeSend: function(){
+            },
+            success: function(data){
+                location.reload();
+            }
+        });
+    });
+    $('#poReopenBtn').click(function (){
+        var po_id = $('#po_id').val();
+        var vendor_id = $('#vendor_id').val();
+        $.ajax({
+            type: "POST",
+            url: "/purchase/purchase-order/reopen",
+            data:{po_id : po_id , vendor_id:vendor_id},
+            beforeSend: function(){
+
+                },
+            success: function(data){
+                location.reload();
+            }
+        });
+    });
+
 });

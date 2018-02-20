@@ -6,9 +6,8 @@
 var $hello= $('#path');
 $hello.on("change", function(event, path,count){
     if (typeof path !== "undefined") {
-        var quotationId = $("#quotationId").val();
         $.ajax({
-            url: "/quotation/display-images/"+quotationId,
+            url: "/drawing/images/display-images?_token="+$("input[name='_token']").val(),
             data: {'path':path,'count':count},
             async:false,
             error: function(data) {
@@ -28,7 +27,7 @@ function removeProductImages(imageId,path,originalId){
     maxCount = maxCount +  1;
     $('#max_files_count').val(maxCount);
     $.ajax({
-        url: "/quotation/delete-temp-product-image",
+        url: "/drawing/images/delete-temp-product-image",
         data: {'path':path,'id':originalId},
         async:false,
         error: function(data) {

@@ -131,8 +131,11 @@
                                                         <input type="password" class="form-control" id="confirm_password" name="confirm_password">
                                                     </div>
                                                 </div>
-                                            </div>
 
+                                            </div>
+                                            <div id="amount_limit">
+
+                                            </div>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="aclTable">
 
 

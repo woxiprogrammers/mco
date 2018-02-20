@@ -30,6 +30,7 @@
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
+                                        <input type="hidden" id="purchaseRequestId" value="{{$purchaseRequest->id}}">
                                         <div class="portlet-body form">
                                             <div class="row">
                                                 <div class="col-md-4">
@@ -59,7 +60,7 @@
                                                 </div>
                                             </div>
                                         @if($userRole == 'superadmin')
-                                            <div class="row">
+                                            {{--<div class="row">
                                                 <div class="col-md-6">
                                                     <a href="#" class="btn btn-set yellow pull-right"  id="assetBtn">
                                                         <i class="fa fa-plus" style="font-size: large"></i>
@@ -74,7 +75,7 @@
                                                         </a>&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div>--}}
                                         @endif
                                         </div>
                                     </div>
@@ -84,13 +85,14 @@
                                         <div class="portlet-body form">
                                             <div class="portlet light ">
                                                 <div class="portlet-title">
-                                                    <button class="btn btn-xs green  pull-right" type="button" aria-expanded="true" id="previewBtn">
-                                                        Preview
-                                                    </button>
+                                                    @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
+                                                        <button class="btn btn-xs green  pull-right" type="button" aria-expanded="true" id="previewBtn">
+                                                            Preview
+                                                        </button>
+                                                    @endif
                                                     <div class="caption">
                                                         <i class="fa fa-bars font-red"></i>&nbsp
                                                         <span class="caption-subject font-red sbold uppercase">Material / Asset List</span>
-
                                                     </div>
                                                 </div>
                                                 <div class="portlet-body">
@@ -101,7 +103,9 @@
                                                             <th> Name </th>
                                                             <th> Quantity </th>
                                                             <th> Unit </th>
-                                                            <th> Action </th>
+                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
+                                                                <th> Action </th>
+                                                            @endif
                                                         </tr>
                                                         </thead>
                                                         <tbody style="height: 500px">
@@ -111,19 +115,30 @@
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['name']}} </td>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['quantity']}} </td>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
-                                                                    <td>
-                                                                        <div>
-                                                                            <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
-                                                                                @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
-                                                                                    @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedVendorData[$materialRequestComponentDetails[$iterator]['id']]))
-                                                                                        <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
-                                                                                    @else
-                                                                                        <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
-                                                                                    @endif
-                                                                                @endfor
-                                                                            </select>
-                                                                        </div>
-                                                                    </td>
+                                                                    @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
+                                                                        <td>
+                                                                            <div>
+                                                                                <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
+                                                                                    @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
+                                                                                        @if(array_key_exists('is_client',$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]) && $materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['is_client'] == true)
+
+                                                                                            @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedClientData[$materialRequestComponentDetails[$iterator]['id']]))
+                                                                                                <option value="client_{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @else
+                                                                                                <option value="client_{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @endif
+                                                                                        @else
+                                                                                            @if(in_array($materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id'],$assignedVendorData[$materialRequestComponentDetails[$iterator]['id']]))
+                                                                                                <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}" selected>{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @else
+                                                                                                <option value="{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['id']}}">{{$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['company']}}</option>
+                                                                                            @endif
+                                                                                        @endif
+                                                                                    @endfor
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                    @endif
                                                                 </tr>
                                                             @endfor
                                                         </tbody>
@@ -265,6 +280,7 @@
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <form role="form" action="/purchase/purchase-request/assign-vendors" method="post">
                                                 {!! csrf_field() !!}
+                                                <input type="hidden" name="is_mail" id="is_mail" value="1">
                                                 <input type="hidden" name="purchase_request_id" value="{{$purchaseRequest['id']}}">
                                                 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
@@ -289,8 +305,8 @@
     <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
     <link rel="stylesheet"  href="/assets/global/css/app.css"/>
     <link rel="stylesheet" href="/assets/global/plugins/bootstrap/css/bootstrap.min.css" type="text/css"/>
-            <script type="text/javascript" src="/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
-            <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
+    <script type="text/javascript" src="/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
+    <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
     <script>
         $(document).ready(function(){
             $('.example-getting-started').multiselect();
@@ -363,6 +379,7 @@
 '                                                        <h4 class="panel-title">\n' +
 '                                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse_'+i+'" aria-expanded="true" aria-controls="collapseOne">\n' +
                         '                                                                <span style="font-size: 16px;text-align: left !important;">'+vendor[i].name+'</span>\n' +
+                            '&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp<button class="btn btn-dark" onclick="downloadPdf(this,'+vendor[i].id+')">Download PDF</button>' +
                         '                                                                <i class="more-less glyphicon glyphicon-plus"></i>\n' +
 '                                                            </a>\n' +
 '                                                        </h4>\n' +
@@ -396,5 +413,15 @@
                 $("#vendorPreviewModal").modal('show');
             });
         });
+    </script>
+    <script>
+        function downloadPdf(element,vendorId){
+            $('#is_mail').val(0);
+            var divId = $(element).closest(".panel-heading").next('.panel-collapse').attr('id');
+            $("#vendorPreviewModal form .panel-collapse[id!="+divId+"]").each(function(){
+                $(this).remove();
+            });
+            $("#vendorPreviewModal form").submit();
+        }
     </script>
 @endsection

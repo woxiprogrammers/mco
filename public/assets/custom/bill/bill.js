@@ -19,8 +19,8 @@ $(document).ready(function (){
             $('#extra_item_description_'+id).prop('disabled',true);
             $('#extra_item_rate_'+id).prop('disabled',true);
             $('#extra_item_rate_'+id).val('');
-            $('#extra_item_rate_'+id).rules('remove');
-            $('#extra_item_rate_'+id).closest('form-group').removeClass('has-error');
+            /*$('#extra_item_rate_'+id).rules('remove');
+            $('#extra_item_rate_'+id).closest('form-group').removeClass('has-error');*/
         }else{
             $('#extra_item_description_'+id).prop('disabled',false);
             $('#extra_item_rate_'+id).prop('disabled',false);
@@ -30,11 +30,11 @@ $(document).ready(function (){
             var total_extra_item_rate = $('#total_extra_item_rate_'+id).text();
             var previous_rates = $('#previous_rates_'+id).text();
             var diff = parseFloat(total_extra_item_rate - previous_rates);
-            $('#extra_item_rate_'+id).rules('add',{
+            /*$('#extra_item_rate_'+id).rules('add',{
                 required: true,
                 min: 0.000001,
                 max: diff
-            });
+            });*/
             enteredRate.on('keyup', function () {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(doneTyping, doneTypingInterval);

@@ -4,18 +4,28 @@ namespace App\Http\Controllers\Admin;
 
 use App\Asset;
 use App\AssetImage;
+use App\AssetType;
+use App\AssetVendorRelation;
+use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
+use App\InventoryComponent;
+use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
+use App\InventoryTransferTypes;
+use App\ProjectSite;
+use App\Unit;
+use App\Vendor;
+use Dompdf\Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use PhpParser\Node\Expr\Array_;
 
 
 class AssetManagementController extends Controller
 {
+use InventoryTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -23,17 +33,67 @@ class AssetManagementController extends Controller
         return view('admin.asset.manage');
     }
     public function getCreateView(Request $request){
-        return view('admin.asset.create');
+        try{
+            $asset_types = AssetType::select('id','name')->get()->toArray();
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get asset create view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return view('admin.asset.create')->with(compact('asset_types'));
     }
     public function getEditView(Request $request,$asset){
         try{
-            $asset = $asset->toArray();
+            $inventoryComponentTransfers = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                ->where('inventory_components.reference_id',$asset['id'])
+                ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                ->orderBy('inventory_component_transfers.created_at','asc')->select('inventory_component_transfers.id','inventory_component_transfers.transfer_type_id','inventory_component_transfers.quantity')->get();
+            $isAssigned = false;
+            $quantityAssigned = $jIterator = 0;
+            foreach($inventoryComponentTransfers as $key => $inventoryComponentTransfer){
+                if($inventoryComponentTransfer->transferType->type == 'IN'){
+                    $isAssigned = true;
+                    $quantityAssigned = $quantityAssigned + $inventoryComponentTransfer['quantity'];
+                }else{
+                    $isAssigned = false;
+                    $quantityAssigned = 0;
+                }
+            }
+            if($asset->assetTypes->slug == 'other'){
+                $remainingQuantity = $asset['quantity'] - $quantityAssigned;
+                $isAssigned = ($remainingQuantity > 0) ? false : true;
+            }else{
+                $remainingQuantity = 1;
+            }
+            $projectSiteData = array();
+            $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                                            ->join('clients','clients.id','=','projects.client_id')
+                                            ->where('projects.is_active',true)
+                                            ->select('project_sites.id','project_sites.name as project_site_name','projects.name as project_name','clients.company')->get()->toArray();
+            $iterator = 0;
+            foreach($projectSites as $key => $projectSite){
+                $projectSiteData[$iterator]['id'] = $projectSite['id'];
+                $projectSiteData[$iterator]['name'] = $projectSite['company'].'-'.$projectSite['project_name'].'-'.$projectSite['project_site_name'];
+                $iterator++;
+            }
+            $asset_types = AssetType::select('id','name')->get()->toArray();
             $assetId = $asset['id'];
             $assetImages = AssetImage::where('asset_id',$assetId)->select('id','name')->get();
             if($assetImages != null){
                 $assetImage = $this->getImagePath($assetId,$assetImages);
             }
-            return view('admin.asset.edit')->with(compact('asset','assetImage'));
+            if ($asset['is_day_wise'] == true){
+                $maintenancePeriodType = 'day_wise';
+             }elseif ($asset['is_day_wise'] == false){
+                $maintenancePeriodType = 'hour_wise';
+            }else{
+                $maintenancePeriodType = '';
+            }
+            $vendorsAssigned = AssetVendorRelation::where('asset_id',$asset['id'])->get();
         }catch (\Exception $e){
             $data = [
                 'action' => "Get asset edit view",
@@ -43,6 +103,7 @@ class AssetManagementController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+        return view('admin.asset.edit')->with(compact('asset','assetImage','asset_types','projectSiteData','isAssigned','quantityAssigned','remainingQuantity','vendorsAssigned','maintenancePeriodType'));
     }
 
     public function createAsset(Request $request){
@@ -52,13 +113,12 @@ class AssetManagementController extends Controller
             $data['model_number'] = $request->model_number;
             $data['expiry_date'] = $request->expiry_date;
             $data['price'] = $request->price;
-            $data['is_fuel_dependent'] = $request->is_fuel_dependent;
-            if($request->is_fuel_dependent == 'true'){
-                $data['litre_per_unit'] = $request->litre_per_unit;
-            }else{
-                $data['litre_per_unit'] = null;
-            }
+            $data['asset_types_id'] = $request->asset_type;
+            $data['electricity_per_unit'] = $request->electricity_per_unit;
+            $data['litre_per_unit'] = $request->litre_per_unit;
             $data['is_active'] = false;
+            $data['quantity'] = $request->qty;
+            $data['rent_per_day'] = $request->rent_per_day;
             $asset = Asset::create($data);
             if($request->work_order_images != null) {
                 $assetId = $asset['id'];
@@ -98,16 +158,11 @@ class AssetManagementController extends Controller
     public function editAsset(Request $request,$asset){
         try{
             $data = $request->all();
+            $assetData = $request->except('_token','name','asset_type','qty','maintenance_period_type');
+            $assetData['is_day_wise'] = ($request->has('maintenance_period_type') && $request['maintenance_period_type'] == 'day_wise' && $request['maintenance_period_type'] != null) ? true : false;
             $assetData['name'] = ucwords(trim($data['name']));
-            $assetData['model_number'] = $data['model_number'];
-            $assetData['expiry_date'] = $data['expiry_date'];
-            $assetData['price'] = $data['price'];
-            $assetData['is_fuel_dependent'] = $data['is_fuel_dependent'];
-            if($assetData['is_fuel_dependent'] == "true"){
-                $assetData['litre_per_unit'] = $data['litre_per_unit'];
-            }else{
-                $assetData['litre_per_unit'] = null;
-            }
+            $assetData['asset_types_id'] = $data['asset_type'];
+            $assetData['quantity'] = $data['qty'];
             $asset->update($assetData);
             $work_order_images = $request->work_order_images;
             $assetImages = $request->asset_images;
@@ -171,6 +226,45 @@ class AssetManagementController extends Controller
         }
     }
 
+    public function assignProjectSite(Request $request,$asset){
+        try{
+            $user = Auth::user();
+            $inventoryComponentId = InventoryComponent::where('project_site_id',$request['project_site_id'])->where('reference_id',$asset['id'])->pluck('id')->first();
+            if($inventoryComponentId == null){
+                $inventoryComponentData['name'] = $asset['name'];
+                $inventoryComponentData['is_material'] = false;
+                $inventoryComponentData['project_site_id'] = $request->project_site_id;
+                $inventoryComponentData['opening_stock'] = 0;
+                $inventoryComponentData['reference_id'] = $asset['id'];
+                $inventoryComponent = InventoryComponent::create($inventoryComponentData);
+                $inventoryComponentId = $inventoryComponent['id'];
+            }
+            $inventoryComponentTransferData = [
+                'inventory_component_id' => $inventoryComponentId,
+                'transfer_type_id' => InventoryTransferTypes::where('type','ilike','IN')->where('slug','office')->pluck('id')->first(),
+                'quantity' => $request['quantity'],
+                'unit_id' => Unit::where('slug','nos')->pluck('id')->first(),
+                'user_id' => $user['id'],
+                'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first(),
+                'rate_per_unit' => $request['rent_per_day']
+            ];
+            $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentTransferData);
+            if(count($inventoryComponentTransfer) > 0){
+                $request->session()->flash('success', 'Project Site assigned successfully.');
+            }else{
+                $request->session()->flash('success', 'Something went wrong.');
+            }
+            return redirect('/asset/edit/'.$asset->id);
+        }catch (Exception $e){
+            $data = [
+                'action' => 'Assign Asset to Project Site',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 
     public function uploadTempAssetImages(Request $request){
         try {
@@ -205,62 +299,114 @@ class AssetManagementController extends Controller
     }
 
     public function assetListing(Request $request){
-                    try{
-                        if($request->has('search_model_number')){
-                            $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get()->toArray();
-                        }else{
-                            $assetData = Asset::orderBy('model_number','asc')->get()->toArray();
-                        }
-                        $iTotalRecords = count($assetData);
-                        $records = array();
-                        $records['data'] = array();
-                        $end = $request->length < 0 ? count($assetData) : $request->length;
-                        for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
-                            if($assetData[$pagination]['is_active'] == true){
-                                $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
-                                $status = 'Disable';
-                            }else{
-                                $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
-                                $status = 'Enable';
-                            }
-                            $records['data'][$iterator] = [
-                                $assetData[$pagination]['id'],
-                                $assetData[$pagination]['model_number'],
-                                $asset_status,
+        try{
+            if($request->has('search_model_number')){
+                $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get();
+            }else{
+                $assetData = Asset::orderBy('model_number','asc')->get();
+            }
+            $iTotalRecords = count($assetData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($assetData) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
+                if($assetData[$pagination]['is_active'] == true){
+                    $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                    $status = 'Disable';
+                }else{
+                    $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                    $status = 'Enable';
+                }
+                if($assetData[$pagination]->assetTypes == null){
+                    $assetType = '';
+                }else{
+                    $assetType = $assetData[$pagination]->assetTypes->name;
 
-                                '<div class="btn-group">
-                       <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                           Actions
-                           <i class="fa fa-angle-down"></i>
-                       </button>
-                       <ul class="dropdown-menu pull-left" role="menu">
-                           <li>
-                               <a href="/asset/edit/'.$assetData[$pagination]['id'].'">
-                               <i class="icon-docs"></i> Edit </a>
-                       </li>
-                       <li>
-                           <a href="/asset/change-status/'.$assetData[$pagination]['id'].'">
-                               <i class="icon-tag"></i> '.$status.' </a>
-                       </li>
-                   </ul>
-               </div>'
-                            ];
-                        }
+                }
+                $records['data'][$iterator] = [
+                    $assetData[$pagination]['name'],
+                    $assetData[$pagination]['id'],
+                    $assetData[$pagination]['model_number'],
+                    $asset_status,
+                    $assetType,
+                    '<div class="btn-group">
+           <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+               Actions
+               <i class="fa fa-angle-down"></i>
+           </button>
+           <ul class="dropdown-menu pull-left" role="menu">
+               <li>
+                   <a href="/asset/edit/'.$assetData[$pagination]['id'].'">
+                   <i class="icon-docs"></i> Edit </a>
+           </li>
+           <li>
+               <a href="/asset/change-status/'.$assetData[$pagination]['id'].'">
+                   <i class="icon-tag"></i> '.$status.' </a>
+           </li>
+       </ul>
+    </div>'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch (Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Asset Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records);
+    }
 
-                        $records["draw"] = intval($request->draw);
-                        $records["recordsTotal"] = $iTotalRecords;
-                        $records["recordsFiltered"] = $iTotalRecords;
-                    }catch (Exception $e){
-                        $records = array();
-                        $data = [
-                            'action' => 'Get Asset Listing',
-                            'params' => $request->all(),
-                            'exception'=> $e->getMessage()
-                        ];
-                        Log::critical(json_encode($data));
-                        abort(500);
-                    }
-                    return response()->json($records);
+    public function projectSiteAssetListing(Request $request,$assetId){
+        try{
+            $inventoryComponentTransfer = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                                                                        ->where('inventory_components.reference_id',$assetId)
+                                                                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                                                                        ->orderBy('inventory_component_transfers.created_at','desc')->get();
+            $status = 200;
+            $iTotalRecords = count($inventoryComponentTransfer);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($inventoryComponentTransfer) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentTransfer); $iterator++,$pagination++ ){
+                if($inventoryComponentTransfer[$pagination]->transferType->type == 'IN'){
+                    $assetStatus = 'Assigned';
+                }else{
+                    $assetStatus = 'Released';
+                }
+                $projectSite = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                    ->join('clients','clients.id','=','projects.client_id')
+                    ->where('project_sites.id',$inventoryComponentTransfer[$pagination]->inventoryComponent->project_site_id)
+                    ->select('project_sites.id','project_sites.name as project_site_name','projects.name as project_name','clients.company')->first();
+                $records['data'][$iterator] = [
+                    $projectSite['company'].' - '.$projectSite['project_name'].' - '.$projectSite['project_site_name'],
+                    $inventoryComponentTransfer[$pagination]->quantity,
+                    $assetStatus,
+                    $inventoryComponentTransfer[$pagination]->rate_per_unit,
+                    $inventoryComponentTransfer[$pagination]->date,
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch (Exception $e){
+            $status = 500;
+            $records = array();
+            $data = [
+                'action' => 'Get Project Site Asset Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records,$status);
     }
 
     public function displayAssetImages(Request $request){
@@ -338,5 +484,70 @@ class AssetManagementController extends Controller
             $iterator++;
         }
         return $imagePaths;
+    }
+
+    public function getVendorAutoSuggest(Request $request,$keyword){
+        try{
+            $vendorList = Vendor::where('name','ilike','%'.$keyword.'%')->where('is_active',true)->select('id','name')->get();
+            $response = array();
+            if(count($vendorList) > 0){
+                $response = $vendorList->toArray();
+                $iterator = 0;
+                foreach($response as $vendorList){
+                    $response[$iterator]['tr_view'] = '<input name="vendors[]" type="hidden" value="'.$vendorList['id'].'">
+                                                        <div class="row">
+                                                            <div class="col-md-9"  style="text-align: left">
+                                                                <label class="control-label">'.$vendorList['name'].'</label>
+                                                            </div>
+                                                        </div>';
+                    $iterator++;
+                }
+            }
+        }catch(\Exception $e){
+            $vendorList = array();
+            $data = [
+                'action' => 'Auto-Suggest Vendor',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response($response,200);
+    }
+
+    public function assignVendors(Request $request,$asset){
+        try{
+            if($request->has('vendors')){
+                $assetVendorRelationData = array();
+                foreach($request->vendors as $vendorID){
+                    $check = AssetVendorRelation::where('vendor_id',$vendorID)->where('asset_id',$asset->id)->first();
+                    if($check == null){
+                        $assetVendorRelationData['vendor_id'] = $vendorID;
+                        $assetVendorRelationData['asset_id'] = $asset->id;
+                        AssetVendorRelation::create($assetVendorRelationData);
+                    }
+                }
+                $assetVendors = AssetVendorRelation::where('asset_id',$asset->id)->whereNotIn('vendor_id',$request->vendors)->get();
+                foreach ($assetVendors as $assetVendor){
+                    $assetVendor->delete();
+                }
+            }else{
+                $assetVendors = AssetVendorRelation::where('asset_id',$asset->id)->get();
+                foreach ($assetVendors as $assetVendor){
+                    $assetVendor->delete();
+                }
+            }
+            $request->session()->flash('success', 'Vendors assigned to asset successfully.');
+            return redirect('/asset/edit/'.$asset->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Assign Vendor',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }

@@ -1,4 +1,8 @@
 var MaterialRequestListing = function () {
+    var projectSiteId = $("#globalProjectSite").val();
+    if(typeof projectSiteId == 'undefined' || projectSiteId == ''){
+        projectSiteId = 0;
+    }
     var handleOrders = function () {
 
         var grid = new Datatable();
@@ -24,7 +28,7 @@ var MaterialRequestListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/purchase/material-request/listing?_token="+$("input[name='_token']").val(), // ajax source
+                    "url": "/purchase/material-request/listing?site_id="+projectSiteId+"&_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]

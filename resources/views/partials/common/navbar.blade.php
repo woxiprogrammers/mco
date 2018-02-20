@@ -1,3 +1,4 @@
+@section('navBar')
 <div class="page-header">
     <div class="page-header-top">
         <div class="container">
@@ -8,6 +9,17 @@
                 </a>
             </div>
             <!-- END LOGO -->
+            <div class="col-md-3 col-md-offset-2 form-group globalSiteSelect">
+                <select class="bs-select form-control" data-style="btn-info" data-width="100%" id="globalProjectSite">
+                    @foreach($globalProjectSites as $projectSite)
+                        @if($projectSite->project_site_id == $selectGlobalProjectSite)
+                            <option value="{{$projectSite->project_site_id}}" selected>{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                        @else
+                            <option value="{{$projectSite->project_site_id}}">{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
             <!-- BEGIN RESPONSIVE MENU TOGGLER -->
             <a href="javascript:;" class="menu-toggler"></a>
             <!-- END RESPONSIVE MENU TOGGLER -->
@@ -56,7 +68,7 @@
             <!-- BEGIN MEGA MENU -->
             <!-- DOC: Apply "hor-menu-light" class after the "hor-menu" class below to have a horizontal menu with white background -->
             <!-- DOC: Remove data-hover="dropdown" and data-close-others="true" attributes below to disable the dropdown opening on mouse hover -->
-            <div class="hor-menu  ">
+            <div class="hor-menu">
                 <ul class="nav navbar-nav">
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/dashboard"> Dashboard
@@ -160,6 +172,16 @@
                                                     <i class="fa fa-sitemap"></i> Manage Users
                                                 </a>
                                             </li>
+                                            <li aria-haspopup="true">
+                                                <a href="/labour/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-sitemap"></i> Manage Employee
+                                                </a>
+                                            </li>
+                                            <li aria-haspopup="true">
+                                                <a href="/subcontractor/manage" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-sitemap"></i> Manage Subcontractor
+                                                </a>
+                                            </li>
                                         </ul>
                                     </li>
                                 @endif
@@ -197,7 +219,7 @@
                             </li>
                     @endif
                     <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
-                    @if($hasStructurePermission)
+                    @if($hasQuotationPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a href="/quotation/manage/status#2"> Quotations
                                 <span class="arrow"></span>
@@ -212,26 +234,53 @@
                             </a>
                         </li>
                     @endif
-                    <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?><!--
+                    <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?>
                     @if($hasPurchasePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> Purchase
-                            <span class="arrow"></span>
-                        </a>
+                        @if(($purchaseRequestNotificationCount + $materialRequestNotificationCount) > 0)
+                            <a> Purchase
+                                <span class="badge badge-success">{!! $purchaseRequestNotificationCount + $materialRequestNotificationCount !!}</span>
+                            </a>
+                        @else
+                            <a> Purchase
+
+                            </a>
+                        @endif
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Material Request
+                                    @if(($materialRequestNotificationCount) > 0)
+                                        <span class="badge badge-success"><b>{{$materialRequestNotificationCount}}</b></span>
+                                    @endif
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Purchase Request
+                                    @if(($purchaseRequestNotificationCount) > 0)
+                                        <span class="badge badge-success"><b>{{$purchaseRequestNotificationCount}}</b></span>
+                                    @endif
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/purchase-order-request/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Purchase Order Request
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Purchase Order
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Purchase Order Billing
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/purchase/vendor-mail/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Vendor Mails
                                 </a>
                             </li>
                         </ul>
@@ -245,13 +294,60 @@
                             </a>
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
-                                    <a href="/inventory/manage-inventory/manage" class="nav-link nav-toggle ">
+                                    <a href="/inventory/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Store Keeper
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Site Transfer
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/asset/maintenance/request/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Asset Maintenance
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/asset/maintenance/request/approval/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Asset Maintenance Approval
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/asset/maintenance/request/bill/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-bars"></i> Asset Maintenance Billing
                                     </a>
                                 </li>
                             </ul>
                         </li>
                     @endif
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> Checklist
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/checklist/structure/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Checklist Structure
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/checklist/site-assignment/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Project Site Assignment
+                                </a>
+                            </li>
+                            <!--<li aria-haspopup="true">
+                                <a href="/checklist/user-assignment/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> User Checklist Management
+                                </a>
+                            </li>-->
+                        </ul>
+                    </li>
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Drawing
                             <span class="arrow"></span>
@@ -267,30 +363,117 @@
                                     <i class="fa fa-bars"></i> Add Image
                                 </a>
                             </li>
-                            {{--<li aria-haspopup="true">
-                                <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Manage Drawing
+                            <li aria-haspopup="true">
+                                <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
+                                    <i class="fa fa-bars"></i> Manage Drawings
                                 </a>
-                            </li>--}}
+                            </li>
                         </ul>
                     </li>
+                    <?php $hasPeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('peticash');?>
+                    @if($hasPeticashPermission  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> Checklist
+                        <a> Peticash
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            @if($user->hasPermissionTo('view-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+                            <li aria-haspopup="true">
+                                <a href="/peticash/master-peticash-account/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-money"></i> Master Peticash Account
+                                </a>
+                            </li>
+                            @endif
+                            @if($user->hasPermissionTo('view-sitewise-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+                            <li aria-haspopup="true">
+                                <a href="/peticash/sitewise-peticash-account/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Sitewise Peticash Account
+                                </a>
+                            </li>
+                            @endif
+                            @if($user->hasPermissionTo('approve-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+                                <li aria-haspopup="true">
+                                    <a href="/peticash/peticash-approval-request/manage-salary-list" class="nav-link nav-toggle ">
+                                        <i class="fa fa-check"></i> Peticash Salary Request Approval
+                                    </a>
+                                </li>
+                            @endif
+                            <li aria-haspopup="true">
+                                <a href="/peticash/salary-request/create" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Peticash Salary Request
+                                </a>
+                            </li>
+                            @if($user->hasPermissionTo('view-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+                                <li aria-haspopup="true" class="dropdown-submenu">
+                               <!-- <a href="/peticash/peticash-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-database"></i> Peticash Management
+                                </a>-->
+                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                    <i class="fa fa-database"></i> Peticash Management
+                                </a>
+                                <ul class="dropdown-menu pull-left">
+                                    <li aria-haspopup="true">
+                                        <a href="/peticash/peticash-management/purchase/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-sitemap"></i> Purchase
+                                        </a>
+                                    </li>
+                                    <li aria-haspopup="true">
+                                        <a href="/peticash/peticash-management/salary/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-bars"></i> Salary
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            @endif
+                        </ul>
+                    </li>
+                    @endif
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a href="/subcontractor/subcontractor-structure/manage"> Subcontractor
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> General Awareness
                             <span class="arrow"></span>
                         </a>
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
-                                <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
+                                <a href="/awareness/category-management/main-category-manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Category Management
                                 </a>
                             </li>
                             <li aria-haspopup="true">
-                                <a href="/checklist/checkList/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Checklist Structure
+                                <a href="/awareness/file-management/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-file" aria-hidden="true"></i> File Management
                                 </a>
                             </li>
                         </ul>
-                    </li>-->
+                    </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> DPR
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/dpr/category_manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-sitemap"></i> Category Management
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/dpr/manage_dpr" class="nav-link nav-toggle ">
+                                    <i class="fa fa-file" aria-hidden="true"></i> DPR Management
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @if(($user->roles[0]->role->slug == 'superadmin'))
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a href="/reports"> Reports
+                            <span class="arrow"></span>
+                        </a>
+                    </li>
+                    @endif
                 </ul>
             </li>
         </div>
@@ -302,3 +485,4 @@
     <!-- END HEADER MENU -->
 </div>
 </div>
+@endsection

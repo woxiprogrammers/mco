@@ -30,7 +30,7 @@ trait CategoryTrait{
     public function getEditView(Request $request,$category){
         try{
             $category = $category->toArray();
-            return view('admin.category.edit')->with(compact('category'));
+             return view('admin.category.edit')->with(compact('category'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get category edit view",
@@ -57,9 +57,9 @@ trait CategoryTrait{
 
     public function createCategory(CategoryRequest $request){
         try{
-            $data = $request->only('name');
-            $data['name'] = ucwords(trim($data['name']));
+            $data['name'] = ucwords(trim($request['name']));
             $data['is_active'] = false;
+            $data['is_miscellaneous'] = $request['is_miscellaneous'];
             $category = Category::create($data);
             $request->session()->flash('success', 'Category Created successfully.');
             return redirect('/category/create');
@@ -76,9 +76,11 @@ trait CategoryTrait{
 
     public function editCategory(CategoryRequest $request, $category){
         try{
-            $category->update(['name' => ucwords(trim($request->name))]);
+            $data['name'] = ucwords(trim($request['name']));
+            $data['is_miscellaneous'] = $request['is_miscellaneous'];
+            $query = Category::where('id',$request['id'])->update($data);
             $request->session()->flash('success', 'Category Edited successfully.');
-            return redirect('/category/edit/'.$category->id);
+            return redirect('/category/edit/'.$category['id']);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Category',

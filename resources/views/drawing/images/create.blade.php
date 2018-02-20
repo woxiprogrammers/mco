@@ -11,6 +11,7 @@
             <div class="page-wrapper-middle">
                 <!-- BEGIN CONTAINER -->
                 <div class="page-container">
+                    <form role="form" id="create-image" class="form-horizontal" method="post" action="/drawing/images/create">
                     <!-- BEGIN CONTENT -->
                     <div class="page-content-wrapper">
                         <div class="page-head">
@@ -18,6 +19,12 @@
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
                                     <h1>Add Image</h1>
+                                </div>
+                                <div class="col-md-6" style="margin-top: 12px;float: right">
+                                    <button type="submit" class="btn btn-set red pull-right">
+                                        <i class="fa fa-check"></i>
+                                        Submit
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -39,50 +46,19 @@
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
-                                            <form role="form" id="create-image" class="form-horizontal" method="post" action="">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Client Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="client_name" name="client_name">
-                                                                <option value="">Select Client name from here </option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Project Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="project_name" name="project_name">
-                                                                <option value="">Select Project Name from here</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Site Name</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <select class="form-control" id="site_name" name="site_name">
-                                                                <option value="">Select Site Name from here</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="name" class="control-label">Main Category</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="main_category" name="main_category">
+                                                            <select class="form-control" id="main_category_id" required>
                                                                 <option value="">Select Main Category from here</option>
+                                                                @foreach($categories as $category)
+                                                                    <option value="{{$category['id']}}">{{$category['name']}} </option>
+                                                                @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
@@ -92,7 +68,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <select class="form-control" id="sub_category" name="sub_category">
+                                                            <select class="form-control" id="sub_category_id" name="drawing_category_id" required>
                                                                 <option value="">Select Sub Category from here</option>
                                                             </select>
                                                         </div>
@@ -100,15 +76,6 @@
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="name" class="control-label">Add Image :</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Image Title</label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="text" class="form-control" id="image_title" name="image_title">
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
@@ -129,27 +96,11 @@
                                                             </tr>
                                                             </thead>
                                                             <tbody id="show-product-images">
-                                                                {{--<tr id="image-{{1}}">
-                                                                    <td>
-                                                                        <a href="" target="_blank" class="fancybox-button" data-rel="fancybox-button">
-                                                                            <img class="img-responsive" src="" alt="" style="width:100px; height:100px;"> </a>
-                                                                        <input type="hidden" class="work-order-image-name" name="work_order_images[$image->id][image_name]" id="work-order-image-" value=""/>
-                                                                    </td>
-                                                                    <td>
-                                                                        <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image");'>
-                                                                            <i class="fa fa-times"></i> Remove </a>
-                                                                    </td>
-                                                                </tr>--}}
+
                                                             </tbody>
                                                         </table>
-                                                       {{-- <div class="form-group">
-                                                            <button type="submit" class="btn btn-success" style="margin-left: 40%; margin-top:3%">
-                                                                Submit
-                                                            </button>
-                                                        </div>--}}
                                                     </div>
                                                 </div>
-                                            </form>
                                             <input type="hidden" id="path" name="path" value="">
                                             <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                                         </div>
@@ -158,6 +109,7 @@
                             </div>
                         </div>
                     </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -170,11 +122,5 @@
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/drawing/image/image-datatable.js"></script>
     <script src="/assets/custom/admin/drawing/image/image-upload.js"></script>
-    <script src="/assets/custom/admin/drawing/image/validation.js" type="application/javascript"></script>
-    <script>
-        $(document).ready(function(){
-            CreateImage.init();
-        });
-    </script>
-
+    <script src="/assets/custom/Drawing/drawing.js" type="application/javascript"></script>
 @endsection

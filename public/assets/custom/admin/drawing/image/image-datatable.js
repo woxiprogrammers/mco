@@ -3,21 +3,20 @@
  */
 
 var QuotationImageUpload = function() {
-    var quotationId = $("#quotationId").val();
     var e = function() {
             var e = new plupload.Uploader({
                 max_files : 20,
                 runtimes: "html5,html4",
                 browse_button: document.getElementById("tab_images_uploader_pickfiles"),
                 container: document.getElementById("tab_images_uploader_container"),
-                url: "/quotation/image-upload/"+quotationId,
+                url: "/drawing/images/image-upload?_token="+$('input[name="_token"]').val(),
                 async:false,
                 multi_selection : true,
                 filters: {
                     max_file_size: "1mb",
                     mime_types: [{
                         title: "Image files",
-                        extensions: "jpg,jpeg,png"
+                        extensions: "jpg,jpeg,png,dwg"
                     }]
                 },
                 flash_swf_url: "/assets/global/plugins/plupload/js/Moxie.swf",

@@ -17,7 +17,9 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'first_name', 'email', 'password','last_name','is_active','mobile','dob','gender'
+        'first_name', 'email', 'password','last_name','is_active','mobile','dob',
+        'gender','purchase_order_amount_limit','purchase_peticash_amount_limit',
+        'web_fcm_token','mobile_fcm_token'
     ];
 
     /**
@@ -35,5 +37,22 @@ class User extends Authenticatable
 
     public function userProjectSitesRelation(){
         return $this->hasMany('App\UserProjectSiteRelation','user_id');
+    }
+
+    public function customHasPermission($permission){
+        $permissionExists = UserHasPermission::join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                                            ->where('permissions.name','ilike',$permission)
+                                            ->where('user_has_permissions.user_id',$this->id)
+                                            ->where('user_has_permissions.is_web', true)
+                                            ->first();
+        if($permissionExists  == null){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public function lastLogins(){
+        return $this->hasMany('App\UserLastLogin','user_id');
     }
 }

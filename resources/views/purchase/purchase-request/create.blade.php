@@ -6,6 +6,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="unitOptions" value="{{$unitOptions}}">
     <input type="hidden" id="iterator" value="0">
     <input type="hidden" id="component_id">
     <form role="form" id="new_purchase_request" class="form-horizontal" action="/purchase/purchase-request/create" method="post">
@@ -23,10 +24,13 @@
                                 <div class="page-title">
                                     <h1>Create Purchase Request</h1>
                                 </div>
-                                <button type="submit"  class="btn red pull-right margin-top-15">
-                                    <i class="fa fa-check" style="font-size: large"></i>
-                                    Submit
-                                </button>
+                                <div class="pull-right">
+                                    <a href="/purchase/purchase-request/manage/" class="btn btn-secondary-outline margin-top-15">Back</a>
+                                    <button type="submit"  class="btn red margin-top-15">
+                                        <i class="fa fa-check" style="font-size: large"></i>
+                                        Submit
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">
@@ -40,20 +44,18 @@
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="clientSearchbox" name="client_name" placeholder="Enter client name" >
-                                                            <div id="client-suggesstion-box"></div>
+                                                            <input type="text" class="form-control empty" id="clientSearchbox" value="{{$globalProjectSite->project->client->company}}" placeholder="Enter client name" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="projectSearchbox"  placeholder="Enter project site name" >
-                                                            <input type="hidden"  id="project_side_id" name="project_site_id">
-                                                            <div id="project-suggesstion-box"></div>
+                                                            <input type="text" class="form-control empty" id="projectSearchbox" value="{{$globalProjectSite->project->name}} - {{$globalProjectSite->name}}" placeholder="Enter project site name" readonly>
+                                                            <input type="hidden"  id="project_site_id" name="project_site_id" value="{{$globalProjectSite->id}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter username" >
+                                                            <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter username" name="user_name" >
                                                             <input type="hidden" name="user_id" id="user_id_">
                                                             <div id="user-suggesstion-box"></div>
                                                         </div>
@@ -84,50 +86,50 @@
                                         <div class="portlet-body-form">
                                             <div class="container">
                                                 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                                                    <div class="panel panel-default">
-                                                        <div class="panel-heading" role="tab" id="headingOne">
-                                                            <h4 class="panel-title" style="padding-bottom: 20px">
-                                                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                                    <i class="more-less glyphicon glyphicon-plus"></i>
-                                                                    <span style="float: left ;font-size: 20px">Added from indent</span>
-                                                                </a>
-                                                            </h4>
-                                                        </div>
-                                                        <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                                                            <div class="panel-body">
-                                                                <table class="table table-hover table-light">
-                                                                    <thead>
-                                                                    <tr>
-                                                                        <th> # </th>
-                                                                        <th> Material \ Asset Name </th>
-                                                                        <th> Quantity </th>
-                                                                        <th> Unit </th>
-                                                                        <th> Action </th>
-                                                                    </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                    @foreach($materialRequestList as $components)
-                                                                    <tr>
-                                                                        <td> <input type="checkbox"> <input type="hidden" name="material_request_component_ids[]" value="{{$components['material_request_component_id']}}"></td>
-                                                                        <td> <input type="text" value="{{$components['name']}}" readonly> </td>
-                                                                        <td> <input type="text" value="{{$components['quantity']}}" readonly> </td>
-                                                                        <td> <input type="text" value="{{$components['unit']}}" readonly> </td>
-                                                                        <td>
-                                                                            <div class="btn-group open">
-                                                                                <a class="btn btn-xs green dropdown-toggle deleteRowButton" href="javascript:void(0);" onclick="removeTableRow(this)">
-                                                                                    Remove
-                                                                                </a>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                        @endforeach
-                                                                    </tbody>
-                                                                </table>
-
+                                                    @if(count($materialRequestList) > 0)
+                                                        <div class="panel panel-default" id="indentPanel">
+                                                            <div class="panel-heading" role="tab" id="headingOne">
+                                                                <h4 class="panel-title" style="padding-bottom: 20px">
+                                                                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                                        <i class="more-less glyphicon glyphicon-plus"></i>
+                                                                        <span style="float: left ;font-size: 20px">Added from indent</span>
+                                                                    </a>
+                                                                </h4>
+                                                            </div>
+                                                            <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                                                <div class="panel-body">
+                                                                    <table class="table table-hover table-light">
+                                                                        <thead>
+                                                                        <tr>
+                                                                            <th> # </th>
+                                                                            <th> Material \ Asset Name </th>
+                                                                            <th> Quantity </th>
+                                                                            <th> Unit </th>
+                                                                            <th> Action </th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach($materialRequestList as $components)
+                                                                                <tr>
+                                                                                    <td> <input type="checkbox"> <input type="hidden" name="material_request_component_ids[]" value="{{$components['material_request_component_id']}}"></td>
+                                                                                    <td> <input type="text" value="{{$components['name']}}" readonly> </td>
+                                                                                    <td> <input type="text" value="{{$components['quantity']}}" readonly> </td>
+                                                                                    <td> <input type="text" value="{{$components['unit']}}" readonly> </td>
+                                                                                    <td>
+                                                                                        <div class="btn-group open">
+                                                                                            <a class="btn btn-xs green dropdown-toggle deleteRowButton" href="javascript:void(0);" onclick="removeTableRow(this)">
+                                                                                                Remove
+                                                                                            </a>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-
+                                                    @endif
                                                     <div class="panel panel-default">
                                                         <div class="panel-heading" role="tab" id="headingTwo">
                                                             <h4 class="panel-title" style="padding-bottom: 20px">
@@ -155,7 +157,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                     <div class="panel panel-default">
                                                         <div class="panel-heading" role="tab" id="headingThree">
                                                             <h4 class="panel-title" style="padding-bottom: 20px">
@@ -183,10 +184,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                 </div><!-- panel-group -->
-
-
                                             </div><!-- container -->
                                         </div>
                                     </div>
@@ -206,35 +204,22 @@
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <div class="form-group">
                                                 <input type="text" class="form-control empty typeahead" id="searchbox"  placeholder="Enter material name" >
-
                                             </div>
                                             <div class="form-group">
                                                 <input type="number" class="form-control empty" id="qty"  placeholder="Enter quantity">
                                             </div>
                                             <div class="form-group" id="unitDrpdn">
-
+                                                <select id="materialUnit" style="width: 80%;height: 20px;text-align: center">
+                                                    @foreach($units as $unit)
+                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
-                                            <div class="form-group">
-                                                <div class="row">
-                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                </div>
-                                                <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                        Browse</a>
-                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                        <i class="fa fa-share"></i> Upload Files </a>
-                                                </div>
-                                                <table class="table table-bordered table-hover" style="width: 200px">
-                                                    <thead>
-                                                    <tr role="row" class="heading">
-                                                        <th> Image </th>
-                                                        <th> Action </th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody id="show-product-images">
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                         <article>
+                                                <label for="files">Select multiple files:</label>
+                                                <input id="files" type="file" multiple="multiple" />
+                                                <output id="result" />
+                                            </article>
                                             <div class="btn red pull-right" id="createMaterial"> Create</div>
                                         </div>
                                     </div>
@@ -262,29 +247,12 @@
                                             <div class="form-group">
                                                 <input type="hidden" id="AssetUnitId" value="{{$nosUnitId}}">
                                                 <input type="text" class="form-control empty" id="AssetUnitsearchbox"  value="Nos" readonly >
-                                                <div id="asset_unit-suggesstion-box"></div>
                                             </div>
-                                            <div class="form-group">
-                                                <div class="row">
-                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                </div>
-                                                <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                        Browse</a>
-                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                        <i class="fa fa-share"></i> Upload Files </a>
-                                                </div>
-                                                <table class="table table-bordered table-hover" style="width: 200px">
-                                                    <thead>
-                                                    <tr role="row" class="heading">
-                                                        <th> Image </th>
-                                                        <th> Action </th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody id="show-product-images">
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            <article>
+                                                <label for="filesAsset">Select multiple files:</label>
+                                                <input id="filesAsset" type="file" multiple="multiple" />
+                                                <output id="resultAsset" />
+                                            </article>
                                             <div class="btn red pull-right" id="createAsset"> Create</div>
                                         </div>
                                     </div>
@@ -307,5 +275,60 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <link rel="stylesheet"  href="/assets/custom/purchase/material-request/material-request.css"/>
     <script src="/assets/custom/purchase/purchase-request/purchase-request-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/purchase/validations.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function(){
+            CreatePurchaseRequest.init();
+        });
+        function handleFileSelect() {
+            //Check File API support
+            if (window.File && window.FileList && window.FileReader) {
+                var files = event.target.files; //FileList object
+                var output = document.getElementById("result");
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    //Only pics
+                    if (!file.type.match('image')) continue;
+                    var picReader = new FileReader();
+                    picReader.addEventListener("load", function (event) {
+                        var picFile = event.target;
+                        var div = document.createElement("div");
+                        div.innerHTML = "<img class='thumbnail img' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
+                        output.insertBefore(div, null);
+                    });
+                    //Read the image
+                    picReader.readAsDataURL(file);
+                }
+            } else {
+                alert("Your browser does not support File API");
+            }
+        }
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+        function handleFileSelectForAsset() {
+            //Check File API support
+            if (window.File && window.FileList && window.FileReader) {
+                var files = event.target.files; //FileList object
+                var output = document.getElementById("resultAsset");
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    //Only pics
+                    if (!file.type.match('image')) continue;
+                    var picReader = new FileReader();
+                    picReader.addEventListener("load", function (event) {
+                        var picFiles = event.target;
+                        var div = document.createElement("div");
+                        div.innerHTML = "<img class='thumbnail assetImg' src='" + picFiles.result + "'" + "title='" + picFiles.name + "'/>";
+                        output.insertBefore(div, null);
+                    });
+                    //Read the image
+                    picReader.readAsDataURL(file);
+                }
+            } else {
+                alert("Your browser does not support File API");
+            }
+        }
+        document.getElementById('filesAsset').addEventListener('change', handleFileSelectForAsset, false);
+    </script>
 @endsection

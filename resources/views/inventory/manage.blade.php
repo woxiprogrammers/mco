@@ -3,6 +3,7 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -19,6 +20,11 @@
                                 <div class="page-title">
                                     <h1>Manage Inventory</h1>
                                 </div>
+                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 70%">
+                                    <a href="javascript:void(0);" style="color: white" id="createInventoryComponent">
+                                        <i class="fa fa-plus"></i> Inventory Component
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">
@@ -32,116 +38,100 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        <div class="table-actions-wrapper right">
-                                                            <span> </span>
-                                                            <select class="table-group-action-input form-control input-inline input-small input-sm">
-                                                                <option value="">Select...</option>
-                                                                <option value="Cancel">Approve</option>
-                                                                <option value="Cancel">Disapprove</option>
-                                                            </select>
-                                                            <button class="btn btn-sm green table-group-action-submit">
-                                                                <i class="fa fa-check"></i> Submit</button>
-                                                        </div>
-                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest">
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="inventoryListingTable">
                                                             <thead>
-                                                            <tr>
-                                                                <th> Material Name </th>
-                                                                <th> In</th>
-                                                                <th> Out </th>
-                                                                <th> Available  </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            <tr class="filter">
-                                                                <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_status" > </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
-                                                                <th>
-                                                                    <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                                    <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                                </th>
-                                                            </tr>
+                                                                <tr>
+                                                                    <th> Project </th>
+                                                                    <th> Material Name </th>
+                                                                    <th> In</th>
+                                                                    <th> Out </th>
+                                                                    <th> Available  </th>
+                                                                    <th> Action </th>
+                                                                </tr>
+                                                                <tr class="filter">
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_project" readonly> </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_name" readonly> </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                                    <th>
+                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                                    </th>
+                                                                </tr>
                                                             </thead>
                                                             <tbody>
-                                                            <tr>
-                                                                <td> 5 </td>
-                                                                <td> Otto </td>
-                                                                <td> makr124 </td>
-                                                                <td><span class="label label-sm label-danger" > Approved</span> </td>
-                                                                <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-inventory/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                            Manage
-                                                                        </a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td> Jacob </td>
-                                                                <td> Nilson </td>
-                                                                <td> jac123 </td>
-                                                                <td><span class="label label-sm label-danger"> Draft</span> </td>
-                                                                <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-inventory/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                            Manage
-                                                                        </a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td> Larry </td>
-                                                                <td> Cooper </td>
-                                                                <td> lar </td>
-                                                                <td><span class="label label-sm label-danger"> Disabled</span> </td>
-                                                                <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/inventory/manage-inventory/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                            Manage
-                                                                        </a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td> Sandy </td>
-                                                                <td> Lim </td>
-                                                                <td> sanlim </td>
-                                                                <td><span class="label label-sm label-danger"> Disabled</span> </td>
-                                                                <td>
-                                                                    <div id="sample_editable_1_new" class="btn btn-xs green"><a href="/purchase/material-request/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                            Manage
-                                                                        </a>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
+
                                                             </tbody>
                                                         </table>
                                                     </div>
-                                                    <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <form class="modal-content">
-                                                                <div class="modal-header" style="background-color:#00844d">
-                                                                    <center><h4 class="modal-title" id="exampleModalLongTitle">ADD REMARK</h4></center>
-                                                                    <button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <form role="form" class="form-horizontal" method="post">
-                                                                        <div class="form-body">
-                                                                            <div class="form-group row">
-                                                                                <div class="col-md-3" style="text-align: right">
-                                                                                    <label for="company" class="control-label">Remark</label>
-                                                                                </div>
-                                                                                <div class="col-md-6">
-                                                                                    <input type="text" class="form-control" id="remark" name="remark">
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                </div>
-                                                                <div class="modal-footer" style="background-color:#00844d">
-                                                                    <button type="submit" class="btn blue">Approve</button>
-                                                                    <button type="submit" class="btn blue">disapprove</button>
-                                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="inventoryComponentModal" role="dialog">
+                                    <div class="modal-dialog">
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header" style="padding-bottom:10px">
+                                                <div class="row">
+                                                    <div class="col-md-4"></div>
+                                                    <div class="col-md-4"> Inventory Component</div>
+                                                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-body" style="padding:40px 50px;">
+                                                <form role="form" action="/inventory/component/create" method="POST" id="addTransferForm">
+                                                    {!! csrf_field() !!}
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+                                                            <label for="name" class="control-label">Project Site : </label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <select class="form-control" id="project_site" name="project_site_id">
+                                                                <option value="">Select Project Site</option>
+                                                                @foreach($projectSites as $projectSite)
+                                                                    <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
-                                                    </form>
-                                                </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+                                                            <label for="name" class="control-label">Inventory Type: </label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <select class="form-control" id="inventory_type" name="inventory_type">
+                                                                <option value="">Select Inventory Type</option>
+                                                                <option value="material">Material</option>
+                                                                <option value="asset">Asset</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+                                                            <label for="name" class="control-label">Name : </label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <input type="text" class="form-control" id="name" name="name">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" class="form-control" id="reference_id" name="reference_id">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+                                                            <label for="name" class="control-label">Opening Stock : </label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <input type="text" class="form-control" id="opening_stock" name="opening_stock">
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn red pull-right" id="createComponentButton" hidden> Create</button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -162,10 +152,70 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/purchase/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/custom/inventory/manage-datatable.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+    <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#purchaseRequest').DataTable();
+            InventoryListing.init();
+            $("#createInventoryComponent").click(function(){
+                $("#inventoryComponentModal").modal();
+            });
+            $("#inventory_type,#project_site").on('change',function(){
+                var componentType = $("#inventory_type").val();
+                var project_site_id = $('#project_site').val();
+                if(typeof componentType != 'undefined' && componentType != '' && typeof project_site_id != 'undefined' && project_site_id != ''){
+                    $('#name').removeClass('typeahead');
+                    $('#name').typeahead('destroy');
+                    $('#name').addClass('typeahead');
+                    var citiList = new Bloodhound({
+                        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                        queryTokenizer: Bloodhound.tokenizers.whitespace,
+                        remote: {
+                            url: "/inventory/transfer/auto-suggest/"+project_site_id+"/"+componentType+"/%QUERY",
+                            filter: function(x) {
+                                if($(window).width()<420){
+                                    $("#header").addClass("fixed");
+                                }
+                                return $.map(x, function (data) {
+                                    return {
+                                        name:data.name,
+                                        reference_id:data.reference_id
+                                    };
+                                });
+                            },
+                            wildcard: "%QUERY"
+                        }
+                    });
+                    citiList.initialize();
+                    $('.typeahead').typeahead(null, {
+                        displayKey: 'name',
+                        engine: Handlebars,
+                        source: citiList.ttAdapter(),
+                        limit: 30,
+                        templates: {
+                            empty: [
+                                '<div class="empty-suggest">',
+                                'Unable to find any Result that match the current query',
+                                '</div>'
+                            ].join('\n'),
+                            suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
+                        },
+
+                    }).on('typeahead:selected', function (obj, datum) {
+                        var POData = $.parseJSON(JSON.stringify(datum));
+                        POData.name = POData.name.replace(/\&/g,'%26');
+                        $("#reference_id").val(POData.reference_id);
+                        $("#name").val(POData.name);
+                    })
+                        .on('typeahead:open', function (obj, datum) {
+
+                        });
+                }else{
+                    $('#name').removeClass('typeahead');
+                    $('#name').typeahead('destroy');
+                }
+            });
         });
     </script>
 @endsection

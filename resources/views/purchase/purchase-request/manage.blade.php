@@ -19,12 +19,14 @@
                                 <div class="page-title">
                                     <h1>Manage Purchase Request</h1>
                                 </div>
-                                <div class="btn-group pull-right margin-top-15">
-                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-request/create" style="color: white"> Purchase Request
-                                            <i class="fa fa-plus"></i>
-                                        </a>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-request') || $user->customHasPermission('create-purchase-request'))
+                                    <div class="btn-group pull-right margin-top-15">
+                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-request/create" style="color: white"> Purchase Request
+                                                <i class="fa fa-plus"></i>
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
@@ -36,33 +38,89 @@
                                         <div class="portlet light ">
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
-                                                <div class="portlet-body">
-                                                    <div class="table-container">
-                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequestTable">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th style="width: 10%;"> PR Id </th>
-                                                                    <th> Project Name - Site Name</th>
-                                                                    <th> RM Id </th>
-                                                                    <th> status  </th>
-                                                                    <th> Action </th>
-                                                                </tr>
-                                                                <tr class="filter">
-                                                                    <th><input type="text" class="form-control form-filter" name="search_name"></th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_status" > </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" > </th>
-                                                                    <th>
-                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                                    </th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-
-                                                            </tbody>
-                                                        </table>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <label>Select Year :</label>
+                                                        <select class="form-control" id="year" name="year">
+                                                            <option value="0">ALL</option>
+                                                            <option value="2017">2017</option>
+                                                            <option value="2018">2018</option>
+                                                            <option value="2019">2019</option>
+                                                            <option value="2020">2020</option>
+                                                            <option value="2021">2021</option>
+                                                            <option value="2022">2022</option>
+                                                            <option value="2023">2023</option>
+                                                        </select>
                                                     </div>
+                                                    <div class="col-md-2">
+                                                        <label>Select Month :</label>
+                                                        <select class="form-control" id="month" name="month">
+                                                            <option value="0">ALL</option>
+                                                            <option value="01">Jan</option>
+                                                            <option value="02">Feb</option>
+                                                            <option value="03">Mar</option>
+                                                            <option value="04">Apr</option>
+                                                            <option value="05">May</option>
+                                                            <option value="06">Jun</option>
+                                                            <option value="07">Jul</option>
+                                                            <option value="08">Aug</option>
+                                                            <option value="09">Sep</option>
+                                                            <option value="10">Oct</option>
+                                                            <option value="11">Nov</option>
+                                                            <option value="12">Dec</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <label>PR Id :</label>
+                                                        <input  class="form-control" type="number" id="pr_count" name="pr_count"/>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <label>&nbsp;</label>
+                                                        <div class="btn-group">
+                                                            <div id="search-withfilter" class="btn blue" >
+                                                                <a href="#" style="color: white"> Submit
+                                                                    <i class="fa fa-plus"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr/>
+                                                <div class="table-container">
+                                                    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequestTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:20%"> PR Id </th>
+                                                                <th> Client Name</th>
+                                                                <th> Project Name - Site Name </th>
+                                                                <th> Created At</th>
+                                                                <th> Status  </th>
+                                                                <th> Action </th>
+                                                            </tr>
+                                                            <tr class="filter">
+                                                                <th><input type="text" class="form-control form-filter" name="pr_name" id="pr_name" readonly></th>
+                                                                <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th>
+                                                                    <select class="form-control" id="status_id" name="status_id">
+                                                                            <option value="0">ALL</option>
+                                                                            @foreach($purchaseStatus as $status)
+                                                                                <option value="{{$status['id']}}">{{$status['name']}}</option>
+                                                                            @endforeach
+                                                                    </select>
+                                                                    <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                                </th>
+                                                                <th>
+                                                                    <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                    <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                             <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
@@ -130,10 +188,98 @@
                 $(this).closest('form').attr('action',action);
                 $(this).closest('form').submit();
             });
+
+            $("#client_id").on('change', function(){
+                getProjects($('#client_id').val());
+            });
+            $("#project_id").on('change', function(){
+                getProjectSites($('#project_id').val());
+            });
+
+            $("#status_id").on('change',function(){
+                var site_id = $('#globalProjectSite').val();
+                var year = $('#year').val();
+                var month = $('#month').val();
+                var status_id = $('#status_id').val();
+                var pr_name = $('#pr_name').val();
+                var pr_count = $('#pr_count').val();
+
+                var postData =
+                        'site_id=>'+site_id+','+
+                        'year=>'+year+','+
+                        'month=>'+month+','+
+                        'pr_count=>'+pr_count;
+
+                $("input[name='postdata']").val(postData);
+                $("input[name='pr_name']").val(pr_name);
+                $("input[name='status']").val(status_id);
+                $(".filter-submit").trigger('click');
+            });
+
+            $("#search-withfilter").on('click',function(){
+                var client_id = $('#client_id').val();
+                var project_id = $('#project_id').val();
+                var site_id = $('#site_id').val();
+                var year = $('#year').val();
+                var month = $('#month').val();
+                var status_id = $('#status_id').val();
+                var pr_name = $('#pr_name').val();
+                var pr_count = $('#pr_count').val();
+
+                var postData =
+                    'client_id=>'+client_id+','+
+                        'project_id=>'+project_id+','+
+                        'site_id=>'+site_id+','+
+                        'year=>'+year+','+
+                        'month=>'+month+','+
+                        'pr_count=>'+pr_count;
+
+                $("input[name='postdata']").val(postData);
+                $("input[name='pr_name']").val(pr_name);
+                $("input[name='status']").val(status_id);
+                $(".filter-submit").trigger('click');
+            });
         });
+
         function openApproveModal(purchaseRequestId){
             $("#remarkModal #purchaseRequestId").val(purchaseRequestId);
             $("#remarkModal").modal('show');
         }
+
+        function getProjects(client_id){
+            $.ajax({
+                url: '/purchase/projects/'+client_id,
+                type: 'GET',
+                async : false,
+                success: function(data,textStatus,xhr){
+                    if(xhr.status == 200){
+                        $('#project_id').html(data);
+                        $('#project_id').prop('disabled',false);
+                        getProjectSites($('#project_id').val());
+                    }
+                },
+                error: function(errorStatus,xhr){
+
+                }
+            });
+        }
+
+        function getProjectSites(project_id){
+            $.ajax({
+                url: '/purchase/project-sites/'+project_id,
+                type: 'GET',
+                async : false,
+                success: function(data,textStatus,xhr){
+                    if(xhr.status == 200){
+                        $('#site_id').html(data);
+                        $('#site_id').prop('disabled',false);
+                    }
+                },
+                error: function(errorStatus,xhr){
+
+                }
+            });
+        }
+
     </script>
 @endsection

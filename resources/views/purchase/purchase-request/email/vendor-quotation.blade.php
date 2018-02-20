@@ -1,5 +1,6 @@
 <html>
 <body>
- Please Find PDF in Attachment.
+ Dear Sir <br>
+ <span style="margin-left: 5%">{{$mailMessage}}</span>
 </body>
 </html>

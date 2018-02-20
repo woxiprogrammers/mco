@@ -7,6 +7,7 @@ use App\ClientUser;
 use App\Helper\ACLHelper;
 use App\Http\Requests\UserRequest;
 use App\Module;
+use App\Permission;
 use App\ProjectSite;
 use App\Role;
 use App\RoleHasPermission;
@@ -144,7 +145,13 @@ class UserController extends Controller
                 $showSiteTable = false;
                 $projectSites = array();
             }
-            return view('user.edit')->with(compact('userEdit','roles','userWebPermissions','userMobilePermissions','webModuleResponse','mobileModuleResponse','showAclTable','permissionTypes','projectSites','showSiteTable'));
+            $purchaseOrderCreatePermission = Permission::join('user_has_permissions','permissions.id','=','user_has_permissions.permission_id')
+                ->where('permissions.name','create-peticash-management')->where('permissions.is_mobile',true)
+                ->where('user_has_permissions.user_id',$userEdit->id)->count();
+            $peticashManagementPermission = Permission::join('user_has_permissions','permissions.id','=','user_has_permissions.permission_id')
+                ->where('permissions.name','create-peticash-management')->where('permissions.is_mobile',true)
+                ->where('user_has_permissions.user_id',$userEdit->id)->count();
+            return view('user.edit')->with(compact('userEdit','roles','userWebPermissions','userMobilePermissions','webModuleResponse','mobileModuleResponse','showAclTable','permissionTypes','projectSites','showSiteTable','purchaseOrderCreatePermission','peticashManagementPermission'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get user edit view",
@@ -213,8 +220,6 @@ class UserController extends Controller
             abort(500);
         }
     }
-
-
 
     public function getManageView(Request $request){
         try{
@@ -476,5 +481,35 @@ class UserController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getPermission(Request $request){
+        try{
+            $peticashManagementPermission = Permission::join('role_has_permissions','permissions.id','=','role_has_permissions.permission_id')
+                ->where('permissions.name','create-peticash-management')->where('permissions.is_mobile',true)
+                ->where('role_has_permissions.role_id',$request['role_id'])->count();
+            if($peticashManagementPermission > 0){
+                $data['peticash_management_permission'] = true;
+            }else{
+                $data['peticash_management_permission'] = false;
+            }
+            $purchaseCreatePermission = Permission::join('role_has_permissions','permissions.id','=','role_has_permissions.permission_id')
+                ->where('permissions.name','create-purchase-order')
+                ->where('role_has_permissions.role_id',$request['role_id'])->count();
+            if($purchaseCreatePermission > 0){
+                $data['purchase_create_permission'] = true;
+            }else{
+                $data['purchase_create_permission'] = false;
+            }
+            return view('/partials/user/user-create')->with(compact('data'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get Permissions",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+        }
+        Log::critical(json_encode($data));
+        abort(500);
     }
 }

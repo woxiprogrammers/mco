@@ -8,7 +8,7 @@ class MaterialRequestComponents extends Model
 {
     protected $table = 'material_request_components';
 
-    protected $fillable = ['material_request_id','name','quantity','unit_id','component_type_id','component_status_id'];
+    protected $fillable = ['material_request_id','name','quantity','unit_id','component_type_id','component_status_id','serial_no','format_id'];
 
     public function unit(){
         return $this->belongsTo('App\Unit','unit_id');
@@ -28,5 +28,9 @@ class MaterialRequestComponents extends Model
 
     public function purchaseRequestComponent(){
         return $this->hasOne('App\PurchaseRequestComponent','material_request_component_id');
+    }
+
+    public function materialRequestComponentVersion(){
+        return $this->hasMany('App\MaterialRequestComponentVersion','material_request_component_id');
     }
 }

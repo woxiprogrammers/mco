@@ -1,6 +1,10 @@
 var PurchaseOrderListing = function () {
     var handleOrders = function () {
         var grid = new Datatable();
+        var projectSiteId = $("#globalProjectSite").val();
+        if(typeof projectSiteId == 'undefined' || projectSiteId == ''){
+            projectSiteId = 0;
+        }
         grid.init({
             src: $("#purchaseOrder"),
             onSuccess: function (grid) {
@@ -22,7 +26,7 @@ var PurchaseOrderListing = function () {
                 ],
                 "pageLength": 10, // default record count per page
                 "ajax": {
-                    "url": "/purchase/purchase-order/listing?_token="+$("input[name='_token']").val(), // ajax source
+                    "url": "/purchase/purchase-order/listing?site_id="+projectSiteId+"&_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]

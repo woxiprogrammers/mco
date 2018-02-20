@@ -195,3 +195,22 @@ var  EditUser = function () {
         }
     };
 }();
+
+$('#role_id').on('change',function () {
+    $.ajax({
+        url: '/user/get-permission',
+        type: 'POST',
+        async: false,
+        data :{
+            'role_id' : $('#role_id').val()
+        },
+        success: function(data,textStatus,xhr){
+            if(xhr.status == 200){
+                $('#amount_limit').html(data);
+            }
+        },
+        error: function(data, textStatus, xhr){
+
+        }
+    });
+});

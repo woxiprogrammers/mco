@@ -34,7 +34,8 @@ trait ProductTrait{
 
     public function getCreateView(Request $request) {
         try{
-            $categories = Category::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $miscellaneousCategoryIds = Category::where('is_miscellaneous',true)->pluck('id');
+            $categories = Category::where('is_active', true)->whereNotIn('id',$miscellaneousCategoryIds)->select('id','name')->orderBy('name','asc')->get()->toArray();
             $profitMargins = ProfitMargin::where('is_active', true)->select('id','name','base_percentage')->orderBy('id','asc')->get()->toArray();
             $units = Unit::where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
             return view('admin.product.create')->with(compact('categories','profitMargins','units'));
@@ -510,9 +511,11 @@ trait ProductTrait{
             $materialVersionIds = implode(',',ProductMaterialRelation::where('product_version_id','=',$recentProductVersion['id'])->pluck('material_version_id')->toArray());
             $data['product'] = $product;
             $profitMarginData = array();
+
             foreach ($profitMargins as $pms) {
                 array_push($profitMarginData, $pms['name']);
             }
+            //dd($profitMargins);
             $data['profitMargins'] = $profitMargins;
             $data['units'] = $units;
             $data['materials'] = $materials;
@@ -521,24 +524,24 @@ trait ProductTrait{
             $data['productMaterialVersions'] = $productMaterialVersions;
             $subtotal = 0;
             foreach ($productMaterialVersions as $mat) {
-                $subtotal = $subtotal + MaterialProductHelper::customRound(($mat['quantity']*$mat['rate_per_unit']));
+                $subtotal = $subtotal + ($mat['quantity']*$mat['rate_per_unit']);
             }
             $data['subtotal'] = $subtotal;
 
             $finalAmount = $subtotal;
             $profitMarginRestruct = array();
             $pmCount = 0;
-            foreach ($productProfitMargins as $pm) {
+            foreach ($productProfitMargins as $key => $pm) {
                 $pmArray = array(
-                    'pm_name' => $profitMarginData[$pmCount],
+                    'pm_name' => ProfitMargin::findOrfail($key)->name,
                     'percentage' => $pm,
                     'total' => MaterialProductHelper::customRound(($subtotal*$pm)/100)
                 );
                 array_push($profitMarginRestruct, $pmArray);
-                $finalAmount = MaterialProductHelper::customRound($finalAmount + MaterialProductHelper::customRound(($subtotal*$pm)/100));
+                $finalAmount = $finalAmount + ($subtotal*$pm)/100;
                 $pmCount++;
             }
-            $data['finalAmount'] = $finalAmount;
+            $data['finalAmount'] = MaterialProductHelper::customRound($finalAmount);
             $data['productProfitMargins'] = $profitMarginRestruct;
             $data['materialVersionIds'] = $materialVersionIds;
             $pdf = App::make('dompdf.wrapper');

@@ -52,10 +52,13 @@
                                                 <li>
                                                     <a href="#billTransactionTab" data-toggle="tab"> Transactions </a>
                                                 </li>
+                                                <li>
+                                                    <a href="#reconcileTab" data-toggle="tab"> Reconcile </a>
+                                                </li>
                                             </ul>
                                         @endif
                                         <div class="tab-content">
-                                        <div class="tab-pane fade in active" id="billViewTab">
+                                            <div class="tab-pane fade in active" id="billViewTab">
                                             @if($bills != NULL)
                                             <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px;">
                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill" style="margin-left: 1%">
@@ -296,8 +299,8 @@
                                                 </tr>
                                             </table>
                                         </div>
-                                        <div class="tab-pane fade in" id="billApproveTab">
-                                            <form id="approve" action="/bill/approve" method="post">
+                                            <div class="tab-pane fade in" id="billApproveTab">
+                                                <form id="approve" action="/bill/approve" method="post">
                                                 {!! csrf_field() !!}
                                                 <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
                                                 <div class="col-md-offset-2">
@@ -342,15 +345,16 @@
                                                     </div>
                                                 </div>
                                             </form>
-                                        </div>
-                                        <div class="tab-pane fade in" id="billTransactionTab">
-                                            <div class="tab-content">
+                                            </div>
+                                            <div class="tab-pane fade in" id="billTransactionTab">
+                                                <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="billTransactionListingTab">
                                                     <div class="table-toolbar">
                                                         <div class="row" style="text-align: right">
                                                             <div class="col-md-12">
                                                                 <div class="btn-group">
-                                                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="javascript:void(0);" style="color: white" id="billTransactionCreateButton"> Transaction
+                                                                    <div id="sample_editable_1_new" class="btn yellow" >
+                                                                        <a href="#paymentModal" style="color: white" id="billTransactionCreateButton" data-toggle="modal"> Transaction
                                                                             <i class="fa fa-plus"></i>
                                                                         </a>
                                                                     </div>
@@ -358,100 +362,111 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="transactionListingTable">
-                                                        <thead>
-                                                        <tr>
-                                                            <th style="width: 5%"> Sr. No. </th>
-                                                            <th> Subtotal </th>
-                                                            @foreach($taxes as $tax)
-                                                                <th> {{$tax['tax_name']}} </th>
-                                                            @endforeach
-                                                            @foreach($specialTaxes as $specialTax)
-                                                                <th> {{$specialTax['tax_name']}} </th>
-                                                            @endforeach
-                                                            <th> Total
-                                                                <input type="hidden" class="filter-submit">
-                                                            </th>
-                                                            <th>
-                                                                Action
-                                                            </th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
+                                                    <div class="table-scrollable">
+                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="transactionListingTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th style="width: 5%"> Sr. No. </th>
+                                                                <th> Date </th>
+                                                                <th> Paid From </th>
+                                                                <th> Amount </th>
+                                                                <th> Debit </th>
+                                                                <th> Hold </th>
+                                                                <th> Retention </th>
+                                                                <th> TDS </th>
+                                                                <th> Other Recovery Value </th>
+                                                                <th> Total </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
 
-                                                        </tbody>
-                                                    </table>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
-                                                <div class="tab-pane fade in" id="billTransactionCreateTab">
-                                                    <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/bill/transaction/create">
-                                                        {!! csrf_field() !!}
-                                                        <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
-                                                        <input type="hidden" id="remainingTotal" name="remainingTotal" value="{{$remainingAmount}}">
-                                                        <div class="form-body">
-                                                            <div class="form-group row">
-                                                                <div class="col-md-3" style="text-align: right">
-                                                                    <label for="name" class="control-label"> Total </label>
-                                                                    <span>*</span>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <input type="number" class="form-control" id="transactionTotal" name="total" onchange="calculateTransactionDetails()">
-                                                                </div>
+                                            </div>
+                                            </div>
+                                            <div class="tab-pane fade in" id="reconcileTab">
+                                                <ul class="nav nav-tabs nav-tabs-lg">
+                                                    <li class="active">
+                                                        <a href="#holdReconcileTab" data-toggle="tab"> Hold </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#retentionReconcileTab" data-toggle="tab"> Retention </a>
+                                                    </li>
+                                                </ul>
+                                                <div class="tab-content">
+                                                    <div class="tab-pane fade in active" id="holdReconcileTab">
+                                                        <div class="form-group row">
+                                                            <div class="col-md-3">
+                                                                <label class="pull-right control-label">
+                                                                    Reconcile Hold Amount :
+                                                                </label>
                                                             </div>
-                                                            <div class="form-group">
-                                                                <div class="col-md-3" style="text-align: right">
-                                                                    <label for="name" class="control-label"> Subtotal </label>
-                                                                    <span>*</span>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <input type="text" class="form-control" id="transactionSubTotal" name="subtotal" readonly>
-                                                                </div>
+                                                            <div class="col-md-3">
+                                                                <input type="text" class="form-control" readonly value="{{$remainingHoldAmount}}">
                                                             </div>
-                                                            @foreach($taxes as $tax)
-                                                                <input type="hidden" name="tax_info[{{$tax['tax_id']}}][percent]" value="{{$tax['percentage']}}">
-                                                                <input type="hidden" name="tax_info[{{$tax['tax_id']}}][applied_on]" value="{{$tax['applied_on']}}">
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3" style="text-align: right">
-                                                                        <label for="name" class="control-label"> {{$tax['tax_name']}} </label>
-                                                                        <span>*</span>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input type="text" class="form-control" id="TaxAmount_{{$tax['tax_id']}}" name="tax_amount[{{$tax['id']}}]" readonly>
-                                                                    </div>
+                                                            @if($remainingHoldAmount < 0)
+                                                                <div class="col-md-6">
+                                                                    <a class="btn yellow pull-right" href="javascript:void(0);" onclick="openReconcilePaymentModal('hold')">
+                                                                        <i class="fa fa-plus"></i>Reconcile Hold
+                                                                    </a>
                                                                 </div>
-                                                            @endforeach
-                                                            @foreach($specialTaxes as $specialTax)
-                                                                <input type="hidden" name="tax_info[{{$specialTax['tax_id']}}][percent]" value="{{$specialTax['percentage']}}">
-                                                                <input type="hidden" name="tax_info[{{$specialTax['tax_id']}}][applied_on]" value="{{json_encode($specialTax['applied_on'])}}">
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3" style="text-align: right">
-                                                                        <label for="name" class="control-label"> {{$specialTax['tax_name']}} </label>
-                                                                        <span>*</span>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input type="text" class="form-control" id="TaxAmount_{{$specialTax['tax_id']}}" name="tax_amount[{{$specialTax['tax_id']}}]" readonly>
-                                                                    </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="table-scrollable">
+                                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="holdReconcileTable">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th style="width: 25%"> Date </th>
+                                                                    <th style="width: 25%"> Amount </th>
+                                                                    <th style="width: 25%"> Payment Method </th>
+                                                                    <th style="width: 25%"> Reference Number </th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tab-pane fade in" id="retentionReconcileTab">
+                                                        <div class="form-group row">
+                                                            <div class="col-md-3">
+                                                                <label class="pull-right control-label">
+                                                                    Reconcile Retention Amount :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <input type="text" class="form-control" readonly value="{{$remainingRetentionAmount}}">
+                                                            </div>
+                                                            @if($remainingRetentionAmount < 0)
+                                                                <div class="col-md-6">
+                                                                    <a class="btn yellow pull-right" href="javascript:void(0);" onclick="openReconcilePaymentModal('retention')">
+                                                                        <i class="fa fa-plus"></i>Reconcile Retention
+                                                                    </a>
                                                                 </div>
-                                                            @endforeach
-                                                            <div class="form-group">
-                                                                <div class="col-md-3" style="text-align: right">
-                                                                    <label for="name" class="control-label"> Remark </label>
-                                                                    <span>*</span>
-                                                                </div>
-                                                                <div class="col-md-8">
-                                                                    <textarea class="form-control" name="remark" id="transactionRemark"></textarea>
-                                                                </div>
+                                                            @endif
+                                                            <div class="table-scrollable">
+                                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="retentionReconcileTable">
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th style="width: 25%"> Date </th>
+                                                                        <th style="width: 25%"> Amount </th>
+                                                                        <th style="width: 25%"> Payment Method </th>
+                                                                        <th style="width: 25%"> Reference Number </th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+
+                                                                    </tbody>
+                                                                </table>
                                                             </div>
                                                         </div>
-                                                        <div class="form-actions noborder row">
-                                                            <div class="col-md-offset-3">
-                                                                <a class="btn blue" id="transactionSubmit">Submit</a>
-                                                            </div>
-                                                        </div>
-                                                    </form>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                      </div>
                                     </div>
                                 </div>
                             </div>
@@ -489,29 +504,179 @@
                 </div>
             </div>
         </div>
-        <div id="transactionModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-
-                <!-- Modal content-->
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Modal Header</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>Some text in the modal.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
+    </div>
+</div>
+<div class="modal fade" id="paymentModal" role="dialog">
+    <div class="modal-dialog" style="width: 60%">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding-bottom:10px">
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4"> <h3><b>Add Payment</b></h3></div>
+                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                 </div>
-
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+                <form id="paymentCreateForm" method="post" action="/bill/transaction/create">
+                    {!! csrf_field() !!}
+                    <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                    <div class="form-group row" id="paymentSelect">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                Paid By:
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            <select class="form-control" name="paid_from_advanced">
+                                <option value="true"> Advance Payments </option>
+                                <option value="false"> Cheque </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                Amount:
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            <input type="number" class="form-control calculatable-field" name="amount" placeholder="Enter Amount">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                Debit:
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            <input type="number" class="form-control calculatable-field" name="debit" placeholder="Enter Debit Amount">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                Hold:
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            <input type="number" class="form-control calculatable-field" name="hold" placeholder="Enter Hold Amount">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                Retention:
+                            </label>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <input type="number" class="form-control calculatable-field" name="retention_percent" placeholder="Enter Retention Percent">
+                                <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="number" class="form-control calculatable-field" name="retention_amount" placeholder="Retention Amount" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                TDS:
+                            </label>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <input type="number" class="form-control calculatable-field" name="tds_percent" placeholder="Enter TDS Percent">
+                                <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="number" class="form-control calculatable-field" name="tds_amount" placeholder="TDS Amount" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                Other Recovery Value:
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            <input type="number" name="other_recovery_value" class="form-control calculatable-field">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                Total:
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            <input type="number" name="total" class="form-control calculatable-field" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="pull-right control-label">
+                                Remark:
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            <textarea name="remark" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-top: 5%">
+                        <div class="col-md-6">
+                            <button type="submit" class="btn red pull-right">
+                                <i class="fa fa-check" style="font-size: large"></i>
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
-
+<div class="modal fade " id="reconcilePaymentModal"  role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <form id="add_payment_form" action="/bill/reconcile/add-transaction" method="post">
+                {!! csrf_field() !!}
+                <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                <input name="transaction_slug" id="reconcileTransactionSlug" type="hidden">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4" style="font-size: 18px"> Payment</div>
+                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding:40px 50px;">
+                    <div class="form-group row">
+                        <select class="form-control" name="payment_type_id">
+                            @foreach($paymentTypes as $type)
+                                <option value="{{$type['id']}}">{{$type['name']}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group row">
+                        <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount">
+                    </div>
+                    <div class="form-group row">
+                        <input type="text" class="form-control"  name="reference_number" placeholder="Enter Reference Number" >
+                    </div>
+                    <button class="btn btn-set red pull-right" type="submit">
+                        <i class="fa fa-check" style="font-size: large"></i>
+                        Add &nbsp; &nbsp; &nbsp;
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
@@ -528,6 +693,8 @@
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
 <script src="/assets/custom/bill/bill-view.js"></script>
 <script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
+<script src="/assets/custom/bill/hold-reconcile-datatable.js" type="text/javascript"></script>
+<script src="/assets/custom/bill/retention-reconcile-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
 
@@ -537,6 +704,11 @@
         });
         $('select[name="change_bill"]').find('option[value={{$selectedBillId}}]').attr("selected",true);
     });
+
+    function openReconcilePaymentModal(transactionSlug){
+        $("#reconcileTransactionSlug").val(transactionSlug);
+        $("#reconcilePaymentModal").modal('show');
+    }
 
 </script>
 @endsection
