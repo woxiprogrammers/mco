@@ -717,7 +717,7 @@ class PeticashController extends Controller
         try{
             $status = 200;
             foreach($request->txn_ids as $txnId){
-                $salaryTxn = PeticashSalaryTransaction::findOrFail($txnId);
+                $salaryTxn = PeticashRequestedSalaryTransaction::findOrFail($txnId);
                 $newStatus = PeticashStatus::where('slug',$request->status)->pluck('id')->first();
                 $remark = $request->remark;
                 $salaryTxn->update(['peticash_status_id' => $newStatus,'admin_remark' => $remark]);

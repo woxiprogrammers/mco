@@ -519,7 +519,6 @@
                             success: function(data, textStatus, xhr){
                                 $("#remarkApproveModal").modal('hide');
                                 $("#componentId").val(0);
-                                alert(data);
                                 $(".filter-submit").trigger('click');
                             },
                             error: function(data){
@@ -581,7 +580,6 @@
                             success: function(data, textStatus, xhr){
                                 $("#remarkApproveModal").modal('hide');
                                 $("#componentId").val(0);
-                                alert(data);
                                 $(".filter-submit").trigger('click');
                             },
                             error: function(data){
@@ -655,7 +653,7 @@
     });
 
     function openApproveModal(componentId){
-        $("#componentId").val(componentId);
+        $("#remarkApproveModal #componentId").val(componentId);
         $("#remarkApproveModal").modal('show');
     }
 
