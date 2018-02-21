@@ -76,13 +76,13 @@ class PurchaseOrderRequestController extends Controller
                 'purchase_request_id' => $request->purchase_request_id,
                 'user_id' => $user->id
             ];
-            $projectSiteId = PurchaseRequest::where($request->purchase_request_id)->pluck('project_site_id')->first();
+            $projectSiteId = PurchaseRequest::where('id',$request->purchase_request_id)->pluck('project_site_id')->first();
             $purchaseOrderRequest = PurchaseOrderRequest::create($purchaseOrderRequestData);
             $purchaseOrderRequestApproveAclTokens = User::join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
-                ->join('user_has_permissions','user_has_permissions.user_id','=','user_id')
+                ->join('user_has_permissions','user_has_permissions.user_id','=','user_project_site_relation.user_id')
                 ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
                 ->where('user_project_site_relation.project_site_id', $projectSiteId)
-                ->where('permissions','approve-purchase-order-request')
+                ->where('permissions.name','approve-purchase-order-request')
                 ->select('users.web_fcm_token as web_fcm_token','users.mobile_fcm_token')
                 ->get()->toArray();
             foreach($request['data'] as $purchaseRequestComponentVendorRelationId => $componentData){
