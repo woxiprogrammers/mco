@@ -15,6 +15,7 @@ use App\QuotationFloor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class ChecklistSiteAssignmentController extends Controller
 {
@@ -38,12 +39,18 @@ class ChecklistSiteAssignmentController extends Controller
         }
     }
 
-    public function getCreateView(Request $request)
-    {
+    public function getCreateView(Request $request){
         try {
-            $clients = Client::where('is_active', true)->select('id','company')->get();
+            $projectSiteId = Session::get('global_project_site');
+            $quotationId = Quotation::where('project_site_id', $projectSiteId)->pluck('id')->first();
+            $quotationFloors = QuotationFloor::where('quotation_id',$quotationId)->select('id','name')->get();
+            $quotationFloorsOptions = '<option value="">-- Select Quotation Floor --</option>';
+            foreach($quotationFloors as $quotationFloor){
+                $quotationFloorsOptions .= '<option value="'.$quotationFloor['id'].'">'.$quotationFloor['name'].'</option>';
+            }
+            //$clients = Client::where('is_active', true)->select('id','company')->get();
             $mainCategories = ChecklistCategory::whereNull('category_id')->where('is_active', true)->select('id','name')->get();
-            return view('checklist.site-assignment.create')->with(compact('mainCategories','clients'));
+            return view('checklist.site-assignment.create')->with(compact('quotationFloors','mainCategories','clients'));
         } catch (\Exception $e) {
             $data = [
                 'action' => "Get check list create view",
@@ -97,7 +104,7 @@ class ChecklistSiteAssignmentController extends Controller
         return response()->json($projectOptions,$status);
     }
 
-    public function getQuotationFloors(Request $request){
+    /*public function getQuotationFloors(Request $request){
         try{
             $quotationId = Quotation::where('project_site_id', $request->project_site_id)->pluck('id')->first();
             $quotationFloors = QuotationFloor::where('quotation_id',$quotationId)->select('id','name')->get();
@@ -117,7 +124,7 @@ class ChecklistSiteAssignmentController extends Controller
             $quotationFloorsOptions = '';
         }
         return response()->json($quotationFloorsOptions,$status);
-    }
+    }*/
 
     public function getCheckpoints(Request $request,$checklistCategory){
         try{
@@ -135,8 +142,9 @@ class ChecklistSiteAssignmentController extends Controller
 
     public function siteAssignmentCreate(Request $request){
         try{
+            $projectSiteId = Session::get('global_project_site');
             $projectSiteChecklistData = [
-                'project_site_id' => $request->project_site_id,
+                'project_site_id' => $projectSiteId,
                 'title' => $request->title,
                 'quotation_floor_id' => $request->quotation_floor_id,
                 'detail' => $request->detail,
@@ -175,7 +183,8 @@ class ChecklistSiteAssignmentController extends Controller
 
     public function siteAssignmentListing(Request $request){
         try{
-            $siteAssignmentData = ProjectSiteChecklist::orderBy('id','desc')->get();
+            $projectSiteId = Session::get('global_project_site');
+            $siteAssignmentData = ProjectSiteChecklist::where('project_site_id',$projectSiteId)->orderBy('id','desc')->get();
             $records = array();
             $records["draw"] = intval($request->draw);
             $records["recordsFiltered"] = $records["recordsTotal"] = count($siteAssignmentData);

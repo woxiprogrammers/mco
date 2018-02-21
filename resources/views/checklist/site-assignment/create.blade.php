@@ -46,7 +46,7 @@
                                                 <div class="form-body">
                                                     <fieldset>
                                                         <legend>Project </legend>
-                                                        <div class="form-group">
+                                                      {{--  <div class="form-group">
                                                             <div class="col-md-5" style="text-align: right; margin-left: -6% ; font-size: 14px">
                                                                 <label for="main_cat" class="control-label"> Client :</label>
                                                                 <span>*</span>
@@ -81,7 +81,7 @@
                                                                     <option value="">--Select Project Site --</option>
                                                                 </select>
                                                             </div>
-                                                        </div>
+                                                        </div>--}}
                                                         <div class="form-group">
                                                             <div class="col-md-5" style="text-align: right; margin-left: -6% ; font-size: 14px">
                                                                 <label for="main_cat" class="control-label">Quotation Floor :</label>
@@ -90,6 +90,9 @@
                                                             <div class="col-md-6">
                                                                 <select class="form-control" id="quotationFloorId" name="quotation_floor_id">
                                                                     <option value="">--Select Quotation Floor --</option>
+                                                                    @foreach($quotationFloors as $quotationFloor)
+                                                                        <option value="{{$quotationFloor['id']}}">{{$quotationFloor['name']}}</option>
+                                                                    @endforeach
                                                                 </select>
                                                             </div>
                                                         </div>

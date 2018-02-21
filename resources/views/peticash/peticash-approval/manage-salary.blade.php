@@ -42,27 +42,6 @@
                                         <div class="portlet-body">
                                             <div class="row">
                                                 <div class="col-md-2">
-                                                    <label>Select Client :</label>
-                                                    <select class="form-control" id="client_id" name="client_id">
-                                                        <option value="0">ALL</option>
-                                                        @foreach($clients as $client)
-                                                        <option value="{{$client['id']}}">{{$client['company']}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label>Select Project :</label>
-                                                    <select class="form-control" id="project_id" name="project_id">
-                                                        <option value="0">ALL</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label>Select Site :</label>
-                                                    <select class="form-control" id="site_id" name="site_id">
-                                                        <option value="0">ALL</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2">
                                                     <label>Select Year :</label>
                                                     <select class="form-control" id="year" name="year">
                                                         <option value="0">ALL</option>
