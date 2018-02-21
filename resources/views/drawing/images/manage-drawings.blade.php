@@ -21,10 +21,10 @@
                                     <h1>Manage</h1>
                                 </div>
                                 <div class="col-md-6" style="margin-top: 12px;float: right">
-                                    <button type="submit" class="btn btn-set red pull-right">
+                                    {{--<button type="submit" class="btn btn-set red pull-right">
                                         <i class="fa fa-check"></i>
                                         Submit
-                                    </button>
+                                    </button>--}}
                                 </div>
                             </div>
                         </div>
@@ -47,7 +47,7 @@
 
                                         <div class="portlet-body form">
                                             {!! csrf_field() !!}
-                                            <div class="form-body">
+                                            {{--<div class="form-body">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
                                                         <label for="name" class="control-label">Client Name</label>
@@ -83,7 +83,8 @@
                                                             <option value="">Select Site Name from here</option>
                                                         </select>
                                                     </div>
-                                                </div>
+                                                </div>--}}
+                                            <input type="hidden" id="projectSiteId" name="site_id" value="{{$projectSiteId}}">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
                                                         <label for="name" class="control-label">Main Category</label>
