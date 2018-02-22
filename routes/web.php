@@ -462,7 +462,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'checklist'], function(){
         Route::post('get-projects',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getProjects'));
         Route::post('get-project-sites',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getProjectSites'));
-        Route::post('get-quotation-floors',array('uses'=> 'Checklist\ChecklistSiteAssignmentController@getQuotationFloors'));
         Route::group(['prefix' => 'category-management'], function(){
             Route::get('manage',array('uses'=> 'Checklist\CategoryManagementController@getManageView'));
             Route::get('edit',array('uses'=> 'Checklist\CategoryManagementController@getEditView'));
@@ -634,7 +633,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'salary-request'], function(){
             Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryRequestCreateView'));
             Route::post('create',array('uses' => 'Peticash\PeticashController@createSalaryRequestCreate'));
-            //Route::post('get-labours',array('uses' => 'Peticash\PeticashController@getLabours'));
             Route::post('change-status',array('uses' => 'Peticash\PeticashController@salaryRequestedChangeStatus'));
         });
 

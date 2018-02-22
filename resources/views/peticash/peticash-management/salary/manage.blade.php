@@ -258,9 +258,6 @@
                 var emp_id = $('#emp_id').val();
 
                 var postData =
-                    /*'client_id=>'+client_id+','+
-                    'project_id=>'+project_id+','+
-                    'site_id=>'+site_id+','+*/
                     'year=>'+year+','+
                     'month=>'+month;
 
@@ -269,48 +266,9 @@
                 $("input[name='search_employee_id']").val(emp_id);
                 $(".filter-submit").trigger('click');
             });
-            /*$("#client_id").on('change', function(){
-                getProjects($('#client_id').val());
-            });
-            $("#project_id").on('change', function(){
-                getProjectSites($('#project_id').val());
-            });*/
         });
-        /*function getProjects(client_id){
-            $.ajax({
-                url: '/peticash/projects/'+client_id,
-                type: 'GET',
-                async : false,
-                success: function(data,textStatus,xhr){
-                    if(xhr.status == 200){
-                        $('#project_id').html(data);
-                        $('#project_id').prop('disabled',false);
-                        getProjectSites($('#project_id').val());
-                    }
-                },
-                error: function(errorStatus,xhr){
 
-                }
-            });
-        }*/
 
-        /*function getProjectSites(project_id){
-            $.ajax({
-                url: '/peticash/project-sites/'+project_id,
-                type: 'GET',
-                async : false,
-                success: function(data,textStatus,xhr){
-                    if(xhr.status == 200){
-                        $('#site_id').html(data);
-                        $('#site_id').prop('disabled',false);
-                        $("#search-withfilter").trigger('click');
-                    }
-                },
-                error: function(errorStatus,xhr){
-
-                }
-            });
-        }*/
 
         function detailsSalaryModal(txnId) {
             $.ajax({

@@ -48,7 +48,6 @@ class ChecklistSiteAssignmentController extends Controller
             foreach($quotationFloors as $quotationFloor){
                 $quotationFloorsOptions .= '<option value="'.$quotationFloor['id'].'">'.$quotationFloor['name'].'</option>';
             }
-            //$clients = Client::where('is_active', true)->select('id','company')->get();
             $mainCategories = ChecklistCategory::whereNull('category_id')->where('is_active', true)->select('id','name')->get();
             return view('checklist.site-assignment.create')->with(compact('quotationFloors','mainCategories','clients'));
         } catch (\Exception $e) {
@@ -103,28 +102,6 @@ class ChecklistSiteAssignmentController extends Controller
         }
         return response()->json($projectOptions,$status);
     }
-
-    /*public function getQuotationFloors(Request $request){
-        try{
-            $quotationId = Quotation::where('project_site_id', $request->project_site_id)->pluck('id')->first();
-            $quotationFloors = QuotationFloor::where('quotation_id',$quotationId)->select('id','name')->get();
-            $quotationFloorsOptions = '<option value="">-- Select Quotation Floor --</option>';
-            foreach($quotationFloors as $quotationFloor){
-                $quotationFloorsOptions .= '<option value="'.$quotationFloor['id'].'">'.$quotationFloor['name'].'</option>';
-            }
-            $status = 200;
-        }catch(\Exception $e){
-            $data = [
-                'action' => "Get Quotation Floors",
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            $status = 500;
-            $quotationFloorsOptions = '';
-        }
-        return response()->json($quotationFloorsOptions,$status);
-    }*/
 
     public function getCheckpoints(Request $request,$checklistCategory){
         try{

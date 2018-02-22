@@ -1363,7 +1363,6 @@ class PeticashController extends Controller
             $status = 200;
             $postdata = null;
             $emp_name = null;
-           // $site_id = 0;
             $month = 0;
             $year = 0;
             $postDataArray = array();
@@ -1471,12 +1470,6 @@ class PeticashController extends Controller
             $ids = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
 
-            /*if ($site_id != 0 && $filterFlag == true) {
-                $ids = PeticashSalaryTransaction::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
-                if(count($ids) <= 0) {
-                    $filterFlag = false;
-                }
-            }*/
             if ($request->has('search_employee_id') && $filterFlag == true) {
                 $ids = PeticashSalaryTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
                                     ->whereIn('peticash_salary_transactions.id',$ids)

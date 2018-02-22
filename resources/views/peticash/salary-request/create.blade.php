@@ -106,32 +106,6 @@
                                                         </div>
                                                     </div>
                                                 @endif
-                                                {{--<div class="form-body">
-                                                    <div class="row" style="margin-left: 5%">
-                                                        <div class="col-md-4 form-group">
-                                                            <select class="form-control" id="clientId" style="width: 80%;">
-                                                                <option value=""> -- Select Client -- </option>
-                                                                @foreach($clients as $client)
-                                                                    <option value="{{$client['id']}}"> {{$client['company']}} </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-4 form-group">
-                                                            <select id="projectId" class="form-control" style="width: 80%;">
-                                                                <option value=""> -- Select Project -- </option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-4 form-group">
-                                                            <select name="project_site_id" id="projectSiteId" class="form-control" style="width: 80%;">
-                                                                <option value=""> -- Select Project site -- </option>
-                                                            </select>
-                                                        </div>
-
-                                                    </div>
-                                                    <div class="table-scrollable" id="employeeTableDiv" hidden>
-
-                                                    </div>
-                                                </div>--}}
                                             </form>
                                         </div>
                                     </div>
