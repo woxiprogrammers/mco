@@ -43,6 +43,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class PeticashController extends Controller
 {
@@ -532,6 +533,7 @@ class PeticashController extends Controller
     }
     public function salaryApprovalListing(Request $request){
         try{
+            $projectSiteId = Session::get('global_project_site');
             $postdata = null;
             $emp_id = "";
             $emp_name = null;
@@ -569,7 +571,7 @@ class PeticashController extends Controller
             }
 
             $salaryTransactionData = array();
-            $ids = PeticashRequestedSalaryTransaction::all()->pluck('id');
+            $ids = PeticashRequestedSalaryTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
 
             if ($site_id != 0 && $filterFlag == true) {
@@ -869,7 +871,8 @@ class PeticashController extends Controller
                 $projectSites = ProjectSite::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->pluck('id');
                 $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->whereIn('project_site_id',$projectSites)->orderBy('created_at','desc')->get()->toArray();;
             }else{
-                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->orderBy('created_at','desc')->get()->toArray();;
+                $projectSiteId = Session::get('global_project_site');
+                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->orderBy('created_at','desc')->get()->toArray();;
             }
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
             $iTotalRecords = count($sitewiseAccountData);
@@ -1263,8 +1266,6 @@ class PeticashController extends Controller
             $inventoryComponentTransferData['created_at'] = $inventoryComponentTransferData['updated_at'] = Carbon::now();
             $inventoryComponentTransferDataId = InventoryComponentTransfers::insertGetId($inventoryComponentTransferData);
         }catch (\Exception $e){
-            $message = "Fail";
-            $status = 500;
             $data = [
                 'action' => 'Create Inventory Transfer Component',
                 'exception' => $e->getMessage()
@@ -1276,9 +1277,10 @@ class PeticashController extends Controller
 
     public function getSalaryRequestCreateView(Request $request){
         try{
-            $projectSites = ProjectSite::select('id','name')->get();
-            $clients = Client::where('is_active', true)->get();
-            return view('peticash.salary-request.create')->with(compact('projectSites','clients'));
+            $projectSiteId = Session::get('global_project_site');
+            $employees = Employee::where('project_site_id',$projectSiteId)->get();
+            $transactionTypes = PeticashTransactionType::where('type','ilike','PAYMENT')->select('id','name')->get();
+            return view('peticash.salary-request.create')->with(compact('employees','transactionTypes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Labour Create View',
@@ -1290,28 +1292,13 @@ class PeticashController extends Controller
         }
     }
 
-    public function getLabours(Request $request){
-        try{
-            $employees = Employee::where('project_site_id',$request['project_site_id'])->get();
-            $transactionTypes = PeticashTransactionType::where('type','ilike','PAYMENT')->select('id','name')->get();
-            return view('partials.peticash.salary-request.employee-listing')->with(compact('employees','transactionTypes'));
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Get Labour Create View',
-                'exception' => $e->getMessage(),
-                'request' => $request->all()
-            ];
-            Log::critical(json_encode($data));
-            return response()->json(['message' => 'Something went wrong'], 500);
-        }
-    }
-
     public function createSalaryRequestCreate(Request $request){
         try{
+            $projectSiteId = Session::get('global_project_site');
             $user = Auth::user();
             foreach($request->employee_ids as $employeeId){
                 $peticashRequestSalaryTransactionData = [
-                    'project_site_id' => $request->project_site_id,
+                    'project_site_id' => $projectSiteId,
                     'employee_id' => $employeeId,
                     'reference_user_id'=> $user->id,
                     'peticash_transaction_type_id' => $request->employee[$employeeId]['payment_type'],
@@ -1372,10 +1359,10 @@ class PeticashController extends Controller
     }
     public function purchaseTransactionListing(Request $request){
         try{
+            $projectSiteId = Session::get('global_project_site');
             $status = 200;
             $postdata = null;
             $emp_name = null;
-            $site_id = 0;
             $month = 0;
             $year = 0;
             $postDataArray = array();
@@ -1391,19 +1378,12 @@ class PeticashController extends Controller
                         $postDataArray[$narr[0]] = $ytr[1];
                     }
                 }
-                $site_id = $postDataArray['site_id'];
                 $month = $postDataArray['month'];
                 $year = $postDataArray['year'];
-            }
-            $ids = PurcahsePeticashTransaction::all()->pluck('id');
-            $filterFlag = true;
 
-            if ($site_id != 0 && $filterFlag == true) {
-                $ids = PurcahsePeticashTransaction::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
-                if(count($ids) <= 0) {
-                    $filterFlag = false;
-                }
             }
+            $ids = PurcahsePeticashTransaction::where('project_site_id',$projectSiteId)->pluck('id');
+            $filterFlag = true;
             if ($request->has('search_employee_id') && $filterFlag == true) {
                 $ids = PurcahsePeticashTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
                     ->whereIn('peticash_salary_transactions.id',$ids)
@@ -1437,10 +1417,10 @@ class PeticashController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     $purchaseTransactionData[$pagination]->id,
-                    $purchaseTransactionData[$pagination]->name,
+                    ucwords($purchaseTransactionData[$pagination]->name),
                     $purchaseTransactionData[$pagination]->quantity,
                     $purchaseTransactionData[$pagination]->unit->name,
-                    $purchaseTransactionData[$pagination]->amount,
+                    $purchaseTransactionData[$pagination]->bill_amount,
                     $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
                     date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
                     $purchaseTransactionData[$pagination]->projectSite->project->name.' - '.$purchaseTransactionData[$pagination]->projectSite->name,
@@ -1464,6 +1444,7 @@ class PeticashController extends Controller
     }
     public function salaryTransactionListing(Request $request){
         try{
+            $projectSiteId = Session::get('global_project_site');
             $status = 200;
             $postdata = null;
             $emp_name = null;
@@ -1483,19 +1464,12 @@ class PeticashController extends Controller
                         $postDataArray[$narr[0]] = $ytr[1];
                     }
                 }
-                $site_id = $postDataArray['site_id'];
                 $month = $postDataArray['month'];
                 $year = $postDataArray['year'];
             }
-            $ids = PeticashSalaryTransaction::all()->pluck('id');
+            $ids = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
 
-            if ($site_id != 0 && $filterFlag == true) {
-                $ids = PeticashSalaryTransaction::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
-                if(count($ids) <= 0) {
-                    $filterFlag = false;
-                }
-            }
             if ($request->has('search_employee_id') && $filterFlag == true) {
                 $ids = PeticashSalaryTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
                                     ->whereIn('peticash_salary_transactions.id',$ids)

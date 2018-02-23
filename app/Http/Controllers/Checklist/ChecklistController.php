@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\CheckList;
 
+use App\Category;
 use App\ChecklistCategory;
 use App\ChecklistCheckpoint;
 use App\ChecklistCheckpointImages;
@@ -133,20 +134,20 @@ class ChecklistController extends Controller
     public function structureListing(Request $request){
         try{
             $status = 200;
-            $checkpointsData = ChecklistCheckpoint::select('id','checklist_category_id')->distinct('checklist_category_id')->orderBy('id','desc')->get();
+            $checklistCategory = ChecklistCategory::where('is_active',true)->whereNotNull('category_id')->orderBy('id','desc')->get();
             $records = array();
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $records["recordsFiltered"] = count($checkpointsData);
+            $records["recordsTotal"] = $records["recordsFiltered"] = count($checklistCategory);
             $records['data'] = array();
-            $end = $request->length < 0 ? count($checkpointsData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($checkpointsData); $iterator++,$pagination++ ){
-                $checklistCategory = ChecklistCategory::findOrFail($checkpointsData[$pagination]['checklist_category_id']);
+            $end = $request->length < 0 ? count($checklistCategory) : $request->length;
+            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($checklistCategory); $iterator++,$pagination++ ){
+            $mainCategoryName = ChecklistCategory::where('id',$checklistCategory[$pagination]['category_id'])->pluck('name')->first();
                 $records['data'][] = [
                     ($iterator+1),
-                    $checklistCategory->mainCategory->name,
-                    $checklistCategory->name,
-                    ChecklistCheckpoint::where('checklist_category_id',$checklistCategory->id)->count(),
-                    '<a href="/checklist/structure/edit/'.$checklistCategory->id.'" class="btn blue">Edit</a>'
+                    $mainCategoryName,
+                    $checklistCategory[$pagination]->name,
+                    ChecklistCheckpoint::where('checklist_category_id',$checklistCategory[$pagination]->id)->count(),
+                    '<a href="/checklist/structure/edit/'.$checklistCategory[$pagination]->id.'" class="btn blue">Edit</a>'
                 ];
             }
         }catch(\Exception $e){
