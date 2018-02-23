@@ -150,7 +150,7 @@
                 <label class="control-label pull-right">Expected Delivery Date</label>
             </div>
             <div class="col-md-6">
-                <input type="date" class="form-control tax-modal-delivery-date" name="expected_delivery_date" min="2018-02-23">
+                <input type="date" class="form-control tax-modal-delivery-date" name="expected_delivery_date" min="{{$date}}">
             </div>
         </div>
         <div class="row form-group">

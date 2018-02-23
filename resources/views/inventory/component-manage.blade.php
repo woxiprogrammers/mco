@@ -1270,7 +1270,6 @@
                     },
                     success: function(data,textStatus,xhr){
                         if(data.show_validation == true){
-                            console.log(data.available_quantity)
                             $('#site_form_quantity').rules('add',{
                                 max: data.available_quantity,
                                 messages: {
