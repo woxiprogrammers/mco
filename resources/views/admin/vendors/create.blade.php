@@ -81,7 +81,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control" id="mobile" name="mobile">
+                                                                <input type="number" class="form-control" id="mobile" name="mobile">
                                                             </div>
                                                         </div>
                                                     </div>

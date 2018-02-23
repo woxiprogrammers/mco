@@ -529,7 +529,7 @@
                                                                 <label class="control-label pull-right">Unit</label>
                                                             </div>
                                                             <div class="col-md-9">
-                                                                <select class="form-control" id="unit" name="unit_id">
+                                                                <select class="form-control" id="unit" name="unit_id" onchange="checkAllowedQuantity()">
                                                                     <option value=""> -- Unit -- </option>
                                                                     @foreach($units as $unit)
                                                                         <option value="{{$unit['id']}}">{{$unit['name']}}</option>
@@ -537,7 +537,14 @@
                                                                 </select>
                                                             </div>
                                                         </div>
-
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Quantity</label>
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity" onkeyup="calculateTaxes(this)" onchange="checkAllowedQuantity()">
+                                                            </div>
+                                                        </div>
                                                         <div class="row form-group" id="site_out_rate">
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right">Rate</label>
@@ -546,14 +553,7 @@
                                                                 <input type="text" name="rate_per_unit" id="rate" class="form-control tax-modal-rate" placeholder="Enter Rate" value="{!! $amount['rate_per_unit'] !!}" onkeyup="calculateTaxes(this)">
                                                             </div>
                                                         </div>
-                                                        <div class="row form-group">
-                                                            <div class="col-md-3">
-                                                                <label class="control-label pull-right">Quantity</label>
-                                                            </div>
-                                                            <div class="col-md-9">
-                                                                <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity" onkeyup="calculateTaxes(this)">
-                                                            </div>
-                                                        </div>
+
                                                         <div class="row form-group" id="site_cgst">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">CGST</label>
@@ -1250,6 +1250,43 @@
                     alert('Something went wrong');
                 }
             });
+        }
+
+        function checkAllowedQuantity(){
+            $('#site_form_quantity').rules('remove');
+            $('#site_form_quantity').closest('form-group').removeClass('has-error');
+            var quantity = $('#site_form_quantity').val();
+            var unitId =  $('#unit').val();
+            if(typeof quantity != 'undefined' && quantity != '' && !(isNaN(quantity)) && typeof unitId != 'undefined' && unitId != '' && !(isNaN(unitId))){
+                $.ajax({
+                    url: '/inventory/transfer/check-quantity',
+                    type: 'POST',
+                    async: true,
+                    data: {
+                        _token: $("input[name='_token']").val(),
+                        inventoryComponentId : $('#inventoryComponentId').val(),
+                        quantity: quantity,
+                        unitId: unitId
+                    },
+                    success: function(data,textStatus,xhr){
+                        if(data.show_validation == true){
+                            console.log(data.available_quantity)
+                            $('#site_form_quantity').rules('add',{
+                                max: data.available_quantity,
+                                messages: {
+                                    max  : "Available quantity is "+data.available_quantity
+                                }
+                            });
+                        }else{
+                            $('#site_form_quantity').rules('remove');
+                            $('#site_form_quantity').closest('form-group').removeClass('has-error');
+                        }
+                    },
+                    error: function(){
+
+                    }
+                });
+            }
         }
 
     </script>

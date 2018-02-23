@@ -50,7 +50,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="number" class="form-control" id="model_number" name="model_number">
+                                                            <input type="text" class="form-control" id="model_number" name="model_number">
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
