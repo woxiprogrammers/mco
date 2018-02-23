@@ -418,7 +418,8 @@ class PurchaseOrderRequestController extends Controller
             $purchaseRequestComponentData['rate'] = $request->rate;
             $purchaseRequestComponentData['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
             $purchaseRequestComponentData['subtotal'] = $purchaseRequestComponentData['rate'] * $purchaseRequestComponentData['quantity'];
-            return view('partials.purchase.purchase-order-request.component-tax-details')->with(compact('purchaseRequestComponentData'));
+            $date = date_format(Carbon::now(),'Y-m-d');
+            return view('partials.purchase.purchase-order-request.component-tax-details')->with(compact('date','purchaseRequestComponentData'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Component Tax Details',
