@@ -8,6 +8,7 @@ use App\Client;
 use App\FuelAssetReading;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
@@ -15,6 +16,7 @@ use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\Material;
 use App\MaterialRequestComponents;
+use App\Module;
 use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteUserCheckpoint;
@@ -24,6 +26,7 @@ use App\Quotation;
 use App\QuotationMaterial;
 use App\Unit;
 use App\UnitConversion;
+use App\UserLastLogin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -36,6 +39,7 @@ use Illuminate\Support\Facades\Session;
 class InventoryManageController extends Controller
 {
     use InventoryTrait;
+    use NotificationTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -136,6 +140,13 @@ class InventoryManageController extends Controller
             InventoryComponentTransfers::where('id',$inventoryTransferId)->update([
                 'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug',$status)->pluck('id')->first()
             ]);
+            if($status == 'approved'){
+                $siteOutTransferTypeId = InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->pluck('id')->first();
+                $inventoryTransfer = InventoryComponentTransfers::findOrFail($inventoryTransferId);
+                if($inventoryTransfer->transfer_type_id == $siteOutTransferTypeId){
+
+                }
+            }
             return view('/inventory/transfer/manage');
         }catch(\Exception $e){
             $data = [
@@ -335,6 +346,21 @@ class InventoryManageController extends Controller
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
             $records["recordsFiltered"] = $iTotalRecords;
+            $user = Auth::user();
+            $userLastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                ->where('modules.slug','component-transfer')
+                ->where('user_last_logins.user_id',$user->id)
+                ->pluck('user_last_logins.id as user_last_login_id')
+                ->first();
+            if($userLastLogin != null){
+                UserLastLogin::where('id', $userLastLogin)->update(['last_login' => Carbon::now()]);
+            }else{
+                UserLastLogin::create([
+                    'user_id' => $user->id,
+                    'module_id' => Module::where('slug','component-transfer')->pluck('id')->first(),
+                    'last_login' => Carbon::now()
+                ]);
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory listing',

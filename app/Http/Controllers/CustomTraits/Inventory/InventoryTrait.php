@@ -11,6 +11,7 @@ use App\GRNCount;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
 use App\InventoryTransferTypes;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +33,22 @@ trait InventoryTrait{
             }
             $data['in_time'] = $data['out_time'] = $data['date'] = Carbon::now();
             $inventoryComponentTransfer = InventoryComponentTransfers::create($data);
+            $siteOutTypeId = InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->pluck('id')->first();
+            if($inventoryComponentTransfer->transfer_type_id == $siteOutTypeId){
+                $materialSiteTransferApproveTokens = User::join('user_has_permissions','user_has_permissions.user_id','=','users.id')
+                    ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                    ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
+                    ->where('permissions.name','ilike','approve-component-transfer')
+                    ->where('user_project_site_relation.project_site_id',$inventoryComponentTransfer->inventoryComponent->project_site_id)
+                    ->select('users.web_fcm_token as web_fcm_token','users.mobile_fcm_token')
+                    ->get()->toArray();
+                $webTokens = array_column($materialSiteTransferApproveTokens,'web_fcm_token');
+                $mobileTokens = array_column($materialSiteTransferApproveTokens,'mobile_fcm_token');
+                $notificationString = $inventoryComponentTransfer->inventoryComponent->projectSite->project->name.'-'.$inventoryComponentTransfer->inventoryComponent->projectSite->name.' ';
+                $notificationString .= 'Stock transferred to '.$inventoryComponentTransfer->source_name.' ';
+                $notificationString .= $inventoryComponentTransfer->inventoryComponent.' - '.$inventoryComponentTransfer->quantity.' and '.$inventoryComponentTransfer->unit->name;
+                $this->sendPushNotification('Manish Construction',$notificationString,$webTokens,$mobileTokens,'c-m-s-t');
+            }
             return $inventoryComponentTransfer;
         }catch(\Exception $e){
             $logData = [
