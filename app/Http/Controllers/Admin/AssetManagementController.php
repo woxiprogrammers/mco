@@ -527,6 +527,7 @@ use InventoryTrait;
                         $assetVendorRelationData['asset_id'] = $asset->id;
                         AssetVendorRelation::create($assetVendorRelationData);
                     }
+                    $request->session()->flash('success', 'Vendors assigned to asset successfully.');
                 }
                 $assetVendors = AssetVendorRelation::where('asset_id',$asset->id)->whereNotIn('vendor_id',$request->vendors)->get();
                 foreach ($assetVendors as $assetVendor){
@@ -538,7 +539,6 @@ use InventoryTrait;
                     $assetVendor->delete();
                 }
             }
-            $request->session()->flash('success', 'Vendors assigned to asset successfully.');
             return redirect('/asset/edit/'.$asset->id);
         }catch(\Exception $e){
             $data = [
