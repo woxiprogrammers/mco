@@ -240,17 +240,22 @@ trait MaterialTrait{
                 $newStatus = (boolean)!$material->is_active;
                 $material->update(['is_active' => $newStatus]);
             }
-            $request->session()->flash('success', 'Material Status changed successfully.');
-            return redirect('/material/manage');
+            $message = 'Material Status changed successfully.';
+            $status = 200;
         }catch(\Exception $e){
+            $message = 'Something went wrong';
+            $status = 500;
             $data = [
                 'action' => 'Change Material status',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            abort(500);
         }
+        $response = [
+            'message' => $message,
+        ];
+        return response($response,$status);
     }
 
     public function checkMaterialName(Request $request){
