@@ -144,7 +144,12 @@ class InventoryManageController extends Controller
                 $siteOutTransferTypeId = InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->pluck('id')->first();
                 $inventoryTransfer = InventoryComponentTransfers::findOrFail($inventoryTransferId);
                 if($inventoryTransfer->transfer_type_id == $siteOutTransferTypeId){
-
+                    $webTokens = [$inventoryTransfer->user->web_fcm_token];
+                    $mobileTokens = [$inventoryTransfer->user->mobile_fcm_token];
+                    $notificationString = $inventoryTransfer->inventoryComponent->projectSite->project->name.'-'.$inventoryTransfer->inventoryComponent->projectSite->name.' ';
+                    $notificationString .= 'Stock transferred to '.$inventoryTransfer->source_name.' Approved ';
+                    $notificationString .= $inventoryTransfer->inventoryComponent.' - '.$inventoryTransfer->quantity.' and '.$inventoryTransfer->unit->name;
+                    $this->sendPushNotification('Manish Construction',$notificationString,$webTokens,$mobileTokens,'c-m-s-t-a');
                 }
             }
             return view('/inventory/transfer/manage');
