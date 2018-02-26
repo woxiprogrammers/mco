@@ -270,6 +270,75 @@ class InventoryManageController extends Controller
         }
     }
 
+    public function checkAvailableQuantity(Request $request){
+        try{
+            $inventoryComponent = InventoryComponent::where('id',$request['inventoryComponentId'])->first();
+            if($inventoryComponent->is_material == true){
+                $materialUnit = Material::where('id',$inventoryComponent['reference_id'])->pluck('unit_id')->first();
+                $unitID = Unit::where('id',$materialUnit)->pluck('id')->first();
+                $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.type','ilike','in')
+                    ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                    ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                    ->get();
+                $outTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.type','ilike','out')
+                    ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                    ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                    ->get();
+                $inQuantity = $outQuantity = 0;
+                foreach($inTransferQuantities as $inTransferQuantity){
+                    $unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$materialUnit,$inTransferQuantity['quantity']);
+                    if(!is_array($unitConversionQuantity)){
+                        $inQuantity += $unitConversionQuantity;
+                    }
+                }
+                foreach($outTransferQuantities as $outTransferQuantity){
+                    $unitConversionQuantity = UnitHelper::unitQuantityConversion($outTransferQuantity['unit_id'],$materialUnit,$outTransferQuantity['quantity']);
+                    if(!is_array($unitConversionQuantity)){
+                        $outQuantity += $unitConversionQuantity;
+                    }
+                }
+            }else{
+                $unitID = Unit::where('slug','nos')->pluck('id')->first();
+                $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.type','ilike','in')
+                    ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                    ->sum('inventory_component_transfers.quantity');
+                $outQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.type','ilike','out')
+                    ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                    ->sum('inventory_component_transfers.quantity');
+            }
+            $availableQuantity = $inQuantity - $outQuantity;
+            if($unitID != $request['unitId']){
+                $availableQuantity= UnitHelper::unitQuantityConversion($request['unitId'],$unitID,$availableQuantity);
+            }
+            if($request['quantity'] < $availableQuantity){
+                $show_validation = false;
+            }else{
+                $show_validation = true;
+            }
+        }catch (\Exception $e){
+            $show_validation = false;
+            $data = [
+                'action' => 'Check Available Quantity',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+        $response = [
+            'show_validation' => $show_validation,
+            'available_quantity' => $availableQuantity
+        ];
+        return $response;
+    }
+
     public function inventoryListing(Request $request){
         try{
             $status = 200;
