@@ -40,27 +40,6 @@
                                                 <div class="portlet-body">
                                                     <div class="row">
                                                         <div class="col-md-2">
-                                                            <label>Select Client :</label>
-                                                            <select class="form-control" id="client_id" name="client_id">
-                                                                <option value="0">ALL</option>
-                                                                @foreach($clients as $client)
-                                                                    <option value="{{$client['id']}}">{{$client['company']}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <label>Select Project :</label>
-                                                            <select class="form-control" id="project_id" name="project_id">
-                                                                <option value="0">ALL</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <label>Select Site :</label>
-                                                            <select class="form-control" id="site_id" name="site_id">
-                                                                <option value="0">ALL</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2">
                                                             <label>Select Year :</label>
                                                             <select class="form-control" id="year" name="year">
                                                                 <option value="0">ALL</option>
@@ -279,9 +258,6 @@
                 var emp_id = $('#emp_id').val();
 
                 var postData =
-                    'client_id=>'+client_id+','+
-                    'project_id=>'+project_id+','+
-                    'site_id=>'+site_id+','+
                     'year=>'+year+','+
                     'month=>'+month;
 
@@ -290,48 +266,9 @@
                 $("input[name='search_employee_id']").val(emp_id);
                 $(".filter-submit").trigger('click');
             });
-            $("#client_id").on('change', function(){
-                getProjects($('#client_id').val());
-            });
-            $("#project_id").on('change', function(){
-                getProjectSites($('#project_id').val());
-            });
         });
-        function getProjects(client_id){
-            $.ajax({
-                url: '/peticash/projects/'+client_id,
-                type: 'GET',
-                async : false,
-                success: function(data,textStatus,xhr){
-                    if(xhr.status == 200){
-                        $('#project_id').html(data);
-                        $('#project_id').prop('disabled',false);
-                        getProjectSites($('#project_id').val());
-                    }
-                },
-                error: function(errorStatus,xhr){
 
-                }
-            });
-        }
 
-        function getProjectSites(project_id){
-            $.ajax({
-                url: '/peticash/project-sites/'+project_id,
-                type: 'GET',
-                async : false,
-                success: function(data,textStatus,xhr){
-                    if(xhr.status == 200){
-                        $('#site_id').html(data);
-                        $('#site_id').prop('disabled',false);
-                        $("#search-withfilter").trigger('click');
-                    }
-                },
-                error: function(errorStatus,xhr){
-
-                }
-            });
-        }
 
         function detailsSalaryModal(txnId) {
             $.ajax({

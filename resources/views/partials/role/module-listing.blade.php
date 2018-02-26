@@ -20,7 +20,14 @@
                      </td>
                      @foreach($permissionTypes as $permissionType)
                          <td style="text-align: center">
-                            @if(array_key_exists($permissionType['id'],$subModule['permissions']))
+                             @if($userRole != 'superadmin' &&
+                                 (
+                                     ($subModule['submodule_name'] == 'Purchase Order Request' && $permissionType['name'] == 'Approve') ||
+                                     ($subModule['submodule_name'] == 'Component Transfer' && ($permissionType['name'] == 'View' || $permissionType['name'] == 'Approve'))
+                                 )
+                             )
+                                 <span>-</span>
+                             @elseif(array_key_exists($permissionType['id'],$subModule['permissions']))
                                  @if(in_array($subModule['permissions'][$permissionType['id']],$roleWebPermissions))
                                      <input type="checkbox" name="web_permissions[]" value="{{$subModule['permissions'][$permissionType['id']]}}" checked>
                                  @else
@@ -28,7 +35,7 @@
                                  @endif
                             @else
                                 <span>-</span>
-                             @endif
+                            @endif
                          </td>
                      @endforeach
                  </tr>

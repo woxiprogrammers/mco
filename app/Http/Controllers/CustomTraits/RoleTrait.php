@@ -12,6 +12,7 @@ use App\Role;
 use App\Http\Requests\RoleRequest;
 use App\RoleHasPermission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Expr\Array_;
 
@@ -263,6 +264,8 @@ trait RoleTrait{
 
     public function getSubModules(Request $request){
         try{
+            $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
             $moduleIds = $request->module_id;
             $data = ACLHelper::getPermissions($moduleIds);
             $webModuleResponse = $data['webModuleResponse'];
@@ -277,7 +280,7 @@ trait RoleTrait{
                 $roleWebPermissions = [];
                 $roleMobilePermissions = [];
             }
-            return view('partials.role.module-listing')->with(compact('moduleIds','webModuleResponse','permissionTypes','mobileModuleResponse','roleWebPermissions','roleMobilePermissions'));
+            return view('partials.role.module-listing')->with(compact('userRole','moduleIds','webModuleResponse','permissionTypes','mobileModuleResponse','roleWebPermissions','roleMobilePermissions'));
         }
         catch (\Exception $e){
             $data = [

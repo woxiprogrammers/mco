@@ -653,7 +653,7 @@
                                                                             <span>{{$miscellaneousMaterial['unit_name']}}</span>
                                                                             <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][unit_id]" value="{{$miscellaneousMaterial['unit_id']}}">
                                                                         </td>
-                                                                        @if(array_key_exists('quantity',$miscellaneousMaterial))
+                                                                        @if(array_key_exists('quantity',$miscellaneousMaterial) && $miscellaneousMaterial['quantity'] != null)
                                                                             <td class="form-group">
                                                                                 <input class="form-control current_quantity" type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="{{$miscellaneousMaterial['quantity']}}">
                                                                                 <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quotation_material_id]" value="{{$miscellaneousMaterial['quotation_material_id']}}">

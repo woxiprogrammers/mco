@@ -74,8 +74,7 @@ jQuery(document).ready(function() {
         $(".filter-submit").trigger('click');
     });
 
-    $("#changeStatusButton").on('click',function(e){
-        e.stopPropagation();
+    $("#changeStatusButton").on('click',function(){
         var materialIds = [];
         $("input:checkbox:checked").each(function(i){
             materialIds[i] = $(this).val();

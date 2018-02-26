@@ -515,7 +515,6 @@ trait ProductTrait{
             foreach ($profitMargins as $pms) {
                 array_push($profitMarginData, $pms['name']);
             }
-            //dd($profitMargins);
             $data['profitMargins'] = $profitMargins;
             $data['units'] = $units;
             $data['materials'] = $materials;
