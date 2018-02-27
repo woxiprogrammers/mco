@@ -715,7 +715,7 @@ class PeticashController extends Controller
         return response()->json($records);
     }
 
-      public function changeSalaryStatus(Request $request){
+    public function changeSalaryStatus(Request $request){
         try{
             $status = 200;
             foreach($request->txn_ids as $txnId){
