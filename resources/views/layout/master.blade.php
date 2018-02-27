@@ -84,12 +84,9 @@
     messaging.onTokenRefresh(function() {
         messaging.getToken()
         .then(function(refreshedToken) {
-            console.log('token refreshed');
-            console.log(refreshedToken);
             sendfcmToken(refreshedToken);
         })
         .catch(function(err) {
-            console.log('in token refresh get token catch');
         });
     });
     function sendfcmToken(token){
@@ -101,11 +98,8 @@
                 fcm_token: token
             },
             success: function(data, textStatus, xhr){
-                console.log('token stored successfully');
             },
             error: function(errorData){
-                console.log('fcm token ajax error');
-                console.log(errorData);
             }
         });
     }

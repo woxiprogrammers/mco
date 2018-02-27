@@ -76,15 +76,23 @@ class PurchaseOrderRequestController extends Controller
                 'purchase_request_id' => $request->purchase_request_id,
                 'user_id' => $user->id
             ];
-            $projectSiteId = PurchaseRequest::where('id',$request->purchase_request_id)->pluck('project_site_id')->first();
+            $projectSiteInfo = PurchaseRequest::join('project_sites','project_sites.id','=','purchase_requests.project_site_id')
+                                        ->join('projects','projects.id','=','project_sites.project_id')
+                                        ->where('purchase_requests.id', $request->purchase_request_id)
+                                        ->select('project_sites.id as project_site_id','project_sites.name as project_site_name','projects.name as project_name')
+                                        ->first()->toArray();
             $purchaseOrderRequest = PurchaseOrderRequest::create($purchaseOrderRequestData);
             $purchaseOrderRequestApproveAclTokens = User::join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
                 ->join('user_has_permissions','user_has_permissions.user_id','=','user_project_site_relation.user_id')
                 ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
-                ->where('user_project_site_relation.project_site_id', $projectSiteId)
+                ->where('user_project_site_relation.project_site_id', $projectSiteInfo['project_site_id'])
                 ->where('permissions.name','approve-purchase-order-request')
-                ->select('users.web_fcm_token as web_fcm_token','users.mobile_fcm_token')
+                ->select('users.web_fcm_token as web_fcm_token','users.mobile_fcm_token as mobile_fcm_token')
                 ->get()->toArray();
+            $webTokens = array_column($purchaseOrderRequestApproveAclTokens,'web_fcm_token');
+            $mobileTokens = array_column($purchaseOrderRequestApproveAclTokens,'mobile_fcm_token');
+            $notificationString = $projectSiteInfo['project_name'].'-'.$projectSiteInfo['project_site_name'].' : Purchase Order waiting for approval.';
+            $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-o-r');
             foreach($request['data'] as $purchaseRequestComponentVendorRelationId => $componentData){
                 if($componentData['rate_per_unit'] == '-'){
                     $componentData['rate_per_unit'] = 0;
