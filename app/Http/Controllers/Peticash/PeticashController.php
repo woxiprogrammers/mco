@@ -8,6 +8,7 @@ use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
 use App\Employee;
+use App\GRNCount;
 use App\Helper\NumberHelper;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
@@ -531,6 +532,7 @@ class PeticashController extends Controller
         }
         return response()->json($records);
     }
+
     public function salaryApprovalListing(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
@@ -736,6 +738,7 @@ class PeticashController extends Controller
         }
           return response()->json($message,$status);
     }
+
     public function salaryRequestedChangeStatus(Request $request){
         try{
             $status = 200;
@@ -776,6 +779,7 @@ class PeticashController extends Controller
         }
         return response()->json($message,$status);
     }
+
     public function changePurchaseStatus(Request $request){
         try{
             $status = 200;
@@ -1344,6 +1348,7 @@ class PeticashController extends Controller
             abort(500);
         }
     }
+
     public function getSalaryManageView(Request $request){
         try{
             $clients = Client::where('is_active', true)->get();
@@ -1357,6 +1362,7 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
     public function purchaseTransactionListing(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
@@ -1442,6 +1448,7 @@ class PeticashController extends Controller
         }
         return response()->json($records,$status);
     }
+
     public function salaryTransactionListing(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
@@ -1565,5 +1572,64 @@ class PeticashController extends Controller
         Log::critical(json_encode($data));
         abort(500,$e->getMessage());
 
+    }
+
+    public function getPurchaseTransactionCreateView(Request $request){
+        try{
+            $units = Unit::where('is_active',true)->select('id','name')->get();
+            $noUnit = Unit::where('slug','nos')->pluck('id','name')->first();
+            return view('peticash.peticash-management.purchase.transaction.create');
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get Peticash Purchase Transaction create view",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function generateGRN(Request $request){
+        try{
+            $status = 200;
+            $now = Carbon::now();
+            $purchasePeticashTransaction = $request->only('source_name','quantity','bill_amount','component_type_id');
+            $purchasePeticashTransaction['name'] = $request['component_name'];
+            $purchasePeticashTransaction['component_type_id'] = $request['component_id'];
+            $purchasePeticashTransaction['project_site_id'] = Session::get('global_project_site');
+            $purchasePeticashTransaction['peticash_transaction_type_id'] = PeticashTransactionType::where('slug','hand')->where('type','PURCHASE')->pluck('id')->first();
+            $purchasePeticashTransaction['unit_id'] = $request['unit_id'];
+            $purchasePeticashTransaction['bill_number'] = $request['challan_number'];
+            $currentDate = Carbon::now();
+            $monthlyGrnGeneratedCount = GRNCount::where('month',$currentDate->month)->where('year',$currentDate->year)->pluck('count')->first();
+            if($monthlyGrnGeneratedCount != null){
+                $serialNumber = $monthlyGrnGeneratedCount + 1;
+            }else{
+                $serialNumber = 1;
+            }
+            $purchasePeticashTransaction['grn'] = "GRN".date('Ym').($serialNumber);
+            $purchasePeticashTransaction['peticash_status_id'] = PeticashStatus::where('slug','grn-generated')->pluck('id')->first();
+            $purchasePeticashTransaction['in_time'] = $now;
+            $purchaseTransaction = PurcahsePeticashTransaction::create($purchasePeticashTransaction);
+            if($monthlyGrnGeneratedCount != null) {
+                GRNCount::where('month', $currentDate->month)->where('year', $currentDate->year)->update(['count' => $serialNumber]);
+            }else{
+                GRNCount::create(['month'=> $currentDate->month, 'year'=> $currentDate->year,'count' => $serialNumber]);
+            }
+        }catch(\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => "Generate GRN",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        $response = [
+            'purchase_transaction' => $purchaseTransaction
+        ];
+        return response()->json($response,$status);
     }
 }

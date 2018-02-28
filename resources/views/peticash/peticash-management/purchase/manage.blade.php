@@ -26,6 +26,12 @@
                                 <div class="page-title">
                                     <h1>Manage Peticash Purchase</h1>
                                 </div>
+                                <div class="btn-group" style="float: right;margin-top:1%">
+                                    <div id="sample_editable_1_new" class="btn yellow"><a href="/peticash/peticash-management/purchase/transaction/create" style="color: white">                                         <i class="fa fa-plus"></i>
+                                            Transaction
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="page-content">
@@ -80,8 +86,6 @@
                                                                     </a>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-md-1">
                                                         </div>
                                                     </div>
                                                     <div class="table-container">
