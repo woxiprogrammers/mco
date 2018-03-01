@@ -571,7 +571,19 @@ class PurchaseRequestController extends Controller
                     /*client Supplied*/
                     $clientId = $vendorIdArray[1];
                     $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
-                    PurchaseRequestComponentVendorRelation::where('client_id',$clientId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
+                    if(count($purchaseRequestComponentIds) > 0){
+                        $purchaseRequestId = PurchaseRequestComponent::where('id', $purchaseRequestComponentIds[0])->pluck('purchase_request_id')->first();
+                        $alreadyCreatedPurchaseRequestVendorRelationIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->where('purchase_request_components.purchase_request_id', $purchaseRequestId)
+                            ->where('purchase_request_component_vendor_relation.client_id', $clientId)
+                            ->whereNotIn('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseRequestComponentIds)
+                            ->pluck('purchase_request_component_vendor_relation.id')
+                            ->toArray();
+                        PurchaseRequestComponentVendorRelation::whereIn('id', $alreadyCreatedPurchaseRequestVendorRelationIds)->delete();
+                    }
+                    $purchaseRequestFormat = PurchaseRequest::join('purchase_request_components', 'purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                                                ->where('purchase_request_components.id', $purchaseRequestComponentIds[0])
+                                                ->pluck('purchase_requests.format_id')->first();
                     if(array_key_exists('checked_vendor_materials',$data)){
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
                             $vendorInfo = Client::findOrFail($clientId)->toArray();
@@ -624,6 +636,19 @@ class PurchaseRequestController extends Controller
                     }
                 }else{
                     $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
+                    $purchaseRequestFormat = PurchaseRequest::join('purchase_request_components', 'purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                                                ->where('purchase_request_components.id', $purchaseRequestComponentIds[0])
+                                                ->pluck('purchase_requests.format_id')->first();
+                    if(count($purchaseRequestComponentIds) > 0){
+                        $purchaseRequestId = PurchaseRequestComponent::where('id', $purchaseRequestComponentIds[0])->pluck('purchase_request_id')->first();
+                        $alreadyCreatedPurchaseRequestVendorRelationIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->where('purchase_request_components.purchase_request_id', $purchaseRequestId)
+                            ->where('purchase_request_component_vendor_relation.vendor_id', $vendorId)
+                            ->whereNotIn('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseRequestComponentIds)
+                            ->pluck('purchase_request_component_vendor_relation.id')
+                            ->toArray();
+                        PurchaseRequestComponentVendorRelation::whereIn('id', $alreadyCreatedPurchaseRequestVendorRelationIds)->delete();
+                    }
                     PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
                     if(array_key_exists('checked_vendor_materials',$data)){
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
@@ -680,7 +705,8 @@ class PurchaseRequestController extends Controller
                 if(isset($vendorInfo)){
                     $pdfTitle = "Purchase Request";
                     $pdf = App::make('dompdf.wrapper');
-                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle')));
+                    $formatId = $purchaseRequestFormat;
+                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle','formatId')));
                     $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                     $pdfFileName = sha1($vendorId).'.pdf';
                     $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
@@ -694,7 +720,7 @@ class PurchaseRequestController extends Controller
                         }
                         file_put_contents($pdfUploadPath,$pdfContent);
                         $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        $mailMessage = 'Please check the P.R. attached herewith';
+                        $mailMessage = 'Please check the Purchase Request ('.$purchaseRequestFormat.') attached herewith';
                         Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
                             $message->subject('Testing with attachment');
                             $message->to($mailData['toMail']);
