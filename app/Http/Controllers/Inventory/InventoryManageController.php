@@ -46,7 +46,7 @@ class InventoryManageController extends Controller
     public function getManageView(Request $request){
         try{
             $projectSites  = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                ->where('projects.is_active',true)->select('project_sites.id','project_sites.name','projects.name as project_name')->get()->toArray();
+                ->where('project_sites.name','!=',env('OFFICE_PROJECT_SITE_NAME'))->where('projects.is_active',true)->select('project_sites.id','project_sites.name','projects.name as project_name')->get()->toArray();
             return view('inventory/manage')->with(compact('projectSites'));
         }catch(\Exception $e){
             $data = [
