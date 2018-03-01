@@ -656,7 +656,8 @@ class PurchaseOrderRequestController extends Controller
                         $pdf = App::make('dompdf.wrapper');
                         $pdfFlag = "purchase-order-listing-download";
                         $pdfTitle = 'Purchase Order';
-                        $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle')));
+                        $formatId = $purchaseOrder->format_id;
+                        $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle','formatId')));
                         $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                         $pdfFileName = sha1($vendorId).'.pdf';
                         $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
@@ -669,7 +670,7 @@ class PurchaseOrderRequestController extends Controller
                         }
                         file_put_contents($pdfUploadPath,$pdfContent);
                         $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        $mailMessage = 'Please check the P.O. attached herewith';
+                        $mailMessage = 'Please check the Purchase Order ('.$purchaseOrder->format_id.') attached herewith';
                         Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
                             $message->subject('Testing with attachment');
                             $message->to($mailData['toMail']);

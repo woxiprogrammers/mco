@@ -26,7 +26,7 @@
         </style>
     </head>
     <body>
-        <span style="text-align: center; margin-left: 40%; font-size: 19px; font-weight: bold">{{$pdfTitle}}</span>
+        <span style="text-align: center; margin-left: 35%; font-size: 19px; font-weight: bold">{{$pdfTitle}}({{$formatId}})</span>
         <table border="1" id="mainTable">
             <tr style="height: 100px">
                 <td style="width: 50%;padding-left: 1%; padding-top: 0.5%; padding-bottom: 1%" >
@@ -49,7 +49,10 @@
                                     </div>
                                     <div>
                                         {!! env('CONTACT_NO') !!}
-                                    </div>            
+                                    </div>
+                                    <div>
+                                        {!! env('GSTIN_NUMBER') !!}
+                                    </div>
                                 </td>
                             </tr>
                         </table>

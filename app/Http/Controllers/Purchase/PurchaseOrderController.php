@@ -315,6 +315,7 @@ class PurchaseOrderController extends Controller
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
+            Log::critical(json_encode($data));
             $message = "Something went wrong" .$e->getMessage();
         }
         return response()->json($message);
