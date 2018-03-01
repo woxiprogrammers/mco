@@ -356,6 +356,9 @@
         structureTypeSlug = $("input[name='structure_type']:checked").val();
         if(structureTypeSlug == 'amountwise'){
             $("#floor_div").show();
+        }else{
+            $("#floor_div").hide();
+            $("#billTable table").hide();
         }
     }
 

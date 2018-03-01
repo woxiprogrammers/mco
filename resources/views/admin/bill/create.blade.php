@@ -63,6 +63,7 @@
                                                        </div>
                                                        <div class="col-md-2" style="margin-left: 6%">
                                                            <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
+                                                               <option value="default">Select Bank</option>
                                                                @foreach($banksAssigned as $bankId)
                                                                    <option value="{{$bankId['bank_info_id']}}">{{$bankId->bankInfo->bank_name}} - {{$bankId->bankInfo->account_number}} </option>
                                                                 @endforeach
