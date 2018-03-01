@@ -438,7 +438,7 @@ class PurchaseOrderRequestController extends Controller
                 if(Session::has('global_project_site')){
                     $projectSiteId = Session::get('global_project_site');
                 }else{
-                    $projectSiteId = $purchaseOrderRequest->purchaseOrderRequest->purchaseRequest->project_site_id;
+                    $projectSiteId = $purchaseOrderRequest->purchaseRequest->project_site_id;
                 }
                 $user = Auth::user();
                 foreach($request->approved_purchase_order_request_relation as $vendorId => $purchaseOrderRequestComponentArray){
@@ -643,24 +643,6 @@ class PurchaseOrderRequestController extends Controller
                         }
                         $iterator++;
                     }
-                    $webTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token];
-                    $mobileTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
-                    $purchaseRequestComponentIds = array_column($purchaseOrder->purchaseOrderComponent->toArray(),'purchase_request_component_id');
-                    $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
-                        ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
-                        ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
-                        ->join('purchase_order_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
-                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
-                        ->where('purchase_orders.id', $purchaseOrder->id)
-                        ->whereIn('purchase_request_components.id', $purchaseRequestComponentIds)
-                        ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
-                        ->get()->toArray();
-                    $webTokens = array_merge($webTokens, array_column($materialRequestUserToken,'web_fcm_token'));
-                    $mobileTokens = array_merge($mobileTokens, array_column($materialRequestUserToken,'mobile_fcm_token'));
-                    $notificationString = '3 -'.$purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
-                    $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Order Created.';
-                    $notificationString .= 'PO number: '.$purchaseOrder->format_id;
-                    $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-o');
                     if(count($vendorInfo['materials']) > 0){
                         $projectSiteInfo = array();
                         $projectSiteInfo['project_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;
