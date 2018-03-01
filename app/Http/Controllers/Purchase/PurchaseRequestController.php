@@ -649,7 +649,6 @@ class PurchaseRequestController extends Controller
                             ->toArray();
                         PurchaseRequestComponentVendorRelation::whereIn('id', $alreadyCreatedPurchaseRequestVendorRelationIds)->delete();
                     }
-                    PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
                     if(array_key_exists('checked_vendor_materials',$data)){
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
                             $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
