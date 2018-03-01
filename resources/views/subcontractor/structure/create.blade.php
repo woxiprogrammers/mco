@@ -356,6 +356,9 @@
         structureTypeSlug = $("input[name='structure_type']:checked").val();
         if(structureTypeSlug == 'amountwise'){
             $("#floor_div").show();
+        }else{
+            $("#floor_div").hide();
+            $("#billTable table").hide();
         }
     }
 
@@ -444,6 +447,13 @@
         $("#taxModal #billRowId").val(rowID);
         $("#addTaxForm .modal-body").html($("#taxDiv").clone().attr('id','').show());
         $("#taxModal").modal('show');
+        var hiddenTaxLength = $(element).closest('tr').find(".tax-modal-name:input:hidden").length;
+        if(hiddenTaxLength > 0){
+            $(element).closest('tr').find(".tax-modal-name:input:hidden").each(function () {
+                var taxId = $(this).attr('id');
+                $("#addTaxForm").find("input[name='"+ taxId +"']").val($(this).val());
+            });
+        }
         calculateTaxes();
     }
 
@@ -472,9 +482,9 @@
             var className = $("input[name='"+ value.name +"']").attr('class');
             var taxId = value.name.match(/\d+/)[0];
             if(className.indexOf('tax-modal-value') != -1){
-                var inputData = '<input type="hidden" name="bills['+iterator+'][taxes]['+taxId+'][amount]" class="'+className+'" value="'+value.value+'">'
+                var inputData = '<input type="hidden" id = "'+taxId+'" name="bills['+iterator+'][taxes]['+taxId+'][amount]" class="'+className+'" value="'+value.value+'">'
             }else{
-                var inputData = '<input type="hidden" name="bills['+iterator+'][taxes]['+taxId+'][percentage]" class="'+className+'" value="'+value.value+'">'
+                var inputData = '<input type="hidden" id = "'+taxId+'" name="bills['+iterator+'][taxes]['+taxId+'][percentage]" class="'+className+'" value="'+value.value+'">'
             }
             row.append(inputData);
         });
