@@ -99,7 +99,7 @@
                                                                 <th> Amount  </th>
                                                                 <th> Created By </th>
                                                                 <th> Date </th>
-                                                                <th> Site </th>
+                                                                <th> Status </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">

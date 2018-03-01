@@ -645,6 +645,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::group(['prefix' => 'transaction'], function(){
                     Route::get('create',array('uses' => 'Peticash\PeticashController@getPurchaseTransactionCreateView'));
                     Route::post('generate-grn',array('uses' => 'Peticash\PeticashController@generateGRN'));
+                    Route::post('create',array('uses' => 'Peticash\PeticashController@createPurchaseTransaction'));
+                    Route::get('edit/{purchasePeticashTransactionId}',array('uses' => 'Peticash\PeticashController@getPurchaseTransactionEditView'));
                 });
             });
             Route::group(['prefix' => 'salary'], function(){

@@ -387,12 +387,13 @@ class PurchaseController extends Controller
                 case "asset" :
                     $assetList = array();
                     $alreadyExistAsset = Asset::where('name','ilike','%'.$request['keyword'].'%')->get();
-                    $assetUnit = Unit::where('slug','nos')->pluck('name')->first();
+                    $assetUnit = Unit::where('slug','nos')->select('name','id')->first();
                     $systemAssetStatus = MaterialRequestComponentTypes::where('slug','system-asset')->first();
                     foreach ($alreadyExistAsset as $key => $asset){
                         $assetList[$iterator]['asset_id'] = $asset['id'];
                         $assetList[$iterator]['asset_name'] = $asset['name'];
-                        $assetList[$iterator]['asset_unit'] = $assetUnit;
+                        $assetList[$iterator]['asset_unit'] = $assetUnit['name'];
+                        $assetList[$iterator]['asset_unit_id'] = $assetUnit['id'];
                         $assetList[$iterator]['material_request_component_type_slug'] = $systemAssetStatus->slug;
                         $assetList[$iterator]['material_request_component_type_id'] = $systemAssetStatus->id;
                         $iterator++;
@@ -416,6 +417,7 @@ class PurchaseController extends Controller
         ];
         return($data);
     }
+
     public function unitConversion($unit_from_id,$unit_to_id,$quantity_from){
         $unitConversionData = UnitConversion::where('unit_1_id',$unit_from_id)->where('unit_2_id',$unit_to_id)->first();
         if(count($unitConversionData) > 0){

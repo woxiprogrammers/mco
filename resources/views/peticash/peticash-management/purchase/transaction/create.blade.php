@@ -17,6 +17,8 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="unitOptions" value="{{$unitOptions}}">
+    <input id="nosUnit" type="hidden" value="{{$nosUnit}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -37,7 +39,7 @@
                             <div class="container">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/asset/manage">Manage Peticash Purchase Transaction</a>
+                                        <a href="/peticash/peticash-management/purchase/manage">Manage Peticash Purchase Transaction</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
@@ -52,6 +54,7 @@
                                             <form role="form" id="create-peticash-purchase-transaction" class="form-horizontal" method="post" action="/peticash/peticash-management/purchase/transaction/create">
                                                 {!! csrf_field() !!}
                                                 <input type="hidden"  id="csrf-token" name="csrf-token" value="{{ csrf_token() }}">
+                                                <input type="hidden" id="purchase_peticash_transaction_id" name="purchase_peticash_transaction_id">
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
@@ -61,11 +64,11 @@
                                                         &nbsp;&nbsp;&nbsp;
                                                         <div class="col-md-6 mt-radio-inline">
                                                             <label class="mt-radio" style="margin-left: 13px">
-                                                                <input type="radio" name="component_type" id="component_type" value="material" > Material
+                                                                <input type="radio" name="component_type" id="material" value="material" > Material
                                                                 <span></span>
                                                             </label>
                                                             <label class="mt-radio" style="margin-left: 13px">
-                                                                <input type="radio" name="component_type" id="component_type" value="asset"> Asset
+                                                                <input type="radio" name="component_type" id="asset" value="asset"> Asset
                                                                 <span></span>
                                                             </label>
                                                         </div>
@@ -110,13 +113,17 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row" hidden id="category_select">
+                                                    <div class="form-group row"  id="category_select" hidden>
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="qty" class="control-label">Select Category</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" name="miscellaneous_category" id="miscellaneous_category">
+                                                            <select class="form-control" name="miscellaneous_category_id" id="miscellaneous_category">
+                                                                @foreach($miscellaneousCategories as $key => $category)
+                                                                    <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -159,13 +166,7 @@
                                                             </tbody>
                                                         </table>
                                                     </div>
-                                                    {{--<div class="btn-group" style="float: right;margin-top:1%">
-                                                        <div id="sample_editable_1_new" class="btn yellow"><a href="/peticash/peticash-management/purchase/transaction/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                                                Transaction
-                                                            </a>
-                                                        </div>
-                                                    </div>--}}
-                                                    <div class="col-md-offset-3 btn-group">
+                                                    <div class="col-md-offset-3 btn-group generate-grn-button">
                                                         <div class=" btn red" style="margin-left: 26%">
                                                             <a href="javascript:void(0)" style="color: white" onclick="generateGRN()"><i class="fa fa-check"></i> Generate GRN</a>
                                                         </div>
@@ -177,7 +178,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control" id="grn" name="grn" value="1">
+                                                                <input type="text" class="form-control" id="grn" name="grn" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -248,6 +249,8 @@
 <script>
     $(document).ready(function() {
         $("input[type='radio']").change(function(){
+            $('#component_name').val('');
+            $('#category_select').hide();
             $('#component_name').typeahead('destroy');
             var searchIn = $(this).val();
             var site_name = $("#globalProjectSite").val();
@@ -257,11 +260,13 @@
                 case 'material':
                     $("#component_id").val(4);
                     componentID = 4;
+                    $('#category_select').show();
                     validSearchIn = true;
                     break;
 
                 case 'asset':
                     $("#component_id").val(6);
+                    $('#category_select').hide();
                     componentID = 6;
                     validSearchIn = true;
                     break;
@@ -279,12 +284,23 @@
                             if($(window).width()<420){
                                 $("#header").addClass("fixed");
                             }
+
                             return $.map(x, function (data) {
-                                return {
-                                    name:data.material_name,
-                                    unit:data.unit_quantity,
-                                    component_type_id:data.material_request_component_type_id,
-                                };
+                                if(searchIn == 'material'){
+                                    return {
+                                        name:data.material_name,
+                                        unit:data.unit_quantity,
+                                        component_type_id:data.material_request_component_type_id
+                                    };
+                                }else{
+                                    return {
+                                        name:data.asset_name,
+                                        unit:data.asset_unit,
+                                        unit_id:data.asset_unit_id,
+                                        component_type_id:data.material_request_component_type_id
+                                    };
+                                }
+
                             });
                         },
                         wildcard: "%QUERY"
@@ -310,16 +326,30 @@
                         var componentTypeId = datum.component_type_id;
                         $('#component_id').val(componentTypeId);
                         var options = '';
-                        $.each( POData, function( key, value ) {
-                            var unitId = value.unit_id;
-                            var unitName = value.unit_name;
+                        if(searchIn == 'material'){
+                            $.each( POData, function( key, value ) {
+                                var unitId = value.unit_id;
+                                var unitName = value.unit_name;
+                                options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
+                            });
+                        }else{
+                            var unitId = datum.unit_id;
+                            var unitName = POData;
                             options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
-                        });
+                        }
+
                         $('#unit').html(options);
+                        $('#category_select').hide();
                     })
                     .on('typeahead:open', function (obj, datum) {
                         $("#component_id").val(componentID);
-                        $("#unit").html($("#unitOptions").val());
+                        if(searchIn == 'material') {
+                            $("#unit").html($("#unitOptions").val());
+                            $('#category_select').show();
+                        }else{
+                            $("#unit").html($("#nosUnit").val());
+                        }
+
                     });
             }
             $('#quantity').prop('disabled',false);
@@ -334,17 +364,21 @@
             async: true,
             data: {
                 _token: $("input[name='_token']").val(),
-                component_type : $('#component_type').val(),
+                component_type : $("input[name='component_type']:checked").val(),
                 source_name : $('#source_name').val(),
                 component_id : $('#component_id').val(),
                 component_name : $('#component_name').val(),
                 quantity : $('#quantity').val(),
                 unit : $('#unit').val(),
+                miscellaneous_category_id : $('#miscellaneous_category').val(),
                 challan_number : $('#challan_number').val(),
-                bill_amount : $('#bill_amount').val(),
+                bill_amount : $('#bill_amount').val()
             },
             success: function(data,textStatus,xhr){
-
+                $('.post-grn').show();
+                $('.generate-grn-button').hide();
+                $('#grn').val(data.purchase_transaction.grn);
+                $('#purchase_peticash_transaction_id').val(data.purchase_transaction.id);
             },
             error: function(){
 

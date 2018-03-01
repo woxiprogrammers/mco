@@ -1127,7 +1127,7 @@ class PeticashController extends Controller
             $data['in_time'] = ($purchaseTransactionData->in_time != null) ? $purchaseTransactionData->in_time : '';
             $data['out_time'] = ($purchaseTransactionData->out_time) ? $purchaseTransactionData->out_time : '';
             $data['reference_number'] = ($purchaseTransactionData->reference_number != null) ? $purchaseTransactionData->reference_number : '';
-            $data['payment_type'] = $purchaseTransactionData->paymentType->name;
+            $data['payment_type'] = ($purchaseTransactionData->payment_type_id != null) ? $purchaseTransactionData->paymentType->name : '';
             $data['peticash_status_name'] = $purchaseTransactionData->peticashStatus->name;
             $data['remark'] = ($purchaseTransactionData->remark != null) ? $purchaseTransactionData->remark : '' ;
             $data['admin_remark'] = ($purchaseTransactionData->admin_remark == null) ? '' : $purchaseTransactionData->admin_remark;
@@ -1421,6 +1421,11 @@ class PeticashController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
+                if($purchaseTransactionData[$pagination]->peticashStatus->slug == 'grn-generated'){
+                    $button = '<a class="btn blue" href="/peticash/peticash-management/purchase/transaction/edit/'.$purchaseTransactionData[$pagination]->id.'">Edit</a>';;
+                }else{
+                    $button = '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>';
+                }
                 $records['data'][] = [
                     $purchaseTransactionData[$pagination]->id,
                     ucwords($purchaseTransactionData[$pagination]->name),
@@ -1429,8 +1434,8 @@ class PeticashController extends Controller
                     $purchaseTransactionData[$pagination]->bill_amount,
                     $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
                     date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
-                    $purchaseTransactionData[$pagination]->projectSite->project->name.' - '.$purchaseTransactionData[$pagination]->projectSite->name,
-                    '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>'
+                    $purchaseTransactionData[$pagination]->peticashStatus->name,
+                    $button
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -1576,12 +1581,18 @@ class PeticashController extends Controller
 
     public function getPurchaseTransactionCreateView(Request $request){
         try{
-            $units = Unit::where('is_active',true)->select('id','name')->get();
-            $noUnit = Unit::where('slug','nos')->pluck('id','name')->first();
-            return view('peticash.peticash-management.purchase.transaction.create');
+            $miscellaneousCategories = Category::where('is_miscellaneous',true)->select('id','name')->get();
+            $units = Unit::where('is_active',true)->select('id','name')->get()->toArray();
+            $unitOptions = '';
+            foreach($units as $unit){
+                $unitOptions .= '<option value="'.$unit['id'].'">'.$unit['name'].'</option>';
+            }
+            $noUnit = Unit::where('slug','nos')->select('id','name')->first();
+            $nosUnit = '<option value="'.$noUnit['id'].'">'.$noUnit['name'].'</option>';
+            return view('peticash.peticash-management.purchase.transaction.create')->with(compact('unitOptions','nosUnit','miscellaneousCategories'));
         }catch(\Exception $e){
             $data = [
-                'action' => "Get Peticash Purchase Transaction create view",
+                'action' => "Generate GRN Peticash Purchase Transaction",
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -1592,15 +1603,43 @@ class PeticashController extends Controller
 
     public function generateGRN(Request $request){
         try{
+            $projectSiteId = Session::get('global_project_site');
+            $user = Auth::user();
             $status = 200;
             $now = Carbon::now();
+            $componentTypeSlug = MaterialRequestComponentTypes::where('id',$request['component_id'])->pluck('slug')->first();
+            $materialId = Material::where('name',$request['component_name'])->pluck('id')->first();
+            switch ($componentTypeSlug){
+                case 'quotation-material':
+                    $quotationId = Quotation::where('project_site_id',$projectSiteId)->pluck('id')->first();
+                    $purchasePeticashTransaction['reference_id'] = QuotationMaterial::where('quotation_id',$quotationId)->where('material_id',$materialId)->pluck('id')->first();
+                    break;
+
+                case 'system-asset':
+                    $purchasePeticashTransaction['reference_id'] = Asset::where('name',$request['component_name'])->pluck('id')->first();
+                    break;
+
+                case 'new-asset' :
+                    $purchasePeticashTransaction['unit_id'] = Unit::where('slug','nos')->pluck('id')->first();
+                    $data = $request['component_name'];
+                    $purchaseTransaction['reference_id'] = $this->createMaterial($data,'new-asset');
+                    break;
+
+                case 'new-material' :
+                    $data = $request->only('miscellaneous_category_id','bill_amount','quantity');
+                    $data['unit_id'] = $request['unit'];
+                    $data['name'] = $request['component_name'];
+                    $purchasePeticashTransaction['reference_id'] = $this->createMaterial($data,'new-material');
+            }
             $purchasePeticashTransaction = $request->only('source_name','quantity','bill_amount','component_type_id');
             $purchasePeticashTransaction['name'] = $request['component_name'];
             $purchasePeticashTransaction['component_type_id'] = $request['component_id'];
-            $purchasePeticashTransaction['project_site_id'] = Session::get('global_project_site');
+            $purchasePeticashTransaction['project_site_id'] = $projectSiteId;
             $purchasePeticashTransaction['peticash_transaction_type_id'] = PeticashTransactionType::where('slug','hand')->where('type','PURCHASE')->pluck('id')->first();
-            $purchasePeticashTransaction['unit_id'] = $request['unit_id'];
+            $purchasePeticashTransaction['unit_id'] = $request['unit'];
             $purchasePeticashTransaction['bill_number'] = $request['challan_number'];
+            $purchasePeticashTransaction['reference_user_id'] = $user->id;
+            $purchaseTransaction['payment_type_id'] = PaymentType::where('slug','peticash')->pluck('id')->first();
             $currentDate = Carbon::now();
             $monthlyGrnGeneratedCount = GRNCount::where('month',$currentDate->month)->where('year',$currentDate->year)->pluck('count')->first();
             if($monthlyGrnGeneratedCount != null){
@@ -1632,4 +1671,84 @@ class PeticashController extends Controller
         ];
         return response()->json($response,$status);
     }
+
+    public function createMaterial($data,$componentTypeSlug){
+        try{
+            $now = Carbon::now();
+            if($componentTypeSlug == 'new-material') {
+                $materialData['name'] = ucwords(trim($data['name']));
+                $categoryMaterialData['category_id'] = $data['miscellaneous_category_id'];
+                $materialData['rate_per_unit'] = round(($data['bill_amount'] / $data['quantity']),3);
+                $materialData['unit_id'] = $data['unit_id'];
+                $materialData['is_active'] = (boolean)1;
+                $material = Material::create($materialData);
+                $categoryMaterialData['material_id'] = $material['id'];
+                CategoryMaterialRelation::create($categoryMaterialData);
+                $approvedQuotationIds = Quotation::where('quotation_status_id', QuotationStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
+                foreach ($approvedQuotationIds as $quotationId) {
+                    $quotationMaterialData = array();
+                    $quotationMaterialData['material_id'] = $material['id'];
+                    $quotationMaterialData['rate_per_unit'] = round(($data['bill_amount'] / $data['quantity']),3);
+                    $quotationMaterialData['unit_id'] = $data['unit_id'];
+                    $quotationMaterialData['quantity'] = $data['quantity'];
+                    $quotationMaterialData['is_client_supplied'] = false;
+                    $quotationMaterialData['created_at'] = $now;
+                    $quotationMaterialData['updated_at'] = $now;
+                    $quotationMaterialData['quotation_id'] = $quotationId;
+                    QuotationMaterial::create($quotationMaterialData);
+                }
+                $reference_id = $material['id'];
+            }elseif($componentTypeSlug == 'new-asset'){
+                $assetData['name'] = ucwords(trim($data['name']));
+                $assetData['is_active'] = true;
+                $assetData['asset_types_id'] = AssetType::where('slug','other')->pluck('id')->first();
+                $asset = Asset::create($assetData);
+                $reference_id = $asset['id'];
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create New Material/Asset',
+                'exception' => $e->getMessage(),
+                'params' => $data
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $reference_id;
+    }
+
+    public function createPurchaseTransaction(Request $request){
+        try{
+            $purchasePeticashTransaction = PurcahsePeticashTransaction::where('id',$request['purchase_peticash_transaction_id'])->first();
+            $purchasePeticashTransactionData['reference_number'] = $request['reference_number'];
+            $purchasePeticashTransactionData['out_time'] = $purchasePeticashTransactionData['date'] = Carbon::now();
+            $purchasePeticashTransaction['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
+            $purchasePeticashTransaction->update($purchasePeticashTransactionData);
+            $request->session()->flash('success', 'Trasaction completed successfully.');
+            return redirect('/peticash/peticash-management/purchase/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Create Peticash Purchase Transaction",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getPurchaseTransactionEditView(Request $request,$purchasePeticashTransactionId){
+        try{
+            $purchasePeticashTransaction = PurcahsePeticashTransaction::where('id',$purchasePeticashTransactionId)->first();
+            return view('peticash.peticash-management.purchase.transaction.edit')->with(compact('purchasePeticashTransaction'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Generate GRN Peticash Purchase Transaction",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
 }
