@@ -439,7 +439,9 @@ class PurchaseRequestController extends Controller
                     ->where('project_sites.id','=',$purchaseRequests[$pagination]['project_site_id'])
                     ->select('project_sites.name as site_name','projects.name as proj_name', 'clients.company as company')->first()->toArray();
                 $records['data'][$iterator] = [
-                    $this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']),
+                    '<a href="javascript:void(0);" onclick="openDetails('.$purchaseRequests[$pagination]['id'].')">
+                        '.$this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']).'
+                    </a>',
                     $projectdata['company'],
                     $projectdata['proj_name']." - ".$projectdata['site_name'],
                     date('d M Y', strtotime($purchaseRequests[$pagination]['created_at'])),
@@ -744,6 +746,21 @@ class PurchaseRequestController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getPurchaseRequestDetails(Request $request,$purchaseRequestId){
+        try{
+            $purchaseRequest = PurchaseRequest::where('id',$purchaseRequestId)->first();
+            return view('partials.purchase.purchase-request.detail')->with(compact('purchaseRequest'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Request Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
         }
     }
 }

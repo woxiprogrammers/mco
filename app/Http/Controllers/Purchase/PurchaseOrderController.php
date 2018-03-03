@@ -233,8 +233,12 @@ class PurchaseOrderController extends Controller
                     </a></div>';
                 }
                 $records['data'][$iterator] = [
-                    $purchaseOrderList[$pagination]['purchase_order_format_id'],
-                    $purchaseOrderList[$pagination]['purchase_request_format_id'],
+                    '<a href="javascript:void(0);" onclick="openPurchaseOrderDetails('.$purchaseOrderList[$pagination]['purchase_order_id'].')">
+                        '.$purchaseOrderList[$pagination]['purchase_order_format_id'].'
+                    </a>',
+                    '<a href="javascript:void(0);" onclick="openPurchaseRequestDetails('.$purchaseOrderList[$pagination]['purchase_request_id'].')">
+                        '.$purchaseOrderList[$pagination]['purchase_request_format_id'].'
+                    </a>',
                     $purchaseOrderList[$pagination]['client_name'],
                     $purchaseOrderList[$pagination]['project']." - ".$purchaseOrderList[$pagination]['site_name'],
                     date('d M Y',strtotime($purchaseOrderList[$pagination]['created_at'])),
@@ -1387,6 +1391,21 @@ class PurchaseOrderController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getPurchaseOrderDetails(Request $request, $purchaseOrderId){
+        try{
+            $purchaseOrder = PurchaseOrder::where('id',$purchaseOrderId)->first();
+            return view('partials.purchase.purchase-order.component-detail')->with(compact('purchaseOrder'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Order Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
         }
     }
 }
