@@ -9,6 +9,7 @@ use App\CategoryMaterialRelation;
 use App\Client;
 use App\Employee;
 use App\Helper\NumberHelper;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
@@ -47,6 +48,7 @@ use Illuminate\Support\Facades\Session;
 
 class PeticashController extends Controller
 {
+    use NotificationTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -715,7 +717,7 @@ class PeticashController extends Controller
         return response()->json($records);
     }
 
-      public function changeSalaryStatus(Request $request){
+    public function changeSalaryStatus(Request $request){
         try{
             $status = 200;
             foreach($request->txn_ids as $txnId){
@@ -753,6 +755,11 @@ class PeticashController extends Controller
                     }else{
                         $projectSiteWiseAmount[$salaryTxn->project_site_id] = $salaryTxn->amount;
                     }
+                    $projectSite = ProjectSite::where('id',$salaryTxn['project_site_id'])->first();
+                    $webTokens = [$salaryTxn->referenceUser->web_fcm_token];
+                    $mobileTokens = [$salaryTxn->referenceUser->mobile_fcm_token];
+                    $notificationString = $projectSite->project->name.' - '.$projectSite->name.' - Approved payment';
+                    $this->sendPushNotification('Manisha Construction', $notificationString,$webTokens,$mobileTokens,'p-s-r-a');
                 }
             }
             foreach($projectSiteWiseAmount as $projectSiteId => $amount){
@@ -1305,9 +1312,12 @@ class PeticashController extends Controller
                     'peticash_status_id' => PeticashStatus::where('slug','pending')->pluck('id')->first(),
                     'per_day_wages' => $request->employee[$employeeId]['per_day_wages']
                 ];
+                $projectSite = ProjectSite::where('id',$projectSiteId)->first();
                 $peticashTransactionSlug = PeticashTransactionType::where('id',$request->employee[$employeeId]['payment_type'])->pluck('slug')->first();
                 if($peticashTransactionSlug == 'salary'){
                     $peticashRequestSalaryTransactionData['days'] = $request->employee[$employeeId]['days'];
+                    $peticashRequestSalaryTransactionData['amount'] = $request->employee[$employeeId]['amount'];
+                    $peticashRequestSalaryTransactionData['days'] = null;
                     $peticashRequestSalaryTransactionData['amount'] = $request->employee[$employeeId]['amount'];
                 }elseif($peticashTransactionSlug == 'advance'){
                     $peticashRequestSalaryTransactionData['days'] = null;
@@ -1317,6 +1327,18 @@ class PeticashController extends Controller
                     return redirect('/peticash/salary-request/create');
                 }
                 PeticashRequestedSalaryTransaction::create($peticashRequestSalaryTransactionData);
+                $peticashSalaryRequestApproveTokens = User::join('user_has_permissions','user_has_permissions.user_id','=','users.id')
+                    ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                    ->join('user_project_site_relation','user_project_site_relation.user_id','=','users.id')
+                    ->where('permissions.name','ilike','approve-peticash-management')
+                    ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                    ->select('users.web_fcm_token as web_fcm_token','users.mobile_fcm_token')
+                    ->get()->toArray();
+                $webTokens = array_column($peticashSalaryRequestApproveTokens,'web_fcm_token');
+                $mobileTokens = array_column($peticashSalaryRequestApproveTokens,'mobile_fcm_token');
+                $notificationString = $projectSite->project->name.'-'.$projectSite->name.' ';
+                $notificationString .= $projectSite->name.' - Required payment';
+                $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-s-r');
             }
             $request->session()->flash('success', 'Requested Transactions created successfully');
             return redirect('/peticash/peticash-approval-request/manage-salary-list');

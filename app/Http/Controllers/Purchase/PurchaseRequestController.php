@@ -439,7 +439,9 @@ class PurchaseRequestController extends Controller
                     ->where('project_sites.id','=',$purchaseRequests[$pagination]['project_site_id'])
                     ->select('project_sites.name as site_name','projects.name as proj_name', 'clients.company as company')->first()->toArray();
                 $records['data'][$iterator] = [
-                    $this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']),
+                    '<a href="javascript:void(0);" onclick="openDetails('.$purchaseRequests[$pagination]['id'].')">
+                        '.$this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']).'
+                    </a>',
                     $projectdata['company'],
                     $projectdata['proj_name']." - ".$projectdata['site_name'],
                     date('d M Y', strtotime($purchaseRequests[$pagination]['created_at'])),
@@ -571,6 +573,9 @@ class PurchaseRequestController extends Controller
                     /*client Supplied*/
                     $clientId = $vendorIdArray[1];
                     $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
+                    $purchaseRequestFormat = PurchaseRequest::join('purchase_request_components', 'purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                        ->where('purchase_request_components.id', $purchaseRequestComponentIds[0])
+                        ->pluck('purchase_requests.format_id')->first();
                     if(count($purchaseRequestComponentIds) > 0){
                         $purchaseRequestId = PurchaseRequestComponent::where('id', $purchaseRequestComponentIds[0])->pluck('purchase_request_id')->first();
                         $alreadyCreatedPurchaseRequestVendorRelationIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
@@ -581,9 +586,6 @@ class PurchaseRequestController extends Controller
                             ->toArray();
                         PurchaseRequestComponentVendorRelation::whereIn('id', $alreadyCreatedPurchaseRequestVendorRelationIds)->delete();
                     }
-                    $purchaseRequestFormat = PurchaseRequest::join('purchase_request_components', 'purchase_request_components.purchase_request_id','=','purchase_requests.id')
-                                                ->where('purchase_request_components.id', $purchaseRequestComponentIds[0])
-                                                ->pluck('purchase_requests.format_id')->first();
                     if(array_key_exists('checked_vendor_materials',$data)){
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
                             $vendorInfo = Client::findOrFail($clientId)->toArray();
@@ -744,6 +746,21 @@ class PurchaseRequestController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getPurchaseRequestDetails(Request $request,$purchaseRequestId){
+        try{
+            $purchaseRequest = PurchaseRequest::where('id',$purchaseRequestId)->first();
+            return view('partials.purchase.purchase-request.detail')->with(compact('purchaseRequest'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Request Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
         }
     }
 }

@@ -143,6 +143,18 @@
                 redirectionUrl = '/purchase/material-request/manage';
                 break;
 
+            case 'inventory':
+                redirectionUrl = '/inventory/manage';
+                break;
+
+            case 'checklist':
+                redirectionUrl = '/checklist/user-assignment/manage';
+                break;
+
+            case 'peticash':
+                redirectionUrl = '/peticash/peticash-approval-request/manage-salary-list'
+                break;
+
             default :
                 redirectionUrl = '/dashboard';
         }

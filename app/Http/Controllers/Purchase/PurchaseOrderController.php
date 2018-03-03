@@ -9,23 +9,21 @@ use App\CategoryMaterialRelation;
 use App\Client;
 use App\Helper\MaterialProductHelper;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
-use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
 use App\MaterialVersion;
 use App\PaymentType;
 use App\Project;
 use App\ProjectSite;
-use App\PurcahsePeticashTransaction;
 use App\PurchaseOrder;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\PurchaseOrderAdvancePayment;
 use App\PurchaseOrderBill;
-use App\PurchaseOrderBillPayment;
 use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderStatus;
@@ -40,7 +38,6 @@ use App\QuotationStatus;
 use App\UnitConversion;
 use App\User;
 use App\Vendor;
-use Barryvdh\DomPDF\PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -61,6 +58,7 @@ class PurchaseOrderController extends Controller
 {
     use MaterialRequestTrait;
     use InventoryTrait;
+    use NotificationTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -72,6 +70,7 @@ class PurchaseOrderController extends Controller
         $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
         return view('purchase/purchase-order/manage')->with(compact('clients'));
     }
+
     public function getCreateView(Request $request){
         try{
             $purchaseOrderComponentPRIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
@@ -111,9 +110,8 @@ class PurchaseOrderController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
-
     }
-
+    
     public function getListing(Request $request){
         try{
             $postdata = null;
@@ -237,8 +235,12 @@ class PurchaseOrderController extends Controller
                     </a></div>';
                 }
                 $records['data'][$iterator] = [
-                    $purchaseOrderList[$pagination]['purchase_order_format_id'],
-                    $purchaseOrderList[$pagination]['purchase_request_format_id'],
+                    '<a href="javascript:void(0);" onclick="openPurchaseOrderDetails('.$purchaseOrderList[$pagination]['purchase_order_id'].')">
+                        '.$purchaseOrderList[$pagination]['purchase_order_format_id'].'
+                    </a>',
+                    '<a href="javascript:void(0);" onclick="openPurchaseRequestDetails('.$purchaseOrderList[$pagination]['purchase_request_id'].')">
+                        '.$purchaseOrderList[$pagination]['purchase_request_format_id'].'
+                    </a>',
                     $purchaseOrderList[$pagination]['client_name'],
                     $purchaseOrderList[$pagination]['project']." - ".$purchaseOrderList[$pagination]['site_name'],
                     date('d M Y',strtotime($purchaseOrderList[$pagination]['created_at'])),
@@ -264,6 +266,7 @@ class PurchaseOrderController extends Controller
             $records = array();
         }
     }
+
     public function createMaterial(Request $request){
         try{
             $now = Carbon::now();
@@ -301,6 +304,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function closePurchaseOrder(Request $request){
         try{
             $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();
@@ -340,6 +344,7 @@ class PurchaseOrderController extends Controller
         }
         return response()->json($message);
     }
+
     public function getEditView(Request $request,$id){
         try{
             $user = Auth::user();
@@ -441,6 +446,7 @@ class PurchaseOrderController extends Controller
                 abort(500);
         }
     }
+
     public function getPurchaseOrderComponentDetails(Request $request){
         try{
             $data = $request->all();
@@ -495,6 +501,7 @@ class PurchaseOrderController extends Controller
            return response()->json($message,$status);
         }
     }
+
     public function getPurchaseOrderBillDetails(Request $request){
         try{
                 $purchaseOrderBillData = PurchaseOrderBill::where('id',$request['po_id'])->first();
@@ -539,6 +546,10 @@ class PurchaseOrderController extends Controller
                     PurchaseOrderTransactionImage::create($transactionImageData);
                 }
             }
+            $user = Auth::user();
+            $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
+            $projectInfo = $purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
+            $mainNotificationString = '4-'.$projectInfo.' '.$user->first_name.' '.$user->last_name.' Material Received. ';
             foreach($request->component_data as $purchaseOrderComponentId => $purchaseOrderComponentData){
                 $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($purchaseOrderComponentId);
                 $purchaseOrderTransactionComponentData = [
@@ -548,6 +559,28 @@ class PurchaseOrderController extends Controller
                     'purchase_order_transaction_id' => $purchaseOrderTransaction->id
                 ];
                 PurchaseOrderTransactionComponent::create($purchaseOrderTransactionComponentData);
+                $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
+                    ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
+                    ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                    ->join('purchase_order_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
+                    ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                    ->where('purchase_orders.id', $purchaseOrder->id)
+                    ->where('purchase_request_components.id', $purchaseOrderComponent->purchase_request_component_id)
+                    ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
+                    ->get()->toArray();
+                $purchaseRequestApproveUserToken = User::join('material_request_component_history_table','material_request_component_history_table.user_id','=','users.id')
+                    ->join('material_request_components','material_request_component_history_table.material_request_component_id','=','material_request_components.id')
+                    ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                    ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','material_request_component_history_table.component_status_id')
+                    ->whereIn('purchase_request_component_statuses.slug',['p-r-manager-approved','p-r-admin-approved'])
+                    ->where('purchase_request_components.id',$purchaseOrderComponent->purchase_request_component_id)
+                    ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
+                    ->get()->toArray();
+                $webTokens = array_merge(array_column($materialRequestUserToken,'web_fcm_token'), array_column($purchaseRequestApproveUserToken,'web_fcm_token'));
+                $mobileTokens = array_merge(array_column($materialRequestUserToken,'mobile_fcm_token'), array_column($purchaseRequestApproveUserToken,'mobile_fcm_token'));
+                $notificationString = $mainNotificationString.' '.$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
+                $notificationString .= ' '.$purchaseOrderTransactionComponentData->quantity.' '.$purchaseOrderTransactionComponentData->unit->name;
+                $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-b');
                 $projectSiteId = $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id;
                 $inventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',$purchaseOrderComponentData['name'])->first();
                 if($inventoryComponent == null){
@@ -591,6 +624,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function createAdvancePayment(Request $request){
         try{
             $advancePaymentData = $request->except('_token');
@@ -1035,22 +1069,6 @@ class PurchaseOrderController extends Controller
         return response()->json($response,$status);
     }
 
-    public function getTransactionDetails(Request $request,$purchaseOrderTransaction){
-        try{
-            // Get Details
-        }catch(\Exception $e){
-            $data = [
-                'action' => 'Get Purchase Order Transaction Details',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-            $response = array();
-            $status = 500;
-            return response()->json($response,$status);
-        }
-    }
-
     public function checkGeneratedGRN(Request $request,$purchaseOrder){
         try{
             $response = array();
@@ -1397,6 +1415,21 @@ class PurchaseOrderController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getPurchaseOrderDetails(Request $request, $purchaseOrderId){
+        try{
+            $purchaseOrder = PurchaseOrder::where('id',$purchaseOrderId)->first();
+            return view('partials.purchase.purchase-order.component-detail')->with(compact('purchaseOrder'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Order Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
         }
     }
 }
