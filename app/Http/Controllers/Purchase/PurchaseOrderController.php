@@ -70,6 +70,7 @@ class PurchaseOrderController extends Controller
         $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
         return view('purchase/purchase-order/manage')->with(compact('clients'));
     }
+
     public function getCreateView(Request $request){
         try{
             $purchaseOrderComponentPRIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
@@ -110,6 +111,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+    
     public function getListing(Request $request){
         try{
             $postdata = null;
@@ -264,6 +266,7 @@ class PurchaseOrderController extends Controller
             $records = array();
         }
     }
+
     public function createMaterial(Request $request){
         try{
             $now = Carbon::now();
@@ -301,6 +304,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function closePurchaseOrder(Request $request){
         try{
             $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();
@@ -324,6 +328,7 @@ class PurchaseOrderController extends Controller
         }
         return response()->json($message);
     }
+
     public function reopenPurchaseOrder(Request $request){
         try{
             $purchase_order_data['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','re-open')->pluck('id')->first();
@@ -339,6 +344,7 @@ class PurchaseOrderController extends Controller
         }
         return response()->json($message);
     }
+
     public function getEditView(Request $request,$id){
         try{
             $user = Auth::user();
@@ -440,6 +446,7 @@ class PurchaseOrderController extends Controller
                 abort(500);
         }
     }
+
     public function getPurchaseOrderComponentDetails(Request $request){
         try{
             $data = $request->all();
@@ -494,6 +501,7 @@ class PurchaseOrderController extends Controller
            return response()->json($message,$status);
         }
     }
+
     public function getPurchaseOrderBillDetails(Request $request){
         try{
                 $purchaseOrderBillData = PurchaseOrderBill::where('id',$request['po_id'])->first();
@@ -506,6 +514,7 @@ class PurchaseOrderController extends Controller
             return response()->json($message,$status);
         }
     }
+
     public function createTransaction(Request $request){
         try{
             $purchaseOrderTransactionData = $request->except('_token','pre_grn_image','post_grn_image','component_data','vendor_name','purchase_order_id','purchase_order_transaction_id');
@@ -615,6 +624,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function createAdvancePayment(Request $request){
         try{
             $advancePaymentData = $request->except('_token');
@@ -638,6 +648,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function changeStatus(Request $request){
         try{
             PurchaseOrderBill::where('id',$request['purchase_order_bill_id'])->update(['is_paid' => false, 'is_amendment' => false,'remark' => $request['remark']]);
@@ -653,6 +664,7 @@ class PurchaseOrderController extends Controller
             return Redirect::Back();
         }
     }
+
     public function getPurchaseRequestComponents(Request $request,$purchaseRequestId){
         try{
             $purchaseOrderComponentIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
@@ -729,6 +741,7 @@ class PurchaseOrderController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
     public function getClientProjectName(Request $request ,$purchaseRequestId){
         try{
             $status = 200;
@@ -748,6 +761,7 @@ class PurchaseOrderController extends Controller
         }
         return response()->json($response,$status);
     }
+
     public function getOrderDetails(Request $request,$purchaseRequestId){
         try{
             $purchaseOrderComponentIds = PurchaseOrderComponent::pluck('purchase_request_component_id');
@@ -824,6 +838,7 @@ class PurchaseOrderController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
     public function downloadPoPDF(Request $request, $purchaseOrder) {
         try {
             $pdfTitle = 'Purchase Order';
@@ -917,6 +932,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function createAsset(Request $request){
         try{
             $is_present = Asset::where('name','ilike',$request->name)->pluck('id')->toArray();
@@ -939,6 +955,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function getComponentDetails(Request $request){
         try{
             $purchaseOrderComponentIds = $request->purchase_order_component_id;
@@ -1000,6 +1017,7 @@ class PurchaseOrderController extends Controller
             return response()->json($response,$status);
         }
     }
+
     public function preGrnImageUpload(Request $request){
         try{
             $generatedGrn = $this->generateGRN();
@@ -1050,6 +1068,7 @@ class PurchaseOrderController extends Controller
         }
         return response()->json($response,$status);
     }
+
     public function checkGeneratedGRN(Request $request,$purchaseOrder){
         try{
             $response = array();
@@ -1082,6 +1101,7 @@ class PurchaseOrderController extends Controller
         }
         return response()->json($response,$status);
     }
+
     public function getTransactionEditView(Request $request, $purchaseOrderTransaction){
         try{
             $purchaseOrder = $purchaseOrderTransaction->purchaseOrder;
@@ -1197,6 +1217,7 @@ class PurchaseOrderController extends Controller
             return response()->json([],500);
         }
     }
+
     public function transactionEdit(Request $request,$purchaseOrderTransaction){
         try{
             $purchaseOrderTransactionData = $request->except('_token','component_data','vendor_name','purchase_order_id');
@@ -1221,6 +1242,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function getComponentTaxData(Request $request,$purchaseRequestComponent){
         try{
             $data = [
@@ -1266,6 +1288,7 @@ class PurchaseOrderController extends Controller
             return response()->json($response,$status);
         }
     }
+
     public function getAdvancePaymentListing(Request $request){
         try{
             $status = 200;
@@ -1301,6 +1324,7 @@ class PurchaseOrderController extends Controller
         }
         return response()->json($records,$status);
     }
+
     public function editPurchaseOrder(Request $request,$purchaseOrder){
         try{
             $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($request->purchase_order_component_id);
