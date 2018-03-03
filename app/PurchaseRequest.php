@@ -30,4 +30,8 @@ class PurchaseRequest extends Model
     public function onBehalfOfUser(){
         return $this->belongsTo('App\User','behalf_of_user_id');
     }
+
+    public function purchaseRequestComponents(){
+        return $this->hasMany('App\PurchaseRequestComponent','purchase_request_id');
+    }
 }

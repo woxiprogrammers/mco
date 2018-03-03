@@ -86,9 +86,9 @@ function componentTaxDetailSubmit(){
         var sgst_percentage = $("input[name='data["+componentRelationId+"][sgst_percentage]'").val();
         var igst_percentage = $("input[name='data["+componentRelationId+"][igst_percentage]'").val();
         var rate_with_tax = parseFloat(rate) + parseFloat(rate * (cgst_percentage/100)) + parseFloat(rate * (sgst_percentage/100)) + parseFloat(rate * (igst_percentage/100));
-        $("#componentRow-"+componentRelationId+" .rate-without-tax").text(rate);
-        $("#componentRow-"+componentRelationId+" .rate-with-tax").text(rate_with_tax);
-        $("#componentRow-"+componentRelationId+" .total-with-tax").text($("input[name='data["+componentRelationId+"][total]'").val());
+        $("#componentRow-"+componentRelationId+" .rate-without-tax").text(customRound(rate));
+        $("#componentRow-"+componentRelationId+" .rate-with-tax").text(customRound(rate_with_tax));
+        $("#componentRow-"+componentRelationId+" .total-with-tax").text(customRound($("input[name='data["+componentRelationId+"][total]'").val()));
     }
 
     $('#detailsModal').modal('toggle');
