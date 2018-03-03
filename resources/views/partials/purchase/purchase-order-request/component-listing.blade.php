@@ -12,12 +12,12 @@
         <td style="width: 15%"><span> {{$purchaseRequestComponent['name']}} </span></td>
         <td style="width: 10%"><span> {{$purchaseRequestComponent['quantity']}} </span></td>
         <td style="width: 10%;"><span> {{$purchaseRequestComponent['unit']}} </span></td>
-        <td style="width: 10%"><span class="rate-without-tax">{!!  $purchaseRequestComponent['rate_per_unit'] !!} </span></td>
-        <td style="width: 10%"><span class="rate-with-tax"> {!!  $purchaseRequestComponent['rate_per_unit'] !!} </span></td>
+        <td style="width: 10%"><span class="rate-without-tax">{!!  \App\Helper\MaterialProductHelper::customRound($purchaseRequestComponent['rate_per_unit']) !!} </span></td>
+        <td style="width: 10%"><span class="rate-with-tax"> {!!  \App\Helper\MaterialProductHelper::customRound($purchaseRequestComponent['rate_per_unit']) !!} </span></td>
         @if($purchaseRequestComponent['is_client'] == true)
             <td style="width: 10%"><span class="total-with-tax"> - </span></td>
         @else
-            <td style="width: 10%"><span class="total-with-tax"> {!! $purchaseRequestComponent['quantity'] * $purchaseRequestComponent['rate_per_unit'] !!} </span></td>
+            <td style="width: 10%"><span class="total-with-tax"> {!! \App\Helper\MaterialProductHelper::customRound($purchaseRequestComponent['quantity'] * $purchaseRequestComponent['rate_per_unit']) !!} </span></td>
         @endif
         <td style="width: 10%">
             <a class="btn blue" href="javascript:void(0);" onclick="openDetailsModal(this,{{$purchaseRequestComponent['vendor_relation_id']}})">
