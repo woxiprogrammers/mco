@@ -137,6 +137,40 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="purchaseRequestDetailModel" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header" style="padding-bottom:10px">
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-6"><center><h4 class="modal-title" id="exampleModalLongTitle">Purchase Request Details</h4></center></div>
+                            <div class="col-md-3"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="purchaseOrderDetailModel" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header" style="padding-bottom:10px">
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-6"><center><h4 class="modal-title" id="exampleModalLongTitle">Purchase Order Details</h4></center></div>
+                            <div class="col-md-3"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     </div>
 @endsection
@@ -189,6 +223,37 @@
             });
         });
 
+        function openPurchaseRequestDetails(purchaseRequestId){
+            $.ajax({
+                url: '/purchase/purchase-request/get-detail/'+purchaseRequestId+'?_token='+$("input[name='_token']").val(),
+                type: 'GET',
+                async: true,
+                success: function(data,textStatus,xhr){
+                    $("#purchaseRequestDetailModel .modal-body").html(data);
+                    $("#purchaseRequestDetailModel").modal('show');
+                },
+                error:function(errorData){
+                    alert("Something went wrong");
+                }
+
+            });
+        }
+
+        function openPurchaseOrderDetails(purchaseOrderId){
+            $.ajax({
+                url: '/purchase/purchase-order/get-detail/'+purchaseOrderId+'?_token='+$("input[name='_token']").val(),
+                type: 'GET',
+                async: true,
+                success: function(data,textStatus,xhr){
+                    $("#purchaseOrderDetailModel .modal-body").html(data);
+                    $("#purchaseOrderDetailModel").modal('show');
+                },
+                error:function(errorData){
+                    alert("Something went wrong");
+                }
+
+            });
+        }
 
     </script>
 @endsection
