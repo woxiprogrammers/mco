@@ -233,7 +233,7 @@
                     $("#purchaseRequestDetailModel").modal('show');
                 },
                 error:function(errorData){
-                    alert(errorData);
+                    alert("Something went wrong");
                 }
 
             });
@@ -249,7 +249,7 @@
                     $("#purchaseOrderDetailModel").modal('show');
                 },
                 error:function(errorData){
-                    alert(errorData);
+                    alert("Something went wrong");
                 }
 
             });
