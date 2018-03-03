@@ -14,6 +14,7 @@ use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentTypes;
 use App\MaterialVersion;
+use App\Module;
 use App\PurchaseOrder;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderComponentImage;
@@ -26,6 +27,7 @@ use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentVendorMailInfo;
 use App\Unit;
 use App\User;
+use App\UserLastLogin;
 use App\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -183,6 +185,7 @@ class PurchaseOrderRequestController extends Controller
     }
     public function listing(Request $request){
         try{
+            $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
                 $purchaseOrderRequestsData = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
@@ -218,6 +221,20 @@ class PurchaseOrderRequestController extends Controller
                             </ul>
                         </div>'
                 ];
+            }
+            $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                ->where('modules.slug','purchase-order-request')
+                ->where('user_last_logins.user_id',$loggedInUser->id)
+                ->pluck('user_last_logins.id')
+                ->first();
+            if($lastLogin == null){
+                UserLastLogin::create([
+                    'user_id' => $loggedInUser->id,
+                    'module_id' => Module::where('slug','purchase-order-request')->pluck('id')->first(),
+                    'last_login' => Carbon::now()
+                ]);
+            }else{
+                UserLastLogin::where('id', $lastLogin)->update(['last_login' => Carbon::now()]);
             }
             $status = 200;
         }catch(\Exception $e){
