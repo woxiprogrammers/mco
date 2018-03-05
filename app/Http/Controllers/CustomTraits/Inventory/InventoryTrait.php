@@ -51,7 +51,7 @@ trait InventoryTrait{
                 $notificationString = $inventoryComponentTransfer->inventoryComponent->projectSite->project->name.'-'.$inventoryComponentTransfer->inventoryComponent->projectSite->name.' ';
                 $notificationString .= 'Stock transferred to '.$inventoryComponentTransfer->source_name.' ';
                 $notificationString .= $inventoryComponentTransfer->inventoryComponent.' - '.$inventoryComponentTransfer->quantity.' and '.$inventoryComponentTransfer->unit->name;
-                $this->sendPushNotification('Manish Construction',$notificationString,$webTokens,$mobileTokens,'c-m-s-t');
+                $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-m-s-t');
             }elseif($inventoryComponentTransfer->transfer_type_id == $userOutTypeId){
                 $purchaseRequestApproveAclTokens = User::join('user_has_permissions','user_has_permissions.user_id','=','users.id')
                     ->join('permissions','permissions.id','=','user_has_permissions.permission_id')

@@ -264,6 +264,7 @@ class PurchaseOrderController extends Controller
             $records = array();
         }
     }
+
     public function createMaterial(Request $request){
         try{
             $now = Carbon::now();
@@ -301,6 +302,7 @@ class PurchaseOrderController extends Controller
             abort(500);
         }
     }
+
     public function closePurchaseOrder(Request $request){
         try{
             $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();

@@ -191,26 +191,14 @@
                                                             </div>
                                                         </div>
                                                         <div class="form-group">
+                                                            <label class="control-label">Select Images :</label>
+                                                            <input id="imageupload" type="file" class="btn blue" multiple />
+                                                            <br />
                                                             <div class="row">
-                                                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
-                                                            </div>
-                                                            <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: 26%">
-                                                                    Browse</a>
-                                                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                    <i class="fa fa-share"></i> Upload Files </a>
-                                                            </div>
-                                                            <table class="table table-bordered table-hover" style="width: 554px; margin-left: 26%; margin-top: 1%">
-                                                                <thead>
-                                                                <tr role="row" class="heading">
-                                                                    <th> Image </th>
-                                                                    <th> Action </th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody id="show-product-images">
+                                                                <div id="preview-image" class="row">
 
-                                                                </tbody>
-                                                            </table>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="form-actions noborder row">
                                                             <div class="col-md-offset-3" style="margin-left: 26%">
@@ -241,9 +229,8 @@
     <script src="/assets/custom/user/user.js" type="application/javascript"></script>
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/admin/asset/image-datatable.js"></script>
-    <script src="/assets/custom/admin/asset/image-upload.js"></script>
-    <script src="/assets/custom/admin/asset/asset.js" type="application/javascript"></script>
+    <script src="/assets/custom/peticash/purchase/image-datatable.js"></script>
+    <script src="/assets/custom/peticash/purchase/image-upload.js"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
@@ -355,9 +342,37 @@
             $('#quantity').prop('disabled',false);
             $('#unit').prop('disabled',false);
         });
+
+        $("#imageupload").on('change', function () {
+            var countFiles = $(this)[0].files.length;
+            var imgPath = $(this)[0].value;
+            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+            var image_holder = $("#preview-image");
+            image_holder.empty();
+            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                if (typeof (FileReader) != "undefined") {
+                    for (var i = 0; i < countFiles; i++) {
+                        var reader = new FileReader()
+                        reader.onload = function (e) {
+                            var imagePreview = '<div class="col-md-2"><input type="hidden" name="bill_images[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                            image_holder.append(imagePreview);
+                        };
+                        image_holder.show();
+                        reader.readAsDataURL($(this)[0].files[i]);
+                    }
+                } else {
+                    alert("It doesn't supports");
+                }
+            } else {
+                alert("Select Only images");
+            }
+        });
     });
 
     function generateGRN(){
+        var images = [];
+        images = $('.product-image-name').val();
+        console.log($('.product-image-name').length);
         $.ajax({
             url: '/peticash/peticash-management/purchase/transaction/generate-grn',
             type: 'POST',
@@ -372,7 +387,8 @@
                 unit : $('#unit').val(),
                 miscellaneous_category_id : $('#miscellaneous_category').val(),
                 challan_number : $('#challan_number').val(),
-                bill_amount : $('#bill_amount').val()
+                bill_amount : $('#bill_amount').val(),
+                //images : images
             },
             success: function(data,textStatus,xhr){
                 $('.post-grn').show();
