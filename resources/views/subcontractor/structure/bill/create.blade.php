@@ -62,11 +62,9 @@
                                                             </td>
                                                             <td>
                                                                 <input type="text" class="form-control description" name="description" id="description">
-                                                                {{--{!! $subcontractorBill['description'] !!}--}}
                                                             </td>
                                                             <td>
                                                                 <input type="text" class="form-control" name="qty" id="quantity" onkeyup="calculateSubTotal(this)">
-                                                                {{--{!! $subcontractorBill['qty'] !!}--}}
                                                             </td>
                                                             <td>
                                                                 <span id="rate">{!! $subcontractorStructure['rate'] !!}</span>
