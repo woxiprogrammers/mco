@@ -148,7 +148,7 @@ class InventoryManageController extends Controller
                     $mobileTokens = [$inventoryTransfer->user->mobile_fcm_token];
                     $notificationString = $inventoryTransfer->inventoryComponent->projectSite->project->name.'-'.$inventoryTransfer->inventoryComponent->projectSite->name.' ';
                     $notificationString .= 'Stock transferred to '.$inventoryTransfer->source_name.' Approved ';
-                    $notificationString .= $inventoryTransfer->inventoryComponent.' - '.$inventoryTransfer->quantity.' and '.$inventoryTransfer->unit->name;
+                    $notificationString .= $inventoryTransfer->inventoryComponent->name.' - '.$inventoryTransfer->quantity.' and '.$inventoryTransfer->unit->name;
                     $this->sendPushNotification('Manish Construction',$notificationString,$webTokens,$mobileTokens,'c-m-s-t-a');
                 }
             }

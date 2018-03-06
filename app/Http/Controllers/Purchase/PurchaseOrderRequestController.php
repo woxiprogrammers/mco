@@ -14,6 +14,7 @@ use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\Material;
 use App\MaterialRequestComponentTypes;
 use App\MaterialVersion;
+use App\Module;
 use App\PurchaseOrder;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderComponentImage;
@@ -26,6 +27,7 @@ use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentVendorMailInfo;
 use App\Unit;
 use App\User;
+use App\UserLastLogin;
 use App\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -39,10 +41,11 @@ use Illuminate\Support\Facades\Session;
 
 class PurchaseOrderRequestController extends Controller
 {
+    use MaterialRequestTrait;
+    use NotificationTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
-
     public function getManageView(Request $request){
         try{
             return view('purchase.purchase-order-request.manage');
@@ -55,7 +58,6 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
-
     public function getCreateView(Request $request){
         try{
             return view('purchase.purchase-order-request.create');
@@ -68,7 +70,6 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
-
     public function createPurchaseOrderRequest(Request $request){
         try{
             $user = Auth::user();
@@ -182,9 +183,9 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
-
     public function listing(Request $request){
         try{
+            $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
                 $purchaseOrderRequestsData = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
@@ -221,6 +222,20 @@ class PurchaseOrderRequestController extends Controller
                         </div>'
                 ];
             }
+            $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                ->where('modules.slug','purchase-order-request')
+                ->where('user_last_logins.user_id',$loggedInUser->id)
+                ->pluck('user_last_logins.id')
+                ->first();
+            if($lastLogin == null){
+                UserLastLogin::create([
+                    'user_id' => $loggedInUser->id,
+                    'module_id' => Module::where('slug','purchase-order-request')->pluck('id')->first(),
+                    'last_login' => Carbon::now()
+                ]);
+            }else{
+                UserLastLogin::where('id', $lastLogin)->update(['last_login' => Carbon::now()]);
+            }
             $status = 200;
         }catch(\Exception $e){
             $data = [
@@ -234,7 +249,6 @@ class PurchaseOrderRequestController extends Controller
         }
         return response()->json($records,$status);
     }
-
     public function getEditView(Request $request,$purchaseOrderRequest){
         try{
             $purchaseOrderRequestComponents = array();
@@ -285,7 +299,6 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
-
     public function purchaseRequestAutoSuggest(Request $request,$keyword){
         try{
             if(Session::has('global_project_site')){
@@ -332,7 +345,6 @@ class PurchaseOrderRequestController extends Controller
         }
         return response()->json($purchaseRequests,$status);
     }
-
     public function getPurchaseRequestComponentDetails(Request $request){
         try{
             $purchaseRequestComponents = PurchaseRequestComponent::where('purchase_request_id', $request->purchase_request_id)->get();
@@ -391,7 +403,6 @@ class PurchaseOrderRequestController extends Controller
             return response()->json([], 500);
         }
     }
-
     public function getComponentTaxDetails(Request $request, $purchaseRequestComponentVendorRelation){
         try{
             $purchaseRequestComponentData = array();
@@ -438,18 +449,13 @@ class PurchaseOrderRequestController extends Controller
             return response()->json([], 500);
         }
     }
-
-    use MaterialRequestTrait;
-    use NotificationTrait;
-
-
     public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
         try{
             if($request->has('approved_purchase_order_request_relation')){
                 if(Session::has('global_project_site')){
                     $projectSiteId = Session::get('global_project_site');
                 }else{
-                    $projectSiteId = $purchaseOrderRequest->purchaseOrderRequest->purchaseRequest->project_site_id;
+                    $projectSiteId = $purchaseOrderRequest->purchaseRequest->project_site_id;
                 }
                 $user = Auth::user();
                 foreach($request->approved_purchase_order_request_relation as $vendorId => $purchaseOrderRequestComponentArray){
@@ -488,6 +494,24 @@ class PurchaseOrderRequestController extends Controller
                     }
                     $vendorInfo['materials'] = array();
                     $purchaseOrder = PurchaseOrder::create($purchaseOrderData);
+                    $webTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token];
+                    $mobileTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
+                    $purchaseRequestComponentIds = array_column(($purchaseOrder->purchaseOrderComponent->toArray()),'purchase_request_component_id');
+                    $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
+                        ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
+                        ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                        ->join('purchase_order_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
+                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                        ->where('purchase_orders.id', $purchaseOrder->id)
+                        ->whereIn('purchase_request_components.id', $purchaseRequestComponentIds)
+                        ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
+                        ->get()->toArray();
+                    $webTokens = array_merge($webTokens, array_column($materialRequestUserToken,'web_fcm_token'));
+                    $mobileTokens = array_merge($mobileTokens, array_column($materialRequestUserToken,'mobile_fcm_token'));
+                    $notificationString = '3 -'.$purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
+                    $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Order Created.';
+                    $notificationString .= 'PO number: '.$purchaseOrder->format_id;
+                    $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-o');
                     $iterator = 0;
                     foreach($purchaseOrderRequestComponentArray as $purchaseOrderRequestComponentId){
                         $vendorInfo['materials'][$iterator] = array();
@@ -636,24 +660,6 @@ class PurchaseOrderRequestController extends Controller
                         }
                         $iterator++;
                     }
-                    $webTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token];
-                    $mobileTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
-                    $purchaseRequestComponentIds = array_column($purchaseOrder->purchaseOrderComponent->toArray(),'purchase_request_component_id');
-                    $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
-                        ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
-                        ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
-                        ->join('purchase_order_components','purchase_order_components.purchase_request_component_id','=','purchase_request_components.id')
-                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
-                        ->where('purchase_orders.id', $purchaseOrder->id)
-                        ->whereIn('purchase_request_components.id', $purchaseRequestComponentIds)
-                        ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
-                        ->get()->toArray();
-                    $webTokens = array_merge($webTokens, array_column($materialRequestUserToken,'web_fcm_token'));
-                    $mobileTokens = array_merge($mobileTokens, array_column($materialRequestUserToken,'mobile_fcm_token'));
-                    $notificationString = '3 -'.$purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
-                    $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Order Created.';
-                    $notificationString .= 'PO number: '.$purchaseOrder->format_id;
-                    $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-o');
                     if(count($vendorInfo['materials']) > 0){
                         $projectSiteInfo = array();
                         $projectSiteInfo['project_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;
@@ -667,7 +673,8 @@ class PurchaseOrderRequestController extends Controller
                         $pdf = App::make('dompdf.wrapper');
                         $pdfFlag = "purchase-order-listing-download";
                         $pdfTitle = 'Purchase Order';
-                        $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle')));
+                        $formatId = $purchaseOrder->format_id;
+                        $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle','formatId')));
                         $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                         $pdfFileName = sha1($vendorId).'.pdf';
                         $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
@@ -680,7 +687,7 @@ class PurchaseOrderRequestController extends Controller
                         }
                         file_put_contents($pdfUploadPath,$pdfContent);
                         $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        $mailMessage = 'Please check the P.O. attached herewith';
+                        $mailMessage = 'Please check the Purchase Order ('.$purchaseOrder->format_id.') attached herewith';
                         Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
                             $message->subject('Testing with attachment');
                             $message->to($mailData['toMail']);

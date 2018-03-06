@@ -612,8 +612,10 @@ trait BillTrait{
             $bill['date'] = $request->date;
             $bill['performa_invoice_date'] = $request->performa_invoice_date;
             $bill['discount_amount'] = $request->discount_amount;
+            if($request->assign_bank != 'default') {
+                $bill['bank_info_id'] = $request->assign_bank;
+            }
             $bill['discount_description'] = $request->discount_description;
-            $bill['bank_info_id'] = $request->assign_bank;
             $bill_created = Bill::create($bill);
             foreach($request['quotation_product_id'] as $key => $value){
                 $bill_quotation_product['bill_id'] = $bill_created['id'];
@@ -1067,6 +1069,9 @@ trait BillTrait{
             $billData['discount_amount'] = $request->discount_amount;
             $billData['discount_description'] = $request->discount_description;
             $billData['bank_info_id'] = $request->assign_bank;
+            if($request->assign_bank != 'default') {
+                $billData['bank_info_id'] = $request->assign_bank;
+            }
             Bill::where('id',$bill->id)->update($billData);
             $products = $request->quotation_product_id;
             $alreadyExistQuotationProductIds = BillQuotationProducts::where('bill_id',$bill->id)->pluck('quotation_product_id')->toArray();

@@ -237,9 +237,9 @@
                     <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?>
                     @if($hasPurchasePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        @if(($purchaseRequestNotificationCount + $materialRequestNotificationCount) > 0)
+                        @if(($purchaseRequestNotificationCount + $materialRequestNotificationCount + $purchaseOrderRequestNotificationCount + $purchaseOrderNotificationCount) > 0)
                             <a> Purchase
-                                <span class="badge badge-success">{!! $purchaseRequestNotificationCount + $materialRequestNotificationCount !!}</span>
+                                <span class="badge badge-success">{!! $purchaseRequestNotificationCount + $materialRequestNotificationCount + $purchaseOrderRequestNotificationCount + $purchaseOrderNotificationCount!!}</span>
                             </a>
                         @else
                             <a> Purchase
@@ -266,11 +266,17 @@
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order-request/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Purchase Order Request
+                                    @if(($purchaseOrderRequestNotificationCount) > 0)
+                                        <span class="badge badge-success"><b>{{$purchaseOrderRequestNotificationCount}}</b></span>
+                                    @endif
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-bars"></i> Purchase Order
+                                    @if($purchaseOrderNotificationCount > 0)
+                                        <span class="badge badge-success"><b>{{$purchaseOrderNotificationCount}}</b></span>
+                                    @endif
                                 </a>
                             </li>
                             <li aria-haspopup="true">
@@ -290,7 +296,9 @@
                     @if($hasInventoryPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
-                                <span class="arrow"></span>
+                                @if(($inventorySiteTransferNotificationCount) > 0)
+                                    <span class="badge badge-success">{!! $inventorySiteTransferNotificationCount !!}</span>
+                                @endif
                             </a>
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
@@ -301,6 +309,9 @@
                                 <li aria-haspopup="true">
                                     <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-sitemap"></i> Site Transfer
+                                        @if(($inventorySiteTransferNotificationCount) > 0)
+                                            <span class="badge badge-success">{!! $inventorySiteTransferNotificationCount !!}</span>
+                                        @endif
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
@@ -374,7 +385,9 @@
                     @if($hasPeticashPermission  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Peticash
-                            <span class="arrow"></span>
+                            @if(($peticashSalaryRequestApprovalNotificationCount) > 0)
+                                <span class="badge badge-success">{!! $peticashSalaryRequestApprovalNotificationCount !!}</span>
+                            @endif
                         </a>
                         <ul class="dropdown-menu pull-left">
                             @if($user->hasPermissionTo('view-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
@@ -395,6 +408,9 @@
                                 <li aria-haspopup="true">
                                     <a href="/peticash/peticash-approval-request/manage-salary-list" class="nav-link nav-toggle ">
                                         <i class="fa fa-check"></i> Peticash Salary Request Approval
+                                        @if(($peticashSalaryRequestApprovalNotificationCount) > 0)
+                                            <span class="badge badge-success">{!! $peticashSalaryRequestApprovalNotificationCount !!}</span>
+                                        @endif
                                     </a>
                                 </li>
                             @endif
