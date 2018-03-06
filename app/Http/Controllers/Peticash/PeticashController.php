@@ -1660,21 +1660,22 @@ class PeticashController extends Controller
             }else{
                 GRNCount::create(['month'=> $currentDate->month, 'year'=> $currentDate->year,'count' => $serialNumber]);
             }
-
             if(array_has($request,'images')){
                 $user = Auth::user();
-                $sha1UserId = sha1($user['id']);
                 $sha1PurchaseTransactionId = sha1($purchaseTransactionId);
                 foreach($request['images'] as $key1 => $imageName){
-                    $tempUploadFile = public_path().env('PETICASH_PURCHASE_TRANSACTION_TEMP_IMAGE_UPLOAD').$sha1UserId.DIRECTORY_SEPARATOR.$imageName;
+                    $tempUploadFile = public_path().$imageName;
                     if(File::exists($tempUploadFile)){
                         $imageUploadNewPath = public_path().env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseTransactionId;
                         if(!file_exists($imageUploadNewPath)) {
                             File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
                         }
-                        $imageUploadNewPath .= DIRECTORY_SEPARATOR.$imageName;
+                        $imagePath = $imageName;
+                        $imageName = explode("/", $imagePath);
+                        $filename = $imageName[5];
+                        $imageUploadNewPath .= DIRECTORY_SEPARATOR.$filename;
                         File::move($tempUploadFile,$imageUploadNewPath);
-                        PurchasePeticashTransactionImage::create(['name' => $imageName,'purchase_peticash_transaction_id' => $purchaseTransactionId,'type' => 'bill']);
+                        PurchasePeticashTransactionImage::create(['name' => $filename,'purchase_peticash_transaction_id' => $purchaseTransactionId,'type' => 'bill']);
                     }
                 }
             }

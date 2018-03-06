@@ -370,9 +370,13 @@
     });
 
     function generateGRN(){
-        var images = [];
-        images = $('.product-image-name').val();
-        console.log($('.product-image-name').length);
+        if($('.product-image-name').length > 0){
+            var images = [];
+            $('.product-image-name').each(function(){
+                images.push($(this).val());
+            });
+        }
+
         $.ajax({
             url: '/peticash/peticash-management/purchase/transaction/generate-grn',
             type: 'POST',
@@ -388,7 +392,7 @@
                 miscellaneous_category_id : $('#miscellaneous_category').val(),
                 challan_number : $('#challan_number').val(),
                 bill_amount : $('#bill_amount').val(),
-                //images : images
+                images : images
             },
             success: function(data,textStatus,xhr){
                 $('.post-grn').show();
