@@ -1895,7 +1895,6 @@ class PeticashController extends Controller
 
     public function displayPurchaseImages(Request $request){
         try{
-            Log::info('gher');
             $path = $request->path;
             $count = $request->count;
             $random = mt_rand(1,10000000000);
