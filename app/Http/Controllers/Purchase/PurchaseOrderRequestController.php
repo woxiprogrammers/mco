@@ -466,7 +466,7 @@ class PurchaseOrderRequestController extends Controller
                     if(count($vendorIdArray) == 2){
                         /*Client Supplied*/
                         $vendorId = $vendorIdArray[1];
-                        $vendorInfo = Client::findOrFail($vendorId)->toArray();
+//                        $vendorInfo = Client::findOrFail($vendorId)->toArray();
                         $purchaseOrderData = [
                             'user_id' => Auth::user()->id,
                             'client_id' => $vendorId,
@@ -476,10 +476,11 @@ class PurchaseOrderRequestController extends Controller
                             'is_client_order' => true,
                             'purchase_order_request_id' => $purchaseOrderRequest->id,
                             'format_id' => $purchaseOrderFormatID,
-                            'serial_no' => $purchaseOrderCount
+                            'serial_no' => $purchaseOrderCount,
+                            'is_email_sent' => false
                         ];
                     }else{
-                        $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
+//                        $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
                         $purchaseOrderData = [
                             'user_id' => Auth::user()->id,
                             'vendor_id' => $vendorId,
@@ -489,10 +490,11 @@ class PurchaseOrderRequestController extends Controller
                             'is_client_order' => false,
                             'purchase_order_request_id' => $purchaseOrderRequest->id,
                             'format_id' => $purchaseOrderFormatID,
-                            'serial_no' => $purchaseOrderCount
+                            'serial_no' => $purchaseOrderCount,
+                            'is_email_sent' => false
                         ];
                     }
-                    $vendorInfo['materials'] = array();
+//                    $vendorInfo['materials'] = array();
                     $purchaseOrder = PurchaseOrder::create($purchaseOrderData);
                     $webTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token];
                     $mobileTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
@@ -514,7 +516,7 @@ class PurchaseOrderRequestController extends Controller
                     $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-o');
                     $iterator = 0;
                     foreach($purchaseOrderRequestComponentArray as $purchaseOrderRequestComponentId){
-                        $vendorInfo['materials'][$iterator] = array();
+                        /*$vendorInfo['materials'][$iterator] = array();*/
                         $purchaseOrderRequestComponent = PurchaseOrderRequestComponent::findOrFail($purchaseOrderRequestComponentId);
                         $purchaseOrderComponentData = PurchaseOrderRequestComponent::where('id', $purchaseOrderRequestComponentId)
                                                                 ->select('id as purchase_order_request_component_id','rate_per_unit','gst','hsn_code','expected_delivery_date','remark','credited_days',
@@ -527,7 +529,7 @@ class PurchaseOrderRequestController extends Controller
                         $newAssetTypeId = MaterialRequestComponentTypes::where('slug','new-asset')->pluck('id')->first();
                         $newMaterialTypeId = MaterialRequestComponentTypes::where('slug','new-material')->pluck('id')->first();
                         $componentTypeId = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id;
-                        $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
+                        /*$vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                         $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
                         $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
                         $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate_per_unit'];
@@ -580,7 +582,7 @@ class PurchaseOrderRequestController extends Controller
                         $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
                         $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
                         $vendorInfo['materials'][$iterator]['transportation_igst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_igst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
-                        $vendorInfo['materials'][$iterator]['transportation_total_amount'] = $vendorInfo['materials'][$iterator]['transportation_amount'] + $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_igst_amount'];
+                        $vendorInfo['materials'][$iterator]['transportation_total_amount'] = $vendorInfo['materials'][$iterator]['transportation_amount'] + $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_igst_amount'];*/
                         if($newMaterialTypeId == $componentTypeId){
                             $materialName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                             $isMaterialExists = Material::where('name','ilike',$materialName)->first();
@@ -660,7 +662,7 @@ class PurchaseOrderRequestController extends Controller
                         }
                         $iterator++;
                     }
-                    if(count($vendorInfo['materials']) > 0){
+                    /*if(count($vendorInfo['materials']) > 0){
                         $projectSiteInfo = array();
                         $projectSiteInfo['project_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;
                         $projectSiteInfo['project_site_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->name;
@@ -715,10 +717,9 @@ class PurchaseOrderRequestController extends Controller
                                 'updated_at' => Carbon::now()
                             ];
                         }
-
                         PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
                         unlink($pdfUploadPath);
-                    }
+                    }*/
                 }
                 $request->session()->flash('success','Purchase Orders Created Successfully !');
                 return redirect('/purchase/purchase-order/manage');
