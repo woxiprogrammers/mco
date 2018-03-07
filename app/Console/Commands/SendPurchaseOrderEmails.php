@@ -147,10 +147,11 @@ class SendPurchaseOrderEmails extends Command
                     }
                     file_put_contents($pdfUploadPath,$pdfContent);
                     $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                    $mailMessage = 'Please check the Purchase Order ('.$purchaseOrder->format_id.') attached herewith';
+                    $purchaseRequestFormat = $purchaseOrder->purchaseRequest->format_id;
+                    $mailMessage = 'Attached herewith the Purchase Order '.$purchaseOrder->format_id.' for Purchase Request '.$purchaseRequestFormat;
                     $this->comment('Sending mail to '.$vendorInfo['company'].' at email address '.$vendorInfo['email']);
-                    Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
-                        $message->subject('Testing with attachment');
+                    Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData, $purchaseRequestFormat){
+                        $message->subject('Purchase Order for '.$purchaseRequestFormat);
                         $message->to($mailData['toMail']);
                         $message->from(env('MAIL_USERNAME'));
                         $message->attach($mailData['path']);
