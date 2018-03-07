@@ -27,6 +27,8 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+        $schedule->command('custom:send-purchase-order-email')
+                ->everyFiveMinutes();
     }
 
     /**
