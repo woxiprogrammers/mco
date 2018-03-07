@@ -75,6 +75,22 @@
                                                             <legend> Bill Details </legend>
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Transportation Sub-Total</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="transportation_total" id="transportation_total" value="{{$purchaseOrderBill->transportation_tax_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Transportation Tax Amount</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="transportation_tax_amount" name="transportation_tax_amount" value="{{$purchaseOrderBill->transportation_total_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
                                                                     <label class="control-label pull-right"> GRN </label>
                                                                 </div>
                                                                 <div class="col-md-6">
@@ -169,13 +185,21 @@
                                                                     <input type="hidden" id="purchaseOrderBillId" name="purchase_order_bill_id" value="{{$purchaseOrderBill->id}}">
                                                                     <br>
                                                                     <div class="form-group row">
+                                                                        <div class="col-md-3">
+
+                                                                        </div>
+                                                                        <div class="col-md-7">
+                                                                            <label><b>Total payment done till today - Rs. {{$paymentTillToday}}</b></label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group row">
                                                                         <div class="col-md-4">
 
                                                                         </div>
                                                                         <div class="col-md-6">
                                                                             <input type="checkbox" name="is_advance" id="isAdvanceCheckbox">
                                                                             <label class="control-label" style="margin-left: 1%">
-                                                                                Is Advance Payment
+                                                                                To be deducted from advance
                                                                             </label>
                                                                         </div>
                                                                     </div>
@@ -186,7 +210,7 @@
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount">
+                                                                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount" value="{{$paymentRemainingAmount}}">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group row"id="paymentSelect">
@@ -251,7 +275,6 @@
     <script>
         $(document).ready(function(){
             $("#isAdvanceCheckbox").on('click', function(){
-                console.log();
                 if($(this).is(':checked') == true){
                     $("#paymentSelect").hide();
                 }else{
