@@ -255,37 +255,40 @@ class PurchaseOrderRequestController extends Controller
             $draftPurchaseOrderRequestComponents = PurchaseOrderRequestComponent::where('purchase_order_request_id',$purchaseOrderRequest->id)->whereNull('is_approved')->get();
             foreach($draftPurchaseOrderRequestComponents as $purchaseOrderRequestComponent){
                 $purchaseRequestComponentId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
-                if(!array_key_exists($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id,$purchaseOrderRequestComponents)){
-                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->name;
-                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'] = $purchaseOrderRequestComponent->quantity;
-                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['unit'] = $purchaseOrderRequestComponent->unit->name;
+                $purchaseOrderCount = PurchaseOrderComponent::where('purchase_request_component_id', $purchaseRequestComponentId)->count();
+                if($purchaseOrderCount > 0){
+                    if(!array_key_exists($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id,$purchaseOrderRequestComponents)){
+                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->name;
+                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'] = $purchaseOrderRequestComponent->quantity;
+                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['unit'] = $purchaseOrderRequestComponent->unit->name;
+                    }
+                    $rateWithTax = $purchaseOrderRequestComponent->rate_per_unit;
+                    $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
+                    $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->sgst_percentage / 100));
+                    $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->igst_percentage / 100));
+                    if($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->is_client == true){
+                        $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->company;
+                        $vendorId = 'client_'.$purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->id;
+                    }else{
+                        $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->company;
+                        $vendorId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->id;
+                    }
+                    $transportationWithTax = $purchaseOrderRequestComponent->transportation_amount;
+                    $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_cgst_percentage / 100));
+                    $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_sgst_percentage / 100));
+                    $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_igst_percentage / 100));
+                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['vendor_relations'][] = [
+                        'component_vendor_relation_id' => $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id,
+                        'purchase_order_request_component_id' => $purchaseOrderRequestComponent->id,
+                        'vendor_name' => $vendorName,
+                        'vendor_id' => $vendorId,
+                        'rate_without_tax' => $purchaseOrderRequestComponent->rate_per_unit,
+                        'rate_with_tax' => $rateWithTax,
+                        'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'],
+                        'transportation_without_tax' => $purchaseOrderRequestComponent->transportation_amount,
+                        'transportation_with_tax' => $transportationWithTax
+                    ];
                 }
-                $rateWithTax = $purchaseOrderRequestComponent->rate_per_unit;
-                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
-                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->sgst_percentage / 100));
-                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->igst_percentage / 100));
-                if($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->is_client == true){
-                    $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->company;
-                    $vendorId = 'client_'.$purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->id;
-                }else{
-                    $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->company;
-                    $vendorId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->id;
-                }
-                $transportationWithTax = $purchaseOrderRequestComponent->transportation_amount;
-                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_cgst_percentage / 100));
-                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_sgst_percentage / 100));
-                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_igst_percentage / 100));
-                $purchaseOrderRequestComponents[$purchaseRequestComponentId]['vendor_relations'][] = [
-                    'component_vendor_relation_id' => $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id,
-                    'purchase_order_request_component_id' => $purchaseOrderRequestComponent->id,
-                    'vendor_name' => $vendorName,
-                    'vendor_id' => $vendorId,
-                    'rate_without_tax' => $purchaseOrderRequestComponent->rate_per_unit,
-                    'rate_with_tax' => $rateWithTax,
-                    'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'],
-                    'transportation_without_tax' => $purchaseOrderRequestComponent->transportation_amount,
-                    'transportation_with_tax' => $transportationWithTax
-                ];
             }
             return view('purchase.purchase-order-request.approve')->with(compact('purchaseOrderRequest','purchaseOrderRequestComponents'));
         }catch(\Exception $e){
@@ -466,7 +469,6 @@ class PurchaseOrderRequestController extends Controller
                     if(count($vendorIdArray) == 2){
                         /*Client Supplied*/
                         $vendorId = $vendorIdArray[1];
-//                        $vendorInfo = Client::findOrFail($vendorId)->toArray();
                         $purchaseOrderData = [
                             'user_id' => Auth::user()->id,
                             'client_id' => $vendorId,
@@ -480,7 +482,6 @@ class PurchaseOrderRequestController extends Controller
                             'is_email_sent' => false
                         ];
                     }else{
-//                        $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
                         $purchaseOrderData = [
                             'user_id' => Auth::user()->id,
                             'vendor_id' => $vendorId,
@@ -494,7 +495,6 @@ class PurchaseOrderRequestController extends Controller
                             'is_email_sent' => false
                         ];
                     }
-//                    $vendorInfo['materials'] = array();
                     $purchaseOrder = PurchaseOrder::create($purchaseOrderData);
                     $webTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->web_fcm_token];
                     $mobileTokens = [$purchaseOrder->purchaseRequest->onBehalfOfUser->mobile_fcm_token];
@@ -516,7 +516,6 @@ class PurchaseOrderRequestController extends Controller
                     $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-o');
                     $iterator = 0;
                     foreach($purchaseOrderRequestComponentArray as $purchaseOrderRequestComponentId){
-                        /*$vendorInfo['materials'][$iterator] = array();*/
                         $purchaseOrderRequestComponent = PurchaseOrderRequestComponent::findOrFail($purchaseOrderRequestComponentId);
                         $purchaseOrderComponentData = PurchaseOrderRequestComponent::where('id', $purchaseOrderRequestComponentId)
                                                                 ->select('id as purchase_order_request_component_id','rate_per_unit','gst','hsn_code','expected_delivery_date','remark','credited_days',
@@ -529,60 +528,6 @@ class PurchaseOrderRequestController extends Controller
                         $newAssetTypeId = MaterialRequestComponentTypes::where('slug','new-asset')->pluck('id')->first();
                         $newMaterialTypeId = MaterialRequestComponentTypes::where('slug','new-material')->pluck('id')->first();
                         $componentTypeId = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id;
-                        /*$vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
-                        $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
-                        $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
-                        $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate_per_unit'];
-                        $vendorInfo['materials'][$iterator]['subtotal'] = MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']));
-                        if($purchaseOrderComponent['cgst_percentage'] == null || $purchaseOrderComponent['cgst_percentage'] == ''){
-                            $vendorInfo['materials'][$iterator]['cgst_percentage'] = 0;
-                        }else{
-                            $vendorInfo['materials'][$iterator]['cgst_percentage'] = $purchaseOrderComponent['cgst_percentage'];
-                        }
-                        $vendorInfo['materials'][$iterator]['cgst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['cgst_percentage']/100);
-                        if($purchaseOrderComponent['sgst_percentage'] == null || $purchaseOrderComponent['sgst_percentage'] == ''){
-                            $vendorInfo['materials'][$iterator]['sgst_percentage'] = 0;
-                        }else{
-                            $vendorInfo['materials'][$iterator]['sgst_percentage'] = $purchaseOrderComponent['sgst_percentage'];
-                        }
-                        $vendorInfo['materials'][$iterator]['sgst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['sgst_percentage']/100);
-                        if($purchaseOrderComponent['igst_percentage'] == null || $purchaseOrderComponent['igst_percentage'] == ''){
-                            $vendorInfo['materials'][$iterator]['igst_percentage'] = 0;
-                        }else{
-                            $vendorInfo['materials'][$iterator]['igst_percentage'] = $purchaseOrderComponent['igst_percentage'];
-                        }
-                        $vendorInfo['materials'][$iterator]['igst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['igst_percentage']/100);
-                        $vendorInfo['materials'][$iterator]['total'] = $vendorInfo['materials'][$iterator]['subtotal'] + $vendorInfo['materials'][$iterator]['cgst_amount'] + $vendorInfo['materials'][$iterator]['sgst_amount'] + $vendorInfo['materials'][$iterator]['igst_amount'];
-                        if($purchaseOrderComponent['expected_delivery_date'] == null || $purchaseOrderComponent['expected_delivery_date'] == ''){
-                            $vendorInfo['materials'][$iterator]['due_date'] = '';
-                        }else{
-                            $vendorInfo['materials'][$iterator]['due_date'] = 'Due on '.date('j/n/Y',strtotime($purchaseOrderComponent['expected_delivery_date']));
-                        }
-                        $purchaseOrderRequestComponent = $purchaseOrderComponent->purchaseOrderRequestComponent;
-                        if($purchaseOrderRequestComponent['transportation_amount'] == null || $purchaseOrderRequestComponent['transportation_amount'] == ''){
-                            $vendorInfo['materials'][$iterator]['transportation_amount'] = 0;
-                        }else{
-                            $vendorInfo['materials'][$iterator]['transportation_amount'] = $purchaseOrderRequestComponent['transportation_amount'];
-                        }
-                        if($purchaseOrderRequestComponent['transportation_cgst_percentage'] == null || $purchaseOrderRequestComponent['transportation_cgst_percentage'] == ''){
-                            $vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] = 0;
-                        }else{
-                            $vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] = $purchaseOrderRequestComponent['transportation_cgst_percentage'];
-                        }
-                        if($purchaseOrderRequestComponent['transportation_sgst_percentage'] == null || $purchaseOrderRequestComponent['transportation_sgst_percentage'] == ''){
-                            $vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] = 0;
-                        }else{
-                            $vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] = $purchaseOrderRequestComponent['transportation_sgst_percentage'];
-                        }
-                        if($purchaseOrderRequestComponent['transportation_igst_percentage'] == null || $purchaseOrderRequestComponent['transportation_igst_percentage'] == ''){
-                            $vendorInfo['materials'][$iterator]['transportation_igst_percentage'] = 0;
-                        }else{
-                            $vendorInfo['materials'][$iterator]['transportation_igst_percentage'] = $purchaseOrderRequestComponent['transportation_igst_percentage'];
-                        }
-                        $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
-                        $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
-                        $vendorInfo['materials'][$iterator]['transportation_igst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_igst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
-                        $vendorInfo['materials'][$iterator]['transportation_total_amount'] = $vendorInfo['materials'][$iterator]['transportation_amount'] + $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_igst_amount'];*/
                         if($newMaterialTypeId == $componentTypeId){
                             $materialName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                             $isMaterialExists = Material::where('name','ilike',$materialName)->first();
@@ -662,64 +607,6 @@ class PurchaseOrderRequestController extends Controller
                         }
                         $iterator++;
                     }
-                    /*if(count($vendorInfo['materials']) > 0){
-                        $projectSiteInfo = array();
-                        $projectSiteInfo['project_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;
-                        $projectSiteInfo['project_site_name'] = $purchaseOrderRequest->purchaseRequest->projectSite->name;
-                        $projectSiteInfo['project_site_address'] = $purchaseOrderRequest->purchaseRequest->projectSite->address;
-                        if($purchaseOrderRequest->purchaseRequest->projectSite->city_id == null){
-                            $projectSiteInfo['project_site_city'] = '';
-                        }else{
-                            $projectSiteInfo['project_site_city'] = $purchaseOrderRequest->purchaseRequest->projectSite->city->name;
-                        }
-                        $pdf = App::make('dompdf.wrapper');
-                        $pdfFlag = "purchase-order-listing-download";
-                        $pdfTitle = 'Purchase Order';
-                        $formatId = $purchaseOrder->format_id;
-                        $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle','formatId')));
-                        $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
-                        $pdfFileName = sha1($vendorId).'.pdf';
-                        $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
-                        $pdfContent = $pdf->stream();
-                        if(file_exists($pdfUploadPath)){
-                            unlink($pdfUploadPath);
-                        }
-                        if (!file_exists($pdfDirectoryPath)) {
-                            File::makeDirectory(public_path().$pdfDirectoryPath, $mode = 0777, true, true);
-                        }
-                        file_put_contents($pdfUploadPath,$pdfContent);
-                        $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        $mailMessage = 'Please check the Purchase Order ('.$purchaseOrder->format_id.') attached herewith';
-                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
-                            $message->subject('Testing with attachment');
-                            $message->to($mailData['toMail']);
-                            $message->from(env('MAIL_USERNAME'));
-                            $message->attach($mailData['path']);
-                        });
-                        if($purchaseOrder->is_client_order == true){
-                            $mailInfoData = [
-                                'user_id' => Auth::user()->id,
-                                'type_slug' => 'for-purchase-order',
-                                'is_client' => true,
-                                'reference_id' => $purchaseOrder->id,
-                                'client_id' => $purchaseOrder->client_id,
-                                'created_at' => Carbon::now(),
-                                'updated_at' => Carbon::now()
-                            ];
-                        }else{
-                            $mailInfoData = [
-                                'user_id' => Auth::user()->id,
-                                'type_slug' => 'for-purchase-order',
-                                'is_client' => false,
-                                'reference_id' => $purchaseOrder->id,
-                                'vendor_id' => $purchaseOrder->vendor_id,
-                                'created_at' => Carbon::now(),
-                                'updated_at' => Carbon::now()
-                            ];
-                        }
-                        PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
-                        unlink($pdfUploadPath);
-                    }*/
                 }
                 $request->session()->flash('success','Purchase Orders Created Successfully !');
                 return redirect('/purchase/purchase-order/manage');
