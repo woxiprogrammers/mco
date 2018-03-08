@@ -10,6 +10,10 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link href="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -46,13 +50,50 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
+                                                        <div class="row">
+                                                            <div class="col-md-3" style="text-align: right">
+                                                                <label>Date Range :  </label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="input-group input-large date-picker input-daterange" data-date-format="yyyy-mm-dd">
+                                                                    <input type="text" class="form-control" name="start_date" id="start_date" required="required">
+                                                                    <span class="input-group-addon"> to </span>
+                                                                    <input type="text" class="form-control" name="end_date" id="end_date" required="required"> </div>
+                                                                <!-- /input-group -->
+                                                                <span class="help-block"> Select date range </span>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="btn-group">
+                                                                    <div id="search-withfilter" class="btn blue" >
+                                                                        <a href="#" style="color: white"> Submit
+                                                                            <i class="fa fa-plus"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrderBillTable">
                                                             <thead>
                                                                 <tr>
                                                                     <th>Bill Number</th>
                                                                     <th>Purchase Order Id</th>
                                                                     <th>Amount</th>
+                                                                    <th>Vendor name</th>
+                                                                    <th>Created at</th>
                                                                     <th>Action</th>
+                                                                </tr>
+                                                                <tr class="filter">
+                                                                    <th></th>
+                                                                    <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th>
+
+                                                                    </th>
+                                                                    <th>
+                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                                    </th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -80,8 +121,25 @@
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
+
     <script src="/assets/custom/purchase/purchase-order-billing/manage-datatables.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function() {
+            $("#search-withfilter").on('click',function(){
+            var start_date = $('#start_date').val();
+            var end_date = $('#end_date').val();
+                var postData =
+                    'start_date=>'+start_date+','+
+                    'end_date=>'+end_date;
+                $("input[name='postdata']").val(postData);
+            $(".filter-submit").trigger('click');
+            });
+        });
+    </script>
 @endsection
 

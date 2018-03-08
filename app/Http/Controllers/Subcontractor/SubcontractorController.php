@@ -787,6 +787,7 @@ class SubcontractorController extends Controller
             $subcontractorStructure = SubcontractorStructure::where('id',$subcontractorStructureId)->first();
             $totalBillCount = $subcontractorStructure->subcontractorBill->count();
             $billName = "R.A. ".($totalBillCount + 1);
+
             $taxes = Tax::whereNotIn('slug',['vat'])->where('is_active',true)->where('is_special',false)->select('id','name','slug','base_percentage')->get();
             return view('subcontractor.structure.bill.create')->with(compact('subcontractorStructure','billName','taxes'));
         }catch(\Exception $e){
