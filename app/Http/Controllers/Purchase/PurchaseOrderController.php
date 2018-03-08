@@ -1032,7 +1032,6 @@ class PurchaseOrderController extends Controller
 
     public function preGrnImageUpload(Request $request){
         try{
-            Log::info($request->all());
             $generatedGrn = $this->generateGRN();
             $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
             $grnGeneratedStatusId = PurchaseOrderTransactionStatus::where('slug','grn-generated')->pluck('id')->first();
