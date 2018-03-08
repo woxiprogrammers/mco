@@ -138,6 +138,14 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
+                                                                <label class="control-label pull-right">Remark</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" id="remark" name="remark">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
                                                                 <label class="control-label pull-right">Confirm Total Amount</label>
                                                             </div>
                                                             <div class="col-md-3">
