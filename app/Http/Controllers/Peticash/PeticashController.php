@@ -8,7 +8,9 @@ use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
 use App\Employee;
+use App\GRNCount;
 use App\Helper\NumberHelper;
+use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
@@ -29,7 +31,6 @@ use App\Project;
 use App\ProjectSite;
 use App\PurcahsePeticashTransaction;
 use App\PurchasePeticashTransactionImage;
-use App\PurchaseOrderBillPayment;
 use App\Quotation;
 use App\QuotationMaterial;
 use App\QuotationStatus;
@@ -48,6 +49,7 @@ use Illuminate\Support\Facades\Session;
 
 class PeticashController extends Controller
 {
+    use InventoryTrait;
     use NotificationTrait;
     public function __construct(){
         $this->middleware('custom.auth');
@@ -533,6 +535,7 @@ class PeticashController extends Controller
         }
         return response()->json($records);
     }
+
     public function salaryApprovalListing(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
@@ -738,6 +741,7 @@ class PeticashController extends Controller
         }
           return response()->json($message,$status);
     }
+
     public function salaryRequestedChangeStatus(Request $request){
         try{
             $status = 200;
@@ -783,6 +787,7 @@ class PeticashController extends Controller
         }
         return response()->json($message,$status);
     }
+
     public function changePurchaseStatus(Request $request){
         try{
             $status = 200;
@@ -1130,7 +1135,7 @@ class PeticashController extends Controller
             $data['in_time'] = ($purchaseTransactionData->in_time != null) ? $purchaseTransactionData->in_time : '';
             $data['out_time'] = ($purchaseTransactionData->out_time) ? $purchaseTransactionData->out_time : '';
             $data['reference_number'] = ($purchaseTransactionData->reference_number != null) ? $purchaseTransactionData->reference_number : '';
-            $data['payment_type'] = $purchaseTransactionData->paymentType->name;
+            $data['payment_type'] = ($purchaseTransactionData->payment_type_id != null) ? $purchaseTransactionData->paymentType->name : '';
             $data['peticash_status_name'] = $purchaseTransactionData->peticashStatus->name;
             $data['remark'] = ($purchaseTransactionData->remark != null) ? $purchaseTransactionData->remark : '' ;
             $data['admin_remark'] = ($purchaseTransactionData->admin_remark == null) ? '' : $purchaseTransactionData->admin_remark;
@@ -1155,7 +1160,6 @@ class PeticashController extends Controller
 
     public function approvePurchaseAjaxRequest(Request $request) {
         try {
-
             $now = Carbon::now();
             $user = Auth::user();
             if($request->comp_type == MaterialRequestComponentTypes::where('slug','new-material')->pluck('slug')->first()) {
@@ -1236,7 +1240,7 @@ class PeticashController extends Controller
             $sha1PurchaseOrderId = sha1($request->txn_id);
             foreach ($purchaseOrderBillImages as $key => $image){
                 $tempUploadFile = public_path().env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseOrderId.DIRECTORY_SEPARATOR.$image['name'];
-                $imageUploadNewPath = public_path().env('INVENTORY_TRANSFER_IMAGE_UPLOAD').$sha1InventoryComponentId.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$sha1InventoryTransferId;
+                $imageUploadNewPath = public_path().env('INVENTORY_COMPONENT_IMAGE_UPLOAD').$sha1InventoryComponentId.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$sha1InventoryTransferId;
                 if(!file_exists($imageUploadNewPath)) {
                     File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
                 }
@@ -1366,6 +1370,7 @@ class PeticashController extends Controller
             abort(500);
         }
     }
+
     public function getSalaryManageView(Request $request){
         try{
             $clients = Client::where('is_active', true)->get();
@@ -1379,6 +1384,7 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
     public function purchaseTransactionListing(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
@@ -1437,6 +1443,11 @@ class PeticashController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
+                if($purchaseTransactionData[$pagination]->peticashStatus->slug == 'grn-generated'){
+                    $button = '<a class="btn blue" href="/peticash/peticash-management/purchase/transaction/edit/'.$purchaseTransactionData[$pagination]->id.'">Edit</a>';;
+                }else{
+                    $button = '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>';
+                }
                 $records['data'][] = [
                     $purchaseTransactionData[$pagination]->id,
                     ucwords($purchaseTransactionData[$pagination]->name),
@@ -1445,8 +1456,8 @@ class PeticashController extends Controller
                     $purchaseTransactionData[$pagination]->bill_amount,
                     $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
                     date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
-                    $purchaseTransactionData[$pagination]->projectSite->project->name.' - '.$purchaseTransactionData[$pagination]->projectSite->name,
-                    '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>'
+                    $purchaseTransactionData[$pagination]->peticashStatus->name,
+                    $button
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -1464,6 +1475,7 @@ class PeticashController extends Controller
         }
         return response()->json($records,$status);
     }
+
     public function salaryTransactionListing(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
@@ -1588,4 +1600,339 @@ class PeticashController extends Controller
         abort(500,$e->getMessage());
 
     }
+
+    public function getPurchaseTransactionCreateView(Request $request){
+        try{
+            $miscellaneousCategories = Category::where('is_miscellaneous',true)->select('id','name')->get();
+            $units = Unit::where('is_active',true)->select('id','name')->get()->toArray();
+            $unitOptions = '';
+            foreach($units as $unit){
+                $unitOptions .= '<option value="'.$unit['id'].'">'.$unit['name'].'</option>';
+            }
+            $noUnit = Unit::where('slug','nos')->select('id','name')->first();
+            $nosUnit = '<option value="'.$noUnit['id'].'">'.$noUnit['name'].'</option>';
+            return view('peticash.peticash-management.purchase.transaction.create')->with(compact('unitOptions','nosUnit','miscellaneousCategories'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Generate GRN Peticash Purchase Transaction",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function generateGRN(Request $request){
+        try{
+            $projectSiteId = Session::get('global_project_site');
+            $user = Auth::user();
+            $status = 200;
+            $now = Carbon::now();
+            $componentTypeSlug = MaterialRequestComponentTypes::where('id',$request['component_id'])->pluck('slug')->first();
+            $materialId = Material::where('name',$request['component_name'])->pluck('id')->first();
+            switch ($componentTypeSlug){
+                case 'quotation-material':
+                    $quotationId = Quotation::where('project_site_id',$projectSiteId)->pluck('id')->first();
+                    $purchasePeticashTransaction['reference_id'] = QuotationMaterial::where('quotation_id',$quotationId)->where('material_id',$materialId)->pluck('id')->first();
+                    break;
+
+                case 'system-asset':
+                    $purchasePeticashTransaction['reference_id'] = Asset::where('name',$request['component_name'])->pluck('id')->first();
+                    break;
+
+                case 'new-asset' :
+                    $purchasePeticashTransaction['unit_id'] = Unit::where('slug','nos')->pluck('id')->first();
+                    $data = $request['component_name'];
+                    $purchaseTransaction['reference_id'] = $this->createMaterial($data,'new-asset');
+                    break;
+
+                case 'new-material' :
+                    $data = $request->only('miscellaneous_category_id','bill_amount','quantity');
+                    $data['unit_id'] = $request['unit'];
+                    $data['name'] = $request['component_name'];
+                    $purchasePeticashTransaction['reference_id'] = $this->createMaterial($data,'new-material');
+            }
+            $purchasePeticashTransaction = $request->only('source_name','quantity','bill_amount','component_type_id');
+            $purchasePeticashTransaction['name'] = $request['component_name'];
+            $purchasePeticashTransaction['component_type_id'] = $request['component_id'];
+            $purchasePeticashTransaction['project_site_id'] = $projectSiteId;
+            $purchasePeticashTransaction['peticash_transaction_type_id'] = PeticashTransactionType::where('slug','hand')->where('type','PURCHASE')->pluck('id')->first();
+            $purchasePeticashTransaction['unit_id'] = $request['unit'];
+            $purchasePeticashTransaction['bill_number'] = $request['challan_number'];
+            $purchasePeticashTransaction['reference_user_id'] = $user->id;
+            $purchaseTransaction['payment_type_id'] = PaymentType::where('slug','peticash')->pluck('id')->first();
+            $currentDate = Carbon::now();
+            $monthlyGrnGeneratedCount = GRNCount::where('month',$currentDate->month)->where('year',$currentDate->year)->pluck('count')->first();
+            if($monthlyGrnGeneratedCount != null){
+                $serialNumber = $monthlyGrnGeneratedCount + 1;
+            }else{
+                $serialNumber = 1;
+            }
+            $purchasePeticashTransaction['grn'] = "GRN".date('Ym').($serialNumber);
+            $purchasePeticashTransaction['peticash_status_id'] = PeticashStatus::where('slug','grn-generated')->pluck('id')->first();
+            $purchasePeticashTransaction['in_time'] = $now;
+            $purchaseTransaction = PurcahsePeticashTransaction::create($purchasePeticashTransaction);
+            $purchaseTransactionId = $purchaseTransaction['id'];
+            if($monthlyGrnGeneratedCount != null) {
+                GRNCount::where('month', $currentDate->month)->where('year', $currentDate->year)->update(['count' => $serialNumber]);
+            }else{
+                GRNCount::create(['month'=> $currentDate->month, 'year'=> $currentDate->year,'count' => $serialNumber]);
+            }
+            if(array_has($request,'images')){
+                $user = Auth::user();
+                $sha1PurchaseTransactionId = sha1($purchaseTransactionId);
+                foreach($request['images'] as $key1 => $imageName){
+                    $tempUploadFile = public_path().$imageName;
+                    if(File::exists($tempUploadFile)){
+                        $imageUploadNewPath = public_path().env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseTransactionId;
+                        if(!file_exists($imageUploadNewPath)) {
+                            File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
+                        }
+                        $imagePath = $imageName;
+                        $imageName = explode("/", $imagePath);
+                        $filename = $imageName[5];
+                        $imageUploadNewPath .= DIRECTORY_SEPARATOR.$filename;
+                        File::move($tempUploadFile,$imageUploadNewPath);
+                        PurchasePeticashTransactionImage::create(['name' => $filename,'purchase_peticash_transaction_id' => $purchaseTransactionId,'type' => 'bill']);
+                    }
+                }
+            }
+
+            $alreadyPresent = InventoryComponent::where('name','ilike',$purchaseTransaction['name'])->where('project_site_id',$purchaseTransaction['project_site_id'])->first();
+            if($alreadyPresent != null){
+                $inventoryComponentId = $alreadyPresent['id'];
+            }else {
+                if ($componentTypeSlug == 'quotation-material' || $componentTypeSlug == 'new-material' || $componentTypeSlug == 'structure-material') {
+                    $inventoryData['is_material'] = true;
+                    $inventoryData['reference_id'] = Material::where('name', 'ilike', $purchaseTransaction['name'])->pluck('id')->first();
+                } else {
+                    $inventoryData['is_material'] = false;
+                    $inventoryData['reference_id'] = Asset::where('name', 'ilike', $purchaseTransaction['name'])->pluck('id')->first();
+                }
+                $inventoryData['name'] = $purchaseTransaction['name'];
+                $inventoryData['project_site_id'] = $purchaseTransaction['project_site_id'];
+                $inventoryData['opening_stock'] = 0;
+                $inventoryComponent = InventoryComponent::create($inventoryData);
+                $inventoryComponentId = $inventoryComponent->id;
+            }
+            $transferData['inventory_component_id'] = $inventoryComponentId;
+            $transferData['source_slug'] = $request['source_name'];
+            $transferData['quantity'] = $purchaseTransaction['quantity'];
+            $transferData['unit_id'] = $purchaseTransaction['unit_id'];
+            $transferData['date'] = $purchaseTransaction['created_at'];
+            $transferData['in_time'] = $now;
+            $transferData['out_time'] = $now;
+            $transferData['vehicle_number'] = $purchaseTransaction['vehicle_number'];
+            $transferData['bill_number'] = $purchaseTransaction['bill_number'];
+            $transferData['bill_amount'] = $purchaseTransaction['bill_amount'];
+            $transferData['remark'] = $purchaseTransaction['remark'];
+            $transferData['source_name'] = $purchaseTransaction['source_name'];
+            $transferData['grn'] = $purchaseTransaction['grn'];
+            $transferData['user_id'] = $user['id'];
+            $transferData['transfer_type_id'] = InventoryTransferTypes::where('slug','hand')->where('type','ilike','IN')->pluck('id')->first();
+            $inventoryComponentTransfer = $this->createInventoryComponentTransfer($transferData);
+            $createdTransferInId = $inventoryComponentTransfer['id'];
+            if ($componentTypeSlug == 'quotation-material' || $componentTypeSlug == 'new-material' || $componentTypeSlug == 'structure-material') {
+                $transferData['transfer_type_id'] = InventoryTransferTypes::where('slug','user')->where('type','ilike','OUT')->pluck('id')->first();
+                $createdTransferOutId = $this->createInventoryComponentTransfer($transferData);
+                $sha1InventoryTransferOutId = sha1($createdTransferOutId);
+            }
+            $purchasePeticashTransactionImages = PurchasePeticashTransactionImage::where('purchase_peticash_transaction_id',$purchaseTransaction['id'])->get();
+            if(count($purchasePeticashTransactionImages) > 0){
+                $sha1PurchaseTransactionId = sha1($purchaseTransaction['id']);
+                $sha1InventoryComponentId = sha1($inventoryComponentId);
+                $sha1InventoryTransferInId = sha1($createdTransferInId);
+
+                foreach ($purchasePeticashTransactionImages as $key => $images){
+                    $tempUploadFile = public_path().env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseTransactionId.DIRECTORY_SEPARATOR.$images['name'];
+
+                    $imageUploadNewPathForInventoryIn = public_path().env('INVENTORY_COMPONENT_IMAGE_UPLOAD').$sha1InventoryComponentId.DIRECTORY_SEPARATOR.'transfers'.DIRECTORY_SEPARATOR.$sha1InventoryTransferInId;
+                    if(!file_exists($imageUploadNewPathForInventoryIn)) {
+                        File::makeDirectory($imageUploadNewPathForInventoryIn, $mode = 0777, true, true);
+                    }
+                    $imageUploadNewPathForInventoryIn .= DIRECTORY_SEPARATOR.$images['name'];
+                    File::copy($tempUploadFile,$imageUploadNewPathForInventoryIn);
+                    InventoryComponentTransferImage::create(['name' => $images['name'],'inventory_component_transfer_id' => $createdTransferInId]);
+
+                    if ($componentTypeSlug == 'quotation-material' || $componentTypeSlug == 'new-material' || $componentTypeSlug == 'structure-material') {
+                        $imageUploadNewPathForInventoryOut = public_path() . env('INVENTORY_COMPONENT_IMAGE_UPLOAD') . $sha1InventoryComponentId . DIRECTORY_SEPARATOR . 'transfers' . DIRECTORY_SEPARATOR . $sha1InventoryTransferOutId;
+                        if (!file_exists($imageUploadNewPathForInventoryOut)) {
+                            File::makeDirectory($imageUploadNewPathForInventoryOut, $mode = 0777, true, true);
+                        }
+                        $imageUploadNewPathForInventoryOut .= DIRECTORY_SEPARATOR.$images['name'];
+                        File::copy($tempUploadFile,$imageUploadNewPathForInventoryOut);
+                        InventoryComponentTransferImage::create(['name' => $images['name'],'inventory_component_transfer_id' => $createdTransferInId]);
+                    }
+                }
+            }
+        }catch(\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => "Generate GRN",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        $response = [
+            'purchase_transaction' => $purchaseTransaction
+        ];
+        return response()->json($response,$status);
+    }
+
+    public function createMaterial($data,$componentTypeSlug){
+        try{
+            $now = Carbon::now();
+            if($componentTypeSlug == 'new-material') {
+                $materialData['name'] = ucwords(trim($data['name']));
+                $categoryMaterialData['category_id'] = $data['miscellaneous_category_id'];
+                $materialData['rate_per_unit'] = round(($data['bill_amount'] / $data['quantity']),3);
+                $materialData['unit_id'] = $data['unit_id'];
+                $materialData['is_active'] = (boolean)1;
+                $material = Material::create($materialData);
+                $categoryMaterialData['material_id'] = $material['id'];
+                CategoryMaterialRelation::create($categoryMaterialData);
+                $approvedQuotationIds = Quotation::where('quotation_status_id', QuotationStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
+                foreach ($approvedQuotationIds as $quotationId) {
+                    $quotationMaterialData = array();
+                    $quotationMaterialData['material_id'] = $material['id'];
+                    $quotationMaterialData['rate_per_unit'] = round(($data['bill_amount'] / $data['quantity']),3);
+                    $quotationMaterialData['unit_id'] = $data['unit_id'];
+                    $quotationMaterialData['quantity'] = $data['quantity'];
+                    $quotationMaterialData['is_client_supplied'] = false;
+                    $quotationMaterialData['created_at'] = $now;
+                    $quotationMaterialData['updated_at'] = $now;
+                    $quotationMaterialData['quotation_id'] = $quotationId;
+                    QuotationMaterial::create($quotationMaterialData);
+                }
+                $reference_id = $material['id'];
+            }elseif($componentTypeSlug == 'new-asset'){
+                $assetData['name'] = ucwords(trim($data['name']));
+                $assetData['is_active'] = true;
+                $assetData['asset_types_id'] = AssetType::where('slug','other')->pluck('id')->first();
+                $asset = Asset::create($assetData);
+                $reference_id = $asset['id'];
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create New Material/Asset',
+                'exception' => $e->getMessage(),
+                'params' => $data
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $reference_id;
+    }
+
+    public function createPurchaseTransaction(Request $request){
+        try{
+            $purchasePeticashTransaction = PurcahsePeticashTransaction::where('id',$request['purchase_peticash_transaction_id'])->first();
+            $purchasePeticashTransactionData['reference_number'] = $request['reference_number'];
+            $purchasePeticashTransactionData['out_time'] = $purchasePeticashTransactionData['date'] = Carbon::now();
+            $purchasePeticashTransaction['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
+            $purchasePeticashTransaction->update($purchasePeticashTransactionData);
+            $sha1PurchaseTransactionId = sha1($purchasePeticashTransaction->id);
+            $imageUploadPath = public_path().env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1PurchaseTransactionId;
+            if (!file_exists($imageUploadPath)) {
+                File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            }
+            if($request->has('bill_images')){
+                foreach($request->bill_images as $billImage){
+                    $imageArray = explode(';',$billImage);
+                    $image = explode(',',$imageArray[1])[1];
+                    $pos  = strpos($billImage, ';');
+                    $type = explode(':', substr($billImage, 0, $pos))[1];
+                    $extension = explode('/',$type)[1];
+                    $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                    $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                    file_put_contents($fileFullPath,base64_decode($image));
+                    PurchasePeticashTransactionImage::create(['name' => $filename,'purchase_peticash_transaction_id' => $purchasePeticashTransaction['id'],'type' => 'bill']);
+                }
+            }
+            $request->session()->flash('success', 'Trasaction completed successfully.');
+            return redirect('/peticash/peticash-management/purchase/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Create Peticash Purchase Transaction",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function getPurchaseTransactionEditView(Request $request,$purchasePeticashTransactionId){
+        try{
+            $purchasePeticashTransaction = PurcahsePeticashTransaction::where('id',$purchasePeticashTransactionId)->first();
+            return view('peticash.peticash-management.purchase.transaction.edit')->with(compact('purchasePeticashTransaction'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Generate GRN Peticash Purchase Transaction",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function uploadTempPurchaseImages(Request $request){
+        try {
+            $user = Auth::user();
+            $assetDirectoryName = sha1($user->id);
+            $tempUploadPath = public_path() . env('PETICASH_PURCHASE_TRANSACTION_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+            /* Create Upload Directory If Not Exists */
+            if (!file_exists($tempImageUploadPath)) {
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            $path = env('PETICASH_PURCHASE_TRANSACTION_TEMP_IMAGE_UPLOAD').$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path,
+            ];
+        }catch (\Exception $e){
+            $response = [
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => 101,
+                    'message' => 'Failed to open input stream.',
+                ],
+                'id' => 'id'
+            ];
+            Log::info($e->getMessage());
+        }
+        return response()->json($response);
+    }
+
+    public function displayPurchaseImages(Request $request){
+        try{
+            $path = $request->path;
+            $count = $request->count;
+            $random = mt_rand(1,10000000000);
+        }catch (\Exception $e){
+            $path = null;
+            $count = null;
+            Log::critical($e->getMessage());
+        }
+        return view('partials.peticash.purchase-image')->with(compact('path','count','random'));
+    }
+
+    public function removePurchaseImage(Request $request){
+        try {
+            $sellerUploadPath = public_path() . $request->path;
+            File::delete($sellerUploadPath);
+            return response(200);
+        } catch (\Exception $e) {
+            return response(500);
+        }
+    }
+
 }

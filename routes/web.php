@@ -645,6 +645,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::group(['prefix' => 'purchase'], function(){
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getPurchaseManageView'));
                 Route::post('listing',array('uses' => 'Peticash\PeticashController@purchaseTransactionListing'));
+                Route::group(['prefix' => 'transaction'], function(){
+                    Route::get('create',array('uses' => 'Peticash\PeticashController@getPurchaseTransactionCreateView'));
+                    Route::post('generate-grn',array('uses' => 'Peticash\PeticashController@generateGRN'));
+                    Route::post('create',array('uses' => 'Peticash\PeticashController@createPurchaseTransaction'));
+                    Route::get('edit/{purchasePeticashTransactionId}',array('uses' => 'Peticash\PeticashController@getPurchaseTransactionEditView'));
+                    Route::post('image-upload',array('uses'=>'Peticash\PeticashController@uploadTempPurchaseImages'));
+                    Route::post('display-images',array('uses'=>'Peticash\PeticashController@displayPurchaseImages'));
+                    Route::post('delete-temp-product-image',array('uses'=>'Peticash\PeticashController@removePurchaseImage'));
+                });
             });
             Route::group(['prefix' => 'salary'], function(){
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
