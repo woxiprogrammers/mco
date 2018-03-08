@@ -129,6 +129,14 @@
                                                                     <input type="text" class="form-control" id="totalAmount" value="{{$purchaseOrderBill->amount}}" readonly>
                                                                 </div>
                                                             </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Remark</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="remark" name="remark" value="{{$purchaseOrderBill->remark}}" readonly>
+                                                                </div>
+                                                            </div>
                                                             <div class="form-group">
                                                                 <div class="col-md-2">
                                                                     <label class="control-label pull-right">Selected Images :</label>
