@@ -17,10 +17,10 @@ var CategoryListing = function () {
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
                 "lengthMenu": [
-                    [10, 20, 50, 100, 150, -1],
-                    [10, 20, 50, 100, 150, "All"] // change per page values here
+                    [50, 100, 150],
+                    [50, 100, 150] // change per page values here
                 ],
-                "pageLength": 10, // default record count per page
+                "pageLength": 50, // default record count per page
                 "ajax": {
                     "url": "/awareness/category-management/main-category-listing?_token="+$("input[name='_token']").val(), // ajax source
                 },

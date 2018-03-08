@@ -77,6 +77,35 @@
                                                     <div id="billData" hidden>
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
+
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="checkbox" name="is_transportation" id="transportationCheckbox">
+                                                                <label class="control-label">
+                                                                    Add Transportation Amount
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div id="transportation_div" hidden>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Transportation Sub-Total</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="transportation_total" id="transportation_total" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Transportation Tax Amount</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="transportation_tax_amount" name="transportation_tax_amount" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
                                                                 <label class="control-label pull-right">Sub-Total</label>
                                                             </div>
                                                             <div class="col-md-6">
@@ -105,6 +134,14 @@
                                                             </div>
                                                             <div class="col-md-3">
                                                                 <input type="text" class="form-control" id="totalAmount" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Remark</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" id="remark" name="remark">
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -178,6 +215,15 @@
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function(){
+            $("#transportationCheckbox").on('click', function(){
+                if($(this).is(':checked') == true){
+                    $("#transportation_div").show();
+                    calculateTotal();
+                }else{
+                    $("#transportation_div").hide();
+                    calculateTotal();
+                }
+            });
             CreatePurchaseOrderBill.init();
             $("#transactionSelectButton").on('click', function(event){
                 event.stopPropagation();
@@ -197,6 +243,8 @@
                             $("#subTotal").val(data.sub_total);
                             $("#totalAmount").val(data.tax_amount + data.sub_total);
                             $("#taxAmount").val(data.tax_amount);
+                            $("#transportation_total").val(data.transportation_amount);
+                            $("#transportation_tax_amount").val(data.transportation_tax_amount);
                             $("#billData").show();
                         },
                         error: function(errorData){
@@ -356,7 +404,13 @@
                     total += parseFloat($(this).val());
                 }
             });
-            $("#totalAmount").val(total);
+            if($('#transportationCheckbox').is(':checked') == true){
+                total = total + parseFloat($('#transportation_total').val()) + parseFloat($('#transportation_tax_amount').val()) ;
+                $("#totalAmount").val(total);
+            }else{
+                $("#totalAmount").val(total);
+            }
+
         }
         function viewTransactionDetails(transactionId){
             $.ajax({
