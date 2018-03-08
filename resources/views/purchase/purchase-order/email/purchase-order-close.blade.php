@@ -1,16 +1,18 @@
 <html>
 <body>
-Dear sir/madam,<br>
-&nbsp &nbsp &nbsp &nbsp &nbsp We are unable to accept the quotation sent by you earlier.  Please revise the rates if possible.<br>
-&nbsp &nbsp &nbsp &nbsp &nbsp Looking forward to working with you in the near future.<br>
-Regards,
+Dear Sir,<br>
+&nbsp &nbsp &nbsp &nbsp &nbsp We regret notifying you that the quotation you sent with reference to PR No.{{$purchaseOrder->purchaseRequest->format_id}} has been disapproved.<br>
+<br>
+&nbsp &nbsp &nbsp &nbsp &nbsp We look forward to deal with you in near future.<br>
+&nbsp &nbsp &nbsp &nbsp &nbsp *This is an auto generated message.<br>
+&nbsp &nbsp &nbsp &nbsp &nbsp *Please revert back at purchase.manishaconstruction@gmail.com for any queries.<br>
+<br>
+Thanking you,
+Purchase Manager,
 Manisha Construction
-Office no. 5-A, 5th floor, Siddhi Towers,
-Above Rupee Bank,
-Opp. Parmar Pavan building,
+Siddhi Towers, Above Rupee Bank,
+5th floor, Opp. Parmar Pavan Bldg,
 Kondhwa, Pune - 411048
-Tel no:- 020 26831325/26
-Email id: vaghelasuresh@yahoo.com<br><br>
-*Please note: This is a system-generated mail, kindly revert back on this mail or call for any queries*
+Contact No:- 020 26831325/26
 </body>
 </html>
