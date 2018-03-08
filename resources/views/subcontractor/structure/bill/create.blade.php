@@ -67,7 +67,7 @@
                                                                 <input type="text" class="form-control" name="qty" id="quantity" onkeyup="calculateSubTotal(this)">
                                                             </td>
                                                             <td>
-                                                                <span id="rate">{!! $rate !!}</span>
+                                                                <span id="rate">{!! $subcontractorStructure['rate'] !!}</span>
                                                             </td>
                                                             <td>
                                                                 <span id="subtotal"></span>

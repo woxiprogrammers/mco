@@ -245,7 +245,7 @@ class SubcontractorController extends Controller
                                                     'total_work_area' => $request['total_work_area'],
                                                     'description' => $request['description'],
                                                 ]);
-                        /*foreach($request['bills'] as $key => $billData){
+                        foreach($request['bills'] as $key => $billData){
                             $subcontractorBill = SubcontractorBill::create([
                                 'sc_structure_id' => $subcontractorStructure['id'],
                                 'subcontractor_bill_status_id' => SubcontractorBillStatus::where('slug','draft')->pluck('id')->first(),
@@ -261,7 +261,7 @@ class SubcontractorController extends Controller
                                     ]);
                                 }
                             }
-                        }*/
+                        }
                     break;
 
                 case 'sqft' :
@@ -787,21 +787,9 @@ class SubcontractorController extends Controller
             $subcontractorStructure = SubcontractorStructure::where('id',$subcontractorStructureId)->first();
             $totalBillCount = $subcontractorStructure->subcontractorBill->count();
             $billName = "R.A. ".($totalBillCount + 1);
-            if($subcontractorStructure->contractType->slug == 'amountwise'){
-                $allowedQuantity = 1;
-                $alreadyAssignedQuantity = $subcontractorStructure->subcontractorBill->sum('qty');
-                $allowedQuantity = 1 - $alreadyAssignedQuantity;
-                $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
-            }else{
-                $allowedQuantity = $subcontractorStructure->total_work_area;
-                $alreadyAssignedQuantity = $subcontractorStructure->subcontractorBill->sum('qty');
-                if($alreadyAssignedQuantity > 0){
-                    $allowedQuantity = $subcontractorStructure->total_work_area / $alreadyAssignedQuantity;
-                }
-                $rate = $subcontractorStructure['rate'];
-            }
+
             $taxes = Tax::whereNotIn('slug',['vat'])->where('is_active',true)->where('is_special',false)->select('id','name','slug','base_percentage')->get();
-            return view('subcontractor.structure.bill.create')->with(compact('rate','allowedQuantity','subcontractorStructure','billName','taxes'));
+            return view('subcontractor.structure.bill.create')->with(compact('subcontractorStructure','billName','taxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Bill Create View',
