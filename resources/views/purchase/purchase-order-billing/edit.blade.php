@@ -42,9 +42,18 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/purchase/purchase-order-bill/manage">Manage Purchase Order Bill</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Edit Purchase Order Bill</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <div class="row">
                                     <div class="col-md-12">
-
                                         <!-- BEGIN VALIDATION STATES-->
                                         <div class="portlet light ">
                                             <div class="portlet-body">
@@ -73,28 +82,33 @@
                                                         </fieldset>
                                                         <fieldset style="margin-top: 2%">
                                                             <legend> Bill Details </legend>
-                                                            <div class="form-group row">
-                                                                <div class="col-md-2">
-                                                                    <label class="control-label pull-right">Transportation Sub-Total</label>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <input type="text" class="form-control" name="transportation_total" id="transportation_total" value="{{$purchaseOrderBill->transportation_tax_amount}}" readonly>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group row">
-                                                                <div class="col-md-2">
-                                                                    <label class="control-label pull-right">Transportation Tax Amount</label>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <input type="number" class="form-control" id="transportation_tax_amount" name="transportation_tax_amount" value="{{$purchaseOrderBill->transportation_total_amount}}" readonly>
-                                                                </div>
-                                                            </div>
+
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
                                                                     <label class="control-label pull-right"> GRN </label>
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <input type="text" class="form-control calculate-amount" name="grn" id="subTotal" value="{{$grn}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right"> Bill Number </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control calculate-amount" name="vendor_bill_number" id="vendorBillNumber" value="{{$purchaseOrderBill->vendor_bill_number}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right"> Bill Date </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    @if(isset($purchaseOrderBill->bill_date))
+                                                                        <input type="text" class="form-control calculate-amount" name="grn" id="subTotal" value="{{date('j M Y',strtotime($purchaseOrderBill->bill_date))}}" readonly>
+                                                                    @else
+                                                                        <input type="text" class="form-control calculate-amount" name="grn" id="subTotal" value="" readonly>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                             <div class="form-group row">
@@ -115,10 +129,34 @@
                                                             </div>
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Transportation Sub-Total</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="transportation_total" id="transportation_total" value="{{$purchaseOrderBill->transportation_tax_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Transportation Tax Amount</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="transportation_tax_amount" name="transportation_tax_amount" value="{{$purchaseOrderBill->transportation_total_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
                                                                     <label class="control-label pull-right">Extra Amount</label>
                                                                 </div>
                                                                 <div class="col-md-3">
-                                                                    <input type="text" class="form-control calculate-amount" name="extra_amount" value="{{$purchaseOrderBill->extra_amount}}">
+                                                                    <input type="text" class="form-control calculate-amount" name="extra_amount" value="{{$purchaseOrderBill->extra_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Extra Tax Amount</label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control calculate-amount" name="extra_tax_amount" value="{{$purchaseOrderBill->extra_tax_amount}}" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group row">

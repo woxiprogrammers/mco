@@ -704,14 +704,16 @@ class PurchaseRequestController extends Controller
                     }
                 }
                 if(isset($vendorInfo)){
+                    $now = date('j_M_Y_His');
                     $pdfTitle = "Purchase Request";
+                    $pdfName = $purchaseRequestFormat."_".$now;
                     $pdf = App::make('dompdf.wrapper');
                     $formatId = $purchaseRequestFormat;
                     $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle','formatId')));
                     $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                     $pdfFileName = sha1($vendorId).'.pdf';
                     $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
-                    $pdfContent = $pdf->stream();
+                    $pdfContent = $pdf->stream($pdfName);
                     if($data['is_mail'] == 1){
                         if(file_exists($pdfUploadPath)){
                             unlink($pdfUploadPath);

@@ -12,6 +12,11 @@
             padding:5px;
         }
     </style>
+    <link href="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/clockface/css/clockface.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -36,6 +41,16 @@
                             <div class="page-content">
                                 @include('partials.common.messages')
                                 <div class="container">
+                                    <ul class="page-breadcrumb breadcrumb">
+                                        <li>
+                                            <a href="/purchase/purchase-order-bill/manage">Manage Purchase Order Bill</a>
+                                            <i class="fa fa-circle"></i>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);">Create Purchase Order Bill</a>
+                                            <i class="fa fa-circle"></i>
+                                        </li>
+                                    </ul>
                                     <div class="row">
                                         <div class="col-md-12">
                                             <!-- BEGIN VALIDATION STATES-->
@@ -106,6 +121,29 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
+                                                                <label class="control-label pull-right">Bill Number</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" name="vendor_bill_number" id="vendorBillNumber">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Bill Date</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="input-group input-medium date date-picker" data-date-format="yyyy-mm-dd" data-date-end-date="+0d">
+                                                                    <input type="text" class="form-control" name="bill_date" readonly>
+                                                                    <span class="input-group-btn">
+                                                                        <button class="btn default" type="button">
+                                                                            <i class="fa fa-calendar"></i>
+                                                                        </button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
                                                                 <label class="control-label pull-right">Sub-Total</label>
                                                             </div>
                                                             <div class="col-md-6">
@@ -125,7 +163,16 @@
                                                                 <label class="control-label pull-right">Extra Amount</label>
                                                             </div>
                                                             <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" name="extra_amount">
+                                                                <input type="text" class="form-control calculate-amount" id="extra_amount" name="extra_amount">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row" id="extra_tax_div" hidden>
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Extra Tax Amount</label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <input type="hidden" id="extra_amount_tax_value">
+                                                                <input type="text" class="form-control calculate-amount" name="extra_tax_amount" id="extra_tax_amount" value="0" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -205,16 +252,28 @@
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
     <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
     <link rel="stylesheet"  href="/assets/global/css/app.css"/>
-    <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
-    <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/moment.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/clockface/js/clockface.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order-billing/validations.js"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function(){
+            $('#extra_amount').on('keyup', function(){
+                if(parseFloat($('#extra_amount').val()) > 0){
+                    $('#extra_tax_div').show();
+                    var total_tax = (parseFloat($("#extra_amount_tax_value").val()) * parseFloat($(this).val())) / 100 ;
+                    $('#extra_tax_amount').val(total_tax);
+                }else{
+                    $('#extra_tax_div').hide();
+                    $('#extra_tax_amount').val(0);
+                }
+            });
             $("#transportationCheckbox").on('click', function(){
                 if($(this).is(':checked') == true){
                     $("#transportation_div").show();
@@ -245,7 +304,29 @@
                             $("#taxAmount").val(data.tax_amount);
                             $("#transportation_total").val(data.transportation_amount);
                             $("#transportation_tax_amount").val(data.transportation_tax_amount);
+                            $("#extra_amount_tax_value").val(data.extra_tax_percentage);
                             $("#billData").show();
+                            $("#vendorBillNumber").rules('add',{
+                                remote : {
+                                    url: "/purchase/purchase-order-bill/check-bill-number",
+                                    type: "POST",
+                                    async: true,
+                                    data: {
+                                        _token: function(){
+                                            return $("input[name='_token']").val();
+                                        },
+                                        purchase_order_id: function() {
+                                            return $( "#purchaseOrderId" ).val();
+                                        },
+                                        vendor_bill_number: function(){
+                                            return $("#vendorBillNumber").val()
+                                        }
+                                    }
+                                },
+                                messages: {
+                                    remote : 'This Bill is already registered.'
+                                }
+                            });
                         },
                         error: function(errorData){
 

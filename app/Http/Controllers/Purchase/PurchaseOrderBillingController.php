@@ -11,6 +11,7 @@ use App\PurchaseOrder;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillImage;
 use App\PurchaseOrderBillTransactionRelation;
+use App\PurchaseOrderComponent;
 use App\PurchaseOrderPayment;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionStatus;
@@ -19,6 +20,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -170,6 +172,7 @@ class PurchaseOrderBillingController extends Controller
             $taxAmount = 0;
             $transportationAmount = $totalTransportationTaxAmount = 0;
             $purchaseOrderTransactions = PurchaseOrderTransaction::whereIn('id',$request->transaction_id)->get();
+            $purchaseOrderId = $purchaseOrderTransactions->pluck('purchase_order_id')->first();
             foreach($purchaseOrderTransactions as $purchaseOrderTransaction){
                 foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
                     $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
@@ -196,11 +199,16 @@ class PurchaseOrderBillingController extends Controller
                     $totalTransportationTaxAmount += $transportationTaxAmount;
                 }
             }
+            $purchaseOrderComponents = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrderId)->get();
+            $highestTaxAmount = $purchaseOrderComponents->max(function ($purchaseOrderComponent) {
+                return ($purchaseOrderComponent->cgst_percentage + $purchaseOrderComponent->sgst_percentage + $purchaseOrderComponent->igst_percentage);
+            });
             $response = [
                 'sub_total' => $amount,
                 'tax_amount' => $taxAmount,
                 'transportation_amount' => $transportationAmount,
-                'transportation_tax_amount' => $totalTransportationTaxAmount
+                'transportation_tax_amount' => $totalTransportationTaxAmount,
+                'extra_tax_percentage' => $highestTaxAmount
             ];
             $status = 200;
         }catch (\Exception $e){
@@ -279,7 +287,18 @@ class PurchaseOrderBillingController extends Controller
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
             $postDataArray = array();
-            if($request->has('postdata')) {
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->where('purchase_requests.project_site_id', $projectSiteId)
+                    ->pluck('purchase_order_bills.id')
+                    ->toArray();
+            }else{
+                $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
+            }
+            $filterFlag = true;
+            if($request->has('postdata')){
                 $postdata = $request['postdata'];
                 if($postdata != null) {
                     $mstr = explode(",",$request['postdata']);
@@ -293,40 +312,40 @@ class PurchaseOrderBillingController extends Controller
                 }
                 $start_date = $postDataArray['start_date'];
                 $end_date = $postDataArray['end_date'];
+                $purchaseOrderBillIds = PurchaseOrderBill::whereIn('id',$purchaseOrderBillIds)
+                    ->whereBetween('created_at', [$start_date, $end_date])
+                    ->pluck('id')
+                    ->toArray();
+                if(count($purchaseOrderBillIds) <= 0){
+                    $filterFlag = false;
+                }
             }
-
-            if(Session::has('global_project_site')){
-                $projectSiteId = Session::get('global_project_site');
-                if($request->has('postdata')) {
-                    $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                        ->where('purchase_requests.project_site_id', $projectSiteId)
-                        ->whereBetween('purchase_order_bills.created_at', [$start_date, $end_date])
-                        ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as bill_number','purchase_order_bills.amount as amount','purchase_orders.format_id as format_id','purchase_orders.vendor_id','purchase_order_bills.created_at')
-                        ->orderBy('id','desc')
-                        ->get();
-                }else{
-                    $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                        ->where('purchase_requests.project_site_id', $projectSiteId)
-                        ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as bill_number','purchase_order_bills.amount as amount','purchase_orders.format_id as format_id','purchase_orders.vendor_id','purchase_order_bills.created_at')
-                        ->orderBy('id','desc')
-                        ->get();
+            if($request->has('vendor_name') && $request->vendor_name != '' && $filterFlag == true){
+                $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                                            ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
+                                            ->where('vendors.company','ilike','%'.$request->vendor_name.'%')
+                                            ->pluck('purchase_order_bills.id')->toArray();
+                if(count($purchaseOrderBillIds) <= 0){
+                    $filterFlag = false;
                 }
-
+            }
+            if($request->has('bill_date') && $request->bill_date != '' && $filterFlag == true){
+                $purchaseOrderBillIds = PurchaseOrderBill::whereIn('id', $purchaseOrderBillIds)
+                                            ->whereDate('bill_date',$request->bill_date)
+                                            ->pluck('id')->toArray();
+                if(count($purchaseOrderBillIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            if($filterFlag == true){
+                $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
+                    ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as serial_number','purchase_order_bills.created_at as created_at','purchase_order_bills.bill_date as bill_date','purchase_order_bills.vendor_bill_number as vendor_bill_number','purchase_orders.vendor_id as vendor_id','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.amount as amount')
+                    ->orderBy('id','desc')
+                    ->get();
             }else{
-                if($request->has('postdata')) {
-                    $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                        ->whereBetween('purchase_order_bills.created_at', [$start_date, $end_date])
-                        ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as bill_number','purchase_order_bills.amount as amount','purchase_orders.format_id as format_id','purchase_orders.vendor_id','purchase_order_bills.created_at')
-                        ->orderBy('id','desc')
-                        ->get();
-                }else{
-                    $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                        ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as bill_number','purchase_order_bills.amount as amount','purchase_orders.format_id as format_id','purchase_orders.vendor_id','purchase_order_bills.created_at')
-                        ->orderBy('id','desc')
-                        ->get();
-                }
+                $purchaseOrderBillData = array();
             }
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
             if($request->length == -1){
@@ -336,6 +355,15 @@ class PurchaseOrderBillingController extends Controller
             }
             $user = Auth::user();
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
+                $taxAmount = $purchaseOrderBillData[$pagination]['transportation_tax_amount'] + $purchaseOrderBillData[$pagination]['extra_tax_amount'] + $purchaseOrderBillData[$pagination]['tax_amount'];
+                $basicAmount = $purchaseOrderBillData[$pagination]['amount'] - $taxAmount;
+                $paidAmount = PurchaseOrderPayment::where('purchase_order_bill_id', $purchaseOrderBillData[$pagination]['id'])->sum('amount');
+                $pendingAmount = $purchaseOrderBillData[$pagination]['amount'] - $paidAmount;
+                $vendorName = Vendor::where('id', $purchaseOrderBillData[$pagination]['vendor_id'])->pluck('company')->first();
+                $entryDate = '';
+                if(isset($purchaseOrderBillData[$pagination]['bill_date'])){
+                    $entryDate = date('j M Y',strtotime($purchaseOrderBillData[$pagination]['bill_date']));
+                }
                 if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill') || $user->customHasPermission('edit-purchase-bill')){
                     $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
                         <a href="/purchase/purchase-order-bill/edit/'.$purchaseOrderBillData[$pagination]['id'].'" style="color: white"> Edit
@@ -344,11 +372,16 @@ class PurchaseOrderBillingController extends Controller
                     $editButton = '';
                 }
                 $records['data'][] = [
-                    $purchaseOrderBillData[$pagination]['bill_number'],
-                    $purchaseOrderBillData[$pagination]['format_id'],
-                    $purchaseOrderBillData[$pagination]['amount'],
-                    Vendor::where('id',$purchaseOrderBillData[$pagination]['vendor_id'])->pluck('name')->first(),
+                    $purchaseOrderBillData[$pagination]['serial_number'],
                     date('j M Y',strtotime($purchaseOrderBillData[$pagination]['created_at'])),
+                    $entryDate,
+                    $purchaseOrderBillData[$pagination]['vendor_bill_number'],
+                    $vendorName,
+                    $basicAmount,
+                    $taxAmount,
+                    $purchaseOrderBillData[$pagination]['amount'],
+                    $pendingAmount,
+                    $paidAmount,
                     $editButton
                 ];
             }
@@ -469,6 +502,31 @@ class PurchaseOrderBillingController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function checkBillNumber(Request $request){
+        try{
+            $purchaseOrderId = $request->purchase_order_id;
+            $vendorBillNumber = $request->vendor_bill_number;
+            $vendorId = PurchaseOrder::findOrFail($purchaseOrderId)->vendor_id;
+            $purchaseBillNumberCount = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                        ->where('purchase_orders.vendor_id', $vendorId)
+                                        ->where('purchase_order_bills.vendor_bill_number','ilike',($vendorBillNumber))
+                                        ->count();
+            if($purchaseBillNumberCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Purchase Order Bill Number Check',
+                'data' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return null;
         }
     }
 }

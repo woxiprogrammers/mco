@@ -282,6 +282,10 @@
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
+        $('#expected_delivery_date').attr("readonly", "readonly");
+        $('#expected_delivery_date').datepicker({
+            minDate: 'today', // 0 days offset = today
+        });
         $(".tax-modal-quantity").each(function(){
             calculateTaxes(this);
         });
