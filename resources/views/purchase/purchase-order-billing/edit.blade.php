@@ -118,7 +118,15 @@
                                                                     <label class="control-label pull-right">Extra Amount</label>
                                                                 </div>
                                                                 <div class="col-md-3">
-                                                                    <input type="text" class="form-control calculate-amount" name="extra_amount" value="{{$purchaseOrderBill->extra_amount}}">
+                                                                    <input type="text" class="form-control calculate-amount" name="extra_amount" value="{{$purchaseOrderBill->extra_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Extra Tax Amount</label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control calculate-amount" name="extra_tax_amount" value="{{$purchaseOrderBill->extra_tax_amount}}" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group row">
