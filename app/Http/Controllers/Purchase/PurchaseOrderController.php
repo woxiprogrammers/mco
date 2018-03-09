@@ -216,11 +216,6 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
                      $purchaseOrderList[$iterator]['created_at'] = $purchaseOrder['created_at'];
                      $purchaseOrderList[$iterator]['is_email_sent'] = $purchaseOrder['is_email_sent'];
-                     /*if($purchaseOrder['is_email_sent'] == null && $purchaseOrder['is_email_sent'] != false){
-                         $purchaseOrderList[$iterator]['is_email_sent'] = true;
-                     }else{
-
-                     }*/
                      $iterator++;
                  }
              }
