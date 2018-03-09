@@ -215,11 +215,12 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['chk_status'] = $purchaseOrder['is_approved'];
                      $purchaseOrderList[$iterator]['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
                      $purchaseOrderList[$iterator]['created_at'] = $purchaseOrder['created_at'];
-                     if($purchaseOrder['is_email_sent'] == null){
+                     $purchaseOrderList[$iterator]['is_email_sent'] = $purchaseOrder['is_email_sent'];
+                     /*if($purchaseOrder['is_email_sent'] == null && $purchaseOrder['is_email_sent'] != false){
                          $purchaseOrderList[$iterator]['is_email_sent'] = true;
                      }else{
-                         $purchaseOrderList[$iterator]['is_email_sent'] = $purchaseOrder['is_email_sent'];
-                     }
+
+                     }*/
                      $iterator++;
                  }
              }
@@ -234,13 +235,15 @@ class PurchaseOrderController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
                 $actionData = "";
                 if ($purchaseOrderList[$pagination]['chk_status'] == true) {
-                    if($purchaseOrderList[$pagination]['is_email_sent'] == true){
+                    if($purchaseOrderList[$pagination]['is_email_sent'] == true || !isset($purchaseOrderList[$pagination]['is_email_sent'])){
                         $imageName = 'email_sent.svg';
+                        $imageTitle = 'Email is Sent.';
                     }else{
                         $imageName = 'email_pending.svg';
+                        $imageTitle = 'Email is pending.';
                     }
                     $actionData =  '<div>
-                        <img src="/assets/global/img/'.$imageName.'" style="height: 20px" title="Email is pending.">
+                        <img src="/assets/global/img/'.$imageName.'" style="height: 20px" title="'.$imageTitle.'">
                     <div id="sample_editable_1_new" class="btn btn-small blue" >
                     <a href="/purchase/purchase-order/edit/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white; margin-left: 8%"> Edit
                     </a> &nbsp; | &nbsp; <a href="/purchase/purchase-order/download-po-pdf/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white"> <i class="fa fa-download" aria-hidden="true"></i>
@@ -266,7 +269,6 @@ class PurchaseOrderController extends Controller
             $records["recordsFiltered"] = $iTotalRecords;
             $responseStatus = 200;
             return response()->json($records,$responseStatus);
-
         }catch(\Exception $e){
             $data = [
                 'action' => 'Purchase Requests listing',

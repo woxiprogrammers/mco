@@ -24,7 +24,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Manage Purchase Order</h1>
+                                    <h1>Manage Purchase Order Request</h1>
                                 </div>
                                 @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'/* || $user->customHasPermission('create-purchase-order')*/)
                                     <div class="btn-group pull-right margin-top-15">
