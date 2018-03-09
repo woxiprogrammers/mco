@@ -723,11 +723,33 @@ class PeticashController extends Controller
     public function changeSalaryStatus(Request $request){
         try{
             $status = 200;
+            $projectSiteWiseAmount = array();
             foreach($request->txn_ids as $txnId){
                 $salaryTxn = PeticashRequestedSalaryTransaction::findOrFail($txnId);
                 $newStatus = PeticashStatus::where('slug',$request->status)->pluck('id')->first();
                 $remark = $request->remark;
                 $salaryTxn->update(['peticash_status_id' => $newStatus,'admin_remark' => $remark]);
+                if($request->status == 'approved'){
+                    if(array_key_exists($salaryTxn->project_site_id,$projectSiteWiseAmount)){
+                        $projectSiteWiseAmount[$salaryTxn->project_site_id] += $salaryTxn->amount;
+                    }else{
+                        $projectSiteWiseAmount[$salaryTxn->project_site_id] = $salaryTxn->amount;
+                    }
+                    $projectSite = ProjectSite::where('id',$salaryTxn['project_site_id'])->first();
+                    $webTokens = [$salaryTxn->referenceUser->web_fcm_token];
+                    $mobileTokens = [$salaryTxn->referenceUser->mobile_fcm_token];
+                    $notificationString = $projectSite->project->name.' - '.$projectSite->name.' - Approved payment';
+                    $this->sendPushNotification('Manisha Construction', $notificationString,$webTokens,$mobileTokens,'p-s-r-a');
+                }
+            }
+            foreach($projectSiteWiseAmount as $projectSiteId => $amount){
+                $peticashSiteApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->first();
+                if($peticashSiteApprovedAmount == null){
+                    $peticashSiteApprovedAmount = PeticashSiteApprovedAmount::create(['project_site_id' => $projectSiteId, 'salary_amount_approved' => $amount]);
+                }else{
+                    $newAmount = $peticashSiteApprovedAmount->salary_amount_approved + $amount;
+                    $peticashSiteApprovedAmount->update(['salary_amount_approved' => $newAmount]);
+                }
             }
             $message = 'Peticash Salary Txn Status changed successfully.';
         }catch(\Exception $e){
