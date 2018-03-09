@@ -516,4 +516,27 @@ class UserController extends Controller
         Log::critical(json_encode($data));
         abort(500);
     }
+
+    public function checkEmail(Request $request){
+        try{
+            if($request->has('user_id')){
+                $emailCount = User::where('email','ilike',$request->email)->where('id','!=',$request->user_id)->count();
+            }else{
+                $emailCount = User::where('email','ilike',$request->email)->count();
+            }
+            if($emailCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'User Check Email',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return null;
+        }
+    }
 }

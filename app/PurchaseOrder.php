@@ -10,7 +10,7 @@ class PurchaseOrder extends Model
 
     protected $fillable = ['user_id','vendor_id','is_approved','purchase_request_id','serial_no',
         'format_id','purchase_order_status_id','client_id','is_client_order','purchase_order_request_id',
-        'total_advance_amount','balance_advance_amount'
+        'total_advance_amount','balance_advance_amount','is_email_sent'
     ];
 
     public function client(){

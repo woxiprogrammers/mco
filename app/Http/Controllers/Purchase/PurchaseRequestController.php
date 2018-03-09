@@ -704,14 +704,16 @@ class PurchaseRequestController extends Controller
                     }
                 }
                 if(isset($vendorInfo)){
+                    $now = date('j_M_Y_His');
                     $pdfTitle = "Purchase Request";
+                    $pdfName = $purchaseRequestFormat."_".$now;
                     $pdf = App::make('dompdf.wrapper');
                     $formatId = $purchaseRequestFormat;
                     $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle','formatId')));
                     $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                     $pdfFileName = sha1($vendorId).'.pdf';
                     $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
-                    $pdfContent = $pdf->stream();
+                    $pdfContent = $pdf->stream($pdfName);
                     if($data['is_mail'] == 1){
                         if(file_exists($pdfUploadPath)){
                             unlink($pdfUploadPath);
@@ -721,9 +723,9 @@ class PurchaseRequestController extends Controller
                         }
                         file_put_contents($pdfUploadPath,$pdfContent);
                         $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        $mailMessage = 'Please check the Purchase Request ('.$purchaseRequestFormat.') attached herewith';
-                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
-                            $message->subject('Testing with attachment');
+                        $mailMessage = 'Please send the quotation of materials listed in the attachment.';
+                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData,$purchaseRequestFormat){
+                            $message->subject('Quotation Requirement ('.$purchaseRequestFormat.')');
                             $message->to($mailData['toMail']);
                             $message->from(env('MAIL_USERNAME'));
                             $message->attach($mailData['path']);

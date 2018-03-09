@@ -26,6 +26,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
         Route::post('listing',array('uses' => 'User\UserController@userListing'));
         Route::post('check-mobile',array('uses' => 'User\UserController@checkMobile'));
+        Route::post('check-email',array('uses' => 'User\UserController@checkEmail'));
         Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
         Route::get('get-route-acls/{roleId}',array('uses' => 'User\UserController@getRoleAcls'));
         Route::group(['prefix' => 'project-site'],function(){
@@ -326,6 +327,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('listing/{purchaseOrderBillId}',array('uses' => 'Purchase\PurchaseOrderBillingController@paymentListing'));
                 Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createPayment'));
             });
+            Route::post('check-bill-number',array('uses' => 'Purchase\PurchaseOrderBillingController@checkBillNumber'));
         });
         Route::group(['prefix' => 'vendor-mail'],function(){
             Route::get('manage',array('uses' => 'Purchase\VendorMailController@getManageView'));

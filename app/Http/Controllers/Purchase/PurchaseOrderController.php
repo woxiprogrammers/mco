@@ -215,6 +215,7 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['chk_status'] = $purchaseOrder['is_approved'];
                      $purchaseOrderList[$iterator]['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
                      $purchaseOrderList[$iterator]['created_at'] = $purchaseOrder['created_at'];
+                     $purchaseOrderList[$iterator]['is_email_sent'] = $purchaseOrder['is_email_sent'];
                      $iterator++;
                  }
              }
@@ -229,10 +230,19 @@ class PurchaseOrderController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
                 $actionData = "";
                 if ($purchaseOrderList[$pagination]['chk_status'] == true) {
-                    $actionData =  '<div id="sample_editable_1_new" class="btn btn-small blue" >
-                    <a href="/purchase/purchase-order/edit/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white"> Edit
+                    if($purchaseOrderList[$pagination]['is_email_sent'] == true || !isset($purchaseOrderList[$pagination]['is_email_sent'])){
+                        $imageName = 'email_sent.svg';
+                        $imageTitle = 'Email is Sent.';
+                    }else{
+                        $imageName = 'email_pending.svg';
+                        $imageTitle = 'Email is pending.';
+                    }
+                    $actionData =  '<div>
+                        <img src="/assets/global/img/'.$imageName.'" style="height: 20px" title="'.$imageTitle.'">
+                    <div id="sample_editable_1_new" class="btn btn-small blue" >
+                    <a href="/purchase/purchase-order/edit/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white; margin-left: 8%"> Edit
                     </a> &nbsp; | &nbsp; <a href="/purchase/purchase-order/download-po-pdf/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white"> <i class="fa fa-download" aria-hidden="true"></i>
-                    </a></div>';
+                    </a></div></div>';
                 }
                 $records['data'][$iterator] = [
                     '<a href="javascript:void(0);" onclick="openPurchaseOrderDetails('.$purchaseOrderList[$pagination]['purchase_order_id'].')">
@@ -254,7 +264,6 @@ class PurchaseOrderController extends Controller
             $records["recordsFiltered"] = $iTotalRecords;
             $responseStatus = 200;
             return response()->json($records,$responseStatus);
-
         }catch(\Exception $e){
             $data = [
                 'action' => 'Purchase Requests listing',
@@ -309,10 +318,12 @@ class PurchaseOrderController extends Controller
         try{
             $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();
             $purchase_order_data['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','close')->pluck('id')->first();
-            PurchaseOrder::where('id',$request['po_id'])->update($purchase_order_data);
+            $purchaseOrder = PurchaseOrder::where('id',$request['po_id'])->first();
+            $purchaseOrder->update($purchase_order_data);
             $mailData = ['toMail' => $mail_id];
-            Mail::send('purchase.purchase-order.email.purchase-order-close', [], function($message) use ($mailData){
-                $message->subject('Disapproval of the quotation');
+            $purchaseOrderComponent = $purchaseOrder->purchaseOrderComponent;
+            Mail::send('purchase.purchase-order.email.purchase-order-close', ['purchaseOrder' => $purchaseOrder,'purchaseOrderComponent' => $purchaseOrderComponent], function($message) use ($mailData,$purchaseOrder){
+                $message->subject('PO '.$purchaseOrder->purchaseRequest->format_id.'has been closed');
                 $message->to($mailData['toMail']);
                 $message->from(env('MAIL_USERNAME'));
             });
@@ -558,7 +569,7 @@ class PurchaseOrderController extends Controller
                     'unit_id' => $purchaseOrderComponentData['unit_id'],
                     'purchase_order_transaction_id' => $purchaseOrderTransaction->id
                 ];
-                PurchaseOrderTransactionComponent::create($purchaseOrderTransactionComponentData);
+                $purchaseOrderTransactionComponent = PurchaseOrderTransactionComponent::create($purchaseOrderTransactionComponentData);
                 $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
                     ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                     ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
@@ -579,7 +590,7 @@ class PurchaseOrderController extends Controller
                 $webTokens = array_merge(array_column($materialRequestUserToken,'web_fcm_token'), array_column($purchaseRequestApproveUserToken,'web_fcm_token'));
                 $mobileTokens = array_merge(array_column($materialRequestUserToken,'mobile_fcm_token'), array_column($purchaseRequestApproveUserToken,'mobile_fcm_token'));
                 $notificationString = $mainNotificationString.' '.$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
-                $notificationString .= ' '.$purchaseOrderTransactionComponentData->quantity.' '.$purchaseOrderTransactionComponentData->unit->name;
+                $notificationString .= ' '.$purchaseOrderTransactionComponent->quantity.' '.$purchaseOrderTransactionComponent->unit->name;
                 $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-b');
                 $projectSiteId = $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id;
                 $inventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',$purchaseOrderComponentData['name'])->first();

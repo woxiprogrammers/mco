@@ -201,7 +201,6 @@
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
-                                                            {{--<input type="date" class="form-control" id="termination_date" name="termination_date">--}}
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
