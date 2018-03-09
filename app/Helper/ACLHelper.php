@@ -59,11 +59,13 @@ class ACLHelper{
                 ->whereIn('modules.module_id',$moduleIds)
                 ->where('permissions.is_web',true)
                 ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
+                ->orderBy('submodule_id')
                 ->get();
             $mobileModules =  Module::join('permissions','modules.id','=','permissions.module_id')
                 ->whereIn('modules.module_id',$moduleIds)
                 ->where('permissions.is_mobile',true)
                 ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
+                ->orderBy('submodule_id')
                 ->get();
             $webModuleResponse = array();
             foreach ($webModules as $subModule){
