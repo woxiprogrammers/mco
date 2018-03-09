@@ -18,16 +18,6 @@
                     <div class="page-content-wrapper">
                         <div class="page-head">
                             <div class="container">
-                                <ul class="page-breadcrumb breadcrumb">
-                                    <li>
-                                        <a href="/purchase/purchase-order/manage">Manage Purchase Orders</a>
-                                        <i class="fa fa-circle"></i>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);">Edit Purchase Order</a>
-                                        <i class="fa fa-circle"></i>
-                                    </li>
-                                </ul>
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
                                     <h1>Edit Purchase Order</h1>
@@ -53,6 +43,16 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/purchase/purchase-order/manage">Manage Purchase Order</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Edit Purchase Order</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <input type="hidden" id="po_id" value="{{$purchaseOrderList['purchase_order_id']}}">
                                 <input type="hidden" id="vendor_id" value="{{$purchaseOrderList['vendor_id']}}">
                                 <div class="row">

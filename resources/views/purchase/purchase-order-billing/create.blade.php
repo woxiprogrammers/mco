@@ -12,6 +12,11 @@
             padding:5px;
         }
     </style>
+    <link href="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/clockface/css/clockface.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -36,6 +41,16 @@
                             <div class="page-content">
                                 @include('partials.common.messages')
                                 <div class="container">
+                                    <ul class="page-breadcrumb breadcrumb">
+                                        <li>
+                                            <a href="/purchase/purchase-order-bill/manage">Manage Purchase Order Bill</a>
+                                            <i class="fa fa-circle"></i>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);">Create Purchase Order Bill</a>
+                                            <i class="fa fa-circle"></i>
+                                        </li>
+                                    </ul>
                                     <div class="row">
                                         <div class="col-md-12">
                                             <!-- BEGIN VALIDATION STATES-->
@@ -101,6 +116,29 @@
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <input type="number" class="form-control" id="transportation_tax_amount" name="transportation_tax_amount" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Bill Number</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" name="vendor_bill_number" id="vendorBillNumber">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Bill Date</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="input-group input-medium date date-picker" data-date-format="yyyy-mm-dd" data-date-end-date="+0d">
+                                                                    <input type="text" class="form-control" name="bill_date" readonly>
+                                                                    <span class="input-group-btn">
+                                                                        <button class="btn default" type="button">
+                                                                            <i class="fa fa-calendar"></i>
+                                                                        </button>
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -205,11 +243,13 @@
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
     <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
     <link rel="stylesheet"  href="/assets/global/css/app.css"/>
-    <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
-    <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/moment.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/clockface/js/clockface.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order-billing/validations.js"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
@@ -246,6 +286,27 @@
                             $("#transportation_total").val(data.transportation_amount);
                             $("#transportation_tax_amount").val(data.transportation_tax_amount);
                             $("#billData").show();
+                            $("#vendorBillNumber").rules('add',{
+                                remote : {
+                                    url: "/purchase/purchase-order-bill/check-bill-number",
+                                    type: "POST",
+                                    async: true,
+                                    data: {
+                                        _token: function(){
+                                            return $("input[name='_token']").val();
+                                        },
+                                        purchase_order_id: function() {
+                                            return $( "#purchaseOrderId" ).val();
+                                        },
+                                        vendor_bill_number: function(){
+                                            return $("#vendorBillNumber").val()
+                                        }
+                                    }
+                                },
+                                messages: {
+                                    remote : 'This Bill is already registered.'
+                                }
+                            });
                         },
                         error: function(errorData){
 
