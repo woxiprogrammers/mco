@@ -479,4 +479,29 @@ class PurchaseOrderBillingController extends Controller
             abort(500);
         }
     }
+
+    public function checkBillNumber(Request $request){
+        try{
+            $purchaseOrderId = $request->purchase_order_id;
+            $vendorBillNumber = $request->vendor_bill_number;
+            $vendorId = PurchaseOrder::findOrFail($purchaseOrderId)->vendor_id;
+            $purchaseBillNumberCount = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                        ->where('purchase_orders.vendor_id', $vendorId)
+                                        ->where('purchase_order_bills.vendor_bill_number','ilike',($vendorBillNumber))
+                                        ->count();
+            if($purchaseBillNumberCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Purchase Order Bill Number Check',
+                'data' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return null;
+        }
+    }
 }
