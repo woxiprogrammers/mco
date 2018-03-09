@@ -324,8 +324,9 @@ class PurchaseOrderController extends Controller
             $purchaseOrder = PurchaseOrder::where('id',$request['po_id'])->first();
             $purchaseOrder->update($purchase_order_data);
             $mailData = ['toMail' => $mail_id];
-            Mail::send('purchase.purchase-order.email.purchase-order-close', [], function($message) use ($mailData,$purchaseOrder){
-                $message->subject('Disapproval of the quotation '.$purchaseOrder->purchaseRequest->format_id);
+            $purchaseOrderComponent = $purchaseOrder->purchaseOrderComponent;
+            Mail::send('purchase.purchase-order.email.purchase-order-close', ['purchaseOrder' => $purchaseOrder,'purchaseOrderComponent' => $purchaseOrderComponent], function($message) use ($mailData,$purchaseOrder){
+                $message->subject('PO '.$purchaseOrder->purchaseRequest->format_id.'has been closed');
                 $message->to($mailData['toMail']);
                 $message->from(env('MAIL_USERNAME'));
             });
