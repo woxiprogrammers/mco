@@ -569,7 +569,7 @@ class PurchaseOrderController extends Controller
                     'unit_id' => $purchaseOrderComponentData['unit_id'],
                     'purchase_order_transaction_id' => $purchaseOrderTransaction->id
                 ];
-                PurchaseOrderTransactionComponent::create($purchaseOrderTransactionComponentData);
+                $purchaseOrderTransactionComponent = PurchaseOrderTransactionComponent::create($purchaseOrderTransactionComponentData);
                 $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
                     ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                     ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
@@ -590,7 +590,7 @@ class PurchaseOrderController extends Controller
                 $webTokens = array_merge(array_column($materialRequestUserToken,'web_fcm_token'), array_column($purchaseRequestApproveUserToken,'web_fcm_token'));
                 $mobileTokens = array_merge(array_column($materialRequestUserToken,'mobile_fcm_token'), array_column($purchaseRequestApproveUserToken,'mobile_fcm_token'));
                 $notificationString = $mainNotificationString.' '.$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
-                $notificationString .= ' '.$purchaseOrderTransactionComponentData->quantity.' '.$purchaseOrderTransactionComponentData->unit->name;
+                $notificationString .= ' '.$purchaseOrderTransactionComponent->quantity.' '.$purchaseOrderTransactionComponent->unit->name;
                 $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-b');
                 $projectSiteId = $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id;
                 $inventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',$purchaseOrderComponentData['name'])->first();
