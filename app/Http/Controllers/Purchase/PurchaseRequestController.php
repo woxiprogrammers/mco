@@ -704,7 +704,8 @@ class PurchaseRequestController extends Controller
                     }
                 }
                 if(isset($vendorInfo)){
-                    $pdfTitle = "Purchase Request";
+                    $now = date('j_M_Y_His');
+                    $pdfTitle = $purchaseRequestFormat."_".$now;
                     $pdf = App::make('dompdf.wrapper');
                     $formatId = $purchaseRequestFormat;
                     $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle','formatId')));
