@@ -15,6 +15,11 @@
     <link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
+    <style>
+        #purchaseOrderBillTable tr th, #purchaseOrderBillTable tr td,#purchaseOrderBillTable tr td input{
+            font-size: 13px !important;
+        }
+    </style>
 @endsection
 @section('content')
     <div class="page-wrapper">
@@ -72,34 +77,54 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrderBillTable">
-                                                            <thead>
+                                                        <div class="table-scrollable profit-margin-table" style="overflow: scroll !important;">
+                                                            <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrderBillTable">
+                                                                <thead>
                                                                 <tr>
-                                                                    <th>Bill Number</th>
-                                                                    <th>Purchase Order Id</th>
-                                                                    <th>Amount</th>
-                                                                    <th>Vendor name</th>
-                                                                    <th>Created at</th>
-                                                                    <th>Action</th>
+                                                                    <th style="width: 11%">Sr.No.</th>
+                                                                    <th style="width: 11%">Entry Date</th>
+                                                                    <th style="width: 11%">Bill Date</th>
+                                                                    <th style="width: 11%">Bill Number</th>
+                                                                    <th style="width: 11%">Vendor Name</th>
+                                                                    <th style="width: 11%">Basic Amount</th>
+                                                                    <th style="width: 11%">Tax Amount</th>
+                                                                    <th style="width: 11%">Total</th>
+                                                                    <th style="width: 11%">Pending Amount</th>
+                                                                    <th style="width: 11%">Paid Amount</th>
+                                                                    <th style="width: 11%">Action</th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th></th>
-                                                                    <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
-                                                                    <th> </th>
-                                                                    <th> </th>
-                                                                    <th>
-
+                                                                    <th style="width: 11%"></th>
+                                                                    <th style="width: 11%"> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                    <th style="width: 11%">
+                                                                        <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" data-date-end-date="+0d">
+                                                                            <input type="text" class="form-control form-filter" name="bill_date" style="font-size: 9px" readonly>
+                                                                            <span class="input-group-btn">
+                                                                                <button class="btn default" type="button">
+                                                                                    <i class="fa fa-calendar"></i>
+                                                                                </button>
+                                                                            </span>
+                                                                        </div>
                                                                     </th>
-                                                                    <th>
+                                                                    <th style="width: 11%"> </th>
+                                                                    <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" class="form-control form-filter"> </th>
+                                                                    <th style="width: 11%"> </th>
+                                                                    <th style="width: 11%"> </th>
+                                                                    <th style="width: 11%"> </th>
+                                                                    <th style="width: 11%"> </th>
+                                                                    <th style="width: 11%"> </th>
+                                                                    <th style="width: 11%">
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                     </th>
                                                                 </tr>
-                                                            </thead>
-                                                            <tbody>
+                                                                </thead>
+                                                                <tbody>
 
-                                                            </tbody>
-                                                        </table>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
                                                     </div>
                                                     </form>
                                                 </div>
@@ -126,18 +151,21 @@
     <script src="/assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
-
     <script src="/assets/custom/purchase/purchase-order-billing/manage-datatables.js" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
             $("#search-withfilter").on('click',function(){
-            var start_date = $('#start_date').val();
-            var end_date = $('#end_date').val();
+                var start_date = $('#start_date').val();
+                var end_date = $('#end_date').val();
+                /*var bill_date = $('input[name="bill_date"]').val();
+                var vendor_name = $('input[name="vendor_name"]').val();*/
                 var postData =
                     'start_date=>'+start_date+','+
                     'end_date=>'+end_date;
+                  /*  'bill_date=>'+bill_date+','+
+                    'vendor_name=>'+vendor_name;*/
                 $("input[name='postdata']").val(postData);
-            $(".filter-submit").trigger('click');
+                $(".filter-submit").trigger('click');
             });
         });
     </script>
