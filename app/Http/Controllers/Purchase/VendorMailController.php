@@ -58,14 +58,30 @@ class VendorMailController extends Controller
                 switch($vendorMailData[$pagination]['type_slug']){
                     case 'for-quotation':
                         $slug = 'For Quotation';
+                        $action = '<div id="sample_editable_1_new" class="btn btn-small blue">
+                                    <a href="/purchase/vendor-mail/pdf/'.$vendorMailData[$pagination]['id'].'/'.$vendorMailData[$pagination]['type_slug'].'" style="color: white">
+                                        PDF <i class="fa fa-download" aria-hidden="true"></i>
+                                    </a>
+                                </div>';
                         break;
 
                     case 'for-purchase-order':
                         $slug = 'For Purchase Order';
+                        $action = '<div id="sample_editable_1_new" class="btn btn-small blue">
+                                    <a href="/purchase/vendor-mail/pdf/'.$vendorMailData[$pagination]['id'].'/'.$vendorMailData[$pagination]['type_slug'].'" style="color: white">
+                                        PDF <i class="fa fa-download" aria-hidden="true"></i>
+                                    </a>
+                                </div>';
+                        break;
+
+                    case 'disapprove-purchase-order':
+                        $slug = 'For Disapproved Purchase Order';
+                        $action = '-';
                         break;
 
                     default:
                         $slug = '';
+                        $action = '-';
                 }
 
                 if($vendorMailData[$pagination]['is_client'] == true){
@@ -85,11 +101,7 @@ class VendorMailController extends Controller
                     ($pagination+1),
                     $name,
                     $slug,
-                    '<div id="sample_editable_1_new" class="btn btn-small blue">
-                                            <a href="/purchase/vendor-mail/pdf/'.$vendorMailData[$pagination]['id'].'/'.$vendorMailData[$pagination]['type_slug'].'" style="color: white">
-                                                PDF <i class="fa fa-download" aria-hidden="true"></i>
-                                            </a>
-                                        </div>'
+                    $action
                 ];
             }
         }catch (\Exception $e){
