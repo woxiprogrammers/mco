@@ -20,6 +20,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -167,7 +168,6 @@ class PurchaseOrderBillingController extends Controller
 
     public function getTransactionSubtotal(Request $request){
         try{
-            //dd($request->all());
             $amount = 0;
             $taxAmount = 0;
             $transportationAmount = $totalTransportationTaxAmount = 0;
@@ -200,14 +200,15 @@ class PurchaseOrderBillingController extends Controller
                 }
             }
             $purchaseOrderComponents = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrderId)->get();
-            $purchaseOrderComponent = $purchaseOrderComponents->sum(function ($purchaseOrderComponent) {
-                return $purchaseOrderComponent->cgst_percentage * $purchaseOrderComponent->sgst_percentage * $purchaseOrderComponent->igst_percentage;
+            $highestTaxAmount = $purchaseOrderComponents->max(function ($purchaseOrderComponent) {
+                return ($purchaseOrderComponent->cgst_percentage + $purchaseOrderComponent->sgst_percentage + $purchaseOrderComponent->igst_percentage);
             });
             $response = [
                 'sub_total' => $amount,
                 'tax_amount' => $taxAmount,
                 'transportation_amount' => $transportationAmount,
-                'transportation_tax_amount' => $totalTransportationTaxAmount
+                'transportation_tax_amount' => $totalTransportationTaxAmount,
+                'extra_tax_percentage' => $highestTaxAmount
             ];
             $status = 200;
         }catch (\Exception $e){
