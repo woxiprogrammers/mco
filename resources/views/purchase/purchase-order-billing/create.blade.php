@@ -163,7 +163,16 @@
                                                                 <label class="control-label pull-right">Extra Amount</label>
                                                             </div>
                                                             <div class="col-md-3">
-                                                                <input type="text" class="form-control calculate-amount" name="extra_amount">
+                                                                <input type="text" class="form-control calculate-amount" id="extra_amount" name="extra_amount">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row" id="extra_tax_div" hidden>
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Extra Tax Amount</label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <input type="hidden" id="extra_amount_tax_value">
+                                                                <input type="text" class="form-control calculate-amount" name="extra_tax_amount" id="extra_tax_amount" value="0" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -255,6 +264,16 @@
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function(){
+            $('#extra_amount').on('keyup', function(){
+                if(parseFloat($('#extra_amount').val()) > 0){
+                    $('#extra_tax_div').show();
+                    var total_tax = (parseFloat($("#extra_amount_tax_value").val()) * parseFloat($(this).val())) / 100 ;
+                    $('#extra_tax_amount').val(total_tax);
+                }else{
+                    $('#extra_tax_div').hide();
+                    $('#extra_tax_amount').val(0);
+                }
+            });
             $("#transportationCheckbox").on('click', function(){
                 if($(this).is(':checked') == true){
                     $("#transportation_div").show();
@@ -285,6 +304,7 @@
                             $("#taxAmount").val(data.tax_amount);
                             $("#transportation_total").val(data.transportation_amount);
                             $("#transportation_tax_amount").val(data.transportation_tax_amount);
+                            $("#extra_amount_tax_value").val(data.extra_tax_percentage);
                             $("#billData").show();
                             $("#vendorBillNumber").rules('add',{
                                 remote : {

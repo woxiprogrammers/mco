@@ -11,6 +11,7 @@ use App\PurchaseOrder;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillImage;
 use App\PurchaseOrderBillTransactionRelation;
+use App\PurchaseOrderComponent;
 use App\PurchaseOrderPayment;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionStatus;
@@ -19,6 +20,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -170,6 +172,7 @@ class PurchaseOrderBillingController extends Controller
             $taxAmount = 0;
             $transportationAmount = $totalTransportationTaxAmount = 0;
             $purchaseOrderTransactions = PurchaseOrderTransaction::whereIn('id',$request->transaction_id)->get();
+            $purchaseOrderId = $purchaseOrderTransactions->pluck('purchase_order_id')->first();
             foreach($purchaseOrderTransactions as $purchaseOrderTransaction){
                 foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
                     $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
@@ -196,11 +199,16 @@ class PurchaseOrderBillingController extends Controller
                     $totalTransportationTaxAmount += $transportationTaxAmount;
                 }
             }
+            $purchaseOrderComponents = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrderId)->get();
+            $highestTaxAmount = $purchaseOrderComponents->max(function ($purchaseOrderComponent) {
+                return ($purchaseOrderComponent->cgst_percentage + $purchaseOrderComponent->sgst_percentage + $purchaseOrderComponent->igst_percentage);
+            });
             $response = [
                 'sub_total' => $amount,
                 'tax_amount' => $taxAmount,
                 'transportation_amount' => $transportationAmount,
-                'transportation_tax_amount' => $totalTransportationTaxAmount
+                'transportation_tax_amount' => $totalTransportationTaxAmount,
+                'extra_tax_percentage' => $highestTaxAmount
             ];
             $status = 200;
         }catch (\Exception $e){
