@@ -157,13 +157,9 @@
             $("#search-withfilter").on('click',function(){
                 var start_date = $('#start_date').val();
                 var end_date = $('#end_date').val();
-                /*var bill_date = $('input[name="bill_date"]').val();
-                var vendor_name = $('input[name="vendor_name"]').val();*/
                 var postData =
                     'start_date=>'+start_date+','+
                     'end_date=>'+end_date;
-                  /*  'bill_date=>'+bill_date+','+
-                    'vendor_name=>'+vendor_name;*/
                 $("input[name='postdata']").val(postData);
                 $(".filter-submit").trigger('click');
             });
