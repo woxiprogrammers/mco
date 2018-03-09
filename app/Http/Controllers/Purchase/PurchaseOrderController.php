@@ -316,8 +316,6 @@ class PurchaseOrderController extends Controller
 
     public function closePurchaseOrder(Request $request){
         try{
-            Log::info(12);
-            Log::info($request->all());
             $mail_id = Vendor::where('id',$request['vendor_id'])->pluck('email')->first();
             $purchase_order_data['purchase_order_status_id'] = PurchaseOrderStatus::where('slug','close')->pluck('id')->first();
             $purchaseOrder = PurchaseOrder::where('id',$request['po_id'])->first();
