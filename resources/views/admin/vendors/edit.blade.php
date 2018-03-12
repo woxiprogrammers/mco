@@ -55,6 +55,16 @@
                                             <div class="portlet-body form">
                                                 <div class="tab-content">
                                                     <div class="tab-pane fade in active" id="generaltab">
+                                                        @if($vendor->for_transportation == true)
+                                                            <div class="form-group row">
+                                                                <div class="col-md-4" style="text-align: right">
+
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label for="name" class="control-label"><b>Transportation Vendor</b></label>
+                                                                </div>
+                                                            </div>
+                                                        @endif
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
                                                                 <label for="name" class="control-label">Name</label>
