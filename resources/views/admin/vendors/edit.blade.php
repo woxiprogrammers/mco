@@ -57,10 +57,10 @@
                                                     <div class="tab-pane fade in active" id="generaltab">
                                                         @if($vendor->for_transportation == true)
                                                             <div class="form-group row">
-                                                                <div class="col-md-4" style="text-align: right">
+                                                                <div class="col-md-5" style="text-align: right">
 
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <label for="name" class="control-label"><b>Transportation Vendor</b></label>
                                                                 </div>
                                                             </div>
