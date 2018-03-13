@@ -74,6 +74,7 @@ class ImagesController extends Controller
 
     public function uploadTempDrawingImages(Request $request){
         try{
+            dd($request->all());
             $user_id = Auth::id();
             $drawingDirectoryName = sha1($user_id);
             $tempUploadPath = public_path().env('DRAWING_TEMP_IMAGE_UPLOAD');

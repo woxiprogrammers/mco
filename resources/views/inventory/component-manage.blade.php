@@ -432,7 +432,7 @@
                                                     </div>
                                                 </div>
                                                 <div id="site_form" hidden>
-                                                    <div class="row form-group" id="get_grn">
+                                                    {{--<div class="row form-group" id="get_grn">
                                                         <div class="col-md-3">
                                                             <label class="control-label pull-right">GRN</label>
                                                         </div>
@@ -444,7 +444,7 @@
                                                                 Get Details
                                                             </a>
                                                         </div>
-                                                    </div>
+                                                    </div>--}}
                                                     <div class="row form-group">
                                                         <div class="col-md-3">
                                                             <label class="control-label pull-right">Client Name</label>
@@ -617,8 +617,120 @@
                                                             </div>
                                                         </div>
                                                     @endif
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Select Vendor</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <select class="form-control" id="vendor_id" name="vendor_id">
+                                                                <option value="default">Select Transportation Vendor</option>
+                                                                @foreach($transportationVendors as $vendor)
+                                                                    <option value="{{$vendor['id']}}">{{$vendor['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group" id="transportation_amount">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Transportation Amount</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <input type="text" class="form-control transportation-amount" name="transportation_amount">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group" id="transportation_cgst">
+                                                        <div class="col-md-2">
+                                                            <label class="control-label pull-right">CGST</label>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <div class="input-group" >
+                                                               <input type="text" class="form-control transportation-cgst-percentage" name="transportation_cgst_percent" onkeyup="calculateTransportationTaxes(this)">
+                                                                <span class="input-group-addon">%</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <input type="text" class="form-control transportation-cgst-amount" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group" id="transportation_sgst">
+                                                        <div class="col-md-2">
+                                                            <label class="control-label pull-right">SGST</label>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <div class="input-group" >
+                                                                <input type="text" class="form-control transportation-sgst-percentage" name="transportation_sgst_percent" onkeyup="calculateTransportationTaxes(this)">
+                                                                <span class="input-group-addon">%</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <input type="text" class="form-control transportation-sgst-amount" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group" id="transportation_igst">
+                                                        <div class="col-md-2">
+                                                            <label class="control-label pull-right">IGST</label>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <div class="input-group" >
+                                                                <input type="text" class="form-control transportation-igst-percentage" name="transportation_igst_percent" onkeyup="calculateTransportationTaxes(this)">
+                                                                <span class="input-group-addon">%</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <input type="text" class="form-control transportation-igst-amount" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group" id="transportation_total">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Transportation Total</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <input type="text" class="form-control transportation-total" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Driver Name</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <input type="text" class="form-control" name="driver_name" id="driver_name">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Mobile No</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <input type="text" class="form-control" name="mobile" id="mobile_no">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Vehicle No</label>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <input type="text" class="form-control" name="vehicle_number" id="vehicle_number">
+                                                        </div>
+                                                    </div>
                                                     <div class="form-group">
                                                         <textarea name="remark" class="form-control" id="remark" placeholder="Remark..."></textarea>
+                                                    </div>
+                                                </div>
+                                                <div id="site_in_form" hidden>
+                                                    <div class="form-group">
+                                                        <label class="control-label">Select Images For Generating GRN :</label>
+                                                        <input id="imageupload" type="file" class="btn blue" multiple />
+                                                        <br />
+                                                        <div class="row">
+                                                            <div id="preview-image" class="row">
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3" id="grnImageUplaodButton" style="margin-top: 1%;" hidden>
+                                                                <a href="javascript:void(0);" class="btn blue" > Upload Images</a>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -956,7 +1068,52 @@
                 changeType();
             });
 
-            $("#transfer_type").on('change', function () {
+            $("#imageupload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#preview-image");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-2"><input type="hidden" name="pre_grn_image[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                            $("#grnImageUplaodButton").show();
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
+            });
+
+            $("#grnImageUplaodButton a").on('click',function(){
+                var imageArray = $("#transactionForm").serializeArray();
+                $.ajax({
+                    url: '/inventory/transfer/upload-pre-grn-images',
+                    type: 'POST',
+                    data: imageArray,
+                    success: function(data, textStatus, xhr){
+                        $("#imageupload").hide();
+                        $("#grnImageUplaodButton").hide();
+                        $("#purchaseOrderTransactionId").val(data.purchase_order_transaction_id);
+                        $("#transactionForm input[name='grn']").val(data.grn);
+                        $("#afterImageUploadDiv").show();
+                    },
+                    error: function(errorData){
+
+                    }
+                });
+            });
+
+            /*$("#transfer_type").on('change', function () {
                 if($("#inOutCheckbox").is(':checked') == false) {
                     $('#get_grn').hide();
                     $('#rent').show();
@@ -975,7 +1132,7 @@
                     $('#total').hide();
                 }
 
-                });
+                });*/
 
             if(typeof ($("#assetType").val()) != 'undefined'){
                 var assetType = $("#assetType").val();
@@ -1180,7 +1337,11 @@
                 $("#dynamicForm").html($('#subcontractor_form').clone().removeAttr('hidden').show(500));
                 $("#inOutSubmit").show();
             }else if($(this).val() == 'site'){
-                $("#dynamicForm").html($('#site_form').clone().removeAttr('hidden').show(500));
+                    if($('#inOutCheckbox').is(':checked') == true){
+                        $("#dynamicForm").html($('#site_in_form').clone().removeAttr('hidden').show(500));
+                    }else{
+                        $("#dynamicForm").html($('#site_form').clone().removeAttr('hidden').show(500));
+                    }
                 $("#inOutSubmit").show();
             }else if($(this).val() == 'maintenance'){
                 $("#dynamicForm").html($('#maintenance_form').clone().show(500));
@@ -1227,6 +1388,42 @@
             $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
             var total = subtotal + cgstAmount + sgstAmount + igstAmount;
             $(element).closest('.modal-body').find('.tax-modal-total').val(total);
+        }
+
+        function calculateTransportationTaxes(element){
+            var transportationAmount = parseFloat($(element).closest('.modal-body').find('.transportation-amount').val());
+            if(typeof transportationAmount == 'undefined' || transportationAmount == '' || isNaN(transportationAmount)){
+                transportationAmount = 0;
+            }
+
+            var transportationCGSTPercent = parseFloat($(element).closest('.modal-body').find('.transportation-cgst-percentage').val());
+            if(typeof transportationCGSTPercent == 'undefined' || transportationCGSTPercent == '' || isNaN(transportationCGSTPercent)){
+                transportationCGSTPercent = 0;
+            }
+
+            var transportationSGSTPercent = parseFloat($(element).closest('.modal-body').find('.transportation-sgst-percentage').val());
+            if(typeof transportationSGSTPercent == 'undefined' || transportationSGSTPercent == '' || isNaN(transportationSGSTPercent)){
+                transportationSGSTPercent = 0;
+            }
+
+            var transportationIGSTPercent = parseFloat($(element).closest('.modal-body').find('.transportation-igst-percentage').val());
+            if(typeof transportationIGSTPercent == 'undefined' || transportationIGSTPercent == '' || isNaN(transportationIGSTPercent)){
+                transportationIGSTPercent = 0;
+            }
+
+            var transportationTotalAmount = parseFloat($(element).closest('.modal-body').find('.transportation-total').val());
+            if(typeof transportationTotalAmount == 'undefined' || transportationTotalAmount == '' || isNaN(transportationTotalAmount)){
+                transportationTotalAmount = 0;
+            }
+
+            var cgstAmount = (transportationCGSTPercent * transportationAmount) / 100;
+            var sgstAmount = (transportationSGSTPercent * transportationAmount) / 100;
+            var igstAmount = (transportationIGSTPercent * transportationAmount) / 100;
+            $(element).closest('.modal-body').find('.transportation-cgst-amount').val(cgstAmount);
+            $(element).closest('.modal-body').find('.transportation-sgst-amount').val(sgstAmount);
+            $(element).closest('.modal-body').find('.transportation-igst-amount').val(igstAmount);
+            var transportationTotal = transportationAmount + cgstAmount + sgstAmount + igstAmount;
+            $(element).closest('.modal-body').find('.transportation-total').val(transportationTotal);
         }
 
         function getGRNDetails(){

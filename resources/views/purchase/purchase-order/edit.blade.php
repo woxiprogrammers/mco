@@ -284,7 +284,7 @@
                                                 <div class="modal-header">
                                                     <div class="row">
                                                         <div class="col-md-4"></div>
-                                                        <div class="col-md-4" style="font-size: 18px"> Purchase Order Transaction</div>
+                                                        <div class="col-md-4" style="font-size: 18px"> Purchase Order Transactionnn</div>
                                                         <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                     </div>
                                                 </div>

@@ -27,6 +27,7 @@ use App\QuotationMaterial;
 use App\Unit;
 use App\UnitConversion;
 use App\UserLastLogin;
+use App\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -264,7 +265,8 @@ class InventoryManageController extends Controller
             }
             $asset_type = Asset::join('asset_types','assets.asset_types_id','=','asset_types.id')
                             ->where('assets.id',$inventoryComponent['reference_id'])->select('assets.asset_types_id','asset_types.name','asset_types.slug')->first();
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_type','amount'));
+            $transportationVendors = Vendor::where('for_transportation',true)->select('id','name')->get()->toArray();
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_type','amount','transportationVendors'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -598,6 +600,57 @@ class InventoryManageController extends Controller
         }
     }
 
+    public function preGrnImageUpload(Request $request){
+        try{
+            $generatedGrn = $this->generateGRN();
+            $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
+            $grnGeneratedStatusId = PurchaseOrderTransactionStatus::where('slug','grn-generated')->pluck('id')->first();
+            $purchaseOrderTransactionData = [
+                'purchase_order_id' => $purchaseOrder->id,
+                'purchase_order_transaction_status_id' => $grnGeneratedStatusId,
+                'grn' => $generatedGrn
+            ];
+            $purchaseOrderTransaction = PurchaseOrderTransaction::create($purchaseOrderTransactionData);
+            $purchaseOrderDirectoryName = sha1($purchaseOrder->id);
+            $purchaseTransactionDirectoryName = sha1($purchaseOrderTransaction->id);
+            $imageUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
+            if (!file_exists($imageUploadPath)) {
+                File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            }
+            foreach($request->pre_grn_image as $preGrnImage){
+                $imageArray = explode(';',$preGrnImage);
+                $image = explode(',',$imageArray[1])[1];
+                $pos  = strpos($preGrnImage, ';');
+                $type = explode(':', substr($preGrnImage, 0, $pos))[1];
+                $extension = explode('/',$type)[1];
+                $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                $transactionImageData = [
+                    'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
+                    'name' => $filename,
+                    'is_pre_grn' => true
+                ];
+                file_put_contents($fileFullPath,base64_decode($image));
+                PurchaseOrderTransactionImage::create($transactionImageData);
+            }
+            $response = [
+                'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
+                'grn' => $generatedGrn
+            ];
+            $status = 200;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Upload Pre GRN images',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $response = array();
+            $status = 500;
+        }
+        return response()->json($response,$status);
+    }
+
     public function addComponentTransfer(Request $request,$inventoryComponent){
         try{
             $user = Auth::user();
@@ -635,6 +688,7 @@ class InventoryManageController extends Controller
             }else{
                 $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
             }
+
             $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
             if($request->has('work_order_images')){
                 $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);

@@ -376,6 +376,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('check-quantity',array('uses'=> 'Inventory\InventoryManageController@checkAvailableQuantity'));
             Route::get('auto-suggest/{projectSiteId}/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
             Route::post('change-status/{status}/{inventoryTransferId}',array('uses'=> 'Inventory\InventoryManageController@changeStatus'));
+            Route::post('upload-pre-grn-images',array('uses'=> 'Inventory\InventoryManageController@preGrnImageUpload'));
         });
     });
 

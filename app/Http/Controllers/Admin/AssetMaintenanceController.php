@@ -52,6 +52,7 @@ class AssetMaintenanceController extends Controller{
 
     public function uploadTempAssetMaintenanceImages(Request $request){
         try {
+            dd($request->all());
             $user = Auth::user();
             $assetDirectoryName = sha1($user->id);
             $tempUploadPath = public_path() . env('ASSET_MAINTENANCE_REQUEST_TEMP_IMAGE_UPLOAD');
