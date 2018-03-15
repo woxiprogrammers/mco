@@ -140,7 +140,7 @@
                                     </div>
                                 </div>
                                 <div class="modal fade" id="transactionModal" role="dialog">
-                                    <div class="modal-dialog">
+                                    <div class="modal-dialog" style="width: 90%; ">
                                         <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header" style="padding-bottom:10px">
