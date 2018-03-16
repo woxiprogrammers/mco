@@ -10,6 +10,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="subcontractorStructureSlug" value="{{$subcontractorStructure->contractType->slug}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -50,6 +51,9 @@
                                                         <tr id="tableHeader">
                                                             <th width="10%" style="text-align: center"><b> Bill No  </b></th>
                                                             <th width="30%" style="text-align: center"><b> Description </b></th>
+                                                            @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                <th width="15%" class="numeric" style="text-align: center"><b> Number of floors </b></th>
+                                                            @endif
                                                             <th width="15%" class="numeric" style="text-align: center"><b> Quantity </b></th>
                                                             <th width="15%" class="numeric" style="text-align: center"><b> Rate </b></th>
                                                             <th width="15%" class="numeric" style="text-align: center"><b> Amount </b></th>
@@ -63,6 +67,13 @@
                                                             <td>
                                                                 <input type="text" class="form-control" name="description" id="description" value="{!! $subcontractorBill['description'] !!}">
                                                             </td>
+                                                            @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                <td>
+                                                                    <div class="form-group" style="width: 90% !important;margin-left: 5%">
+                                                                        <input type="text" class="form-control" name="number_of_floors" id="number_of_floors" value="{{$subcontractorBill['number_of_floors']}}">
+                                                                    </div>
+                                                                </td>
+                                                            @endif
                                                             <td>
                                                                 {!! $subcontractorBill['qty'] !!}
                                                             </td>
@@ -75,7 +86,11 @@
                                                         </tr>
                                                         @if(count($subcontractorBillTaxes) > 0)
                                                             <tr>
-                                                                <td colspan="2">
+                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                    <td colspan="3">
+                                                                @else
+                                                                    <td colspan="2">
+                                                                @endif
                                                                     <b>Tax Name</b>
                                                                 </td>
                                                                 <td colspan="2">
@@ -87,7 +102,11 @@
                                                             </tr>
                                                             @foreach($subcontractorBillTaxes as $key => $billTaxData)
                                                                 <tr>
-                                                                    <td colspan="2">
+                                                                    @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                        <td colspan="3">
+                                                                    @else
+                                                                        <td colspan="2">
+                                                                    @endif
                                                                         {!! $billTaxData->taxes->name !!}
                                                                     </td>
                                                                     <td colspan="2">
@@ -100,7 +119,11 @@
                                                             @endforeach
                                                         @endif
                                                         <tr>
-                                                            <td colspan="4">
+                                                            @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                <td colspan="5">
+                                                            @else
+                                                                <td colspan="4">
+                                                            @endif
                                                                 <b>Final Total</b>
                                                             </td>
                                                             <td colspan="1">
@@ -137,7 +160,17 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+    <script src="/assets/custom/subcontractor/validations.js"></script>
     <script>
+        $(document).ready(function(){
+            EditSubcontractorBill.init();
+            var subcontractorStructureSlug = $("#subcontractorStructureSlug").val();
+            if(subcontractorStructureSlug == 'amountwise'){
+                $("#number_of_floors").rules('add',{
+                    required: true
+                });
+            }
+        });
         function calculateTaxAmount(element){
             var percentage = $(element).val();
             var taxId = $(element).attr('id').match(/\d+/)[0];
