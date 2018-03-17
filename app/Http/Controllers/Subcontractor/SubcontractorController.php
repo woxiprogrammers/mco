@@ -234,47 +234,15 @@ class SubcontractorController extends Controller
             }else{
                 $selectedGlobalProjectSiteID = 0;
             }
-            switch($request['structure_type']){
-                case 'amountwise' :
-                        $subcontractorStructure = SubcontractorStructure::create([
-                                                    'project_site_id' => $selectedGlobalProjectSiteID,
-                                                    'subcontractor_id' => $request['subcontractor_id'],
-                                                    'summary_id' => $request['summary_id'],
-                                                    'sc_structure_type_id' => SubcontractorStructureType::where('slug',$request['structure_type'])->pluck('id')->first(),
-                                                    'rate' => $request['rate'],
-                                                    'total_work_area' => $request['total_work_area'],
-                                                    'description' => $request['description'],
-                                                ]);
-                        foreach($request['bills'] as $key => $billData){
-                            $subcontractorBill = SubcontractorBill::create([
-                                'sc_structure_id' => $subcontractorStructure['id'],
-                                'subcontractor_bill_status_id' => SubcontractorBillStatus::where('slug','draft')->pluck('id')->first(),
-                                'qty' => $billData['quantity'],
-                                'description' => $billData['description'],
-                            ]);
-                            if(array_key_exists('taxes',$billData)){
-                                foreach ($billData['taxes'] as $taxID => $taxData){
-                                    SubcontractorBillTax::create([
-                                        'subcontractor_bills_id' => $subcontractorBill['id'],
-                                        'tax_id' => $taxID,
-                                        'percentage' => $taxData['percentage'],
-                                    ]);
-                                }
-                            }
-                        }
-                    break;
-
-                case 'sqft' :
-                    $subcontractorStructure = SubcontractorStructure::create([
-                                                'project_site_id' => $selectedGlobalProjectSiteID,
-                                                'subcontractor_id' => $request['subcontractor_id'],
-                                                'summary_id' => $request['summary_id'],
-                                                'sc_structure_type_id' => SubcontractorStructureType::where('slug',$request['structure_type'])->pluck('id')->first(),
-                                                'rate' => $request['rate'],
-                                                'total_work_area' => $request['total_work_area'],
-                                                'description' => $request['description'],
-                                            ]);
-            }
+            $subcontractorStructure = SubcontractorStructure::create([
+                'project_site_id' => $selectedGlobalProjectSiteID,
+                'subcontractor_id' => $request['subcontractor_id'],
+                'summary_id' => $request['summary_id'],
+                'sc_structure_type_id' => SubcontractorStructureType::where('slug',$request['structure_type'])->pluck('id')->first(),
+                'rate' => $request['rate'],
+                'total_work_area' => $request['total_work_area'],
+                'description' => $request['description'],
+            ]);
             $request->session()->flash('success', 'Subcontractor Structured Created successfully.');
             return redirect('/subcontractor/subcontractor-structure/create');
         }catch(\Exception $e){
@@ -520,10 +488,7 @@ class SubcontractorController extends Controller
                 ->where('subcontractor_structure.id',$subcontractorStructureId)->distinct('taxes.id')
                 ->orderBy('taxes.id')->select('taxes.id','taxes.name')->get()->toArray();
             $taxes = array_column($taxData,'name');
-            $subcontractorStructureTypeSlug = SubcontractorStructure::join('subcontractor_structure_types','subcontractor_structure_types.id','=','subcontractor_structure.sc_structure_type_id')
-                                                    ->where('subcontractor_structure.id',$subcontractorStructureId)
-                                                    ->pluck('subcontractor_structure_types.slug')->first();
-            return view('subcontractor.structure.bill.manage')->with(compact('taxes','subcontractorStructureId','subcontractorStructureTypeSlug'));
+            return view('subcontractor.structure.bill.manage')->with(compact('taxes','subcontractorStructureId'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Structure Bill Manage view',
@@ -762,7 +727,8 @@ class SubcontractorController extends Controller
     public function editSubcontractorStructureBill(Request $request,$subcontractorStructureBillId){
         try{
             SubcontractorBill::where('id',$subcontractorStructureBillId)->update([
-                'description' => $request['description']
+                'description' => $request['description'],
+                'number_of_floors' => $request->number_of_floors
             ]);
             foreach ($request['taxes'] as $taxId => $taxPercentage){
                 SubcontractorBillTax::where('id',$taxId)->where('subcontractor_bills_id',$subcontractorStructureBillId)->update([
@@ -782,19 +748,27 @@ class SubcontractorController extends Controller
         }
     }
 
-    public function getSubcontractorBillCreateView(Request $request,$subcontractorStructureId){
+    public function getSubcontractorBillCreateView(Request $request,$subcontractorStructure){
         try{
-            $subcontractorStructure = SubcontractorStructure::where('id',$subcontractorStructureId)->first();
+            $quantitySum = SubcontractorBill::join('subcontractor_structure','subcontractor_structure.id','=','sc_structure_id')
+                                            ->join('subcontractor_bill_status','subcontractor_bill_status.id','=','subcontractor_bills.subcontractor_bill_status_id')
+                                            ->where('subcontractor_structure.id', $subcontractorStructure->id)
+                                            ->where('subcontractor_bill_status.slug','!=','disapproved')
+                                            ->sum('qty');
+            if($subcontractorStructure->contractType->slug == 'amountwise'){
+                $allowedQuantity = 1 - $quantitySum;
+            }else{
+                $allowedQuantity = $subcontractorStructure->total_work_area - $quantitySum;
+            }
             $totalBillCount = $subcontractorStructure->subcontractorBill->count();
             $billName = "R.A. ".($totalBillCount + 1);
-
             $taxes = Tax::whereNotIn('slug',['vat'])->where('is_active',true)->where('is_special',false)->select('id','name','slug','base_percentage')->get();
-            return view('subcontractor.structure.bill.create')->with(compact('subcontractorStructure','billName','taxes'));
+            return view('subcontractor.structure.bill.create')->with(compact('subcontractorStructure','billName','taxes','allowedQuantity'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Bill Create View',
                 'exception' => $e->getMessage(),
-                'data' => $subcontractorStructureId
+                'data' => $subcontractorStructure->id
             ];
             Log::Critical(json_encode($data));
             abort(500);
@@ -808,6 +782,7 @@ class SubcontractorController extends Controller
                 'subcontractor_bill_status_id' => SubcontractorBillStatus::where('slug','draft')->pluck('id')->first(),
                 'qty' => $request['qty'],
                 'description' => $request['description'],
+                'number_of_floors' => $request->number_of_floors
             ]);
             if($request->has('taxes')){
                 foreach ($request['taxes'] as $taxID => $taxPercentage){
