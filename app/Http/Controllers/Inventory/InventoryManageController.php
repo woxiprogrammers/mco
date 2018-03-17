@@ -6,6 +6,7 @@ use App\Asset;
 use App\AssetType;
 use App\Client;
 use App\FuelAssetReading;
+use App\GRNCount;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
@@ -167,11 +168,12 @@ class InventoryManageController extends Controller
 
     public function createInventoryComponent(Request $request){
         try{
-            $newInventoryComponent = InventoryComponent::where('project_site_id',$request->project_site_id)->where('name','ilike',trim($request['name']))->first();
+            $projectSiteId = Session::get('global_project_site');
+            $newInventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',trim($request['name']))->first();
             if($newInventoryComponent == null){
                 $inventoryComponentData['name'] = $request['name'];
                 $inventoryComponentData['is_material'] = ($request['inventory_type'] == 'material') ? true : false;
-                $inventoryComponentData['project_site_id'] = $request->project_site_id;
+                $inventoryComponentData['project_site_id'] = $projectSiteId;
                 $inventoryComponentData['opening_stock'] = ($request->has('opening_stock')) ? $request['opening_stock'] : 0;
                 $inventoryComponentData['reference_id'] = $request['reference_id'];
                 InventoryComponent::create($inventoryComponentData);
@@ -266,7 +268,12 @@ class InventoryManageController extends Controller
             $asset_type = Asset::join('asset_types','assets.asset_types_id','=','asset_types.id')
                             ->where('assets.id',$inventoryComponent['reference_id'])->select('assets.asset_types_id','asset_types.name','asset_types.slug')->first();
             $transportationVendors = Vendor::where('for_transportation',true)->select('id','name')->get()->toArray();
-            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_type','amount','transportationVendors'));
+            $siteOutGrns = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                ->where('transfer_type_id',InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->pluck('id')->first())
+                ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                ->where('inventory_components.project_site_id','!=',$request['project_site_id'])
+                ->whereNull('related_transfer_id')->select('inventory_component_transfers.id','inventory_component_transfers.grn')->get();
+            return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_type','amount','transportationVendors','siteOutGrns'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory manage',
@@ -462,7 +469,17 @@ class InventoryManageController extends Controller
 
                 if($inventoryComponentTransfers[$pagination]->transferType->type == 'IN'){
                     $transferStatus = 'IN - From '.$inventoryComponentTransfers[$pagination]->transferType->name;
-                    if($inventoryComponentTransfers[$pagination]->transferType->slug == 'site'){
+                    if($inventoryComponentTransfers[$pagination]->transferType->slug == 'site' && $inventoryComponentTransfers[$pagination]->inventoryComponentTransferStatus->slug == 'grn-generated'){
+                        $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
+                                        Update
+                                    </a>
+                                    <a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
+                                        Details
+                                    </a>
+                                    <a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                        Make Payment
+                                    </a>';
+                    }elseif ($inventoryComponentTransfers[$pagination]->transferType->slug == 'site'){
                         $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
                                         Details
                                     </a>
@@ -602,40 +619,78 @@ class InventoryManageController extends Controller
 
     public function preGrnImageUpload(Request $request){
         try{
-            $generatedGrn = $this->generateGRN();
-            $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
-            $grnGeneratedStatusId = PurchaseOrderTransactionStatus::where('slug','grn-generated')->pluck('id')->first();
-            $purchaseOrderTransactionData = [
-                'purchase_order_id' => $purchaseOrder->id,
-                'purchase_order_transaction_status_id' => $grnGeneratedStatusId,
-                'grn' => $generatedGrn
-            ];
-            $purchaseOrderTransaction = PurchaseOrderTransaction::create($purchaseOrderTransactionData);
-            $purchaseOrderDirectoryName = sha1($purchaseOrder->id);
-            $purchaseTransactionDirectoryName = sha1($purchaseOrderTransaction->id);
-            $imageUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bill_transaction'.DIRECTORY_SEPARATOR.$purchaseTransactionDirectoryName;
-            if (!file_exists($imageUploadPath)) {
-                File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            $user = Auth::user();
+            $relatedInventoryComponentTransferData = InventoryComponentTransfers::where('id', $request['related_inventory_component_transfer_id'])->first();
+            $inventoryComponentId = $request['inventory_component_id'];
+            $projectSite = ProjectSite::where('id',$relatedInventoryComponentTransferData->inventoryComponent->project_site_id)->first();
+            $sourceName = $projectSite->project->name.'-'.$projectSite->name;
+            $currentDate = Carbon::now();
+            $monthlyGrnGeneratedCount = GRNCount::where('month',$currentDate->month)->where('year',$currentDate->year)->pluck('count')->first();
+            if($monthlyGrnGeneratedCount != null){
+                $serialNumber = $monthlyGrnGeneratedCount + 1;
+            }else{
+                $serialNumber = 1;
             }
-            foreach($request->pre_grn_image as $preGrnImage){
-                $imageArray = explode(';',$preGrnImage);
+            $grn = "GRN".date('Ym').($serialNumber);
+            $inventoryComponentTransfer = InventoryComponentTransfers::create([
+                'inventory_component_id' => $inventoryComponentId,
+                'transfer_type_id' => InventoryTransferTypes::where('slug','site')->where('type','ilike','IN')->pluck('id')->first(),
+                'quantity' => $request['quantity'],
+                'unit_id' => $relatedInventoryComponentTransferData['unit_id'],
+                'source_name' => $sourceName,
+                'bill_number' => $relatedInventoryComponentTransferData['bill_number'],
+                'bill_amount' => $relatedInventoryComponentTransferData['bill_amount'],
+                'vehicle_number' => $relatedInventoryComponentTransferData['vehicle_number'],
+                'in_time' => $currentDate,
+                'user_id' => $user['id'],
+                'grn' => $grn,
+                'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','grn-generated')->pluck('id')->first(),
+                'rate_per_unit' => $relatedInventoryComponentTransferData['rate_per_unit'],
+                'cgst_percentage' => $relatedInventoryComponentTransferData['cgst_percentage'],
+                'sgst_percentage' => $relatedInventoryComponentTransferData['sgst_percentage'],
+                'igst_percentage' => $relatedInventoryComponentTransferData['igst_percentage'],
+                'cgst_amount' => $relatedInventoryComponentTransferData['cgst_amount'],
+                'sgst_amount' => $relatedInventoryComponentTransferData['sgst_amount'],
+                'igst_amount' => $relatedInventoryComponentTransferData['igst_amount'],
+                'total' => $relatedInventoryComponentTransferData['total'],
+                'vendor_id' => $relatedInventoryComponentTransferData['vendor_id'],
+                'transportation_amount' => $relatedInventoryComponentTransferData['transportation_amount'],
+                'transportation_cgst_percent' => $relatedInventoryComponentTransferData['transportation_cgst_percent'],
+                'transportation_sgst_percent' => $relatedInventoryComponentTransferData['transportation_sgst_percent'],
+                'transportation_igst_percent' => $relatedInventoryComponentTransferData['transportation_igst_percent'],
+                'driver_name' => $relatedInventoryComponentTransferData['driver_name'],
+                'mobile' => $relatedInventoryComponentTransferData['mobile'],
+                'related_transfer_id' => $relatedInventoryComponentTransferData['id']
+            ]);
+
+            $relatedInventoryComponentTransferData->update(['related_transfer_id' => $inventoryComponentTransfer['id']]);
+            if ($monthlyGrnGeneratedCount != null) {
+                GRNCount::where('month', $currentDate->month)->where('year', $currentDate->year)->update(['count' => $serialNumber]);
+            } else {
+                GRNCount::create(['month' => $currentDate->month, 'year' => $currentDate->year, 'count' => $serialNumber]);
+            }
+            if($request->has('imageArray')){
+                $sha1InventoryComponentId = sha1($inventoryComponentId);
+                $sha1InventoryTransferId = sha1($inventoryComponentTransfer['id']);
+                $imageUploadPath = public_path().env('INVENTORY_COMPONENT_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $sha1InventoryComponentId . DIRECTORY_SEPARATOR . 'transfers' . DIRECTORY_SEPARATOR . $sha1InventoryTransferId;
+                if (!file_exists($imageUploadPath)) {
+                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                }
+                $imageArray = explode(';',$request['imageArray']);
                 $image = explode(',',$imageArray[1])[1];
-                $pos  = strpos($preGrnImage, ';');
-                $type = explode(':', substr($preGrnImage, 0, $pos))[1];
+                $pos  = strpos($request['imageArray'], ';');
+                $type = explode(':', substr($request['imageArray'], 0, $pos))[1];
                 $extension = explode('/',$type)[1];
                 $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
                 $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
-                $transactionImageData = [
-                    'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
-                    'name' => $filename,
-                    'is_pre_grn' => true
-                ];
                 file_put_contents($fileFullPath,base64_decode($image));
-                PurchaseOrderTransactionImage::create($transactionImageData);
+                InventoryComponentTransferImage::create(['name' => $filename, 'inventory_component_transfer_id' => $inventoryComponentTransfer['id']]);
             }
+            $status = 200;
+            $message = "Success";
             $response = [
-                'purchase_order_transaction_id' => $purchaseOrderTransaction->id,
-                'grn' => $generatedGrn
+                'inventory_component_transfer_id' => $inventoryComponentTransfer['id'],
+                'grn' => $grn
             ];
             $status = 200;
         }catch (\Exception $e){
@@ -654,57 +709,108 @@ class InventoryManageController extends Controller
     public function addComponentTransfer(Request $request,$inventoryComponent){
         try{
             $user = Auth::user();
-            $data = $request->except(['_token','work_order_images','project_site_id','grn']);
-            $data['inventory_component_id'] = $inventoryComponent->id;
-            $data['user_id'] = $user['id'];
-            $data['in_time'] = $data['out_time'] = $data['date'] = Carbon::now();
-            if($request->has('project_site_id') && $request->transfer_type =='site'){
-                $projectSite = ProjectSite::where('id',$request['project_site_id'])->first();
-                $data['source_name'] = $projectSite->project->name.'-'.$projectSite->name;
-                if($request->has('in_or_out')){
-                    $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
-                    $baseInventoryComponentTransfer = InventoryComponentTransfers::where('grn',$request['grn'])->first();
-                    if($inventoryComponent['is_material'] == true){
-                        $data['rate_per_unit'] = $baseInventoryComponentTransfer['rate_per_unit'];
-                        $data['cgst_percentage'] = $baseInventoryComponentTransfer['cgst_percentage'];
-                        $data['sgst_percentage'] = $baseInventoryComponentTransfer['sgst_percentage'];
-                        $data['igst_percentage'] = $baseInventoryComponentTransfer['igst_percentage'];
-                        $subtotal = $data['quantity'] * $data['rate_per_unit'];
-                        $data['cgst_amount'] = $subtotal * ($data['cgst_percentage'] / 100) ;
-                        $data['sgst_amount'] = $subtotal * ($data['sgst_percentage'] / 100) ;
-                        $data['igst_amount'] = $subtotal * ($data['igst_percentage'] / 100) ;
-                        $data['total'] = $subtotal + $data['cgst_amount'] + $data['sgst_amount'] + $data['igst_amount'];
-                    }else{
-                        $data['rate_per_unit'] = $baseInventoryComponentTransfer['rate_per_unit'];
+            if($request['transfer_type'] == 'site' && $request['in_or_out'] == 'on'){
+                $inventoryComponentTransfer = InventoryComponentTransfers::where('id',$request['inventory_component_transfer_id'])->first();
+                $now = Carbon::now();
+                $inventoryComponentTransfer->update([
+                    'out_time' => $now,
+                    'date' => $now,
+                    'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first(),
+                    'remark' => $request['remark']
+                ]);
+                if ($request->has('post_grn_image')) {
+                    $sha1UserId = sha1($user['id']);
+                    $sha1InventoryTransferId = sha1($inventoryComponentTransfer['id']);
+                    $sha1InventoryComponentId = sha1($inventoryComponentTransfer['inventory_component_id']);
+                    foreach ($request['post_grn_image'] as $key1 => $imageName) {
+                        $tempUploadFile = env('WEB_PUBLIC_PATH') . env('INVENTORY_TRANSFER_TEMP_IMAGE_UPLOAD') . $sha1UserId . DIRECTORY_SEPARATOR . $imageName;
+                        if (File::exists($tempUploadFile)) {
+                            $imageUploadNewPath = env('WEB_PUBLIC_PATH') . env('INVENTORY_TRANSFER_IMAGE_UPLOAD') . $sha1InventoryComponentId . DIRECTORY_SEPARATOR . 'transfers' . DIRECTORY_SEPARATOR . $sha1InventoryTransferId;
+                            if (!file_exists($imageUploadNewPath)) {
+                                File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
+                            }
+                            $imageUploadNewPath .= DIRECTORY_SEPARATOR . $imageName;
+                            File::move($tempUploadFile, $imageUploadNewPath);
+                            InventoryComponentTransferImage::create(['name' => $imageName, 'inventory_component_transfer_id' => $inventoryComponentTransfer['id']]);
+                        }
                     }
-                }else{
-                    $data = array_merge($data,$request->only('rate_per_unit','cgst_percentage','sgst_percentage','igst_percentage','cgst_amount','sgst_amount','igst_amount','total','transfer_type'));
-                    $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
-                    $data['rate_per_unit'] = $request['rate_per_unit'];
                 }
-            }elseif($request->transfer_type =='user'){
-                $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
-                $data['rate_per_unit'] = $request['rent'];
-            }else{
-                $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
-            }
-
-            $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
-            if($request->has('work_order_images')){
-                $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
-            }
-            if($request->has('project_site_id') && $request->transfer_type =='site'){
-                if($request->has('in_or_out')) {
-                    $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
-                    return redirect('/inventory/component/manage/'.$inventoryComponent->id);
-                }else{
-                    $request->session()->flash('success', 'Inventory Component Transfer Saved Successfully!!');
-                    return redirect('/inventory/transfer/manage');
-                }
-            }else{
+                $fromProjectSitesArray = explode('-', $inventoryComponentTransfer->source_name);
+                $projectSiteId = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                    ->where('project_sites.name','ilike', trim($fromProjectSitesArray[1]))
+                    ->where('projects.name','ilike', trim($fromProjectSitesArray[0]))
+                    ->pluck('project_sites.id')->first();
+                $fromInventoryComponentId = InventoryComponent::where('project_site_id', $projectSiteId)
+                    ->where('name','ilike', $inventoryComponentTransfer->inventoryComponent->name)
+                    ->pluck('id')->first();
+                $siteOutTransferTypeId = InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->pluck('id')->first();
+                $lastOutInventoryComponentTransfer = InventoryComponentTransfers::where('inventory_component_id', $fromInventoryComponentId)
+                    ->where('transfer_type_id', $siteOutTransferTypeId)
+                    ->where('source_name','ilike',$inventoryComponentTransfer->inventoryComponent->projectSite->project->name.'-'.$inventoryComponentTransfer->inventoryComponent->projectSite->name)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                $webTokens = [$lastOutInventoryComponentTransfer->user->web_fcm_token];
+                $mobileTokens = [$lastOutInventoryComponentTransfer->user->mobile_fcm_token];
+                $notificationString = 'From '.$inventoryComponentTransfer->source_name.' stock received to ';
+                $notificationString .= $inventoryComponentTransfer->inventoryComponent->projectSite->project->name.' - '.$inventoryComponentTransfer->inventoryComponent->projectSite->name.' ';
+                $notificationString .= $inventoryComponentTransfer->inventoryComponent->name.' - '.$inventoryComponentTransfer->quantity.' and '.$inventoryComponentTransfer->unit->name;
+                $this->sendPushNotification('Manisha Construction', $notificationString,$webTokens,$mobileTokens,'c-m-s-i-t');
                 $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
                 return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+            }else{
+                $data = $request->except(['_token','work_order_images','project_site_id','grn']);
+                $data['inventory_component_id'] = $inventoryComponent->id;
+                $data['user_id'] = $user['id'];
+                $data['in_time'] = $data['out_time'] = $data['date'] = Carbon::now();
+                if($request->has('project_site_id') && $request->transfer_type =='site'){
+                    $projectSite = ProjectSite::where('id',$request['project_site_id'])->first();
+                    $data['source_name'] = $projectSite->project->name.'-'.$projectSite->name;
+                    if($request->has('in_or_out')){
+                        $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+                        $baseInventoryComponentTransfer = InventoryComponentTransfers::where('grn',$request['grn'])->first();
+                        if($inventoryComponent['is_material'] == true){
+                            $data['rate_per_unit'] = $baseInventoryComponentTransfer['rate_per_unit'];
+                            $data['cgst_percentage'] = $baseInventoryComponentTransfer['cgst_percentage'];
+                            $data['sgst_percentage'] = $baseInventoryComponentTransfer['sgst_percentage'];
+                            $data['igst_percentage'] = $baseInventoryComponentTransfer['igst_percentage'];
+                            $subtotal = $data['quantity'] * $data['rate_per_unit'];
+                            $data['cgst_amount'] = $subtotal * ($data['cgst_percentage'] / 100) ;
+                            $data['sgst_amount'] = $subtotal * ($data['sgst_percentage'] / 100) ;
+                            $data['igst_amount'] = $subtotal * ($data['igst_percentage'] / 100) ;
+                            $data['total'] = $subtotal + $data['cgst_amount'] + $data['sgst_amount'] + $data['igst_amount'];
+                        }else{
+                            $data['rate_per_unit'] = $baseInventoryComponentTransfer['rate_per_unit'];
+                        }
+                    }else{
+                        $data = array_merge($data,$request->only('rate_per_unit','cgst_percentage','sgst_percentage','igst_percentage','cgst_amount','sgst_amount','igst_amount','total','transfer_type'));
+                        $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','requested')->pluck('id')->first();
+                        $data['rate_per_unit'] = $request['rate_per_unit'];
+                    }
+                }elseif($request->transfer_type =='user'){
+                    $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+                    $data['rate_per_unit'] = $request['rent'];
+                }else{
+                    $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
+                }
+
+                $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
+                if($request->has('work_order_images')){
+                    $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
+                }
+                if($request->has('project_site_id') && $request->transfer_type =='site'){
+                    if($request->has('in_or_out')) {
+                        $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
+                        return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+                    }else{
+                        $request->session()->flash('success', 'Inventory Component Transfer Saved Successfully!!');
+                        return redirect('/inventory/transfer/manage');
+                    }
+                }else{
+                    $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
+                    return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+                }
             }
+
 
         }catch(\Exception $e){
             $data = [
@@ -866,8 +972,9 @@ class InventoryManageController extends Controller
         }
     }
 
-    public function autoSuggest(Request $request,$projectSiteId,$type,$keyword){
+    public function autoSuggest(Request $request,$type,$keyword){
         try{
+            $projectSiteId = Session::get('global_project_site');
             $response = array();
             $alreadyExitMaterialsIds = InventoryComponent::where('project_site_id',$projectSiteId)->pluck('reference_id');
             if($type == 'material'){
@@ -938,12 +1045,14 @@ class InventoryManageController extends Controller
 
     public function getGRNDetails(Request $request){
         try{
-            $response['inventory_component_transfer'] = InventoryComponentTransfers::where('grn',$request['grn'])->first();
-            $projectSiteId = $response['inventory_component_transfer']->inventoryComponent->project_site_id;
-            $response['client_id'] = Client::join('projects','projects.client_id','=','clients.id')
-                                        ->join('project_sites','project_sites.project_id','=','projects.id')
-                                        ->where('project_sites.id',$projectSiteId)
-                                        ->pluck('clients.id')->first();
+            $inventoryComponentTransfer= InventoryComponentTransfers::where('id',$request['inventory_component_transfer_id'])->first();
+            $transportation_cgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100;
+            $transportation_sgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100;
+            $transportation_igst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100;
+            $response['inventory_component_transfer'] = $inventoryComponentTransfer;
+            $response['inventory_component_transfer']['unit'] = Unit::where('id',$inventoryComponentTransfer['unit_id'])->pluck('name')->first();
+            $response['inventory_component_transfer']['transportation_tax_amount'] = $transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount;
+            $response['inventory_component_transfer']['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
             $status = 200;
         }catch(\Exception $e){
             $data = [

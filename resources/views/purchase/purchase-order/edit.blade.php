@@ -496,6 +496,7 @@
                 }
             });
             $("#imageupload").on('change', function () {
+                console.log('inside here');
                 var countFiles = $(this)[0].files.length;
                 var imgPath = $(this)[0].value;
                 var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();

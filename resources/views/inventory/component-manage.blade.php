@@ -151,7 +151,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-body" style="padding:40px 50px;">
-                                                <form role="form" action="/inventory/component/add-transfer/{{$inventoryComponent['id']}}" method="POST" id="addTransferForm">
+                                                <form id="transactionForm" role="form" action="/inventory/component/add-transfer/{{$inventoryComponent['id']}}" method="POST" id="addTransferForm">
                                                     {!! csrf_field() !!}
                                                     <div class="form-group">
                                                         <div class="bootstrap-switch-container" style="height: 30px;width: 200px; margin-left: 0px;">
@@ -717,10 +717,97 @@
                                                     </div>
                                                 </div>
                                                 <div id="site_in_form" hidden>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Select GRN : </label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <select class="form-control" id="siteOutGrn" name="siteOutId" onchange="getGRNDetails()">
+                                                                <option value="default">Select Site Out Grn</option>
+                                                                @foreach($siteOutGrns as $grn)
+                                                                    <option value="{{$grn['id']}}">{{$grn['grn']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="grnDetail" hidden>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Site Details : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="siteDetails" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Quantity : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="quantity" name="quantity">
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Unit : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="unit" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Transportation Amount : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="transportation_amount" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Transportation Tax Amount : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="transportation_tax_amount" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Company name : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="company_name" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Driver Name : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="driver_name" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Mobile : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="mobile" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right">Vehicle Number : </label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="vehicle_name" readonly>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     <div class="form-group">
                                                         <label class="control-label">Select Images For Generating GRN :</label>
-                                                        <input id="imageupload" type="file" class="btn blue" multiple />
-                                                        <br />
+                                                        <input id="imageupload" type="file" class="btn blue"/>
+                                                        <br>
                                                         <div class="row">
                                                             <div id="preview-image" class="row">
 
@@ -731,6 +818,34 @@
                                                                 <a href="javascript:void(0);" class="btn blue" > Upload Images</a>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                    <div id="afterImageUploadDiv" hidden>
+                                                        <input type="hidden" name="inventory_component_transfer_id" id="inventoryComponentTransferId">
+                                                        <div class="form-group">
+                                                            <div class="col-md-3">
+                                                                <label class="control-label pull-right"> GRN :</label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" name="grn" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="control-label">Select Images :</label>
+                                                            <input id="postImageUpload" type="file" class="btn blue" multiple />
+                                                            <br />
+                                                            <div class="row">
+                                                                <div id="postPreviewImage" class="row">
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-set red pull-right">
+                                                            <i class="fa fa-check" style="font-size: large"></i>
+                                                            Save&nbsp; &nbsp; &nbsp;
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1029,11 +1144,11 @@
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/component-manage-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/component-reading-manage-datatable.js" type="text/javascript"></script>
-    <script src="/assets/custom/inventory/image-datatable.js" type="text/javascript"></script>
-    <script src="/assets/custom/inventory/image-upload.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
+
+
             InventoryComponentListing.init();
             changeType();
             $("#transaction").click(function(){
@@ -1068,50 +1183,8 @@
                 changeType();
             });
 
-            $("#imageupload").on('change', function () {
-                var countFiles = $(this)[0].files.length;
-                var imgPath = $(this)[0].value;
-                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
-                var image_holder = $("#preview-image");
-                image_holder.empty();
-                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
-                    if (typeof (FileReader) != "undefined") {
-                        for (var i = 0; i < countFiles; i++) {
-                            var reader = new FileReader()
-                            reader.onload = function (e) {
-                                var imagePreview = '<div class="col-md-2"><input type="hidden" name="pre_grn_image[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
-                                image_holder.append(imagePreview);
-                            };
-                            image_holder.show();
-                            reader.readAsDataURL($(this)[0].files[i]);
-                            $("#grnImageUplaodButton").show();
-                        }
-                    } else {
-                        alert("It doesn't supports");
-                    }
-                } else {
-                    alert("Select Only images");
-                }
-            });
 
-            $("#grnImageUplaodButton a").on('click',function(){
-                var imageArray = $("#transactionForm").serializeArray();
-                $.ajax({
-                    url: '/inventory/transfer/upload-pre-grn-images',
-                    type: 'POST',
-                    data: imageArray,
-                    success: function(data, textStatus, xhr){
-                        $("#imageupload").hide();
-                        $("#grnImageUplaodButton").hide();
-                        $("#purchaseOrderTransactionId").val(data.purchase_order_transaction_id);
-                        $("#transactionForm input[name='grn']").val(data.grn);
-                        $("#afterImageUploadDiv").show();
-                    },
-                    error: function(errorData){
 
-                    }
-                });
-            });
 
             /*$("#transfer_type").on('change', function () {
                 if($("#inOutCheckbox").is(':checked') == false) {
@@ -1310,47 +1383,96 @@
     </script>
     <script>
         $('#transfer_type').change(function(){
-            if($(this).val() == "client"){
-                $("#dynamicForm").html($('#client_form').clone().show(500));
-                $("#inOutSubmit").show();
-            }else if($(this).val() == "supplier"){
-                $("#dynamicForm").html($('#supplier_form').clone().show(500));
-                $("#dynamicForm .custom-file-list").attr('id','tab_images_uploader_filelist');
-                $("#dynamicForm .custom-file-container").attr('id','tab_images_uploader_container');
-                $("#dynamicForm .custom-file-browse").attr('id','tab_images_uploader_pickfiles');
-                $("#dynamicForm .custom-upload-file").attr('id','tab_images_uploader_uploadfiles');
-                $("#dynamicForm .date").each(function(){
-                    $(this).datetimepicker();
-                });
-                $("#inOutSubmit").show();
-                InventoryComponentImageUpload.init();
-            }else if($(this).val() == "hand"){
-                $("#dynamicForm").html($('#hand_form').clone().show(500));
-                $("#inOutSubmit").show();
-            }else if($(this).val() == 'office'){
-                $("#dynamicForm").html($('#office_form').clone().show(500));
-                $("#inOutSubmit").show();
-            }else if($(this).val() == 'user'){
+            if($(this).val() == 'user'){
                 $("#dynamicForm").html($('#labour_form').clone().show(500));
-                $("#inOutSubmit").show();
-            }else if($(this).val() == 'sub-contractor'){
-                $("#dynamicForm").html($('#subcontractor_form').clone().removeAttr('hidden').show(500));
                 $("#inOutSubmit").show();
             }else if($(this).val() == 'site'){
                     if($('#inOutCheckbox').is(':checked') == true){
                         $("#dynamicForm").html($('#site_in_form').clone().removeAttr('hidden').show(500));
+                        $("#imageupload").on('change',function () {
+                            console.log('inside here');
+                            var countFiles = $(this)[0].files.length;
+                            var imgPath = $(this)[0].value;
+                            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                            var image_holder = $("#preview-image");
+                            image_holder.empty();
+                            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                                if (typeof (FileReader) != "undefined") {
+                                    for (var i = 0; i < countFiles; i++) {
+                                        var reader = new FileReader()
+                                        reader.onload = function (e) {
+                                            var imagePreview = '<div class="col-md-2"><input class="grn-images" type="hidden" name="pre_grn_image[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                            image_holder.append(imagePreview);
+                                        };
+                                        image_holder.show();
+                                        reader.readAsDataURL($(this)[0].files[i]);
+                                        $("#grnImageUplaodButton").show();
+                                    }
+                                } else {
+                                    alert("It doesn't supports");
+                                }
+                            } else {
+                                alert("Select Only images");
+                            }
+                        });
+                        $("#grnImageUplaodButton a").on('click',function(){
+                            console.log('inside grn upload');
+                            var imageArray = $("#transactionForm .grn-images").val();
+                            console.log(imageArray);
+                            $.ajax({
+                                url: '/inventory/transfer/upload-pre-grn-images',
+                                type: 'POST',
+                                data: {
+                                    'imageArray' : imageArray,
+                                    'inventory_component_id' : $('#inventoryComponentId').val(),
+                                    'related_inventory_component_transfer_id' : $('#siteOutGrn').val(),
+                                    'quantity' : $('#quantity').val()
+                                },
+                                success: function(data, textStatus, xhr){
+                                    console.log('in sucess');
+                                    $("#imageupload").hide();
+                                    $("#grnImageUplaodButton").hide();
+                                    $("#inventoryComponentTransferId").val(data.inventory_component_transfer_id);
+                                    $("#afterImageUploadDiv").show();
+                                    $("#afterImageUploadDiv input[name='grn']").val(data.grn);
+                                },
+                                error: function(errorData){
+
+                                }
+                            });
+                        });
+
+                        $("#postImageUpload").on('change', function () {
+                            var countFiles = $(this)[0].files.length;
+                            var imgPath = $(this)[0].value;
+                            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                            var image_holder = $("#postPreviewImage");
+                            image_holder.empty();
+                            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                                if (typeof (FileReader) != "undefined") {
+                                    for (var i = 0; i < countFiles; i++) {
+                                        var reader = new FileReader()
+                                        reader.onload = function (e) {
+                                            var imagePreview = '<div class="col-md-2"><input type="hidden" name="post_grn_image[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                            image_holder.append(imagePreview);
+                                        };
+                                        image_holder.show();
+                                        reader.readAsDataURL($(this)[0].files[i]);
+                                    }
+                                } else {
+                                    alert("It doesn't supports");
+                                }
+                            } else {
+                                alert("Select Only images");
+                            }
+                        });
+
                     }else{
                         $("#dynamicForm").html($('#site_form').clone().removeAttr('hidden').show(500));
+                        $("#imageupload").unbind('change');
                     }
+
                 $("#inOutSubmit").show();
-            }else if($(this).val() == 'maintenance'){
-                $("#dynamicForm").html($('#maintenance_form').clone().show(500));
-                $("#dynamicForm .custom-file-list").attr('id','tab_images_uploader_filelist');
-                $("#dynamicForm .custom-file-container").attr('id','tab_images_uploader_container');
-                $("#dynamicForm .custom-file-browse").attr('id','tab_images_uploader_pickfiles');
-                $("#dynamicForm .custom-upload-file").attr('id','tab_images_uploader_uploadfiles');
-                $("#inOutSubmit").show();
-                InventoryComponentImageUpload.init();
             }else{
                 $("#dynamicForm").html('');
                 $("#inOutSubmit").hide();
@@ -1427,21 +1549,29 @@
         }
 
         function getGRNDetails(){
+            var inventoryComponentTransferId = $('#siteOutGrn').val();
+            console.log(inventoryComponentTransferId);
             $.ajax({
                 url: '/inventory/component/get-detail',
                 type: 'POST',
                 async: true,
                 data: {
                     _token: $("input[name='_token']").val(),
-                    grn : $('#grn').val()
+                    inventory_component_transfer_id : inventoryComponentTransferId
                 },
                 success: function(data,textStatus,xhr){
-                    unit_id = data.inventory_component_transfer['unit_id'];
-                    client_id = data.client_id;
-                    $('select[name="client_id"]').find('option[value="'+client_id+'"]').attr("selected",true);
-                    clientChange($('#client_id'));
-                    $('select[name="unit_id"]').find('option[value="'+unit_id+'"]').attr("selected",true);
-                    $('#site_form_quantity').val(data.inventory_component_transfer['quantity']);
+                    $('.grnDetail').show();
+                    console.log(data.inventory_component_transfer);
+                    $('#siteDetails').val(data.inventory_component_transfer['source_name']);
+                    $('#quantity').val(data.inventory_component_transfer['quantity']);
+                    $('#unit').val(data.inventory_component_transfer['unit']);
+                    $('#transportation_amount').val(data.inventory_component_transfer['transportation_amount']);
+                    $('#transportation_tax_amount').val(data.inventory_component_transfer['transportation_tax_amount']);
+                    $('#company_name').val(data.inventory_component_transfer['company_name']);
+                    $('#driver_name').val(data.inventory_component_transfer['driver_name']);
+                    $('#mobile').val(data.inventory_component_transfer['mobile']);
+                    $('#vehicle_name').val(data.inventory_component_transfer['vehicle_number']);
+
                 },
                 error: function(errorData){
                     alert('Something went wrong');
