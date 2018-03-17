@@ -79,7 +79,11 @@
                                                             <tr id="tableHeader">
                                                                 <th width="10%" style="text-align: center"><b> Bill No  </b></th>
                                                                 <th width="30%" style="text-align: center"><b> Description </b></th>
+                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                    <th width="15%" class="numeric" style="text-align: center"><b> Number of Floors </b></th>
+                                                                @endif
                                                                 <th width="15%" class="numeric" style="text-align: center"><b> Quantity </b></th>
+
                                                                 <th width="15%" class="numeric" style="text-align: center"><b> Rate </b></th>
                                                                 <th width="15%" class="numeric" style="text-align: center"><b> Amount </b></th>
                                                             </tr>
@@ -92,6 +96,11 @@
                                                                 <td>
                                                                     {!! $subcontractorBill['description'] !!}
                                                                 </td>
+                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                    <td>
+                                                                        {!! $subcontractorBill['number_of_floors'] !!}
+                                                                    </td>
+                                                                @endif
                                                                 <td>
                                                                     {!! $subcontractorBill['qty'] !!}
                                                                 </td>
@@ -104,7 +113,11 @@
                                                             </tr>
                                                             @if(count($subcontractorBillTaxes) > 0)
                                                                 <tr>
-                                                                    <td colspan="2">
+                                                                    @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                        <td colspan="3">
+                                                                    @else
+                                                                        <td colspan="2">
+                                                                    @endif
                                                                         <b>Tax Name</b>
                                                                     </td>
                                                                     <td colspan="2">
@@ -116,7 +129,11 @@
                                                                 </tr>
                                                                 @foreach($subcontractorBillTaxes as $key => $billTaxData)
                                                                     <tr>
-                                                                        <td colspan="2">
+                                                                        @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                            <td colspan="3">
+                                                                        @else
+                                                                            <td colspan="2">
+                                                                        @endif
                                                                             {!! $billTaxData->taxes->name !!}
                                                                         </td>
                                                                         <td colspan="2">
@@ -129,7 +146,11 @@
                                                                 @endforeach
                                                             @endif
                                                             <tr>
-                                                                <td colspan="4">
+                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                    <td colspan="5">
+                                                                @else
+                                                                    <td colspan="4">
+                                                                @endif
                                                                     <b>Final Total</b>
                                                                 </td>
                                                                 <td colspan="1">
