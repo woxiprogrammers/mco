@@ -170,7 +170,8 @@
                                                                 <div class="row" style="text-align: right">
                                                                     <div class="col-md-12">
                                                                         <div class="btn-group">
-                                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="javascript:void(0);" style="color: white" id="billTransactionCreateButton"> Transaction
+                                                                            <div id="sample_editable_1_new" class="btn yellow" >
+                                                                                <a href="##billTransactionCreateModel" data-toggle="modal" style="color: white" id="billTransactionCreateButton"> Transaction
                                                                                     <i class="fa fa-plus"></i>
                                                                                 </a>
                                                                             </div>
@@ -218,7 +219,7 @@
                                                                     <div class="modal-header" style="padding-bottom:10px">
                                                                         <div class="row">
                                                                             <div class="col-md-4"></div>
-                                                                            <div class="col-md-4"> Transaction </div>
+                                                                            <div class="col-md-4"> <h3><b>Transaction</b></h3> </div>
                                                                             <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                                         </div>
                                                                     </div>
@@ -228,6 +229,17 @@
                                                                             <input type="hidden" name="bill_id" value="{{$subcontractorBill['id']}}">
                                                                             <input type="hidden" id="remainingTotal" name="remainingTotal" >
                                                                             <div class="form-body">
+                                                                                <div class="form=group row">
+                                                                                    <div class="col-md-6">
+                                                                                        <span>
+                                                                                            Total Advance Amount Paid : {{$subcontractorBill->subcontractorStructure->subcontractor->total_advance_amount}}
+                                                                                        </span><br>
+                                                                                        <span>
+                                                                                            Balance Advance Amount : {{$subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount}}
+                                                                                        </span>
+                                                                                    </div>
+
+                                                                                </div>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-4">
 
@@ -462,12 +474,6 @@
     <script src="/assets/custom/subcontractor/hold-reconcile-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
-        $(document).ready(function (){
-            $('#billTransactionCreateButton').on('click',function(){
-                $("#billTransactionCreateModel").modal();
-            });
-        });
-
         function calculateTaxAmount(element){
             var percentage = parseFloat($(element).val());
             var total = parseFloat($('#transactionTotal').val());
