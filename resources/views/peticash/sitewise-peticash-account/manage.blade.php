@@ -39,6 +39,19 @@
                                     <div class="portlet light ">
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
+                                            <div class="table-toolbar">
+                                                <div class="row" style="text-align: center">
+                                                    <div class="col-md-4" style="background-color: #c2c2c2">
+                                                        Total Peticash Amount : {{$masteraccountAmount}}
+                                                    </div>
+                                                    <div class="col-md-4" style="background-color: #e2e2e2">
+                                                        Allocated Peticash : {{$sitewiseaccountAmount}}
+                                                    </div>
+                                                    <div class="col-md-4" style="background-color: #c2c2c2">
+                                                        Balance : {{$balance}}
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="sitewisePeticashTable">
                                                 <thead>
                                                 <tr>

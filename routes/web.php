@@ -562,6 +562,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
         Route::get('projects/{client_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjects'));
         Route::get('project-sites/{project_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjectSites'));
+        Route::group(['prefix' => 'advance-payment'], function(){
+            Route::post('add', array('uses' => 'Subcontractor\SubcontractorController@addAdvancePayment'));
+            Route::post('listing', array('uses' => 'Subcontractor\SubcontractorController@advancePaymentListing'));
+        });
         Route::group(['prefix' => 'dpr'], function(){
             Route::get('auto-suggest/{keyword}',array('uses' => 'Subcontractor\SubcontractorController@dprAutoSuggest'));
             Route::post('assign-categories/{subcontractor}',array('uses' => 'Subcontractor\SubcontractorController@assignDprCategories'));
