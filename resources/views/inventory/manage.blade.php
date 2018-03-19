@@ -84,20 +84,6 @@
                                             <div class="modal-body" style="padding:40px 50px;">
                                                 <form role="form" action="/inventory/component/create" method="POST" id="addTransferForm">
                                                     {!! csrf_field() !!}
-                                                    {{--<div class="form-group row">
-                                                        <div class="col-md-4" style="text-align: right">
-                                                            <label for="name" class="control-label">Project Site : </label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-8">
-                                                            <select class="form-control" id="project_site" name="project_site_id">
-                                                                <option value="">Select Project Site</option>
-                                                                @foreach($projectSites as $projectSite)
-                                                                    <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>--}}
                                                     <div class="form-group row">
                                                         <div class="col-md-4" style="text-align: right">
                                                             <label for="name" class="control-label">Inventory Type: </label>
