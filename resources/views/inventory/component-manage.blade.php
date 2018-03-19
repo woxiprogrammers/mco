@@ -809,7 +809,7 @@
                                                     </div>
                                                     <div id="afterImageUploadDiv" hidden>
                                                         <input type="hidden" name="inventory_component_transfer_id" id="inventoryComponentTransferId">
-                                                        <div class="form-group">
+                                                        <div class="form-group row">
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right"> GRN :</label>
                                                             </div>
@@ -817,10 +817,8 @@
                                                                 <input class="form-control" name="grn" readonly>
                                                             </div>
                                                         </div>
+
                                                         <div class="form-group row">
-                                                            <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
-                                                        </div>
-                                                        <div class="form-group">
                                                             <label class="control-label">Select Images :</label>
                                                             <input id="postImageUpload" type="file" class="btn blue" multiple />
                                                             <br />
@@ -830,10 +828,13 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <button type="submit" class="btn btn-set red pull-right">
+                                                        <div class="form-group row">
+                                                            <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
+                                                        </div>
+                                                        {{--<button type="submit" class="btn btn-set red pull-right">
                                                             <i class="fa fa-check" style="font-size: large"></i>
                                                             Save&nbsp; &nbsp; &nbsp;
-                                                        </button>
+                                                        </button>--}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -1570,33 +1571,37 @@
 
         function getGRNDetails(){
             var inventoryComponentTransferId = $('#siteOutGrn').val();
-            console.log(inventoryComponentTransferId);
-            $.ajax({
-                url: '/inventory/component/get-detail',
-                type: 'POST',
-                async: true,
-                data: {
-                    _token: $("input[name='_token']").val(),
-                    inventory_component_transfer_id : inventoryComponentTransferId
-                },
-                success: function(data,textStatus,xhr){
-                    $('.grnDetail').show();
-                    console.log(data.inventory_component_transfer);
-                    $('#siteDetails').val(data.inventory_component_transfer['source_name']);
-                    $('#quantity').val(data.inventory_component_transfer['quantity']);
-                    $('#unit').val(data.inventory_component_transfer['unit']);
-                    $('#transportation_amount').val(data.inventory_component_transfer['transportation_amount']);
-                    $('#transportation_tax_amount').val(data.inventory_component_transfer['transportation_tax_amount']);
-                    $('#company_name').val(data.inventory_component_transfer['company_name']);
-                    $('#driver_name').val(data.inventory_component_transfer['driver_name']);
-                    $('#mobile').val(data.inventory_component_transfer['mobile']);
-                    $('#vehicle_name').val(data.inventory_component_transfer['vehicle_number']);
+            if(inventoryComponentTransferId == 'default'){
+                $('.grnDetail').hide();
+            }else{
+                $.ajax({
+                    url: '/inventory/component/get-detail',
+                    type: 'POST',
+                    async: true,
+                    data: {
+                        _token: $("input[name='_token']").val(),
+                        inventory_component_transfer_id : inventoryComponentTransferId
+                    },
+                    success: function(data,textStatus,xhr){
+                        $('.grnDetail').show();
+                        $('#siteDetails').val(data.inventory_component_transfer['source_name']);
+                        $('#quantity').val(data.inventory_component_transfer['quantity']);
+                        $('#unit').val(data.inventory_component_transfer['unit']);
+                        $('#transportation_amount').val(data.inventory_component_transfer['transportation_amount']);
+                        $('#transportation_tax_amount').val(data.inventory_component_transfer['transportation_tax_amount']);
+                        $('#company_name').val(data.inventory_component_transfer['company_name']);
+                        $('#driver_name').val(data.inventory_component_transfer['driver_name']);
+                        $('#mobile').val(data.inventory_component_transfer['mobile']);
+                        $('#vehicle_name').val(data.inventory_component_transfer['vehicle_number']);
 
-                },
-                error: function(errorData){
-                    alert('Something went wrong');
-                }
-            });
+                    },
+                    error: function(errorData){
+                        alert('Something went wrong');
+                    }
+                });
+            }
+
+
         }
 
         function checkAllowedQuantity(){

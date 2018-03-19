@@ -131,6 +131,14 @@ table {
                 <td style="padding-left: 5%;width: 50%;"><b>Company Name</b></td>
                 <td style="padding-left: 5%;text-align: left;">{!! $company_name !!}</td>
             </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Mobile no</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $mobile !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Vehicle number</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $vehicle_number !!}</td>
+            </tr>
         </table>
 </body>
 </html>

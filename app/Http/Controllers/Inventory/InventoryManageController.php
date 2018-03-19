@@ -1041,6 +1041,7 @@ class InventoryManageController extends Controller
             $data['transportation_igst_amount'] = ($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_igst_percent) / 100;
             $data['driver_name'] = $inventoryComponentTransfer->driver_name;
             $data['mobile'] = $inventoryComponentTransfer->mobile;
+            $data['vehicle_number'] = $inventoryComponentTransfer->vehicle_number;
             $data['company_name'] = Vendor::where('id',$inventoryComponentTransfer->vendor_id)->pluck('company')->first();
 
             if($data['is_material'] == true){

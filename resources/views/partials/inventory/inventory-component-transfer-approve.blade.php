@@ -12,10 +12,10 @@
     <input type="hidden" name="inventory_component_transfer_id" value="{{$inventoryComponentTransfer->id}}">
     <div class="row form-group">
         <div class="col-md-4">
-            <label class="control-label pull-right">Selected GRN : </label>
+            <label class="control-label pull-right">GRN Generated: </label>
         </div>
         <div class="col-md-8">
-            <input type="text" class="form-control" value="{{$relatedTransferGRN}}" readonly>
+            <input type="text" class="form-control" value="{{$inventoryComponentTransfer['grn']}}" readonly>
         </div>
     </div>
     <div class="form-group">
