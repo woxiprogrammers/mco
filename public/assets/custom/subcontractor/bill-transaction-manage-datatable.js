@@ -104,8 +104,8 @@ var  CreateTransaction = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
+                var totalAmount = parseFloat($("#transactionTotal").val());
                 if($("#isAdvanceCheckbox").prop('checked') == true){
-                    var totalAmount = parseFloat($("#transactionTotal").val());
                     var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
                     if(totalAmount <= balanceAdvanceAmount){
                         $("button[type='submit']").prop('disabled', true);
@@ -119,12 +119,19 @@ var  CreateTransaction = function () {
                         $("#transactionTotal").closest('.form-group').addClass('has-error');
                     }
                 }else{
-                    $("button[type='submit']").prop('disabled', true);
-                    success.show();
-                    error.hide();
-                    form.submit();
+                    var pendingAmount = parseFloat($("#pendingAmount").val());
+                    if(pendingAmount < totalAmount){
+                        $("button[type='submit']").prop('disabled', false);
+                        error.show();
+                        success.hide();
+                        $("#transactionTotal").closest('.form-group').addClass('has-error');
+                    }else{
+                        $("button[type='submit']").prop('disabled', true);
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }
                 }
-
             }
         });
     }

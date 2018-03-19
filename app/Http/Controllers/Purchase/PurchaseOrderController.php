@@ -927,7 +927,8 @@ class PurchaseOrderController extends Controller
             }
             $pdf = App::make('dompdf.wrapper');
             $pdfFlag = "purchase-order-listing-download";
-            $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle')));
+            $formatId = $purchaseOrder['format_id'];
+            $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle','formatId')));
             if($purchaseOrder['format_id'] == null){
                 return $pdf->download('PO.pdf');
             }else{
