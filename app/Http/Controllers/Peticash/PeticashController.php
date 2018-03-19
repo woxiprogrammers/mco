@@ -918,7 +918,6 @@ class PeticashController extends Controller
                                 <i class="icon-docs"></i> Edit </a>
                             </li>';
                 }
-                Log::info(json_encode($sitewiseAccountData[$pagination]));
                 $records['data'][$iterator] = [
                     $sitewiseAccountData[$pagination]['id'],
                     User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],

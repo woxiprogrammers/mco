@@ -462,40 +462,6 @@
     <script src="/assets/custom/subcontractor/hold-reconcile-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
-        $(document).ready(function(){
-            $("#isAdvanceCheckbox").on('change', function(){
-                if($(this).prop('checked') == true){
-                    var balanceAdvanceAmount = $("#balanceAdvanceAmount").val();
-                    console.log(balanceAdvanceAmount);
-//                    $("#transactionTotal").rules('add',{
-//                        max: balanceAdvanceAmount
-//                    });
-                }else{
-//                    $("#transactionTotal").rules('remove','max');
-                }
-            });
-            $("#transactionTotal").on('keyup', function(){
-                console.log($(this).val());
-            });
-        });
-        /*function calculateTaxAmount(element){
-            var percentage = parseFloat($(element).val());
-            var total = parseFloat($('#transactionTotal').val());
-            if(isNaN(total)){
-                total = 0;
-            }
-            if(isNaN(percentage)){
-                percentage = 0;
-            }
-            var taxAmount = (percentage * total) / 100;
-            $(element).closest('.form-group').find('.tax_amount').val(taxAmount);
-        }
-        function changeTaxAmounts(){
-            $('.tax_percent').each(function(){
-                calculateTaxAmount($(this));
-            });
-        }*/
-
         function openReconcilePaymentModal(transactionSlug){
             $("#reconcileTransactionSlug").val(transactionSlug);
             $("#reconcilePaymentModal").modal('show');
