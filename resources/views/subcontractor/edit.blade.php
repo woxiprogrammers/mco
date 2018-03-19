@@ -9,6 +9,7 @@
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="subcontractorId" value="{{$subcontractor['id']}}">
 <div class="page-wrapper">
 <div class="page-wrapper-row full-height">
 <div class="page-wrapper-middle">
@@ -47,6 +48,9 @@
     </li>
     <li>
         <a href="#dprCategoryTab" data-toggle="tab"> Assign DPR Category </a>
+    </li>
+    <li>
+        <a href="#advancePaymentTab" data-toggle="tab"> Advance Payment </a>
     </li>
 </ul>
     <div class="tab-content">
@@ -269,6 +273,40 @@
                 </div>
             </form>
         </div>
+        <div class="tab-pane fade in" id="advancePaymentTab">
+            <div class="row">
+                <div class="col-md-2">
+                    <label class="control-label pull-right">Total Advance Paid Amount</label>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" value="{{$subcontractor->total_advance_amount}}" readonly>
+                </div>
+                <div class="col-md-2">
+                    <label class="control-label pull-right">Balance Advance Amount</label>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control"  value="{{$subcontractor->balance_advance_amount}}" readonly>
+                </div>
+            </div>
+            <div class="btn-group pull-right margin-top-15">
+                <a id="sample_editable_1_new" class="btn yellow" href="#paymentModal" data-toggle="modal" >
+                    <i class="fa fa-plus"></i>  &nbsp; Advance Payment
+                </a>
+            </div>
+            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="subcontractorAdvancePaymentTable">
+                <thead>
+                <tr>
+                    <th style="width: 25%"> Date </th>
+                    <th style="width: 25%"> Amount </th>
+                    <th style="width: 25%"> Payment Method </th>
+                    <th style="width: 25%"> Reference Number </th>
+                </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>
@@ -281,17 +319,56 @@
 </div>
 </div>
 </div>
+<div class="modal fade " id="paymentModal"  role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <form id="add_payment_form" action="/subcontractor/advance-payment/add" method="post">
+                {!! csrf_field() !!}
+                <input type="hidden" name="subcontractor_id" value="{{$subcontractor['id']}}">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4" style="font-size: 18px"> Payment</div>
+                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding:40px 50px;">
+                    <div class="form-group row">
+                        <select class="form-control" name="payment_id">
+                            @foreach($transaction_types as $type)
+                                <option value="{{$type['id']}}">{{$type['name']}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group row">
+                        <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount">
+                    </div>
+                    <div class="form-group row">
+                        <input type="number" class="form-control"  name="reference_number" placeholder="Enter Reference Number" >
+                    </div>
+                    <button class="btn btn-set red pull-right" type="submit">
+                        <i class="fa fa-check" style="font-size: large"></i>
+                        Add &nbsp; &nbsp; &nbsp;
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 @section('javascript')
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/custom/subcontractor/subcontractor.js" type="application/javascript"></script>
+<script src="/assets/custom/subcontractor/subcontractor-advance-payment-datatable.js" type="application/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
+
 <script>
     $(document).ready(function() {
         EditSubcontractor.init();

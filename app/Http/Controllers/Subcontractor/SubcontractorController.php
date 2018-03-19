@@ -10,6 +10,7 @@ use App\ProjectSite;
 use App\Quotation;
 use App\QuotationStatus;
 use App\Subcontractor;
+use App\SubcontractorAdvancePayment;
 use App\SubcontractorBill;
 use App\SubcontractorBillReconcileTransaction;
 use App\SubcontractorBillStatus;
@@ -155,7 +156,8 @@ class SubcontractorController extends Controller
 
     public function getEditView(Request $request, $subcontractor){
         try{
-            return view('subcontractor.edit')->with(compact('subcontractor'));
+            $transaction_types = PaymentType::get();
+            return view('subcontractor.edit')->with(compact('subcontractor','transaction_types'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -808,28 +810,25 @@ class SubcontractorController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            $subcontractorBillTransaction = SubcontractorBillTransaction::create([
-                'subcontractor_bills_id' => $request['bill_id'],
-                'subtotal' => $request['total']  + $request['other_recovery'] - ($request['debit'] + $request['hold'] + $request['retention_tax_amount'] + $request['tds_tax_amount']),
-                'total' => $request['total'],
-                'debit' => $request['debit'],
-                'hold' => $request['hold'],
-                'retention_percent' => $request['retention_tax_percent'],
-                'retention_amount' => $request['retention_tax_amount'],
-                'tds_percent' => $request['tds_tax_percent'],
-                'tds_amount' => $request['tds_tax_amount'],
-                'other_recovery' => $request['other_recovery'],
-                'remark' => $request['remark']
-            ]);
+            $subcontractorBillTransactionData = $request->except('_token');
+            $subcontractorBillTransactionData['subtotal'] = $request['total']  + $request['other_recovery'] - ($request['debit'] + $request['hold'] + $request['retention_tax_amount'] + $request['tds_tax_amount']);
             if($request->has('is_advance')){
-
+                $subcontractorBillTransactionData['is_advance'] = true;
+            }else{
+                $subcontractorBillTransactionData['is_advance'] = false;
+            }
+            $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+            if($subcontractorBillTransaction->is_advance == true){
+                $subcontractor = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->subcontractor;
+                $balanceAdvanceAmount = $subcontractor->balance_advance_amount;
+                $subcontractor->update(['balance_advance_amount' => $balanceAdvanceAmount - $subcontractorBillTransaction->total]);
             }
             if($subcontractorBillTransaction != null){
                 $request->session()->flash('success','Transaction created successfully');
             }else{
                 $request->session()->flash('error','Cannot create transaction');
             }
-            return redirect('/subcontractor/subcontractor-bills/view/'.$request['bill_id']);
+            return redirect('/subcontractor/subcontractor-bills/view/'.$request['subcontractor_bills_id']);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Subcontractor Bill Transaction',
@@ -964,6 +963,70 @@ class SubcontractorController extends Controller
             ];
             Log::critical(json_encode($data));
             $status = 500;
+        }
+        return response()->json($records,$status);
+    }
+
+    public function addAdvancePayment(Request $request){
+        try{
+            $advancePaymentData = $request->all();
+            $subcontractorAdvanceAmount = SubcontractorAdvancePayment::create($advancePaymentData);
+            $subcontractor = Subcontractor::findOrFail($request->subcontractor_id);
+            if(!isset($subcontractor->total_advance_amount)){
+                $newBalanceadvanceAmount = $newTotaladvanceAmount = $request->amount;
+            }else{
+                $newBalanceadvanceAmount = $subcontractor->balance_advance_amount + $request->amount;
+                $newTotaladvanceAmount = $subcontractor->total_advance_amount + $request->amount;
+            }
+            $subcontractor->update([
+                'total_advance_amount' => $newTotaladvanceAmount,
+                'balance_advance_amount' => $newBalanceadvanceAmount
+            ]);
+            $request->session()->flash('success','Advance Amount added successfully.');
+            return redirect('/subcontractor/edit/'.$request->subcontractor_id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add subcontractor advance payment',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function advancePaymentListing(Request $request){
+        try{
+            $status = 200;
+            $paymentData = SubcontractorAdvancePayment::where('subcontractor_id',$request->subcontractor_id)->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($paymentData);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]['amount'],
+                    $paymentData[$pagination]->paymentType->name,
+                    $paymentData[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Subcontractor Advance Payment Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = [];
         }
         return response()->json($records,$status);
     }

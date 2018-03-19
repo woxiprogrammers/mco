@@ -8,5 +8,11 @@ class SubcontractorBillTransaction extends Model
 {
     protected $table = 'subcontractor_bill_transactions';
 
-    protected $fillable = ['subcontractor_bills_id','subtotal','total','debit','hold','retention_percent','retention_amount','tds_percent','tds_amount','other_recovery','remark'];
+    protected $fillable = ['subcontractor_bills_id','subtotal','total','debit','hold','retention_percent',
+        'retention_amount','tds_percent','tds_amount','other_recovery','remark','is_advance'
+    ];
+
+    public function subcontractorBill(){
+        return $this->belongsTo('App\SubcontractorBill','subcontractor_bills_id');
+    }
 }
