@@ -432,19 +432,7 @@
                                                     </div>
                                                 </div>
                                                 <div id="site_form" hidden>
-                                                    {{--<div class="row form-group" id="get_grn">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label pull-right">GRN</label>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input type="text" name="grn" id="grn" class="form-control" placeholder="Enter GRN">
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <a href="javascript:void(0);" class="btn btn-primary pull-right" onclick="getGRNDetails()" id="get_grn_details">
-                                                                Get Details
-                                                            </a>
-                                                        </div>
-                                                    </div>--}}
+
                                                     <div class="row form-group">
                                                         <div class="col-md-3">
                                                             <label class="control-label pull-right">Client Name</label>
@@ -895,6 +883,22 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="modal fade" id="transferApproveModel" role="dialog">
+                                    <div class="modal-dialog" style="width: 90%;" >
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header" style="padding-bottom:10px">
+                                                <div class="row">
+                                                    <div class="col-md-7 col-md-offset-2"> Approve Transfer </div>
+                                                    <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 @if($isReadingApplicable)
                                     <input type="hidden" name="asset_type" id="assetType" value="{{$inventoryComponent->asset->assetTypes->slug}}">
                                     <div class="modal fade" id="readingFormModel" role="dialog">
@@ -1311,12 +1315,28 @@
 
         function openDetails(componentTransferId){
             $.ajax({
-                url: '/inventory/component/detail/'+componentTransferId+'?_token='+$("input[name='_token']").val(),
+                url: '/inventory/component/detail/'+componentTransferId+'/for-detail?_token='+$("input[name='_token']").val(),
                 type: 'GET',
                 async: true,
                 success: function(data,textStatus,xhr){
                     $("#transferDetailModel .modal-body").html(data);
                     $("#transferDetailModel").modal('show');
+                },
+                error:function(errorData){
+                    alert('Something went wrong');
+                }
+
+            });
+        }
+
+        function changeStatus(componentTransferId){
+            $.ajax({
+                url: '/inventory/component/detail/'+componentTransferId+'/for-approval?_token='+$("input[name='_token']").val(),
+                type: 'GET',
+                async: true,
+                success: function(data,textStatus,xhr){
+                    $("#transferApproveModel .modal-body").html(data);
+                    $("#transferApproveModel").modal('show');
                 },
                 error:function(errorData){
                     alert('Something went wrong');

@@ -470,7 +470,7 @@ class InventoryManageController extends Controller
                 if($inventoryComponentTransfers[$pagination]->transferType->type == 'IN'){
                     $transferStatus = 'IN - From '.$inventoryComponentTransfers[$pagination]->transferType->name;
                     if($inventoryComponentTransfers[$pagination]->transferType->slug == 'site' && $inventoryComponentTransfers[$pagination]->inventoryComponentTransferStatus->slug == 'grn-generated'){
-                        $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
+                        $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="changeStatus('.$inventoryComponentTransfers[$pagination]->id.')">
                                         Update
                                     </a>
                                     <a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
@@ -550,7 +550,18 @@ class InventoryManageController extends Controller
             }else{
                 $inventoryComponentTransferImages = array();
             }
-            return view('partials.inventory.inventory-component-transfer-detail')->with(compact('inventoryComponentTransfer','inventoryComponentTransferImages'));
+            if($forSlug == 'for-detail'){
+                return view('partials.inventory.inventory-component-transfer-detail')->with(compact('inventoryComponentTransfer','inventoryComponentTransferImages'));
+            }else{
+                $transportation_cgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100;
+                $transportation_sgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100;
+                $transportation_igst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100;
+                $unit = $inventoryComponentTransfer->unit->name;
+                $relatedTransferGRN = InventoryComponentTransfers::where('id',$inventoryComponentTransfer['related_transfer_id'])->pluck('grn')->first();
+                $inventoryComponentTransfer['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
+                $inventoryComponentTransfer['transportation_tax_amount'] = $transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount;
+                return view('partials.inventory.inventory-component-transfer-approve')->with(compact('inventoryComponentTransfer','inventoryComponentTransferImages','relatedTransferGRN','unit'));
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get inventory component transfer details',
@@ -1021,6 +1032,16 @@ class InventoryManageController extends Controller
             $data['total'] = $inventoryComponentTransfer['total'];
             $data['unit'] = $inventoryComponentTransfer->unit->name;
             $data['is_material'] = $inventoryComponentTransfer->inventoryComponent->is_material;
+            $data['transportation_amount'] = $inventoryComponentTransfer->transportation_amount;
+            $data['transportation_cgst_percent'] = $inventoryComponentTransfer->transportation_cgst_percent;
+            $data['transportation_cgst_amount'] = ($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_cgst_percent) / 100;
+            $data['transportation_sgst_percent'] = $inventoryComponentTransfer->transportation_sgst_percent;
+            $data['transportation_sgst_amount'] = ($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_sgst_percent) / 100;
+            $data['transportation_igst_percent'] = $inventoryComponentTransfer->transportation_igst_percent;
+            $data['transportation_igst_amount'] = ($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_igst_percent) / 100;
+            $data['driver_name'] = $inventoryComponentTransfer->driver_name;
+            $data['mobile'] = $inventoryComponentTransfer->mobile;
+            $data['company_name'] = Vendor::where('id',$inventoryComponentTransfer->vendor_id)->pluck('company')->first();
 
             if($data['is_material'] == true){
                 $data['rate'] = null;

@@ -107,6 +107,30 @@ table {
                     <td style="padding-left: 5%;text-align: left;">{!! $rate_per_unit !!}</td>
                 </tr>
             @endif
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transportation Amount</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $transportation_amount !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transportation CGST ({!! $transportation_cgst_percent !!} %)</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $transportation_cgst_amount !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transportation SGST ({!! $transportation_sgst_percent !!} %)</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $transportation_sgst_amount !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transportation IGST ({!! $transportation_igst_percent !!} %)</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $transportation_igst_amount !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Driver Name</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $driver_name !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Company Name</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $company_name !!}</td>
+            </tr>
         </table>
 </body>
 </html>
