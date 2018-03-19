@@ -86,20 +86,6 @@
                                                     {!! csrf_field() !!}
                                                     <div class="form-group row">
                                                         <div class="col-md-4" style="text-align: right">
-                                                            <label for="name" class="control-label">Project Site : </label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-8">
-                                                            <select class="form-control" id="project_site" name="project_site_id">
-                                                                <option value="">Select Project Site</option>
-                                                                @foreach($projectSites as $projectSite)
-                                                                    <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-4" style="text-align: right">
                                                             <label for="name" class="control-label">Inventory Type: </label>
                                                             <span>*</span>
                                                         </div>
@@ -161,10 +147,10 @@
             $("#createInventoryComponent").click(function(){
                 $("#inventoryComponentModal").modal();
             });
-            $("#inventory_type,#project_site").on('change',function(){
+            $("#inventory_type").on('change',function(){
                 var componentType = $("#inventory_type").val();
                 var project_site_id = $('#project_site').val();
-                if(typeof componentType != 'undefined' && componentType != '' && typeof project_site_id != 'undefined' && project_site_id != ''){
+                if(typeof componentType != 'undefined' && componentType != ''){
                     $('#name').removeClass('typeahead');
                     $('#name').typeahead('destroy');
                     $('#name').addClass('typeahead');
@@ -172,7 +158,7 @@
                         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                         queryTokenizer: Bloodhound.tokenizers.whitespace,
                         remote: {
-                            url: "/inventory/transfer/auto-suggest/"+project_site_id+"/"+componentType+"/%QUERY",
+                            url: "/inventory/transfer/auto-suggest/"+componentType+"/%QUERY",
                             filter: function(x) {
                                 if($(window).width()<420){
                                     $("#header").addClass("fixed");

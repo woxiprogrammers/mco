@@ -364,7 +364,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('delete-temp-inventory-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
             Route::post('edit-opening-stock',['uses' => 'Inventory\InventoryManageController@editOpeningStock']);
             Route::post('get-detail',['uses' => 'Inventory\InventoryManageController@getGRNDetails']);
-            Route::get('detail/{inventoryComponentTransfer}',['uses' => 'Inventory\InventoryManageController@getInventoryComponentTransferDetail']);
+            Route::get('detail/{inventoryComponentTransfer}/{slug}',['uses' => 'Inventory\InventoryManageController@getInventoryComponentTransferDetail']);
             Route::group(['prefix' => 'readings'],function(){
                 Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentReadingListing'));
                 Route::post('add/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@addInventoryComponentReading'));
@@ -374,8 +374,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('manage',array('uses' => 'Inventory\InventoryManageController@getTransferManageView'));
             Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@getSiteTransferRequestListing'));
             Route::post('check-quantity',array('uses'=> 'Inventory\InventoryManageController@checkAvailableQuantity'));
-            Route::get('auto-suggest/{projectSiteId}/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
+            Route::get('auto-suggest/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
             Route::post('change-status/{status}/{inventoryTransferId}',array('uses'=> 'Inventory\InventoryManageController@changeStatus'));
+            Route::post('upload-pre-grn-images',array('uses'=> 'Inventory\InventoryManageController@preGrnImageUpload'));
         });
     });
 
