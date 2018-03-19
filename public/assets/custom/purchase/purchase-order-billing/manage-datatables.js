@@ -68,4 +68,7 @@ var PurchaseOrderListing = function () {
 }();
 jQuery(document).ready(function() {
     PurchaseOrderListing.init();
+    $("input[name='vendor_name']").on('keyup', function(){
+        $(".filter-submit").trigger('click');
+    });
 });
