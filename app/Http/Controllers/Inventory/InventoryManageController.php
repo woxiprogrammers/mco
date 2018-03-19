@@ -543,23 +543,23 @@ class InventoryManageController extends Controller
         return response()->json($response,$status);
     }
 
-    public function getInventoryComponentTransferDetail(Request $request,$inventoryComponentTransfer){
+    public function getInventoryComponentTransferDetail(Request $request,$inventoryComponentTransfer,$forSlug){
         try{
             if(count($inventoryComponentTransfer->images) > 0){
                 $inventoryComponentTransferImages = $this->getTransferImages($inventoryComponentTransfer);
             }else{
                 $inventoryComponentTransferImages = array();
             }
+            $transportation_cgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100;
+            $transportation_sgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100;
+            $transportation_igst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100;
+            $inventoryComponentTransfer['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
+            $inventoryComponentTransfer['transportation_tax_amount'] = $transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount;
             if($forSlug == 'for-detail'){
                 return view('partials.inventory.inventory-component-transfer-detail')->with(compact('inventoryComponentTransfer','inventoryComponentTransferImages'));
             }else{
-                $transportation_cgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100;
-                $transportation_sgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100;
-                $transportation_igst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100;
                 $unit = $inventoryComponentTransfer->unit->name;
                 $relatedTransferGRN = InventoryComponentTransfers::where('id',$inventoryComponentTransfer['related_transfer_id'])->pluck('grn')->first();
-                $inventoryComponentTransfer['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
-                $inventoryComponentTransfer['transportation_tax_amount'] = $transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount;
                 return view('partials.inventory.inventory-component-transfer-approve')->with(compact('inventoryComponentTransfer','inventoryComponentTransferImages','relatedTransferGRN','unit'));
             }
         }catch(\Exception $e){
