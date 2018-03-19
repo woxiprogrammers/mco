@@ -149,6 +149,9 @@ var  EditUser = function () {
                             },
                             email: function() {
                                 return $("#email").val();
+                            },
+                            user_id: function(){
+                                return $("#user_id").val();
                             }
                         }
                     }

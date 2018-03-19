@@ -79,7 +79,11 @@
                                                             <tr id="tableHeader">
                                                                 <th width="10%" style="text-align: center"><b> Bill No  </b></th>
                                                                 <th width="30%" style="text-align: center"><b> Description </b></th>
+                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                    <th width="15%" class="numeric" style="text-align: center"><b> Number of Floors </b></th>
+                                                                @endif
                                                                 <th width="15%" class="numeric" style="text-align: center"><b> Quantity </b></th>
+
                                                                 <th width="15%" class="numeric" style="text-align: center"><b> Rate </b></th>
                                                                 <th width="15%" class="numeric" style="text-align: center"><b> Amount </b></th>
                                                             </tr>
@@ -92,6 +96,11 @@
                                                                 <td>
                                                                     {!! $subcontractorBill['description'] !!}
                                                                 </td>
+                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                    <td>
+                                                                        {!! $subcontractorBill['number_of_floors'] !!}
+                                                                    </td>
+                                                                @endif
                                                                 <td>
                                                                     {!! $subcontractorBill['qty'] !!}
                                                                 </td>
@@ -104,7 +113,11 @@
                                                             </tr>
                                                             @if(count($subcontractorBillTaxes) > 0)
                                                                 <tr>
-                                                                    <td colspan="2">
+                                                                    @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                        <td colspan="3">
+                                                                    @else
+                                                                        <td colspan="2">
+                                                                    @endif
                                                                         <b>Tax Name</b>
                                                                     </td>
                                                                     <td colspan="2">
@@ -116,7 +129,11 @@
                                                                 </tr>
                                                                 @foreach($subcontractorBillTaxes as $key => $billTaxData)
                                                                     <tr>
-                                                                        <td colspan="2">
+                                                                        @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                            <td colspan="3">
+                                                                        @else
+                                                                            <td colspan="2">
+                                                                        @endif
                                                                             {!! $billTaxData->taxes->name !!}
                                                                         </td>
                                                                         <td colspan="2">
@@ -129,7 +146,11 @@
                                                                 @endforeach
                                                             @endif
                                                             <tr>
-                                                                <td colspan="4">
+                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                    <td colspan="5">
+                                                                @else
+                                                                    <td colspan="4">
+                                                                @endif
                                                                     <b>Final Total</b>
                                                                 </td>
                                                                 <td colspan="1">
@@ -149,7 +170,8 @@
                                                                 <div class="row" style="text-align: right">
                                                                     <div class="col-md-12">
                                                                         <div class="btn-group">
-                                                                            <div id="sample_editable_1_new" class="btn yellow" ><a href="javascript:void(0);" style="color: white" id="billTransactionCreateButton"> Transaction
+                                                                            <div id="sample_editable_1_new" class="btn yellow" >
+                                                                                <a href="##billTransactionCreateModel" data-toggle="modal" style="color: white" id="billTransactionCreateButton"> Transaction
                                                                                     <i class="fa fa-plus"></i>
                                                                                 </a>
                                                                             </div>
@@ -194,19 +216,30 @@
                                                             <div class="modal-dialog">
                                                                 <!-- Modal content-->
                                                                 <div class="modal-content">
-                                                                    <div class="modal-header" style="padding-bottom:10px">
+                                                                    <div class="modal-header" style="padding:0px !important;">
                                                                         <div class="row">
                                                                             <div class="col-md-4"></div>
-                                                                            <div class="col-md-4"> Transaction </div>
+                                                                            <div class="col-md-4"> <h3><b>Transaction</b></h3> </div>
                                                                             <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="modal-body" style="padding:40px 50px;">
+                                                                    <div class="modal-body">
+                                                                        <input type="hidden" id="balanceAdvanceAmount" value="{{$subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount}}">
                                                                         <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/subcontractor/subcontractor-bills/transaction/create">
                                                                             {!! csrf_field() !!}
-                                                                            <input type="hidden" name="bill_id" value="{{$subcontractorBill['id']}}">
+                                                                            <input type="hidden" value="{{$subcontractorBill['id']}}" name="subcontractor_bills_id">
                                                                             <input type="hidden" id="remainingTotal" name="remainingTotal" >
                                                                             <div class="form-body">
+                                                                                <div class="form=group row">
+                                                                                    <div class="col-md-8 col-md-offset-2">
+                                                                                        <span style="font-size: 15px; font-weight: bold">
+                                                                                            Total Advance Amount Paid : {{$subcontractorBill->subcontractorStructure->subcontractor->total_advance_amount}}
+                                                                                        </span><br>
+                                                                                        <span style="font-size: 15px; font-weight: bold">
+                                                                                            Balance Advance Amount : {{$subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount}}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-4">
 
@@ -224,7 +257,7 @@
                                                                                         <span>*</span>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control" id="transactionTotal" name="total" onkeyup="changeTaxAmounts()">
+                                                                                        <input type="number" class="form-control" id="transactionTotal" name="total">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group row">
@@ -247,28 +280,16 @@
                                                                                     <div class="col-md-3">
                                                                                         <label class="control-label pull-right">Retention</label>
                                                                                     </div>
-                                                                                    <div class="col-md-3">
-                                                                                        <div class="input-group" >
-                                                                                            <input type="text" class="form-control tax_percent" id="retention_tax_percent" name="retention_tax_percent" onkeyup="calculateTaxAmount(this)" >
-                                                                                            <span class="input-group-addon">%</span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="col-md-4">
-                                                                                        <input type="text" class="form-control tax_amount" id="retention_tax_amount" name="retention_tax_amount" readonly>
+                                                                                    <div class="col-md-6">
+                                                                                        <input type="number" class="form-control tax_amount" id="retention_tax_amount" name="retention_tax_amount">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row form-group">
                                                                                     <div class="col-md-3">
                                                                                         <label class="control-label pull-right">TDS</label>
                                                                                     </div>
-                                                                                    <div class="col-md-3">
-                                                                                        <div class="input-group" >
-                                                                                            <input type="text" class="form-control tax_percent" id="tds_tax_percent" name="tds_tax_percent" onkeyup="calculateTaxAmount(this)">
-                                                                                            <span class="input-group-addon">%</span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="col-md-4">
-                                                                                        <input type="text" class="form-control tax_amount" id="tds_tax_amount" name="tds_tax_amount" readonly>
+                                                                                    <div class="col-md-6">
+                                                                                        <input type="number" class="form-control tax_amount" id="tds_tax_amount" name="tds_tax_amount">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group">
@@ -276,7 +297,7 @@
                                                                                         <label for="name" class="control-label"> Other Recovery </label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="text" class="form-control" id="other_recovery" name="other_recovery">
+                                                                                        <input type="number" class="form-control" id="other_recovery" name="other_recovery">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group">
@@ -441,30 +462,6 @@
     <script src="/assets/custom/subcontractor/hold-reconcile-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
-        $(document).ready(function (){
-            $('#billTransactionCreateButton').on('click',function(){
-                $("#billTransactionCreateModel").modal();
-            });
-        });
-
-        function calculateTaxAmount(element){
-            var percentage = parseFloat($(element).val());
-            var total = parseFloat($('#transactionTotal').val());
-            if(isNaN(total)){
-                total = 0;
-            }
-            if(isNaN(percentage)){
-                percentage = 0;
-            }
-            var taxAmount = (percentage * total) / 100;
-            $(element).closest('.form-group').find('.tax_amount').val(taxAmount);
-        }
-        function changeTaxAmounts(){
-            $('.tax_percent').each(function(){
-                calculateTaxAmount($(this));
-            });
-        }
-
         function openReconcilePaymentModal(transactionSlug){
             $("#reconcileTransactionSlug").val(transactionSlug);
             $("#reconcilePaymentModal").modal('show');
