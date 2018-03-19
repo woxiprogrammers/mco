@@ -1,8 +1,12 @@
-var PurchaseOrderListing = function () {
+/**
+ * Created by Ameya Joshi on 17/3/18.
+ */
+
+var SubcontractorAdvancePaymentListing = function () {
     var handleOrders = function () {
         var grid = new Datatable();
         grid.init({
-            src: $("#purchaseOrderBillTable"),
+            src: $("#subcontractorAdvancePaymentTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -22,13 +26,14 @@ var PurchaseOrderListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/purchase/purchase-order-bill/listing?_token="+$("input[name='_token']").val(), // ajax source
+                    "url": "/subcontractor/advance-payment/listing?subcontractor_id="+$("#subcontractorId").val()+"&_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]
                 ] // set first column as a default sort by asc
             }
         });
+
         // handle group actionsubmit button click
         grid.getTableWrapper().on('click', '.table-group-action-submit', function (e) {
             e.preventDefault();
@@ -57,18 +62,17 @@ var PurchaseOrderListing = function () {
                 });
             }
         });
-    }
-    return {
 
+    }
+
+    return {
         //main function to initiate the module
         init: function () {
             handleOrders();
         }
     };
 }();
+
 jQuery(document).ready(function() {
-    PurchaseOrderListing.init();
-    $("input[name='vendor_name']").on('keyup', function(){
-        $(".filter-submit").trigger('click');
-    });
+    SubcontractorAdvancePaymentListing.init();
 });

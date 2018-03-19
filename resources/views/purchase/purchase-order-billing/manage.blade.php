@@ -81,6 +81,7 @@
                                                             <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrderBillTable">
                                                                 <thead>
                                                                 <tr>
+                                                                    <th style="width: 11%">Project</th>
                                                                     <th style="width: 11%">Sr.No.</th>
                                                                     <th style="width: 11%">Entry Date</th>
                                                                     <th style="width: 11%">Bill Date</th>
@@ -94,6 +95,7 @@
                                                                     <th style="width: 11%">Action</th>
                                                                 </tr>
                                                                 <tr class="filter">
+                                                                    <th style="width: 11%"></th>
                                                                     <th style="width: 11%"></th>
                                                                     <th style="width: 11%"> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
                                                                     <th style="width: 11%">
