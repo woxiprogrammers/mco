@@ -343,7 +343,6 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#email').css('pointer-events',"none");
         EditUser.init();
         var citiList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
