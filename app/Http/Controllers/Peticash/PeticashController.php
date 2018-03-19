@@ -257,7 +257,10 @@ class PeticashController extends Controller
 
     public function getManageViewForSitewisePeticashAccount(Request $request){
         try{
-            return view('peticash.sitewise-peticash-account.manage');
+            $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
+            $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
+            $balance = $masteraccountAmount - $sitewiseaccountAmount;
+            return view('peticash.sitewise-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Peticash Sitewise Manage view',
@@ -900,8 +903,7 @@ class PeticashController extends Controller
                 $projectSites = ProjectSite::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->pluck('id');
                 $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->whereIn('project_site_id',$projectSites)->orderBy('created_at','desc')->get()->toArray();;
             }else{
-                $projectSiteId = Session::get('global_project_site');
-                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->orderBy('created_at','desc')->get()->toArray();;
+                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->orderBy('created_at','desc')->get()->toArray();;
             }
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
             $iTotalRecords = count($sitewiseAccountData);
@@ -916,6 +918,7 @@ class PeticashController extends Controller
                                 <i class="icon-docs"></i> Edit </a>
                             </li>';
                 }
+                Log::info(json_encode($sitewiseAccountData[$pagination]));
                 $records['data'][$iterator] = [
                     $sitewiseAccountData[$pagination]['id'],
                     User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],

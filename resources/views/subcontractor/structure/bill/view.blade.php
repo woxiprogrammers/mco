@@ -216,29 +216,29 @@
                                                             <div class="modal-dialog">
                                                                 <!-- Modal content-->
                                                                 <div class="modal-content">
-                                                                    <div class="modal-header" style="padding-bottom:10px">
+                                                                    <div class="modal-header" style="padding:0px !important;">
                                                                         <div class="row">
                                                                             <div class="col-md-4"></div>
                                                                             <div class="col-md-4"> <h3><b>Transaction</b></h3> </div>
                                                                             <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="modal-body" style="padding:40px 50px;">
+                                                                    <div class="modal-body">
+                                                                        <input type="hidden" id="balanceAdvanceAmount" value="{{$subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount}}">
                                                                         <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/subcontractor/subcontractor-bills/transaction/create">
                                                                             {!! csrf_field() !!}
-                                                                            <input type="hidden" name="bill_id" value="{{$subcontractorBill['id']}}">
+                                                                            <input type="hidden" value="{{$subcontractorBill['id']}}" name="subcontractor_bills_id">
                                                                             <input type="hidden" id="remainingTotal" name="remainingTotal" >
                                                                             <div class="form-body">
                                                                                 <div class="form=group row">
-                                                                                    <div class="col-md-6">
-                                                                                        <span>
+                                                                                    <div class="col-md-8 col-md-offset-2">
+                                                                                        <span style="font-size: 15px; font-weight: bold">
                                                                                             Total Advance Amount Paid : {{$subcontractorBill->subcontractorStructure->subcontractor->total_advance_amount}}
                                                                                         </span><br>
-                                                                                        <span>
+                                                                                        <span style="font-size: 15px; font-weight: bold">
                                                                                             Balance Advance Amount : {{$subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount}}
                                                                                         </span>
                                                                                     </div>
-
                                                                                 </div>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-4">
@@ -257,7 +257,7 @@
                                                                                         <span>*</span>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control" id="transactionTotal" name="total" onkeyup="changeTaxAmounts()">
+                                                                                        <input type="number" class="form-control" id="transactionTotal" name="total">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group row">
@@ -280,28 +280,16 @@
                                                                                     <div class="col-md-3">
                                                                                         <label class="control-label pull-right">Retention</label>
                                                                                     </div>
-                                                                                    <div class="col-md-3">
-                                                                                        <div class="input-group" >
-                                                                                            <input type="text" class="form-control tax_percent" id="retention_tax_percent" name="retention_tax_percent" onkeyup="calculateTaxAmount(this)" >
-                                                                                            <span class="input-group-addon">%</span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="col-md-4">
-                                                                                        <input type="text" class="form-control tax_amount" id="retention_tax_amount" name="retention_tax_amount" readonly>
+                                                                                    <div class="col-md-6">
+                                                                                        <input type="number" class="form-control tax_amount" id="retention_tax_amount" name="retention_tax_amount">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row form-group">
                                                                                     <div class="col-md-3">
                                                                                         <label class="control-label pull-right">TDS</label>
                                                                                     </div>
-                                                                                    <div class="col-md-3">
-                                                                                        <div class="input-group" >
-                                                                                            <input type="text" class="form-control tax_percent" id="tds_tax_percent" name="tds_tax_percent" onkeyup="calculateTaxAmount(this)">
-                                                                                            <span class="input-group-addon">%</span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="col-md-4">
-                                                                                        <input type="text" class="form-control tax_amount" id="tds_tax_amount" name="tds_tax_amount" readonly>
+                                                                                    <div class="col-md-6">
+                                                                                        <input type="number" class="form-control tax_amount" id="tds_tax_amount" name="tds_tax_amount">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group">
@@ -309,7 +297,7 @@
                                                                                         <label for="name" class="control-label"> Other Recovery </label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="text" class="form-control" id="other_recovery" name="other_recovery">
+                                                                                        <input type="number" class="form-control" id="other_recovery" name="other_recovery">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group">
@@ -474,7 +462,23 @@
     <script src="/assets/custom/subcontractor/hold-reconcile-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
-        function calculateTaxAmount(element){
+        $(document).ready(function(){
+            $("#isAdvanceCheckbox").on('change', function(){
+                if($(this).prop('checked') == true){
+                    var balanceAdvanceAmount = $("#balanceAdvanceAmount").val();
+                    console.log(balanceAdvanceAmount);
+//                    $("#transactionTotal").rules('add',{
+//                        max: balanceAdvanceAmount
+//                    });
+                }else{
+//                    $("#transactionTotal").rules('remove','max');
+                }
+            });
+            $("#transactionTotal").on('keyup', function(){
+                console.log($(this).val());
+            });
+        });
+        /*function calculateTaxAmount(element){
             var percentage = parseFloat($(element).val());
             var total = parseFloat($('#transactionTotal').val());
             if(isNaN(total)){
@@ -490,7 +494,7 @@
             $('.tax_percent').each(function(){
                 calculateTaxAmount($(this));
             });
-        }
+        }*/
 
         function openReconcilePaymentModal(transactionSlug){
             $("#reconcileTransactionSlug").val(transactionSlug);

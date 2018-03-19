@@ -83,7 +83,11 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <span id="rate">{!! $subcontractorStructure['rate'] !!}</span>
+                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
+                                                                    <span id="rate">{!! $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'] !!}</span>
+                                                                @else
+                                                                    <span id="rate">{!! $subcontractorStructure['rate'] !!}</span>
+                                                                @endif
                                                             </td>
                                                             <td>
                                                                 <span id="subtotal"></span>

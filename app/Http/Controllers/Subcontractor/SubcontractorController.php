@@ -810,28 +810,25 @@ class SubcontractorController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            $subcontractorBillTransaction = SubcontractorBillTransaction::create([
-                'subcontractor_bills_id' => $request['bill_id'],
-                'subtotal' => $request['total']  + $request['other_recovery'] - ($request['debit'] + $request['hold'] + $request['retention_tax_amount'] + $request['tds_tax_amount']),
-                'total' => $request['total'],
-                'debit' => $request['debit'],
-                'hold' => $request['hold'],
-                'retention_percent' => $request['retention_tax_percent'],
-                'retention_amount' => $request['retention_tax_amount'],
-                'tds_percent' => $request['tds_tax_percent'],
-                'tds_amount' => $request['tds_tax_amount'],
-                'other_recovery' => $request['other_recovery'],
-                'remark' => $request['remark']
-            ]);
+            $subcontractorBillTransactionData = $request->except('_token');
+            $subcontractorBillTransactionData['subtotal'] = $request['total']  + $request['other_recovery'] - ($request['debit'] + $request['hold'] + $request['retention_tax_amount'] + $request['tds_tax_amount']);
             if($request->has('is_advance')){
-
+                $subcontractorBillTransactionData['is_advance'] = true;
+            }else{
+                $subcontractorBillTransactionData['is_advance'] = false;
+            }
+            $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+            if($subcontractorBillTransaction->is_advance == true){
+                $subcontractor = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->subcontractor;
+                $balanceAdvanceAmount = $subcontractor->balance_advance_amount;
+                $subcontractor->update(['balance_advance_amount' => $balanceAdvanceAmount - $subcontractorBillTransaction->total]);
             }
             if($subcontractorBillTransaction != null){
                 $request->session()->flash('success','Transaction created successfully');
             }else{
                 $request->session()->flash('error','Cannot create transaction');
             }
-            return redirect('/subcontractor/subcontractor-bills/view/'.$request['bill_id']);
+            return redirect('/subcontractor/subcontractor-bills/view/'.$request['subcontractor_bills_id']);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Subcontractor Bill Transaction',
