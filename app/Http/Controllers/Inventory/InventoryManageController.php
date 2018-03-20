@@ -112,7 +112,7 @@ class InventoryManageController extends Controller
                                         </button>';
                 }
                 $records['data'][$iterator] = [
-                    $inventoryTransferData[$pagination]->inventoryComponent->projectSite->name,
+                    $inventoryTransferData[$pagination]->inventoryComponent->projectSite->project->name,
                     $inventoryTransferData[$pagination]->source_name,
                     $inventoryTransferData[$pagination]->inventoryComponent->name,
                     $inventoryTransferData[$pagination]->quantity,

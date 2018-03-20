@@ -199,8 +199,9 @@ class PeticashController extends Controller
                 $data['remark'] = $txn['remark'];
                 $data['created_on'] = $txn['created_at'];
                 $data['txn_id'] = $txn['id'];
-                $data['sitename'] = ProjectSite::findOrFail($txn['project_site_id'])->toArray()['name'];
+                $data['sitename'] = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.project_id', $txn['project_site_id'])->pluck('projects.name')->first();
             }
+
             return view('peticash/sitewise-peticash-account/edit', $data);
         }catch(\Exception $e){
             $data = [
@@ -276,7 +277,9 @@ class PeticashController extends Controller
         try{
             $paymenttypes = PaymentType::get(['id','name'])->toArray();
             $users = array();
-            $sites = ProjectSite::get(['id','name','address'])->toArray();
+            $sites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                               ->where('projects.is_active', true)
+                         ->select('project_sites.id as id','projects.name as name')->get()->toArray();
             return view('peticash.sitewise-peticash-account.create')->with(compact('paymenttypes','users','sites'));
         }catch(\Exception $e){
             $data = [
@@ -699,7 +702,7 @@ class PeticashController extends Controller
                     $salaryTransactionData[$pagination]['amount'],
                     $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
                     date('d M Y',strtotime($salaryTransactionData[$pagination]['created_at'])),
-                    $salaryTransactionData[$pagination]->projectSite->name,
+                    $salaryTransactionData[$pagination]->projectSite->project->name,
                     $user_status,
                     $actionDropDown
                 ];
@@ -900,10 +903,11 @@ class PeticashController extends Controller
         try{
             $user = Auth::user();
             if($request->has('search_name')){
-                $projectSites = ProjectSite::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->pluck('id');
+                $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request->search_name.'%')->select('project_sites.id')->get()->toArray();
+                //$projectSites = ProjectSite::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->pluck('id');
                 $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->whereIn('project_site_id',$projectSites)->orderBy('created_at','desc')->get()->toArray();;
             }else{
-                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->orderBy('created_at','desc')->get()->toArray();;
+                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->orderBy('created_at','desc')->get()->toArray();
             }
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
             $iTotalRecords = count($sitewiseAccountData);
@@ -922,7 +926,7 @@ class PeticashController extends Controller
                     $sitewiseAccountData[$pagination]['id'],
                     User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
                     User::findOrFail($sitewiseAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['user_id'])->toArray()['last_name'],
-                    ProjectSite::findOrFail($sitewiseAccountData[$pagination]['project_site_id'])->toArray()['name'],
+                    Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.id',$sitewiseAccountData[$pagination]['project_site_id'])->pluck('projects.name')->first(),
                     $sitewiseAccountData[$pagination]['amount'],
                     PaymentType::findOrFail($sitewiseAccountData[$pagination]['payment_id'])->toArray()['name'],
                     $sitewiseAccountData[$pagination]['remark'],
@@ -1469,7 +1473,7 @@ class PeticashController extends Controller
                     $purchaseTransactionData[$pagination]->bill_amount,
                     $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
                     date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
-                    $purchaseTransactionData[$pagination]->projectSite->project->name.' - '.$purchaseTransactionData[$pagination]->projectSite->name,
+                    $purchaseTransactionData[$pagination]->projectSite->project->name,
                     '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>'
                 ];
             }
@@ -1568,7 +1572,7 @@ class PeticashController extends Controller
                     $salaryTransactionData[$pagination]->payable_amount,
                     $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
                     date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
-                    $salaryTransactionData[$pagination]->projectSite->project->name.' - '.$salaryTransactionData[$pagination]->projectSite->name,
+                    $salaryTransactionData[$pagination]->projectSite->project->name,
                     $actionDropDown
                 ];
             }

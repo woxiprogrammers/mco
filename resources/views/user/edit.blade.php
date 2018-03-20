@@ -378,7 +378,7 @@
                     'Unable to find any Result that match the current query',
                     '</div>'
                 ].join('\n'),
-                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{client_company}}, @{{project_name}}, @{{project_site_name}}</strong></div>')
+                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{project_name}}</strong></div>')
             },
         })
         .on('typeahead:selected', function (obj, datum) {

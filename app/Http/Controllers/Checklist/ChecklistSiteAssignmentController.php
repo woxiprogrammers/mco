@@ -170,7 +170,7 @@ class ChecklistSiteAssignmentController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($siteAssignmentData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     $siteAssignmentData[$pagination]->id,
-                    $siteAssignmentData[$pagination]->projectSite->project->name.' - '.$siteAssignmentData[$pagination]->projectSite->name,
+                    $siteAssignmentData[$pagination]->projectSite->project->name,
                     $siteAssignmentData[$pagination]->checklistCategory->mainCategory->name,
                     $siteAssignmentData[$pagination]->checklistCategory->name,
                     $siteAssignmentData[$pagination]->title,

@@ -58,7 +58,7 @@
                                                     <th> Transaction Id </th>
                                                     <th> From </th>
                                                     <th> To </th>
-                                                    <th> Sitename </th>
+                                                    <th> Project Name </th>
                                                     <th> Amount </th>
                                                     <th> Type </th>
                                                     <th> Remark </th>
