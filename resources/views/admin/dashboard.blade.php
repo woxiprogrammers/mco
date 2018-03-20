@@ -51,7 +51,7 @@
                                             <div class="panel-heading" style="background-color: cornflowerblue">
                                                 <h4 class="panel-title">
                                                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion{{$projectSiteData[$iterator]['project_site_id']}}" href="#collapse_{{$projectSiteData[$iterator]['project_site_id']}}" style="font-size: 14px;color: white">
-                                                        <b> {{$projectSiteData[$iterator]['project_site_name']}} </b>
+                                                        <b>{{$projectSiteData[$iterator]['project_site_name']}} </b>
                                                         @if((array_sum(array_column($projectSiteData[$iterator]['modules'],'notification_count'))) > 0)
                                                             <span class="badge badge-danger" style="background-color: #ed6b75 !important; margin-left: 3%">
                                                                 <b>{!! array_sum(array_column($projectSiteData[$iterator]['modules'],'notification_count')) !!}</b>

@@ -7,6 +7,7 @@ use App\EmployeeImage;
 use App\EmployeeImageType;
 use App\EmployeeType;
 use App\Labour;
+use App\Project;
 use App\ProjectSite;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -21,7 +22,9 @@ class LabourController extends Controller
 
     public function getCreateView(Request $request){
         try{
-            $projectSites = ProjectSite::select('id','name')->get()->toArray();
+            $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                ->where('projects.is_active', true)
+                ->select('project_sites.id as id','projects.name as name')->get()->toArray();
             $labourTypes = EmployeeType::get()->toArray();
             return view('labour.create')->with(compact('projectSites','labourTypes'));
         }catch (\Exception $e){
@@ -110,7 +113,7 @@ class LabourController extends Controller
                     $labourStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->name : '-';
+                $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->Project->name : '-';
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['employee_id'],
                     $listingData[$pagination]['name'],
@@ -171,7 +174,9 @@ class LabourController extends Controller
 
     public function getEditView(Request $request,$labour){
         try{
-            $projectSites = ProjectSite::select('id','name')->get()->toArray();
+            $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                ->where('projects.is_active', true)
+                ->select('project_sites.id as id','projects.name as name')->get()->toArray();
             $profilePicTypeId = EmployeeImageType::where('slug','profile')->pluck('id')->first();
             $employeeProfilePic = EmployeeImage::where('employee_id',$labour->id)->where('employee_image_type_id',$profilePicTypeId)->first();
             if($employeeProfilePic == null){
