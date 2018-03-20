@@ -377,6 +377,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('auto-suggest/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
             Route::post('change-status/{status}/{inventoryTransferId}',array('uses'=> 'Inventory\InventoryManageController@changeStatus'));
             Route::post('upload-pre-grn-images',array('uses'=> 'Inventory\InventoryManageController@preGrnImageUpload'));
+            Route::group(['prefix' => 'billing'], function(){
+                Route::get('manage',array('uses' => 'Inventory\SiteTransferBillingController@getManageView'));
+                Route::get('create', array('uses' => 'Inventory\SiteTransferBillingController@getCreateView'));
+                Route::get('',array('uses' => 'Inventory\SiteTransferBillingController@getApprovedTransaction'));
+            });
         });
     });
 
