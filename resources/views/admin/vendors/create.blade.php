@@ -46,7 +46,7 @@
                                                     <li class="active">
                                                         <a href="#generaltab" data-toggle="tab"> General </a>
                                                     </li>
-                                                    <li>
+                                                    <li class="materialTab">
                                                         <a href="#materialassigntab" data-toggle="tab"> Material Assign </a>
                                                     </li>
                                                 </ul>
@@ -55,8 +55,18 @@
                                                 <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="generaltab">
                                                     <div class="form-group row">
+                                                        <div class="col-md-4" style="text-align: right">
+
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <input type="checkbox" id="transportationVendor" name="transportation_vendor">
+                                                            <label for="name" class="control-label">Is transportation provided</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="name" class="control-label">Name</label>
+
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
@@ -189,6 +199,13 @@
 
     <script>
         $(document).ready(function() {
+            $('#transportationVendor').on('change',function(){
+                if($(this).is(':checked') == true){
+                    $("a[href='#materialassigntab']").remove();
+                }else{
+                    $('.materialTab').append('<a href="#materialassigntab" data-toggle="tab"> Material Assign </a>');
+                }
+            });
             CreateVendor.init();
             var citiList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),

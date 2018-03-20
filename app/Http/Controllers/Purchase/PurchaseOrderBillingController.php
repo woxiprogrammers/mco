@@ -6,6 +6,7 @@ use App\Client;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\PaymentType;
+use App\Project;
 use App\ProjectSite;
 use App\PurchaseOrder;
 use App\PurchaseOrderBill;
@@ -287,16 +288,7 @@ class PurchaseOrderBillingController extends Controller
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
             $postDataArray = array();
-            if(Session::has('global_project_site')){
-                $projectSiteId = Session::get('global_project_site');
-                $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                    ->where('purchase_requests.project_site_id', $projectSiteId)
-                    ->pluck('purchase_order_bills.id')
-                    ->toArray();
-            }else{
-                $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
-            }
+            $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
             $filterFlag = true;
             if($request->has('postdata')){
                 $postdata = $request['postdata'];
@@ -341,7 +333,7 @@ class PurchaseOrderBillingController extends Controller
             if($filterFlag == true){
                 $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                     ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
-                    ->select('purchase_order_bills.id as id','purchase_order_bills.bill_number as serial_number','purchase_order_bills.created_at as created_at','purchase_order_bills.bill_date as bill_date','purchase_order_bills.vendor_bill_number as vendor_bill_number','purchase_orders.vendor_id as vendor_id','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.amount as amount')
+                    ->select('purchase_orders.id as purchase_order_id','purchase_order_bills.id as id','purchase_order_bills.bill_number as serial_number','purchase_order_bills.created_at as created_at','purchase_order_bills.bill_date as bill_date','purchase_order_bills.vendor_bill_number as vendor_bill_number','purchase_orders.vendor_id as vendor_id','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.amount as amount')
                     ->orderBy('id','desc')
                     ->get();
             }else{
@@ -371,7 +363,13 @@ class PurchaseOrderBillingController extends Controller
                 }else{
                     $editButton = '';
                 }
+                $projectName = Project::join('project_sites','project_sites.project_id','=','projects.id')
+                                    ->join('purchase_requests','purchase_requests.project_site_id','=','project_sites.id')
+                                    ->join('purchase_orders','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                    ->where('purchase_orders.id',$purchaseOrderBillData[$pagination]['purchase_order_id'])
+                                    ->pluck('projects.name')->first();
                 $records['data'][] = [
+                    $projectName,
                     $purchaseOrderBillData[$pagination]['serial_number'],
                     date('j M Y',strtotime($purchaseOrderBillData[$pagination]['created_at'])),
                     $entryDate,

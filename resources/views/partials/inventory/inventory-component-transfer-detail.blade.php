@@ -231,6 +231,56 @@
     </div>
 </div>
 @endif
+<div class="row">
+    <div class="col-md-5 col-md-offset-1">
+        <label class="control-label pull-right">Transportation Amount : </label>
+    </div>
+    <div class="col-md-6">
+        <label class="control-label pull-left">{{$inventoryComponentTransfer['transportation_amount']}}</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5 col-md-offset-1">
+        <label class="control-label pull-right">Transportation Tax Amount : </label>
+    </div>
+    <div class="col-md-6">
+        <label class="control-label pull-left">{{$inventoryComponentTransfer['transportation_tax_amount']}}</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5 col-md-offset-1">
+        <label class="control-label pull-right">Company name : </label>
+    </div>
+    <div class="col-md-6">
+        <label class="control-label pull-left">
+            {{$inventoryComponentTransfer['company_name']}}
+        </label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5 col-md-offset-1">
+        <label class="control-label pull-right">Driver Name : </label>
+    </div>
+    <div class="col-md-6">
+        <label class="control-label pull-left">{{$inventoryComponentTransfer['driver_name']}}</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5 col-md-offset-1">
+        <label class="control-label pull-right">Mobile : </label>
+    </div>
+    <div class="col-md-6">
+        <label class="control-label pull-left">{{$inventoryComponentTransfer['mobile']}}</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5 col-md-offset-1">
+        <label class="control-label pull-right">Vehicle Number : </label>
+    </div>
+    <div class="col-md-6">
+        <label class="control-label pull-left">{{$inventoryComponentTransfer['vehicle_number']}}</label>
+    </div>
+</div>
 @if(count($inventoryComponentTransferImages) > 0)
     <table class="table table-bordered table-hover">
         <thead>

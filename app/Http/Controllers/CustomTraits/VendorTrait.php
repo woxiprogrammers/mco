@@ -168,6 +168,7 @@ trait VendorTrait
             $data['alternate_contact'] = $request->alternate_contact;
             $data['alternate_email'] = $request->alternate_email;
             $data['is_active'] = false;
+            $data['for_transportation'] = ($request->has('transportation_vendor')) ? true : false;
             $vendor = Vendor::create($data);
             $vendorCityData = array();
             $vendorMaterialData = array();

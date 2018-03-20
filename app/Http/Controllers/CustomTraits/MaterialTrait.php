@@ -181,8 +181,8 @@ trait MaterialTrait{
                     $records['data'][$iterator] = [
                         '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
                         $materialData[$pagination]['name'],
-                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                         round($materialData[$pagination]['rate_per_unit'],3),
+                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                         $material_status,
                         date('d M Y',strtotime($materialData[$pagination]['created_at'])),
                         '<div class="btn-group">

@@ -99,6 +99,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('purchaseRequestComponent',PurchaseRequestComponent::class);
         Route::model('purchaseOrderRequest',PurchaseOrderRequest::class);
         Route::model('purchaseComponentVendorRelation',PurchaseRequestComponentVendorRelation::class);
+        Route::model('subcontractorStructure',SubcontractorStructure::class);
     }
 
     /**

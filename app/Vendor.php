@@ -8,7 +8,7 @@ class Vendor extends Model
 {
     protected $table = 'vendors';
 
-    protected $fillable = ['name', 'company', 'mobile', 'email', 'gstin', 'alternate_contact', 'alternate_email','city','is_active'];
+    protected $fillable = ['name', 'company', 'mobile', 'email', 'gstin', 'alternate_contact', 'alternate_email','city','is_active','for_transportation'];
 
     public function cityRelations(){
         return $this->hasMany('App\VendorCityRelation','vendor_id');
