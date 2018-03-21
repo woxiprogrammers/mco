@@ -51,15 +51,39 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="assetMaintenanceBillTable">
                                                             <thead>
                                                             <tr>
-                                                                <th>Bill Number</th>
                                                                 <th>Asset Maintenance Id</th>
-                                                                <th>Amount</th>
+                                                                <th>Vendor Company Name</th>
+                                                                <th>Bill Number</th>
+                                                                <th>Final Amount</th>
+                                                                <th>Paid Amount</th>
+                                                                <th>Pending Amount</th>
                                                                 <th>Action</th>
+                                                            </tr>
+                                                            <tr class="filter">
+                                                                <th> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="vendor_name" id ="vendor_name"> </th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th>
+                                                                    <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                    <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                                </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
 
                                                             </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <th colspan="3" style="text-align:right">Total Page Wise:</th>
+                                                                    <th></th>
+                                                                    <th></th>
+                                                                    <th></th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </tfoot>
                                                         </table>
                                                     </div>
                                                     </form>
@@ -85,6 +109,13 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/asset-maintenance/bill/manage-datatable.js" type="text/javascript"></script>
+<script>
+    $(document).ready(function() {
+        $("input[name='vendor_name']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
+        });
+    });
+</script>
 @endsection
 
 
