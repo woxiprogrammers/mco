@@ -630,7 +630,9 @@ class SubcontractorController extends Controller
             $totalBillRetentionAmount = SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('retention_amount');
             $reconciledRetentionAmount = SubcontractorBillReconcileTransaction::where('subcontractor_bill_id',$subcontractorStructureBillId)->where('transaction_slug','retention')->sum('amount');
             $remainingRetentionAmount = $reconciledRetentionAmount - $totalBillRetentionAmount;
-            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount'));
+            $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBill->id)->sum('total');
+            $pendingAmount = $finalTotal - $paidAmount;
+            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Bill View',

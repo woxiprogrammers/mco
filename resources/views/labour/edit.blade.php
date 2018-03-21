@@ -150,13 +150,13 @@
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Select Project Site</label>
+                                                            <label for="name" class="control-label">Select Project Name</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <select id="project_site" class="form-control" name="project_site_id">
                                                                 @if($labour['project_site_id'] == null)
-                                                                    <option value="-1">Select Project Site</option>
+                                                                    <option value="-1">Select Project Name</option>
                                                                 @endif
                                                                 @foreach($projectSites as $projectSite)
                                                                     @if($labour['project_site_id'] == $projectSite['id'])

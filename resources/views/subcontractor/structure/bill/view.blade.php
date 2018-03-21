@@ -10,6 +10,8 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="balanceAdvanceAmount" value="{{$subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount}}">
+    <input type="hidden" id="pendingAmount" value="{{$pendingAmount}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -224,7 +226,6 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-body">
-                                                                        <input type="hidden" id="balanceAdvanceAmount" value="{{$subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount}}">
                                                                         <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/subcontractor/subcontractor-bills/transaction/create">
                                                                             {!! csrf_field() !!}
                                                                             <input type="hidden" value="{{$subcontractorBill['id']}}" name="subcontractor_bills_id">
@@ -462,6 +463,21 @@
     <script src="/assets/custom/subcontractor/hold-reconcile-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
+        $(document).ready(function(){
+            $('#isAdvanceCheckbox').on('change', function(){
+                if($(this).prop('checked') == true){
+                    var pendingAmount = parseFloat($("#pendingAmount").val());
+                    var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
+                    if(balanceAdvanceAmount >= pendingAmount){
+                        $("#transactionTotal").val(pendingAmount);
+                    }else{
+                        $("#transactionTotal").val(balanceAdvanceAmount);
+                    }
+                }else{
+
+                }
+            });
+        });
         function openReconcilePaymentModal(transactionSlug){
             $("#reconcileTransactionSlug").val(transactionSlug);
             $("#reconcilePaymentModal").modal('show');

@@ -130,12 +130,12 @@
                                                     </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="name" class="control-label">Project Site</label>
+                                                            <label for="name" class="control-label">Project Name</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <select id="project_site" class="form-control" name="project_site_id">
-                                                                <option value="-1">Select Project Site</option>
+                                                                <option value="-1">Select Project</option>
                                                                 @foreach($projectSites as $projectSite)
                                                                     <option value = "{!! $projectSite['id'] !!}">{!! $projectSite['name'] !!}</option>
                                                                 @endforeach

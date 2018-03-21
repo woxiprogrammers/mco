@@ -78,7 +78,7 @@ use InventoryTrait;
             $iterator = 0;
             foreach($projectSites as $key => $projectSite){
                 $projectSiteData[$iterator]['id'] = $projectSite['id'];
-                $projectSiteData[$iterator]['name'] = $projectSite['company'].'-'.$projectSite['project_name'].'-'.$projectSite['project_site_name'];
+                $projectSiteData[$iterator]['name'] = $projectSite['project_name'];
                 $iterator++;
             }
             $asset_types = AssetType::select('id','name')->get()->toArray();
