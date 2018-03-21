@@ -377,6 +377,19 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('auto-suggest/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
             Route::post('change-status/{status}/{inventoryTransferId}',array('uses'=> 'Inventory\InventoryManageController@changeStatus'));
             Route::post('upload-pre-grn-images',array('uses'=> 'Inventory\InventoryManageController@preGrnImageUpload'));
+            Route::group(['prefix' => 'billing'], function(){
+                Route::get('manage',array('uses' => 'Inventory\SiteTransferBillingController@getManageView'));
+                Route::get('create', array('uses' => 'Inventory\SiteTransferBillingController@getCreateView'));
+                Route::get('edit/{siteTransferBill}', array('uses' => 'Inventory\SiteTransferBillingController@getEditView'));
+                Route::post('create', array('uses' => 'Inventory\SiteTransferBillingController@createSiteTransferBill'));
+                Route::post('listing', array('uses' => 'Inventory\SiteTransferBillingController@listing'));
+                Route::get('get-approved-transaction',array('uses' => 'Inventory\SiteTransferBillingController@getApprovedTransaction'));
+                Route::group(['prefix' => 'payment'], function(){
+                    Route::post('create',array('uses' => 'Inventory\SiteTransferBillingController@createPayment'));
+                    Route::post('listing/{siteTransferBill}',array('uses' => 'Inventory\SiteTransferBillingController@paymentListing'));
+
+                });
+            });
         });
     });
 

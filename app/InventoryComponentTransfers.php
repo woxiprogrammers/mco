@@ -36,4 +36,7 @@ class InventoryComponentTransfers extends Model{
     public function inventoryComponentTransferStatus(){
         return $this->belongsTo('App\InventoryComponentTransferStatus','inventory_component_transfer_status_id');
     }
+    public function vendor(){
+        return $this->belongsTo('App\Vendor','vendor_id');
+    }
 }
