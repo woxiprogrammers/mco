@@ -139,7 +139,7 @@
                                         @if($user->hasPermissionTo('view-manage-extra-items'))
                                             <li aria-haspopup="true">
                                                 <a href="/extra-item/manage" class="nav-link nav-toggle ">
-                                                    <i class="fa fa-money"></i> Extra-Item
+                                                    <i class="fa fa-plus"></i> Extra-Item
                                                 </a>
                                             </li>
                                         @endif
