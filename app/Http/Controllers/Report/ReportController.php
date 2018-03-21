@@ -13,6 +13,7 @@ use App\Category;
 use App\Employee;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\BillTrait;
+use App\InventoryComponent;
 use App\Material;
 use App\Helper\MaterialProductHelper;
 use App\PeticashSalaryTransaction;
@@ -589,9 +590,11 @@ class ReportController extends Controller
                     $miscellaneousPurchaseAmount = $this->getPeticashPurchaseAmount($projectSiteId);
                     $totalReceiptEntry = $this->getBillTransactionsAmount($projectSiteId);
                     $purchasePaidAmount = $this->getPurchasePaidAmount($projectSiteId);
+                    $assetRentAmount = $this->getAssetRentPaidAmount($projectSiteId);
                     $assetMaintenancePaidAmount = $this->getAssetMaintenancePaidAmount($projectSiteId);
+                    $peticashSalaryAmount = $this->getPeticashSalaryAmount($projectSiteId);
                     $totalPurchase = $purchasePaidAmount + $assetMaintenancePaidAmount;
-                    $total = $totalPurchase + $miscellaneousPurchaseAmount + $subcontractor + $indirectExpensesAmount;
+                    $total = $totalPurchase + $miscellaneousPurchaseAmount + $subcontractor + $indirectExpensesAmount + $peticashSalaryAmount;
                     $profitLossSaleWise = $totalSalesEntry - $total;
                     $profitLossReceiptWise = $totalReceiptEntry - $total;
                     $data = array(
@@ -601,7 +604,7 @@ class ReportController extends Controller
                         array(null, null, 'Total purchase' , $totalPurchase),
                         array(null, null, 'Total miscellaneous purchase' , $miscellaneousPurchaseAmount),
                         array(null, null, 'Subcontractor' , $subcontractor),
-                        array(null, null, 'SALARY' , 2500),
+                        array(null, null, 'SALARY' , $peticashSalaryAmount),
                         array(null, null, 'IndirectExpences(GST,TDS Paid to government from Manisha)' , $indirectExpensesAmount),
                         array(null, null, 'Subcontractor' , $subcontractor),
                         array(null, null),
@@ -1044,5 +1047,116 @@ class ReportController extends Controller
             Log::critical(json_encode($data));
         }
         return $assetMaintenanceBillAmount;
+    }
+
+    public function getAssetRentPaidAmount($projectSiteId){
+        try{
+            $assetRentAmount = 0;
+            if($projectSiteId == 'all'){
+
+            }else{
+
+            }
+        }catch(\Exception $e){
+            $assetRentAmount = 0;
+            $data = [
+                'action' => 'Get Asset Maintenance Bill Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $assetRentAmount;
+    }
+
+    public function getPeticashSalaryAmount($projectSiteId){
+        try{
+            $peticashSalaryAmount = 0;
+            $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+            $officeSiteId = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+            if($projectSiteId == 'all'){
+                $advanceAmountTotal = PeticashSalaryTransaction::
+                    where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('amount');
+
+                $salaryPayableAmountTotal = PeticashSalaryTransaction::
+                    where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('payable_amount');
+                $salaryPfAmountTotal = PeticashSalaryTransaction::
+                    where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('pf');
+                $salaryTdsAmountTotal = PeticashSalaryTransaction::
+                    where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('tds');
+                $salaryPtAmountTotal = PeticashSalaryTransaction::
+                    where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('pt');
+                $salaryEsicAmountTotal = PeticashSalaryTransaction::
+                    where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('esic');
+
+                $salaryAmountTotal = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
+                $officeSiteDistributedAmount = ProjectSite::sum('distributed_salary_amount');
+                $peticashSalaryAmount = $salaryAmountTotal + $advanceAmountTotal + $officeSiteDistributedAmount;
+            }else{
+                $advanceAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                                ->where('project_site_id','!=',$officeSiteId)
+                                ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                                ->where('peticash_status_id',$approvedPeticashStatusId)
+                                ->sum('amount');
+
+                $salaryPayableAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                    ->where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('payable_amount');
+                $salaryPfAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                    ->where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('pf');
+                $salaryTdsAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                    ->where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('tds');
+                $salaryPtAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                    ->where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('pt');
+                $salaryEsicAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                    ->where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('esic');
+
+                $salaryAmountTotal = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
+                $officeSiteDistributedAmount = ProjectSite::where('id',$projectSiteId)->pluck('distributed_salary_amount')->first();
+                $officeSiteDistributedAmount = ($officeSiteDistributedAmount != null) ? $officeSiteDistributedAmount : 0;
+                $peticashSalaryAmount = $salaryAmountTotal + $advanceAmountTotal + $officeSiteDistributedAmount;
+            }
+        }catch(\Exception $e){
+            $peticashSalaryAmount = 0;
+            $data = [
+                'action' => 'Get Peticash Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $peticashSalaryAmount;
     }
 }
