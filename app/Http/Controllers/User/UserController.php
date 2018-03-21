@@ -377,7 +377,7 @@ class UserController extends Controller
             $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                     ->join('clients','clients.id','=','projects.client_id')
                                     ->where('project_sites.name','!=',env('OFFICE_PROJECT_SITE_NAME'))
-                                    ->where('project_sites.name','ilike','%'.$keyword.'%')
+                                    ->where('projects.name','ilike','%'.$keyword.'%')
                                     ->select('project_sites.id as project_site_id','project_sites.address as address','project_sites.name as project_site_name','projects.name as project_name','clients.company as client_company')
                                     ->get();
             $response = array();

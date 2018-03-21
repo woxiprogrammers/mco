@@ -13,9 +13,9 @@
                 <select class="bs-select form-control" data-style="btn-info" data-width="100%" id="globalProjectSite">
                     @foreach($globalProjectSites as $projectSite)
                         @if($projectSite->project_site_id == $selectGlobalProjectSite)
-                            <option value="{{$projectSite->project_site_id}}" selected>{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                            <option value="{{$projectSite->project_site_id}}" selected>{{$projectSite->project_name}}</option>
                         @else
-                            <option value="{{$projectSite->project_site_id}}">{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                            <option value="{{$projectSite->project_site_id}}">{{$projectSite->project_name}}</option>
                         @endif
                     @endforeach
                 </select>

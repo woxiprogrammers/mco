@@ -97,10 +97,12 @@ class VendorMailController extends Controller
                         $name = $vendorMailData[$pagination]->vendor->company;
                     }
                 }
+                $createdAt = date('d M Y h:i:s',strtotime($vendorMailData[$pagination]['created_at']));
                 $records['data'][] = [
                     ($pagination+1),
                     $name,
                     $slug,
+                    $createdAt,
                     $action
                 ];
             }
