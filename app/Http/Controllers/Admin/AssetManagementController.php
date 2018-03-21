@@ -384,6 +384,7 @@ use InventoryTrait;
 
     public function projectSiteAssetListing(Request $request,$assetId){
         try{
+            //here
             $inventoryComponentTransfer = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                                                                         ->where('inventory_components.reference_id',$assetId)
                                                                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
