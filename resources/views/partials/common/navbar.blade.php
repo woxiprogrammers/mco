@@ -314,6 +314,14 @@
                                         @endif
                                     </a>
                                 </li>
+                                <?php $hasSiteTransferPermission = \App\Helper\ACLHelper::checkModuleAcl('component-transfer-bill-entry')?>
+                                @if($hasSiteTransferPermission == true)
+                                    <li aria-haspopup="true">
+                                        <a href="/inventory/transfer/billing/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-sitemap"></i> Site Transfer Billing
+                                        </a>
+                                    </li>
+                                @endif
                                 <li aria-haspopup="true">
                                     <a href="/asset/maintenance/request/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-square"></i> Asset Maintenance
