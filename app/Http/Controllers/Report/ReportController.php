@@ -278,7 +278,7 @@ class ReportController extends Controller
 
                         if($peticashTransactionTypeSlug == 'salary'){
                             if($lastSalaryTransactionId == null){
-                                $advancesAfterLastSalary = -1;
+                                $advancesAfterLastSalary = 0;
                             }else{
                                 $advancesAfterLastSalary = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
                                     ->where('project_site_id',$salaryTransaction['project_site_id'])
@@ -293,7 +293,7 @@ class ReportController extends Controller
                             $data[$row]['balance'] = ($balance > 0) ? 0 : $balance;
                         }else{
                             if($lastSalaryTransactionId == null){
-                                $data[$row]['balance'] = 0;
+                                $data[$row]['balance'] = -$salaryTransaction['amount'];
                             }else{
                                 $advancesAfterLastSalary = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
                                     ->where('project_site_id',$salaryTransaction['project_site_id'])
@@ -482,7 +482,7 @@ class ReportController extends Controller
                             $data[$row]['other_recovery'] = $billTransaction['other_recovery_value'];
                             $data[$row]['payable_amount'] = $data[$row]['total_amount'] + $data[$row]['mobilise'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
                             $data[$row]['check_amount'] = ($billTransaction['paid_from_advanced'] == false) ? $billTransaction['amount'] : 0;
-                            $data[$row]['balance'] = '-';
+                            $data[$row]['balance'] = $data[$row]['payable_amount'] - $data[$row]['check_amount'] - $data[$row]['mobilise'];
                             $row++;
                         }
                     }
@@ -560,7 +560,7 @@ class ReportController extends Controller
                         $data[$row]['amount_with_tax'] = $purchaseOrderBillPayment['bill_amount'] - $purchaseOrderBillPayment['extra_amount'];
                         $data[$row]['total_amount'] = $purchaseOrderBillPayment['bill_amount'];
                         $data[$row]['paid_amount'] = $purchaseOrderBillPayment['amount'];
-                        $data[$row]['balance'] = $data[$row]['amount_with_tax'] - $data[$row]['paid_amount'];
+                        $data[$row]['balance'] = $data[$row]['total_amount'] - $data[$row]['paid_amount'];
                         $total['basicAmount'] += $data[$row]['basic_amount'];
                         $total['igstAmount'] += $data[$row]['igst_amount'];
                         $total['sgstAmount'] += $data[$row]['sgst_amount'];
