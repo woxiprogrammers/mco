@@ -332,6 +332,7 @@ class ReportController extends Controller
                         'Date', 'Summary Type', 'Bill No', 'Basic amount', 'Total tax', 'Total Bill Amount', 'Advance' ,'Debit', 'Hold', 'Retention',
                         'TDS', 'Other Recovery', 'Payable Amount', 'Check amount', 'Balance'
                     );
+                    $totalAdvanceAmount = Subcontractor::where('id',$request['subcontractor_id'])->pluck('total_advance_amount')->first();
                     $subContractorBillTransactionList = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
                                                         ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                                                         ->whereBetween('subcontractor_bill_transactions.created_at',[$start_date, $end_date])
@@ -340,7 +341,7 @@ class ReportController extends Controller
                                                         ->where('subcontractor_structure.project_site_id',$request['subcontractor_report_site_id'])
                                                         ->orderBy('subcontractor_bills.created_at')
                                                         ->select('subcontractor_structure.summary_id','subcontractor_bill_transactions.id as subcontractor_bill_transaction_id','subcontractor_bill_transactions.subcontractor_bills_id as subcontractor_bill_id','subcontractor_bill_transactions.subtotal','subcontractor_bill_transactions.total','subcontractor_bill_transactions.debit','subcontractor_bill_transactions.hold',
-                                                            'subcontractor_bill_transactions.retention_percent','subcontractor_bill_transactions.retention_amount','subcontractor_bill_transactions.tds_percent','subcontractor_bill_transactions.tds_amount','subcontractor_bill_transactions.other_recovery','subcontractor_bill_transactions.created_at')->get();
+                                                            'subcontractor_bill_transactions.retention_percent','subcontractor_bill_transactions.retention_amount','subcontractor_bill_transactions.tds_percent','subcontractor_bill_transactions.tds_amount','subcontractor_bill_transactions.other_recovery','subcontractor_bill_transactions.created_at','subcontractor_bill_transactions.is_advance')->get();
 
                     $subContractorBillTransactions = $subContractorBillTransactionList->groupBy('subcontractor_bill_id')->toArray();
                     foreach ($subContractorBillTransactions as $subcontractorBillId => $subContractorBillTransactionData){
@@ -379,21 +380,32 @@ class ReportController extends Controller
                             $finalTotal = $subTotal + $taxTotal;
                         }
                         foreach ($subContractorBillTransactionData as $key =>$subContractorBillTransaction){
+                            $totalAdvancedTillBill = SubcontractorBillTransaction::where('id','<',$subContractorBillTransaction['subcontractor_bill_transaction_id'])->where('is_advance',true)->sum('total');
+
                             $data[$row]['date'] = date('d/m/y',strtotime($subContractorBillTransaction['created_at']));
                             $data[$row]['summary_type'] = Summary::where('id',$subContractorBillTransaction['summary_id'])->pluck('name')->first();
                             $data[$row]['bill_no'] = $billName;
                             $data[$row]['basic_amount'] = $rate;
                             $data[$row]['total_tax'] = $taxTotal;
                             $data[$row]['total_bill_amount'] = $finalTotal;
-                            $data[$row]['advance'] = '-';
+                            if($subContractorBillTransaction['is_advance'] == true){
+                                $data[$row]['advance'] = $subContractorBillTransaction['total'];
+                            }else{
+                                $data[$row]['advance'] = 0;
+                            }
                             $data[$row]['debit'] = (-$subContractorBillTransaction['debit'] !=0 ) ? -$subContractorBillTransaction['debit'] : $subContractorBillTransaction['debit'];
                             $data[$row]['hold'] = ($subContractorBillTransaction['hold'] != 0) ? -$subContractorBillTransaction['hold'] : $subContractorBillTransaction['hold'];
                             $data[$row]['retention'] = ($subContractorBillTransaction['retention_amount'] != 0) ? -$subContractorBillTransaction['retention_amount'] : $subContractorBillTransaction['retention_amount'];
                             $data[$row]['tds'] = ($subContractorBillTransaction['tds_amount'] != 0) ? -$subContractorBillTransaction['tds_amount'] : $subContractorBillTransaction['tds_amount'];
                             $data[$row]['other_recovery'] = $subContractorBillTransaction['other_recovery'];
                             $data[$row]['payable_amount'] = $data[$row]['total_bill_amount'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
-                            $data[$row]['check_amount'] = $subContractorBillTransaction['total'];
-                            $data[$row]['balance'] = '-';
+                            if($subContractorBillTransaction['is_advance'] == true){
+                                $data[$row]['check_amount'] = 0;
+                            }else{
+                                $data[$row]['check_amount'] = $subContractorBillTransaction['total'];
+                            }
+                            $data[$row]['balance'] = $totalAdvanceAmount - $totalAdvancedTillBill;
+
                             $row++;
                         }
                     }
