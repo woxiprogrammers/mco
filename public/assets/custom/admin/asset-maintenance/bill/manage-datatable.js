@@ -32,7 +32,7 @@ var AssetMaintenanceBillListing = function () {
                         type: 'POST',
                         data :{
                             "get_total" : true,
-                            "asset_name" : $("#vendor_name").val()
+                            "vendor_name" : $("#vendor_name").val(),
                         },
                         success: function(result){
                             total = result['total'];
@@ -50,9 +50,9 @@ var AssetMaintenanceBillListing = function () {
                                 pageTotal +' ( '+ total +' total )'
                             );
 
-                            pending_total = result['pending_total'];
+                            paid_total = result['paid_total'];
                             // Total over this page
-                            pageTotal_pending = api
+                            pageTotal_paid = api
                                 .column( 4, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -61,6 +61,20 @@ var AssetMaintenanceBillListing = function () {
 
                             // Update footer
                             $( api.column( 4 ).footer() ).html(
+                                pageTotal_paid +' ( '+ paid_total +' total )'
+                            );
+
+                            pending_total = result['pending_total'];
+                            // Total over this page
+                            pageTotal_pending = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
                                 pageTotal_pending +' ( '+ pending_total +' total )'
                             );
                         }});

@@ -17,4 +17,8 @@ class AssetMaintenanceBill extends Model
     public function assetMaintenanceTransactionRelation(){
         return $this->hasMany('App\AssetMaintenanceBillTransaction','asset_maintenance_bill_id');
     }
+
+    public function assetMaintenanceBillPayment(){
+        return $this->hasMany('App\AssetMaintenanceBillPayment','asset_maintenance_bill_id');
+    }
 }
