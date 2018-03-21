@@ -54,7 +54,7 @@
                                                         <th> Employee Name </th>
                                                         <th> Contact No </th>
                                                         <th> Per Day wages </th>
-                                                        <th> Project Site </th>
+                                                        <th> Project Name </th>
                                                         <th> Status </th>
                                                         <th> Actions </th>
                                                     </tr>

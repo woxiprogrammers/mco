@@ -29,6 +29,7 @@
                                                                 <th style="width:20%"> Seq. No. </th>
                                                                 <th> Vendor Name</th>
                                                                 <th> Mailed For</th>
+                                                                <th> Mail Sent Date</th>
                                                                 <th> PDF </th>
                                                             </tr>
                                                         </thead>
