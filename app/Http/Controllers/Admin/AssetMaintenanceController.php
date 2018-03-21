@@ -579,6 +579,11 @@ class AssetMaintenanceController extends Controller{
             $status = 200;
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
+
+            if($request->has('vendor_name')){
+
+            }
+
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
                 $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
@@ -592,23 +597,38 @@ class AssetMaintenanceController extends Controller{
                     ->orderBy('id','desc')
                     ->get();
             }
-            $records["recordsFiltered"] = $records["recordsTotal"] = count($assetMaintenanceBillData);
-            if($request->length == -1){
-                $length = $records["recordsTotal"];
-            }else{
-                $length = $request->length;
-            }
-            $user = Auth::user();
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
-                $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
-                    <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['bill_id'].'" style="color: white"> View
-                </div>';
-                $records['data'][] = [
-                    $assetMaintenanceBillData[$pagination]['bill_number'],
-                    $assetMaintenanceBillData[$pagination]['id'],
-                    $assetMaintenanceBillData[$pagination]['amount'],
-                    $editButton
-                ];
+
+            if ($request->has('get_total')) {
+                $total = 0;
+                $pending_total = 0;
+                foreach($assetMaintenanceBillData as $assetBilldata) {
+                    $assetMaintenanceBillTransactionData = $assetBilldata->assetMaintenanceTransactionRelation;
+                    //dd($assetMaintenanceBillTransactionData);
+                    $total = $total + $assetBilldata['amount'];
+                }
+                $records['total'] = $total;
+                $records['pending_total'] = $pending_total;
+            } else {
+                $records["recordsFiltered"] = $records["recordsTotal"] = count($assetMaintenanceBillData);
+                if($request->length == -1){
+                    $length = $records["recordsTotal"];
+                }else{
+                    $length = $request->length;
+                }
+                $user = Auth::user();
+                for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
+                    $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                        <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['bill_id'].'" style="color: white"> View
+                    </div>';
+                    $records['data'][] = [
+                        $assetMaintenanceBillData[$pagination]['id'],
+                        "Vendor Name",
+                        $assetMaintenanceBillData[$pagination]['bill_number'],
+                        $assetMaintenanceBillData[$pagination]['amount'],
+                        100,
+                        $editButton
+                    ];
+                }
             }
         }catch (\Exception $e){
             $data = [
