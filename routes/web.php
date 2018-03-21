@@ -380,7 +380,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::group(['prefix' => 'billing'], function(){
                 Route::get('manage',array('uses' => 'Inventory\SiteTransferBillingController@getManageView'));
                 Route::get('create', array('uses' => 'Inventory\SiteTransferBillingController@getCreateView'));
-                Route::get('',array('uses' => 'Inventory\SiteTransferBillingController@getApprovedTransaction'));
+                Route::get('edit/{siteTransferBill}', array('uses' => 'Inventory\SiteTransferBillingController@getEditView'));
+                Route::post('create', array('uses' => 'Inventory\SiteTransferBillingController@createSiteTransferBill'));
+                Route::post('listing', array('uses' => 'Inventory\SiteTransferBillingController@listing'));
+                Route::get('get-approved-transaction',array('uses' => 'Inventory\SiteTransferBillingController@getApprovedTransaction'));
+                Route::group(['prefix' => 'payment'], function(){
+                    Route::post('create',array('uses' => 'Inventory\SiteTransferBillingController@createPayment'));
+                    Route::post('listing/{siteTransferBill}',array('uses' => 'Inventory\SiteTransferBillingController@paymentListing'));
+
+                });
             });
         });
     });

@@ -30,6 +30,7 @@ use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
 use App\QuotationWorkOrder;
 use App\Role;
+use App\SiteTransferBill;
 use App\Subcontractor;
 use App\SubcontractorStructure;
 use App\Summary;
@@ -100,6 +101,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('purchaseOrderRequest',PurchaseOrderRequest::class);
         Route::model('purchaseComponentVendorRelation',PurchaseRequestComponentVendorRelation::class);
         Route::model('subcontractorStructure',SubcontractorStructure::class);
+        Route::model('siteTransferBill',SiteTransferBill::class);
     }
 
     /**

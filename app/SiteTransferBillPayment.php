@@ -13,4 +13,8 @@ class SiteTransferBillPayment extends Model
     public function siteTransferBill(){
         return $this->belongsTo('App\SiteTransferBill','site_transfer_bill_id');
     }
+
+    public function paymentType(){
+        return $this->belongsTo('App\PaymentType','payment_type_id');
+    }
 }

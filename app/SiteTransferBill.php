@@ -14,6 +14,10 @@ class SiteTransferBill extends Model
     ];
 
     public function inventoryComponentTransfer(){
-        return $this->belongsTo('App\InventoryComponentTransfer','inventory_component_transfer_id');
+        return $this->belongsTo('App\InventoryComponentTransfers','inventory_component_transfer_id');
+    }
+
+    public function siteTransferBillImages(){
+        return $this->hasMany('App\SiteTransferBillImage','site_transfer_bill_id');
     }
 }

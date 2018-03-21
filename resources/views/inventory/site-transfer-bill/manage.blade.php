@@ -49,7 +49,7 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        <table class="table table-striped table-bordered table-hover order-column" id="inventoryListingTable">
+                                                        <table class="table table-striped table-bordered table-hover order-column" id="siteTransferBillListingTable">
                                                             <thead>
                                                                 <tr>
                                                                     <th style="width: 11%">Project</th>
@@ -57,6 +57,7 @@
                                                                     <th style="width: 11%">Entry Date</th>
                                                                     <th style="width: 11%">Bill Date</th>
                                                                     <th style="width: 11%">Bill Number</th>
+                                                                    <th style="width: 11%">Vendor Name</th>
                                                                     <th style="width: 11%">Basic Amount</th>
                                                                     <th style="width: 11%">Tax Amount</th>
                                                                     <th style="width: 11%">Total</th>
@@ -79,6 +80,7 @@
                                                                         </div>
                                                                     </th>
                                                                     <th style="width: 11%"> </th>
+                                                                    <th style="width: 11%"> <input type="text" class="form-control form-filter" style="margin-left: 5% !important; width: 90% !important;" name="vendor_name"></th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
@@ -171,5 +173,14 @@
     <script src="/assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
+    <script src="/assets/custom/inventory/site-transfer-bill-datatable.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function(){
+            SiteTransferBillListing.init();
+            $(".form-filter:input[name='vendor_name']").on('keyup', function(){
+                $(".filter-submit").trigger('click');
+            });
+        });
+    </script>
 @endsection
 

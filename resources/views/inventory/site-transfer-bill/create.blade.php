@@ -6,7 +6,7 @@
  */
 ?>
 @extends('layout.master')
-@section('title','Constro | Create Purchase Order Bill')
+@section('title','Constro | Create Site Transfer Bill')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -34,35 +34,35 @@
                 <div class="page-container">
                     <!-- BEGIN CONTENT -->
                     <div class="page-content-wrapper">
-                        <form action="/purchase/purchase-order-bill/create" method="POST" id="purchaseOrderBillCreateForm" role="form" enctype="multipart/form-data">
-                            {!! csrf_field() !!}
-                            <div class="page-head">
-                                <div class="container">
-                                    <!-- BEGIN PAGE TITLE -->
-                                    <div class="page-title">
-                                        <h1>Create Site Transfer Bill</h1>
-                                    </div>
-
+                        <div class="page-head">
+                            <div class="container">
+                                <!-- BEGIN PAGE TITLE -->
+                                <div class="page-title">
+                                    <h1>Create Site Transfer Bill</h1>
                                 </div>
+
                             </div>
-                            <div class="page-content">
-                                @include('partials.common.messages')
-                                <div class="container">
-                                    <ul class="page-breadcrumb breadcrumb">
-                                        <li>
-                                            <a href="/inventory/transfer/billing/manage">Manage Site Transfer Bill</a>
-                                            <i class="fa fa-circle"></i>
-                                        </li>
-                                        <li>
-                                            <a href="javascript:void(0);">Create Site Transfer Bill</a>
-                                            <i class="fa fa-circle"></i>
-                                        </li>
-                                    </ul>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <!-- BEGIN VALIDATION STATES-->
-                                            <div class="portlet light ">
-                                                <div class="portlet-body">
+                        </div>
+                        <div class="page-content">
+                            @include('partials.common.messages')
+                            <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/inventory/transfer/billing/manage">Manage Site Transfer Bill</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Create Site Transfer Bill</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <!-- BEGIN VALIDATION STATES-->
+                                        <div class="portlet light ">
+                                            <div class="portlet-body">
+                                                <form action="/inventory/transfer/billing/create" method="POST" id="siteTransferBillCreateForm">
+                                                    {!! csrf_field() !!}
                                                     <fieldset>
                                                         <legend> Site Transfer </legend>
                                                         <div class="form-group row">
@@ -73,6 +73,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <input type="text" class="form-control transfer-grn-typeahead" name="transfer_grn">
+                                                                <input type="hidden" name="inventory_component_transfer_id" id="inventoryComponentTransferId">
                                                             </div>
                                                         </div>
                                                     </fieldset>
@@ -82,7 +83,7 @@
                                                                 <label class="control-label pull-right">Bill Number</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control" name="vendor_bill_number" id="vendorBillNumber">
+                                                                <input type="text" class="form-control" name="bill_number" id="billNumber">
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -105,7 +106,7 @@
                                                                 <label class="control-label pull-right">Sub-Total</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control calculate-amount" name="sub_total" id="subTotal" readonly>
+                                                                <input type="text" class="form-control calculate-amount" name="subtotal" id="subTotal" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -120,24 +121,57 @@
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">Extra Amount</label>
                                                             </div>
-                                                            <div class="col-md-3">
+                                                            <div class="col-md-6">
                                                                 <input type="text" class="form-control calculate-amount" id="extra_amount" name="extra_amount">
                                                             </div>
                                                         </div>
-                                                        <div class="form-group row" id="extra_tax_div" hidden>
+                                                        <div class="form-group row">
                                                             <div class="col-md-2">
-                                                                <label class="control-label pull-right">Extra Tax Amount</label>
+                                                                <label class="control-label pull-right">Extra Amount CGST</label>
                                                             </div>
-                                                            <div class="col-md-3">
-                                                                <input type="hidden" id="extra_amount_tax_value">
-                                                                <input type="text" class="form-control calculate-amount" name="extra_tax_amount" id="extra_tax_amount" value="0" readonly>
+                                                            <div class="col-md-6 row">
+                                                                <div class="col-md-6 input-group" id="inputGroup" style="float: inherit; !important;">
+                                                                    <input type="number" class="form-control calculate-amount" id="extra_amount_cgst_percentage" name="extra_amount_cgst_percentage">
+                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="extra_amount_cgst_amount" id="extra_amount_cgst_amount" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Extra Amount SGST</label>
+                                                            </div>
+                                                            <div class="col-md-6 row">
+                                                                <div class="col-md-6 input-group" id="inputGroup" style="float: inherit; !important;">
+                                                                    <input type="number" class="form-control calculate-amount" id="extra_amount_sgst_percentage" name="extra_amount_sgst_percentage">
+                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="extra_amount_sgst_amount" id="extra_amount_sgst_amount" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-2">
+                                                                <label class="control-label pull-right">Extra Amount IGST</label>
+                                                            </div>
+                                                            <div class="col-md-6 row">
+                                                                <div class="col-md-6 input-group" id="inputGroup" style="float: inherit; !important;">
+                                                                    <input type="number" class="form-control calculate-amount" id="extra_amount_igst_percentage" name="extra_amount_igst_percentage">
+                                                                    <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="extra_amount_igst_amount" id="extra_amount_igst_amount" readonly>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">Total Amount</label>
                                                             </div>
-                                                            <div class="col-md-3">
+                                                            <div class="col-md-6">
                                                                 <input type="text" class="form-control" id="totalAmount" readonly>
                                                             </div>
                                                         </div>
@@ -153,8 +187,8 @@
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">Confirm Total Amount</label>
                                                             </div>
-                                                            <div class="col-md-3">
-                                                                <input type="text" class="form-control" id="ConfirmTotalAmount" name="amount">
+                                                            <div class="col-md-6">
+                                                                <input type="text" class="form-control" id="ConfirmTotalAmount" name="total">
                                                             </div>
                                                         </div>
                                                         <div class="form-group">
@@ -176,26 +210,9 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </form>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        <div class="modal fade" id="editTransactionModal" role="dialog">
-                            <div class="modal-dialog transaction-modal" style="width: 90%; ">
-                                <!-- Modal content-->
-                                <div class="modal-content" style="overflow: scroll !important;">
-                                    <div class="modal-header">
-                                        <div class="row">
-                                            <div class="col-md-4"></div>
-                                            <div class="col-md-4" style="font-size: 18px"> Purchase Order Transaction</div>
-                                            <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-body" style="padding:40px 50px;">
-
                                     </div>
                                 </div>
                             </div>
@@ -219,8 +236,10 @@
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
+    <script src="/assets/custom/inventory/site-transfer-validations.js"></script>
     <script>
         $(document).ready(function(){
+            CreateSiteTransferBill.init();
             var transferGrnList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -232,7 +251,10 @@
                         }
                         return $.map(x, function (data) {
                             return {
-
+                                transfer_component_transfer_id : data.inventory_component_transfer_id,
+                                subtotal : data.subtotal,
+                                tax_amount: data.tax_amount,
+                                grn: data.grn
                             };
                         });
                     },
@@ -253,26 +275,81 @@
                     ].join('\n'),
                     suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{grn}}</strong></div>')
                 },
-            }).on('typeahead:selected', function (obj, datum) {
-                $("input[name='purchase_order_format']").attr('readonly', true);
-                var POData = $.parseJSON(JSON.stringify(datum));
-                $("input[name='transaction_grn']").val(POData.grn);
-                $("#grnSelectionDiv .list-group").html(POData.list);
-                $("#purchaseOrderId").val(POData.id);
-                $("#grnSelectionDiv").show();
-                $("#grnSelectionDiv .list-group input:checkbox").each(function(){
-                    $(this).attr('checked', true);
-                });
-                $("#transactionSelectButton").trigger('click');
             })
-                .on('typeahead:open', function (obj, datum) {
-                    $("input[name='purchase_order_format']").attr('readonly', false);
-                    $(".transaction-grn-typeahead").val('');
-                    $(".purchase-order-typeahead").val('');
-                    $("#grnSelectionDiv .list-group").html('');
-                    $("#grnSelectionDiv").hide();
-                    $("#billData").hide();
-                });
+            .on('typeahead:selected', function (obj, datum) {
+                var POData = $.parseJSON(JSON.stringify(datum));
+                $("#subTotal").val(POData.subtotal);
+                $("#taxAmount").val(POData.tax_amount);
+                $(".transfer-grn-typeahead").typeahead('val',POData.grn);
+                $("#inventoryComponentTransferId").attr('value', POData.transfer_component_transfer_id);
+                $("#billData").show();
+            })
+            .on('typeahead:open', function (obj, datum) {
+                $("#billData").hide();
+                $("#inventoryComponentTransferId").removeAttr('value');
+            });
+            $(".calculate-amount").on('keyup', function(){
+                var extraAmount = parseFloat($("#extra_amount").val());
+                if(isNaN(extraAmount)){
+                    extraAmount = 0;
+                }
+                var cgstPercent = parseFloat($("#extra_amount_cgst_percentage").val());
+                if(isNaN(cgstPercent)){
+                    cgstPercent = 0;
+                }
+                var sgstPercent = parseFloat($("#extra_amount_sgst_percentage").val());
+                if(isNaN(sgstPercent)){
+                    sgstPercent = 0;
+                }
+                var igstPercent = parseFloat($("#extra_amount_igst_percentage").val());
+                if(isNaN(igstPercent)){
+                    igstPercent = 0;
+                }
+                var cgstAmount = extraAmount * (cgstPercent / 100);
+                var sgstAmount = extraAmount * (sgstPercent / 100);
+                var igstAmount = extraAmount * (igstPercent / 100);
+                $("#extra_amount_cgst_amount").val(cgstAmount.toFixed(2));
+                $("#extra_amount_sgst_amount").val(sgstAmount.toFixed(2));
+                $("#extra_amount_igst_amount").val(igstAmount.toFixed(2));
+                var subtotal = parseFloat($("#subtotal").val());
+                if(isNaN(subtotal)){
+                    subtotal = 0;
+                }
+                var taxAmount = parseFloat($("#taxAmount").val());
+                if(isNaN(taxAmount)){
+                    taxAmount = 0;
+                }
+                var totalAmount = subtotal + taxAmount + extraAmount + cgstAmount + sgstAmount + igstAmount;
+                if(isNaN(totalAmount)){
+                    totalAmount = 0;
+                }
+                $("#totalAmount").val(totalAmount.toFixed(2));
+                $(".calculate-amount").trigger('keyup');
+            });
+            $("#imageupload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#preview-image");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-2"><input type="hidden" name="bill_images[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
+            });
         });
     </script>
 @endsection
