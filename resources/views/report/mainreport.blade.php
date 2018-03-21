@@ -139,8 +139,9 @@
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="receiptwise_p_and_l_report_site_id" name="receiptwise_p_and_l_report_site_id">
                                                             @foreach($sites as $site)
-                                                            <option value="{{$site['id']}}">{{$site['name']}} - {{$site['project_name']}}</option>
+                                                                <option value="{{$site['id']}}">{{$site['name']}} - {{$site['project_name']}}</option>
                                                             @endforeach
+                                                                <option value="all">All</option>
                                                         </select>
                                                     </div>
                                                 </div>

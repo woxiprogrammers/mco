@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Report;
 
+use App\AssetMaintenanceBill;
 use App\Bill;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
@@ -20,6 +21,8 @@ use App\PeticashTransactionType;
 use App\Product;
 use App\ProductDescription;
 use App\ProjectSite;
+use App\ProjectSiteIndirectExpense;
+use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderPayment;
@@ -32,6 +35,7 @@ use App\Subcontractor;
 use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
 use App\SubcontractorBillTransaction;
+use App\SubcontractorStructure;
 use App\Summary;
 use App\Tax;
 use App\Unit;
@@ -578,21 +582,51 @@ class ReportController extends Controller
 
 
                 case 'receiptwise_p_and_l_report':
-                    $header = array(null, null);
+                    $projectSiteId = $request['receiptwise_p_and_l_report_site_id'];
+                    $totalSalesEntry = $this->getTotalSalesEntry($projectSiteId);
+                    $subcontractor = $this->getSubcontractorBillPaidAmount($projectSiteId);
+                    $indirectExpensesAmount = $this->getIndirectExpensesAmount($projectSiteId);
+                    $miscellaneousPurchaseAmount = $this->getPeticashPurchaseAmount($projectSiteId);
+                    $totalReceiptEntry = $this->getBillTransactionsAmount($projectSiteId);
+                    $purchasePaidAmount = $this->getPurchasePaidAmount($projectSiteId);
+                    $assetMaintenancePaidAmount = $this->getAssetMaintenancePaidAmount($projectSiteId);
+                    $totalPurchase = $purchasePaidAmount + $assetMaintenancePaidAmount;
+                    $total = $totalPurchase + $miscellaneousPurchaseAmount + $subcontractor + $indirectExpensesAmount;
+                    $profitLossSaleWise = $totalSalesEntry - $total;
+                    $profitLossReceiptWise = $totalReceiptEntry - $total;
                     $data = array(
-                        array('Total Sale Entry', 1),
-                        array('Total receipt entry', 1),
+                        array('Total Sale Entry', 'Total Sale Entry'),
+                        array($totalSalesEntry, $totalReceiptEntry, 'Expences on', 'Total expence'),
+                        array(null, null, 'Labour' , '1000000'),
+                        array(null, null, 'Total purchase' , $totalPurchase),
+                        array(null, null, 'Total miscellaneous purchase' , $miscellaneousPurchaseAmount),
+                        array(null, null, 'Subcontractor' , $subcontractor),
+                        array(null, null, 'SALARY' , 2500),
+                        array(null, null, 'IndirectExpences(GST,TDS Paid to government from Manisha)' , $indirectExpensesAmount),
+                        array(null, null, 'Subcontractor' , $subcontractor),
                         array(null, null),
-                        array('Labour + Staff Salary', null),
-                        array('Total Purchase', null),
-                        array('Total Miscellaneous Purchase', null),
-                        array('Subcontractor', null),
-                        array('Indirect Expences (GST,TDS Paid to government from manisha)', null),
-                        array('Total Expence', null),
+                        array($totalSalesEntry, $totalReceiptEntry, null, $total),
                         array(null, null),
                         array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
-                        array(1, 1),
+                        array($profitLossSaleWise, $profitLossReceiptWise),
                     );
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $sheet->row(1, $header);
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                            }
+                        });
+                    })->export('xls');
                     break;
 
                 default :
@@ -708,5 +742,307 @@ class ReportController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getTotalSalesEntry($projectSiteId){
+        try{
+            $billData = $currentTaxes = array();
+            $i = 0;
+            if($projectSiteId == 'all'){
+                $quotations = Quotation::get();
+            }else{
+                $quotations = Quotation::where('project_site_id',$projectSiteId)->get();
+            }
+            $saleBillTotal = 0;
+            foreach($quotations as $key4 => $quotation){
+                $allBills = Bill::where('quotation_id',$quotation->id)->get();
+                $statusId = BillStatus::where('slug','approved')->pluck('id')->first();
+                $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
+                $taxesAppliedToBills = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                    ->whereIn('bill_taxes.bill_id',array_column($allBills->toArray(),'id'))
+                    ->where('taxes.is_special', false)
+                    ->distinct('bill_taxes.tax_id')
+                    ->orderBy('bill_taxes.tax_id')
+                    ->pluck('bill_taxes.tax_id')
+                    ->toArray();
+                $specialTaxesAppliedToBills = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                    ->whereIn('bill_taxes.bill_id',array_column($allBills->toArray(),'id'))
+                    ->where('taxes.is_special', true)
+                    ->distinct('bill_taxes.tax_id')
+                    ->orderBy('bill_taxes.tax_id')
+                    ->pluck('bill_taxes.tax_id')
+                    ->toArray();
+                foreach($bills as $key => $bill){
+                    $total_amount = 0;
+                    foreach($bill->bill_quotation_product as $key1 => $product){
+                        $rate = MaterialProductHelper::customRound(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                        $total_amount = $total_amount + ($product->quantity * $rate) ;
+                    }
+                    if(count($bill->bill_quotation_extraItems) > 0){
+                        $extraItemsTotal = $bill->bill_quotation_extraItems->sum('rate');
+                    }else{
+                        $extraItemsTotal = 0;
+                    }
+                    $total_amount = ($total_amount + $extraItemsTotal) - $bill->discount_amount;
+                    $billData['subTotal'] = $total_amount;
+                    $thisBillTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                        ->where('bill_taxes.bill_id',$bill->id)
+                        ->where('taxes.is_special', false)
+                        ->pluck('bill_taxes.tax_id')
+                        ->toArray();
+                    $otherTaxes = array_values(array_diff($taxesAppliedToBills,$thisBillTax));
+                    if($thisBillTax != null){
+                        $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->where('is_special', false)->select('id as tax_id','name')->get();
+                    }
+                    if($currentTaxes != null){
+                        $thisBillTaxInfo = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                            ->where('bill_taxes.bill_id',$bill->id)
+                            ->where('taxes.is_special', false)
+                            ->select('bill_taxes.percentage as percentage','bill_taxes.tax_id as tax_id')
+                            ->get()
+                            ->toArray();
+                        $currentTaxes = array_merge($thisBillTaxInfo,$currentTaxes->toArray());
+                        usort($currentTaxes, function($a, $b) {
+                            return $a['tax_id'] > $b['tax_id'];
+                        });
+                    }else{
+                        $currentTaxes = Tax::where('is_active',true)->where('is_special', false)->select('id as tax_id')->get();
+                    }
+                    $billData['final_total'] = $total_amount;
+                    foreach($currentTaxes as $key2 => $tax){
+                        if(array_key_exists('percentage',$tax)){
+                            $billData['tax'][$tax['tax_id']] = $total_amount * ($tax['percentage'] / 100);
+                        }else{
+                            $billData['tax'][$tax['tax_id']] = 0;
+                        }
+                        $billData['final_total'] = MaterialProductHelper::customRound($billData['final_total'] + $billData['tax'][$tax['tax_id']]);
+                        $i++;
+                    }
+                    $thisBillSpecialTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                        ->where('bill_taxes.bill_id',$bill->id)
+                        ->where('taxes.is_special', true)
+                        ->pluck('bill_taxes.tax_id')
+                        ->toArray();
+                    $otherSpecialTaxes = array_values(array_diff($specialTaxesAppliedToBills,$thisBillSpecialTax));
+                    if($thisBillSpecialTax != null){
+                        $currentSpecialTaxes = Tax::whereIn('id',$otherSpecialTaxes)->where('is_active',true)->where('is_special', true)->select('id as tax_id','name','base_percentage as percentage')->get();
+                    }else{
+                        $currentSpecialTaxes = Tax::where('is_active',true)->where('is_special', true)->select('id as tax_id','name','base_percentage as percentage')->get();
+
+                    }
+                    if($currentSpecialTaxes != null){
+                        $thisBillSpecialTaxInfo = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
+                            ->where('bill_taxes.bill_id',$bill->id)
+                            ->where('taxes.is_special', true)
+                            ->select('bill_taxes.percentage as percentage','bill_taxes.applied_on as applied_on','bill_taxes.tax_id as tax_id')
+                            ->get()
+                            ->toArray();
+                        if(!is_array($currentSpecialTaxes)){
+                            $currentSpecialTaxes = $currentSpecialTaxes->toArray();
+                        }
+                        $currentSpecialTaxes = array_merge($thisBillSpecialTaxInfo,$currentSpecialTaxes);
+                        usort($currentSpecialTaxes, function($a, $b) {
+                            return $a['tax_id'] > $b['tax_id'];
+                        });
+                    }else{
+                        $currentSpecialTaxes = Tax::where('is_active',true)->where('is_special', true)->select('id as tax_id','base_percentage as percentage')->get();
+                    }
+                    foreach($currentSpecialTaxes as $key2 => $tax){
+                        $taxAmount = 0;
+                        if(array_key_exists('applied_on',$tax)){
+                            $appliedOnTaxes = json_decode($tax['applied_on']);
+                            foreach($appliedOnTaxes as $appliedTaxId){
+                                if($appliedTaxId == 0){                 // On Subtotal
+                                    $taxAmount += $total_amount * ($tax['percentage'] / 100);
+                                }else{
+                                    $taxAmount += $billData['tax'][$appliedTaxId] * ($tax['percentage'] / 100);
+                                }
+                            }
+                        }else{
+                            $taxAmount += $total_amount * ($tax['percentage'] / 100);
+                        }
+
+                        $billData['tax'][$tax['tax_id']] = $taxAmount;
+                        $billData['final_total'] = MaterialProductHelper::customRound($billData['final_total'] + $billData['tax'][$tax['tax_id']]);
+                    }
+                    $saleBillTotal += $billData['final_total'];
+                }
+            }
+        }catch(\Exception $e){
+            $saleBillTotal = 0;
+            $data = [
+                'action' => 'Get Bill Detail Listing',
+                'project_site_id' => $projectSiteId,
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return $saleBillTotal;
+    }
+
+    public function getSubcontractorBillPaidAmount($projectSiteId){
+        try{
+            if($projectSiteId == 'all'){
+                $subcontractorStructureData = SubcontractorStructure::get();
+            }else{
+                $subcontractorStructureData = SubcontractorStructure::where('project_site_id', $projectSiteId)->get();
+            }
+            $subcontractorAmount = 0;
+            foreach ($subcontractorStructureData as $key => $subcontractorStructure){
+                $subcontractorBillIds = $subcontractorStructure->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
+                $billTotals = 0;
+                $billPaidAmount = 0;
+                foreach ($subcontractorBillIds as $subcontractorStructureBillId){
+                    $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
+                    $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+                    $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                    $taxTotal = 0;
+                    $structureSlug = $subcontractorStructure->contractType->slug;
+                    if($structureSlug == 'sqft'){
+                        $rate = $subcontractorStructure['rate'];
+                        $subTotal = $subcontractorBill['qty'] * $rate;
+                        foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                            $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                        }
+                        $finalTotal = $subTotal + $taxTotal;
+                    }else{
+                        $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
+                        $subTotal = $subcontractorBill['qty'] * $rate;
+                        foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                            $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                        }
+                        $finalTotal = $subTotal + $taxTotal;
+                    }
+                    $billTotals += $finalTotal;
+                    $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+                }
+                $subcontractorAmount += $billPaidAmount;
+            }
+        }catch(\Exception $e){
+            $subcontractorAmount = 0;
+            $data = [
+                'action' => 'Get Subcontractor Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $subcontractorAmount;
+    }
+
+    public function getIndirectExpensesAmount($projectSiteId){
+        try{
+            if($projectSiteId == 'all'){
+                $projectSiteIndirectExpenseData = ProjectSiteIndirectExpense::orderBy('created_at','desc')->get();
+            }else{
+                $projectSiteIndirectExpenseData = ProjectSiteIndirectExpense::where('project_site_id',$projectSiteId)->orderBy('created_at','desc')->get();
+            }
+            $indirectExpenseAmount = 0;
+            foreach ($projectSiteIndirectExpenseData as $key => $projectSiteIndirectExpense){
+                $indirectExpenseAmount += $projectSiteIndirectExpense['tds'] + $projectSiteIndirectExpense['gst'];
+            }
+        }catch (\Exception $e){
+            $indirectExpenseAmount = 0;
+            $data = [
+                'action' => 'Get Subcontractor Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $indirectExpenseAmount;
+    }
+
+    public function getPeticashPurchaseAmount($projectSiteId){
+        try{
+            if($projectSiteId == 'all'){
+                $miscellaneousPurchaseAmount = PurcahsePeticashTransaction::sum('bill_amount');
+            }else{
+                $miscellaneousPurchaseAmount = PurcahsePeticashTransaction::where('project_site_id',$projectSiteId)->sum('bill_amount');
+            }
+        }catch(\Exception $e){
+            $miscellaneousPurchaseAmount = 0;
+            $data = [
+                'action' => 'Get Subcontractor Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $miscellaneousPurchaseAmount;
+    }
+
+    public function getBillTransactionsAmount($projectSiteId){
+        try{
+            if($projectSiteId == 'all'){
+                $quotations = Quotation::get();
+            }else{
+                $quotations = Quotation::where('project_site_id',$projectSiteId)->get();
+            }
+            $totalReceiptEntry = 0;
+            foreach($quotations as $key4 => $quotation){
+                $statusId = BillStatus::where('slug','approved')->pluck('id')->first();
+                $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
+                foreach($bills as $key => $bill){
+                    $totalReceiptEntry += BillTransaction::where('bill_id', $bill->id)->sum('total');
+                }
+            }
+        }catch(\Exception $e){
+            $totalReceiptEntry = 0;
+            $data = [
+                'action' => 'Get Bill Transaction Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $totalReceiptEntry;
+    }
+
+    public function getPurchasePaidAmount($projectSiteId){
+        try{
+            if($projectSiteId == 'all'){
+                $purchasePaidAmount = PurchaseOrderPayment::sum('amount');
+            }else{
+                $purchasePaidAmount = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                        ->where('purchase_requests.project_site_id',$projectSiteId)->sum('purchase_order_payments.amount');
+            }
+        }catch(\Exception $e){
+            $purchasePaidAmount = 0;
+            $data = [
+                'action' => 'Get Bill Transaction Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $purchasePaidAmount;
+    }
+
+    public function getAssetMaintenancePaidAmount($projectSiteId){
+        try{
+            if($projectSiteId == 'all'){
+                $assetMaintenanceBillAmount = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                    ->select('asset_maintenance.id as id','asset_maintenance_bills.id as bill_id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
+                    ->sum('asset_maintenance_bills.amount');
+            }else{
+                $assetMaintenanceBillAmount = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                    ->where('asset_maintenance.project_site_id',$projectSiteId)
+                    ->select('asset_maintenance.id as id','asset_maintenance_bills.id as bill_id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
+                    ->sum('asset_maintenance_bills.amount');
+            }
+        }catch(\Exception $e){
+            $assetMaintenanceBillAmount = 0;
+            $data = [
+                'action' => 'Get Asset Maintenance Bill Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $assetMaintenanceBillAmount;
     }
 }
