@@ -219,11 +219,11 @@
                                                             {!! csrf_field() !!}
                                                             <div class="row form-group">
                                                                 <div class="col-md-3">
-                                                                    <label class="control-label pull-right" for="project_site">Select Project Site</label>
+                                                                    <label class="control-label pull-right" for="project_site">Project Name</label>
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <select name="project_site_id" class="form-control" id="project_site">
-                                                                        <option value=""> Select Project Site </option>
+                                                                        <option value=""> Select Project Name </option>
                                                                         @foreach($projectSiteData as $projectSite)
                                                                             <option value="{{$projectSite['id']}}">{!! $projectSite['name'] !!}</option>
                                                                         @endforeach
@@ -293,6 +293,7 @@
                                                                     <tr>
                                                                         <th style="width: 10%;">Remove</th>
                                                                         <th> Vendor Information</th>
+                                                                        <th> Is Assigned?</th>
                                                                     </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -309,6 +310,9 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </td>
+                                                                                <th>
+                                                                                    <button type="button" class="btn yellow">Yes</button>
+                                                                                </th>
                                                                             </tr>
                                                                         @endforeach
                                                                     </tbody>
