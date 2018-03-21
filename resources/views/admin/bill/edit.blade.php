@@ -65,7 +65,7 @@
                                                                 @endif
                                                             </div>
                                                             <div class="col-md-4 date date-picker" data-date-end-date="0d" style="margin-left: 20%">
-                                                                <label class="control-label" for="performa_invoice_date" style="margin-left: -60%">Select Performa Invoice Date : </label>
+                                                                <label class="control-label" for="performa_invoice_date" style="margin-left: -60%">Select Proforma Invoice Date : </label>
                                                                 @if(!empty($bill['performa_invoice_date']))
                                                                     <input type="text"  name="performa_invoice_date" value="{{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}" id="performa_invoice_date" readonly>
                                                                     <button class="btn btn-sm default" type="button">

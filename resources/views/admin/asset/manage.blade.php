@@ -43,28 +43,42 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="assetTable">
                                                             <thead>
                                                             <tr>
-                                                                <th>Asset Name</th>
                                                                 <th> Asset ID </th>
+                                                                <th> Asset Name</th>
                                                                 <th> Model Number</th>
-                                                                <th> Status </th>
+                                                                <th> Qty </th>
+                                                                <th> Price/Qty </th>
+                                                                <th> Value (Qty*Price)</th>
+                                                                <th> Rent Per Day </th>
                                                                 <th> Asset Type </th>
+                                                                <th> Status </th>
                                                                 <th> Actions </th>
                                                             </tr>
-                                                            {{--<tr class="filter">
-                                                                <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_asset_number" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_model_number" > </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                            <tr class="filter">
+                                                                <th> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="asset_name" id ="asset_name"> </th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th> </th>
+                                                                <th> </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                 </th>
-                                                            </tr>--}}
+                                                            </tr>
                                                             </thead>
                                                             <tbody>
 
                                                             </tbody>
+                                                            <tfoot>
+                                                            <tr>
+                                                                <th colspan="5" style="text-align:right">Total Page Wise:</th>
+                                                                <th colspan="5"></th>
+                                                            </tr>
+                                                            </tfoot>
                                                         </table>
                                                     </div>
                                                     <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
@@ -123,6 +137,9 @@
     <script>
         $(document).ready(function() {
             $('#assetTable').DataTable();
+            $("input[name='asset_name']").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
         });
     </script>
 @endsection

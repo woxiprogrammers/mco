@@ -212,7 +212,7 @@
 
                                 <li  aria-haspopup="true">
                                     <a href="/bank/manage">
-                                        <i class="fa fa-folder"></i> Manage Bank
+                                        <i class="fa fa-building"></i> Manage Bank
                                     </a>
                                 </li>
                                 </ul>
@@ -249,7 +249,7 @@
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Material Request
+                                    <i class="fa fa-clipboard"></i> Material Request
                                     @if(($materialRequestNotificationCount) > 0)
                                         <span class="badge badge-success"><b>{{$materialRequestNotificationCount}}</b></span>
                                     @endif
@@ -257,7 +257,7 @@
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Purchase Request
+                                    <i class="fa fa-clipboard"></i> Purchase Request
                                     @if(($purchaseRequestNotificationCount) > 0)
                                         <span class="badge badge-success"><b>{{$purchaseRequestNotificationCount}}</b></span>
                                     @endif
@@ -265,7 +265,7 @@
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Purchase Order Request
+                                    <i class="fa fa-clipboard"></i> Purchase Order Request
                                     @if(($purchaseOrderRequestNotificationCount) > 0)
                                         <span class="badge badge-success"><b>{{$purchaseOrderRequestNotificationCount}}</b></span>
                                     @endif
@@ -273,7 +273,7 @@
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Purchase Order
+                                    <i class="fa fa-shopping-cart"></i> Purchase Order
                                     @if($purchaseOrderNotificationCount > 0)
                                         <span class="badge badge-success"><b>{{$purchaseOrderNotificationCount}}</b></span>
                                     @endif
@@ -281,12 +281,12 @@
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Purchase Order Billing
+                                    <i class="fa fa-calculator"></i> Purchase Order Billing
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/vendor-mail/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Vendor Mails
+                                    <i class="fa fa-envelope"></i> Vendor Mails
                                 </a>
                             </li>
                         </ul>
@@ -303,12 +303,12 @@
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
                                     <a href="/inventory/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Store Keeper
+                                        <i class="fa fa-home"></i> Store Keeper
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
                                     <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Site Transfer
+                                        <i class="fa fa-arrow-right"></i> Site Transfer
                                         @if(($inventorySiteTransferNotificationCount) > 0)
                                             <span class="badge badge-success">{!! $inventorySiteTransferNotificationCount !!}</span>
                                         @endif
@@ -316,17 +316,17 @@
                                 </li>
                                 <li aria-haspopup="true">
                                     <a href="/asset/maintenance/request/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Asset Maintenance
+                                        <i class="fa fa-square"></i> Asset Maintenance
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
                                     <a href="/asset/maintenance/request/approval/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Asset Maintenance Approval
+                                        <i class="fa fa-check-square"></i> Asset Maintenance Approval
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
                                     <a href="/asset/maintenance/request/bill/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-bars"></i> Asset Maintenance Billing
+                                        <i class="fa fa-calculator"></i> Asset Maintenance Billing
                                     </a>
                                 </li>
                             </ul>
@@ -339,7 +339,7 @@
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Category Management
+                                    <i class="fa fa-list-alt"></i> Category Management
                                 </a>
                             </li>
                             <li aria-haspopup="true">
@@ -349,7 +349,7 @@
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/checklist/site-assignment/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Project Site Assignment
+                                    <i class="fa fa-arrow-right"></i> Project Site Assignment
                                 </a>
                             </li>
                             <!--<li aria-haspopup="true">
@@ -366,17 +366,17 @@
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Category Management
+                                    <i class="fa fa-list-alt"></i> Category Management
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/drawing/images/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Add Image
+                                    <i class="fa fa-plus"></i> Add Image
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Manage Drawings
+                                    <i class="fa fa-edit"></i> Manage Drawings
                                 </a>
                             </li>
                         </ul>

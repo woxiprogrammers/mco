@@ -293,6 +293,7 @@
                                                                     <tr>
                                                                         <th style="width: 10%;">Remove</th>
                                                                         <th> Vendor Information</th>
+                                                                        <th> Is Assigned?</th>
                                                                     </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -309,6 +310,9 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </td>
+                                                                                <th>
+                                                                                    <button type="button" class="btn yellow">Yes</button>
+                                                                                </th>
                                                                             </tr>
                                                                         @endforeach
                                                                     </tbody>
