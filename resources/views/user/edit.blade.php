@@ -134,7 +134,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control" id="purchase_order_amount_limit" name="purchase_order_amount_limit" value="{{$userEdit['purchase_order_amount_limit']}}">
+                                                                <input type="text" class="form-control" id="purchase_order_amount_limit" name="purchase_order_amount_limit" value="{{$userEdit['purchase_order_amount_limit']}}" maxlength="15">
                                                             </div>
                                                         </div>
                                                     @endif
@@ -145,7 +145,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control" id="purchase_peticash_amount_limit" name="purchase_peticash_amount_limit" value="{{$userEdit['purchase_peticash_amount_limit']}}">
+                                                                <input type="text" class="form-control" id="purchase_peticash_amount_limit" name="purchase_peticash_amount_limit" value="{{$userEdit['purchase_peticash_amount_limit']}}" maxlength="11">
                                                             </div>
                                                         </div>
                                                     @endif

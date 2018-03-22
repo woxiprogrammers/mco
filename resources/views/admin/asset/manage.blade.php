@@ -74,10 +74,10 @@
 
                                                             </tbody>
                                                             <tfoot>
-                                                            <tr>
-                                                                <th colspan="5" style="text-align:right">Total Page Wise:</th>
-                                                                <th colspan="5"></th>
-                                                            </tr>
+                                                                <tr>
+                                                                    <th colspan="5" style="text-align:right">Total Page Wise:</th>
+                                                                    <th colspan="5"></th>
+                                                                </tr>
                                                             </tfoot>
                                                         </table>
                                                     </div>

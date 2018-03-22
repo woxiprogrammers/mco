@@ -52,12 +52,12 @@
                                                 <div class="portlet-body">
                                                     <fieldset>
                                                         <legend>Asset Maintenance</legend>
-                                                        <div class="row">
+                                                        <div class="row" style="margin-bottom: 20px;">
                                                             <div class="col-md-4">
                                                                 Transaction GRN
                                                             </div>
                                                         </div>
-                                                        <div class="row">
+                                                        <div class="row" >
                                                             <div class="col-md-4 form-group">
                                                                 <input type="hidden" name="asset_maintenance_id" id="assetMaintenanceId">
                                                                 <input type="text" class="form-control transaction-grn-typeahead" name="transaction_grn">
