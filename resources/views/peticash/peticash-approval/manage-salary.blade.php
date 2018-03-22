@@ -130,6 +130,12 @@
                                                 </thead>
                                                 <tbody>
                                                 </tbody>
+                                                <tfoot>
+                                                <tr>
+                                                    <th colspan="5" style="text-align:right">Total Page Wise: </th>
+                                                    <th colspan="6"></th>
+                                                </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                         <div class="modal fade" id="remarkApproveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
