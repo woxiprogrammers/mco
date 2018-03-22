@@ -100,7 +100,7 @@
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_name" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
@@ -117,6 +117,13 @@
                                                             <tbody>
 
                                                             </tbody>
+                                                            <tfoot>
+                                                            <tr>
+                                                                <th colspan="4" style="text-align:right">Total Page Wise: </th>
+                                                                <th></th>
+                                                                <th colspan="4"></th>
+                                                            </tr>
+                                                            </tfoot>
                                                         </table>
                                                     </div>
                                                 </div>
@@ -317,7 +324,6 @@
                 var month = $('#month').val();
                 var status_id = $('#status_id').val();
                 var search_name = $('#search_name').val();
-                var emp_id = $('#emp_id').val();
 
                 var postData =
                     'year=>'+year+','+
@@ -325,7 +331,6 @@
 
                 $("input[name='postdata']").val(postData);
                 $("input[name='search_name']").val(search_name);
-                $("input[name='search_employee_id']").val(emp_id);
                 $(".filter-submit").trigger('click');
             });
         });
