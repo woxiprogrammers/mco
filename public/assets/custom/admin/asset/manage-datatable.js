@@ -60,7 +60,7 @@ var AssetListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/asset/listing", // ajax source
+                    "url": "/asset/listing" // ajax source
                 },
                 "order": [
                     [1, "asc"]

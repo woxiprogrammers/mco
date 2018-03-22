@@ -548,6 +548,7 @@ class PeticashController extends Controller
             $site_id = 0;
             $month = 0;
             $year = 0;
+            $total = 0;
             $postDataArray = array();
             if ($request->has('emp_id')) {
                 if ($request['emp_id'] != "") {
@@ -605,7 +606,7 @@ class PeticashController extends Controller
             if ($emp_id != "" && $filterFlag == true) {
                 $ids = PeticashRequestedSalaryTransaction::join('employees','employees.id','=','peticash_requested_salary_transactions.employee_id')
                                             ->whereIn('peticash_requested_salary_transactions.id',$ids)
-                                            ->where('employees.employee_id',$emp_id)
+                                            ->where('employees.employee_id','ilike',"%".$emp_id."%")
                                             ->pluck('peticash_requested_salary_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
@@ -623,92 +624,101 @@ class PeticashController extends Controller
                 $salaryTransactionData = PeticashRequestedSalaryTransaction::whereIn('id',$ids)->orderBy('id','desc')->get();
             }
 
-            $iTotalRecords = count($salaryTransactionData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
-                $txnStatus = PeticashStatus::findOrFail($salaryTransactionData[$pagination]['peticash_status_id'])->toArray()['slug'];
-                switch(strtolower($txnStatus)){
-                    case 'pending':
-                        $checkbox_enable = '<input type="checkbox" class="salary-transactions" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
-                        $user_status = '<td><span class="label label-sm label-warning">'.$txnStatus.' </span></td>';
-                        $actionDropDown = '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
+            if ($request->has('get_total')) {
+                if ($filterFlag) {
+                    foreach($salaryTransactionData as $salarytxn) {
+                        $total = $total + $salarytxn['amount'];
+                    }
+                }
+                $records['total'] = $total;
+            } else {
+                $iTotalRecords = count($salaryTransactionData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
+                    $txnStatus = PeticashStatus::findOrFail($salaryTransactionData[$pagination]['peticash_status_id'])->toArray()['slug'];
+                    switch(strtolower($txnStatus)){
+                        case 'pending':
+                            $checkbox_enable = '<input type="checkbox" class="salary-transactions" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
+                            $user_status = '<td><span class="label label-sm label-warning">'.$txnStatus.' </span></td>';
+                            $actionDropDown = '<div class="btn-group">
+                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                    <i class="fa fa-angle-down"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-left" role="menu">
+                                    <li>
+                                        <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                            <i class="icon-tag"></i> Approve / Disapprove
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>';
+                            break;
+                        case 'approved':
+                            $checkbox_enable = '<input  disabled type="checkbox" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
+                            $user_status = '<td><span class="label label-sm label-success">'.$txnStatus.' </span></td>';
+                            $actionDropDown = '<div class="btn-group">
+                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                    <i class="fa fa-angle-down"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-left" role="menu">
+                                    <!--<li>
+                                    <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Details
+                                    </a>
+                                    </li> -->
+                                <!--<li>
                                     <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
                                         <i class="icon-tag"></i> Approve / Disapprove
                                     </a>
-                                </li>
-                            </ul>
-                        </div>';
-                        break;
-                    case 'approved':
-                        $checkbox_enable = '<input  disabled type="checkbox" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
-                        $user_status = '<td><span class="label label-sm label-success">'.$txnStatus.' </span></td>';
-                        $actionDropDown = '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
+                                </li>-->
+                                </ul>
+                            </div>';
+                            break;
+                        default:
+                            $checkbox_enable = '<input  disabled type="checkbox" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
+                            $user_status = '<td><span class="label label-sm label-danger">'.$txnStatus.' </span></td>';
+                            $actionDropDown = '<div class="btn-group">
+                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                    <i class="fa fa-angle-down"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-left" role="menu">
+                                    <!--<li>
+                                    <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                        <i class="icon-docs"></i> Details
+                                    </a>
+                                </li>-->
                                 <!--<li>
-                                <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                    <i class="icon-docs"></i> Details
-                                </a>
-                                </li> -->
-                            <!--<li>
-                                <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                    <i class="icon-tag"></i> Approve / Disapprove
-                                </a>
-                            </li>-->
-                            </ul>
-                        </div>';
-                        break;
-                    default:
-                        $checkbox_enable = '<input  disabled type="checkbox" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
-                        $user_status = '<td><span class="label label-sm label-danger">'.$txnStatus.' </span></td>';
-                        $actionDropDown = '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <!--<li>
-                                <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                    <i class="icon-docs"></i> Details
-                                </a>
-                            </li>-->
-                            <!--<li>
-                                <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                    <i class="icon-tag"></i> Approve / Disapprove
-                                </a>
-                            </li>-->
-                            </ul>
-                        </div>';
-                        break;
+                                    <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                        <i class="icon-tag"></i> Approve / Disapprove
+                                    </a>
+                                </li>-->
+                                </ul>
+                            </div>';
+                            break;
+                    }
+                    $records['data'][$iterator] = [
+                        $checkbox_enable,
+                        $salaryTransactionData[$pagination]['id'],
+                        $salaryTransactionData[$pagination]->employee->employee_id,
+                        $salaryTransactionData[$pagination]->employee->name,
+                        $salaryTransactionData[$pagination]->paymentType->name,
+                        $salaryTransactionData[$pagination]['amount'],
+                        $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
+                        date('d M Y',strtotime($salaryTransactionData[$pagination]['created_at'])),
+                        $salaryTransactionData[$pagination]->projectSite->project->name,
+                        $user_status,
+                        $actionDropDown
+                    ];
                 }
-                $records['data'][$iterator] = [
-                    $checkbox_enable,
-                    $salaryTransactionData[$pagination]['id'],
-                    $salaryTransactionData[$pagination]->employee->employee_id,
-                    $salaryTransactionData[$pagination]->employee->name,
-                    $salaryTransactionData[$pagination]->paymentType->name,
-                    $salaryTransactionData[$pagination]['amount'],
-                    $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
-                    date('d M Y',strtotime($salaryTransactionData[$pagination]['created_at'])),
-                    $salaryTransactionData[$pagination]->projectSite->project->name,
-                    $user_status,
-                    $actionDropDown
-                ];
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
         }catch(\Exception $e){
             $records = array();
             $data = [
