@@ -132,7 +132,7 @@
                                                                     <label class="control-label pull-right">Transportation Sub-Total</label>
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <input type="text" class="form-control" name="transportation_total" id="transportation_total" value="{{$purchaseOrderBill->transportation_tax_amount}}" readonly>
+                                                                    <input type="text" class="form-control" name="transportation_total" id="transportation_total" value="{{$purchaseOrderBill->transportation_total_amount}}" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group row">
@@ -140,7 +140,7 @@
                                                                     <label class="control-label pull-right">Transportation Tax Amount</label>
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <input type="number" class="form-control" id="transportation_tax_amount" name="transportation_tax_amount" value="{{$purchaseOrderBill->transportation_total_amount}}" readonly>
+                                                                    <input type="number" class="form-control" id="transportation_tax_amount" name="transportation_tax_amount" value="{{$purchaseOrderBill->transportation_tax_amount}}" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group row">
