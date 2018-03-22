@@ -1096,7 +1096,7 @@ class ReportController extends Controller
             }
             foreach ($inventoryComponents as $key => $inventoryComponent){
                 $transferInData = $inventoryComponent->inventoryComponentTransfers
-                    ->where('transfer_type_id',InventoryTransferTypes::where('slug','site')->where('type','ilike','IN')->pluck('id')->first())
+                    ->where('transfer_type_id',InventoryTransferTypes::whereIn('slug',['site','office'])->where('type','ilike','IN')->pluck('id')->first())
                     ->where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())->first();
                 if($transferInData == null){
                     $assetRentAmount += 0;
@@ -1110,7 +1110,7 @@ class ReportController extends Controller
                     }else{
                         $transferOutDate = $transferOutData['created_at'];
                     }
-                    $rentDays = $this->timeDelay($transferInData['created_at'],$transferOutDate)->format("%R%a");
+                    $rentDays = Carbon::parse(date('Y-m-d',strtotime($transferInData['created_at'])))->diffInDays(Carbon::parse(date('Y-m-d',strtotime($transferOutDate))));
                     $assetRentAmount += $rentDays * $transferInData['rate_per_unit'] * $transferInData['quantity'];
                 }
             }
