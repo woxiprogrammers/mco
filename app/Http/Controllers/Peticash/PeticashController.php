@@ -1420,9 +1420,10 @@ class PeticashController extends Controller
             $projectSiteId = Session::get('global_project_site');
             $status = 200;
             $postdata = null;
-            $emp_name = null;
+            $material_name = null;
             $month = 0;
             $year = 0;
+            $total = 0;
             $postDataArray = array();
             if($request->has('postdata')) {
                 $postdata = $request['postdata'];
@@ -1440,13 +1441,15 @@ class PeticashController extends Controller
                 $year = $postDataArray['year'];
 
             }
+            if ($request->has('search_name')) {
+                $material_name = $request['search_name'];
+            }
+
             $ids = PurcahsePeticashTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
-            if ($request->has('search_employee_id') && $filterFlag == true) {
-                $ids = PurcahsePeticashTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
-                    ->whereIn('peticash_salary_transactions.id',$ids)
-                    ->where('employees.employee_id','ilike','%'.$request->search_employee_id.'%')
-                    ->pluck('peticash_salary_transactions.id');
+            if ($request->has('search_name') && $filterFlag == true) {
+                $ids = PurcahsePeticashTransaction::whereIn('id',$ids)
+                    ->where('name','ilike','%'.$material_name.'%')->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -1468,26 +1471,36 @@ class PeticashController extends Controller
             if ($filterFlag) {
                 $purchaseTransactionData = PurcahsePeticashTransaction::whereIn('id',$ids)->orderBy('id','desc')->get();
             }
-            $iTotalRecords = count($purchaseTransactionData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
-                $records['data'][] = [
-                    $purchaseTransactionData[$pagination]->id,
-                    ucwords($purchaseTransactionData[$pagination]->name),
-                    $purchaseTransactionData[$pagination]->quantity,
-                    $purchaseTransactionData[$pagination]->unit->name,
-                    $purchaseTransactionData[$pagination]->bill_amount,
-                    $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
-                    date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
-                    $purchaseTransactionData[$pagination]->projectSite->project->name,
-                    '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>'
-                ];
+
+            if ($request->has('get_total')) {
+                if ($filterFlag) {
+                    foreach($purchaseTransactionData as $salarytxn) {
+                        $total = $total + $salarytxn['bill_amount'];
+                    }
+                }
+                $records['total'] = $total;
+            } else {
+                $iTotalRecords = count($purchaseTransactionData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
+                    $records['data'][] = [
+                        $purchaseTransactionData[$pagination]->id,
+                        ucwords($purchaseTransactionData[$pagination]->name),
+                        $purchaseTransactionData[$pagination]->quantity,
+                        $purchaseTransactionData[$pagination]->unit->name,
+                        $purchaseTransactionData[$pagination]->bill_amount,
+                        $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
+                        date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
+                        $purchaseTransactionData[$pagination]->projectSite->project->name,
+                        '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>'
+                    ];
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Transaction Listing',
