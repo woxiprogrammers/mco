@@ -33,6 +33,7 @@
 
                 <!-- END PAGE BREADCRUMBS -->
                 <!-- BEGIN PAGE CONTENT INNER -->
+                @if(($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                 <div class="page-content-inner">
                     <div class="row">
                         <fieldset>
@@ -117,6 +118,7 @@
                     </div>
 
                 </div>
+                @endif
 
             </div>
         </div>

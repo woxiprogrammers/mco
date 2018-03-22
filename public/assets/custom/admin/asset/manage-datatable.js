@@ -17,6 +17,42 @@ var AssetListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    // Total over all pages
+                    $.ajax({
+                        url: "/asset/listing",
+                        type: 'POST',
+                        data :{
+                            "get_total" : true,
+                            "asset_name" : $("#asset_name").val()
+                        },
+                        success: function(result){
+                            total = result['total'];
+
+                            // Total over this page
+                            pageTotal = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
+                                pageTotal +' ( '+ total +' total)'
+                            );
+                    }});
+                },
 
                 "lengthMenu": [
                     [50, 100, 150],
@@ -24,7 +60,7 @@ var AssetListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/asset/listing", // ajax source
+                    "url": "/asset/listing" // ajax source
                 },
                 "order": [
                     [1, "asc"]

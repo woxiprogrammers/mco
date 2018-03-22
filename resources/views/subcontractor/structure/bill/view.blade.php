@@ -282,7 +282,7 @@
                                                                                         <label class="control-label pull-right">Retention</label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control tax_amount" id="retention_tax_amount" name="retention_tax_amount">
+                                                                                        <input type="number" class="form-control tax_amount" id="retention_tax_amount" name="retention_amount">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row form-group">
@@ -290,7 +290,7 @@
                                                                                         <label class="control-label pull-right">TDS</label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control tax_amount" id="tds_tax_amount" name="tds_tax_amount">
+                                                                                        <input type="number" class="form-control tax_amount" id="tds_tax_amount" name="tds_amount">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group">

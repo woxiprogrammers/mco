@@ -69,7 +69,7 @@
 
                                                     <label class="control-label" for="date" style="margin-left: 1%">Bill Date : {{date('m/d/Y',strtotime($bill['date']))}}</label>
 
-                                                    <label class="control-label" for="date" style="margin-left: 1%"> Performa Invoice Date : {{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}</label>
+                                                    <label class="control-label" for="date" style="margin-left: 1%"> Proforma Invoice Date : {{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}</label>
 
                                                     <a href="/bill/cumulative/invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                         <i class="fa fa-download"></i> Cumulative Bill
@@ -85,7 +85,7 @@
 
                                                     <a href="/bill/current/performa-invoice/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 10px">
                                                         <i class="fa fa-download"></i>
-                                                        Performa Invoice Bill
+                                                        Proforma Invoice Bill
                                                     </a>
                                                     <div class="col-md-12" style="margin-top: 1%">
                                                         @if($bill->bank_info_id != null)

@@ -1,14 +1,12 @@
 /**
- * Created by Ameya Joshi on 5/12/17.
+ * Created by Ameya Joshi on 21/3/18.
  */
 
-var peticashManagementListing = function () {
-    var handleOrders = function () {
-
+var SiteTransferBillListing = function () {
+    var handleInventory = function () {
         var grid = new Datatable();
-
         grid.init({
-            src: $("#purchaseManageTable"),
+            src: $("#siteTransferBillListingTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -21,58 +19,6 @@ var peticashManagementListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
-                "footerCallback": function ( row, data, start, end, display ) {
-                    var api = this.api(), data;
-
-                    // Remove the formatting to get integer data for summation
-                    var intVal = function ( i ) {
-                        return typeof i === 'string' ?
-                            i.replace(/[\$,]/g, '')*1 :
-                            typeof i === 'number' ?
-                                i : 0;
-                    };
-
-                    var client_id = $('#client_id').val();
-                    var project_id = $('#project_id').val();
-                    var site_id = $('#site_id').val();
-                    var year = $('#year').val();
-                    var month = $('#month').val();
-                    var search_name = $('#search_name').val();
-
-                    var postData =
-                        'client_id=>'+client_id+','+
-                            'project_id=>'+project_id+','+
-                            'site_id=>'+site_id+','+
-                            'year=>'+year+','+
-                            'month=>'+month;
-
-
-                    // Total over all pages
-                    $.ajax({
-                        url: "/peticash/peticash-management/purchase/listing?_token="+$("input[name='_token']").val(),
-                        type: 'POST',
-                        data :{
-                            "get_total" : true,
-                            "search_name" : search_name,
-                            "postdata" : postData
-                        },
-                        success: function(result){
-                            total = result['total'];
-
-                            // Total over this page
-                            pageTotal = api
-                                .column( 4, { page: 'current'} )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                }, 0 );
-
-                            // Update footer
-                            $( api.column( 4 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
-                            );
-                        }});
-                },
 
                 "lengthMenu": [
                     [50, 100, 150],
@@ -80,7 +26,7 @@ var peticashManagementListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/peticash/peticash-management/purchase/listing?_token="+$("input[name='_token']").val() // ajax source
+                    "url": "/inventory/transfer/billing/listing?_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -116,16 +62,11 @@ var peticashManagementListing = function () {
                 });
             }
         });
-
     }
-
     return {
-
         //main function to initiate the module
         init: function () {
-            handleOrders();
+            handleInventory();
         }
-
     };
-
 }();

@@ -44,13 +44,13 @@
                                                 <fieldset>
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
-                                                            <label for="type" class="control-label">Sitename</label>
+                                                            <label for="type" class="control-label">Project name</label>
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <select class="form-control" id="project_site_id" name="project_site_id">
                                                                 @foreach($sites as $site)
-                                                                <option value="{{$site['id']}}">{{$site['name']}}-{{$site['address']}}</option>
+                                                                <option value="{{$site['id']}}">{{$site['name']}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>

@@ -15,14 +15,77 @@ var AssetMaintenanceBillListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
 
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    // Total over all pages
+                    $.ajax({
+                        url: "/asset/maintenance/request/bill/listing?_token="+$("input[name='_token']").val(),
+                        type: 'POST',
+                        data :{
+                            "get_total" : true,
+                            "vendor_name" : $("#vendor_name").val(),
+                        },
+                        success: function(result){
+                            total = result['total'];
+
+                            // Total over this page
+                            pageTotal = api
+                                .column( 3, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 3 ).footer() ).html(
+                                pageTotal +' ( '+ total +' total )'
+                            );
+
+                            paid_total = result['paid_total'];
+                            // Total over this page
+                            pageTotal_paid = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 4 ).footer() ).html(
+                                pageTotal_paid +' ( '+ paid_total +' total )'
+                            );
+
+                            pending_total = result['pending_total'];
+                            // Total over this page
+                            pageTotal_pending = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
+                                pageTotal_pending +' ( '+ pending_total +' total )'
+                            );
+                        }});
+                },
                 "lengthMenu": [
                     [50, 100, 150],
                     [50, 100, 150] // change per page values here
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/asset/maintenance/request/bill/listing?_token="+$("input[name='_token']").val(), // ajax source
+                    "url": "/asset/maintenance/request/bill/listing?_token="+$("input[name='_token']").val() // ajax source
                 },
                 "order": [
                     [1, "asc"]
