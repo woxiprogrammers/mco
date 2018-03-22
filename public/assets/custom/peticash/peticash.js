@@ -33,7 +33,7 @@ var masterAccountListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/peticash/master-peticash-account/listing", // ajax source
+                    "url": "/peticash/master-peticash-account/listing" // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -109,7 +109,7 @@ var sitewiseAccountListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/peticash/sitewise-peticash-account/listing", // ajax source
+                    "url": "/peticash/sitewise-peticash-account/listing" // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -253,14 +253,69 @@ var peticashSalaryApprovalListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
 
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    var client_id = $('#client_id').val();
+                    var project_id = $('#project_id').val();
+                    var site_id = $('#site_id').val();
+                    var year = $('#year').val();
+                    var month = $('#month').val();
+                    var status_id = $('#status_id').val();
+                    var search_name = $('#search_name').val();
+                    var emp_id = $('#emp_id').val();
+
+                    var postData =
+                        'client_id=>'+client_id+','+
+                            'project_id=>'+project_id+','+
+                            'site_id=>'+site_id+','+
+                            'year=>'+year+','+
+                            'month=>'+month;
+
+
+                    // Total over all pages
+                    $.ajax({
+                        url: "/peticash/peticash-approval-request/manage-salary-list-ajax",
+                        type: 'POST',
+                        data :{
+                            "get_total" : true,
+                            "search_name" : search_name,
+                            "status" : status_id,
+                            "postdata" : postData,
+                            "emp_id" : emp_id
+                        },
+                        success: function(result){
+                            total = result['total'];
+
+                            // Total over this page
+                            pageTotal = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
+                                pageTotal +' ( '+ total +' total)'
+                            );
+                        }});
+                },
                 "lengthMenu": [
                     [50, 100, 150],
                     [50, 100, 150] // change per page values here
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/peticash/peticash-approval-request/manage-salary-list-ajax", // ajax source
+                    "url": "/peticash/peticash-approval-request/manage-salary-list-ajax" // ajax source
                     /*"data" :{
                         "client_id" : client_id,
                         "project_id" : project_id,
