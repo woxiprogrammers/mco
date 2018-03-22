@@ -316,6 +316,9 @@
     <script>
         $(document).ready(function(){
             peticashManagementListing.init();
+            $("input[name='search_name']").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
             $("#search-withfilter").on('click',function(){
                 var client_id = $('#client_id').val();
                 var project_id = $('#project_id').val();

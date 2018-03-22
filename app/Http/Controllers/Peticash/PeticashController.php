@@ -1522,6 +1522,7 @@ class PeticashController extends Controller
             $site_id = 0;
             $month = 0;
             $year = 0;
+            $total = 0;
             $postDataArray = array();
             if($request->has('postdata')) {
                 $postdata = $request['postdata'];
@@ -1567,39 +1568,49 @@ class PeticashController extends Controller
             if ($filterFlag) {
                 $salaryTransactionData = PeticashSalaryTransaction::whereIn('id',$ids)->orderBy('id','desc')->get();
             }
-            $iTotalRecords = count($salaryTransactionData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
-                $actionDropDown =  '<button class="btn btn-xs blue"> 
-                                                <a href="/peticash/peticash-management/salary/payment-voucher-pdf/'.$salaryTransactionData[$pagination]->id.'" style="color: white">
-                                                     PDF 
-                                                </a>
-                                                <input type="hidden" name="_token">
-                                        </button>
-                                        <button class="btn btn-xs default "> 
-                                                <a href="javascript:void(0);" onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]->id.')" style="color: grey">
-                                                    Details 
-                                                </a>
-                                                <input type="hidden" name="_token">
-                                        </button>';
-                $records['data'][] = [
-                    $salaryTransactionData[$pagination]->id,
-                    $salaryTransactionData[$pagination]->employee->employee_id,
-                    $salaryTransactionData[$pagination]->employee->name,
-                    $salaryTransactionData[$pagination]->peticashTransactionType->name,
-                    $salaryTransactionData[$pagination]->amount,
-                    $salaryTransactionData[$pagination]->payable_amount,
-                    $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
-                    date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
-                    $salaryTransactionData[$pagination]->projectSite->project->name,
-                    $actionDropDown
-                ];
+
+            if ($request->has('get_total')) {
+                if ($filterFlag) {
+                    foreach($salaryTransactionData as $salarytxn) {
+                        $total = $total + $salarytxn['amount'];
+                    }
+                }
+                $records['total'] = $total;
+            } else {
+                $iTotalRecords = count($salaryTransactionData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
+                    $actionDropDown =  '<button class="btn btn-xs blue">
+                                                    <a href="/peticash/peticash-management/salary/payment-voucher-pdf/'.$salaryTransactionData[$pagination]->id.'" style="color: white">
+                                                         PDF
+                                                    </a>
+                                                    <input type="hidden" name="_token">
+                                            </button>
+                                            <button class="btn btn-xs default ">
+                                                    <a href="javascript:void(0);" onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]->id.')" style="color: grey">
+                                                        Details
+                                                    </a>
+                                                    <input type="hidden" name="_token">
+                                            </button>';
+                    $records['data'][] = [
+                        $salaryTransactionData[$pagination]->id,
+                        $salaryTransactionData[$pagination]->employee->employee_id,
+                        $salaryTransactionData[$pagination]->employee->name,
+                        $salaryTransactionData[$pagination]->peticashTransactionType->name,
+                        $salaryTransactionData[$pagination]->amount,
+                        $salaryTransactionData[$pagination]->payable_amount,
+                        $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
+                        date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
+                        $salaryTransactionData[$pagination]->projectSite->project->name,
+                        $actionDropDown
+                    ];
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
         }catch(\Exception $e){
             $status = 500;
             $data = [
