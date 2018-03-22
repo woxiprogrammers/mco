@@ -606,9 +606,8 @@ class PeticashController extends Controller
             if ($emp_id != "" && $filterFlag == true) {
                 $ids = PeticashRequestedSalaryTransaction::join('employees','employees.id','=','peticash_requested_salary_transactions.employee_id')
                                             ->whereIn('peticash_requested_salary_transactions.id',$ids)
-                                            ->where('employees.employee_id',$emp_id)
+                                            ->where('employees.employee_id','ilike',"%".$emp_id."%")
                                             ->pluck('peticash_requested_salary_transactions.id');
-                dd($ids);
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }

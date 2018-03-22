@@ -106,7 +106,7 @@
                                                 <tr class="filter">
                                                     <th></th>
                                                     <th></th>
-                                                    <th> <input type="number" class="form-filter" name="emp_id" id="emp_id"> </th>
+                                                    <th> <input type="text" class="form-filter" name="emp_id" id="emp_id"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
                                                     <th></th>
