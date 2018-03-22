@@ -524,7 +524,7 @@ class ReportController extends Controller
                 case 'purchase_bill_tax_report':
                     $header = array(
                         'Date', 'Bill Number', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
-                        'Extra Amount Tax', 'With Tax Amount', 'Total Amount', 'Paid Amount', 'Balance'
+                        'Extra Amount Tax', 'With Tax Amount', 'Paid Amount', 'Balance'
                     );
                     $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
                                                     ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
@@ -532,7 +532,7 @@ class ReportController extends Controller
                                                     ->where('purchase_requests.project_site_id',$request['purchase_bill_tax_report_site_id'])
                                                     ->whereBetween('purchase_order_payments.created_at',[$start_date, $end_date])
                                                     ->where('purchase_orders.vendor_id',$request['vendor_id'])
-                                                    ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
+                        ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
                                                         ,'purchase_order_payments.amount','purchase_order_payments.reference_number','purchase_order_payments.is_advance'
                                                         ,'purchase_order_payments.created_at','purchase_order_bills.purchase_order_id as purchase_order_id','purchase_order_bills.amount as bill_amount','purchase_order_bills.tax_amount'
                                                         ,'purchase_order_bills.bill_number','purchase_order_bills.extra_amount','purchase_order_bills.transportation_tax_amount','purchase_order_bills.extra_tax_amount','purchase_order_bills.transportation_total_amount')->get()->toArray();
@@ -543,11 +543,6 @@ class ReportController extends Controller
                         $cgstAmount = $sgstAmount = $igstAmount = $extraTaxAmount = 0;
                         $transporationAmount = $purchaseOrderBillPayment['transportation_total_amount'];
                         foreach($purchaseOrderTransactions as $purchaseOrderTransaction){
-                            $purchaseOrderComponents = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrderTransaction['purchase_order_id'])->get();
-                            $extraTaxAmount += $purchaseOrderComponents->max(function ($purchaseOrderComponent) {
-                                return ($purchaseOrderComponent->cgst_percentage + $purchaseOrderComponent->sgst_percentage + $purchaseOrderComponent->igst_percentage);
-                            });
-
                             foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
                                 $transporationCgstAmount = $transporationSgstAmount = $transporationIgstAmount = 0;
                                 $thisCgstAmount = $thisSgstAmount = $thisIgstAmount = 0;
@@ -586,17 +581,15 @@ class ReportController extends Controller
                         $data[$row]['igst_amount'] = $igstAmount;
                         $data[$row]['sgst_amount'] = $sgstAmount;
                         $data[$row]['cgst_amount'] = $cgstAmount;
-                        $data[$row]['extra_amount_tax'] = ($purchaseOrderBillPayment['extra_amount'] > 0) ? $extraTaxAmount : 0;
-                        $data[$row]['amount_with_tax'] = $purchaseOrderBillPayment['bill_amount'] - $purchaseOrderBillPayment['extra_amount'];
-                        $data[$row]['total_amount'] = $purchaseOrderBillPayment['bill_amount'];
+                        $data[$row]['extra_amount_tax'] = ($purchaseOrderBillPayment['extra_amount'] > 0) ? $purchaseOrderBillPayment['extra_tax_amount'] : 0;
+                        $data[$row]['amount_with_tax'] = $purchaseOrderBillPayment['bill_amount'];
                         $data[$row]['paid_amount'] = $purchaseOrderBillPayment['amount'];
-                        $data[$row]['balance'] = $data[$row]['total_amount'] - $data[$row]['paid_amount'];
+                        $data[$row]['balance'] = $data[$row]['amount_with_tax'] - $data[$row]['paid_amount'];
                         $total['basicAmount'] += $data[$row]['basic_amount'];
                         $total['igstAmount'] += $data[$row]['igst_amount'];
                         $total['sgstAmount'] += $data[$row]['sgst_amount'];
                         $total['cgstAmount'] += $data[$row]['cgst_amount'];
                         $total['amountWithTax'] += $data[$row]['amount_with_tax'];
-                        $total['amount'] += $data[$row]['total_amount'];
                         $total['paidAmount'] += $data[$row]['paid_amount'];
                         $total['balance'] += $data[$row]['balance'];
                         $row++;
@@ -614,11 +607,12 @@ class ReportController extends Controller
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
                                     });
+
                                 }
                             }
-                            if($row > 2){
-                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['amount'],$total['paidAmount'],$total['balance']));
-                            }
+                            /*if($row > 2){
+                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['paidAmount'],$total['balance']));
+                            }*/
                         });
                     })->export('xls');
                 break;
