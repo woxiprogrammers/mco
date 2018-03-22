@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Report;
 
 use App\AssetMaintenanceBill;
+use App\AssetMaintenanceBillPayment;
 use App\Bill;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
@@ -631,14 +632,13 @@ class ReportController extends Controller
                     $assetRentAmount = $this->getAssetRentPaidAmount($projectSiteId);
                     $assetMaintenancePaidAmount = $this->getAssetMaintenancePaidAmount($projectSiteId);
                     $peticashSalaryAmount = $this->getPeticashSalaryAmount($projectSiteId);
-                    $totalPurchase = $purchasePaidAmount + $assetMaintenancePaidAmount;
+                    $totalPurchase = $purchasePaidAmount + $assetMaintenancePaidAmount + $assetRentAmount;
                     $total = $totalPurchase + $miscellaneousPurchaseAmount + $subcontractor + $indirectExpensesAmount + $peticashSalaryAmount;
                     $profitLossSaleWise = $totalSalesEntry - $total;
                     $profitLossReceiptWise = $totalReceiptEntry - $total;
                     $data = array(
                         array('Total Sale Entry', 'Total Sale Entry'),
                         array($totalSalesEntry, $totalReceiptEntry, 'Expences on', 'Total expence'),
-                        array(null, null, 'Labour' , '1000000'),
                         array(null, null, 'Total purchase' , $totalPurchase),
                         array(null, null, 'Total miscellaneous purchase' , $miscellaneousPurchaseAmount),
                         array(null, null, 'Subcontractor' , $subcontractor),
@@ -1066,14 +1066,16 @@ class ReportController extends Controller
     public function getAssetMaintenancePaidAmount($projectSiteId){
         try{
             if($projectSiteId == 'all'){
-                $assetMaintenanceBillAmount = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                $assetMaintenanceBillAmount = AssetMaintenanceBillPayment::join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                    ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                     ->select('asset_maintenance.id as id','asset_maintenance_bills.id as bill_id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
-                    ->sum('asset_maintenance_bills.amount');
+                    ->sum('asset_maintenance_bill_payments.amount');
             }else{
-                $assetMaintenanceBillAmount = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                $assetMaintenanceBillAmount = AssetMaintenanceBillPayment::join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                    ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                     ->where('asset_maintenance.project_site_id',$projectSiteId)
                     ->select('asset_maintenance.id as id','asset_maintenance_bills.id as bill_id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
-                    ->sum('asset_maintenance_bills.amount');
+                    ->sum('asset_maintenance_bill_payments.amount');
             }
         }catch(\Exception $e){
             $assetMaintenanceBillAmount = 0;
@@ -1091,24 +1093,28 @@ class ReportController extends Controller
         try{
             $assetRentAmount = 0;
             if($projectSiteId == 'all'){
-
+                $inventoryComponents = InventoryComponent::where('is_material',false)->get();
             }else{
                 $inventoryComponents = InventoryComponent::where('project_site_id',$projectSiteId)->where('is_material',false)->get();
-                foreach ($inventoryComponents as $key => $inventoryComponent){
-                    dd($inventoryComponent->inventoryComponentTransfers);
-                    $transferInDate = $inventoryComponent->inventoryComponentTransfers
-                        ->where('transfer_type_id',InventoryTransferTypes::where('slug','site')->where('type','ilike','IN')->pluck('id')->first())
-                        ->where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())->pluck('created_at')->first();
-                    dd($transferInDate);
-                    $transferOutDate = $inventoryComponent->inventoryComponentTransfers
+            }
+            foreach ($inventoryComponents as $key => $inventoryComponent){
+                $transferInData = $inventoryComponent->inventoryComponentTransfers
+                    ->where('transfer_type_id',InventoryTransferTypes::where('slug','site')->where('type','ilike','IN')->pluck('id')->first())
+                    ->where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())->first();
+                if($transferInData == null){
+                    $assetRentAmount += 0;
+                }else{
+                    $transferOutData = $inventoryComponent->inventoryComponentTransfers
+                        ->where('id','>',$transferInData['id'])
                         ->where('transfer_type_id',InventoryTransferTypes::where('slug','site')->where('type','ilike','OUT')->pluck('id')->first())
-                        ->where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())->pluck('created_at')->first();
-                    if(count($transferOutDate) >= 0){
+                        ->where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())->first();
+                    if($transferOutData == null){
                         $transferOutDate = Carbon::now();
+                    }else{
+                        $transferOutDate = $transferOutData['created_at'];
                     }
-                    /*$rentDays = $this->timeDelay($transferIn['created_at'],$transferOut['created_at'])->format("%R%a");
-                    $totalRent = $rentDays * $transferIn['rate_per_unit'];*/
-
+                    $rentDays = $this->timeDelay($transferInData['created_at'],$transferOutDate)->format("%R%a");
+                    $assetRentAmount += $rentDays * $transferInData['rate_per_unit'] * $transferInData['quantity'];
                 }
             }
         }catch(\Exception $e){
@@ -1121,6 +1127,10 @@ class ReportController extends Controller
             Log::critical(json_encode($data));
         }
         return $assetRentAmount;
+    }
+
+    public function timeDelay($actualDate,$estimatedDate){
+        return Carbon::parse($actualDate)->diff(Carbon::parse($estimatedDate));
     }
 
     public function getPeticashSalaryAmount($projectSiteId){
