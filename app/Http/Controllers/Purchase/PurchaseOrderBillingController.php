@@ -470,6 +470,7 @@ class PurchaseOrderBillingController extends Controller
 
     public function createPayment(Request $request){
         try{
+            dd($request->all());
             $purchaseOrderPaymentData = $request->except('_token','is_advance','payment_id');
             if($request->has('is_advance')){
                 $purchaseOrderPaymentData['is_advance'] = true;

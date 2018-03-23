@@ -23,6 +23,8 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="remainingPaymentAmount" value="{{$paymentRemainingAmount}}">
+    <input type="hidden" id="balanceAdvanceAmount" value="{{$purchaseOrderBill->purchaseOrder->balance_advance_amount}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -256,7 +258,7 @@
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount" value="{{$paymentRemainingAmount}}">
+                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount" value="{{$paymentRemainingAmount}}">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group row"id="paymentSelect">
@@ -318,12 +320,32 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order-billing/payment-manage-datatable.js"></script>
+    <script src="/assets/custom/purchase/purchase-order-billing/validations.js"></script>
+
     <script>
         $(document).ready(function(){
+            CreatePurchaseOrderPayment.init();
+            var remainingBillAmount = parseFloat($("#remainingPaymentAmount").val());
+            if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){
+                remainingBillAmount = 0;
+            }
+            $("#amount").rules('add',{
+                max: remainingBillAmount
+            });
             $("#isAdvanceCheckbox").on('click', function(){
                 if($(this).is(':checked') == true){
+                    var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
+                    if(balanceAdvanceAmount == null || typeof balanceAdvanceAmount == 'undefined' || isNaN(balanceAdvanceAmount)){
+                        balanceAdvanceAmount = 0;
+                    }
+                    $("#amount").rules('add',{
+                        max: balanceAdvanceAmount
+                    });
                     $("#paymentSelect").hide();
                 }else{
+                    $("#amount").rules('add',{
+                        max: remainingBillAmount
+                    });
                     $("#paymentSelect").show();
                 }
             });
