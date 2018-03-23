@@ -61,8 +61,8 @@
                                                                     <th style="width: 11%">Basic Amount</th>
                                                                     <th style="width: 11%">Tax Amount</th>
                                                                     <th style="width: 11%">Total</th>
-                                                                    <th style="width: 11%">Pending Amount</th>
                                                                     <th style="width: 11%">Paid Amount</th>
+                                                                    <th style="width: 11%">Pending Amount</th>
                                                                     <th style="width: 11%">Action</th>
                                                                 </tr>
                                                                 <tr class="filter">

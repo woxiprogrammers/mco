@@ -106,7 +106,7 @@
                                                 <tr class="filter">
                                                     <th></th>
                                                     <th></th>
-                                                    <th> <input type="number" class="form-filter" name="emp_id" id="emp_id"> </th>
+                                                    <th> <input type="text" class="form-filter" name="emp_id" id="emp_id"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
                                                     <th></th>
@@ -130,6 +130,12 @@
                                                 </thead>
                                                 <tbody>
                                                 </tbody>
+                                                <tfoot>
+                                                <tr>
+                                                    <th colspan="5" style="text-align:right">Total Page Wise: </th>
+                                                    <th colspan="6"></th>
+                                                </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                         <div class="modal fade" id="remarkApproveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">

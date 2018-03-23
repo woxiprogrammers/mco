@@ -38,6 +38,7 @@ use App\PurchaseOrderTransactionStatus;
 use App\PurchaseRequestComponent;
 use App\Quotation;
 use App\QuotationProduct;
+use App\SiteTransferBillPayment;
 use App\Subcontractor;
 use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
@@ -243,7 +244,7 @@ class ReportController extends Controller
 
                 case 'labour_specific_report':
                     $header = array(
-                        'Date', 'Payment Type', 'Gross Salary', '-PT', '-PF', '-ESIC', '-TDS',
+                        'Project Name', 'Date', 'Payment Type', 'Gross Salary', '-PT', '-PF', '-ESIC', '-TDS',
                         '-ADVANCE', 'Net Payment', 'Balance'
                     );
                     $approvedStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
@@ -265,6 +266,7 @@ class ReportController extends Controller
 
                     foreach($salaryTransactionData as $key => $salaryTransaction){
                         $peticashTransactionTypeSlug = $salaryTransaction->peticashTransactionType->slug;
+                        $data[$row]['project_name'] = $salaryTransaction->projectSite->project->name;
                         $data[$row]['date'] = date('d/m/y',strtotime($salaryTransaction['date']));
                         $data[$row]['payment_type'] = $salaryTransaction->peticashTransactionType->name;
                         $data[$row]['gross_salary'] = ($peticashTransactionTypeSlug == 'salary') ? ($salaryTransaction->employee->per_day_wages * $salaryTransaction['days']) : 0;
@@ -522,7 +524,7 @@ class ReportController extends Controller
                 case 'purchase_bill_tax_report':
                     $header = array(
                         'Date', 'Bill Number', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
-                        'Extra Amount Tax', 'With Tax Amount', 'Total Amount', 'Paid Amount', 'Balance'
+                        'Extra Amount Tax', 'With Tax Amount', 'Paid Amount', 'Balance'
                     );
                     $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
                                                     ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
@@ -530,32 +532,28 @@ class ReportController extends Controller
                                                     ->where('purchase_requests.project_site_id',$request['purchase_bill_tax_report_site_id'])
                                                     ->whereBetween('purchase_order_payments.created_at',[$start_date, $end_date])
                                                     ->where('purchase_orders.vendor_id',$request['vendor_id'])
-                                                    ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
+                        ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
                                                         ,'purchase_order_payments.amount','purchase_order_payments.reference_number','purchase_order_payments.is_advance'
                                                         ,'purchase_order_payments.created_at','purchase_order_bills.purchase_order_id as purchase_order_id','purchase_order_bills.amount as bill_amount','purchase_order_bills.tax_amount'
-                                                        ,'purchase_order_bills.bill_number','purchase_order_bills.extra_amount','purchase_order_bills.transportation_tax_amount','purchase_order_bills.extra_tax_amount')->get()->toArray();
+                                                        ,'purchase_order_bills.bill_number','purchase_order_bills.extra_amount','purchase_order_bills.transportation_tax_amount','purchase_order_bills.extra_tax_amount','purchase_order_bills.transportation_total_amount')->get()->toArray();
                     $total['basicAmount'] = $total['igstAmount'] = $total['sgstAmount'] = $total['cgstAmount'] = $total['paidAmount'] = $total['amount'] = $total['amountWithTax'] = $total['balance'] = 0;
                     foreach($purchaseOrderBillPayments as $key => $purchaseOrderBillPayment){
                         $transactionIds = PurchaseOrderBillTransactionRelation::where('purchase_order_bill_id',$purchaseOrderBillPayment['purchase_order_bill_id'])->pluck('purchase_order_transaction_id');
                         $purchaseOrderTransactions = PurchaseOrderTransaction::whereIn('id',$transactionIds)->get();
                         $cgstAmount = $sgstAmount = $igstAmount = $extraTaxAmount = 0;
-
+                        $transporationAmount = $purchaseOrderBillPayment['transportation_total_amount'];
                         foreach($purchaseOrderTransactions as $purchaseOrderTransaction){
-                            $purchaseOrderComponents = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrderTransaction['purchase_order_id'])->get();
-                            $extraTaxAmount += $purchaseOrderComponents->max(function ($purchaseOrderComponent) {
-                                return ($purchaseOrderComponent->cgst_percentage + $purchaseOrderComponent->sgst_percentage + $purchaseOrderComponent->igst_percentage);
-                            });
-
                             foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
                                 $transporationCgstAmount = $transporationSgstAmount = $transporationIgstAmount = 0;
                                 $thisCgstAmount = $thisSgstAmount = $thisIgstAmount = 0;
                                 $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
                                 $purchaseRequestComponent = $purchaseOrderComponent->purchaseOrderRequestComponent;
                                 $unitConversionRate = UnitHelper::unitConversion($purchaseOrderTransactionComponent->purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderTransactionComponent->purchaseOrderComponent->rate_per_unit);
-                                $transporationAmount = $purchaseRequestComponent->transportation_amount;
-                                $transporationCgstAmount =  $transporationAmount * ($purchaseRequestComponent->transportation_cgst_percentage / 100);
-                                $transporationSgstAmount =  $transporationAmount * ($purchaseRequestComponent->transportation_sgst_percentage / 100);
-                                $transporationIgstAmount =  $transporationAmount * ($purchaseRequestComponent->transportation_igst_percentage / 100);
+                                if($transporationAmount != null){
+                                    $transporationCgstAmount =  $transporationAmount * ($purchaseRequestComponent->transportation_cgst_percentage / 100);
+                                    $transporationSgstAmount =  $transporationAmount * ($purchaseRequestComponent->transportation_sgst_percentage / 100);
+                                    $transporationIgstAmount =  $transporationAmount * ($purchaseRequestComponent->transportation_igst_percentage / 100);
+                                }
                                 if(!is_array($unitConversionRate)){
                                     $tempAmount = $purchaseOrderTransactionComponent->quantity * $unitConversionRate;
 
@@ -583,17 +581,15 @@ class ReportController extends Controller
                         $data[$row]['igst_amount'] = $igstAmount;
                         $data[$row]['sgst_amount'] = $sgstAmount;
                         $data[$row]['cgst_amount'] = $cgstAmount;
-                        $data[$row]['extra_amount_tax'] = ($purchaseOrderBillPayment['extra_amount'] > 0) ? $extraTaxAmount : 0;
-                        $data[$row]['amount_with_tax'] = $purchaseOrderBillPayment['bill_amount'] - $purchaseOrderBillPayment['extra_amount'];
-                        $data[$row]['total_amount'] = $purchaseOrderBillPayment['bill_amount'];
+                        $data[$row]['extra_amount_tax'] = ($purchaseOrderBillPayment['extra_amount'] > 0) ? $purchaseOrderBillPayment['extra_tax_amount'] : 0;
+                        $data[$row]['amount_with_tax'] = $purchaseOrderBillPayment['bill_amount'];
                         $data[$row]['paid_amount'] = $purchaseOrderBillPayment['amount'];
-                        $data[$row]['balance'] = $data[$row]['total_amount'] - $data[$row]['paid_amount'];
+                        $data[$row]['balance'] = $data[$row]['amount_with_tax'] - $data[$row]['paid_amount'];
                         $total['basicAmount'] += $data[$row]['basic_amount'];
                         $total['igstAmount'] += $data[$row]['igst_amount'];
                         $total['sgstAmount'] += $data[$row]['sgst_amount'];
                         $total['cgstAmount'] += $data[$row]['cgst_amount'];
                         $total['amountWithTax'] += $data[$row]['amount_with_tax'];
-                        $total['amount'] += $data[$row]['total_amount'];
                         $total['paidAmount'] += $data[$row]['paid_amount'];
                         $total['balance'] += $data[$row]['balance'];
                         $row++;
@@ -611,15 +607,15 @@ class ReportController extends Controller
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
                                     });
+
                                 }
                             }
-                            if($row > 2){
-                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['amount'],$total['paidAmount'],$total['balance']));
-                            }
+                            /*if($row > 2){
+                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['paidAmount'],$total['balance']));
+                            }*/
                         });
                     })->export('xls');
                 break;
-
 
                 case 'receiptwise_p_and_l_report':
                     $projectSiteId = $request['receiptwise_p_and_l_report_site_id'];
@@ -632,7 +628,8 @@ class ReportController extends Controller
                     $assetRentAmount = $this->getAssetRentPaidAmount($projectSiteId);
                     $assetMaintenancePaidAmount = $this->getAssetMaintenancePaidAmount($projectSiteId);
                     $peticashSalaryAmount = $this->getPeticashSalaryAmount($projectSiteId);
-                    $totalPurchase = $purchasePaidAmount + $assetMaintenancePaidAmount + $assetRentAmount;
+                    $siteTransferAmount = $this->getSiteTransferAmount($projectSiteId);
+                    $totalPurchase = $purchasePaidAmount + $assetMaintenancePaidAmount + $assetRentAmount + $siteTransferAmount;
                     $total = $totalPurchase + $miscellaneousPurchaseAmount + $subcontractor + $indirectExpensesAmount + $peticashSalaryAmount;
                     $profitLossSaleWise = $totalSalesEntry - $total;
                     $profitLossReceiptWise = $totalReceiptEntry - $total;
@@ -644,7 +641,6 @@ class ReportController extends Controller
                         array(null, null, 'Subcontractor' , $subcontractor),
                         array(null, null, 'SALARY' , $peticashSalaryAmount),
                         array(null, null, 'IndirectExpences(GST,TDS Paid to government from Manisha)' , $indirectExpensesAmount),
-                        array(null, null, 'Subcontractor' , $subcontractor),
                         array(null, null),
                         array($totalSalesEntry, $totalReceiptEntry, null, $total),
                         array(null, null),
@@ -689,6 +685,7 @@ class ReportController extends Controller
 
 
     }
+
 
     public function getBillData($billId){
         try{
@@ -912,7 +909,7 @@ class ReportController extends Controller
         }catch(\Exception $e){
             $saleBillTotal = 0;
             $data = [
-                'action' => 'Get Bill Detail Listing',
+                'action' => 'Get Total Sale amount for report',
                 'project_site_id' => $projectSiteId,
                 'exception'=> $e->getMessage()
             ];
@@ -986,7 +983,7 @@ class ReportController extends Controller
         }catch (\Exception $e){
             $indirectExpenseAmount = 0;
             $data = [
-                'action' => 'Get Subcontractor Amount for Report',
+                'action' => 'Get Indirect Expenses Amount for Report',
                 'exception' => $e->getMessage(),
                 'project_site_id' => $projectSiteId,
             ];
@@ -1054,7 +1051,7 @@ class ReportController extends Controller
         }catch(\Exception $e){
             $purchasePaidAmount = 0;
             $data = [
-                'action' => 'Get Bill Transaction Amount for Report',
+                'action' => 'Get Purchase Order Payment Amount for Report',
                 'exception' => $e->getMessage(),
                 'project_site_id' => $projectSiteId,
             ];
@@ -1099,7 +1096,7 @@ class ReportController extends Controller
             }
             foreach ($inventoryComponents as $key => $inventoryComponent){
                 $transferInData = $inventoryComponent->inventoryComponentTransfers
-                    ->where('transfer_type_id',InventoryTransferTypes::where('slug','site')->where('type','ilike','IN')->pluck('id')->first())
+                    ->where('transfer_type_id',InventoryTransferTypes::whereIn('slug',['site','office'])->where('type','ilike','IN')->pluck('id')->first())
                     ->where('inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())->first();
                 if($transferInData == null){
                     $assetRentAmount += 0;
@@ -1113,20 +1110,43 @@ class ReportController extends Controller
                     }else{
                         $transferOutDate = $transferOutData['created_at'];
                     }
-                    $rentDays = $this->timeDelay($transferInData['created_at'],$transferOutDate)->format("%R%a");
+                    $rentDays = Carbon::parse(date('Y-m-d',strtotime($transferInData['created_at'])))->diffInDays(Carbon::parse(date('Y-m-d',strtotime($transferOutDate))));
                     $assetRentAmount += $rentDays * $transferInData['rate_per_unit'] * $transferInData['quantity'];
                 }
             }
         }catch(\Exception $e){
             $assetRentAmount = 0;
             $data = [
-                'action' => 'Get Asset Maintenance Bill Amount for Report',
+                'action' => 'Get Asset Rent Amount for Report',
                 'exception' => $e->getMessage(),
                 'project_site_id' => $projectSiteId,
             ];
             Log::critical(json_encode($data));
         }
         return $assetRentAmount;
+    }
+
+    public function getSiteTransferAmount($projectSiteId){
+        try{
+            $siteTransferAmount = 0;
+            if($projectSiteId == 'all'){
+                $siteTransferAmount = SiteTransferBillPayment::sum('amount');
+            }else{
+                $siteTransferAmount = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
+                                                                    ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
+                                                                    ->join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                                                                    ->where('inventory_components.project_site_id',$projectSiteId)->sum('site_transfer_bill_payments.amount');
+            }
+        }catch(\Exception $e){
+            $siteTransferAmount = 0;
+            $data = [
+                'action' => 'Get Site Transfer Amount for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $siteTransferAmount;
     }
 
     public function timeDelay($actualDate,$estimatedDate){
@@ -1141,7 +1161,7 @@ class ReportController extends Controller
             if($projectSiteId == 'all'){
                 $advanceAmountTotal = PeticashSalaryTransaction::
                     where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','advance')->pluck('id')->first())
                     ->where('peticash_status_id',$approvedPeticashStatusId)
                     ->sum('amount');
 
@@ -1177,7 +1197,7 @@ class ReportController extends Controller
             }else{
                 $advanceAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
                                 ->where('project_site_id','!=',$officeSiteId)
-                                ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
+                                ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','PAYMENT')->where('slug','advance')->pluck('id')->first())
                                 ->where('peticash_status_id',$approvedPeticashStatusId)
                                 ->sum('amount');
 

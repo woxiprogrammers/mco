@@ -56,6 +56,7 @@ class SiteTransferBillingController extends Controller
                                                 ->where('inventory_components.project_site_id', $projectSiteId)
                                                 ->where('inventory_component_transfers.grn','ilike','%'.$request->keyword.'%')
                                                 ->where('inventory_transfer_types.slug','site')
+                                                ->where('inventory_transfer_types.type','ilike','IN')
                                                 ->pluck('inventory_component_transfers.id')->toArray();
             $billCreatedTransferIds = SiteTransferBill::pluck('inventory_component_transfer_id')->toArray();
             $approvedBillPendingTransferIds = array_diff($approvedTransferIds, $billCreatedTransferIds);
@@ -163,7 +164,7 @@ class SiteTransferBillingController extends Controller
             }
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($siteTransferBillData); $iterator++,$pagination++ ){
                 $projectName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->inventoryComponent->projectSite->project->name;
-                $paidAmount = SiteTransferBillPayment::where('id',$siteTransferBillData[$pagination]['id'])->sum('amount');
+                $paidAmount = SiteTransferBillPayment::where('site_transfer_bill_id',$siteTransferBillData[$pagination]['id'])->sum('amount');
                 $pendingAmount = $siteTransferBillData[$pagination]['total'] - $paidAmount;
                 if($siteTransferBillData[$pagination]->inventoryComponentTransfer->vendor == null){
                     $vendorName = '-';
