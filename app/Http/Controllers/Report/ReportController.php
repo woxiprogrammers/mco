@@ -995,9 +995,14 @@ class ReportController extends Controller
     public function getPeticashPurchaseAmount($projectSiteId){
         try{
             if($projectSiteId == 'all'){
-                $miscellaneousPurchaseAmount = PurcahsePeticashTransaction::sum('bill_amount');
+                $purchasePeticashTransactionAmount = PurcahsePeticashTransaction::sum('bill_amount');
+                $officeSiteDistributedAmount = ProjectSite::sum('distributed_purchase_peticash_amount');
+                $miscellaneousPurchaseAmount = $purchasePeticashTransactionAmount + $officeSiteDistributedAmount;
             }else{
-                $miscellaneousPurchaseAmount = PurcahsePeticashTransaction::where('project_site_id',$projectSiteId)->sum('bill_amount');
+                $purchasePeticashTransactionAmount = PurcahsePeticashTransaction::where('project_site_id',$projectSiteId)->sum('bill_amount');
+                $officeSiteDistributedAmount = ProjectSite::where('id',$projectSiteId)->pluck('distributed_purchase_peticash_amount')->first();
+                $officeSiteDistributedAmount = ($officeSiteDistributedAmount != null) ? $officeSiteDistributedAmount : 0;
+                $miscellaneousPurchaseAmount = $purchasePeticashTransactionAmount + $officeSiteDistributedAmount;
             }
         }catch(\Exception $e){
             $miscellaneousPurchaseAmount = 0;
