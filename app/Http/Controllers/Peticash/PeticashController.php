@@ -199,7 +199,7 @@ class PeticashController extends Controller
                 $data['remark'] = $txn['remark'];
                 $data['created_on'] = $txn['created_at'];
                 $data['txn_id'] = $txn['id'];
-                Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.project_id', $txn['project_site_id'])->pluck('projects.name')->first();
+                $data['sitename'] = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.project_id', $txn['project_site_id'])->pluck('projects.name')->first();
             }
             return view('peticash/sitewise-peticash-account/edit', $data);
         }catch(\Exception $e){
