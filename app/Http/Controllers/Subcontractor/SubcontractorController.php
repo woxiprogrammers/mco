@@ -529,20 +529,13 @@ class SubcontractorController extends Controller
                         </a>
                     </div>';
                 $billStatus = $listingData[$pagination]->subcontractorBillStatus->name;
-                $taxIds = SubcontractorBillTax::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_taxes.subcontractor_bills_id')
-                    ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
-                    ->join('taxes','subcontractor_bill_taxes.tax_id','=','taxes.id')
-                    ->where('subcontractor_structure.id',$subcontractorStructureId)->distinct('subcontractor_bill_taxes.tax_id')
-                    ->pluck('subcontractor_bill_taxes.tax_id');
-                $taxes = Tax::whereIn('id',$taxIds)->distinct('id')->orderBy('id')->pluck('id');
-                $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$listingData[$pagination]['id'])->select('tax_id','percentage')->get();
-                $taxArray = array();
-                $jIterator = 0;
-                foreach ($taxes as $taxId){
-                    $percentage = $taxesApplied->where('tax_id',$taxId)->pluck('percentage')->first();
-                    $taxArray[$jIterator]['tax_id'] = $taxId;
-                    $taxArray[$jIterator]['tax_percentage'] = ($percentage == null ) ? 0 : $percentage;
-                    $jIterator++;
+                $structureTypeSlug = SubcontractorStructureType::where('id',$listingData[$pagination]['sc_structure_type_id'])->pluck('slug')->first();
+                if($structureTypeSlug == 'sqft'){
+                    $rate = $listingData[$pagination]['rate'];
+                    $basicAmount = $rate * $listingData[$pagination]['qty'];
+                }else{
+                    $rate = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
+                    $basicAmount = $rate * $listingData[$pagination]['qty'];
                 }
                 if($billStatusSlug == 'disapproved'){
                     $billNo = "-";
@@ -550,22 +543,20 @@ class SubcontractorController extends Controller
                     $billNo = "R. A. - ".($billArrayNo);
                     $billArrayNo++;
                 }
-                $structureTypeSlug = SubcontractorStructureType::where('id',$listingData[$pagination]['sc_structure_type_id'])->pluck('slug')->first();
-                if($structureTypeSlug == 'sqft'){
-                    $rate = $listingData[$pagination]['rate'];
-                    $subTotal = $rate * $listingData[$pagination]['qty'];
-                }else{
-                    $rate = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
-                    $subTotal = $rate * $listingData[$pagination]['qty'];
-                }
+                $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$listingData[$pagination]['id'])->sum('percentage');
+                $taxAmount = $basicAmount * ($taxesApplied / 100);
+                $finalAmount = $basicAmount + $taxAmount;
+                $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('total');
                 $records['data'][$iterator] = [
                     $billNo,
+                    $basicAmount,
+                    $taxAmount,
+                    $finalAmount,
+                    $paidAmount,
+                    $finalAmount - $paidAmount,
+                    $billStatus,
+                    $action
                 ];
-                foreach($taxArray as $taxAmount){
-                    array_push($records['data'][$iterator],(($taxAmount['tax_percentage'] * $subTotal) / 100));
-                }
-                array_push($records['data'][$iterator],$billStatus);
-                array_push($records['data'][$iterator],$action);
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -812,8 +803,7 @@ class SubcontractorController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            $subcontractorBillTransactionData = $request->except('_token');
-            $subcontractorBillTransactionData['subtotal'] = $request['total']  + $request['other_recovery'] - ($request['debit'] + $request['hold'] + $request['retention_tax_amount'] + $request['tds_tax_amount']);
+            $subcontractorBillTransactionData = $request->except('_token','remainingTotal');
             if($request->has('is_advance')){
                 $subcontractorBillTransactionData['is_advance'] = true;
             }else{
