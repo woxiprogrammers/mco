@@ -634,7 +634,7 @@ class ReportController extends Controller
                     $profitLossSaleWise = $totalSalesEntry - $total;
                     $profitLossReceiptWise = $totalReceiptEntry - $total;
                     $data = array(
-                        array('Total Sale Entry', 'Total Sale Entry'),
+                        array('Total Sale Entry', 'Total Receipt Entry'),
                         array($totalSalesEntry, $totalReceiptEntry, 'Expences on', 'Total expence'),
                         array(null, null, 'Total purchase' , $totalPurchase),
                         array(null, null, 'Total miscellaneous purchase' , $miscellaneousPurchaseAmount),
