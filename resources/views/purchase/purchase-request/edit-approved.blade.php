@@ -285,7 +285,7 @@
                                                 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
                                                 </div><!-- panel-group -->
-                                                <button class="btn btn-set yellow">
+                                                <button type="submit" class="btn btn-set yellow" id="submitVendorAssignmentForm">
                                                     <i class="fa fa-check" style="font-size: large"></i>
                                                     Send mail to vendors&nbsp; &nbsp; &nbsp; &nbsp;
                                                 </button>
@@ -309,6 +309,11 @@
     <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
     <script>
         $(document).ready(function(){
+
+            $('#submitVendorAssignmentForm').click(function(){
+                $("button[type='submit']").prop('disabled', true);
+            });
+
             $('.example-getting-started').multiselect();
             $("#myBtn").click(function(){
                 $("#myModal").modal();
