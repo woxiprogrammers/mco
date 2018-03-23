@@ -101,7 +101,7 @@
                                                                 </tr>
                                                                 <tr class="filter">
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_employee_id"> </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_employee_id" id="search_employee_id"> </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_name" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
@@ -119,6 +119,14 @@
                                                             <tbody>
 
                                                             </tbody>
+                                                            <tfoot>
+                                                            <tr>
+                                                                <th colspan="4" style="text-align:right">Total Page Wise: </th>
+                                                                <th></th>
+                                                                <th></th>
+                                                                <th colspan="4"></th>
+                                                            </tr>
+                                                            </tfoot>
                                                         </table>
                                                     </div>
                                                 </div>
@@ -247,6 +255,9 @@
     <script>
         $(document).ready(function(){
             peticashManagementListing.init();
+            $("input[name='search_employee_id']").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
             $("#search-withfilter").on('click',function(){
                 var client_id = $('#client_id').val();
                 var project_id = $('#project_id').val();
