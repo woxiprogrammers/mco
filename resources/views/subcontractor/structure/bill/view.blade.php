@@ -254,19 +254,10 @@
                                                                                 </div>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-3" style="text-align: right">
-                                                                                        <label for="name" class="control-label"> Total </label>
-                                                                                        <span>*</span>
-                                                                                    </div>
-                                                                                    <div class="col-md-6">
-                                                                                        <input type="number" class="form-control" id="transactionTotal" name="total">
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="form-group row">
-                                                                                    <div class="col-md-3" style="text-align: right">
                                                                                         <label for="name" class="control-label"> Debit </label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control" id="debit" name="debit">
+                                                                                        <input type="number" class="form-control calculate-amount" id="debit" name="debit">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group row">
@@ -274,7 +265,7 @@
                                                                                         <label for="name" class="control-label"> Hold </label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control" id="hold" name="hold">
+                                                                                        <input type="number" class="form-control calculate-amount" id="hold" name="hold">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row form-group">
@@ -282,7 +273,7 @@
                                                                                         <label class="control-label pull-right">Retention</label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control tax_amount" id="retention_tax_amount" name="retention_amount">
+                                                                                        <input type="number" class="form-control tax_amount calculate-amount" id="retention_tax_amount" name="retention_amount">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="row form-group">
@@ -290,7 +281,7 @@
                                                                                         <label class="control-label pull-right">TDS</label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control tax_amount" id="tds_tax_amount" name="tds_amount">
+                                                                                        <input type="number" class="form-control tax_amount calculate-amount" id="tds_tax_amount" name="tds_amount">
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group">
@@ -298,7 +289,34 @@
                                                                                         <label for="name" class="control-label"> Other Recovery </label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="number" class="form-control" id="other_recovery" name="other_recovery">
+                                                                                        <input type="number" class="form-control calculate-amount" id="other_recovery" name="other_recovery">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="form-group row">
+                                                                                    <div class="col-md-3" style="text-align: right">
+                                                                                        <label for="name" class="control-label"> Payable Amount </label>
+                                                                                        <span>*</span>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <input type="number" class="form-control" id="payableAmount" value="{{$pendingAmount}}" readonly>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="form-group row">
+                                                                                    <div class="col-md-3" style="text-align: right">
+                                                                                        <label for="name" class="control-label"> Subtotal </label>
+                                                                                        <span>*</span>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <input type="number" class="form-control calculate-amount" id="subtotalAmount" name="subtotal">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="form-group row">
+                                                                                    <div class="col-md-3" style="text-align: right">
+                                                                                        <label for="name" class="control-label"> Total </label>
+                                                                                        <span>*</span>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <input type="number" class="form-control" id="transactionTotal" name="total" readonly>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group">
@@ -469,13 +487,43 @@
                     var pendingAmount = parseFloat($("#pendingAmount").val());
                     var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
                     if(balanceAdvanceAmount >= pendingAmount){
-                        $("#transactionTotal").val(pendingAmount);
+                        $("#subtotalAmount").val(pendingAmount);
                     }else{
-                        $("#transactionTotal").val(balanceAdvanceAmount);
+                        $("#subtotalAmount").val(balanceAdvanceAmount);
                     }
+                    $("#debit").val(0);
+                    $("#debit").prop('readonly', true);
+                    $("#hold").val(0);
+                    $("#hold").prop('readonly', true);
+                    $("#retention_tax_amount").val(0);
+                    $("#retention_tax_amount").prop('readonly', true);
+                    $("#tds_tax_amount").val(0);
+                    $("#tds_tax_amount").prop('readonly', true);
+                    $("#other_recovery").val(0);
+                    $("#other_recovery").prop('readonly', true);
                 }else{
-
+                    $("#debit").prop('readonly', false);
+                    $("#hold").prop('readonly', false);
+                    $("#retention_tax_amount").prop('readonly', false);
+                    $("#tds_tax_amount").prop('readonly', false);
+                    $("#other_recovery").prop('readonly', false);
                 }
+                $(".calculate-amount").trigger('keyup');
+            });
+
+            $(".calculate-amount").on('keyup', function(){
+                var total = parseFloat(0);
+                $(".calculate-amount").each(function(){
+                    var amount = parseFloat($(this).val());
+                    if(isNaN(amount)){
+                        amount = 0;
+                        $(this).val(amount);
+                    }
+                    total = parseFloat(total);
+                    total += parseFloat(amount);
+
+                });
+                $("#transactionTotal").val(total);
             });
         });
         function openReconcilePaymentModal(transactionSlug){

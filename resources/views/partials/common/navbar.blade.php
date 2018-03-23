@@ -62,7 +62,7 @@
     <!-- END HEADER TOP -->
     <!-- BEGIN HEADER MENU -->
     <div class="page-header-menu">
-        <div class="container">
+        <div class="container" style="width: 100%">
             <!-- BEGIN HEADER SEARCH BOX -->
             <!-- END HEADER SEARCH BOX -->
             <!-- BEGIN MEGA MENU -->
