@@ -23,6 +23,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="pendingAmount" value="{!! $siteTransferBill['total'] - $totalPaidAmount !!}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -244,7 +245,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="modal-body" style="padding:40px 50px;">
-                                                                <form id="materialCreateForm" method="post" action="/inventory/transfer/billing/payment/create">
+                                                                <form id="siteTransferPaymentCreateForm" method="post" action="/inventory/transfer/billing/payment/create">
                                                                     {!! csrf_field() !!}
                                                                     <input type="hidden" id="siteTransferBillId" name="site_transfer_bill_id" value="{{$siteTransferBill->id}}">
                                                                     <br>
@@ -263,7 +264,7 @@
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount">
+                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group row"id="paymentSelect">
@@ -325,9 +326,11 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/site-transfer-payment-manage-datatable.js"></script>
+    <script src="/assets/custom/inventory/site-transfer-validations.js"></script>
     <script>
         $(document).ready(function(){
             SiteTransferBillPaymentListing.init();
+            CreateSiteTransferBillPayment.init();
             $("#isAdvanceCheckbox").on('click', function(){
                 if($(this).is(':checked') == true){
                     $("#paymentSelect").hide();
