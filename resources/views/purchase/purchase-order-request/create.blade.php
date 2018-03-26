@@ -74,7 +74,7 @@
                                                     </table>
                                                 </div>
                                                 <div class="col-md-offset-3" style="margin-left: 26%">
-                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                    <button type="submit" class="btn red" id="submitPORequestForm"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -113,4 +113,11 @@
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script src="/assets/custom/purchase/purchase-order-request/purchase-order-request.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#submitPORequestForm').click(function(){
+                $("button[type='submit']").prop('disabled', true);
+            })
+        });
+    </script>
 @endsection

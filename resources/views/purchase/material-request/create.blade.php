@@ -25,13 +25,10 @@
                             <div class="page-title">
                                 <h1>Create Material Request</h1>
                             </div>
-                            <div class="col-md-3 " style="float: right;margin-top:1%">
-                                <a href="/purchase/material-request/manage" class="btn btn-secondary-outline" style="margin-left: 45%;">
-                                    <i class="fa fa-angle-left"></i>
-                                    Back
-                                </a>
-                                <button type="submit" class="btn btn-set red pull-right">
-                                    <i class="fa fa-check"></i>
+                            <div class="pull-right">
+                                <a href="/purchase/material-request/manage" class="btn btn-secondary-outline margin-top-15">< Back</a>
+                                <button type="submit"  class="btn red margin-top-15">
+                                    <i class="fa fa-check" style="font-size: large"></i>
                                     Submit
                                 </button>
                             </div>
