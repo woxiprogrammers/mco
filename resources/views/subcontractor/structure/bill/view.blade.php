@@ -482,10 +482,11 @@
     <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
+            CreateTransaction.init();
             $('#isAdvanceCheckbox').on('change', function(){
+                var pendingAmount = parseFloat($("#pendingAmount").val());
+                var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
                 if($(this).prop('checked') == true){
-                    var pendingAmount = parseFloat($("#pendingAmount").val());
-                    var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
                     if(balanceAdvanceAmount >= pendingAmount){
                         $("#subtotalAmount").val(pendingAmount);
                     }else{
@@ -501,12 +502,18 @@
                     $("#tds_tax_amount").prop('readonly', true);
                     $("#other_recovery").val(0);
                     $("#other_recovery").prop('readonly', true);
+                    $("#transactionTotal").rules('add',{
+                        max: balanceAdvanceAmount
+                    });
                 }else{
                     $("#debit").prop('readonly', false);
                     $("#hold").prop('readonly', false);
                     $("#retention_tax_amount").prop('readonly', false);
                     $("#tds_tax_amount").prop('readonly', false);
                     $("#other_recovery").prop('readonly', false);
+                    $("#transactionTotal").rules('add',{
+                        max: pendingAmount
+                    });
                 }
                 $(".calculate-amount").trigger('keyup');
             });

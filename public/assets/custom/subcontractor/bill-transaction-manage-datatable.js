@@ -72,6 +72,7 @@ var  CreateTransaction = function () {
         var form = $('#createTransactionForm');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
+        var pendingAmount = parseFloat($("#pendingAmount").val());
         form.validate({
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
@@ -79,7 +80,8 @@ var  CreateTransaction = function () {
             rules: {
                 total : {
                     required: true,
-                    min : 1
+                    min : 1,
+                    max: pendingAmount
                 }
             },
             messages: {
@@ -104,34 +106,10 @@ var  CreateTransaction = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
-                var totalAmount = parseFloat($("#transactionTotal").val());
-                if($("#isAdvanceCheckbox").prop('checked') == true){
-                    var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
-                    if(totalAmount <= balanceAdvanceAmount){
-                        $("button[type='submit']").prop('disabled', true);
-                        success.show();
-                        error.hide();
-                        form.submit();
-                    }else{
-                        $("button[type='submit']").prop('disabled', false);
-                        error.show();
-                        success.hide();
-                        $("#transactionTotal").closest('.form-group').addClass('has-error');
-                    }
-                }else{
-                    var pendingAmount = parseFloat($("#pendingAmount").val());
-                    if(pendingAmount < totalAmount){
-                        $("button[type='submit']").prop('disabled', false);
-                        error.show();
-                        success.hide();
-                        $("#transactionTotal").closest('.form-group').addClass('has-error');
-                    }else{
-                        $("button[type='submit']").prop('disabled', true);
-                        success.show();
-                        error.hide();
-                        form.submit();
-                    }
-                }
+                $("button[type='submit']").prop('disabled', true);
+                success.show();
+                error.hide();
+                form.submit();
             }
         });
     }
@@ -144,5 +122,4 @@ var  CreateTransaction = function () {
 
 $(document).ready(function(){
     BillTransactionListing.init();
-    CreateTransaction.init();
 });
