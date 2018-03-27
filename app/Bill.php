@@ -37,4 +37,8 @@ class Bill extends Model
     public function bill_quotation_extraItems(){
         return $this->hasMany('App\BillQuotationExtraItem','bill_id');
     }
+
+    public function billReconcileTransaction(){
+        return $this->hasMany('App\BillReconcileTransaction','bill_id');
+    }
 }

@@ -933,7 +933,7 @@ class ReportController extends Controller
                 $billPaidAmount = 0;
                 foreach ($subcontractorBillIds as $subcontractorStructureBillId){
                     $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
-                    $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+                    /*$subcontractorStructure = $subcontractorBill->subcontractorStructure;
                     $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
                     $taxTotal = 0;
                     $structureSlug = $subcontractorStructure->contractType->slug;
@@ -952,8 +952,17 @@ class ReportController extends Controller
                         }
                         $finalTotal = $subTotal + $taxTotal;
                     }
-                    $billTotals += $finalTotal;
-                    $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+                    $billTotals += $finalTotal;*/
+                    //$billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+                    $subcontractorBillTransaction = $subcontractorBill->subcontractorBillTransaction;
+                    $subcontractorBillReconcileTransaction = $subcontractorBill->subcontractorBillReconcileTransaction;
+                    $transactionTotal = $subcontractorBillTransaction->sum('total');
+                    $tdsTotal = $subcontractorBillTransaction->sum('tds');
+                    $debitTotal = $subcontractorBillTransaction->sum('debit');
+                    $holdTotal = $subcontractorBillTransaction->sum('hold') - $subcontractorBillReconcileTransaction->where('transaction_slug','hold')->sum('amount');
+                    $retentionTotal = $subcontractorBillTransaction->sum('retention_amount') - $subcontractorBillReconcileTransaction->where('transaction_slug','retention')->sum('amount');
+                    $finalTotal = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
+                    $billPaidAmount += $finalTotal;
                 }
                 $subcontractorAmount += $billPaidAmount;
             }
@@ -1028,7 +1037,17 @@ class ReportController extends Controller
                 $statusId = BillStatus::where('slug','approved')->pluck('id')->first();
                 $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
                 foreach($bills as $key => $bill){
-                    $totalReceiptEntry += BillTransaction::where('bill_id', $bill->id)->sum('total');
+                    //$billTransactionTotal = BillTransaction::where('bill_id', $bill->id)->sum('total');
+                    // $totalReceiptEntry += BillTransaction::where('bill_id', $bill->id)->sum('total');
+                    $billTransaction = $bill->transactions;
+                    $billReconcileTransaction = $bill->billReconcileTransaction;
+                    $billTransactionSubTotal = $billTransaction->sum('total');
+                    $billTransactionDebit = $billTransaction->sum('debit');
+                    $billTransactionTds = $billTransaction->sum('tds_amount');
+                    $billTransactionHold = $billTransaction->sum('hold') - $billReconcileTransaction->where('transaction_slug','hold')->sum('amount');
+                    $billTransactionRetention = $billTransaction->sum('retention_amount') - $billReconcileTransaction->where('transaction_slug','retention')->sum('amount');
+                    $billTransactionTotal = $billTransactionSubTotal - ($billTransactionDebit + $billTransactionTds + $billTransactionHold + $billTransactionRetention);
+                    $totalReceiptEntry += $billTransactionTotal;
                 }
             }
         }catch(\Exception $e){

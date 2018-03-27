@@ -576,14 +576,17 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
         Route::get('projects/{client_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjects'));
         Route::get('project-sites/{project_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjectSites'));
+
         Route::group(['prefix' => 'advance-payment'], function(){
             Route::post('add', array('uses' => 'Subcontractor\SubcontractorController@addAdvancePayment'));
             Route::post('listing', array('uses' => 'Subcontractor\SubcontractorController@advancePaymentListing'));
         });
+
         Route::group(['prefix' => 'dpr'], function(){
             Route::get('auto-suggest/{keyword}',array('uses' => 'Subcontractor\SubcontractorController@dprAutoSuggest'));
             Route::post('assign-categories/{subcontractor}',array('uses' => 'Subcontractor\SubcontractorController@assignDprCategories'));
         });
+
         Route::group(['prefix' => 'subcontractor-structure'], function(){
             Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
             Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorStructure'));
@@ -603,10 +606,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('create/{subcontractorStructure}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorBillCreateView'));
             Route::post('create/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorBill'));
             Route::get('change-status/{statusSlug}/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@changeBillStatus'));
+
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createTransaction'));
                 Route::post('listing/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getTransactionListing'));
             });
+
             Route::group(['prefix' => 'reconcile'], function(){
                 Route::post('add-transaction', array('uses' => 'Subcontractor\SubcontractorController@addReconcileTransaction'));
                 Route::post('hold-listing', array('uses' => 'Subcontractor\SubcontractorController@getHoldReconcileListing'));
@@ -702,6 +707,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
 
     });
+
     Route::group(['prefix'=>'dpr'],function (){
         Route::get('category_manage',array('uses' => 'Dpr\DprController@getCategoryManageView'));
         Route::get('create-category-view',array('uses' => 'Dpr\DprController@getCategoryCreateView'));
