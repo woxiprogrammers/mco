@@ -407,11 +407,12 @@ class ReportController extends Controller
                             $data[$row]['retention'] = ($subContractorBillTransaction['retention_amount'] != 0) ? -$subContractorBillTransaction['retention_amount'] : $subContractorBillTransaction['retention_amount'];
                             $data[$row]['tds'] = ($subContractorBillTransaction['tds_amount'] != 0) ? -$subContractorBillTransaction['tds_amount'] : $subContractorBillTransaction['tds_amount'];
                             $data[$row]['other_recovery'] = $subContractorBillTransaction['other_recovery'];
+
+                            $paidAmount = SubcontractorBillTransaction::where('id','<',$subContractorBillTransaction['subcontractor_bill_transaction_id'])->sum('total');
+                            $data[$row]['payable_amount'] = $finalTotal - $paidAmount;
                             if($subContractorBillTransaction['is_advance'] == true){
-                                $data[$row]['payable_amount'] = $data[$row]['total_bill_amount'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
                                 $data[$row]['check_amount'] = 0;
                             }else{
-                                $data[$row]['payable_amount'] = $subContractorBillTransaction['total'] + $data[$row]['total_bill_amount'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
                                 $data[$row]['check_amount'] = $subContractorBillTransaction['total'];
                             }
                             $data[$row]['balance'] = $totalAdvanceAmount - $totalAdvancedTillBill;
