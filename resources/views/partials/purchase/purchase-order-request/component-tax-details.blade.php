@@ -149,8 +149,8 @@
             <div class="col-md-2">
                 <label class="control-label pull-right">Expected Delivery Date</label>
             </div>
-            <div class="col-md-6 date date-picker">
-                <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="expected_delivery_date" data-date-start-date="0d"/>
+            <div class="col-md-6 date date-picker" data-date-start-date="0d">
+                <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="expected_delivery_date" />
                 <button class="btn btn-sm default" type="button">
                     <i class="fa fa-calendar"></i>
                 </button>
@@ -283,9 +283,9 @@
 <script>
     $(document).ready(function(){
         $('#expected_delivery_date').attr("readonly", "readonly");
-        $('#expected_delivery_date').datepicker({
-            minDate: 'today', // 0 days offset = today
-        });
+        var date = new Date();
+        $('#expected_delivery_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+
         $(".tax-modal-quantity").each(function(){
             calculateTaxes(this);
         });
