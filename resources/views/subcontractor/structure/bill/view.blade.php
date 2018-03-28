@@ -298,6 +298,7 @@
                                                                                         <span>*</span>
                                                                                     </div>
                                                                                     <div class="col-md-6">
+                                                                                        <input type="hidden" class="form-control" id="originalPayableAmount" value="{{$pendingAmount}}">
                                                                                         <input type="number" class="form-control" id="payableAmount" value="{{$pendingAmount}}" readonly>
                                                                                     </div>
                                                                                 </div>
@@ -520,7 +521,8 @@
 
             $(".calculate-amount").on('keyup', function(){
                 var total = parseFloat(0);
-                $(".calculate-amount").each(function(){
+                var originalPayablemount = $('#originalPayableAmount').val();
+                    $(".calculate-amount").each(function(){
                     var amount = parseFloat($(this).val());
                     if(isNaN(amount)){
                         amount = 0;
@@ -528,9 +530,13 @@
                     }
                     total = parseFloat(total);
                     total += parseFloat(amount);
-
                 });
+                var changedPayableAmount = originalPayablemount - (total - parseFloat($('#subtotalAmount').val()));
+                $('#payableAmount').val(changedPayableAmount);
                 $("#transactionTotal").val(total);
+                $("#subtotalAmount").rules('add',{
+                    max: changedPayableAmount
+                });
             });
         });
         function openReconcilePaymentModal(transactionSlug){
