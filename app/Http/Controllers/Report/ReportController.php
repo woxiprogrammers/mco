@@ -35,6 +35,7 @@ use App\PurchaseOrderPayment;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionComponent;
 use App\PurchaseOrderTransactionStatus;
+use App\PurchaseRequest;
 use App\PurchaseRequestComponent;
 use App\Quotation;
 use App\QuotationProduct;
@@ -388,7 +389,7 @@ class ReportController extends Controller
                             $finalTotal = $subTotal + $taxTotal;
                         }
                         foreach ($subContractorBillTransactionData as $key =>$subContractorBillTransaction){
-                            $totalAdvancedTillBill = SubcontractorBillTransaction::where('id','<',$subContractorBillTransaction['subcontractor_bill_transaction_id'])->where('is_advance',true)->sum('total');
+                            $totalAdvancedTillBill = SubcontractorBillTransaction::where('id','<=',$subContractorBillTransaction['subcontractor_bill_transaction_id'])->where('is_advance',true)->sum('total');
 
                             $data[$row]['date'] = date('d/m/y',strtotime($subContractorBillTransaction['created_at']));
                             $data[$row]['summary_type'] = Summary::where('id',$subContractorBillTransaction['summary_id'])->pluck('name')->first();
@@ -406,7 +407,9 @@ class ReportController extends Controller
                             $data[$row]['retention'] = ($subContractorBillTransaction['retention_amount'] != 0) ? -$subContractorBillTransaction['retention_amount'] : $subContractorBillTransaction['retention_amount'];
                             $data[$row]['tds'] = ($subContractorBillTransaction['tds_amount'] != 0) ? -$subContractorBillTransaction['tds_amount'] : $subContractorBillTransaction['tds_amount'];
                             $data[$row]['other_recovery'] = $subContractorBillTransaction['other_recovery'];
-                            $data[$row]['payable_amount'] = $data[$row]['total_bill_amount'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
+
+                            $paidAmount = SubcontractorBillTransaction::where('id','<',$subContractorBillTransaction['subcontractor_bill_transaction_id'])->sum('total');
+                            $data[$row]['payable_amount'] = $finalTotal - $paidAmount;
                             if($subContractorBillTransaction['is_advance'] == true){
                                 $data[$row]['check_amount'] = 0;
                             }else{
@@ -926,6 +929,8 @@ class ReportController extends Controller
             }else{
                 $subcontractorStructureData = SubcontractorStructure::where('project_site_id', $projectSiteId)->get();
             }
+            $subcontractorIDs = $subcontractorStructureData->unique('subcontractor_id')->pluck('subcontractor_id');
+            $advanceAmount = Subcontractor::whereIn('id',$subcontractorIDs)->sum('balance_advance_amount');
             $subcontractorAmount = 0;
             foreach ($subcontractorStructureData as $key => $subcontractorStructure){
                 $subcontractorBillIds = $subcontractorStructure->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
@@ -933,8 +938,8 @@ class ReportController extends Controller
                 $billPaidAmount = 0;
                 foreach ($subcontractorBillIds as $subcontractorStructureBillId){
                     $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
-                    $subcontractorStructure = $subcontractorBill->subcontractorStructure;
-                    $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                    $subcontractorIDs = $subcontractorBill->subcontractorStructure->subcontractor_id;
+                    /*$subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
                     $taxTotal = 0;
                     $structureSlug = $subcontractorStructure->contractType->slug;
                     if($structureSlug == 'sqft'){
@@ -952,11 +957,21 @@ class ReportController extends Controller
                         }
                         $finalTotal = $subTotal + $taxTotal;
                     }
-                    $billTotals += $finalTotal;
-                    $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+                    $billTotals += $finalTotal;*/
+                    //$billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+                    $subcontractorBillTransaction = $subcontractorBill->subcontractorBillTransaction;
+                    $subcontractorBillReconcileTransaction = $subcontractorBill->subcontractorBillReconcileTransaction;
+                    $transactionTotal = $subcontractorBillTransaction->sum('total');
+                    $tdsTotal = $subcontractorBillTransaction->sum('tds');
+                    $debitTotal = $subcontractorBillTransaction->sum('debit');
+                    $holdTotal = $subcontractorBillTransaction->sum('hold') - $subcontractorBillReconcileTransaction->where('transaction_slug','hold')->sum('amount');
+                    $retentionTotal = $subcontractorBillTransaction->sum('retention_amount') - $subcontractorBillReconcileTransaction->where('transaction_slug','retention')->sum('amount');
+                    $finalTotal = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
+                    $billPaidAmount += $finalTotal;
                 }
                 $subcontractorAmount += $billPaidAmount;
             }
+            $subcontractorAmount += $advanceAmount;
         }catch(\Exception $e){
             $subcontractorAmount = 0;
             $data = [
@@ -1025,11 +1040,23 @@ class ReportController extends Controller
             }
             $totalReceiptEntry = 0;
             foreach($quotations as $key4 => $quotation){
+                $balanceAdvancedAmount = ProjectSite::where('id',$quotation['project_site_id'])->pluck('advanced_balance')->first();
                 $statusId = BillStatus::where('slug','approved')->pluck('id')->first();
                 $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
                 foreach($bills as $key => $bill){
-                    $totalReceiptEntry += BillTransaction::where('bill_id', $bill->id)->sum('total');
+                    //$billTransactionTotal = BillTransaction::where('bill_id', $bill->id)->sum('total');
+                    // $totalReceiptEntry += BillTransaction::where('bill_id', $bill->id)->sum('total');
+                    $billTransaction = $bill->transactions;
+                    $billReconcileTransaction = $bill->billReconcileTransaction;
+                    $billTransactionSubTotal = $billTransaction->sum('total');
+                    $billTransactionDebit = $billTransaction->sum('debit');
+                    $billTransactionTds = $billTransaction->sum('tds_amount');
+                    $billTransactionHold = $billTransaction->sum('hold') - $billReconcileTransaction->where('transaction_slug','hold')->sum('amount');
+                    $billTransactionRetention = $billTransaction->sum('retention_amount') - $billReconcileTransaction->where('transaction_slug','retention')->sum('amount');
+                    $billTransactionTotal = $billTransactionSubTotal - ($billTransactionDebit + $billTransactionTds + $billTransactionHold + $billTransactionRetention);
+                    $totalReceiptEntry += $billTransactionTotal;
                 }
+                $totalReceiptEntry += $balanceAdvancedAmount;
             }
         }catch(\Exception $e){
             $totalReceiptEntry = 0;
@@ -1046,13 +1073,18 @@ class ReportController extends Controller
     public function getPurchasePaidAmount($projectSiteId){
         try{
             if($projectSiteId == 'all'){
-                $purchasePaidAmount = PurchaseOrderPayment::sum('amount');
+                $purchasePaymentAmount = PurchaseOrderPayment::sum('amount');
+                $advancedAmounts = PurchaseOrder::sum('balance_advance_amount');
+
             }else{
-                $purchasePaidAmount = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                $purchasePaymentAmount = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
                                         ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                                         ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                                         ->where('purchase_requests.project_site_id',$projectSiteId)->sum('purchase_order_payments.amount');
+                $advancedAmounts = PurchaseOrder::join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                    ->where('purchase_requests.project_site_id',$projectSiteId)->sum('purchase_orders.balance_advance_amount');
             }
+            $purchasePaidAmount = $purchasePaymentAmount + $advancedAmounts;
         }catch(\Exception $e){
             $purchasePaidAmount = 0;
             $data = [

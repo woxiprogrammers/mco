@@ -25,6 +25,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="pendingAmount" value="{{$pendingAmount}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -170,7 +171,7 @@
                                                     <div class="tab-pane fade in" id="paymentTab">
                                                         <div class="btn-group pull-right margin-top-15">
                                                             <a id="sample_editable_1_new" class="btn yellow" href="#paymentModal" data-toggle="modal" >
-                                                                <i class="fa fa-plus"></i>  &nbsp; Purchase Order Payment
+                                                                <i class="fa fa-plus"></i>  &nbsp; Asset Maintenance Bill
                                                             </a>
                                                         </div>
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assetMaintenancePaymentTable">
@@ -200,7 +201,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="modal-body" style="padding:40px 50px;">
-                                                                <form id="materialCreateForm" method="post" action="/asset/maintenance/request/bill/payment/create">
+                                                                <form id="createBillPaymentForm" method="post" action="/asset/maintenance/request/bill/payment/create">
                                                                     {!! csrf_field() !!}
                                                                     <input type="hidden" id="assetMaintenanceBillId" name="asset_maintenance_bill_id" value="{{$assetMaintenanceBill->id}}">
                                                                     <br>
@@ -285,16 +286,10 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/admin/asset-maintenance/bill/payment-manage-datatable.js"></script>
+    <script src="/assets/custom/admin/asset-maintenance/bill/validations.js"></script>
     <script>
         $(document).ready(function(){
-            /*$("#isAdvanceCheckbox").on('click', function(){
-                console.log();
-                if($(this).is(':checked') == true){
-                    $("#paymentSelect").hide();
-                }else{
-                    $("#paymentSelect").show();
-                }
-            });*/
+            CreateAssetMaintenanceBillPayment.init();
         });
     </script>
 @endsection

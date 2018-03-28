@@ -7,6 +7,7 @@
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+<input type="hidden" value="{{$remainingAmount}}" id="remainingAmount">
 <div class="page-wrapper">
     <div class="page-wrapper-row full-height">
         <div class="page-wrapper-middle">
@@ -698,7 +699,7 @@
 <script src="/assets/custom/bill/retention-reconcile-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
-
+        CreateBillPayment.init();
         $("#change_bill").on('change', function(){
             var bill_id = $(this).val();
             window.location.href = "/bill/view/"+bill_id;

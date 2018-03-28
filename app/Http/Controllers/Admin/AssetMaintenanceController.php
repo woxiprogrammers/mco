@@ -776,11 +776,13 @@ class AssetMaintenanceController extends Controller{
             $purchaseOrderDirectoryName = sha1($assetMaintenanceBill->asset_maintenance_id);
             $purchaseBillDirectoryName = sha1($assetMaintenanceBill->id);
             $imageUploadPath = env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bills'.DIRECTORY_SEPARATOR.$purchaseBillDirectoryName;
+            $totalPaidAmount = AssetMaintenanceBillPayment::where('asset_maintenance_bill_id', $assetMaintenanceBill->id)->sum('amount');
+            $pendingAmount = $assetMaintenanceBill['amount'] - $totalPaidAmount;
             foreach($assetMaintenanceBillImages as $image){
                 $assetMaintenanceBillImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
             }
             $paymentTypes = PaymentType::select('id','name')->get();
-            return view('asset-maintenance.bill.view')->with(compact('assetMaintenanceBill','assetMaintenanceBillImagePaths','paymentTypes','grn','remainingAmountToPay'));
+            return view('asset-maintenance.bill.view')->with(compact('assetMaintenanceBill','assetMaintenanceBillImagePaths','paymentTypes','grn','remainingAmountToPay','pendingAmount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Asset Maintenance billing view',
