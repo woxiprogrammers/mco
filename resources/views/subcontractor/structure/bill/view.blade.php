@@ -298,6 +298,7 @@
                                                                                         <span>*</span>
                                                                                     </div>
                                                                                     <div class="col-md-6">
+                                                                                        <input type="hidden" class="form-control" id="originalPayableAmount" value="{{$pendingAmount}}">
                                                                                         <input type="number" class="form-control" id="payableAmount" value="{{$pendingAmount}}" readonly>
                                                                                     </div>
                                                                                 </div>
@@ -482,10 +483,11 @@
     <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
+            CreateTransaction.init();
             $('#isAdvanceCheckbox').on('change', function(){
+                var pendingAmount = parseFloat($("#pendingAmount").val());
+                var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
                 if($(this).prop('checked') == true){
-                    var pendingAmount = parseFloat($("#pendingAmount").val());
-                    var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
                     if(balanceAdvanceAmount >= pendingAmount){
                         $("#subtotalAmount").val(pendingAmount);
                     }else{
@@ -501,19 +503,26 @@
                     $("#tds_tax_amount").prop('readonly', true);
                     $("#other_recovery").val(0);
                     $("#other_recovery").prop('readonly', true);
+                    $("#transactionTotal").rules('add',{
+                        max: balanceAdvanceAmount
+                    });
                 }else{
                     $("#debit").prop('readonly', false);
                     $("#hold").prop('readonly', false);
                     $("#retention_tax_amount").prop('readonly', false);
                     $("#tds_tax_amount").prop('readonly', false);
                     $("#other_recovery").prop('readonly', false);
+                    $("#transactionTotal").rules('add',{
+                        max: pendingAmount
+                    });
                 }
                 $(".calculate-amount").trigger('keyup');
             });
 
             $(".calculate-amount").on('keyup', function(){
                 var total = parseFloat(0);
-                $(".calculate-amount").each(function(){
+                var originalPayablemount = $('#originalPayableAmount').val();
+                    $(".calculate-amount").each(function(){
                     var amount = parseFloat($(this).val());
                     if(isNaN(amount)){
                         amount = 0;
@@ -521,9 +530,13 @@
                     }
                     total = parseFloat(total);
                     total += parseFloat(amount);
-
                 });
+                var changedPayableAmount = originalPayablemount - (total - parseFloat($('#subtotalAmount').val()));
+                $('#payableAmount').val(changedPayableAmount);
                 $("#transactionTotal").val(total);
+                $("#subtotalAmount").rules('add',{
+                    max: changedPayableAmount
+                });
             });
         });
         function openReconcilePaymentModal(transactionSlug){

@@ -49,7 +49,7 @@
                                                         </label>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <input type="text" class="form-control typeahead">
+                                                        <input type="text" class="form-control typeahead" id="purchaseRequest" name="purchaseRequest">
                                                     </div>
                                                 </div>
                                                 <div class="table-scrollable" style="overflow: scroll !important;">
@@ -115,9 +115,66 @@
     <script src="/assets/custom/purchase/purchase-order-request/purchase-order-request.js"></script>
     <script>
         $(document).ready(function(){
+            CreatePurchaseOrderRequest.init();
             $('#submitPORequestForm').click(function(){
                 $("button[type='submit']").prop('disabled', true);
             })
         });
+        var  CreatePurchaseOrderRequest = function () {
+            var handleCreate = function() {
+                var form = $('#createPurchaseOrderRequest');
+                var error = $('.alert-danger', form);
+                var success = $('.alert-success', form);
+                form.validate({
+                    errorElement: 'span', //default input error message container
+                    errorClass: 'help-block', // default input error message class
+                    focusInvalid: false, // do not focus the last invalid input
+                    rules: {
+                        purchaseRequest: {
+                            required: true
+                        }
+                    },
+
+                    messages: {
+                        purchaseRequest: {
+                            required: "Purchase Request required"
+                        }
+                    },
+
+                    invalidHandler: function (event, validator) { //display error alert on form submit
+                        success.hide();
+                        error.show();
+                    },
+
+                    highlight: function (element) { // hightlight error inputs
+                        $(element)
+                            .closest('.form-group').addClass('has-error'); // set error class to the control group
+                    },
+
+                    unhighlight: function (element) { // revert the change done by hightlight
+                        $(element)
+                            .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                    },
+
+                    success: function (label) {
+                        label
+                            .closest('.form-group').addClass('has-success');
+                    },
+
+                    submitHandler: function (form) {
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }
+                });
+            };
+
+            return {
+                init: function () {
+                    handleCreate();
+                }
+            };
+        }();
+
     </script>
 @endsection

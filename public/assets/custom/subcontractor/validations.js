@@ -15,7 +15,8 @@ var  CreateSubcontractorBill = function () {
             rules: {
                 qty:{
                     min: 0.000001,
-                    max:allowedQuantity
+                    max:allowedQuantity,
+                    required: true
                 }
             },
 
