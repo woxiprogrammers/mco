@@ -190,6 +190,7 @@
         $(document).ready(function(){
             $('#submitPOApproveForm').click(function(){
                 $("button[type='submit']").prop('disabled', true);
+                $('#editPurchaseOrderRequest').submit();
             })
         });
         function accordionTitleSelect(element){

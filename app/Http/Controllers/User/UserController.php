@@ -92,7 +92,7 @@ class UserController extends Controller
             }else{
                 $request->session()->flash('error', 'Mobile number is already registered with other user.');
             }
-            return redirect('/user/create');
+            return redirect('/user/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create new User',
@@ -210,7 +210,7 @@ class UserController extends Controller
                 $deletedPermission->delete();
             }
             $request->session()->flash('success', 'User Edited successfully.');
-            return redirect('/user/edit/'.$user->id);
+            return redirect('/user/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit User',

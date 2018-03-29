@@ -39,7 +39,25 @@
                                         <form role="form" id="reports-download" class="form-horizontal" method="post" action="/reports/download">
                                             {!! csrf_field() !!}
                                             <input type="hidden" value="false" name="is_miscellaneous" id="is_miscellaneous" >
-                                            <div class="row">
+
+                                            <div class="form-body">
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Report Type : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="report_type" name="report_type">
+                                                            <option value="materialwise_purchase_report">Material wise Purchase Report</option>
+                                                            <option value="receiptwise_p_and_l_report">Profit and Loss Report</option>
+                                                            <option value="subcontractor_report">Subcontractor Report</option>
+                                                            <option value="labour_specific_report">Labour & Staff Report</option>
+                                                            <option value="purchase_bill_tax_report">Purchase Bill Report</option>
+                                                            <option value="sales_bill_tax_report">Sales Bill Reports</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" id="dataDiv">
                                                 <label class="control-label col-md-3">Date Range : </label>
                                                 <div class="col-md-9">
                                                     <div class="input-group input-large date-picker input-daterange" data-date-format="dd/mm/yyyy">
@@ -50,27 +68,10 @@
                                                     <span class="help-block"> Select date range </span>
                                                 </div>
                                             </div>
-                                            <div class="form-body">
-                                                <div class="form-group row">
-                                                    <div class="col-md-3" style="text-align: right">
-                                                        <label>Select Report Type : </label>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <select class="form-control" id="report_type" name="report_type">
-                                                            <option value="materialwise_purchase_report">Materialwise Purchase</option>
-                                                            <option value="receiptwise_p_and_l_report">Receiptwise P & L</option>
-                                                            <option value="subcontractor_report">Subcontractor</option>
-                                                            <option value="labour_specific_report">Labour Specific Report</option>
-                                                            <option value="purchase_bill_tax_report">Purchase Bill Tax Report</option>
-                                                            <option value="sales_bill_tax_report">Sales Bill Tax Reports</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <div class="row" name="materialwise_purchase_report" id="materialwise_purchase_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Materialwise Report</h3>
+                                                        <h3> Material wise Purchase Report</h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -128,7 +129,7 @@
                                             <div class="row" name="receiptwise_p_and_l_report" id="receiptwise_p_and_l_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Receiptwise P & L Report</h3>
+                                                        <h3> Profit and Loss Report </h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -191,7 +192,7 @@
                                             <div class="row" name="labour_specific_report" id="labour_specific_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Labour Report</h3>
+                                                        <h3> Labour & Staff Report</h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -238,7 +239,7 @@
                                             <div class="row" name="purchase_bill_tax_report" id="purchase_bill_tax_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Purchase Bill Tax Vendorwise Report</h3>
+                                                        <h3> Purchase Bill Report</h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -282,7 +283,7 @@
                                             <div class="row" name="sales_bill_tax_report" id="sales_bill_tax_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Sales Bill Tax Report</h3>
+                                                        <h3> Sales Bill Report</h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -330,6 +331,13 @@
 <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function(){
+        $('#report_type').on('change',function(){
+            if($(this).val() == 'receiptwise_p_and_l_report'){
+                $('#dataDiv').css('display','none');
+            }else{
+                $('#dataDiv').css('display','');
+            }
+        });
         toggleReportTypeContent();
         disabledMaterial();
         $('#report_type').on('change',function() {

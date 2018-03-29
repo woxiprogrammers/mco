@@ -6,6 +6,7 @@ use App\Client;
 use App\Helper\MaterialProductHelper;
 use App\PurchaseOrder;
 use App\PurchaseRequestComponentVendorMailInfo;
+use App\PurchaseRequestComponentVendorRelation;
 use App\Unit;
 use App\User;
 use App\UserHasRole;
@@ -13,6 +14,7 @@ use App\Vendor;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -52,6 +54,10 @@ class SendPurchaseOrderEmails extends Command
     {
         try{
             $purchaseOrders = PurchaseOrder::where('is_email_sent',false)->get();
+            $superadminUserId = UserHasRole::join('roles','roles.id','user_has_roles.role_id')
+                ->where('roles.slug','superadmin')
+                ->pluck('user_has_roles.user_id')
+                ->first();
             foreach($purchaseOrders as $purchaseOrder){
                 if($purchaseOrder->is_client_order == true){
                     $vendorInfo = Client::findOrFail($purchaseOrder->client_id)->toArray();
@@ -60,7 +66,13 @@ class SendPurchaseOrderEmails extends Command
                 }
                 $vendorInfo['materials'] = array();
                 $iterator = 0;
+                $disapprovedVendorId = array();
                 foreach ($purchaseOrder->purchaseOrderComponent as $purchaseOrderComponent){
+                    $purchaseRequestComponentVendorRelationId = $purchaseOrderComponent->purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id;
+                    $disapprovedVendorRelationID = PurchaseRequestComponentVendorRelation::where('id','!=',$purchaseRequestComponentVendorRelationId)
+                                                    ->where('purchase_request_component_id', $purchaseOrderComponent->purchase_request_component_id)
+                                                    ->pluck('vendor_id')->toArray();
+                    $disapprovedVendorId = array_unique(array_merge($disapprovedVendorId, $disapprovedVendorRelationID));
                     $vendorInfo['materials'][$iterator] = array();
                     $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                     $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
@@ -158,10 +170,7 @@ class SendPurchaseOrderEmails extends Command
                     });
                     $this->info('Email Sent successfully.!!');
                     $purchaseOrder->update(['is_email_sent' => true]);
-                    $superadminUserId = UserHasRole::join('roles','roles.id','user_has_roles.role_id')
-                        ->where('roles.slug','superadmin')
-                        ->pluck('user_has_roles.user_id')
-                        ->first();
+
                     if($purchaseOrder->is_client_order == true){
                         $mailInfoData = [
                             'user_id' => $superadminUserId,
@@ -186,7 +195,27 @@ class SendPurchaseOrderEmails extends Command
                     PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
                     unlink($pdfUploadPath);
                 }
+                if(count($disapprovedVendorId) > 0){
+                    $disapprovedVendorId = array_unique($disapprovedVendorId);
+                    $purchaseRequestFormatId = $purchaseOrder->purchaseRequest->format_id;
+                    foreach($disapprovedVendorId as $vendorId){
+                        $mailInfoData = [
+                            'user_id' => $superadminUserId,
+                            'type_slug' => 'disapprove-purchase-order',
+                            'vendor_id' => $vendorId,
+                            'is_client' => false
+                        ];
+                        $vendorEmail = Vendor::where('id', $vendorId)->pluck('email')->first();
+                        Mail::send('purchase.purchase-order.email.purchase-order-disapprove', ['purchaseRequestFormatId' => $purchaseRequestFormatId], function($message) use ($vendorEmail, $purchaseRequestFormatId){
+                            $message->subject('Disapproval of Quotation ('.$purchaseRequestFormatId.')');
+                            $message->to($vendorEmail);
+                            $message->from(env('MAIL_USERNAME'));
+                        });
+                        PurchaseRequestComponentVendorMailInfo::create($mailInfoData);
+                    }
+                }
             }
+
         }catch(\Exception $e){
             $data = [
               'action' => 'Purchase Order email send from command',

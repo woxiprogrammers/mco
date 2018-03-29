@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
+
 use App\Category;
 use App\Helper\MaterialProductHelper;
 use App\Material;
@@ -269,8 +270,8 @@ trait ProductTrait{
                     $records['data'][$iterator] = [
                         $productData[$pagination]['name'],
                         Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                         MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                         $product_status,
                         '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -301,8 +302,8 @@ trait ProductTrait{
                     $records['data'][$iterator] = [
                         $productData[$pagination]['name'],
                         Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                         MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                         $product_status,
                         '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">

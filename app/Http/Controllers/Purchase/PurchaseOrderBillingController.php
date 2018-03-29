@@ -115,6 +115,7 @@ class PurchaseOrderBillingController extends Controller
         }
         return response()->json($response,$status);
     }
+
     public function getBillPendingTransactions(Request $request){
         try{
             $status = 200;
@@ -269,7 +270,7 @@ class PurchaseOrderBillingController extends Controller
                 ]);
             }
             $request->session()->flash('success','Purchase Order Bill Created Successfully');
-            return redirect('/purchase/purchase-order-bill/create');
+            return redirect('/purchase/purchase-order-bill/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Purchase Order Bill',
