@@ -57,7 +57,7 @@ trait ExtraItemTrait{
             $data['is_active'] = false;
             $extraItem = ExtraItem::create($data);
             $request->session()->flash('success', 'Extra Item Created successfully.');
-            return redirect('/extra-item/create');
+            return redirect('/extra-item/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Extra Item',
@@ -73,7 +73,7 @@ trait ExtraItemTrait{
         try{
             $extraItem->update(['name' => ucwords(trim($request->name)) , 'rate' => $request->rate]);
             $request->session()->flash('success', 'Extra Item Edited successfully.');
-            return redirect('/extra-item/edit/'.$extraItem->id);
+            return redirect('/extra-item/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Extra Item',

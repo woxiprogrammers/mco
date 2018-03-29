@@ -52,6 +52,7 @@ class PurchaseController extends Controller
             abort(500);
         }
     }
+
     public function getCreateView(Request $request){
         $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
         $units = Unit::select('id','name')->get()->toArray();
@@ -61,6 +62,7 @@ class PurchaseController extends Controller
         }
         return view('purchase/material-request/create')->with(compact('nosUnitId','units','unitOptions'));
     }
+
     public function getMaterialRequestListing(Request $request){
         try{
             $postdata = null;
@@ -319,9 +321,11 @@ class PurchaseController extends Controller
         }
         return response()->json($records,$status);
     }
+
     public function editMaterialRequest(Request $request){
         return view('purchase/material-request/edit');
     }
+
     public function autoSuggest(Request $request){
         try{
             $message = "Success";
@@ -462,6 +466,7 @@ class PurchaseController extends Controller
         ];
         return($data);
     }
+
     public function unitConversion($unit_from_id,$unit_to_id,$quantity_from){
         $unitConversionData = UnitConversion::where('unit_1_id',$unit_from_id)->where('unit_2_id',$unit_to_id)->first();
         if(count($unitConversionData) > 0){
@@ -558,7 +563,7 @@ class PurchaseController extends Controller
             }else{
                 $request->session()->flash('success', 'Material request created successfully.');
             }
-            return redirect('purchase/material-request/create');
+            return redirect('purchase/material-request/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Material Request',
@@ -569,6 +574,7 @@ class PurchaseController extends Controller
             abort(500);
         }
     }
+
     public function getMaterialRequestWiseListing(Request $request){
         try{
             $postdata = null;
@@ -698,6 +704,7 @@ class PurchaseController extends Controller
         }
         return response()->json($records,200);
     }
+
     public function getMaterialRequestWiseListingView(){
         $approvedQuotationStatus = QuotationStatus::where('slug','approved')->first();
         $projectSiteIds = Quotation::where('quotation_status_id',$approvedQuotationStatus['id'])->pluck('project_site_id')->toArray();
@@ -706,7 +713,9 @@ class PurchaseController extends Controller
         $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
         return view ('purchase/material-request/material-request-listing')->with(compact('clients'));
     }
+
     use NotificationTrait;
+
     public function changeMaterialRequestComponentStatus(Request $request,$newStatus,$componentId = null){
         try{
             $user = Auth::user();
@@ -848,6 +857,7 @@ class PurchaseController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
     public function getMaterialRequestComponentDetail(Request $request,$materialRequestComponent){
         try {
             $assetComponentTypes = MaterialRequestComponentTypes::whereIn('slug', ['system-asset', 'new-asset'])->pluck('id')->toArray();

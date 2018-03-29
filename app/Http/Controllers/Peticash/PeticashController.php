@@ -130,7 +130,7 @@ class PeticashController extends Controller
             $accountData['project_site_id'] = 0; // VALUE 0 FOR MASTER ACCOUNT
             $category = PeticashSiteTransfer::create($accountData);
             $request->session()->flash('success', 'Amount Added successfully.');
-            return redirect('peticash/master-peticash-account/createpage');
+            return redirect('peticash/master-peticash-account/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Master Peticash Account',
@@ -243,7 +243,7 @@ class PeticashController extends Controller
             $accountData['project_site_id'] = $request->project_site_id; // VALUE 0 FOR MASTER ACCOUNT
             $category = PeticashSiteTransfer::create($accountData);
             $request->session()->flash('success', 'Amount Added successfully.');
-            return redirect('peticash/sitewise-peticash-account/createpage');
+            return redirect('/peticash/sitewise-peticash-account/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Sitewise Peticash Account',

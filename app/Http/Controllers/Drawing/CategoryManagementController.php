@@ -35,6 +35,7 @@ class CategoryManagementController extends Controller
         }
         return view('drawing/category-management/create-sub')->with(compact('categories'));
     }
+
     public function getMainEditView(Request $request,$id)
     {   try{
                 $main_category = DrawingCategory::where('id',$id)->select('id','name')->first()->toArray();
@@ -50,6 +51,7 @@ class CategoryManagementController extends Controller
     }
 
     }
+
     public function getSubEditView(Request $request,$id)
     {
         try{
@@ -68,6 +70,7 @@ class CategoryManagementController extends Controller
         }
 
     }
+
     public function getCreateMainCategory(Request $request){
          try{
                $category['name'] = $request->main_category;
@@ -84,6 +87,7 @@ class CategoryManagementController extends Controller
              abort(500);
          }
     }
+
     public function mainCategoryEdit(Request $request){
         try{
             $category['name'] = $request->main_category;
@@ -100,6 +104,7 @@ class CategoryManagementController extends Controller
             abort(500);
         }
     }
+
     public function createSubCategory(Request $request){
         try{
             $category['name'] = $request->sub_category;
@@ -117,6 +122,7 @@ class CategoryManagementController extends Controller
             abort(500);
         }
     }
+
     public function mainCategoryListing(Request $request){
         try{
             $subCategories = DrawingCategory::whereNull('drawing_category_id')->get()->toArray();
@@ -166,6 +172,7 @@ class CategoryManagementController extends Controller
             abort(500);
         }
     }
+
     public function changeStatus(Request $request,$id,$status){
         try {
                $categoryData['is_active'] = (bool)$status;
@@ -182,6 +189,7 @@ class CategoryManagementController extends Controller
                 abort(500);
         }
     }
+
     public function editSubCategory(Request $request){
         try {
             $data['drawing_category_id'] =  $request->main_category_id;
@@ -199,6 +207,7 @@ class CategoryManagementController extends Controller
             abort(500);
         }
     }
+
     public function SubCategoryListing(Request $request){
         try{
             $subCategories = DrawingCategory::whereNotNull('drawing_category_id')->get()->toArray();

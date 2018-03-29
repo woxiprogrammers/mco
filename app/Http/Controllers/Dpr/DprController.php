@@ -48,6 +48,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function createCategory(Request $request){
         try{
 
@@ -66,6 +67,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function categoryListing(Request $request){
         try{
             $subCategories = DprMainCategory::select('id','name')->get()->toArray();
@@ -116,6 +118,7 @@ class DprController extends Controller
         }
 
     }
+
     public function changeStatus(Request $request,$id,$status){
         try {
             $categoryData['status'] = (boolean)$status;
@@ -132,6 +135,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function getDprManageView(Request $request){
         try {
             return view('/dpr/manage-dpr');
@@ -145,6 +149,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function getDprCreateView(Request $request){
         try {
             $sub_contractors = Subcontractor::where('is_active', true)->select('id','subcontractor_name','company_name')->get();
@@ -159,6 +164,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function createDpr(Request $request){
         try{
             $today = Carbon::now();
@@ -196,6 +202,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function dprListing(Request $request){
         try{
             if(Session::has('global_project_site')){
@@ -261,6 +268,7 @@ class DprController extends Controller
         }
         return response()->json($records,$status);
     }
+
     public function getDprEditView(Request $request){
         try{
             $date = date('Y-m-j', strtotime($request->date));
@@ -284,6 +292,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function getCategoryEditView(Request $request,$id){
         try{
             $category = DprMainCategory::where('id',$id)->select('id','name')->get()->first()->toArray();
@@ -298,6 +307,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function dprEdit(Request $request){
         try{
             foreach ($request->number_of_users as $dprDetailId => $numberOfUsers){
@@ -315,6 +325,7 @@ class DprController extends Controller
             abort(500);
         }
     }
+
     public function categoryEdit(Request $request){
         try{
             $dprData['name'] = $request->category;
