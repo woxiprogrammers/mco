@@ -113,6 +113,7 @@ class ReportController extends Controller
             $companyHeader['address'] = env('ADDRESS');
             $companyHeader['contact_no'] = env('CONTACT_NO');
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
+            $date = date('l, d F Y',strtotime($start_date)) .' - '. date('l, d F Y',strtotime($end_date));
             switch($report_type) {
 
                 case 'materialwise_purchase_report':
@@ -222,12 +223,64 @@ class ReportController extends Controller
                             }
                         }
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header) {
-                            $sheet->row(1, $header);
-                            $sheet->setBorder('A1:J1', 'thin', "D8572C");
-                            $row = 1;
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:J2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:J3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:J4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:J5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:J6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:J7');
+                            $sheet->cell('A7', function($cell) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Material wise Purchase Report');
+                            });
+
+                            $sheet->mergeCells('A8:J8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+
+                            $sheet->setBorder('A9:J9','thin', 'none', 'thin', 'none');
+
+                            $sheet->row(10, $header);
+                            $sheet->setBorder('A9:J19', 'thin', "D8572C");
+                            $row = 10;
+
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
@@ -325,12 +378,64 @@ class ReportController extends Controller
                         }
                         $row ++;
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date) {
+
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header) {
-                            $sheet->row(1, $header);
-                            $sheet->setBorder('A1:K1', 'thin', "D8572C");
-                            $row = 1;
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:K2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:K3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:K4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:K5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:K6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:K7');
+                            $sheet->cell('A7', function($cell) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Labour & Staff Report');
+                            });
+
+                            $sheet->mergeCells('A8:K8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+
+                            $sheet->setBorder('A9:K9','thin', 'none', 'thin', 'none');
+
+                            $sheet->row(10, $header);
+                            $sheet->setBorder('A9:K19', 'thin', "D8572C");
+                            $row = 10;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
@@ -431,12 +536,64 @@ class ReportController extends Controller
                             $row++;
                         }
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header) {
-                            $sheet->row(1, $header);
-                            $sheet->setBorder('A1:O1', 'thin', "D8572C");
-                            $row = 1;
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:O2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:O3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:O4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:O5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:O6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:O7');
+                            $sheet->cell('A7', function($cell) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Subcontractor Report');
+                            });
+
+                            $sheet->mergeCells('A8:O8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+
+                            $sheet->setBorder('A9:O9','thin', 'none', 'thin', 'none');
+
+                            $sheet->row(10, $header);
+                            $sheet->setBorder('A9:O19', 'thin', "D8572C");
+                            $row = 10;
+
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
@@ -511,13 +668,64 @@ class ReportController extends Controller
                             $row++;
                         }
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header,$companyHeader ,$date) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header) {
-                            $sheet->row(1, $header);
-                            $sheet->setBorder('A1:N1', 'thin', "D8572C");
+                        $excel->sheet($report_type, function($sheet) use($data, $header,$companyHeader, $date) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
 
-                            $row = 1;
+                            $sheet->mergeCells('A2:N2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:N3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:N4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:N5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:N6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:N7');
+                            $sheet->cell('A7', function($cell) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Sales Bill Report');
+                            });
+
+                            $sheet->mergeCells('A8:N8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+
+                            $sheet->setBorder('A9:N9','thin', 'none', 'thin', 'none');
+
+                            $sheet->row(10, $header);
+                            $sheet->setBorder('A9:N19', 'thin', "D8572C");
+                            $row = 10;
+
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
@@ -615,12 +823,63 @@ class ReportController extends Controller
                         $total['balance'] += $data[$row]['balance'];
                         $row++;
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $total) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $total, $companyHeader, $date) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header, $total) {
-                            $sheet->row(1, $header);
-                            $sheet->setBorder('A1:J1', 'thin', "D8572C");
-                            $row = 1;
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $total,$companyHeader, $date) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:J2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:J3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:J4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:J5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:J6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:J7');
+                            $sheet->cell('A7', function($cell) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Purchase Bill Report');
+                            });
+
+                            $sheet->mergeCells('A8:J8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+
+                            $sheet->setBorder('A9:J9','thin', 'none', 'thin', 'none');
+
+                            $sheet->row(10, $header);
+                            $sheet->setBorder('A10:J20', 'thin', "D8572C");
+                            $row = 10;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
@@ -657,10 +916,10 @@ class ReportController extends Controller
                     $total = $totalPurchase + $miscellaneousPurchaseAmount + $subcontractor + $indirectExpensesAmount + $peticashSalaryAmount;
                     $profitLossSaleWise = $totalSalesEntry - $total;
                     $profitLossReceiptWise = $totalReceiptEntry - $total;
+
                     $data = array(
-                        array('Total Sale Entry', 'Total Receipt Entry'),
-                        array($totalSalesEntry, $totalReceiptEntry, 'Expences on', 'Total expence'),
-                        array(null, null, 'Total purchase' , $totalPurchase),
+                        array('Total Sale Entry', 'Total Receipt Entry', 'Expences on', 'Total expence'),
+                        array($totalSalesEntry, $totalReceiptEntry, 'Total purchase' , $totalPurchase),
                         array(null, null, 'Total miscellaneous purchase' , $miscellaneousPurchaseAmount),
                         array(null, null, 'Subcontractor' , $subcontractor),
                         array(null, null, 'SALARY' , $peticashSalaryAmount),
@@ -671,12 +930,56 @@ class ReportController extends Controller
                         array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
                         array($profitLossSaleWise, $profitLossReceiptWise),
                     );
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header) {
-                            $sheet->row(1, $header);
-                            $sheet->setBorder('A2:D13', 'thin', "D8572C");
-                            $row = 1;
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+                            
+                            $sheet->mergeCells('A2:D2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:D3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:D4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:D5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:D6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:D7');
+                            $sheet->cell('A7', function($cell) {
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Profit and Loss Report');
+                            });
+
+                            $sheet->setBorder('A8:D8','thin', 'none', 'thin', 'none');
+
+                            $sheet->setBorder('A9:D19', 'thin', "D8572C");
+                            $row = 8;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;

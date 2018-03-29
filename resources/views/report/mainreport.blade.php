@@ -39,17 +39,7 @@
                                         <form role="form" id="reports-download" class="form-horizontal" method="post" action="/reports/download">
                                             {!! csrf_field() !!}
                                             <input type="hidden" value="false" name="is_miscellaneous" id="is_miscellaneous" >
-                                            <div class="row">
-                                                <label class="control-label col-md-3">Date Range : </label>
-                                                <div class="col-md-9">
-                                                    <div class="input-group input-large date-picker input-daterange" data-date-format="dd/mm/yyyy">
-                                                        <input type="text" class="form-control" name="start_date" id="start_date" value="{{$start_date}}" required="required">
-                                                        <span class="input-group-addon"> to </span>
-                                                        <input type="text" class="form-control" name="end_date" id="end_date" value="{{$end_date}}" required="required"> </div>
-                                                    <!-- /input-group -->
-                                                    <span class="help-block"> Select date range </span>
-                                                </div>
-                                            </div>
+
                                             <div class="form-body">
                                                 <div class="form-group row">
                                                     <div class="col-md-3" style="text-align: right">
@@ -65,6 +55,17 @@
                                                             <option value="sales_bill_tax_report">Sales Bill Tax Reports</option>
                                                         </select>
                                                     </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" id="dataDiv">
+                                                <label class="control-label col-md-3">Date Range : </label>
+                                                <div class="col-md-9">
+                                                    <div class="input-group input-large date-picker input-daterange" data-date-format="dd/mm/yyyy">
+                                                        <input type="text" class="form-control" name="start_date" id="start_date" value="{{$start_date}}" required="required">
+                                                        <span class="input-group-addon"> to </span>
+                                                        <input type="text" class="form-control" name="end_date" id="end_date" value="{{$end_date}}" required="required"> </div>
+                                                    <!-- /input-group -->
+                                                    <span class="help-block"> Select date range </span>
                                                 </div>
                                             </div>
                                             <div class="row" name="materialwise_purchase_report" id="materialwise_purchase_report">
@@ -330,6 +331,13 @@
 <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function(){
+        $('#report_type').on('change',function(){
+            if($(this).val() == 'receiptwise_p_and_l_report'){
+                $('#dataDiv').css('display','none');
+            }else{
+                $('#dataDiv').css('display','');
+            }
+        });
         toggleReportTypeContent();
         disabledMaterial();
         $('#report_type').on('change',function() {
