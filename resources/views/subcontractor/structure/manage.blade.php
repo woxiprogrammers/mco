@@ -42,7 +42,8 @@
                                             <table class="table table-striped table-bordered table-hover" id="subcontractorStructureTable">
                                                 <thead>
                                                 <tr>
-                                                    <th> Subcontractor Name </th>
+                                                    <th data-width="15%"> Subcontractor Name </th>
+                                                    <th data-width="15%"> Project Name </th>
                                                     <th> Summary Name </th>
                                                     <th> Contract type </th>
                                                     <th> Rate </th>
@@ -50,13 +51,42 @@
                                                     <th> Total Amount </th>
                                                     <th> Bill Amount </th>
                                                     <th> Paid Amount </th>
+                                                    <th> Balance Amount</th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>
+                                                </tr>
+                                                <tr class="filter">
+                                                    <th> <input type="text" class="form-control form-filter" name="subcontractor_name" id="subcontractor_name"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="project_name" id="project_name"></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                    </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
 
                                                 </tbody>
+                                                <tfoot>
+                                                <tr>
+                                                    <th colspan="6" style="text-align:right">Total Page Wise: </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                     </div>
@@ -87,6 +117,14 @@
         });
         $("#project_id").on('change', function(){
             getProjectSites($('#project_id').val());
+        });
+
+        $("input[name='subcontractor_name']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
+        });
+
+        $("input[name='project_name']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
         });
     });
 

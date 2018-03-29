@@ -462,7 +462,6 @@ class PurchaseOrderRequestController extends Controller
 
     public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
         try{
-            $disapprovedVendorId = array();
             if($request->has('approved_purchase_order_request_relation')){
                 if(Session::has('global_project_site')){
                     $projectSiteId = Session::get('global_project_site');
@@ -584,12 +583,6 @@ class PurchaseOrderRequestController extends Controller
                                 ->toArray();
                         if(count($disapprovedPurchaseOrderRequestComponentIds) > 0){
                             PurchaseOrderRequestComponent::whereIn('id', $disapprovedPurchaseOrderRequestComponentIds)->update(['is_approved' => false]);
-                            $disapprovedPurchaseOrderVendorIds = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
-                                                        ->where('purchase_request_component_vendor_relation.is_client', false)
-                                                        ->where('purchase_order_request_components.id',$disapprovedPurchaseOrderRequestComponentIds)
-                                                        ->pluck('purchase_request_component_vendor_relation.vendor_id')
-                                                        ->toArray();
-                            $disapprovedVendorId = array_merge($disapprovedVendorId,$disapprovedPurchaseOrderVendorIds);
                         }
                         if(count($purchaseOrderRequestComponent->purchaseOrderRequestComponentImages) > 0){
                             $purchaseOrderMainDirectoryName = sha1($purchaseOrderComponent['purchase_order_id']);
@@ -625,25 +618,6 @@ class PurchaseOrderRequestController extends Controller
                     }
                 }
                 $request->session()->flash('success','Purchase Orders Created Successfully !');
-                if(count($disapprovedVendorId) > 0){
-                    $disapprovedVendorId = array_unique($disapprovedVendorId);
-                    $purchaseRequestFormatId = $purchaseOrderRequest->purchaseRequest->format_id;
-                    foreach($disapprovedVendorId as $vendorId){
-                        $mailInfoData = [
-                            'user_id' => Auth::user()->id,
-                            'type_slug' => 'disapprove-purchase-order',
-                            'vendor_id' => $vendorId,
-                            'is_client' => false
-                        ];
-                        $vendorEmail = Vendor::where('id', $vendorId)->pluck('email')->first();
-                        Mail::send('purchase.purchase-order.email.purchase-order-disapprove', ['purchaseRequestFormatId' => $purchaseRequestFormatId], function($message) use ($vendorEmail, $purchaseRequestFormatId){
-                            $message->subject('Disapproval of Quotation ('.$purchaseRequestFormatId.')');
-                            $message->to($vendorEmail);
-                            $message->from(env('MAIL_USERNAME'));
-                        });
-                        PurchaseRequestComponentVendorMailInfo::create($mailInfoData);
-                    }
-                }
                 return redirect('/purchase/purchase-order/manage');
             }else{
                 $request->session()->flash('error','Please select at least one material/asset.');
