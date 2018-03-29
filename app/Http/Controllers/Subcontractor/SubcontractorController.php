@@ -54,7 +54,7 @@ class SubcontractorController extends Controller
             $scData['is_active'] = (boolean)false;
             Subcontractor::create($scData);
             $request->session()->flash('success', 'Subcontractor Created successfully.');
-            return redirect('/subcontractor/create');
+            return redirect('/subcontractor/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Subcontractor',
@@ -174,7 +174,7 @@ class SubcontractorController extends Controller
             $updateLabourData = $request->except('_token');
             Subcontractor::where('id',$subcontractor['id'])->update($updateLabourData);
             $request->session()->flash('success', 'Subcontractor Edited successfully.');
-            return redirect('/subcontractor/edit/'.$subcontractor->id);
+            return redirect('/subcontractor/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Subcontractor',
@@ -246,10 +246,10 @@ class SubcontractorController extends Controller
                 'description' => $request['description'],
             ]);
             $request->session()->flash('success', 'Subcontractor Structured Created successfully.');
-            return redirect('/subcontractor/subcontractor-structure/create');
+            return redirect('/subcontractor/subcontractor-structure/manage');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Create Subcontractor',
+                'action' => 'Create Subcontractor Structure',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];
@@ -430,7 +430,7 @@ class SubcontractorController extends Controller
             $updateLabourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
             Employee::where('id',$labour['id'])->update($updateLabourData);
             $request->session()->flash('success', 'Subcontractor Edited successfully.');
-            return redirect('/subcontractor/edit/'.$labour->id);
+            return redirect('/subcontractor/subcontractor-structure/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Subcontractor',

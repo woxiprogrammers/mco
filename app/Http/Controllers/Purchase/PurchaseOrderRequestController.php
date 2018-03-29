@@ -58,6 +58,7 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
+
     public function getCreateView(Request $request){
         try{
             return view('purchase.purchase-order-request.create');
@@ -70,6 +71,7 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
+
     public function createPurchaseOrderRequest(Request $request){
         try{
             $user = Auth::user();
@@ -183,6 +185,7 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
+
     public function listing(Request $request){
         try{
             $loggedInUser = Auth::user();
@@ -249,6 +252,7 @@ class PurchaseOrderRequestController extends Controller
         }
         return response()->json($records,$status);
     }
+
     public function getEditView(Request $request,$purchaseOrderRequest){
         try{
             $purchaseOrderRequestComponents = array();
@@ -302,6 +306,7 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
+
     public function purchaseRequestAutoSuggest(Request $request,$keyword){
         try{
             if(Session::has('global_project_site')){
@@ -348,6 +353,7 @@ class PurchaseOrderRequestController extends Controller
         }
         return response()->json($purchaseRequests,$status);
     }
+
     public function getPurchaseRequestComponentDetails(Request $request){
         try{
             $purchaseRequestComponents = PurchaseRequestComponent::where('purchase_request_id', $request->purchase_request_id)->get();
@@ -406,6 +412,7 @@ class PurchaseOrderRequestController extends Controller
             return response()->json([], 500);
         }
     }
+
     public function getComponentTaxDetails(Request $request, $purchaseRequestComponentVendorRelation){
         try{
             $purchaseRequestComponentData = array();
@@ -452,6 +459,7 @@ class PurchaseOrderRequestController extends Controller
             return response()->json([], 500);
         }
     }
+
     public function approvePurchaseOrderRequest(Request $request, $purchaseOrderRequest){
         try{
             if($request->has('approved_purchase_order_request_relation')){

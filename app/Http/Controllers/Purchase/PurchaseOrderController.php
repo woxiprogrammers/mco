@@ -667,7 +667,7 @@ class PurchaseOrderController extends Controller
             return Redirect::Back();
         }catch (\Exception $e){
             $data = [
-                'action' => 'Change Status',
+                'action' => 'Change Status od Purchase Order',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];

@@ -13,6 +13,10 @@ Dear Sir <br>
 <span style="margin-left: 5%">We look forward to deal with you in near future.</span>
 
 <br><br>
+<br>
+<span>*This is an auto generated message</span><br>
+<span>*Please revert back at purchase.manishaconstruction@gmail.com</span>
+<br>
 <span>Thanking you,</span><br>
 <span>Purchase Manager,</span><br>
 <span>Manisha Construction,</span><br>
@@ -21,8 +25,6 @@ Dear Sir <br>
 <span>Kondhwa, Pune - 411048</span><br>
 <span>Contact No. - 02026831325/26</span><br>
 <br>
-<br>
-<span>*This is an auto generated message</span><br>
-<span>*Please revert back at purchase.manishaconstruction@gmail.com</span>
+
 </body>
 </html>

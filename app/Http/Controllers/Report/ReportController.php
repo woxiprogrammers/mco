@@ -108,6 +108,11 @@ class ReportController extends Controller
             $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 24:00:00';
             $row = 0;
             $data = $header = array();
+            $companyHeader['company_name'] = env('COMPANY_NAME');
+            $companyHeader['designation'] = env('DESIGNATION');
+            $companyHeader['address'] = env('ADDRESS');
+            $companyHeader['contact_no'] = env('CONTACT_NO');
+            $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
             switch($report_type) {
 
                 case 'materialwise_purchase_report':
@@ -218,8 +223,10 @@ class ReportController extends Controller
                         }
                     }
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
                         $excel->sheet($report_type, function($sheet) use($data, $header) {
                             $sheet->row(1, $header);
+                            $sheet->setBorder('A1:J1', 'thin', "D8572C");
                             $row = 1;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
@@ -227,6 +234,7 @@ class ReportController extends Controller
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
                                     });
@@ -318,8 +326,10 @@ class ReportController extends Controller
                         $row ++;
                     }
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
                         $excel->sheet($report_type, function($sheet) use($data, $header) {
                             $sheet->row(1, $header);
+                            $sheet->setBorder('A1:K1', 'thin', "D8572C");
                             $row = 1;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
@@ -327,6 +337,7 @@ class ReportController extends Controller
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
                                     });
@@ -421,8 +432,10 @@ class ReportController extends Controller
                         }
                     }
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
                         $excel->sheet($report_type, function($sheet) use($data, $header) {
                             $sheet->row(1, $header);
+                            $sheet->setBorder('A1:O1', 'thin', "D8572C");
                             $row = 1;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
@@ -430,6 +443,7 @@ class ReportController extends Controller
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
                                     });
@@ -498,8 +512,11 @@ class ReportController extends Controller
                         }
                     }
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
                         $excel->sheet($report_type, function($sheet) use($data, $header) {
                             $sheet->row(1, $header);
+                            $sheet->setBorder('A1:N1', 'thin', "D8572C");
+
                             $row = 1;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
@@ -507,6 +524,7 @@ class ReportController extends Controller
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
                                     });
@@ -598,8 +616,10 @@ class ReportController extends Controller
                         $row++;
                     }
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $total) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
                         $excel->sheet($report_type, function($sheet) use($data, $header, $total) {
                             $sheet->row(1, $header);
+                            $sheet->setBorder('A1:J1', 'thin', "D8572C");
                             $row = 1;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
@@ -607,6 +627,7 @@ class ReportController extends Controller
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
                                     });
@@ -643,7 +664,7 @@ class ReportController extends Controller
                         array(null, null, 'Total miscellaneous purchase' , $miscellaneousPurchaseAmount),
                         array(null, null, 'Subcontractor' , $subcontractor),
                         array(null, null, 'SALARY' , $peticashSalaryAmount),
-                        array(null, null, 'IndirectExpences(GST,TDS Paid to government from Manisha)' , $indirectExpensesAmount),
+                        array(null, null, 'Indirect Expences(GST,TDS Paid to government from Manisha)' , $indirectExpensesAmount),
                         array(null, null),
                         array($totalSalesEntry, $totalReceiptEntry, null, $total),
                         array(null, null),
@@ -651,8 +672,10 @@ class ReportController extends Controller
                         array($profitLossSaleWise, $profitLossReceiptWise),
                     );
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
                         $excel->sheet($report_type, function($sheet) use($data, $header) {
                             $sheet->row(1, $header);
+                            $sheet->setBorder('A2:D13', 'thin', "D8572C");
                             $row = 1;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';

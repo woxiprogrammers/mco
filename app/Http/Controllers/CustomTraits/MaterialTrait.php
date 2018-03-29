@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
+
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Helper\MaterialProductHelper;
@@ -112,7 +113,7 @@ trait MaterialTrait{
                 $materialVersion = MaterialVersion::create($materialVersionData);
             }
             $request->session()->flash('success','Material created successfully.');
-            return redirect('/material/create');
+            return redirect('/material/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'create material',
@@ -146,7 +147,7 @@ trait MaterialTrait{
             }else{
                 $request->session()->flash('success','Material Edited successfully.');
             }
-            return redirect('/material/edit/'.$material->id);
+            return redirect('/material/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit material',

@@ -53,8 +53,8 @@
                                                 <tr>
                                                     <th style="width: 25%"> Product Name </th>
                                                     <th style="width: 25%"> Category Name </th>
-                                                    <th> Unit </th>
                                                     <th> Rate </th>
+                                                    <th> Unit </th>
                                                     <th> Status </th>
                                                     <th style="width: 15%"> Actions </th>
                                                 </tr>

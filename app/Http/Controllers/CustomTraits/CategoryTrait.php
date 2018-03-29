@@ -62,7 +62,7 @@ trait CategoryTrait{
             $data['is_miscellaneous'] = $request['is_miscellaneous'];
             $category = Category::create($data);
             $request->session()->flash('success', 'Category Created successfully.');
-            return redirect('/category/create');
+            return redirect('/category/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Category',
@@ -80,7 +80,7 @@ trait CategoryTrait{
             $data['is_miscellaneous'] = $request['is_miscellaneous'];
             $query = Category::where('id',$request['id'])->update($data);
             $request->session()->flash('success', 'Category Edited successfully.');
-            return redirect('/category/edit/'.$category['id']);
+            return redirect('/category/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Category',

@@ -78,7 +78,7 @@ trait UnitsTrait{
             $data['is_active'] = false;
             $unit = Unit::create($data);
             $request->session()->flash('success','Unit Created Successfully');
-            return redirect('/units/create');
+            return redirect('/units/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Unit',
@@ -94,7 +94,7 @@ trait UnitsTrait{
         try{
             $unit->update(['name' => ucwords(trim($request->name))]);
             $request->session()->flash('success','Unit Edited Successfully');
-            return redirect('/units/edit/'.$unit->id);
+            return redirect('/units/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Unit',
@@ -387,4 +387,5 @@ trait UnitsTrait{
         }
         return response()->json($response,$status);
     }
+
 }

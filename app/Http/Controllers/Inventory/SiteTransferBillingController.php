@@ -220,6 +220,7 @@ class SiteTransferBillingController extends Controller
             abort(500);
         }
     }
+
     public function createPayment(Request $request){
         try{
             $siteTransferBillPaymentData = $request->except('_token');
@@ -236,6 +237,7 @@ class SiteTransferBillingController extends Controller
             abort(500);
         }
     }
+
     public function paymentListing(Request $request, $siteTransferBill){
         try{
             $records = array();
