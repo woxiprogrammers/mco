@@ -278,7 +278,7 @@
                                             </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
-                                            <form role="form" action="/purchase/purchase-request/assign-vendors" method="post">
+                                            <form role="form" id="vendorAssignmentForm" action="/purchase/purchase-request/assign-vendors" method="post">
                                                 {!! csrf_field() !!}
                                                 <input type="hidden" name="is_mail" id="is_mail" value="1">
                                                 <input type="hidden" name="purchase_request_id" value="{{$purchaseRequest['id']}}">
@@ -312,6 +312,7 @@
 
             $('#submitVendorAssignmentForm').click(function(){
                 $("button[type='submit']").prop('disabled', true);
+                $('#vendorAssignmentForm').submit();
             });
 
             $('.example-getting-started').multiselect();

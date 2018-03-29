@@ -116,9 +116,6 @@
     <script>
         $(document).ready(function(){
             CreatePurchaseOrderRequest.init();
-            $('#submitPORequestForm').click(function(){
-                $("button[type='submit']").prop('disabled', true);
-            })
         });
         var  CreatePurchaseOrderRequest = function () {
             var handleCreate = function() {
@@ -162,6 +159,7 @@
                     },
 
                     submitHandler: function (form) {
+                        $("button[type='submit']").prop('disabled', true);
                         success.show();
                         error.hide();
                         form.submit();
