@@ -21,6 +21,7 @@ trait SummaryTrait{
             abort(500);
         }
     }
+
     public function getCreateView(Request $request) {
         try{
             return view('admin.summary.create');
@@ -34,6 +35,7 @@ trait SummaryTrait{
             abort(500);
         }
     }
+
     public function getEditView(Request $request,$summary) {
         try{
             $summary = $summary->toArray();
@@ -55,7 +57,7 @@ trait SummaryTrait{
             $data['is_active'] = false;
             $summary = Summary::create($data);
             $request->session()->flash('success', 'Summary Created successfully.');
-            return redirect('/summary/create');
+            return redirect('/summary/manage');
         }catch(\Exception $e){
             $data = [
               'action' => 'Create New Summary',
@@ -71,7 +73,7 @@ trait SummaryTrait{
         try{
             $summary->update(['name' => ucwords(trim($request->name))]);
             $request->session()->flash('success', 'Summary Edited successfully.');
-            return redirect('/summary/edit/'.$summary->id);
+            return redirect('/summary/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit existing Summary',

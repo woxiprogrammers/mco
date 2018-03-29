@@ -52,6 +52,7 @@ class PurchaseRequestController extends Controller
         $purchaseStatus = PurchaseRequestComponentStatuses::whereIn('slug',['purchase-requested','p-r-manager-approved','p-r-manager-disapproved','p-r-admin-approved','p-r-admin-disapproved'])->get()->toArray();
         return view('purchase/purchase-request/manage')->with(compact('clients','purchaseStatus'));
     }
+
     public function getCreateView(Request $request){
         try{
             if(Session::has('global_project_site')){
@@ -246,7 +247,7 @@ class PurchaseRequestController extends Controller
             ];
             Log::critical(json_encode($data));
         }
-        return redirect('purchase/purchase-request/create');
+        return redirect('/purchase/purchase-request/manage');
     }
 
     public function purchaseRequestListing(Request $request){

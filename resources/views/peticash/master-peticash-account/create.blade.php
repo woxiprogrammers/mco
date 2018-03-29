@@ -4,6 +4,7 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+<link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -94,8 +95,11 @@
                                                             <label for="name" class="control-label">Transaction Date</label>
                                                             <span>*</span>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <input name="date" class="form-control" id="date" type="text">
+                                                        <div class="col-md-3 date date-picker" data-date-end-date="0d">
+                                                            <input type="text" name="date" id="date"/>
+                                                            <button class="btn btn-sm default" type="button">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </fieldset>
@@ -123,6 +127,10 @@
 <script src="/assets/custom/peticash/peticash.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+
 <script>
     $(document).ready(function() {
         var date=new Date();

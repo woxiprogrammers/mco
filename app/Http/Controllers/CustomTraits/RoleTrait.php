@@ -75,7 +75,7 @@ trait RoleTrait{
         }
     }
 
-        public function getManageView(Request $request){
+    public function getManageView(Request $request){
         try{
             return view('admin.role.manage');
         }catch(\Exception $e){
@@ -125,7 +125,7 @@ trait RoleTrait{
                 }
             }
             $request->session()->flash('success', 'Role Created successfully.');
-            return redirect('/role/create');
+            return redirect('/role/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Role',
@@ -180,7 +180,7 @@ trait RoleTrait{
             }
             $deletedIds = RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$webPermissions)->whereNotIn('permission_id',$mobilePermissions)->delete();
             $request->session()->flash('success', 'Role Edited successfully.');
-            return redirect('/role/edit/'.$role->id);
+            return redirect('/role/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Role',

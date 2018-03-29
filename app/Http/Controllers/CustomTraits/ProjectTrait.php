@@ -191,7 +191,7 @@ trait ProjectTrait{
 
             $projectSite = ProjectSite::create($projectSiteData);
             $request->session()->flash('success', 'Project Created successfully.');
-            return redirect('/project/create');
+            return redirect('/project/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Project',
@@ -265,7 +265,7 @@ trait ProjectTrait{
                 'city_id' => $request->city_id
             ]);
             $request->session()->flash('success', 'Project edited successfully.');
-            return redirect('/project/edit/'.$project->id);
+            return redirect('/project/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'change Project status',

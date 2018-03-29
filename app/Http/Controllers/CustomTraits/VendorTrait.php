@@ -194,7 +194,7 @@ trait VendorTrait
                 }
             }
             $request->session()->flash('success', 'Vendor Created successfully.');
-            return redirect('/vendors/create');
+            return redirect('/vendors/manage');
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Create Vendor',
@@ -251,7 +251,7 @@ trait VendorTrait
                 }
             }
             $request->session()->flash('success', 'Vendor Edited successfully.');
-            return redirect('/vendors/edit/' . $vendor->id);
+            return redirect('/vendors/manage');
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Create Vendor',

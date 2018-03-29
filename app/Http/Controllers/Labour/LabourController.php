@@ -71,7 +71,7 @@ class LabourController extends Controller
                 EmployeeImage::create($employeeImageData);
             }
             $request->session()->flash('success', 'Labour Created successfully.');
-            return redirect('/labour/create');
+            return redirect('/labour/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Labour',
@@ -235,7 +235,7 @@ class LabourController extends Controller
                 }
             }
             $request->session()->flash('success', 'Labour Edited successfully.');
-            return redirect('/labour/edit/'.$labour->id);
+            return redirect('/labour/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Labour',
