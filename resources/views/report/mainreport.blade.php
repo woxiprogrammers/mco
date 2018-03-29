@@ -71,7 +71,7 @@
                                             <div class="row" name="materialwise_purchase_report" id="materialwise_purchase_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Materialwise Report</h3>
+                                                        <h3> Material wise Purchase Report</h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -129,7 +129,7 @@
                                             <div class="row" name="receiptwise_p_and_l_report" id="receiptwise_p_and_l_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Receiptwise P & L Report</h3>
+                                                        <h3> Profit and Loss Report </h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -192,7 +192,7 @@
                                             <div class="row" name="labour_specific_report" id="labour_specific_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Labour Report</h3>
+                                                        <h3> Labour & Staff Report</h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -239,7 +239,7 @@
                                             <div class="row" name="purchase_bill_tax_report" id="purchase_bill_tax_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Purchase Bill Tax Vendorwise Report</h3>
+                                                        <h3> Purchase Bill Report</h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
@@ -283,7 +283,7 @@
                                             <div class="row" name="sales_bill_tax_report" id="sales_bill_tax_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <h3> Sales Bill Tax Report</h3>
+                                                        <h3> Sales Bill Report</h3>
                                                         <hr/>
                                                     </div>
                                                 </div>
