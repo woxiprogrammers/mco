@@ -47,12 +47,12 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type">
-                                                            <option value="materialwise_purchase_report">Materialwise Purchase</option>
-                                                            <option value="receiptwise_p_and_l_report">Receiptwise P & L</option>
-                                                            <option value="subcontractor_report">Subcontractor</option>
-                                                            <option value="labour_specific_report">Labour Specific Report</option>
-                                                            <option value="purchase_bill_tax_report">Purchase Bill Tax Report</option>
-                                                            <option value="sales_bill_tax_report">Sales Bill Tax Reports</option>
+                                                            <option value="materialwise_purchase_report">Material wise Purchase Report</option>
+                                                            <option value="receiptwise_p_and_l_report">Profit and Loss Report</option>
+                                                            <option value="subcontractor_report">Subcontractor Report</option>
+                                                            <option value="labour_specific_report">Labour & Staff Report</option>
+                                                            <option value="purchase_bill_tax_report">Purchase Bill Report</option>
+                                                            <option value="sales_bill_tax_report">Sales Bill Reports</option>
                                                         </select>
                                                     </div>
                                                 </div>

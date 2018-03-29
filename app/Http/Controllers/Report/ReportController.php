@@ -312,12 +312,15 @@ class ReportController extends Controller
                     $approvedStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
                     $paymentSlug = PeticashTransactionType::where('type','PAYMENT')->select('id','slug')->get();
                     if($request['labour_specific_report_site_id'] == 'all'){
+                        $projectName = "All";
                         $salaryTransactionData = PeticashSalaryTransaction::where('employee_id',$request['labour_id'])
                             ->where('peticash_status_id',$approvedStatusId)
                             ->whereBetween('date', [$start_date, $end_date])
                             ->orderBy('id','asc')
                             ->get();
                     }else{
+                        $projectName = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                            ->where('project_sites.id',$request['labour_specific_report_site_id'])->pluck('projects.name')->first();
                         $salaryTransactionData = PeticashSalaryTransaction::where('project_site_id',$request['labour_specific_report_site_id'])
                             ->where('employee_id',$request['labour_id'])
                             ->where('peticash_status_id',$approvedStatusId)
@@ -325,6 +328,8 @@ class ReportController extends Controller
                             ->orderBy('id','asc')
                             ->get();
                     }
+
+                    $labourData = Employee::where('id',$request['labour_id'])->select('name','employee_id')->first();
 
                     foreach($salaryTransactionData as $key => $salaryTransaction){
                         $peticashTransactionTypeSlug = $salaryTransaction->peticashTransactionType->slug;
@@ -378,10 +383,10 @@ class ReportController extends Controller
                         }
                         $row ++;
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date ,$labourData, $projectName) {
 
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date, $labourData, $projectName) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -420,9 +425,9 @@ class ReportController extends Controller
                             });
 
                             $sheet->mergeCells('A7:K7');
-                            $sheet->cell('A7', function($cell) {
+                            $sheet->cell('A7', function($cell) use($labourData, $projectName) {
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Labour & Staff Report');
+                                $cell->setValue('Labour & Staff Report - ( '.$labourData['employee_id'].' - '.ucwords($labourData['name']).' - '.$projectName.' )');
                             });
 
                             $sheet->mergeCells('A8:K8');
@@ -457,6 +462,8 @@ class ReportController extends Controller
                         'Date', 'Summary Type', 'Bill No', 'Basic amount', 'Total tax', 'Total Bill Amount', 'Advance' ,'Debit', 'Hold', 'Retention',
                         'TDS', 'Other Recovery', 'Payable Amount', 'Check amount', 'Balance'
                     );
+                    $projectName = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$request['subcontractor_report_site_id'])->pluck('projects.name')->first();
                     $totalAdvanceAmount = Subcontractor::where('id',$request['subcontractor_id'])->pluck('total_advance_amount')->first();
                     $subContractorBillTransactionList = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
                                                         ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
@@ -468,6 +475,7 @@ class ReportController extends Controller
                                                         ->select('subcontractor_structure.summary_id','subcontractor_bill_transactions.id as subcontractor_bill_transaction_id','subcontractor_bill_transactions.subcontractor_bills_id as subcontractor_bill_id','subcontractor_bill_transactions.subtotal','subcontractor_bill_transactions.total','subcontractor_bill_transactions.debit','subcontractor_bill_transactions.hold',
                                                             'subcontractor_bill_transactions.retention_percent','subcontractor_bill_transactions.retention_amount','subcontractor_bill_transactions.tds_percent','subcontractor_bill_transactions.tds_amount','subcontractor_bill_transactions.other_recovery','subcontractor_bill_transactions.created_at','subcontractor_bill_transactions.is_advance')->get();
 
+                    $subcontractorCompanyName = Subcontractor::where('id',$request['subcontractor_id'])->pluck('company_name')->first();
                     $subContractorBillTransactions = $subContractorBillTransactionList->groupBy('subcontractor_bill_id')->toArray();
                     foreach ($subContractorBillTransactions as $subcontractorBillId => $subContractorBillTransactionData){
                         $subcontractorBill = SubcontractorBill::where('id',$subcontractorBillId)->first();
@@ -536,9 +544,9 @@ class ReportController extends Controller
                             $row++;
                         }
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date, $subcontractorCompanyName, $projectName) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date, $subcontractorCompanyName,$projectName ) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -577,9 +585,9 @@ class ReportController extends Controller
                             });
 
                             $sheet->mergeCells('A7:O7');
-                            $sheet->cell('A7', function($cell) {
+                            $sheet->cell('A7', function($cell) use($subcontractorCompanyName, $projectName) {
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Subcontractor Report');
+                                $cell->setValue('Subcontractor Report - ( '.$subcontractorCompanyName.' - '.$projectName.' )');
                             });
 
                             $sheet->mergeCells('A8:O8');
@@ -625,6 +633,8 @@ class ReportController extends Controller
                         'TDS', 'Other Recovery', 'Payable Amount', 'Check Amount',
                         'Balance'
                     );
+                    $projectName = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                                                ->where('project_sites.id',$request['sales_bill_tax_report_site_id'])->pluck('projects.name')->first();
                     $quotationId = Quotation::where('project_site_id',$request['sales_bill_tax_report_site_id'])->pluck('id')->first();
                     $billTransactionsList = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
                                             ->whereBetween('bill_transactions.created_at',[$start_date, $end_date])
@@ -668,9 +678,9 @@ class ReportController extends Controller
                             $row++;
                         }
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header,$companyHeader ,$date) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header,$companyHeader ,$date , $projectName) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header,$companyHeader, $date) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header,$companyHeader, $date, $projectName) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -709,9 +719,9 @@ class ReportController extends Controller
                             });
 
                             $sheet->mergeCells('A7:N7');
-                            $sheet->cell('A7', function($cell) {
+                            $sheet->cell('A7', function($cell) use($projectName) {
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Sales Bill Report');
+                                $cell->setValue('Sales Bill Report - '.$projectName);
                             });
 
                             $sheet->mergeCells('A8:N8');
@@ -755,6 +765,8 @@ class ReportController extends Controller
                         'Date', 'Bill Number', 'Basic Amount', 'IGST Amount', 'SGST Amount', 'CGST Amount',
                         'Extra Amount Tax', 'With Tax Amount', 'Paid Amount', 'Balance'
                     );
+                    $projectName = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$request['purchase_bill_tax_report_site_id'])->pluck('projects.name')->first();
                     $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
                                                     ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                                                     ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
@@ -823,9 +835,9 @@ class ReportController extends Controller
                         $total['balance'] += $data[$row]['balance'];
                         $row++;
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $total, $companyHeader, $date) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $total, $companyHeader, $date, $projectName) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header, $total,$companyHeader, $date) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $total,$companyHeader, $date, $projectName) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -864,9 +876,9 @@ class ReportController extends Controller
                             });
 
                             $sheet->mergeCells('A7:J7');
-                            $sheet->cell('A7', function($cell) {
+                            $sheet->cell('A7', function($cell) use ($projectName){
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Purchase Bill Report');
+                                $cell->setValue('Purchase Bill Report - '.$projectName);
                             });
 
                             $sheet->mergeCells('A8:J8');
@@ -916,6 +928,12 @@ class ReportController extends Controller
                     $total = $totalPurchase + $miscellaneousPurchaseAmount + $subcontractor + $indirectExpensesAmount + $peticashSalaryAmount;
                     $profitLossSaleWise = $totalSalesEntry - $total;
                     $profitLossReceiptWise = $totalReceiptEntry - $total;
+                    if($projectSiteId == 'all'){
+                        $projectName = 'All';
+                    }else{
+                        $projectName = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                            ->where('project_sites.id',$projectSiteId)->pluck('projects.name')->first();
+                    }
 
                     $data = array(
                         array('Total Sale Entry', 'Total Receipt Entry', 'Expences on', 'Total expence'),
@@ -930,16 +948,16 @@ class ReportController extends Controller
                         array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
                         array($profitLossSaleWise, $profitLossReceiptWise),
                     );
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $projectName) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $projectName) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
                             $objDrawing->setResizeProportional(true);
                             $objDrawing->setCoordinates('A1');
                             $objDrawing->setWorksheet($sheet);
-                            
+
                             $sheet->mergeCells('A2:D2');
                             $sheet->cell('A2', function($cell) use($companyHeader) {
                                 $cell->setAlignment('center')->setValignment('center');
@@ -971,9 +989,9 @@ class ReportController extends Controller
                             });
 
                             $sheet->mergeCells('A7:D7');
-                            $sheet->cell('A7', function($cell) {
+                            $sheet->cell('A7', function($cell) use($projectName) {
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Profit and Loss Report');
+                                $cell->setValue('Profit and Loss Report - '.$projectName);
                             });
 
                             $sheet->setBorder('A8:D8','thin', 'none', 'thin', 'none');
