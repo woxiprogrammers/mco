@@ -35,7 +35,7 @@
                                 <div class="page-title">
                                     <h1>Manage Purchase Order Bill</h1>
                                 </div>
-                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill'))
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill-entry'))
                                     <div class="btn-group pull-right margin-top-15">
                                         <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order-bill/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order Bill
                                             </a>

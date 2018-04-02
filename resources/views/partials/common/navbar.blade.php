@@ -218,6 +218,7 @@
                                 </ul>
                             </li>
                     @endif
+
                     <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
                     @if($hasQuotationPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -226,6 +227,7 @@
                             </a>
                         </li>
                     @endif
+
                     <?php $hasBillPermission = \App\Helper\ACLHelper::checkModuleAcl('bill'); ?>
                     @if($hasBillPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -234,6 +236,7 @@
                             </a>
                         </li>
                     @endif
+
                     <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?>
                     @if($hasPurchasePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -247,51 +250,75 @@
                             </a>
                         @endif
                         <ul class="dropdown-menu pull-left">
-                            <li aria-haspopup="true">
-                                <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-clipboard"></i> Material Request
-                                    @if(($materialRequestNotificationCount) > 0)
-                                        <span class="badge badge-success"><b>{{$materialRequestNotificationCount}}</b></span>
-                                    @endif
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-clipboard"></i> Purchase Request
-                                    @if(($purchaseRequestNotificationCount) > 0)
-                                        <span class="badge badge-success"><b>{{$purchaseRequestNotificationCount}}</b></span>
-                                    @endif
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/purchase/purchase-order-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-clipboard"></i> Purchase Order Request
-                                    @if(($purchaseOrderRequestNotificationCount) > 0)
-                                        <span class="badge badge-success"><b>{{$purchaseOrderRequestNotificationCount}}</b></span>
-                                    @endif
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-shopping-cart"></i> Purchase Order
-                                    @if($purchaseOrderNotificationCount > 0)
-                                        <span class="badge badge-success"><b>{{$purchaseOrderNotificationCount}}</b></span>
-                                    @endif
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-calculator"></i> Purchase Order Billing
-                                </a>
-                            </li>
+                            <?php $hasMaterialRequestPermission = \App\Helper\ACLHelper::checkModuleAcl('material-request');?>
+                            @if($hasMaterialRequestPermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-clipboard"></i> Material Request
+                                            @if(($materialRequestNotificationCount) > 0)
+                                                <span class="badge badge-success"><b>{{$materialRequestNotificationCount}}</b></span>
+                                            @endif
+                                        </a>
+                                    </li>
+                            @endif
+
+                            <?php $hasPurchaseRequestPermission = \App\Helper\ACLHelper::checkModuleAcl('purchase-request');?>
+                            @if($hasPurchaseRequestPermission)
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-clipboard"></i> Purchase Request
+                                        @if(($purchaseRequestNotificationCount) > 0)
+                                            <span class="badge badge-success"><b>{{$purchaseRequestNotificationCount}}</b></span>
+                                        @endif
+                                    </a>
+                                </li>
+                            @endif
+
+
+                            <?php $hasPurchaseOrderRequestPermission = \App\Helper\ACLHelper::checkModuleAcl('purchase-order-request');?>
+                            @if($hasPurchaseOrderRequestPermission)
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-order-request/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-clipboard"></i> Purchase Order Request
+                                        @if(($purchaseOrderRequestNotificationCount) > 0)
+                                            <span class="badge badge-success"><b>{{$purchaseOrderRequestNotificationCount}}</b></span>
+                                        @endif
+                                    </a>
+                                </li>
+                            @endif
+
+                            <?php $hasPurchaseOrderPermission = \App\Helper\ACLHelper::checkModuleAcl('purchase-order');?>
+                            @if($hasPurchaseOrderPermission)
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-shopping-cart"></i> Purchase Order
+                                        @if($purchaseOrderNotificationCount > 0)
+                                            <span class="badge badge-success"><b>{{$purchaseOrderNotificationCount}}</b></span>
+                                        @endif
+                                    </a>
+                                </li>
+                            @endif
+
+                            <?php $hasPurchaseOrderBillPermission = \App\Helper\ACLHelper::checkModuleAcl('purchase-bill');?>
+                            @if($hasPurchaseOrderBillPermission)
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-calculator"></i> Purchase Order Billing
+                                    </a>
+                                </li>
+                            @endif
+
+                            @if($hasPurchaseOrderPermission)
                             <li aria-haspopup="true">
                                 <a href="/purchase/vendor-mail/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-envelope"></i> Vendor Mails
                                 </a>
                             </li>
+                            @endif
                         </ul>
                     </li>
                     @endif
+
                     <?php $hasInventoryPermission = \App\Helper\ACLHelper::checkModuleAcl('inventory');?>
                     @if($hasInventoryPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
@@ -340,7 +367,10 @@
                             </ul>
                         </li>
                     @endif
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+
+                    <?php $hasChecklistPermission = \App\Helper\ACLHelper::checkModuleAcl('checklist');?>
+                    @if($hasChecklistPermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Checklist
                             <span class="arrow"></span>
                         </a>
@@ -367,31 +397,37 @@
                             </li>-->
                         </ul>
                     </li>
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> Drawing
-                            <span class="arrow"></span>
-                        </a>
-                        <ul class="dropdown-menu pull-left">
-                            <li aria-haspopup="true">
-                                <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-list-alt"></i> Category Management
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/drawing/images/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-plus"></i> Add Image
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
-                                    <i class="fa fa-edit"></i> Manage Drawings
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    @endif
+
+                    <?php $hasDrawingPermission = \App\Helper\ACLHelper::checkModuleAcl('drawing');?>
+                    @if($hasDrawingPermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> Drawing
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-list-alt"></i> Category Management
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/drawing/images/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-plus"></i> Add Image
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
+                                        <i class="fa fa-edit"></i> Manage Drawings
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
+
                     <?php $hasPeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('peticash');?>
-                    @if($hasPeticashPermission  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                    @if($hasPeticashPermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Peticash
                             @if(($peticashSalaryRequestApprovalNotificationCount) > 0)
                                 <span class="badge badge-success">{!! $peticashSalaryRequestApprovalNotificationCount !!}</span>
@@ -452,51 +488,64 @@
                         </ul>
                     </li>
                     @endif
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a href="/subcontractor/subcontractor-structure/manage"> Subcontractor
-                            <span class="arrow"></span>
-                        </a>
-                    </li>
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> General Awareness
-                            <span class="arrow"></span>
-                        </a>
-                        <ul class="dropdown-menu pull-left">
-                            <li aria-haspopup="true">
-                                <a href="/awareness/category-management/main-category-manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Category Management
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/awareness/file-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-file" aria-hidden="true"></i> File Management
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a> DPR
-                            <span class="arrow"></span>
-                        </a>
-                        <ul class="dropdown-menu pull-left">
-                            <li aria-haspopup="true">
-                                <a href="/dpr/category_manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Category Management
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/dpr/manage_dpr" class="nav-link nav-toggle ">
-                                    <i class="fa fa-file" aria-hidden="true"></i> DPR Management
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+
+                    <?php $hasSubcontractorPermission = \App\Helper\ACLHelper::checkModuleAcl('subcontractor');?>
+                    @if($hasSubcontractorPermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a href="/subcontractor/subcontractor-structure/manage"> Subcontractor
+                                <span class="arrow"></span>
+                            </a>
+                        </li>
+                    @endif
+
+                    <?php $hasGeneralAwarenessPermission = \App\Helper\ACLHelper::checkModuleAcl('general-awareness');?>
+                    @if($hasGeneralAwarenessPermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> General Awareness
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/awareness/category-management/main-category-manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Category Management
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/awareness/file-management/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-file" aria-hidden="true"></i> File Management
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
+
+                    <?php $hasDPRPermission = \App\Helper\ACLHelper::checkModuleAcl('dpr');?>
+                    @if($hasDPRPermission)
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a> DPR
+                                <span class="arrow"></span>
+                            </a>
+                            <ul class="dropdown-menu pull-left">
+                                <li aria-haspopup="true">
+                                    <a href="/dpr/category_manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Category Management
+                                    </a>
+                                </li>
+                                <li aria-haspopup="true">
+                                    <a href="/dpr/manage_dpr" class="nav-link nav-toggle ">
+                                        <i class="fa fa-file" aria-hidden="true"></i> DPR Management
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
+
                     @if(($user->roles[0]->role->slug == 'superadmin'))
-                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a href="/reports"> Reports
-                            <span class="arrow"></span>
-                        </a>
-                    </li>
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a href="/reports"> Reports
+                                <span class="arrow"></span>
+                            </a>
+                        </li>
                     @endif
                 </ul>
             </li>
