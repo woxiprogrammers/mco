@@ -162,7 +162,7 @@
                                                     @endforeach
                                                     <div class="form-actions noborder row">
                                                         <div class="col-md-offset-3" style="margin-left: 26%">
-                                                            <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                            <button type="submit" id="submitPOApproveForm" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                         </div>
                                                     </div>
                                                 @else
@@ -186,6 +186,13 @@
 @endsection
 @section('javascript')
     <script>
+
+        $(document).ready(function(){
+            $('#submitPOApproveForm').click(function(){
+                $("button[type='submit']").prop('disabled', true);
+                $('#editPurchaseOrderRequest').submit();
+            })
+        });
         function accordionTitleSelect(element){
             if($(element).is(":checked") == true){
                 $(element).closest('.panel-heading').find('.accordion-toggle').attr('data-toggle','collapse');

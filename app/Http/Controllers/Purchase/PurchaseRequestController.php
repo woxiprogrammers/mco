@@ -52,6 +52,7 @@ class PurchaseRequestController extends Controller
         $purchaseStatus = PurchaseRequestComponentStatuses::whereIn('slug',['purchase-requested','p-r-manager-approved','p-r-manager-disapproved','p-r-admin-approved','p-r-admin-disapproved'])->get()->toArray();
         return view('purchase/purchase-request/manage')->with(compact('clients','purchaseStatus'));
     }
+
     public function getCreateView(Request $request){
         try{
             if(Session::has('global_project_site')){
@@ -246,7 +247,7 @@ class PurchaseRequestController extends Controller
             ];
             Log::critical(json_encode($data));
         }
-        return redirect('purchase/purchase-request/create');
+        return redirect('/purchase/purchase-request/manage');
     }
 
     public function purchaseRequestListing(Request $request){
@@ -439,7 +440,9 @@ class PurchaseRequestController extends Controller
                     ->where('project_sites.id','=',$purchaseRequests[$pagination]['project_site_id'])
                     ->select('project_sites.name as site_name','projects.name as proj_name', 'clients.company as company')->first()->toArray();
                 $records['data'][$iterator] = [
-                    $this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']),
+                    '<a href="javascript:void(0);" onclick="openDetails('.$purchaseRequests[$pagination]['id'].')">
+                        '.$this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']).'
+                    </a>',
                     $projectdata['company'],
                     $projectdata['proj_name']." - ".$projectdata['site_name'],
                     date('d M Y', strtotime($purchaseRequests[$pagination]['created_at'])),
@@ -571,7 +574,19 @@ class PurchaseRequestController extends Controller
                     /*client Supplied*/
                     $clientId = $vendorIdArray[1];
                     $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
-                    PurchaseRequestComponentVendorRelation::where('client_id',$clientId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
+                    $purchaseRequestFormat = PurchaseRequest::join('purchase_request_components', 'purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                        ->where('purchase_request_components.id', $purchaseRequestComponentIds[0])
+                        ->pluck('purchase_requests.format_id')->first();
+                    if(count($purchaseRequestComponentIds) > 0){
+                        $purchaseRequestId = PurchaseRequestComponent::where('id', $purchaseRequestComponentIds[0])->pluck('purchase_request_id')->first();
+                        $alreadyCreatedPurchaseRequestVendorRelationIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->where('purchase_request_components.purchase_request_id', $purchaseRequestId)
+                            ->where('purchase_request_component_vendor_relation.client_id', $clientId)
+                            ->whereNotIn('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseRequestComponentIds)
+                            ->pluck('purchase_request_component_vendor_relation.id')
+                            ->toArray();
+                        PurchaseRequestComponentVendorRelation::whereIn('id', $alreadyCreatedPurchaseRequestVendorRelationIds)->delete();
+                    }
                     if(array_key_exists('checked_vendor_materials',$data)){
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
                             $vendorInfo = Client::findOrFail($clientId)->toArray();
@@ -624,7 +639,19 @@ class PurchaseRequestController extends Controller
                     }
                 }else{
                     $purchaseRequestComponentIds = PurchaseRequestComponent::whereIn('material_request_component_id',$materialRequestComponentIds)->pluck('id')->toArray();
-                    PurchaseRequestComponentVendorRelation::where('vendor_id',$vendorId)->whereNotIn('purchase_request_component_id',$purchaseRequestComponentIds)->delete();
+                    $purchaseRequestFormat = PurchaseRequest::join('purchase_request_components', 'purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                                                ->where('purchase_request_components.id', $purchaseRequestComponentIds[0])
+                                                ->pluck('purchase_requests.format_id')->first();
+                    if(count($purchaseRequestComponentIds) > 0){
+                        $purchaseRequestId = PurchaseRequestComponent::where('id', $purchaseRequestComponentIds[0])->pluck('purchase_request_id')->first();
+                        $alreadyCreatedPurchaseRequestVendorRelationIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->where('purchase_request_components.purchase_request_id', $purchaseRequestId)
+                            ->where('purchase_request_component_vendor_relation.vendor_id', $vendorId)
+                            ->whereNotIn('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseRequestComponentIds)
+                            ->pluck('purchase_request_component_vendor_relation.id')
+                            ->toArray();
+                        PurchaseRequestComponentVendorRelation::whereIn('id', $alreadyCreatedPurchaseRequestVendorRelationIds)->delete();
+                    }
                     if(array_key_exists('checked_vendor_materials',$data)){
                         if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
                             $vendorInfo = Vendor::findOrFail($vendorId)->toArray();
@@ -678,13 +705,16 @@ class PurchaseRequestController extends Controller
                     }
                 }
                 if(isset($vendorInfo)){
+                    $now = date('j_M_Y_His');
                     $pdfTitle = "Purchase Request";
+                    $pdfName = $purchaseRequestFormat."_".$now;
                     $pdf = App::make('dompdf.wrapper');
-                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle')));
+                    $formatId = $purchaseRequestFormat;
+                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle','formatId')));
                     $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                     $pdfFileName = sha1($vendorId).'.pdf';
                     $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
-                    $pdfContent = $pdf->stream();
+                    $pdfContent = $pdf->stream($pdfName);
                     if($data['is_mail'] == 1){
                         if(file_exists($pdfUploadPath)){
                             unlink($pdfUploadPath);
@@ -694,9 +724,9 @@ class PurchaseRequestController extends Controller
                         }
                         file_put_contents($pdfUploadPath,$pdfContent);
                         $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                        $mailMessage = 'Please check the P.R. attached herewith';
-                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
-                            $message->subject('Testing with attachment');
+                        $mailMessage = 'Please send the quotation of materials listed in the attachment.';
+                        Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData,$purchaseRequestFormat){
+                            $message->subject('Quotation Requirement ('.$purchaseRequestFormat.')');
                             $message->to($mailData['toMail']);
                             $message->from(env('MAIL_USERNAME'));
                             $message->attach($mailData['path']);
@@ -719,6 +749,21 @@ class PurchaseRequestController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function getPurchaseRequestDetails(Request $request,$purchaseRequestId){
+        try{
+            $purchaseRequest = PurchaseRequest::where('id',$purchaseRequestId)->first();
+            return view('partials.purchase.purchase-request.detail')->with(compact('purchaseRequest'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Request Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([],500);
         }
     }
 }

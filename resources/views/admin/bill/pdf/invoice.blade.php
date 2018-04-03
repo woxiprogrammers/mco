@@ -64,7 +64,7 @@
         <table width="100%">
             @if($slug == 'performa-invoice')
             <tr>
-                <td style="text-align: center; padding-bottom: 8px;"><i><b>PERFORMA INVOICE</b></i></td>
+                <td style="text-align: center; padding-bottom: 8px;"><i><b>PROFORMA INVOICE</b></i></td>
             </tr>
             @else
                 <tr>

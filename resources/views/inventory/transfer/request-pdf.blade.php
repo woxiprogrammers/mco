@@ -65,48 +65,80 @@ table {
                 </td>
             </tr>
             <tr>
-                <td style="width: 50%;"><b>Component Name</b></td>
-                <td style="text-align: left;">{!! $component_name !!}</td>
+                <td style="width: 50%; padding-left: 5%;" ><b>Component Name</b></td>
+                <td style="text-align: left; padding-left: 5%;">{!! $component_name !!}</td>
             </tr>
             <tr>
-                <td style="width: 50%;"><b>GRN</b></td>
-                <td style="text-align: left;">{!! $grn !!}</td>
+                <td style="width: 50%;padding-left: 5%;"><b>GRN</b></td>
+                <td style="text-align: left;padding-left: 5%;">{!! $grn !!}</td>
             </tr>
             <tr>
-                <td style="width: 50%;"><b>Quantity</b></td>
-                <td style="text-align: left;">{!! $quantity !!}</td>
+                <td style="width: 50%;padding-left: 5%;"><b>Quantity</b></td>
+                <td style="text-align: left;padding-left: 5%;">{!! $quantity !!}</td>
             </tr>
             <tr>
-                <td style="width: 50%;"><b>Unit</b></td>
-                <td style="text-align: left;">{!! $unit !!}</td>
+                <td style="width: 50%;padding-left: 5%;"><b>Unit</b></td>
+                <td style="text-align: left;padding-left: 5%;">{!! $unit !!}</td>
             </tr>
             @if($is_material == true)
                 <tr>
-                    <td style="width: 50%;"><b>Rate</b></td>
-                    <td style="text-align: left;">{!! $rate_per_unit !!}</td>
+                    <td style="padding-left: 5%;width: 50%;"><b>Rate</b></td>
+                    <td style="padding-left: 5%;text-align: left;">{!! $rate_per_unit !!}</td>
                 </tr>
                 <tr>
-                    <td style="width: 50%;"><b>CGST ({!! $cgst_percentage !!} %)</b></td>
-                    <td style="text-align: left;">{!! $cgst_amount !!}</td>
+                    <td style="padding-left: 5%;width: 50%;"><b>CGST ({!! $cgst_percentage !!} %)</b></td>
+                    <td style="padding-left: 5%;text-align: left;">{!! $cgst_amount !!}</td>
                 </tr>
                 <tr>
-                    <td style="width: 50%;"><b>SGST ({!! $sgst_percentage !!} %)</b></td>
-                    <td style="text-align: left;">{!! $sgst_amount !!}</td>
+                    <td style="padding-left: 5%;width: 50%;"><b>SGST ({!! $sgst_percentage !!} %)</b></td>
+                    <td style="padding-left: 5%;text-align: left;">{!! $sgst_amount !!}</td>
                 </tr>
                 <tr>
-                    <td style="width: 50%;"><b>IGST ({!! $igst_percentage !!} %)</b></td>
-                    <td style="text-align: left;">{!! $igst_amount !!}</td>
+                    <td style="padding-left: 5%;width: 50%;"><b>IGST ({!! $igst_percentage !!} %)</b></td>
+                    <td style="padding-left: 5%;text-align: left;">{!! $igst_amount !!}</td>
                 </tr>
                 <tr>
-                    <td style="width: 50%;"><b>Total Amount</b></td>
-                <td style="text-align: left;">{!! $total !!}</td>
+                    <td style="padding-left: 5%;width: 50%;"><b>Total Amount</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $total !!}</td>
                 </tr>
             @else
                 <tr>
-                    <td style="width: 50%;"><b>Rent Per Day</b></td>
-                    <td style="text-align: left;">{!! $rate_per_unit !!}</td>
+                    <td style="padding-left: 5%;width: 50%;"><b>Rent Per Day</b></td>
+                    <td style="padding-left: 5%;text-align: left;">{!! $rate_per_unit !!}</td>
                 </tr>
             @endif
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transportation Amount</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $transportation_amount !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transportation CGST ({!! $transportation_cgst_percent !!} %)</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $transportation_cgst_amount !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transportation SGST ({!! $transportation_sgst_percent !!} %)</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $transportation_sgst_amount !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transportation IGST ({!! $transportation_igst_percent !!} %)</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $transportation_igst_amount !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Driver Name</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $driver_name !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Company Name</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $company_name !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Mobile no</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $mobile !!}</td>
+            </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Vehicle number</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $vehicle_number !!}</td>
+            </tr>
         </table>
 </body>
 </html>

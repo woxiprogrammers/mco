@@ -17,10 +17,10 @@ var BillTransactionListing = function () {
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
                 "lengthMenu": [
-                    [10, 20, 50, 100, 150, -1],
-                    [10, 20, 50, 100, 150, "All"] // change per page values here
+                    [50, 100, 150],
+                    [50, 100, 150] // change per page values here
                 ],
-                "pageLength": 10, // default record count per page
+                "pageLength": 50, // default record count per page
                 "ajax": {
                     "url": "/subcontractor/subcontractor-bills/transaction/listing/"+$("#subcontractorBillId").val()+"?_token="+$("input[name='_token']").val(), // ajax source
                 },
@@ -63,6 +63,59 @@ var BillTransactionListing = function () {
         //main function to initiate the module
         init: function () {
             handleInventory();
+        }
+    };
+}();
+
+var  CreateTransaction = function () {
+    var handleCreate = function() {
+        var form = $('#createTransactionForm');
+        var error = $('.alert-danger', form);
+        var success = $('.alert-success', form);
+        var pendingAmount = parseFloat($("#pendingAmount").val());
+        form.validate({
+            errorElement: 'span', //default input error message container
+            errorClass: 'help-block', // default input error message class
+            focusInvalid: false, // do not focus the last invalid input
+            rules: {
+                total : {
+                    required: true,
+                    min : 1,
+                    max: pendingAmount
+                }
+            },
+            messages: {
+                total : {
+                    required: 'Please enter total.'
+                }
+            },
+            invalidHandler: function (event, validator) { //display error alert on form submit
+                success.hide();
+                error.show();
+            },
+            highlight: function (element) { // hightlight error inputs
+                $(element)
+                    .closest('.form-group').addClass('has-error'); // set error class to the control group
+            },
+            unhighlight: function (element) { // revert the change done by hightlight
+                $(element)
+                    .closest('.form-group').removeClass('has-error'); // set error class to the control group
+            },
+            success: function (label) {
+                label
+                    .closest('.form-group').addClass('has-success');
+            },
+            submitHandler: function (form) {
+                $("button[type='submit']").prop('disabled', true);
+                success.show();
+                error.hide();
+                form.submit();
+            }
+        });
+    }
+    return {
+        init: function () {
+            handleCreate();
         }
     };
 }();

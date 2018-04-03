@@ -13,10 +13,10 @@ var MaterialListing = function () {
             loadingMessage: 'Loading...',
             dataTable: {
                 "lengthMenu": [
-                    [10, 20, 50, 100, 150, -1],
-                    [10, 20, 50, 100, 150, "All"]
+                    [ 50, 100, 150],
+                    [ 50, 100, 150]
                 ],
-                "pageLength": 10,
+                "pageLength": 50,
                 "ajax": {
                     "url": "/material/listing",
                 },
@@ -74,8 +74,7 @@ jQuery(document).ready(function() {
         $(".filter-submit").trigger('click');
     });
 
-    $("#changeStatusButton").on('click',function(e){
-        e.stopPropagation();
+    $("#changeStatusButton").on('click',function(){
         var materialIds = [];
         $("input:checkbox:checked").each(function(i){
             materialIds[i] = $(this).val();

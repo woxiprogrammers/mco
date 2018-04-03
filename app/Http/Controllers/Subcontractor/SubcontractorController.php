@@ -10,6 +10,7 @@ use App\ProjectSite;
 use App\Quotation;
 use App\QuotationStatus;
 use App\Subcontractor;
+use App\SubcontractorAdvancePayment;
 use App\SubcontractorBill;
 use App\SubcontractorBillReconcileTransaction;
 use App\SubcontractorBillStatus;
@@ -53,7 +54,7 @@ class SubcontractorController extends Controller
             $scData['is_active'] = (boolean)false;
             Subcontractor::create($scData);
             $request->session()->flash('success', 'Subcontractor Created successfully.');
-            return redirect('/subcontractor/create');
+            return redirect('/subcontractor/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Subcontractor',
@@ -155,7 +156,8 @@ class SubcontractorController extends Controller
 
     public function getEditView(Request $request, $subcontractor){
         try{
-            return view('subcontractor.edit')->with(compact('subcontractor'));
+            $transaction_types = PaymentType::get();
+            return view('subcontractor.edit')->with(compact('subcontractor','transaction_types'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -172,7 +174,7 @@ class SubcontractorController extends Controller
             $updateLabourData = $request->except('_token');
             Subcontractor::where('id',$subcontractor['id'])->update($updateLabourData);
             $request->session()->flash('success', 'Subcontractor Edited successfully.');
-            return redirect('/subcontractor/edit/'.$subcontractor->id);
+            return redirect('/subcontractor/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Subcontractor',
@@ -234,52 +236,20 @@ class SubcontractorController extends Controller
             }else{
                 $selectedGlobalProjectSiteID = 0;
             }
-            switch($request['structure_type']){
-                case 'amountwise' :
-                        $subcontractorStructure = SubcontractorStructure::create([
-                                                    'project_site_id' => $selectedGlobalProjectSiteID,
-                                                    'subcontractor_id' => $request['subcontractor_id'],
-                                                    'summary_id' => $request['summary_id'],
-                                                    'sc_structure_type_id' => SubcontractorStructureType::where('slug',$request['structure_type'])->pluck('id')->first(),
-                                                    'rate' => $request['rate'],
-                                                    'total_work_area' => $request['total_work_area'],
-                                                    'description' => $request['description'],
-                                                ]);
-                        foreach($request['bills'] as $key => $billData){
-                            $subcontractorBill = SubcontractorBill::create([
-                                'sc_structure_id' => $subcontractorStructure['id'],
-                                'subcontractor_bill_status_id' => SubcontractorBillStatus::where('slug','draft')->pluck('id')->first(),
-                                'qty' => $billData['quantity'],
-                                'description' => $billData['description'],
-                            ]);
-                            if(array_key_exists('taxes',$billData)){
-                                foreach ($billData['taxes'] as $taxID => $taxData){
-                                    SubcontractorBillTax::create([
-                                        'subcontractor_bills_id' => $subcontractorBill['id'],
-                                        'tax_id' => $taxID,
-                                        'percentage' => $taxData['percentage'],
-                                    ]);
-                                }
-                            }
-                        }
-                    break;
-
-                case 'sqft' :
-                    $subcontractorStructure = SubcontractorStructure::create([
-                                                'project_site_id' => $selectedGlobalProjectSiteID,
-                                                'subcontractor_id' => $request['subcontractor_id'],
-                                                'summary_id' => $request['summary_id'],
-                                                'sc_structure_type_id' => SubcontractorStructureType::where('slug',$request['structure_type'])->pluck('id')->first(),
-                                                'rate' => $request['rate'],
-                                                'total_work_area' => $request['total_work_area'],
-                                                'description' => $request['description'],
-                                            ]);
-            }
+            $subcontractorStructure = SubcontractorStructure::create([
+                'project_site_id' => $selectedGlobalProjectSiteID,
+                'subcontractor_id' => $request['subcontractor_id'],
+                'summary_id' => $request['summary_id'],
+                'sc_structure_type_id' => SubcontractorStructureType::where('slug',$request['structure_type'])->pluck('id')->first(),
+                'rate' => $request['rate'],
+                'total_work_area' => $request['total_work_area'],
+                'description' => $request['description'],
+            ]);
             $request->session()->flash('success', 'Subcontractor Structured Created successfully.');
-            return redirect('/subcontractor/subcontractor-structure/create');
+            return redirect('/subcontractor/subcontractor-structure/manage');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Create Subcontractor',
+                'action' => 'Create Subcontractor Structure',
                 'exception' => $e->getMessage(),
                 'params' => $request->all()
             ];
@@ -290,66 +260,131 @@ class SubcontractorController extends Controller
 
     public function subcontractorStructureListing(Request $request){
         try{
-            $selectGlobalProjectSite = 0;
-            if(Session::has('global_project_site')){
-                $selectGlobalProjectSite = Session::get('global_project_site');
+            $filterFlag = true;
+            $subcontractor_name = null;
+            $project_name = null;
+            if ($request->has('subcontractor_name')) {
+                $subcontractor_name = $request['subcontractor_name'];
             }
-            $listingData = SubcontractorStructure::where('project_site_id', $selectGlobalProjectSite)->get();
-            $iTotalRecords = count($listingData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($listingData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                $subcontractorBillIds = $listingData[$pagination]->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
-                $billTotals = 0;
-                $billPaidAmount = 0;
-                foreach ($subcontractorBillIds as $subcontractorStructureBillId){
-                    $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
-                    $subcontractorStructure = $subcontractorBill->subcontractorStructure;
-                    $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
-                    $taxTotal = 0;
-                    $structureSlug = $subcontractorStructure->contractType->slug;
-                    if($structureSlug == 'sqft'){
-                        $rate = $subcontractorStructure['rate'];
-                        $subTotal = $subcontractorBill['qty'] * $rate;
-                        foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                            $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
-                        }
-                        $finalTotal = $subTotal + $taxTotal;
-                    }else{
-                        $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
-                        $subTotal = $subcontractorBill['qty'] * $rate;
-                        foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                            $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
-                        }
-                        $finalTotal = $subTotal + $taxTotal;
-                    }
-                    $billTotals += $finalTotal;
-                    $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+            $ids = SubcontractorStructure::pluck('id');
+
+            if($request->has('project_name') && $filterFlag == true){
+                $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
+                $ids = SubcontractorStructure::where('project_site_id','!=', 0)->whereIn('project_site_id',$projectSites)->orderBy('created_at','desc')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
                 }
-                $action = '<a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
-                                        <i class="icon-docs"></i> Manage
-                                    </a>
-                                    <a href="/subcontractor/subcontractor-structure/view/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
-                                         <i class="icon-docs"></i>View
-                                    </a>';
-                $total_amount = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]->subcontractor->subcontractor_name,
-                    $listingData[$pagination]->summary->name,
-                    $listingData[$pagination]->contractType->name,
-                    $listingData[$pagination]['rate'],
-                    $listingData[$pagination]['total_work_area'],
-                    $total_amount,
-                    $billTotals,
-                    $billPaidAmount,
-                    date('d M Y',strtotime($listingData[$pagination]['created_at'])),
-                    $action
-                ];
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+
+            if($request->has('subcontractor_name') && $filterFlag == true){
+                $subContractorid = Subcontractor::where('company_name','ilike','%'.$request['subcontractor_name'].'%')->select('id')->get()->toArray();
+                $ids = SubcontractorStructure::whereIn('subcontractor_id',$subContractorid)->orderBy('created_at','desc')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            $listingData = array();
+            if ($filterFlag) {
+                $listingData = SubcontractorStructure::whereIn('id',$ids)->get();
+            }
+            $total = 0;
+            $billTotals = 0;
+            $billPaidAmount = 0;
+            if ($request->has('get_total')) {
+                if ($filterFlag) {
+                    foreach($listingData as $subcontractorStruct) {
+                        $total = $total + ($subcontractorStruct['rate']*$subcontractorStruct['total_work_area']);
+                        $subcontractorBillIdsArray = $subcontractorStruct->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
+                        foreach ($subcontractorBillIdsArray as $subBillids) {
+                            $subcontractorBill = SubcontractorBill::where('id',$subBillids)->first();
+                            $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+                            $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                            $taxTotal = 0;
+                            $structureSlug = $subcontractorStructure->contractType->slug;
+                            if($structureSlug == 'sqft'){
+                                $rate = $subcontractorStructure['rate'];
+                                $subTotal = $subcontractorBill['qty'] * $rate;
+                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                }
+                                $finalTotal = $subTotal + $taxTotal;
+                            }else{
+                                $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
+                                $subTotal = $subcontractorBill['qty'] * $rate;
+                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                }
+                                $finalTotal = $subTotal + $taxTotal;
+                            }
+                            $billTotals += $finalTotal;
+                            $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subBillids)->sum('total');
+                        }
+                    }
+                }
+                $records['total'] = $total;
+                $records['billtotal'] = $billTotals;
+                $records['paidtotal'] = $billPaidAmount;
+                $records['balancetotal'] = $billTotals - $billPaidAmount;
+            } else {
+                $iTotalRecords = count($listingData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($listingData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                    $subcontractorBillIds = $listingData[$pagination]->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
+                    $billTotals = 0;
+                    $billPaidAmount = 0;
+                    foreach ($subcontractorBillIds as $subcontractorStructureBillId){
+                        $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
+                        $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+                        $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                        $taxTotal = 0;
+                        $structureSlug = $subcontractorStructure->contractType->slug;
+                        if($structureSlug == 'sqft'){
+                            $rate = $subcontractorStructure['rate'];
+                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                            }
+                            $finalTotal = $subTotal + $taxTotal;
+                        }else{
+                            $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
+                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                            }
+                            $finalTotal = $subTotal + $taxTotal;
+                        }
+                        $billTotals += $finalTotal;
+                        $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+                    }
+                    $action = '<a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                            <i class="icon-docs"></i> Manage
+                                        </a>
+                                        <a href="/subcontractor/subcontractor-structure/view/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                             <i class="icon-docs"></i>View
+                                        </a>';
+                    $total_amount = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
+                    $records['data'][$iterator] = [
+                        $listingData[$pagination]->subcontractor->subcontractor_name,
+                        $listingData[$pagination]->projectSite->project->name,
+                        $listingData[$pagination]->summary->name,
+                        $listingData[$pagination]->contractType->name,
+                        $listingData[$pagination]['rate'],
+                        $listingData[$pagination]['total_work_area'],
+                        $total_amount,
+                        $billTotals,
+                        $billPaidAmount,
+                        $billTotals-$billPaidAmount,
+                        date('d M Y',strtotime($listingData[$pagination]['created_at'])),
+                        $action
+                    ];
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
+            }
         }catch(\Exception $e){
             $records = array();
             $data = [
@@ -395,7 +430,7 @@ class SubcontractorController extends Controller
             $updateLabourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
             Employee::where('id',$labour['id'])->update($updateLabourData);
             $request->session()->flash('success', 'Subcontractor Edited successfully.');
-            return redirect('/subcontractor/edit/'.$labour->id);
+            return redirect('/subcontractor/subcontractor-structure/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Subcontractor',
@@ -520,10 +555,7 @@ class SubcontractorController extends Controller
                 ->where('subcontractor_structure.id',$subcontractorStructureId)->distinct('taxes.id')
                 ->orderBy('taxes.id')->select('taxes.id','taxes.name')->get()->toArray();
             $taxes = array_column($taxData,'name');
-            $subcontractorStructureTypeSlug = SubcontractorStructure::join('subcontractor_structure_types','subcontractor_structure_types.id','=','subcontractor_structure.sc_structure_type_id')
-                                                    ->where('subcontractor_structure.id',$subcontractorStructureId)
-                                                    ->pluck('subcontractor_structure_types.slug')->first();
-            return view('subcontractor.structure.bill.manage')->with(compact('taxes','subcontractorStructureId','subcontractorStructureTypeSlug'));
+            return view('subcontractor.structure.bill.manage')->with(compact('taxes','subcontractorStructureId'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Structure Bill Manage view',
@@ -562,20 +594,13 @@ class SubcontractorController extends Controller
                         </a>
                     </div>';
                 $billStatus = $listingData[$pagination]->subcontractorBillStatus->name;
-                $taxIds = SubcontractorBillTax::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_taxes.subcontractor_bills_id')
-                    ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
-                    ->join('taxes','subcontractor_bill_taxes.tax_id','=','taxes.id')
-                    ->where('subcontractor_structure.id',$subcontractorStructureId)->distinct('subcontractor_bill_taxes.tax_id')
-                    ->pluck('subcontractor_bill_taxes.tax_id');
-                $taxes = Tax::whereIn('id',$taxIds)->distinct('id')->orderBy('id')->pluck('id');
-                $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$listingData[$pagination]['id'])->select('tax_id','percentage')->get();
-                $taxArray = array();
-                $jIterator = 0;
-                foreach ($taxes as $taxId){
-                    $percentage = $taxesApplied->where('tax_id',$taxId)->pluck('percentage')->first();
-                    $taxArray[$jIterator]['tax_id'] = $taxId;
-                    $taxArray[$jIterator]['tax_percentage'] = ($percentage == null ) ? 0 : $percentage;
-                    $jIterator++;
+                $structureTypeSlug = SubcontractorStructureType::where('id',$listingData[$pagination]['sc_structure_type_id'])->pluck('slug')->first();
+                if($structureTypeSlug == 'sqft'){
+                    $rate = $listingData[$pagination]['rate'];
+                    $basicAmount = $rate * $listingData[$pagination]['qty'];
+                }else{
+                    $rate = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
+                    $basicAmount = $rate * $listingData[$pagination]['qty'];
                 }
                 if($billStatusSlug == 'disapproved'){
                     $billNo = "-";
@@ -583,22 +608,20 @@ class SubcontractorController extends Controller
                     $billNo = "R. A. - ".($billArrayNo);
                     $billArrayNo++;
                 }
-                $structureTypeSlug = SubcontractorStructureType::where('id',$listingData[$pagination]['sc_structure_type_id'])->pluck('slug')->first();
-                if($structureTypeSlug == 'sqft'){
-                    $rate = $listingData[$pagination]['rate'];
-                    $subTotal = $rate * $listingData[$pagination]['qty'];
-                }else{
-                    $rate = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
-                    $subTotal = $rate * $listingData[$pagination]['qty'];
-                }
+                $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$listingData[$pagination]['id'])->sum('percentage');
+                $taxAmount = $basicAmount * ($taxesApplied / 100);
+                $finalAmount = $basicAmount + $taxAmount;
+                $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('total');
                 $records['data'][$iterator] = [
                     $billNo,
+                    $basicAmount,
+                    $taxAmount,
+                    $finalAmount,
+                    $paidAmount,
+                    $finalAmount - $paidAmount,
+                    $billStatus,
+                    $action
                 ];
-                foreach($taxArray as $taxAmount){
-                    array_push($records['data'][$iterator],(($taxAmount['tax_percentage'] * $subTotal) / 100));
-                }
-                array_push($records['data'][$iterator],$billStatus);
-                array_push($records['data'][$iterator],$action);
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -663,7 +686,9 @@ class SubcontractorController extends Controller
             $totalBillRetentionAmount = SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('retention_amount');
             $reconciledRetentionAmount = SubcontractorBillReconcileTransaction::where('subcontractor_bill_id',$subcontractorStructureBillId)->where('transaction_slug','retention')->sum('amount');
             $remainingRetentionAmount = $reconciledRetentionAmount - $totalBillRetentionAmount;
-            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount'));
+            $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBill->id)->sum('total');
+            $pendingAmount = $finalTotal - $paidAmount;
+            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Bill View',
@@ -762,7 +787,8 @@ class SubcontractorController extends Controller
     public function editSubcontractorStructureBill(Request $request,$subcontractorStructureBillId){
         try{
             SubcontractorBill::where('id',$subcontractorStructureBillId)->update([
-                'description' => $request['description']
+                'description' => $request['description'],
+                'number_of_floors' => $request->number_of_floors
             ]);
             foreach ($request['taxes'] as $taxId => $taxPercentage){
                 SubcontractorBillTax::where('id',$taxId)->where('subcontractor_bills_id',$subcontractorStructureBillId)->update([
@@ -782,18 +808,27 @@ class SubcontractorController extends Controller
         }
     }
 
-    public function getSubcontractorBillCreateView(Request $request,$subcontractorStructureId){
+    public function getSubcontractorBillCreateView(Request $request,$subcontractorStructure){
         try{
-            $subcontractorStructure = SubcontractorStructure::where('id',$subcontractorStructureId)->first();
+            $quantitySum = SubcontractorBill::join('subcontractor_structure','subcontractor_structure.id','=','sc_structure_id')
+                                            ->join('subcontractor_bill_status','subcontractor_bill_status.id','=','subcontractor_bills.subcontractor_bill_status_id')
+                                            ->where('subcontractor_structure.id', $subcontractorStructure->id)
+                                            ->where('subcontractor_bill_status.slug','!=','disapproved')
+                                            ->sum('qty');
+            if($subcontractorStructure->contractType->slug == 'amountwise'){
+                $allowedQuantity = 1 - $quantitySum;
+            }else{
+                $allowedQuantity = $subcontractorStructure->total_work_area - $quantitySum;
+            }
             $totalBillCount = $subcontractorStructure->subcontractorBill->count();
             $billName = "R.A. ".($totalBillCount + 1);
             $taxes = Tax::whereNotIn('slug',['vat'])->where('is_active',true)->where('is_special',false)->select('id','name','slug','base_percentage')->get();
-            return view('subcontractor.structure.bill.create')->with(compact('subcontractorStructure','billName','taxes'));
+            return view('subcontractor.structure.bill.create')->with(compact('subcontractorStructure','billName','taxes','allowedQuantity'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Bill Create View',
                 'exception' => $e->getMessage(),
-                'data' => $subcontractorStructureId
+                'data' => $subcontractorStructure->id
             ];
             Log::Critical(json_encode($data));
             abort(500);
@@ -807,6 +842,7 @@ class SubcontractorController extends Controller
                 'subcontractor_bill_status_id' => SubcontractorBillStatus::where('slug','draft')->pluck('id')->first(),
                 'qty' => $request['qty'],
                 'description' => $request['description'],
+                'number_of_floors' => $request->number_of_floors
             ]);
             if($request->has('taxes')){
                 foreach ($request['taxes'] as $taxID => $taxPercentage){
@@ -832,28 +868,24 @@ class SubcontractorController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            $subcontractorBillTransaction = SubcontractorBillTransaction::create([
-                'subcontractor_bills_id' => $request['bill_id'],
-                'subtotal' => $request['total']  + $request['other_recovery'] - ($request['debit'] + $request['hold'] + $request['retention_tax_amount'] + $request['tds_tax_amount']),
-                'total' => $request['total'],
-                'debit' => $request['debit'],
-                'hold' => $request['hold'],
-                'retention_percent' => $request['retention_tax_percent'],
-                'retention_amount' => $request['retention_tax_amount'],
-                'tds_percent' => $request['tds_tax_percent'],
-                'tds_amount' => $request['tds_tax_amount'],
-                'other_recovery' => $request['other_recovery'],
-                'remark' => $request['remark']
-            ]);
+            $subcontractorBillTransactionData = $request->except('_token','remainingTotal');
             if($request->has('is_advance')){
-
+                $subcontractorBillTransactionData['is_advance'] = true;
+            }else{
+                $subcontractorBillTransactionData['is_advance'] = false;
+            }
+            $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+            if($subcontractorBillTransaction->is_advance == true){
+                $subcontractor = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->subcontractor;
+                $balanceAdvanceAmount = $subcontractor->balance_advance_amount;
+                $subcontractor->update(['balance_advance_amount' => $balanceAdvanceAmount - $subcontractorBillTransaction->total]);
             }
             if($subcontractorBillTransaction != null){
                 $request->session()->flash('success','Transaction created successfully');
             }else{
                 $request->session()->flash('error','Cannot create transaction');
             }
-            return redirect('/subcontractor/subcontractor-bills/view/'.$request['bill_id']);
+            return redirect('/subcontractor/subcontractor-bills/view/'.$request['subcontractor_bills_id']);
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Subcontractor Bill Transaction',
@@ -988,6 +1020,70 @@ class SubcontractorController extends Controller
             ];
             Log::critical(json_encode($data));
             $status = 500;
+        }
+        return response()->json($records,$status);
+    }
+
+    public function addAdvancePayment(Request $request){
+        try{
+            $advancePaymentData = $request->all();
+            $subcontractorAdvanceAmount = SubcontractorAdvancePayment::create($advancePaymentData);
+            $subcontractor = Subcontractor::findOrFail($request->subcontractor_id);
+            if(!isset($subcontractor->total_advance_amount)){
+                $newBalanceadvanceAmount = $newTotaladvanceAmount = $request->amount;
+            }else{
+                $newBalanceadvanceAmount = $subcontractor->balance_advance_amount + $request->amount;
+                $newTotaladvanceAmount = $subcontractor->total_advance_amount + $request->amount;
+            }
+            $subcontractor->update([
+                'total_advance_amount' => $newTotaladvanceAmount,
+                'balance_advance_amount' => $newBalanceadvanceAmount
+            ]);
+            $request->session()->flash('success','Advance Amount added successfully.');
+            return redirect('/subcontractor/edit/'.$request->subcontractor_id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add subcontractor advance payment',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function advancePaymentListing(Request $request){
+        try{
+            $status = 200;
+            $paymentData = SubcontractorAdvancePayment::where('subcontractor_id',$request->subcontractor_id)->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($paymentData);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]['amount'],
+                    $paymentData[$pagination]->paymentType->name,
+                    $paymentData[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Subcontractor Advance Payment Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = [];
         }
         return response()->json($records,$status);
     }

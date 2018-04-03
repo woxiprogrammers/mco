@@ -19,27 +19,31 @@ class ACLHelper{
             $user = Auth::user();
             $moduleId = Module::where('slug',$moduleSlug)->pluck('id')->first();
             $subModuleCount = Module::where('module_id', $moduleId)->count();
-            if($subModuleCount > 0){
-                $userPermissionCount = UserHasPermission::join('permissions','user_has_permissions.permission_id','=','permissions.id')
-                    ->join('modules','modules.id','=','permissions.module_id')
-                    ->where('user_has_permissions.user_id', $user->id)
-                    ->where('modules.module_id', $moduleId)
-                    ->select('user_has_permissions.permission_id as permission_id','modules.name as module_name')
-                    ->get()
-                    ->toArray();
-            }else{
-                $userPermissionCount = UserHasPermission::join('permissions','user_has_permissions.permission_id','=','permissions.id')
-                    ->join('modules','modules.id','=','permissions.module_id')
-                    ->where('user_has_permissions.user_id', $user->id)
-                    ->where('modules.id', $moduleId)
-                    ->select('user_has_permissions.permission_id as permission_id','modules.name as module_name')
-                    ->get()
-                    ->toArray();
-            }
-            if(count($userPermissionCount) > 0){
+            if(in_array($user->roles[0]->role->slug,['superadmin','admin'])){
                 return true;
             }else{
-                return false;
+                if($subModuleCount > 0){
+                    $userPermissionCount = UserHasPermission::join('permissions','user_has_permissions.permission_id','=','permissions.id')
+                        ->join('modules','modules.id','=','permissions.module_id')
+                        ->where('user_has_permissions.user_id', $user->id)
+                        ->where('modules.module_id', $moduleId)
+                        ->select('user_has_permissions.permission_id as permission_id','modules.name as module_name')
+                        ->get()
+                        ->toArray();
+                }else{
+                    $userPermissionCount = UserHasPermission::join('permissions','user_has_permissions.permission_id','=','permissions.id')
+                        ->join('modules','modules.id','=','permissions.module_id')
+                        ->where('user_has_permissions.user_id', $user->id)
+                        ->where('modules.id', $moduleId)
+                        ->select('user_has_permissions.permission_id as permission_id','modules.name as module_name')
+                        ->get()
+                        ->toArray();
+                }
+                if(count($userPermissionCount) > 0){
+                    return true;
+                }else{
+                    return false;
+                }
             }
         }catch (\Exception $e){
             $data = [
@@ -59,11 +63,13 @@ class ACLHelper{
                 ->whereIn('modules.module_id',$moduleIds)
                 ->where('permissions.is_web',true)
                 ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
+                ->orderBy('submodule_id')
                 ->get();
             $mobileModules =  Module::join('permissions','modules.id','=','permissions.module_id')
                 ->whereIn('modules.module_id',$moduleIds)
                 ->where('permissions.is_mobile',true)
                 ->select('modules.name as module_name','permissions.name as permission_name','modules.id as submodule_id','modules.module_id as module_id','permissions.type_id as permission_type_id','permissions.id as permission_id')
+                ->orderBy('submodule_id')
                 ->get();
             $webModuleResponse = array();
             foreach ($webModules as $subModule){

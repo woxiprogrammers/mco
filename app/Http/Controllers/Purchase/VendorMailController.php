@@ -58,14 +58,30 @@ class VendorMailController extends Controller
                 switch($vendorMailData[$pagination]['type_slug']){
                     case 'for-quotation':
                         $slug = 'For Quotation';
+                        $action = '<div id="sample_editable_1_new" class="btn btn-small blue">
+                                    <a href="/purchase/vendor-mail/pdf/'.$vendorMailData[$pagination]['id'].'/'.$vendorMailData[$pagination]['type_slug'].'" style="color: white">
+                                        PDF <i class="fa fa-download" aria-hidden="true"></i>
+                                    </a>
+                                </div>';
                         break;
 
                     case 'for-purchase-order':
                         $slug = 'For Purchase Order';
+                        $action = '<div id="sample_editable_1_new" class="btn btn-small blue">
+                                    <a href="/purchase/vendor-mail/pdf/'.$vendorMailData[$pagination]['id'].'/'.$vendorMailData[$pagination]['type_slug'].'" style="color: white">
+                                        PDF <i class="fa fa-download" aria-hidden="true"></i>
+                                    </a>
+                                </div>';
+                        break;
+
+                    case 'disapprove-purchase-order':
+                        $slug = 'For Disapproved Purchase Order';
+                        $action = '-';
                         break;
 
                     default:
                         $slug = '';
+                        $action = '-';
                 }
 
                 if($vendorMailData[$pagination]['is_client'] == true){
@@ -81,15 +97,13 @@ class VendorMailController extends Controller
                         $name = $vendorMailData[$pagination]->vendor->company;
                     }
                 }
+                $createdAt = date('d M Y h:i:s',strtotime($vendorMailData[$pagination]['created_at']));
                 $records['data'][] = [
                     ($pagination+1),
                     $name,
                     $slug,
-                    '<div id="sample_editable_1_new" class="btn btn-small blue">
-                                            <a href="/purchase/vendor-mail/pdf/'.$vendorMailData[$pagination]['id'].'/'.$vendorMailData[$pagination]['type_slug'].'" style="color: white">
-                                                PDF <i class="fa fa-download" aria-hidden="true"></i>
-                                            </a>
-                                        </div>'
+                    $createdAt,
+                    $action
                 ];
             }
         }catch (\Exception $e){
@@ -110,8 +124,8 @@ class VendorMailController extends Controller
             $purchaseRequestComponentVendorMailInfo = PurchaseRequestComponentVendorMailInfo::where('id',$purchaseRequestComponentVendorMailId)->first();
             if($slug == 'for-quotation'){
                 $pdfTitle = 'Purchase Request';
-                $vendorInfo = array();
                 $purchaseRequest = PurchaseRequest::where('id',$purchaseRequestComponentVendorMailInfo['reference_id'])->first();
+                $formatId = $purchaseRequest->format_id;
                 $materialRequestComponents = MaterialRequestComponents::join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
                                                 ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
                                                 ->where('purchase_request_component_vendor_relation.vendor_id',$purchaseRequestComponentVendorMailInfo['vendor_id'])
@@ -119,11 +133,11 @@ class VendorMailController extends Controller
                                                 ->select('material_request_components.material_request_id','material_request_components.id','material_request_components.name','material_request_components.quantity','material_request_components.unit_id')
                                                 ->get();
                 $iterator = 0;
-                $client = $purchaseRequest->projectSite->project->client;
-                $vendorInfo['company'] = $client['company'];
-                $vendorInfo['mobile'] = $client['mobile'];
-                $vendorInfo['email'] = $client['email'];
-                $vendorInfo['gstin'] = $client['gstin'];
+                if($purchaseRequestComponentVendorMailInfo->is_client == true){
+                    $vendorInfo = Client::findOrFail($purchaseRequestComponentVendorMailInfo->client_id)->toArray();
+                }else{
+                    $vendorInfo = Vendor::findOrFail($purchaseRequestComponentVendorMailInfo->vendor_id)->toArray();
+                }
                 $vendorInfo['materials'] = array();
                 $projectSiteInfo = array();
                 $projectSiteInfo['project_name'] = $purchaseRequest->projectSite->project->name;
@@ -141,12 +155,13 @@ class VendorMailController extends Controller
                     $iterator++;
                 }
                 $pdf = App::make('dompdf.wrapper');
-                $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle')));
+                $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfTitle','formatId')));
                 return $pdf->stream();
             }elseif($slug == 'for-purchase-order'){
                 $pdfTitle = 'Purchase Order';
                 $pdfFlag = 'after-purchase-order-create';
                 $purchaseOrder = PurchaseOrder::where('id',$purchaseRequestComponentVendorMailInfo['reference_id'])->first();
+                $formatId = $purchaseOrder->format_id;
                 if($purchaseOrder != null){
                     if($purchaseOrder->is_client_order == true){
                         $vendorInfo = Client::findOrFail($purchaseOrder->client_id)->toArray();
@@ -223,7 +238,7 @@ class VendorMailController extends Controller
                         $iterator++;
                     }
                     $pdf = App::make('dompdf.wrapper');
-                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle')));
+                    $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle','formatId')));
                     return $pdf->stream();
                 }else{
 

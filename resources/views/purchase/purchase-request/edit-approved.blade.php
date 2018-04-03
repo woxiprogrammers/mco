@@ -278,14 +278,14 @@
                                             </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
-                                            <form role="form" action="/purchase/purchase-request/assign-vendors" method="post">
+                                            <form role="form" id="vendorAssignmentForm" action="/purchase/purchase-request/assign-vendors" method="post">
                                                 {!! csrf_field() !!}
                                                 <input type="hidden" name="is_mail" id="is_mail" value="1">
                                                 <input type="hidden" name="purchase_request_id" value="{{$purchaseRequest['id']}}">
                                                 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
                                                 </div><!-- panel-group -->
-                                                <button class="btn btn-set yellow">
+                                                <button type="submit" class="btn btn-set yellow" id="submitVendorAssignmentForm">
                                                     <i class="fa fa-check" style="font-size: large"></i>
                                                     Send mail to vendors&nbsp; &nbsp; &nbsp; &nbsp;
                                                 </button>
@@ -309,6 +309,12 @@
     <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
     <script>
         $(document).ready(function(){
+
+            $('#submitVendorAssignmentForm').click(function(){
+                $("button[type='submit']").prop('disabled', true);
+                $('#vendorAssignmentForm').submit();
+            });
+
             $('.example-getting-started').multiselect();
             $("#myBtn").click(function(){
                 $("#myModal").modal();

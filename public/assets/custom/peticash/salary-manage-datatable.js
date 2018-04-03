@@ -22,11 +22,64 @@ var peticashManagementListing = function () {
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    var client_id = $('#client_id').val();
+                    var project_id = $('#project_id').val();
+                    var site_id = $('#site_id').val();
+                    var year = $('#year').val();
+                    var month = $('#month').val();
+                    var search_employee_id = $('#search_employee_id').val();
+
+                    var postData =
+                        'client_id=>'+client_id+','+
+                            'project_id=>'+project_id+','+
+                            'site_id=>'+site_id+','+
+                            'year=>'+year+','+
+                            'month=>'+month;
+
+
+                    // Total over all pages
+                    $.ajax({
+                        url: "/peticash/peticash-management/salary/listing?_token="+$("input[name='_token']").val(), // ajax source
+                        type: 'POST',
+                        data :{
+                            "get_total" : true,
+                            "search_employee_id" : search_employee_id,
+                            "postdata" : postData
+                        },
+                        success: function(result){
+                            total = result['total'];
+
+                            // Total over this page
+                            pageTotal = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 4 ).footer() ).html(
+                                pageTotal +' ( '+ total +' total)'
+                            );
+                        }});
+                },
+
                 "lengthMenu": [
-                    [10, 20, 50, 100, 150, -1],
-                    [10, 20, 50, 100, 150, "All"] // change per page values here
+                    [50, 100, 150],
+                    [50, 100, 150] // change per page values here
                 ],
-                "pageLength": 10, // default record count per page
+                "pageLength": 50, // default record count per page
                 "ajax": {
                     "url": "/peticash/peticash-management/salary/listing?_token="+$("input[name='_token']").val() // ajax source
                 },

@@ -13,9 +13,9 @@
                 <select class="bs-select form-control" data-style="btn-info" data-width="100%" id="globalProjectSite">
                     @foreach($globalProjectSites as $projectSite)
                         @if($projectSite->project_site_id == $selectGlobalProjectSite)
-                            <option value="{{$projectSite->project_site_id}}" selected>{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                            <option value="{{$projectSite->project_site_id}}" selected>{{$projectSite->project_name}}</option>
                         @else
-                            <option value="{{$projectSite->project_site_id}}">{{$projectSite->project_name}} - {{$projectSite->project_site_name}}</option>
+                            <option value="{{$projectSite->project_site_id}}">{{$projectSite->project_name}}</option>
                         @endif
                     @endforeach
                 </select>
@@ -62,7 +62,7 @@
     <!-- END HEADER TOP -->
     <!-- BEGIN HEADER MENU -->
     <div class="page-header-menu">
-        <div class="container">
+        <div class="container" style="width: 100%">
             <!-- BEGIN HEADER SEARCH BOX -->
             <!-- END HEADER SEARCH BOX -->
             <!-- BEGIN MEGA MENU -->
@@ -139,7 +139,7 @@
                                         @if($user->hasPermissionTo('view-manage-extra-items'))
                                             <li aria-haspopup="true">
                                                 <a href="/extra-item/manage" class="nav-link nav-toggle ">
-                                                    <i class="fa fa-money"></i> Extra-Item
+                                                    <i class="fa fa-plus"></i> Extra-Item
                                                 </a>
                                             </li>
                                         @endif
@@ -212,7 +212,7 @@
 
                                 <li  aria-haspopup="true">
                                     <a href="/bank/manage">
-                                        <i class="fa fa-folder"></i> Manage Bank
+                                        <i class="fa fa-building"></i> Manage Bank
                                     </a>
                                 </li>
                                 </ul>
@@ -237,9 +237,9 @@
                     <?php $hasPurchasePermission = \App\Helper\ACLHelper::checkModuleAcl('purchase');?>
                     @if($hasPurchasePermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        @if(($purchaseRequestNotificationCount + $materialRequestNotificationCount) > 0)
+                        @if(($purchaseRequestNotificationCount + $materialRequestNotificationCount + $purchaseOrderRequestNotificationCount + $purchaseOrderNotificationCount) > 0)
                             <a> Purchase
-                                <span class="badge badge-success">{!! $purchaseRequestNotificationCount + $materialRequestNotificationCount !!}</span>
+                                <span class="badge badge-success">{!! $purchaseRequestNotificationCount + $materialRequestNotificationCount + $purchaseOrderRequestNotificationCount + $purchaseOrderNotificationCount!!}</span>
                             </a>
                         @else
                             <a> Purchase
@@ -249,7 +249,7 @@
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/purchase/material-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Material Request
+                                    <i class="fa fa-clipboard"></i> Material Request
                                     @if(($materialRequestNotificationCount) > 0)
                                         <span class="badge badge-success"><b>{{$materialRequestNotificationCount}}</b></span>
                                     @endif
@@ -257,7 +257,7 @@
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Purchase Request
+                                    <i class="fa fa-clipboard"></i> Purchase Request
                                     @if(($purchaseRequestNotificationCount) > 0)
                                         <span class="badge badge-success"><b>{{$purchaseRequestNotificationCount}}</b></span>
                                     @endif
@@ -265,22 +265,28 @@
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order-request/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Purchase Order Request
+                                    <i class="fa fa-clipboard"></i> Purchase Order Request
+                                    @if(($purchaseOrderRequestNotificationCount) > 0)
+                                        <span class="badge badge-success"><b>{{$purchaseOrderRequestNotificationCount}}</b></span>
+                                    @endif
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Purchase Order
+                                    <i class="fa fa-shopping-cart"></i> Purchase Order
+                                    @if($purchaseOrderNotificationCount > 0)
+                                        <span class="badge badge-success"><b>{{$purchaseOrderNotificationCount}}</b></span>
+                                    @endif
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Purchase Order Billing
+                                    <i class="fa fa-calculator"></i> Purchase Order Billing
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/purchase/vendor-mail/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Vendor Mails
+                                    <i class="fa fa-envelope"></i> Vendor Mails
                                 </a>
                             </li>
                         </ul>
@@ -290,32 +296,45 @@
                     @if($hasInventoryPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a> Inventory
-                                <span class="arrow"></span>
+                                @if(($inventorySiteTransferNotificationCount) > 0)
+                                    <span class="badge badge-success">{!! $inventorySiteTransferNotificationCount !!}</span>
+                                @endif
                             </a>
                             <ul class="dropdown-menu pull-left">
                                 <li aria-haspopup="true">
                                     <a href="/inventory/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Store Keeper
+                                        <i class="fa fa-home"></i> Store Keeper
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
                                     <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Site Transfer
+                                        <i class="fa fa-arrow-right"></i> Site Transfer
+                                        @if(($inventorySiteTransferNotificationCount) > 0)
+                                            <span class="badge badge-success">{!! $inventorySiteTransferNotificationCount !!}</span>
+                                        @endif
                                     </a>
                                 </li>
+                                <?php $hasSiteTransferPermission = \App\Helper\ACLHelper::checkModuleAcl('component-transfer-bill-entry')?>
+                                @if($hasSiteTransferPermission == true)
+                                    <li aria-haspopup="true">
+                                        <a href="/inventory/transfer/billing/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-sitemap"></i> Site Transfer Billing
+                                        </a>
+                                    </li>
+                                @endif
                                 <li aria-haspopup="true">
                                     <a href="/asset/maintenance/request/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Asset Maintenance
+                                        <i class="fa fa-square"></i> Asset Maintenance
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
                                     <a href="/asset/maintenance/request/approval/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-sitemap"></i> Asset Maintenance Approval
+                                        <i class="fa fa-check-square"></i> Asset Maintenance Approval
                                     </a>
                                 </li>
                                 <li aria-haspopup="true">
                                     <a href="/asset/maintenance/request/bill/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-bars"></i> Asset Maintenance Billing
+                                        <i class="fa fa-calculator"></i> Asset Maintenance Billing
                                     </a>
                                 </li>
                             </ul>
@@ -328,7 +347,7 @@
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Category Management
+                                    <i class="fa fa-list-alt"></i> Category Management
                                 </a>
                             </li>
                             <li aria-haspopup="true">
@@ -338,7 +357,7 @@
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/checklist/site-assignment/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Project Site Assignment
+                                    <i class="fa fa-arrow-right"></i> Project Site Assignment
                                 </a>
                             </li>
                             <!--<li aria-haspopup="true">
@@ -355,17 +374,17 @@
                         <ul class="dropdown-menu pull-left">
                             <li aria-haspopup="true">
                                 <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Category Management
+                                    <i class="fa fa-list-alt"></i> Category Management
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/drawing/images/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Add Image
+                                    <i class="fa fa-plus"></i> Add Image
                                 </a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
-                                    <i class="fa fa-bars"></i> Manage Drawings
+                                    <i class="fa fa-edit"></i> Manage Drawings
                                 </a>
                             </li>
                         </ul>
@@ -374,7 +393,9 @@
                     @if($hasPeticashPermission  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Peticash
-                            <span class="arrow"></span>
+                            @if(($peticashSalaryRequestApprovalNotificationCount) > 0)
+                                <span class="badge badge-success">{!! $peticashSalaryRequestApprovalNotificationCount !!}</span>
+                            @endif
                         </a>
                         <ul class="dropdown-menu pull-left">
                             @if($user->hasPermissionTo('view-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
@@ -395,6 +416,9 @@
                                 <li aria-haspopup="true">
                                     <a href="/peticash/peticash-approval-request/manage-salary-list" class="nav-link nav-toggle ">
                                         <i class="fa fa-check"></i> Peticash Salary Request Approval
+                                        @if(($peticashSalaryRequestApprovalNotificationCount) > 0)
+                                            <span class="badge badge-success">{!! $peticashSalaryRequestApprovalNotificationCount !!}</span>
+                                        @endif
                                     </a>
                                 </li>
                             @endif

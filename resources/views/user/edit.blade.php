@@ -134,7 +134,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control" id="purchase_order_amount_limit" name="purchase_order_amount_limit" value="{{$userEdit['purchase_order_amount_limit']}}">
+                                                                <input type="text" class="form-control" id="purchase_order_amount_limit" name="purchase_order_amount_limit" value="{{$userEdit['purchase_order_amount_limit']}}" maxlength="15">
                                                             </div>
                                                         </div>
                                                     @endif
@@ -145,7 +145,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control" id="purchase_peticash_amount_limit" name="purchase_peticash_amount_limit" value="{{$userEdit['purchase_peticash_amount_limit']}}">
+                                                                <input type="text" class="form-control" id="purchase_peticash_amount_limit" name="purchase_peticash_amount_limit" value="{{$userEdit['purchase_peticash_amount_limit']}}" maxlength="11">
                                                             </div>
                                                         </div>
                                                     @endif
@@ -260,6 +260,7 @@
                                                                     <tr>
                                                                         <th style="width: 10%;">Remove</th>
                                                                         <th> Project Site Information</th>
+                                                                        <th> Is Assigned?</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -311,6 +312,7 @@
                                                                                     </div>
                                                                                 </div>
                                                                             </td>
+                                                                            <th><button type="button" class="btn yellow">Yes</button></th>
                                                                         </tr>
                                                                     @endforeach
                                                                 </tbody>
@@ -343,7 +345,6 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#email').css('pointer-events',"none");
         EditUser.init();
         var citiList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
@@ -379,7 +380,7 @@
                     'Unable to find any Result that match the current query',
                     '</div>'
                 ].join('\n'),
-                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{client_company}}, @{{project_name}}, @{{project_site_name}}</strong></div>')
+                suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{project_name}}</strong></div>')
             },
         })
         .on('typeahead:selected', function (obj, datum) {

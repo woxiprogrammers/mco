@@ -55,6 +55,16 @@
                                             <div class="portlet-body form">
                                                 <div class="tab-content">
                                                     <div class="tab-pane fade in active" id="generaltab">
+                                                        @if($vendor->for_transportation == true)
+                                                            <div class="form-group row">
+                                                                <div class="col-md-5" style="text-align: right">
+
+                                                                </div>
+                                                                <div class="col-md-5">
+                                                                    <label for="name" class="control-label"><b>Transportation Vendor</b></label>
+                                                                </div>
+                                                            </div>
+                                                        @endif
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
                                                                 <label for="name" class="control-label">Name</label>
@@ -82,7 +92,7 @@
                                                                     <span>*</span>
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <input type="text" class="form-control" id="mobile" name="mobile"  value="{{$vendor->mobile}}">
+                                                                    <input type="number" class="form-control" id="mobile" name="mobile"  value="{{$vendor->mobile}}">
                                                                 </div>
                                                             </div>
                                                         </div>

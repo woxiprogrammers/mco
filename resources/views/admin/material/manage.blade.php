@@ -60,8 +60,8 @@
                                                 <tr>
                                                     <th  style="width: 5%"> </th>
                                                     <th style="width: 25%"> Name </th>
-                                                    <th> Unit </th>
                                                     <th> Rate </th>
+                                                    <th> Unit </th>
                                                     <th> Status </th>
                                                     <th> Created On </th>
                                                     <th style="width: 15%"> Actions </th>
@@ -69,8 +69,8 @@
                                                 <tr>
                                                     <th  style="width: 5%"> </th>
                                                     <th style="width: 25%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_unit" readonly> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_rate" readonly> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_unit" readonly> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                     <th>
@@ -85,34 +85,34 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="portlet light ">
+                                    {{--<div class="portlet light ">
                                        <div class="portlet-body" style="margin-bottom: 8%">
-                                    @if($categories != NULL)
-                                        <form role="form" id="create-material" class="form-horizontal" action="/material/basicrate_material" method="post" novalidate="novalidate">
-                                            {!! csrf_field() !!}
-                                            <div class="form-body">
-                                                <div class="col-md-3">
-                                                    <select class="form-control" id="material_category_ids" name="material_category_ids[]" multiple="true" style="overflow: scroll" aria-invalid="false">
-                                                        @foreach ($categories as $category)
-                                                            <option value="{{$category['id']}}"> {{$category['name']}}</option>
-                                                        @endforeach
-                                                        <option value="all">All Categories</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-1">
-                                                    <div class="btn-group">
-                                                        <div id="basicreate_material_dwn_id">
-                                                            <button type="submit" class="btn btn-success btn-md">
-                                                                <i class="fa fa-download"></i> PDF
-                                                            </button>
+                                            @if($categories != NULL)
+                                                <form role="form" id="create-material" class="form-horizontal" action="/material/basicrate_material" method="post" novalidate="novalidate">
+                                                    {!! csrf_field() !!}
+                                                    <div class="form-body">
+                                                        <div class="col-md-3">
+                                                            <select class="form-control" id="material_category_ids" name="material_category_ids[]" multiple="true" style="overflow: scroll" aria-invalid="false">
+                                                                @foreach ($categories as $category)
+                                                                    <option value="{{$category['id']}}"> {{$category['name']}}</option>
+                                                                @endforeach
+                                                                <option value="all">All Categories</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <div class="btn-group">
+                                                                <div id="basicreate_material_dwn_id">
+                                                                    <button type="submit" class="btn btn-success btn-md">
+                                                                        <i class="fa fa-download"></i> PDF
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    @endif
+                                                </form>
+                                            @endif
                                         </div>
-                                    </div>
+                                    </div>--}}
                                     </div>
                                 </div>
                             </div>

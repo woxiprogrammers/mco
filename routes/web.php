@@ -26,6 +26,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'User\UserController@getManageView'));
         Route::post('listing',array('uses' => 'User\UserController@userListing'));
         Route::post('check-mobile',array('uses' => 'User\UserController@checkMobile'));
+        Route::post('check-email',array('uses' => 'User\UserController@checkEmail'));
         Route::get('change-status/{user}',array('uses' => 'User\UserController@changeUserStatus'));
         Route::get('get-route-acls/{roleId}',array('uses' => 'User\UserController@getRoleAcls'));
         Route::group(['prefix' => 'project-site'],function(){
@@ -276,6 +277,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
             Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
+            Route::get('get-detail/{purchaseRequestId}',array('uses' => 'Purchase\PurchaseRequestController@getPurchaseRequestDetails'));
         });
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
@@ -298,6 +300,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('get-component-details',array('uses'=> 'Purchase\PurchaseOrderController@getComponentDetails'));
             Route::get('get-purchase-order-details/{purchaseRequestId}',array('uses'=> 'Purchase\PurchaseOrderController@getOrderDetails'));
             Route::post('get-tax-details/{purchaseRequestComponent}',array('uses' => 'Purchase\PurchaseOrderController@getComponentTaxData'));
+            Route::get('get-detail/{purchaseOrderId}',array('uses' => 'Purchase\PurchaseOrderController@getPurchaseOrderDetails'));
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
                 Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
@@ -324,6 +327,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('listing/{purchaseOrderBillId}',array('uses' => 'Purchase\PurchaseOrderBillingController@paymentListing'));
                 Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createPayment'));
             });
+            Route::post('check-bill-number',array('uses' => 'Purchase\PurchaseOrderBillingController@checkBillNumber'));
         });
         Route::group(['prefix' => 'vendor-mail'],function(){
             Route::get('manage',array('uses' => 'Purchase\VendorMailController@getManageView'));
@@ -360,7 +364,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('delete-temp-inventory-image',array('uses'=>'Drawing\ImagesController@removeTempImage'));
             Route::post('edit-opening-stock',['uses' => 'Inventory\InventoryManageController@editOpeningStock']);
             Route::post('get-detail',['uses' => 'Inventory\InventoryManageController@getGRNDetails']);
-            Route::get('detail/{inventoryComponentTransfer}',['uses' => 'Inventory\InventoryManageController@getInventoryComponentTransferDetail']);
+            Route::get('detail/{inventoryComponentTransfer}/{slug}',['uses' => 'Inventory\InventoryManageController@getInventoryComponentTransferDetail']);
             Route::group(['prefix' => 'readings'],function(){
                 Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentReadingListing'));
                 Route::post('add/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@addInventoryComponentReading'));
@@ -369,8 +373,23 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'transfer'], function (){
             Route::get('manage',array('uses' => 'Inventory\InventoryManageController@getTransferManageView'));
             Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@getSiteTransferRequestListing'));
-            Route::get('auto-suggest/{projectSiteId}/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
+            Route::post('check-quantity',array('uses'=> 'Inventory\InventoryManageController@checkAvailableQuantity'));
+            Route::get('auto-suggest/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
             Route::post('change-status/{status}/{inventoryTransferId}',array('uses'=> 'Inventory\InventoryManageController@changeStatus'));
+            Route::post('upload-pre-grn-images',array('uses'=> 'Inventory\InventoryManageController@preGrnImageUpload'));
+            Route::group(['prefix' => 'billing'], function(){
+                Route::get('manage',array('uses' => 'Inventory\SiteTransferBillingController@getManageView'));
+                Route::get('create', array('uses' => 'Inventory\SiteTransferBillingController@getCreateView'));
+                Route::get('edit/{siteTransferBill}', array('uses' => 'Inventory\SiteTransferBillingController@getEditView'));
+                Route::post('create', array('uses' => 'Inventory\SiteTransferBillingController@createSiteTransferBill'));
+                Route::post('listing', array('uses' => 'Inventory\SiteTransferBillingController@listing'));
+                Route::get('get-approved-transaction',array('uses' => 'Inventory\SiteTransferBillingController@getApprovedTransaction'));
+                Route::group(['prefix' => 'payment'], function(){
+                    Route::post('create',array('uses' => 'Inventory\SiteTransferBillingController@createPayment'));
+                    Route::post('listing/{siteTransferBill}',array('uses' => 'Inventory\SiteTransferBillingController@paymentListing'));
+
+                });
+            });
         });
     });
 
@@ -557,10 +576,17 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('edit/{subcontractor}', array('uses' => 'Subcontractor\SubcontractorController@editSubcontractor'));
         Route::get('projects/{client_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjects'));
         Route::get('project-sites/{project_id}',array('uses' => 'Subcontractor\SubcontractorController@getProjectSites'));
+
+        Route::group(['prefix' => 'advance-payment'], function(){
+            Route::post('add', array('uses' => 'Subcontractor\SubcontractorController@addAdvancePayment'));
+            Route::post('listing', array('uses' => 'Subcontractor\SubcontractorController@advancePaymentListing'));
+        });
+
         Route::group(['prefix' => 'dpr'], function(){
             Route::get('auto-suggest/{keyword}',array('uses' => 'Subcontractor\SubcontractorController@dprAutoSuggest'));
             Route::post('assign-categories/{subcontractor}',array('uses' => 'Subcontractor\SubcontractorController@assignDprCategories'));
         });
+
         Route::group(['prefix' => 'subcontractor-structure'], function(){
             Route::get('manage',array('uses' => 'Subcontractor\SubcontractorController@getManageStructureView'));
             Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorStructure'));
@@ -577,13 +603,15 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('view/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureBillView'));
             Route::get('edit/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorStructureBillEditView'));
             Route::post('edit/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@editSubcontractorStructureBill'));
-            Route::get('create/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorBillCreateView'));
+            Route::get('create/{subcontractorStructure}',array('uses' => 'Subcontractor\SubcontractorController@getSubcontractorBillCreateView'));
             Route::post('create/{subcontractorStructureId}',array('uses' => 'Subcontractor\SubcontractorController@createSubcontractorBill'));
             Route::get('change-status/{statusSlug}/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@changeBillStatus'));
+
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createTransaction'));
                 Route::post('listing/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getTransactionListing'));
             });
+
             Route::group(['prefix' => 'reconcile'], function(){
                 Route::post('add-transaction', array('uses' => 'Subcontractor\SubcontractorController@addReconcileTransaction'));
                 Route::post('hold-listing', array('uses' => 'Subcontractor\SubcontractorController@getHoldReconcileListing'));
@@ -679,6 +707,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
 
     });
+
     Route::group(['prefix'=>'dpr'],function (){
         Route::get('category_manage',array('uses' => 'Dpr\DprController@getCategoryManageView'));
         Route::get('create-category-view',array('uses' => 'Dpr\DprController@getCategoryCreateView'));

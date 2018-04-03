@@ -22,9 +22,11 @@ class ImagesController extends Controller
     public function __construct(){
         $this->middleware('custom.auth');
     }
+
     public function getManageView(Request $request){
         return view('drawing/images/manage');
     }
+
     public function getCreateView(Request $request){
         try{
              $categories = DrawingCategory::whereNull('drawing_category_id')->where('is_active',TRUE)->select('name','id')->get();
@@ -39,6 +41,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function getEditView(Request $request,$id,$site_id){
         try{
                $site = ProjectSite::where('id',$site_id)->select('id','project_id','name')->first()->toArray();
@@ -129,6 +132,7 @@ class ImagesController extends Controller
             return response(500);
         }
     }
+
     public function getSubCategories(Request $request){
         try{
             $projects = DrawingCategory::where('drawing_category_id',$request->id)->select('id','name')->get();
@@ -146,6 +150,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function create(Request $request){
         try{
             $user_id = Auth::id();
@@ -202,6 +207,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function listing(Request $request){
         try{
             if(Session::has('global_project_site')){
@@ -246,6 +252,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function createVersion(Request $request){
         try{
             $tempImageUploadPath = public_path().env('DRAWING_IMAGE_UPLOAD_PATH').DIRECTORY_SEPARATOR.sha1($request->site_id).DIRECTORY_SEPARATOR.sha1($request->sub_category_id);
@@ -267,6 +274,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function getManageDrawingsView(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
@@ -282,6 +290,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function getData(Request $request){
         try{
             $drawing_category_site_relation_id = DrawingCategorySiteRelation::where('drawing_category_id',$request->sub_category_id)
@@ -308,6 +317,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function getDetails(Request $request,$id){
         try{
             $file_name = DrawingImageVersion::where('id',$id)->pluck('name')->first();
@@ -328,6 +338,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function getAllVersions(Request $request){
         try{
             $id = DrawingImageVersion::where('id',$request->id)->pluck('drawing_image_id')->first();
@@ -343,6 +354,7 @@ class ImagesController extends Controller
             abort(500);
         }
     }
+
     public function addComment(Request $request){
         try{
             $imageData['comment'] = $request->comment;

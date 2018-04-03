@@ -579,36 +579,67 @@ class AssetMaintenanceController extends Controller{
             $status = 200;
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
+            $filterFlag = true;
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
-                $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
-                                                ->where('asset_maintenance.project_site_id',$projectSiteId)
-                                                ->select('asset_maintenance.id as id','asset_maintenance_bills.id as bill_id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
-                                                ->orderBy('id','desc')
-                                                ->get();
+                $assetMaintenanceBillIds = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                    ->where('asset_maintenance.project_site_id',$projectSiteId)
+                    ->pluck('asset_maintenance_bills.id')->toArray();
             }else{
+                $assetMaintenanceBillIds = AssetMaintenanceBill::pluck('id')->toArray();
+            }
+            if(count($assetMaintenanceBillIds) <= 0){
+                $filterFlag = false;
+            }
+            if($filterFlag == true && $request->has('vendor_name') && $request->vendor_name != ''){
+                $assetMaintenanceBillIds = AssetMaintenanceVendorRelation::join('vendors','vendors.id','=','asset_maintenance_vendor_relation.vendor_id')
+                                                                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_vendor_relation.asset_maintenance_id')
+                                                                        ->join('asset_maintenance_bills','asset_maintenance_bills.asset_maintenance_id','=','asset_maintenance.id')
+                                                                        ->whereIn('asset_maintenance_bills.id', $assetMaintenanceBillIds)
+                                                                        ->where('asset_maintenance_vendor_relation.is_approved', true)
+                                                                        ->where('vendors.company','ilike','%'.$request->vendor_name.'%')
+                                                                        ->pluck('asset_maintenance_bills.id')->toArray();
+            }
                 $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
-                    ->select('asset_maintenance.id as id','asset_maintenance_bills.id as bill_id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
-                    ->orderBy('id','desc')
-                    ->get();
-            }
-            $records["recordsFiltered"] = $records["recordsTotal"] = count($assetMaintenanceBillData);
-            if($request->length == -1){
-                $length = $records["recordsTotal"];
-            }else{
-                $length = $request->length;
-            }
-            $user = Auth::user();
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
-                $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
-                    <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['bill_id'].'" style="color: white"> View
-                </div>';
-                $records['data'][] = [
-                    $assetMaintenanceBillData[$pagination]['bill_number'],
-                    $assetMaintenanceBillData[$pagination]['id'],
-                    $assetMaintenanceBillData[$pagination]['amount'],
-                    $editButton
-                ];
+                ->whereIn('asset_maintenance_bills.id',$assetMaintenanceBillIds)
+                ->select('asset_maintenance.id as id','asset_maintenance_bills.id as bill_id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
+                ->orderBy('id','desc')
+                ->get();
+
+            if ($request->has('get_total')) {
+                $total = 0;
+                $paidTotal = 0;
+                foreach($assetMaintenanceBillData as $assetBilldata) {
+                    $paidTotal += $assetBilldata->assetMaintenanceBillPayment->sum('amount');
+                    $total = $total + $assetBilldata['amount'];
+                }
+                $pendingTotal = $total - $paidTotal;
+                $records['total'] = $total;
+                $records['pending_total'] = $pendingTotal;
+                $records['paid_total'] = $paidTotal;
+            } else {
+                $records["recordsFiltered"] = $records["recordsTotal"] = count($assetMaintenanceBillData);
+                if($request->length == -1){
+                    $length = $records["recordsTotal"];
+                }else{
+                    $length = $request->length;
+                }
+                for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
+                    $paidAmount = $assetMaintenanceBillData[$pagination]->assetMaintenanceBillPayment->sum('amount');
+                    $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                        <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['bill_id'].'" style="color: white"> View
+                    </div>';
+                    $vendorId = AssetMaintenanceVendorRelation::where('asset_maintenance_id',$assetMaintenanceBillData[$pagination]['id'])->pluck('vendor_id')->first();
+                    $records['data'][] = [
+                        $assetMaintenanceBillData[$pagination]['id'],
+                        Vendor::where('id',$vendorId)->pluck('company')->first(),
+                        $assetMaintenanceBillData[$pagination]['bill_number'],
+                        $assetMaintenanceBillData[$pagination]['amount'],
+                        $paidAmount,
+                        $assetMaintenanceBillData[$pagination]['amount'] - $paidAmount,
+                        $editButton
+                    ];
+                }
             }
         }catch (\Exception $e){
             $data = [
@@ -745,11 +776,13 @@ class AssetMaintenanceController extends Controller{
             $purchaseOrderDirectoryName = sha1($assetMaintenanceBill->asset_maintenance_id);
             $purchaseBillDirectoryName = sha1($assetMaintenanceBill->id);
             $imageUploadPath = env('ASSET_MAINTENANCE_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bills'.DIRECTORY_SEPARATOR.$purchaseBillDirectoryName;
+            $totalPaidAmount = AssetMaintenanceBillPayment::where('asset_maintenance_bill_id', $assetMaintenanceBill->id)->sum('amount');
+            $pendingAmount = $assetMaintenanceBill['amount'] - $totalPaidAmount;
             foreach($assetMaintenanceBillImages as $image){
                 $assetMaintenanceBillImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
             }
             $paymentTypes = PaymentType::select('id','name')->get();
-            return view('asset-maintenance.bill.view')->with(compact('assetMaintenanceBill','assetMaintenanceBillImagePaths','paymentTypes','grn','remainingAmountToPay'));
+            return view('asset-maintenance.bill.view')->with(compact('assetMaintenanceBill','assetMaintenanceBillImagePaths','paymentTypes','grn','remainingAmountToPay','pendingAmount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Asset Maintenance billing view',

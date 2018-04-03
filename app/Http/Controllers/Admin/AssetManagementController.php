@@ -73,11 +73,12 @@ use InventoryTrait;
             $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                             ->join('clients','clients.id','=','projects.client_id')
                                             ->where('projects.is_active',true)
+                                            ->where('project_sites.name','!=',env('OFFICE_PROJECT_SITE_NAME'))
                                             ->select('project_sites.id','project_sites.name as project_site_name','projects.name as project_name','clients.company')->get()->toArray();
             $iterator = 0;
             foreach($projectSites as $key => $projectSite){
                 $projectSiteData[$iterator]['id'] = $projectSite['id'];
-                $projectSiteData[$iterator]['name'] = $projectSite['company'].'-'.$projectSite['project_name'].'-'.$projectSite['project_site_name'];
+                $projectSiteData[$iterator]['name'] = $projectSite['project_name'];
                 $iterator++;
             }
             $asset_types = AssetType::select('id','name')->get()->toArray();
@@ -300,56 +301,74 @@ use InventoryTrait;
 
     public function assetListing(Request $request){
         try{
-            if($request->has('search_model_number')){
-                $assetData = Asset::where('model_number','ilike','%'.$request->search_model_number.'%')->orderBy('name','asc')->get();
-            }else{
-                $assetData = Asset::orderBy('model_number','asc')->get();
-            }
-            $iTotalRecords = count($assetData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($assetData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
-                if($assetData[$pagination]['is_active'] == true){
-                    $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
-                    $status = 'Disable';
-                }else{
-                    $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
-                    $status = 'Enable';
-                }
-                if($assetData[$pagination]->assetTypes == null){
-                    $assetType = '';
-                }else{
-                    $assetType = $assetData[$pagination]->assetTypes->name;
 
-                }
-                $records['data'][$iterator] = [
-                    $assetData[$pagination]['name'],
-                    $assetData[$pagination]['id'],
-                    $assetData[$pagination]['model_number'],
-                    $asset_status,
-                    $assetType,
-                    '<div class="btn-group">
-           <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-               Actions
-               <i class="fa fa-angle-down"></i>
-           </button>
-           <ul class="dropdown-menu pull-left" role="menu">
-               <li>
-                   <a href="/asset/edit/'.$assetData[$pagination]['id'].'">
-                   <i class="icon-docs"></i> Edit </a>
-           </li>
-           <li>
-               <a href="/asset/change-status/'.$assetData[$pagination]['id'].'">
-                   <i class="icon-tag"></i> '.$status.' </a>
-           </li>
-       </ul>
-    </div>'
-                ];
+            if($request->has('asset_name')){
+                $assetData = Asset::where('name','ilike','%'.$request['asset_name'].'%')->orderBy('name','asc')->get();
+            }else{
+                $assetData = Asset::orderBy('name','asc')->get();
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+
+            if ($request->has('get_total')) {
+                $total = 0;
+                foreach($assetData as $asset) {
+                    $total = $total + $asset['price']*$asset['quantity'];
+                }
+                $records['total'] = $total;
+            } else {
+                $iTotalRecords = count($assetData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($assetData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
+                    if($assetData[$pagination]['is_active'] == true){
+                        $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                        $status = 'Disable';
+                    }else{
+                        $asset_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                        $status = 'Enable';
+                    }
+                    if($assetData[$pagination]->assetTypes == null){
+                        $assetType = '';
+                    }else{
+                        $assetType = $assetData[$pagination]->assetTypes->name;
+
+                    }
+                    $qty = $assetData[$pagination]['quantity'];
+                    $asset_price = $assetData[$pagination]['price'];
+                    $asset_cost = $assetData[$pagination]['price']*$assetData[$pagination]['quantity'];
+                    $rent_per_day = $assetData[$pagination]['rent_per_day'];
+                    $records['data'][$iterator] = [
+                        $assetData[$pagination]['id'],
+                        $assetData[$pagination]['name'],
+                        $assetData[$pagination]['model_number'],
+                        $qty,
+                        $asset_price,
+                        $asset_cost,
+                        $rent_per_day,
+                        $assetType,
+                        $asset_status,
+                        '<div class="btn-group">
+               <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                   Actions
+                   <i class="fa fa-angle-down"></i>
+               </button>
+               <ul class="dropdown-menu pull-left" role="menu">
+                   <li>
+                       <a href="/asset/edit/'.$assetData[$pagination]['id'].'">
+                       <i class="icon-docs"></i> Edit </a>
+               </li>
+               <li>
+                   <a href="/asset/change-status/'.$assetData[$pagination]['id'].'">
+                       <i class="icon-tag"></i> '.$status.' </a>
+               </li>
+           </ul>
+        </div>'
+                    ];
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
+            }
         }catch (Exception $e){
             $records = array();
             $data = [
@@ -365,6 +384,7 @@ use InventoryTrait;
 
     public function projectSiteAssetListing(Request $request,$assetId){
         try{
+            //here
             $inventoryComponentTransfer = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                                                                         ->where('inventory_components.reference_id',$assetId)
                                                                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
@@ -527,6 +547,7 @@ use InventoryTrait;
                         $assetVendorRelationData['asset_id'] = $asset->id;
                         AssetVendorRelation::create($assetVendorRelationData);
                     }
+                    $request->session()->flash('success', 'Vendors assigned to asset successfully.');
                 }
                 $assetVendors = AssetVendorRelation::where('asset_id',$asset->id)->whereNotIn('vendor_id',$request->vendors)->get();
                 foreach ($assetVendors as $assetVendor){
@@ -538,7 +559,6 @@ use InventoryTrait;
                     $assetVendor->delete();
                 }
             }
-            $request->session()->flash('success', 'Vendors assigned to asset successfully.');
             return redirect('/asset/edit/'.$asset->id);
         }catch(\Exception $e){
             $data = [

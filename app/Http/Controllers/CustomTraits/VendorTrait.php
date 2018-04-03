@@ -168,6 +168,7 @@ trait VendorTrait
             $data['alternate_contact'] = $request->alternate_contact;
             $data['alternate_email'] = $request->alternate_email;
             $data['is_active'] = false;
+            $data['for_transportation'] = ($request->has('transportation_vendor')) ? true : false;
             $vendor = Vendor::create($data);
             $vendorCityData = array();
             $vendorMaterialData = array();
@@ -193,7 +194,7 @@ trait VendorTrait
                 }
             }
             $request->session()->flash('success', 'Vendor Created successfully.');
-            return redirect('/vendors/create');
+            return redirect('/vendors/manage');
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Create Vendor',
@@ -250,7 +251,7 @@ trait VendorTrait
                 }
             }
             $request->session()->flash('success', 'Vendor Edited successfully.');
-            return redirect('/vendors/edit/' . $vendor->id);
+            return redirect('/vendors/manage');
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Create Vendor',

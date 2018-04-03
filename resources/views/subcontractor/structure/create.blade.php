@@ -138,11 +138,11 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-2">
-                                                            <input type="text" class="form-control" id="no_of_floors" name="no_of_floors" onkeyup="getBillTable()">
+                                                            <input type="text" class="form-control" id="no_of_floors" name="no_of_floors" {{--onkeyup="getBillTable()"--}}>
                                                         </div>
                                                     </div>
                                                     <hr/>
-                                                    <div id="billTable">
+                                                    {{--<div id="billTable">
                                                         <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="parentBillTable" hidden>
                                                             <thead>
                                                             <tr id="tableHeader">
@@ -157,19 +157,19 @@
                                                             <tbody>
                                                                 <tr id="tableData" class="billRow">
                                                                     <td>
-                                                                        <input type="text" class="form-control bill_no" name="bills[0][bill_no]" id="bill_no_0" value="R.A.1" disabled>
+                                                                        <input type="text" class="form-control bill_no" id="bill_no_0" value="R.A.1" disabled>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control description" name="bills[0][description]" id="description_0">
+                                                                        <input type="text" class="form-control description" id="description_0">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control quantity" name="bills[0][quantity]" id="quantity_0" onkeyup="calculateSubtotal(this)">
+                                                                        <input type="text" class="form-control quantity" id="quantity_0" onkeyup="calculateSubtotal(this)">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control rate" name="bills[0][rate]" id="rate_0" disabled>
+                                                                        <input type="text" class="form-control rate" id="rate_0" disabled>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control amount" name="bills[0][amount]" id="amount_0">
+                                                                        <input type="text" class="form-control amount" id="amount_0">
                                                                     </td>
                                                                     <td>
                                                                         <a class="btn btn-xs blue tax-button" onclick="addTax(this)">Add Tax</a>
@@ -178,7 +178,7 @@
                                                             </tbody>
 
                                                         </table>
-                                                    </div>
+                                                    </div>--}}
                                                 </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
@@ -356,11 +356,14 @@
         structureTypeSlug = $("input[name='structure_type']:checked").val();
         if(structureTypeSlug == 'amountwise'){
             $("#floor_div").show();
+        }else{
+            $("#floor_div").hide();
+            $("#billTable table").hide();
         }
     }
 
     function getBillTable(){
-        var total_amount = $('#total_amount').val();
+        /*var total_amount = $('#total_amount').val();
         var noOfFloor = parseInt($('#no_of_floors').val());
         var quantity = parseFloat(1 / noOfFloor);
         var amount = quantity * parseFloat(total_amount);
@@ -388,7 +391,7 @@
             $(newClone).find('.amount').attr("value",amount);
             $("#billTable tbody").append(newClone);
         }
-        $("#billTable table").show();
+        $("#billTable table").show();*/
     }
 
     function calculateSubtotal(element){
@@ -444,6 +447,13 @@
         $("#taxModal #billRowId").val(rowID);
         $("#addTaxForm .modal-body").html($("#taxDiv").clone().attr('id','').show());
         $("#taxModal").modal('show');
+        var hiddenTaxLength = $(element).closest('tr').find(".tax-modal-name:input:hidden").length;
+        if(hiddenTaxLength > 0){
+            $(element).closest('tr').find(".tax-modal-name:input:hidden").each(function () {
+                var taxId = $(this).attr('id');
+                $("#addTaxForm").find("input[name='"+ taxId +"']").val($(this).val());
+            });
+        }
         calculateTaxes();
     }
 
@@ -472,9 +482,9 @@
             var className = $("input[name='"+ value.name +"']").attr('class');
             var taxId = value.name.match(/\d+/)[0];
             if(className.indexOf('tax-modal-value') != -1){
-                var inputData = '<input type="hidden" name="bills['+iterator+'][taxes]['+taxId+'][amount]" class="'+className+'" value="'+value.value+'">'
+                var inputData = '<input type="hidden" id = "'+taxId+'" name="bills['+iterator+'][taxes]['+taxId+'][amount]" class="'+className+'" value="'+value.value+'">'
             }else{
-                var inputData = '<input type="hidden" name="bills['+iterator+'][taxes]['+taxId+'][percentage]" class="'+className+'" value="'+value.value+'">'
+                var inputData = '<input type="hidden" id = "'+taxId+'" name="bills['+iterator+'][taxes]['+taxId+'][percentage]" class="'+className+'" value="'+value.value+'">'
             }
             row.append(inputData);
         });

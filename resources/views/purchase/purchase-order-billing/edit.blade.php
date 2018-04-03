@@ -23,6 +23,8 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="remainingPaymentAmount" value="{{$paymentRemainingAmount}}">
+    <input type="hidden" id="balanceAdvanceAmount" value="{{$purchaseOrderBill->purchaseOrder->balance_advance_amount}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -42,9 +44,18 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/purchase/purchase-order-bill/manage">Manage Purchase Order Bill</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Edit Purchase Order Bill</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <div class="row">
                                     <div class="col-md-12">
-
                                         <!-- BEGIN VALIDATION STATES-->
                                         <div class="portlet light ">
                                             <div class="portlet-body">
@@ -73,12 +84,33 @@
                                                         </fieldset>
                                                         <fieldset style="margin-top: 2%">
                                                             <legend> Bill Details </legend>
+
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
                                                                     <label class="control-label pull-right"> GRN </label>
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <input type="text" class="form-control calculate-amount" name="grn" id="subTotal" value="{{$grn}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right"> Bill Number </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control calculate-amount" name="vendor_bill_number" id="vendorBillNumber" value="{{$purchaseOrderBill->vendor_bill_number}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right"> Bill Date </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    @if(isset($purchaseOrderBill->bill_date))
+                                                                        <input type="text" class="form-control calculate-amount" name="grn" id="subTotal" value="{{date('j M Y',strtotime($purchaseOrderBill->bill_date))}}" readonly>
+                                                                    @else
+                                                                        <input type="text" class="form-control calculate-amount" name="grn" id="subTotal" value="" readonly>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                             <div class="form-group row">
@@ -99,10 +131,34 @@
                                                             </div>
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Transportation Sub-Total</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" name="transportation_total" id="transportation_total" value="{{$purchaseOrderBill->transportation_total_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Transportation Tax Amount</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" class="form-control" id="transportation_tax_amount" name="transportation_tax_amount" value="{{$purchaseOrderBill->transportation_tax_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
                                                                     <label class="control-label pull-right">Extra Amount</label>
                                                                 </div>
                                                                 <div class="col-md-3">
-                                                                    <input type="text" class="form-control calculate-amount" name="extra_amount" value="{{$purchaseOrderBill->extra_amount}}">
+                                                                    <input type="text" class="form-control calculate-amount" name="extra_amount" value="{{$purchaseOrderBill->extra_amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Extra Tax Amount</label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="text" class="form-control calculate-amount" name="extra_tax_amount" value="{{$purchaseOrderBill->extra_tax_amount}}" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group row">
@@ -111,6 +167,14 @@
                                                                 </div>
                                                                 <div class="col-md-3">
                                                                     <input type="text" class="form-control" id="totalAmount" value="{{$purchaseOrderBill->amount}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
+                                                                    <label class="control-label pull-right">Remark</label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="remark" name="remark" value="{{$purchaseOrderBill->remark}}" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
@@ -169,13 +233,21 @@
                                                                     <input type="hidden" id="purchaseOrderBillId" name="purchase_order_bill_id" value="{{$purchaseOrderBill->id}}">
                                                                     <br>
                                                                     <div class="form-group row">
+                                                                        <div class="col-md-3">
+
+                                                                        </div>
+                                                                        <div class="col-md-7">
+                                                                            <label><b>Total payment done till today - Rs. {{$paymentTillToday}}</b></label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group row">
                                                                         <div class="col-md-4">
 
                                                                         </div>
                                                                         <div class="col-md-6">
                                                                             <input type="checkbox" name="is_advance" id="isAdvanceCheckbox">
                                                                             <label class="control-label" style="margin-left: 1%">
-                                                                                Is Advance Payment
+                                                                                To be deducted from advance
                                                                             </label>
                                                                         </div>
                                                                     </div>
@@ -186,7 +258,7 @@
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount">
+                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount" value="{{$paymentRemainingAmount}}">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group row"id="paymentSelect">
@@ -248,13 +320,32 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order-billing/payment-manage-datatable.js"></script>
+    <script src="/assets/custom/purchase/purchase-order-billing/validations.js"></script>
+
     <script>
         $(document).ready(function(){
+            CreatePurchaseOrderPayment.init();
+            var remainingBillAmount = parseFloat($("#remainingPaymentAmount").val());
+            if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){
+                remainingBillAmount = 0;
+            }
+            $("#amount").rules('add',{
+                max: remainingBillAmount
+            });
             $("#isAdvanceCheckbox").on('click', function(){
-                console.log();
                 if($(this).is(':checked') == true){
+                    var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
+                    if(balanceAdvanceAmount == null || typeof balanceAdvanceAmount == 'undefined' || isNaN(balanceAdvanceAmount)){
+                        balanceAdvanceAmount = 0;
+                    }
+                    $("#amount").rules('add',{
+                        max: balanceAdvanceAmount
+                    });
                     $("#paymentSelect").hide();
                 }else{
+                    $("#amount").rules('add',{
+                        max: remainingBillAmount
+                    });
                     $("#paymentSelect").show();
                 }
             });

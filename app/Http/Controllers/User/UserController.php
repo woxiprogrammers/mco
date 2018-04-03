@@ -17,6 +17,7 @@ use App\UserHasRole;
 use App\UserProjectSiteRelation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -91,7 +92,7 @@ class UserController extends Controller
             }else{
                 $request->session()->flash('error', 'Mobile number is already registered with other user.');
             }
-            return redirect('/user/create');
+            return redirect('/user/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create new User',
@@ -209,7 +210,7 @@ class UserController extends Controller
                 $deletedPermission->delete();
             }
             $request->session()->flash('success', 'User Edited successfully.');
-            return redirect('/user/edit/'.$user->id);
+            return redirect('/user/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit User',
@@ -319,6 +320,8 @@ class UserController extends Controller
 
     public function getRoleAcls(Request $request, $roleId){
         try{
+            $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
             $subModuleIds = RoleHasPermission::join('permissions','permissions.id','=','role_has_permissions.permission_id')
                 ->join('modules','modules.id','=','permissions.module_id')
                 ->where('role_has_permissions.role_id',$roleId)
@@ -335,7 +338,7 @@ class UserController extends Controller
             $webModuleResponse = $data['webModuleResponse'];
             $permissionTypes = $data['permissionTypes'];
             $mobileModuleResponse = $data['mobileModuleResponse'];
-            return view('partials.role.module-listing')->with(compact('roleWebPermissions','roleMobilePermissions','permissionTypes','webModuleResponse','mobileModuleResponse'));
+            return view('partials.role.module-listing')->with(compact('roleWebPermissions','roleMobilePermissions','permissionTypes','webModuleResponse','mobileModuleResponse','userRole'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Role Acls',
@@ -373,7 +376,7 @@ class UserController extends Controller
         try{
             $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                     ->join('clients','clients.id','=','projects.client_id')
-                                    ->where('project_sites.name','ilike','%'.$keyword.'%')
+                                    ->where('projects.name','ilike','%'.$keyword.'%')
                                     ->select('project_sites.id as project_site_id','project_sites.address as address','project_sites.name as project_site_name','projects.name as project_name','clients.company as client_company')
                                     ->get();
             $response = array();
@@ -511,5 +514,28 @@ class UserController extends Controller
         }
         Log::critical(json_encode($data));
         abort(500);
+    }
+
+    public function checkEmail(Request $request){
+        try{
+            if($request->has('user_id')){
+                $emailCount = User::where('email','ilike',$request->email)->where('id','!=',$request->user_id)->count();
+            }else{
+                $emailCount = User::where('email','ilike',$request->email)->count();
+            }
+            if($emailCount > 0){
+                return 'false';
+            }else{
+                return 'true';
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'User Check Email',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return null;
+        }
     }
 }

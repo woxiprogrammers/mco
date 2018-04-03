@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
+
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Helper\MaterialProductHelper;
@@ -112,7 +113,7 @@ trait MaterialTrait{
                 $materialVersion = MaterialVersion::create($materialVersionData);
             }
             $request->session()->flash('success','Material created successfully.');
-            return redirect('/material/create');
+            return redirect('/material/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'create material',
@@ -146,7 +147,7 @@ trait MaterialTrait{
             }else{
                 $request->session()->flash('success','Material Edited successfully.');
             }
-            return redirect('/material/edit/'.$material->id);
+            return redirect('/material/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit material',
@@ -181,8 +182,8 @@ trait MaterialTrait{
                     $records['data'][$iterator] = [
                         '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
                         $materialData[$pagination]['name'],
-                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                         round($materialData[$pagination]['rate_per_unit'],3),
+                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                         $material_status,
                         date('d M Y',strtotime($materialData[$pagination]['created_at'])),
                         '<div class="btn-group">
@@ -240,17 +241,22 @@ trait MaterialTrait{
                 $newStatus = (boolean)!$material->is_active;
                 $material->update(['is_active' => $newStatus]);
             }
-            $request->session()->flash('success', 'Material Status changed successfully.');
-            return redirect('/material/manage');
+            $message = 'Material Status changed successfully.';
+            $status = 200;
         }catch(\Exception $e){
+            $message = 'Something went wrong';
+            $status = 500;
             $data = [
                 'action' => 'Change Material status',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            abort(500);
         }
+        $response = [
+            'message' => $message,
+        ];
+        return response($response,$status);
     }
 
     public function checkMaterialName(Request $request){

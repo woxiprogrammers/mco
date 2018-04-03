@@ -33,6 +33,7 @@
 
                 <!-- END PAGE BREADCRUMBS -->
                 <!-- BEGIN PAGE CONTENT INNER -->
+                @if(($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                 <div class="page-content-inner">
                     <div class="row">
                         <fieldset>
@@ -117,6 +118,7 @@
                     </div>
 
                 </div>
+                @endif
 
             </div>
         </div>
@@ -141,6 +143,18 @@
         switch(moduleSlug){
             case 'purchase':
                 redirectionUrl = '/purchase/material-request/manage';
+                break;
+
+            case 'inventory':
+                redirectionUrl = '/inventory/manage';
+                break;
+
+            case 'checklist':
+                redirectionUrl = '/checklist/user-assignment/manage';
+                break;
+
+            case 'peticash':
+                redirectionUrl = '/peticash/peticash-approval-request/manage-salary-list'
                 break;
 
             default :

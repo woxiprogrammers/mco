@@ -149,8 +149,11 @@
             <div class="col-md-2">
                 <label class="control-label pull-right">Expected Delivery Date</label>
             </div>
-            <div class="col-md-6">
-                <input type="date" class="form-control tax-modal-total" name="expected_delivery_date">
+            <div class="col-md-6 date date-picker" data-date-start-date="0d">
+                <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="expected_delivery_date" />
+                <button class="btn btn-sm default" type="button">
+                    <i class="fa fa-calendar"></i>
+                </button>
             </div>
         </div>
         <div class="row form-group">
@@ -271,8 +274,18 @@
     </div>
 </div>
 
+<link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
+        $('#expected_delivery_date').attr("readonly", "readonly");
+        var date = new Date();
+        $('#expected_delivery_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+
         $(".tax-modal-quantity").each(function(){
             calculateTaxes(this);
         });

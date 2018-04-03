@@ -1,12 +1,15 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
+
 use App\Http\Requests\ProfitMarginRequest;
 use App\ProfitMargin;
 use App\ProfitMarginVersion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+
 trait ProfitMarginTrait{
+
     public function getManageView(Request $request) {
         try{
             return view('admin.profitMargin.manage');
@@ -20,6 +23,7 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
+
     public function getCreateView(Request $request) {
         try{
             return view('admin.profitMargin.create');
@@ -33,6 +37,7 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
+
     public function getEditView(Request $request,$profit_margin){
         try{
             $profit_margin = $profit_margin->toArray();
@@ -47,6 +52,7 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
+
     public function createProfitMargin(ProfitMarginRequest $request){
         try{
             $data = $request->only('name','base_percentage');
@@ -57,7 +63,7 @@ trait ProfitMarginTrait{
             $profitMarginVersionData['percentage'] = $data['base_percentage'];
             $profitMarginVersion = ProfitMarginVersion::create($profitMarginVersionData);
             $request->session()->flash('success', 'Profit Margin Created successfully.');
-            return redirect('/profit-margin/create');
+            return redirect('/profit-margin/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Profit Margin',
@@ -68,12 +74,13 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
+
     public function editProfitMargin(ProfitMarginRequest $request,$profit_margin){
         try{
             $profit_margin->update(['name' => ucwords(trim($request->name)), 'base_percentage' => $request->base_percentage]);
             $profitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$profit_margin['id'])->update(['percentage' => $request->base_percentage]);
             $request->session()->flash('success', 'Profit Margin Edited successfully.');
-            return redirect('/profit-margin/edit/'.$profit_margin->id);
+            return redirect('/profit-margin/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit existing Profit Margin',
@@ -84,6 +91,7 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
+
     public function profitMarginListing(Request $request){
         try{
             if($request->has('search_name')){
@@ -161,6 +169,7 @@ trait ProfitMarginTrait{
 
         return response()->json($records,200);
     }
+
     public function changeProfitMarginStatus(Request $request, $profitMargin){
         try{
             $newStatus = (boolean)!$profitMargin->is_active;
@@ -177,6 +186,7 @@ trait ProfitMarginTrait{
             abort(500);
         }
     }
+
     public function checkProfitMarginName(Request $request){
         try{
             $profitMarginName = $request->name;

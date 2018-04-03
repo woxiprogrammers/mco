@@ -35,7 +35,7 @@ class ClientController extends Controller
             $data['is_active'] = (boolean)false;
             $client = Client::create($data);
             $request->session()->flash('success', 'Client created successfully');
-            return redirect('/client/create');
+            return redirect('/client/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create new Client',
@@ -66,7 +66,7 @@ class ClientController extends Controller
         try{
             $client->update($request->all());
             $request->session()->flash('success', 'Client Edited successfully.');
-            return redirect('/client/edit/'.$client->id);
+            return redirect('/client/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Client',

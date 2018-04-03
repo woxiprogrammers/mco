@@ -45,16 +45,13 @@
 
                                                                 </div>
                                                             </div>
-                                                            @if($subcontractorStructureTypeSlug == 'sqft')
-                                                                <div class="btn-group">
-                                                                    <div id="sample_editable_1_new" class="btn yellow">
-                                                                        <a href="/subcontractor/subcontractor-bills/create/{!! $subcontractorStructureId !!}" style="color: white">
-                                                                            <i class="fa fa-plus"></i> Create Bill
-                                                                        </a>
-                                                                    </div>
+                                                            <div class="btn-group">
+                                                                <div id="sample_editable_1_new" class="btn yellow">
+                                                                    <a href="/subcontractor/subcontractor-bills/create/{!! $subcontractorStructureId !!}" style="color: white">
+                                                                        <i class="fa fa-plus"></i> Create Bill
+                                                                    </a>
                                                                 </div>
-                                                            @endif
-
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -63,9 +60,11 @@
                                                     <thead>
                                                     <tr>
                                                         <th style="width: 10%"> Bill no. </th>
-                                                        @for($iterator = 0 ; $iterator < count($taxes); $iterator++)
-                                                            <th> {!! $taxes[$iterator] !!} </th>
-                                                        @endfor
+                                                        <th> Basic Amount </th>
+                                                        <th> Tax Amount </th>
+                                                        <th> Final Amount </th>
+                                                        <th> Paid Amount </th>
+                                                        <th> Pending Amount </th>
                                                         <th> Status </th>
                                                         <th> Action </th>
                                                     </tr>

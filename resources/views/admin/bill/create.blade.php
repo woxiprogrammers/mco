@@ -55,14 +55,15 @@
                                                                </button>
                                                        </div>
                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
-                                                           <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Performa Invoice Date : </label>
-                                                           <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Performa Invoice Date" id="performa_invoice_date"/>
+                                                           <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Proforma Invoice Date : </label>
+                                                           <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"/>
                                                            <button class="btn btn-sm default" type="button">
                                                                <i class="fa fa-calendar"></i>
                                                            </button>
                                                        </div>
                                                        <div class="col-md-2" style="margin-left: 6%">
                                                            <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
+                                                               <option value="default">Select Bank</option>
                                                                @foreach($banksAssigned as $bankId)
                                                                    <option value="{{$bankId['bank_info_id']}}">{{$bankId->bankInfo->bank_name}} - {{$bankId->bankInfo->account_number}} </option>
                                                                 @endforeach

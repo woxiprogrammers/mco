@@ -16,7 +16,19 @@ var  CreateUser = function () {
                 },
                 email: {
                     required: true,
-                    email: true
+                    email: true,
+                    remote:{
+                        url: "/user/check-email",
+                        type: "POST",
+                        data: {
+                            _token: function() {
+                                return $("input[name='_token']").val();
+                            },
+                            email: function() {
+                                return $("#email").val();
+                            }
+                        }
+                    }
                 },
                 mobile: {
                     required: true,
@@ -57,7 +69,8 @@ var  CreateUser = function () {
                     required: "Last name is required."
                 },
                 email: {
-                    required: "Email is required."
+                    required: "Email is required.",
+                    remote: "Email is already registered."
                 },
                 mobile: {
                     required: "Contact number is required.",
@@ -124,6 +137,25 @@ var  EditUser = function () {
                 last_name: {
                     required: true
                 },
+                email: {
+                    required: true,
+                    email: true,
+                    remote:{
+                        url: "/user/check-email",
+                        type: "POST",
+                        data: {
+                            _token: function() {
+                                return $("input[name='_token']").val();
+                            },
+                            email: function() {
+                                return $("#email").val();
+                            },
+                            user_id: function(){
+                                return $("#user_id").val();
+                            }
+                        }
+                    }
+                },
                 mobile: {
                     required: true,
                     digits: true,
@@ -158,6 +190,10 @@ var  EditUser = function () {
                     required: "Contact number is required.",
                     digits: "Only numbers are valid.",
                     remote: 'This mobile is registered already with other user'
+                },
+                email: {
+                    required: "Email is required.",
+                    remote: "Email is already registered."
                 }
             },
 
