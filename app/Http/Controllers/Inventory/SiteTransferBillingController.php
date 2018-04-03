@@ -130,6 +130,7 @@ class SiteTransferBillingController extends Controller
 
     public function listing(Request $request){
         try{
+            $user = Auth::user();
             $records = array();
             $status = 200;
             $records['data'] = array();
@@ -171,6 +172,14 @@ class SiteTransferBillingController extends Controller
                 }else{
                     $vendorName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->vendor->company;
                 }
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-asset-maintenance-billing')){
+                    $actionButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                        <a href="/inventory/transfer/billing/edit/'.$siteTransferBillData[$pagination]['id'].'" style="color: white"> Edit
+                    </div>';
+                }else{
+                    $actionButton = '';
+                }
+
                 $records['data'][$iterator] = [
                     $projectName,
                     $pagination+1,
@@ -183,9 +192,7 @@ class SiteTransferBillingController extends Controller
                     $siteTransferBillData[$pagination]['total'],
                     $paidAmount,
                     $pendingAmount,
-                    '<div id="sample_editable_1_new" class="btn btn-small blue" >
-                        <a href="/inventory/transfer/billing/edit/'.$siteTransferBillData[$pagination]['id'].'" style="color: white"> Edit
-                    </div>'
+                    $actionButton
                 ];
             }
 

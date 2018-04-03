@@ -6,6 +6,7 @@ use App\ChecklistCategory;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CategoryManagementController extends Controller
@@ -37,6 +38,7 @@ class CategoryManagementController extends Controller
 
     public function getCategoryManagementListing(Request $request,$slug){
         try {
+            $user = Auth::user();
             $records = [
                 'data' => array()
             ];
@@ -51,27 +53,37 @@ class CategoryManagementController extends Controller
                             $category_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                             $status = 'Enable';
                         }
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-checklist-category') || $user->customHasPermission('edit-checklist-category')){
+                            $actionButton = '<div class="btn-group">
+                                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                    <i class="fa fa-angle-down"></i>
+                                                </button>
+                                                <ul class="dropdown-menu pull-left" role="menu">
+                                                    <li>
+                                                        <a href="javascript:void(0);">
+                                                        <i class="icon-docs"></i> Edit </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/checklist/category-management/change-status/'.$categoriesData[$pagination]['id'].'">
+                                                        <i class="icon-tag"></i> '.$status.' </a>
+                                                    </li>
+                                                </ul>
+                                            </div>';
+                        }else{
+                            $actionButton = '<div class="btn-group">
+                                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                    <i class="fa fa-angle-down"></i>
+                                                </button>
+                                            </div>';
+                        }
                         $records['data'][$iterator] = [
                             ($categoriesData[$pagination]['id']+1),
                             $categoriesData[$pagination]['name'],
                             $category_status,
                             date('d M Y',strtotime($categoriesData[$pagination]['created_at'])),
-                            '<div class="btn-group">
-                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                    Actions
-                                    <i class="fa fa-angle-down"></i>
-                                </button>
-                                <ul class="dropdown-menu pull-left" role="menu">
-                                    <li>
-                                        <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit </a>
-                                    </li>
-                                    <li>
-                                        <a href="/checklist/category-management/change-status/'.$categoriesData[$pagination]['id'].'">
-                                        <i class="icon-tag"></i> '.$status.' </a>
-                                    </li>
-                                </ul>
-                            </div>'
+                            $actionButton
                         ];
                     }
                     break;
@@ -86,28 +98,38 @@ class CategoryManagementController extends Controller
                             $category_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                             $status = 'Enable';
                         }
+                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-checklist-category') || $user->customHasPermission('edit-checklist-category')){
+                            $actionButton = '<div class="btn-group">
+                                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                    <i class="fa fa-angle-down"></i>
+                                                </button>
+                                                <ul class="dropdown-menu pull-left" role="menu">
+                                                    <li>
+                                                        <a href="javascript:void(0);">
+                                                        <i class="icon-docs"></i> Edit </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/checklist/category-management/change-status/'.$categoriesData[$pagination]['id'].'">
+                                                        <i class="icon-tag"></i> '.$status.' </a>
+                                                    </li>
+                                                </ul>
+                                            </div>';
+                        }else{
+                            $actionButton = '<div class="btn-group">
+                                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                    <i class="fa fa-angle-down"></i>
+                                                </button>
+                                            </div>';
+                        }
                         $records['data'][$iterator] = [
                             ($categoriesData[$pagination]['id']+1),
                             ChecklistCategory::where('id',$categoriesData[$pagination]['category_id'])->pluck('name')->first(),
                             $categoriesData[$pagination]['name'],
                             $category_status,
                             date('d M Y',strtotime($categoriesData[$pagination]['created_at'])),
-                            '<div class="btn-group">
-                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                    Actions
-                                    <i class="fa fa-angle-down"></i>
-                                </button>
-                                <ul class="dropdown-menu pull-left" role="menu">
-                                    <li>
-                                        <a href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Edit </a>
-                                    </li>
-                                    <li>
-                                        <a href="/checklist/category-management/change-status/'.$categoriesData[$pagination]['id'].'">
-                                        <i class="icon-tag"></i> '.$status.' </a>
-                                    </li>
-                                </ul>
-                            </div>'
+                            $actionButton
                         ];
                     }
                     break;

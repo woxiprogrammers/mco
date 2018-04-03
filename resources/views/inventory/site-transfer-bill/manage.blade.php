@@ -31,11 +31,13 @@
                                 <div class="page-title">
                                     <h1>Manage Site Transfer Bills</h1>
                                 </div>
-                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 70%">
-                                    <a href="/inventory/transfer/billing/create" style="color: white" id="createSiteTransferBill">
-                                        <i class="fa fa-plus"></i> Site Transfer Bill
-                                    </a>
-                                </div>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-maintenance-billing'))
+                                    <div id="sample_editable_1_new" class="btn yellow pull-right" style="margin-left: 70%">
+                                        <a href="/inventory/transfer/billing/create" style="color: white" id="createSiteTransferBill">
+                                            <i class="fa fa-plus"></i> Site Transfer Bill
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">

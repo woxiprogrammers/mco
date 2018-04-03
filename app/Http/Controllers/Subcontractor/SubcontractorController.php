@@ -24,6 +24,7 @@ use App\Tax;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Client;
 use Illuminate\Support\Facades\Session;
@@ -260,6 +261,7 @@ class SubcontractorController extends Controller
 
     public function subcontractorStructureListing(Request $request){
         try{
+            $user = Auth::user();
             $filterFlag = true;
             $subcontractor_name = null;
             $project_name = null;
@@ -359,12 +361,17 @@ class SubcontractorController extends Controller
                         $billTotals += $finalTotal;
                         $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
                     }
-                    $action = '<a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                    $action = '';
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-billing') || $user->customHasPermission('edit-subcontractor-billing') || $user->customHasPermission('view-subcontractor-billing') || $user->customHasPermission('approve-subcontractor-billing')){
+                        $action .= '<a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
                                             <i class="icon-docs"></i> Manage
-                                        </a>
-                                        <a href="/subcontractor/subcontractor-structure/view/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                        </a>';
+                    }
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-structure') || $user->customHasPermission('view-subcontractor-structure')){
+                        $action .= '<a href="/subcontractor/subcontractor-structure/view/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
                                              <i class="icon-docs"></i>View
                                         </a>';
+                    }
                     $total_amount = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
                     $records['data'][$iterator] = [
                         $listingData[$pagination]->subcontractor->subcontractor_name,

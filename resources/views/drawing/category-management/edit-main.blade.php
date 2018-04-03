@@ -52,11 +52,13 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-actions noborder row">
-                                                    <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button type="submit" class="btn red" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Edit</button>
+                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-drawing-category') || $user->customHasPermission('edit-drawing-category'))
+                                                    <div class="form-actions noborder row">
+                                                        <div class="col-md-offset-3" style="margin-left: 26%">
+                                                            <button type="submit" class="btn red" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Edit</button>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                @endif
                                             </form>
                                         </div>
                                     </div>

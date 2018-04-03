@@ -29,12 +29,14 @@
                                 <div class="page-title">
                                     <h1>Manage Asset Maintenance Request</h1>
                                 </div>
-                                <div class="btn-group" style="float: right;margin-top:1%">
-                                    <div id="sample_editable_1_new" class="btn yellow"><a href="/asset/maintenance/request/create" style="color: white">                                         <i class="fa fa-plus"></i>
-                                            Asset Maintenance Request
-                                        </a>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-maintainance'))
+                                    <div class="btn-group" style="float: right;margin-top:1%">
+                                        <div id="sample_editable_1_new" class="btn yellow"><a href="/asset/maintenance/request/create" style="color: white">                                         <i class="fa fa-plus"></i>
+                                                Asset Maintenance Request
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
