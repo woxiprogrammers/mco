@@ -328,19 +328,27 @@
                                 @endif
                             </a>
                             <ul class="dropdown-menu pull-left">
-                                <li aria-haspopup="true">
-                                    <a href="/inventory/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-home"></i> Store Keeper
-                                    </a>
-                                </li>
-                                <li aria-haspopup="true">
-                                    <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-arrow-right"></i> Site Transfer
-                                        @if(($inventorySiteTransferNotificationCount) > 0)
-                                            <span class="badge badge-success">{!! $inventorySiteTransferNotificationCount !!}</span>
-                                        @endif
-                                    </a>
-                                </li>
+                                <?php $hasInventoryInOutTransferPermission = \App\Helper\ACLHelper::checkModuleAcl('inventory-in-out-transfer');?>
+                                @if($hasInventoryInOutTransferPermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/inventory/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-home"></i> Store Keeper
+                                        </a>
+                                    </li>
+                                @endif
+
+                                <?php $hasComponentTransferPermission = \App\Helper\ACLHelper::checkModuleAcl('component-transfer');?>
+                                @if($hasComponentTransferPermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/inventory/transfer/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-arrow-right"></i> Site Transfer
+                                            @if(($inventorySiteTransferNotificationCount) > 0)
+                                                <span class="badge badge-success">{!! $inventorySiteTransferNotificationCount !!}</span>
+                                            @endif
+                                        </a>
+                                    </li>
+                                @endif
+
                                 <?php $hasSiteTransferPermission = \App\Helper\ACLHelper::checkModuleAcl('component-transfer-bill-entry')?>
                                 @if($hasSiteTransferPermission == true)
                                     <li aria-haspopup="true">
@@ -349,21 +357,33 @@
                                         </a>
                                     </li>
                                 @endif
-                                <li aria-haspopup="true">
-                                    <a href="/asset/maintenance/request/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-square"></i> Asset Maintenance
-                                    </a>
-                                </li>
-                                <li aria-haspopup="true">
-                                    <a href="/asset/maintenance/request/approval/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-check-square"></i> Asset Maintenance Approval
-                                    </a>
-                                </li>
-                                <li aria-haspopup="true">
-                                    <a href="/asset/maintenance/request/bill/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-calculator"></i> Asset Maintenance Billing
-                                    </a>
-                                </li>
+
+                                <?php $hasAssetMaintenancePermission = \App\Helper\ACLHelper::checkModuleAcl('asset-maintainance')?>
+                                @if($hasAssetMaintenancePermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/asset/maintenance/request/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-square"></i> Asset Maintenance
+                                        </a>
+                                    </li>
+                                @endif
+
+                                <?php $hasAssetMaintenanceApprovalPermission = \App\Helper\ACLHelper::checkModuleAcl('asset-maintenance-approval')?>
+                                @if($hasAssetMaintenanceApprovalPermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/asset/maintenance/request/approval/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-check-square"></i> Asset Maintenance Approval
+                                        </a>
+                                    </li>
+                                @endif
+
+                                <?php $hasAssetMaintenanceBillingPermission = \App\Helper\ACLHelper::checkModuleAcl('asset-maintenance-billing')?>
+                                @if($hasAssetMaintenanceBillingPermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/asset/maintenance/request/bill/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-calculator"></i> Asset Maintenance Billing
+                                        </a>
+                                    </li>
+                                @endif
                             </ul>
                         </li>
                     @endif

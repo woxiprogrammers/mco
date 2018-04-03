@@ -54,9 +54,11 @@
                                                                     <li class="active">
                                                                         <a href="#transferTab" data-toggle="tab"> Transfers </a>
                                                                     </li>
-                                                                    <li>
-                                                                        <a href="#readingTab" data-toggle="tab"> Readings </a>
-                                                                    </li>
+                                                                    @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-reading')|| $user->customHasPermission('view-asset-reading')|| $user->customHasPermission('edit-asset-reading'))
+                                                                        <li>
+                                                                            <a href="#readingTab" data-toggle="tab"> Readings </a>
+                                                                        </li>
+                                                                    @endif
                                                                 </ul>
                                                             @endif
                                                             <div class="tab-content">
@@ -97,14 +99,17 @@
 
                                                                 @if($isReadingApplicable)
                                                                     <div id="readingTab" class="tab-pane fade">
-                                                                        <div class="pull-right">
-                                                                            <div class="form-group " style="text-align: center">
-                                                                                <a href="#readingFormModel" class="btn yellow" id="readingButton" data-toggle="modal">
-                                                                                    <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
-                                                                                    Reading
-                                                                                </a>
+                                                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-reading'))
+                                                                            <div class="pull-right">
+                                                                                <div class="form-group " style="text-align: center">
+                                                                                    <a href="#readingFormModel" class="btn yellow" id="readingButton" data-toggle="modal">
+                                                                                        <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                                                                        Reading
+                                                                                    </a>
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
+                                                                        @endif
+
                                                                         <div class="portlet-body">
                                                                             <div class="table-scrollable">
                                                                                 <table class="table table-striped table-bordered table-hover order-column" id="inventoryFuelReadingListings">
