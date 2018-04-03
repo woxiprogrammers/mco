@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Drawing;
 use App\DrawingCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CategoryManagementController extends Controller
@@ -125,6 +126,7 @@ class CategoryManagementController extends Controller
 
     public function mainCategoryListing(Request $request){
         try{
+            $user = Auth::user();
             $subCategories = DrawingCategory::whereNull('drawing_category_id')->get()->toArray();
             $iTotalRecords = count($subCategories);
             $records = array();
@@ -132,29 +134,47 @@ class CategoryManagementController extends Controller
             $end = $request->length < 0 ? count($subCategories) : $request->length;
             $categories = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
+                if($user->customHasPermission('view-drawing-category')){
+                    $actionButton = '<div class="btn-group">
+                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+                                            <li>'
+                                                .'<a href="/drawing/category-management/edit/'.$subCategories[$pagination]['id'].'">'
+                                                    .'<i class="icon-tag"></i> Edit </a>'
+                                            .'</li>'
+                                        .'</ul>'
+                                    .'</div>';
+                }else{
+                    $actionButton = '<div class="btn-group">
+                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+                                            <li>
+                                                <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/TRUE">'
+                                                    .'<i class="icon-docs"></i> Enable 
+                                                </a>'
+                                            .'</li>'
+                                            .'<li>'
+                                                .'<a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/FALSE">'
+                                                    .'<i class="icon-tag"></i> Disable 
+                                                </a>'
+                                            .'</li>'
+                                            .'<li>'
+                                                .'<a href="/drawing/category-management/edit/'.$subCategories[$pagination]['id'].'">'
+                                                    .'<i class="icon-tag"></i> Edit </a>'
+                                            .'</li>'
+                                        .'</ul>'
+                                    .'</div>';
+                }
                 $records['data'][$iterator] = [
                     $subCategories[$pagination]['id'],
-                $subCategories[$pagination]['name'],
-                    '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/TRUE">'
-                                    .'<i class="icon-docs"></i> Enable </a>'
-                                .'</li>'
-                                .'<li>'
-                                    .'<a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/FALSE">'
-                                    .'    <i class="icon-tag"></i> Disable </a>'
-                                .'</li>'
-                                .'<li>'
-                                     .'<a href="/drawing/category-management/edit/'.$subCategories[$pagination]['id'].'">'
-                                .'    <i class="icon-tag"></i> Edit </a>'
-                                 .'</li>'
-                            .'</ul>'
-                        .'</div>'
+                    $subCategories[$pagination]['name'],
+                    $actionButton
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -210,6 +230,7 @@ class CategoryManagementController extends Controller
 
     public function SubCategoryListing(Request $request){
         try{
+            $user = Auth::user();
             $subCategories = DrawingCategory::whereNotNull('drawing_category_id')->get()->toArray();
             $iTotalRecords = count($subCategories);
             $records = array();
@@ -217,30 +238,46 @@ class CategoryManagementController extends Controller
             $end = $request->length < 0 ? count($subCategories) : $request->length;
             $categories = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
+                if($user->customHasPermission('view-drawing-category')){
+                    $actionButton = '<div class="btn-group">
+                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+                                            <li>'
+                                                .'<a href="/drawing/category-management/edit-sub/'.$subCategories[$pagination]['id'].'">'
+                                                    .'<i class="icon-tag"></i> Edit </a>'
+                                            .'</li>'
+                                        .'</ul>'
+                                    .'</div>';
+                }else{
+                    $actionButton = '<div class="btn-group">
+                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+                                            <li>
+                                                <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/TRUE">'
+                                                    .'<i class="icon-docs"></i> Enable </a>'
+                                            .'</li>'
+                                            .'<li>'
+                                                .'<a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/FALSE">'
+                                                .'<i class="icon-tag"></i> Disable </a>'
+                                            .'</li>'
+                                            .'<li>'
+                                                .'<a href="/drawing/category-management/edit-sub/'.$subCategories[$pagination]['id'].'">'
+                                                    .'<i class="icon-tag"></i> Edit </a>'
+                                            .'</li>'
+                                        .'</ul>'
+                                    .'</div>';
+                }
                 $records['data'][$iterator] = [
                     $subCategories[$pagination]['id'],
                     $subCategories[$pagination]['name'],
                     DrawingCategory::where('id',$subCategories[$pagination]['drawing_category_id'])->pluck('name')->first(),
-                    '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/TRUE">'
-                    .'<i class="icon-docs"></i> Enable </a>'
-                    .'</li>'
-                    .'<li>'
-                    .'<a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/FALSE">'
-                    .'    <i class="icon-tag"></i> Disable </a>'
-                    .'</li>'
-                    .'<li>'
-                    .'<a href="/drawing/category-management/edit-sub/'.$subCategories[$pagination]['id'].'">'
-                    .'    <i class="icon-tag"></i> Edit </a>'
-                    .'</li>'
-                    .'</ul>'
-                    .'</div>'
+                    $actionButton
                 ];
             }
             $records["draw"] = intval($request->draw);

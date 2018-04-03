@@ -21,10 +21,12 @@
                                 <div class="page-title">
                                     <h1>Checklist Category Management</h1>
                                 </div>
-                                <div class="col-md-offset-8" style="margin-top: 1%">
-                                    <a href="#" style="color: white" data-toggle="modal" data-target="#categoryModal" class="btn red"><i class="fa fa-plus"></i> Main Category</a>
-                                    <a href="#" style="color: white" class="btn red" data-toggle="modal" data-target="#subcategoryModal"><i class="fa fa-plus"></i> Sub Category</a>
-                                </div>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-checklist-category'))
+                                    <div class="col-md-offset-8" style="margin-top: 1%">
+                                        <a href="#" style="color: white" data-toggle="modal" data-target="#categoryModal" class="btn red"><i class="fa fa-plus"></i> Main Category</a>
+                                        <a href="#" style="color: white" class="btn red" data-toggle="modal" data-target="#subcategoryModal"><i class="fa fa-plus"></i> Sub Category</a>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
@@ -45,10 +47,10 @@
                                                             <a href="#subcategorytab" data-toggle="tab"> Sub Category </a>
                                                         </li>
                                                     </ul>
-                                                        </div>
-                                                    </div>
+                                                </div>
+                                            </div>
 
-                                        <div class="tab-content">
+                                            <div class="tab-content">
                                             <div class="tab-pane fade in active" id="categorytab">
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="MainCategoryManagementTable">
                                                     <thead>
@@ -106,8 +108,8 @@
                                                 </table>
                                             </div>
                                         </div>
-                                            </div>
-                                            <div class="modal fade" id="subcategoryModal" tabindex="-1" role="dialog" >
+                                        </div>
+                                        <div class="modal fade" id="subcategoryModal" tabindex="-1" role="dialog" >
                                                 <div class="modal-dialog">
                                                     <div class="modal-content" style="height: 50%">
                                                         <div class="modal-header">
@@ -136,8 +138,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                            <div class="modal fade" id="categoryModal" role="dialog">
+                                    </div>
+                                    <div class="modal fade" id="categoryModal" role="dialog">
                                                 <div class="modal-dialog">
                                                     <!-- Modal content-->
                                                     <div class="modal-content" style="height: 50%">
@@ -160,8 +162,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -170,6 +170,8 @@
             </div>
         </div>
     </div>
+</div>
+</div>
 @endsection
 
 @section('javascript')

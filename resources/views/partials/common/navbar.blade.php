@@ -395,21 +395,33 @@
                             <span class="arrow"></span>
                         </a>
                         <ul class="dropdown-menu pull-left">
-                            <li aria-haspopup="true">
-                                <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-list-alt"></i> Category Management
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/checklist/structure/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Checklist Structure
-                                </a>
-                            </li>
-                            <li aria-haspopup="true">
-                                <a href="/checklist/site-assignment/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-arrow-right"></i> Project Site Assignment
-                                </a>
-                            </li>
+                            <?php $hasChecklistCategoryPermission = \App\Helper\ACLHelper::checkModuleAcl('checklist-category');?>
+                            @if($hasChecklistCategoryPermission)
+                                <li aria-haspopup="true">
+                                    <a href="/checklist/category-management/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-list-alt"></i> Category Management
+                                    </a>
+                                </li>
+                            @endif
+
+                            <?php $hasChecklistStructurePermission = \App\Helper\ACLHelper::checkModuleAcl('checklist-structure');?>
+                            @if($hasChecklistStructurePermission)
+                                <li aria-haspopup="true">
+                                    <a href="/checklist/structure/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Checklist Structure
+                                    </a>
+                                </li>
+                            @endif
+
+                            <?php $hasChecklistSiteAssignmentPermission = \App\Helper\ACLHelper::checkModuleAcl('checklist-structure-site-assignment');?>
+                            @if($hasChecklistSiteAssignmentPermission)
+                                <li aria-haspopup="true">
+                                    <a href="/checklist/site-assignment/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-arrow-right"></i> Project Site Assignment
+                                    </a>
+                                </li>
+                            @endif
+
                             <!--<li aria-haspopup="true">
                                 <a href="/checklist/user-assignment/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> User Checklist Management
@@ -426,21 +438,32 @@
                                 <span class="arrow"></span>
                             </a>
                             <ul class="dropdown-menu pull-left">
-                                <li aria-haspopup="true">
-                                    <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-list-alt"></i> Category Management
-                                    </a>
-                                </li>
-                                <li aria-haspopup="true">
-                                    <a href="/drawing/images/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-plus"></i> Add Image
-                                    </a>
-                                </li>
-                                <li aria-haspopup="true">
-                                    <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
-                                        <i class="fa fa-edit"></i> Manage Drawings
-                                    </a>
-                                </li>
+                                <?php $hasDrawingCategoryPermission = \App\Helper\ACLHelper::checkModuleAcl('drawing-category');?>
+                                @if($hasDrawingCategoryPermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/drawing/category-management/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-list-alt"></i> Category Management
+                                        </a>
+                                    </li>
+                                @endif
+
+                                <?php $hasAddDrawingPermission = \App\Helper\ACLHelper::checkModuleAcl('add-drawing');?>
+                                @if($hasAddDrawingPermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/drawing/images/manage" class="nav-link nav-toggle ">
+                                            <i class="fa fa-plus"></i> Add Image
+                                        </a>
+                                    </li>
+                                @endif
+
+                                <?php $hasManageDrawingPermission = \App\Helper\ACLHelper::checkModuleAcl('manage-drawing');?>
+                                @if($hasManageDrawingPermission)
+                                    <li aria-haspopup="true">
+                                        <a href="/drawing/images/manage-drawings" class="nav-link nav-toggle ">
+                                            <i class="fa fa-edit"></i> Manage Drawings
+                                        </a>
+                                    </li>
+                                @endif
                             </ul>
                         </li>
                     @endif

@@ -41,11 +41,14 @@
                                                     </ul>
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="mainCategoryFormTab">
-                                                            <div id="sample_editable_1_new" class="btn yellow" style="margin-bottom: 1%; margin-left: 89%">
-                                                                <a href="/drawing/category-management/create-main" style="color: white">
-                                                                    <i class="fa fa-plus"></i> Main category
-                                                                </a>
-                                                            </div>
+                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-drawing-category'))
+                                                                <div id="sample_editable_1_new" class="btn yellow" style="margin-bottom: 1%; margin-left: 89%">
+                                                                    <a href="/drawing/category-management/create-main" style="color: white">
+                                                                        <i class="fa fa-plus"></i> Main category
+                                                                    </a>
+                                                                </div>
+                                                            @endif
+
                                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="mainCategoryTable">
                                                                 <thead>
                                                                 <tr>

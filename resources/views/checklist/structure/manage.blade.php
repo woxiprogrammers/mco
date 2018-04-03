@@ -21,8 +21,11 @@
                                 <div class="page-title">
                                     <h1>Manage CheckList</h1>
                                 </div>
-                                <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 78%"><a href="/checklist/structure/create" style="color: white"><i class="fa fa-plus"></i> Checklist</a>
-                                </div>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-checklist-structure'))
+                                    <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 78%">
+                                        <a href="/checklist/structure/create" style="color: white"><i class="fa fa-plus"></i> Checklist</a>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
