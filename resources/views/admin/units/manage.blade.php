@@ -21,7 +21,7 @@
                                 <h1>Manage Units</h1>
                             </div>
 
-                            @if($user->hasPermissionTo('create-units'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-units'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 82%">
                                     <a href="/units/create" style="color: white">
                                         <i class="fa fa-plus"></i>Unit
@@ -95,7 +95,7 @@
                                                 <div class="row" style="text-align: right">
                                                     <div class="col-md-12">
                                                         <div class="btn-group">
-                                                            @if($user->hasPermissionTo('create-units'))
+                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-units'))
                                                                 <div id="sample_editable_1_new" class="btn yellow">
                                                                     <a href="/units/conversion/create" style="color: white"> New
                                                                         <i class="fa fa-plus"></i>

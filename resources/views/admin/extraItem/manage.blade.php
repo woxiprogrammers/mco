@@ -21,7 +21,7 @@
                                 <div class="page-title">
                                     <h1>Manage Extra Item</h1>
                                 </div>
-                                @if($user->hasPermissionTo('edit-manage-extra-items'))
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-extra-items'))
                                     <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 75%; margin-top: 1%"><a href="/extra-item/create" style="color: white"><i class="fa fa-plus"></i> Extra Item
                                         </a>
                                     </div>

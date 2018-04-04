@@ -83,6 +83,7 @@ class SubcontractorController extends Controller
 
     public function subcontractorListing(Request $request){
         try{
+            $user = Auth::user();
             $listingData = Subcontractor::get();
             $iTotalRecords = count($listingData);
             $records = array();
@@ -96,15 +97,8 @@ class SubcontractorController extends Controller
                     $labourStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]['subcontractor_name'],
-                    $listingData[$pagination]['company_name'],
-                    $listingData[$pagination]['primary_cont_person_name'],
-                    $listingData[$pagination]['primary_cont_person_mob_number'],
-                    $listingData[$pagination]['escalation_cont_person_name'],
-                    $listingData[$pagination]['escalation_cont_person_mob_number'],
-                    $labourStatus,
-                    '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-user')){
+                    $actionButton = '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -119,7 +113,30 @@ class SubcontractorController extends Controller
                                     <i class="icon-docs"></i> '.$status.' </a>
                             </li>
                         </ul>
-                    </div>'
+                    </div>';
+                }else{
+                    $actionButton = '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/subcontractor/edit/'.$listingData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                            </li>
+                        </ul>
+                    </div>';
+                }
+                $records['data'][$iterator] = [
+                    $listingData[$pagination]['subcontractor_name'],
+                    $listingData[$pagination]['company_name'],
+                    $listingData[$pagination]['primary_cont_person_name'],
+                    $listingData[$pagination]['primary_cont_person_mob_number'],
+                    $listingData[$pagination]['escalation_cont_person_name'],
+                    $listingData[$pagination]['escalation_cont_person_mob_number'],
+                    $labourStatus,
+                    $actionButton
                 ];
             }
             $records["draw"] = intval($request->draw);

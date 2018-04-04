@@ -28,7 +28,7 @@
                             <div class="page-title">
                                 <h1>Manage Projects</h1>
                             </div>
-                            @if($user->hasPermissionTo('create-manage-sites'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-manage-sites'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 78%; margin-top: 1%">
                                     <a href="/project/create" style="color: white">
                                         <i class="fa fa-plus"></i>

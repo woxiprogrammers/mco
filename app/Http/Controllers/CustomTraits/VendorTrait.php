@@ -16,6 +16,7 @@ use App\VendorCityRelation;
 use App\VendorMaterialCityRelation;
 use App\VendorMaterialRelation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Expr\Array_;
 
@@ -265,6 +266,7 @@ trait VendorTrait
 
     public function vendorListing(Request $request){
         try {
+            $user = Auth::user();
             if ($request->has('search_name')) {
                 $vendorsData = Vendor::where('name', 'ilike', '%' . $request->search_name . '%')->orderBy('name', 'asc')->get()->toArray();
             } else {
@@ -282,11 +284,8 @@ trait VendorTrait
                     $vendor_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $vendorsData[$pagination]['name'],
-                    $vendorsData[$pagination]['mobile'],
-                    $vendor_status,
-                    '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-user')){
+                    $actionButton = '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -301,7 +300,26 @@ trait VendorTrait
                                 <i class="icon-tag"></i> ' . $status . ' </a>
                         </li>
                     </ul>
-                </div>'
+                </div>';
+                }else{
+                    $actionButton = '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/vendors/edit/' . $vendorsData[$pagination]['id'] . '">
+                                <i class="icon-docs"></i> Edit </a>
+                        </li>
+                    </ul>
+                </div>';
+                }
+                $records['data'][$iterator] = [
+                    $vendorsData[$pagination]['name'],
+                    $vendorsData[$pagination]['mobile'],
+                    $vendor_status,
+                    $actionButton
                 ];
             }
             $records["draw"] = intval($request->draw);

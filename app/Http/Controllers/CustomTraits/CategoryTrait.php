@@ -94,6 +94,7 @@ trait CategoryTrait{
 
     public function categoryListing(Request $request){
         try{
+            $user = Auth::user();
             if($request->has('search_name')){
                 $categoriesData = Category::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
@@ -111,7 +112,7 @@ trait CategoryTrait{
                     $category_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                if(Auth::user()->hasPermissionTo('edit-category')){
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-category')){
                     $records['data'][$iterator] = [
                         $categoriesData[$pagination]['name'],
                         $category_status,
@@ -144,7 +145,10 @@ trait CategoryTrait{
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                          
+                                <li>
+                                    <a href="/category/edit/'.$categoriesData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                                </li>
                             </ul>
                         </div>'
                     ];

@@ -66,10 +66,14 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="form-actions noborder row">
-                                                <div class="col-md-offset-3" style="margin-left: 26%">
-                                                    <button type="submit" class="btn red btn-md"><i class="fa fa-check"></i> Submit</button>                                                </div>
-                                            </div>
+                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-units'))
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red btn-md"><i class="fa fa-check"></i> Submit</button>
+                                                    </div>
+                                                </div>
+                                            @endif
+
                                         </form>
                                     </div>
                                 </div>

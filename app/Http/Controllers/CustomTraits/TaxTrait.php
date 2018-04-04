@@ -92,6 +92,7 @@ trait TaxTrait{
 
     public function taxListing(Request $request){
         try{
+            $user = Auth::user();
             if($request->has('search_name')){
                 $taxData = Tax::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
@@ -109,13 +110,8 @@ trait TaxTrait{
                     $tax_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                if(Auth::user()->hasPermissionTo('edit-tax')){
-                    $records['data'][$iterator] = [
-                        $taxData[$pagination]['name'],
-                        $taxData[$pagination]['base_percentage'],
-                        $tax_status,
-                        date('d M Y',strtotime($taxData[$pagination]['created_at'])),
-                        '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-tax')){
+                    $actionButton = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
@@ -130,26 +126,28 @@ trait TaxTrait{
                                         <i class="icon-tag"></i> '.$status.' </a>
                                 </li>
                             </ul>
-                        </div>'
-                    ];
+                        </div>';
                 }else{
-                    $records['data'][$iterator] = [
-                        $taxData[$pagination]['name'],
-                        $taxData[$pagination]['base_percentage'],
-                        $tax_status,
-                        date('d M Y',strtotime($taxData[$pagination]['created_at'])),
-                        '<div class="btn-group">
+                    $actionButton = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                                
+                                <li>
+                                    <a href="/tax/edit/'.$taxData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                                </li>
                             </ul>
-                        </div>'
-                    ];
+                        </div>';
                 }
-
+                $records['data'][$iterator] = [
+                    $taxData[$pagination]['name'],
+                    $taxData[$pagination]['base_percentage'],
+                    $tax_status,
+                    date('d M Y',strtotime($taxData[$pagination]['created_at'])),
+                    $actionButton
+                ];
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;

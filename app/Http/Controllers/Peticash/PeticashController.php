@@ -540,6 +540,7 @@ class PeticashController extends Controller
     }
     public function salaryApprovalListing(Request $request){
         try{
+            $user = Auth::user();
             $projectSiteId = Session::get('global_project_site');
             $postdata = null;
             $emp_id = "";
@@ -642,19 +643,29 @@ class PeticashController extends Controller
                         case 'pending':
                             $checkbox_enable = '<input type="checkbox" class="salary-transactions" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
                             $user_status = '<td><span class="label label-sm label-warning">'.$txnStatus.' </span></td>';
-                            $actionDropDown = '<div class="btn-group">
-                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                    Actions
-                                    <i class="fa fa-angle-down"></i>
-                                </button>
-                                <ul class="dropdown-menu pull-left" role="menu">
-                                    <li>
-                                        <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                            <i class="icon-tag"></i> Approve / Disapprove
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>';
+                            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-salary-request-handler')){
+                                $actionDropDown = '<div class="btn-group">
+                                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                            <i class="fa fa-angle-down"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu pull-left" role="menu">
+                                                            <li>
+                                                                <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
+                                                                    <i class="icon-tag"></i> Approve / Disapprove
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>';
+                            }else{
+                                $actionDropDown = '<div class="btn-group">
+                                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                            <i class="fa fa-angle-down"></i>
+                                                        </button>
+                                                    </div>';
+                            }
+
                             break;
                         case 'approved':
                             $checkbox_enable = '<input  disabled type="checkbox" name="salary_txn_ids" value="'.$salaryTransactionData[$pagination]['id'].'">';
@@ -665,16 +676,6 @@ class PeticashController extends Controller
                                     <i class="fa fa-angle-down"></i>
                                 </button>
                                 <ul class="dropdown-menu pull-left" role="menu">
-                                    <!--<li>
-                                    <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Details
-                                    </a>
-                                    </li> -->
-                                <!--<li>
-                                    <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                        <i class="icon-tag"></i> Approve / Disapprove
-                                    </a>
-                                </li>-->
                                 </ul>
                             </div>';
                             break;
@@ -687,16 +688,6 @@ class PeticashController extends Controller
                                     <i class="fa fa-angle-down"></i>
                                 </button>
                                 <ul class="dropdown-menu pull-left" role="menu">
-                                    <!--<li>
-                                    <a onclick="detailsSalaryModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                        <i class="icon-docs"></i> Details
-                                    </a>
-                                </li>-->
-                                <!--<li>
-                                    <a onclick="openApproveModal('.$salaryTransactionData[$pagination]['id'].');" href="javascript:void(0);">
-                                        <i class="icon-tag"></i> Approve / Disapprove
-                                    </a>
-                                </li>-->
                                 </ul>
                             </div>';
                             break;

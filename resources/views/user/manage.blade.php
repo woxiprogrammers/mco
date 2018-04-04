@@ -19,7 +19,7 @@
                             <div class="page-title">
                                 <h1>Manage User</h1>
                             </div>
-                            @if($user->hasPermissionTo('create-manage-user'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-manage-user'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 82%;margin-top: 1%">
                                     <a href="/user/create" style="color: white">
                                         <i class="fa fa-plus"></i> User

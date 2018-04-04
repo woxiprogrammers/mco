@@ -20,7 +20,7 @@
                             <div class="page-title">
                                 <h1>Manage Bill</h1>
                             </div>
-                            @if($user->hasPermissionTo('create-billing'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 84%; margin-top: 1%">
                                     <a href="/bill/create" style="color: white">
                                         <i class="fa fa-plus"></i> Bill

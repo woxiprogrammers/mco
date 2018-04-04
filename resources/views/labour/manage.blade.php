@@ -21,12 +21,14 @@
                                 <div class="page-title">
                                     <h1>Manage Employee</h1>
                                 </div>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-manage-user'))
                                     <div class="btn-group" style="float: right;margin-top:1%">
                                         <div id="sample_editable_1_new" class="btn yellow" ><a href="/labour/create" style="color: white"> Employee
                                                 <i class="fa fa-plus"></i>
                                             </a>
                                         </div>
                                     </div>
+                                @endif
                             </div>
                         </div>
                         <div class="page-content">
