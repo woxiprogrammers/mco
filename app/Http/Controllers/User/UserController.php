@@ -183,6 +183,7 @@ class UserController extends Controller
                         UserHasPermission::create($userPermissionData);
                     }
                 }
+                UserHasPermission::where('user_id',$user->id)->whereNotIn('permission_id',$web_permissions)->update(['is_web' => false]);
             }else{
                 $web_permissions = array();
             }
@@ -201,6 +202,7 @@ class UserController extends Controller
                         UserHasPermission::create($userPermissionData);
                     }
                 }
+                UserHasPermission::where('user_id',$user->id)->whereNotIn('permission_id',$mobile_permissions)->update(['is_mobile' => false]);
             }else{
                 $mobile_permissions = array();
             }
