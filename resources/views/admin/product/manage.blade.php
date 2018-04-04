@@ -20,7 +20,7 @@
                             <div class="page-title">
                                 <h1>Manage Product</h1>
                             </div>
-                            @if($user->hasPermissionTo('create-product'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-product'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 77%; margin-top: 1%">
                                     <a href="/product/create" style="color: white">
                                         <i class="fa fa-plus"></i>

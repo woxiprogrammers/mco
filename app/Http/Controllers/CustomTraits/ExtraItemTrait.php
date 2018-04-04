@@ -87,6 +87,7 @@ trait ExtraItemTrait{
 
     public function extraItemListing(Request $request){
         try{
+            $user = Auth::user();
             if($request->has('search_name')){
                 $extraItemData = ExtraItem::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
@@ -104,13 +105,8 @@ trait ExtraItemTrait{
                     $extraItem_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                if(Auth::user()->hasPermissionTo('edit-manage-extra-items')){
-                    $records['data'][$iterator] = [
-                        $extraItemData[$pagination]['name'],
-                        $extraItemData[$pagination]['rate'],
-                        $extraItem_status,
-                        date('d M Y',strtotime($extraItemData[$pagination]['created_at'])),
-                        '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-extra-items')){
+                    $actionButton = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
@@ -125,26 +121,28 @@ trait ExtraItemTrait{
                                         <i class="icon-tag"></i> '.$status.' </a>
                                 </li>
                             </ul>
-                        </div>'
-                    ];
+                        </div>';
                 }else{
-                    $records['data'][$iterator] = [
-                        $extraItemData[$pagination]['name'],
-                        $extraItemData[$pagination]['rate'],
-                        $extraItem_status,
-                        date('d M Y',strtotime($extraItemData[$pagination]['created_at'])),
-                        '<div class="btn-group">
+                    $actionButton = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                          
+                                <li>
+                                    <a href="/extra-item/edit/'.$extraItemData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                                </li>
                             </ul>
-                        </div>'
-                    ];
+                        </div>';
                 }
-
+                $records['data'][$iterator] = [
+                        $extraItemData[$pagination]['name'],
+                        $extraItemData[$pagination]['rate'],
+                        $extraItem_status,
+                        date('d M Y',strtotime($extraItemData[$pagination]['created_at'])),
+                        $actionButton
+                    ];
             }
 
             $records["draw"] = intval($request->draw);

@@ -39,9 +39,12 @@
                                         <form role="form" id="edit-vendor" class="form-horizontal" method="post" action="/vendors/edit/{{$vendor->id}}">
                                             {!! csrf_field() !!}
                                             <input type="hidden" name="_method" value="put">
-                                            <div class="pull-right">
-                                                <button type="submit" class="btn red" style=" padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
-                                            </div>
+                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-manage-user'))
+                                                <div class="pull-right">
+                                                    <button type="submit" class="btn red" style=" padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                </div>
+                                            @endif
+
                                             <div class="table-toolbar">
                                                 <ul class="nav nav-tabs nav-tabs-lg">
                                                     <li class="active">

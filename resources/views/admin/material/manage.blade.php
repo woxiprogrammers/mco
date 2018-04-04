@@ -20,7 +20,7 @@
                             <div class="page-title">
                                 <h1>Manage Material</h1>
                             </div>
-                            @if($user->hasPermissionTo('create-material'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-material'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-left: 77%; margin-top: 1%">
                                     <a href="/material/create" style="color: white">
                                         <i class="fa fa-plus"></i>
@@ -50,11 +50,14 @@
                                         </div>
 
                                             {!! csrf_field() !!}
+                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material'))
                                             <div class="col-md-2 pull-right">
                                                 <a class="btn btn-success btn-md pull-right" id="changeStatusButton">
                                                     Change status
                                                 </a>
                                             </div>
+                                        @endif
+
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="materialTable">
                                                 <thead>
                                                 <tr>

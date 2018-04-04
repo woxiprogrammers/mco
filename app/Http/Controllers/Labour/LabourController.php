@@ -10,6 +10,7 @@ use App\Project;
 use App\ProjectSite;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
@@ -99,6 +100,7 @@ class LabourController extends Controller
 
     public function labourListing(Request $request){
         try{
+            $user = Auth::user();
             $listingData = Employee::get();
             $iTotalRecords = count($listingData);
             $records = array();
@@ -113,14 +115,8 @@ class LabourController extends Controller
                     $status = 'Enable';
                 }
                 $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->project->name : '-';
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]['employee_id'],
-                    $listingData[$pagination]['name'],
-                    $listingData[$pagination]['mobile'],
-                    $listingData[$pagination]['per_day_wages'],
-                    $projectSiteName,
-                    $labourStatus,
-                    '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-user')){
+                    $actionButton = '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -135,7 +131,29 @@ class LabourController extends Controller
                                     <i class="icon-docs"></i> '.$status.' </a>
                             </li>
                         </ul>
-                    </div>'
+                    </div>';
+                }else{
+                    $actionButton = '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/labour/edit/'.$listingData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                            </li>
+                        </ul>
+                    </div>';
+                }
+                $records['data'][$iterator] = [
+                    $listingData[$pagination]['employee_id'],
+                    $listingData[$pagination]['name'],
+                    $listingData[$pagination]['mobile'],
+                    $listingData[$pagination]['per_day_wages'],
+                    $projectSiteName,
+                    $labourStatus,
+                    $actionButton
                 ];
             }
             $records["draw"] = intval($request->draw);

@@ -87,70 +87,91 @@
                                         <i class="fa fa-building-o"></i> Manage Structure
                                     </a>
                                     <ul class="dropdown-menu pull-left">
-                                        @if($user->hasPermissionTo('view-category'))
+                                        <?php $hasCategoryPermission = \App\Helper\ACLHelper::checkModuleAcl('category'); ?>
+                                        @if($hasCategoryPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/category/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-sitemap"></i> Category
                                                 </a>
                                             </li>
                                         @endif
-                                        @if($user->hasPermissionTo('view-material'))
+
+                                        <?php $hasMaterialPermission = \App\Helper\ACLHelper::checkModuleAcl('material'); ?>
+                                        @if($hasMaterialPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/material/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-bars"></i> Material
                                                 </a>
                                             </li>
                                         @endif
-                                        @if($user->hasPermissionTo('view-product'))
+
+                                        <?php $hasProductPermission = \App\Helper\ACLHelper::checkModuleAcl('product'); ?>
+                                        @if($hasProductPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/product/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-dropbox"></i> Product
                                                 </a>
                                             </li>
                                         @endif
-                                        @if($user->hasPermissionTo('view-profit-margin'))
+
+                                        <?php $hasProfitMarginPermission = \App\Helper\ACLHelper::checkModuleAcl('profit-margin'); ?>
+                                        @if($hasProfitMarginPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/profit-margin/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-dollar"></i> Profit Margin
                                                 </a>
                                             </li>
                                         @endif
-                                        @if($user->hasPermissionTo('view-units'))
+
+                                        <?php $hasUnitsPermission = \App\Helper\ACLHelper::checkModuleAcl('units'); ?>
+                                        @if($hasUnitsPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/units/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-balance-scale"></i> Units
                                                 </a>
                                             </li>
                                         @endif
-                                        @if($user->hasPermissionTo('view-summary'))
+
+                                        <?php $hasSummaryPermission = \App\Helper\ACLHelper::checkModuleAcl('summary'); ?>
+                                        @if($hasSummaryPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/summary/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-book"></i> Summary
                                                 </a>
                                             </li>
                                         @endif
-                                        @if($user->hasPermissionTo('view-tax'))
+
+                                        <?php $hasTaxPermission = \App\Helper\ACLHelper::checkModuleAcl('tax'); ?>
+                                        @if($hasTaxPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/tax/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-money"></i> Tax
                                                 </a>
                                             </li>
                                         @endif
-                                        @if($user->hasPermissionTo('view-manage-extra-items'))
+
+                                        <?php $hasManageExtraItemsPermission = \App\Helper\ACLHelper::checkModuleAcl('manage-extra-items'); ?>
+                                        @if($hasManageExtraItemsPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/extra-item/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-plus"></i> Extra-Item
                                                 </a>
                                             </li>
                                         @endif
+
+                                        <?php $hasAssetManagementPermission = \App\Helper\ACLHelper::checkModuleAcl('asset-management'); ?>
+                                        @if($hasAssetManagementPermission)
                                             <li aria-haspopup="true">
                                                 <a href="/asset/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-bars"></i> Asset
                                                 </a>
                                             </li>
+                                        @endif
                                     </ul>
                                 </li>
-                                @if($user->hasPermissionTo('view-manage-user'))
+
+                            <?php $hasManageUserPermission = \App\Helper\ACLHelper::checkModuleAcl('manage-user'); ?>
+                            @if($hasManageUserPermission)
                                     <li aria-haspopup="true" class="dropdown-submenu ">
                                         <a href="javascript:void(0);" class="nav-link nav-toggle ">
                                             <i class="fa fa-users"></i> Manage Users
@@ -191,21 +212,24 @@
                                         <i class="fa fa-folder"></i> Manage Sites
                                     </a>
                                     <ul class="dropdown-menu pull-left">
-                                        @if($user->hasPermissionTo('view-manage-client'))
-                                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                                                <a href="/client/manage">
-                                                    <i class="fa fa-users"></i> Manage Client
-                                                    <span class="arrow"></span>
-                                                </a>
-                                            </li>
-                                        @endif
-                                        @if($user->hasPermissionTo('view-manage-sites'))
-                                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                                                <a href="/project/manage">
-                                                    <i class="fa fa-cubes"></i> Manage Project
-                                                    <span class="arrow"></span>
-                                                </a>
-                                            </li>
+                                        <?php $hasManageClientPermission = \App\Helper\ACLHelper::checkModuleAcl('manage-client'); ?>
+                                        @if($hasManageClientPermission)
+                                                <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                                    <a href="/client/manage">
+                                                        <i class="fa fa-users"></i> Manage Client
+                                                        <span class="arrow"></span>
+                                                    </a>
+                                                </li>
+                                            @endif
+
+                                        <?php $hasManageSitesPermission = \App\Helper\ACLHelper::checkModuleAcl('manage-sites'); ?>
+                                        @if($hasManageSitesPermission)
+                                                <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                                    <a href="/project/manage">
+                                                        <i class="fa fa-cubes"></i> Manage Project
+                                                        <span class="arrow"></span>
+                                                    </a>
+                                                </li>
                                         @endif
                                     </ul>
                                 </li>
@@ -299,7 +323,7 @@
                                 </li>
                             @endif
 
-                            <?php $hasPurchaseOrderBillPermission = \App\Helper\ACLHelper::checkModuleAcl('purchase-bill');?>
+                            <?php $hasPurchaseOrderBillPermission = \App\Helper\ACLHelper::checkModuleAcl('purchase-bill-entry');?>
                             @if($hasPurchaseOrderBillPermission)
                                 <li aria-haspopup="true">
                                     <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
@@ -477,21 +501,26 @@
                             @endif
                         </a>
                         <ul class="dropdown-menu pull-left">
-                            @if($user->hasPermissionTo('view-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
-                            <li aria-haspopup="true">
-                                <a href="/peticash/master-peticash-account/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-money"></i> Master Peticash Account
-                                </a>
-                            </li>
+                            <?php $hasMasterPeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('master-peticash-account');?>
+                            @if($hasMasterPeticashPermission)
+                                <li aria-haspopup="true">
+                                    <a href="/peticash/master-peticash-account/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-money"></i> Master Peticash Account
+                                    </a>
+                                </li>
                             @endif
-                            @if($user->hasPermissionTo('view-sitewise-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+
+                            <?php $hasSitewisePeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('sitewise-peticash-account');?>
+                            @if($hasSitewisePeticashPermission)
                             <li aria-haspopup="true">
                                 <a href="/peticash/sitewise-peticash-account/manage" class="nav-link nav-toggle ">
                                     <i class="fa fa-sitemap"></i> Sitewise Peticash Account
                                 </a>
                             </li>
                             @endif
-                            @if($user->hasPermissionTo('approve-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+
+                            <?php $hasPeticashManagementPermission = \App\Helper\ACLHelper::checkModuleAcl('salary-request-handler');?>
+                            @if($hasPeticashManagementPermission)
                                 <li aria-haspopup="true">
                                     <a href="/peticash/peticash-approval-request/manage-salary-list" class="nav-link nav-toggle ">
                                         <i class="fa fa-check"></i> Peticash Salary Request Approval
@@ -500,33 +529,33 @@
                                         @endif
                                     </a>
                                 </li>
+
+                                <li aria-haspopup="true">
+                                    <a href="/peticash/salary-request/create" class="nav-link nav-toggle ">
+                                        <i class="fa fa-sitemap"></i> Peticash Salary Request
+                                    </a>
+                                </li>
                             @endif
-                            <li aria-haspopup="true">
-                                <a href="/peticash/salary-request/create" class="nav-link nav-toggle ">
-                                    <i class="fa fa-sitemap"></i> Peticash Salary Request
-                                </a>
-                            </li>
-                            @if($user->hasPermissionTo('view-peticash-management')  || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+
+                            <?php $hasPeticashManagementPermission = \App\Helper\ACLHelper::checkModuleAcl('peticash-management');?>
+                            @if($hasPeticashManagementPermission)
                                 <li aria-haspopup="true" class="dropdown-submenu">
-                               <!-- <a href="/peticash/peticash-management/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-database"></i> Peticash Management
-                                </a>-->
-                                <a href="javascript:void(0);" class="nav-link nav-toggle ">
-                                    <i class="fa fa-database"></i> Peticash Management
-                                </a>
-                                <ul class="dropdown-menu pull-left">
-                                    <li aria-haspopup="true">
-                                        <a href="/peticash/peticash-management/purchase/manage" class="nav-link nav-toggle ">
-                                            <i class="fa fa-sitemap"></i> Purchase
-                                        </a>
-                                    </li>
-                                    <li aria-haspopup="true">
-                                        <a href="/peticash/peticash-management/salary/manage" class="nav-link nav-toggle ">
-                                            <i class="fa fa-bars"></i> Salary
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                                    <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                        <i class="fa fa-database"></i> Peticash Management
+                                    </a>
+                                    <ul class="dropdown-menu pull-left">
+                                        <li aria-haspopup="true">
+                                            <a href="/peticash/peticash-management/purchase/manage" class="nav-link nav-toggle ">
+                                                <i class="fa fa-sitemap"></i> Purchase
+                                            </a>
+                                        </li>
+                                        <li aria-haspopup="true">
+                                            <a href="/peticash/peticash-management/salary/manage" class="nav-link nav-toggle ">
+                                                <i class="fa fa-bars"></i> Salary
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
                             @endif
                         </ul>
                     </li>

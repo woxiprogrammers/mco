@@ -229,12 +229,14 @@
                                                                     </label>
                                                                 </div>
                                                             </div>--}}
-
-                                                            <div class="form-group">
-                                                                <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">
-                                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit </button>
+                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-product'))
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">
+                                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit </button>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            @endif
+
                                                         </div>
                                                     </fieldset>
                                                 </div>
