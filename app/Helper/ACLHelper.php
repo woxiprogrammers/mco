@@ -27,6 +27,7 @@ class ACLHelper{
                         ->join('modules','modules.id','=','permissions.module_id')
                         ->where('user_has_permissions.user_id', $user->id)
                         ->where('modules.module_id', $moduleId)
+                        ->where('user_has_permissions.is_web',true)
                         ->select('user_has_permissions.permission_id as permission_id','modules.name as module_name')
                         ->get()
                         ->toArray();
@@ -35,6 +36,7 @@ class ACLHelper{
                         ->join('modules','modules.id','=','permissions.module_id')
                         ->where('user_has_permissions.user_id', $user->id)
                         ->where('modules.id', $moduleId)
+                        ->where('user_has_permissions.is_web',true)
                         ->select('user_has_permissions.permission_id as permission_id','modules.name as module_name')
                         ->get()
                         ->toArray();
