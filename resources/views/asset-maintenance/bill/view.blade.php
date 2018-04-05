@@ -169,11 +169,13 @@
                                                         </fieldset>
                                                     </div>
                                                     <div class="tab-pane fade in" id="paymentTab">
-                                                        <div class="btn-group pull-right margin-top-15">
-                                                            <a id="sample_editable_1_new" class="btn yellow" href="#paymentModal" data-toggle="modal" >
-                                                                <i class="fa fa-plus"></i>  &nbsp; Asset Maintenance Bill
-                                                            </a>
-                                                        </div>
+                                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'|| $user->customHasPermission('create-asset-maintenance-billing'))
+                                                            <div class="btn-group pull-right margin-top-15">
+                                                                <a id="sample_editable_1_new" class="btn yellow" href="#paymentModal" data-toggle="modal" >
+                                                                    <i class="fa fa-plus"></i>  &nbsp; Asset Maintenance Bill Payment
+                                                                </a>
+                                                            </div>
+                                                        @endif
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="assetMaintenancePaymentTable">
                                                             <thead>
                                                             <tr>

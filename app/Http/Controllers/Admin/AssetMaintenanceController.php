@@ -261,6 +261,7 @@ class AssetMaintenanceController extends Controller{
 
     public function getMaintenanceRequestApprovalListing(Request $request){
         try{
+            $user = Auth::user();
             $projectSiteId = Session::get('global_project_site');
             $vendorAssignedAssetMaintenance = AssetMaintenanceVendorRelation::join('asset_maintenance','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
                                                                             ->where('asset_maintenance.project_site_id',$projectSiteId)
@@ -274,7 +275,8 @@ class AssetMaintenanceController extends Controller{
             $end = $request->length < 0 ? count($vendorAssignedAssetMaintenance) : $request->length;
 
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($vendorAssignedAssetMaintenance); $iterator++,$pagination++ ){
-                $actionDropDown =  '<button class="btn btn-xs blue"> 
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-asset-maintenance-approval')){
+                    $actionDropDown =  '<button class="btn btn-xs blue"> 
                                             <form action="/asset/maintenance/request/approval/change-status/approve/'.$vendorAssignedAssetMaintenance[$pagination]->id.'" method="post">
                                                 <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: white">
                                                      Approve 
@@ -290,6 +292,10 @@ class AssetMaintenanceController extends Controller{
                                                 <input type="hidden" name="_token">
                                             </form>
                                         </button>';
+                }else{
+                    $actionDropDown =  '';
+                }
+
                 $records['data'][$iterator] = [
                     $vendorAssignedAssetMaintenance[$pagination]->assetMaintenance->asset->name,
                     date('d M Y',strtotime($vendorAssignedAssetMaintenance[$pagination]->assetMaintenance['created_at'])),

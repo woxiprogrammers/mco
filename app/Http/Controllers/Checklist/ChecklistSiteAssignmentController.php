@@ -14,6 +14,7 @@ use App\Quotation;
 use App\QuotationFloor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
@@ -160,6 +161,7 @@ class ChecklistSiteAssignmentController extends Controller
 
     public function siteAssignmentListing(Request $request){
         try{
+            $user = Auth::user();
             $projectSiteId = Session::get('global_project_site');
             $siteAssignmentData = ProjectSiteChecklist::where('project_site_id',$projectSiteId)->orderBy('id','desc')->get();
             $records = array();
@@ -167,7 +169,13 @@ class ChecklistSiteAssignmentController extends Controller
             $records["recordsFiltered"] = $records["recordsTotal"] = count($siteAssignmentData);
             $records['data'] = array();
             $end = $request->length < 0 ? count($siteAssignmentData) : $request->length;
+
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($siteAssignmentData); $iterator++,$pagination++ ){
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-checklist-structure-site-assignment') || $user->customHasPermission('edit-checklist-structure-site-assignment')){
+                    $actionButton = '<a class="btn blue" href="/checklist/site-assignment/edit/'.$siteAssignmentData[$pagination]->id.'" >Edit</a>';
+                }else{
+                    $actionButton = '';
+                }
                 $records['data'][] = [
                     $siteAssignmentData[$pagination]->id,
                     $siteAssignmentData[$pagination]->projectSite->project->name,
@@ -175,7 +183,7 @@ class ChecklistSiteAssignmentController extends Controller
                     $siteAssignmentData[$pagination]->checklistCategory->name,
                     $siteAssignmentData[$pagination]->title,
                     count($siteAssignmentData[$pagination]->projectSiteChecklistCheckpoints),
-                    '<a class="btn blue" href="/checklist/site-assignment/edit/'.$siteAssignmentData[$pagination]->id.'" >Edit</a>'
+                    $actionButton
                 ];
             }
             $status = 200;

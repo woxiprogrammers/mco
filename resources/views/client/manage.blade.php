@@ -19,7 +19,7 @@
                             <div class="page-title">
                                 <h1>Manage Client</h1>
                             </div>
-                            @if($user->hasPermissionTo('create-manage-client'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-manage-client'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 81%">
                                     <a href="/client/create" style="color: white">
                                         <i class="fa fa-plus"></i> Client

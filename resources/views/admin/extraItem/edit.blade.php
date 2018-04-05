@@ -65,11 +65,14 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-actions noborder row">
-                                                    <div class="col-md-offset-3">
-                                                        <button type="submit" id="edit-submit" class="btn red" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-manage-extra-items'))
+                                                    <div class="form-actions noborder row">
+                                                        <div class="col-md-offset-3">
+                                                            <button type="submit" id="edit-submit" class="btn red" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                @endif
+
                                             </form>
                                         </div>
                                     </div>

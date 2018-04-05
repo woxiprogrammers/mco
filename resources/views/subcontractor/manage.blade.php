@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Manage Labour')
+@section('title','Constro | Manage Subcontractor')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -21,12 +21,14 @@
                             <div class="page-title">
                                 <h1>Manage Subcontractor</h1>
                             </div>
-                            <div class="btn-group" style="float: right;margin-top:1%">
-                                <div id="sample_editable_1_new" class="btn yellow" ><a href="/subcontractor/create" style="color: white"> Subcontractor
-                                        <i class="fa fa-plus"></i>
-                                    </a>
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-manage-user'))
+                                <div class="btn-group" style="float: right;margin-top:1%">
+                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/subcontractor/create" style="color: white"> Subcontractor
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
                     <div class="page-content">

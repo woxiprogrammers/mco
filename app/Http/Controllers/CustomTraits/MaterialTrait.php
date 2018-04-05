@@ -161,6 +161,7 @@ trait MaterialTrait{
 
     public function materialListing(Request $request){
         try{
+            $user = Auth::user();
             if($request->has('search_name')){
                 $materialData = Material::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
@@ -178,7 +179,7 @@ trait MaterialTrait{
                     $material_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                if(Auth::user()->hasPermissionTo('edit-material')){
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material')){
                     $records['data'][$iterator] = [
                         '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
                         $materialData[$pagination]['name'],

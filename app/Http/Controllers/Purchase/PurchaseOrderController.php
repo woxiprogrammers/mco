@@ -114,6 +114,7 @@ class PurchaseOrderController extends Controller
     
     public function getListing(Request $request){
         try{
+            $user = Auth::user();
             $postdata = null;
             $status = 0;
             $site_id = 0;
@@ -238,11 +239,17 @@ class PurchaseOrderController extends Controller
                         $imageTitle = 'Email is pending.';
                     }
                     $actionData =  '<div>
-                        <img src="/assets/global/img/'.$imageName.'" style="height: 20px" title="'.$imageTitle.'">
-                    <div id="sample_editable_1_new" class="btn btn-small blue" >
-                    <a href="/purchase/purchase-order/edit/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white; margin-left: 8%"> Edit
-                    </a> &nbsp; | &nbsp; <a href="/purchase/purchase-order/download-po-pdf/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white"> <i class="fa fa-download" aria-hidden="true"></i>
-                    </a></div></div>';
+                                        <img src="/assets/global/img/'.$imageName.'" style="height: 20px" title="'.$imageTitle.'">';
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-order') || $user->customHasPermission('view-purchase-order')){
+                        $actionData .= '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                                            <a href="/purchase/purchase-order/edit/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white; margin-left: 8%"> Edit
+                                            </a> &nbsp; | &nbsp;
+                                            <a href="/purchase/purchase-order/download-po-pdf/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white">
+                                                <i class="fa fa-download" aria-hidden="true"></i>
+                                            </a>
+                                        </div>';
+                    }
+                    $actionData .= '</div>';
                 }
                 $records['data'][$iterator] = [
                     '<a href="javascript:void(0);" onclick="openPurchaseOrderDetails('.$purchaseOrderList[$pagination]['purchase_order_id'].')">

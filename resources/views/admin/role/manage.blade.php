@@ -34,12 +34,14 @@
                                                 <div class="table-toolbar">
                                                     <div class="row" style="text-align: right">
                                                         <div class="col-md-12">
-                                                            <div class="btn-group">
-                                                                <div id="sample_editable_1_new" class="btn yellow" ><a href="/role/create" style="color: white"> Role
-                                                                        <i class="fa fa-plus"></i>
-                                                                    </a>
+                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-manage-user'))
+                                                                <div class="btn-group">
+                                                                    <div id="sample_editable_1_new" class="btn yellow" ><a href="/role/create" style="color: white"> Role
+                                                                            <i class="fa fa-plus"></i>
+                                                                        </a>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>

@@ -50,12 +50,14 @@
                                                 <li class="active">
                                                     <a href="#billViewTab" data-toggle="tab"> Bill View </a>
                                                 </li>
-                                                <li>
-                                                    <a href="#billTransactionTab" data-toggle="tab"> Transactions </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#reconcileTab" data-toggle="tab"> Reconcile </a>
-                                                </li>
+                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing-transaction') || $user->customHasPermission('view-billing-transaction') || $user->customHasPermission('edit-billing-transaction') || $user->customHasPermission('approve-billing-transaction'))
+                                                    <li>
+                                                        <a href="#billTransactionTab" data-toggle="tab"> Transactions </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#reconcileTab" data-toggle="tab"> Reconcile </a>
+                                                    </li>
+                                                @endif
                                             </ul>
                                         @endif
                                         <div class="tab-content">
@@ -93,18 +95,22 @@
                                                             <label for="bank" class="control-label" style="padding-left: 13%">Assigned Bank : {!! $bill->bankInfo->bank_name !!} - {!! $bill->bankInfo->account_number !!}</label>
                                                         @endif
                                                         @if($bill->bill_status->slug == 'draft')
-                                                            <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 11%">
-                                                                <i class="fa fa-edit"></i>
-                                                                Bill
-                                                            </a>
+                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-billing'))
+                                                                <a href="/bill/edit/{{$selectedBillId}}" class="btn btn-info btn-icon" style="margin-left: 11%">
+                                                                    <i class="fa fa-edit"></i>
+                                                                    Bill
+                                                                </a>
+                                                            @endif
+                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-billing'))
+                                                                    <a class="btn green-meadow" id="approve" data-toggle="tab" href="#billApproveTab" style="margin-left: 10px">
+                                                                        <i class="fa fa-check-square-o"></i> Approve
+                                                                    </a>
 
-                                                            <a class="btn green-meadow" id="approve" data-toggle="tab" href="#billApproveTab" style="margin-left: 10px">
-                                                                <i class="fa fa-check-square-o"></i> Approve
-                                                            </a>
+                                                                    <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#cancel-form" style="margin-left: 10px">
+                                                                        <i class="fa fa-remove"></i> Cancel
+                                                                    </a>
+                                                            @endif
 
-                                                            <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#cancel-form" style="margin-left: 10px">
-                                                                <i class="fa fa-remove"></i> Cancel
-                                                            </a>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -354,13 +360,15 @@
                                                     <div class="table-toolbar">
                                                         <div class="row" style="text-align: right">
                                                             <div class="col-md-12">
-                                                                <div class="btn-group">
-                                                                    <div id="sample_editable_1_new" class="btn yellow" >
-                                                                        <a href="#paymentModal" style="color: white" id="billTransactionCreateButton" data-toggle="modal"> Transaction
-                                                                            <i class="fa fa-plus"></i>
-                                                                        </a>
+                                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing-transaction'))
+                                                                    <div class="btn-group">
+                                                                        <div id="sample_editable_1_new" class="btn yellow" >
+                                                                            <a href="#paymentModal" style="color: white" id="billTransactionCreateButton" data-toggle="modal"> Transaction
+                                                                                <i class="fa fa-plus"></i>
+                                                                            </a>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                     </div>
@@ -408,7 +416,7 @@
                                                             <div class="col-md-3">
                                                                 <input type="text" class="form-control" readonly value="{{$remainingHoldAmount}}">
                                                             </div>
-                                                            @if($remainingHoldAmount < 0)
+                                                            @if($remainingHoldAmount < 0 && ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing-transaction')))
                                                                 <div class="col-md-6">
                                                                     <a class="btn yellow pull-right" href="javascript:void(0);" onclick="openReconcilePaymentModal('hold')">
                                                                         <i class="fa fa-plus"></i>Reconcile Hold
@@ -442,7 +450,7 @@
                                                             <div class="col-md-3">
                                                                 <input type="text" class="form-control" readonly value="{{$remainingRetentionAmount}}">
                                                             </div>
-                                                            @if($remainingRetentionAmount < 0)
+                                                            @if($remainingRetentionAmount < 0 && ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing-transaction')))
                                                                 <div class="col-md-6">
                                                                     <a class="btn yellow pull-right" href="javascript:void(0);" onclick="openReconcilePaymentModal('retention')">
                                                                         <i class="fa fa-plus"></i>Reconcile Retention

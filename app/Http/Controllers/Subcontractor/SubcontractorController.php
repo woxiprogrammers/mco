@@ -24,6 +24,7 @@ use App\Tax;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Client;
 use Illuminate\Support\Facades\Session;
@@ -82,6 +83,7 @@ class SubcontractorController extends Controller
 
     public function subcontractorListing(Request $request){
         try{
+            $user = Auth::user();
             $listingData = Subcontractor::get();
             $iTotalRecords = count($listingData);
             $records = array();
@@ -95,15 +97,8 @@ class SubcontractorController extends Controller
                     $labourStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $listingData[$pagination]['subcontractor_name'],
-                    $listingData[$pagination]['company_name'],
-                    $listingData[$pagination]['primary_cont_person_name'],
-                    $listingData[$pagination]['primary_cont_person_mob_number'],
-                    $listingData[$pagination]['escalation_cont_person_name'],
-                    $listingData[$pagination]['escalation_cont_person_mob_number'],
-                    $labourStatus,
-                    '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-user')){
+                    $actionButton = '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -118,7 +113,30 @@ class SubcontractorController extends Controller
                                     <i class="icon-docs"></i> '.$status.' </a>
                             </li>
                         </ul>
-                    </div>'
+                    </div>';
+                }else{
+                    $actionButton = '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/subcontractor/edit/'.$listingData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                            </li>
+                        </ul>
+                    </div>';
+                }
+                $records['data'][$iterator] = [
+                    $listingData[$pagination]['subcontractor_name'],
+                    $listingData[$pagination]['company_name'],
+                    $listingData[$pagination]['primary_cont_person_name'],
+                    $listingData[$pagination]['primary_cont_person_mob_number'],
+                    $listingData[$pagination]['escalation_cont_person_name'],
+                    $listingData[$pagination]['escalation_cont_person_mob_number'],
+                    $labourStatus,
+                    $actionButton
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -260,6 +278,7 @@ class SubcontractorController extends Controller
 
     public function subcontractorStructureListing(Request $request){
         try{
+            $user = Auth::user();
             $filterFlag = true;
             $subcontractor_name = null;
             $project_name = null;
@@ -359,12 +378,17 @@ class SubcontractorController extends Controller
                         $billTotals += $finalTotal;
                         $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
                     }
-                    $action = '<a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                    $action = '';
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-billing') || $user->customHasPermission('edit-subcontractor-billing') || $user->customHasPermission('view-subcontractor-billing') || $user->customHasPermission('approve-subcontractor-billing')){
+                        $action .= '<a href="/subcontractor/subcontractor-bills/manage/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
                                             <i class="icon-docs"></i> Manage
-                                        </a>
-                                        <a href="/subcontractor/subcontractor-structure/view/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                        </a>';
+                    }
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-structure') || $user->customHasPermission('view-subcontractor-structure')){
+                        $action .= '<a href="/subcontractor/subcontractor-structure/view/'.$listingData[$pagination]['id'].'" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
                                              <i class="icon-docs"></i>View
                                         </a>';
+                    }
                     $total_amount = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
                     $records['data'][$iterator] = [
                         $listingData[$pagination]->subcontractor->subcontractor_name,

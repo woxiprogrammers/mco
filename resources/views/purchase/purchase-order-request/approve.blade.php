@@ -160,11 +160,14 @@
                                                             </div>
                                                         </div>
                                                     @endforeach
+                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-order-request')))
                                                     <div class="form-actions noborder row">
                                                         <div class="col-md-offset-3" style="margin-left: 26%">
                                                             <button type="submit" id="submitPOApproveForm" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                         </div>
                                                     </div>
+                                                @endif
+
                                                 @else
                                                     <div class="row" style="margin-top: 10%; margin-bottom: 10%">
                                                         <div class="col-md-8 col-md-offset-3">

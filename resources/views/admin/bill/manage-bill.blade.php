@@ -45,11 +45,13 @@
 
                                                             </div>
                                                         </div>
-                                                        <div class="btn-group">
-                                                            <div id="sample_editable_1_new" class="btn yellow"><a href="/bill/create" style="color: white"><i class="fa fa-plus"></i> Create Bill
-                                                                </a>
+                                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing'))
+                                                            <div class="btn-group">
+                                                                <div id="sample_editable_1_new" class="btn yellow"><a href="/bill/create" style="color: white"><i class="fa fa-plus"></i> Create Bill
+                                                                    </a>
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>

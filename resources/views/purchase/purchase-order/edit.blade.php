@@ -105,7 +105,7 @@
                                                     <div class="tab-content">
                                                         <div class="tab-pane fade in active" id="generalInfoTab">
                                                             <div class="table-container">
-                                                                @if($purchaseOrderStatusSlug == 'open' || $purchaseOrderStatusSlug == 're-open')
+                                                                @if(($purchaseOrderStatusSlug == 'open' || $purchaseOrderStatusSlug == 're-open') && ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill')))
                                                                     <div class="row">
                                                                         <div class="col-md-offset-9 col-md-3 ">
                                                                             <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">

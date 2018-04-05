@@ -9,6 +9,7 @@ use App\ChecklistCheckpointImages;
 use App\Http\Controllers\CustomTraits\CheckListTrait;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ChecklistController extends Controller
@@ -133,6 +134,7 @@ class ChecklistController extends Controller
 
     public function structureListing(Request $request){
         try{
+            $user = Auth::user();
             $status = 200;
             $checklistCategory = ChecklistCategory::where('is_active',true)->whereNotNull('category_id')->orderBy('id','desc')->get();
             $records = array();
@@ -141,13 +143,18 @@ class ChecklistController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($checklistCategory) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($checklistCategory); $iterator++,$pagination++ ){
-            $mainCategoryName = ChecklistCategory::where('id',$checklistCategory[$pagination]['category_id'])->pluck('name')->first();
+                $mainCategoryName = ChecklistCategory::where('id',$checklistCategory[$pagination]['category_id'])->pluck('name')->first();
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-checklist-structure') || $user->customHasPermission('edit-checklist-structure')){
+                    $actionButton = '<a href="/checklist/structure/edit/'.$checklistCategory[$pagination]->id.'" class="btn blue">Edit</a>';
+                }else{
+                    $actionButton = ' ';
+                }
                 $records['data'][] = [
                     ($iterator+1),
                     $mainCategoryName,
                     $checklistCategory[$pagination]->name,
                     ChecklistCheckpoint::where('checklist_category_id',$checklistCategory[$pagination]->id)->count(),
-                    '<a href="/checklist/structure/edit/'.$checklistCategory[$pagination]->id.'" class="btn blue">Edit</a>'
+                    $actionButton
                 ];
             }
         }catch(\Exception $e){

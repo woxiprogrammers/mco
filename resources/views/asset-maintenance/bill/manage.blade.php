@@ -28,7 +28,7 @@
                                 <div class="page-title">
                                     <h1>Manage Asset Maintenance Bill</h1>
                                 </div>
-                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin')
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'|| $user->customHasPermission('create-asset-maintenance-billing'))
                                     <div class="btn-group pull-right margin-top-15">
                                         <div id="sample_editable_1_new" class="btn yellow" ><a href="/asset/maintenance/request/bill/create" style="color: white"> <i class="fa fa-plus"></i>  Asset Maintenance Bill
                                             </a>
