@@ -179,11 +179,11 @@ class UserController extends Controller
                     $check = UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->first();
                     if($check != null){
                         UserHasPermission::where('user_id',$user->id)->where('permission_id',$permissions)->update(['is_web'=>true]);
-                    }
-                    else{
+                    }else{
                         UserHasPermission::create($userPermissionData);
                     }
                 }
+                UserHasPermission::where('user_id',$user->id)->whereNotIn('permission_id',$web_permissions)->update(['is_web' => false]);
             }else{
                 $web_permissions = array();
             }
@@ -202,6 +202,7 @@ class UserController extends Controller
                         UserHasPermission::create($userPermissionData);
                     }
                 }
+                UserHasPermission::where('user_id',$user->id)->whereNotIn('permission_id',$mobile_permissions)->update(['is_mobile' => false]);
             }else{
                 $mobile_permissions = array();
             }
@@ -237,6 +238,7 @@ class UserController extends Controller
 
     public function userListing(Request $request){
         try{
+            $user = Auth::user();
             $userData = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
                             ->join('roles','roles.id','=','user_has_roles.role_id')
                             ->whereNotIn('roles.slug',['admin','superadmin'])
@@ -260,13 +262,8 @@ class UserController extends Controller
                     $user_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $userData[$pagination]['first_name'].' '.$userData[$pagination]['last_name'] ,
-                    $userData[$pagination]['email'],
-                    $userData[$pagination]['mobile'],
-                    $user_status,
-                    date('d M Y',strtotime($userData[$pagination]['created_at'])),
-                    '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-user')){
+                    $actionButton = '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -281,7 +278,28 @@ class UserController extends Controller
                                     <i class="icon-tag"></i> Approve / Disapprove </a>
                             </li>
                         </ul>
-                    </div>'
+                    </div>';
+                }else{
+                    $actionButton = '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                        <li>
+                                <a href="/user/edit/'.$userData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                            </li>
+                        </ul>
+                    </div>';
+                }
+                $records['data'][$iterator] = [
+                    $userData[$pagination]['first_name'].' '.$userData[$pagination]['last_name'] ,
+                    $userData[$pagination]['email'],
+                    $userData[$pagination]['mobile'],
+                    $user_status,
+                    date('d M Y',strtotime($userData[$pagination]['created_at'])),
+                    $actionButton
                 ];
             }
             $records["draw"] = intval($request->draw);

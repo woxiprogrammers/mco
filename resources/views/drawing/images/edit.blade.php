@@ -140,7 +140,9 @@
                                                                         <input type="text" name="title" required>
                                                                     </div>
                                                                 </div>
-                                                                <input type="submit" class="btn red pull-right" >
+                                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-add-drawing')|| $user->customHasPermission('create-add-drawing'))
+                                                                    <input type="submit" class="btn red pull-right" >
+                                                                @endif
                                                             </form>
                                                         </div>
                                                     </div>

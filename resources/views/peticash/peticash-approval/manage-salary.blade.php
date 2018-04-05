@@ -22,9 +22,11 @@
                                 <h1>Peticash Salary Request Approval</h1>
                             </div>
                             <div class="btn-group" style="float: right;margin-top:1%">
-                                <div id="sample_editable_1_new" class="btn yellow" >
-                                    <a id="statusBtn" style="color: white"> Bulk Approve/Disapprove</a>
-                                </div>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-salary-request-handler'))
+                                    <div id="sample_editable_1_new" class="btn yellow" >
+                                        <a id="statusBtn" style="color: white"> Bulk Approve/Disapprove</a>
+                                    </div>
+                                @endif
                                 <div id="sample_editable_1_new" class="btn red" >
                                     <a id="statsBtn" style="color: white">Statistics</a>
                                 </div>

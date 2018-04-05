@@ -176,11 +176,13 @@
                                                             </table>
                                                         </fieldset>
                                                     </div>
-                                                <div class="form-actions noborder row">
-                                                    <div class="col-md-offset-3">
-                                                        <button type="submit" class="btn blue pull-right">Submit</button>
-                                                    </div>
-                                                </div>
+                                                    @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-manage-user'))
+                                                        <div class="form-actions noborder row">
+                                                            <div class="col-md-offset-3">
+                                                                <button type="submit" class="btn blue pull-right">Submit</button>
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </form>
                                         </div>

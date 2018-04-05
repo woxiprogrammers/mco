@@ -66,13 +66,15 @@
                                                             <i class="fa fa-edit"></i>
                                                             Bill
                                                         </a>
-                                                        <a class="btn btn-xs green" id="approve" href="/subcontractor/subcontractor-bills/change-status/approved/{{$subcontractorBill['id']}}" style="margin-left: 10px">
-                                                            <i class="fa fa-check-square-o"></i> Approve
-                                                        </a>
+                                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-subcontractor-billing'))
+                                                            <a class="btn btn-xs green" id="approve" href="/subcontractor/subcontractor-bills/change-status/approved/{{$subcontractorBill['id']}}" style="margin-left: 10px">
+                                                                <i class="fa fa-check-square-o"></i> Approve
+                                                            </a>
 
-                                                        <a href="/subcontractor/subcontractor-bills/change-status/disapproved/{{$subcontractorBill['id']}}" class="btn btn-xs btn-danger" id="disapprove">
-                                                            <i class="fa fa-remove"></i> Disapprove
-                                                        </a>
+                                                            <a href="/subcontractor/subcontractor-bills/change-status/disapproved/{{$subcontractorBill['id']}}" class="btn btn-xs btn-danger" id="disapprove">
+                                                                <i class="fa fa-remove"></i> Disapprove
+                                                            </a>
+                                                        @endif
                                                     @endif
 
                                                     <div class="form-body">

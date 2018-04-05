@@ -75,6 +75,7 @@ class InventoryManageController extends Controller
 
     public function getSiteTransferRequestListing(Request $request){
         try{
+            $user = Auth::user();
             $status = 200;
             if($request->has('search_name')){
                 // Inventory listing search
@@ -93,7 +94,7 @@ class InventoryManageController extends Controller
                                                 PDF <i class="fa fa-download" aria-hidden="true"></i>
                                             </a>
                                         </div>';
-                }else{
+                }elseif($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-asset-maintenance-approval')){
                     $actionDropDown =  '<button class="btn btn-xs blue"> 
                                             <form action="/inventory/transfer/change-status/approved/'.$inventoryTransferData[$pagination]->id.'" method="post">
                                                 <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: white">
@@ -110,6 +111,8 @@ class InventoryManageController extends Controller
                                                 <input type="hidden" name="_token">
                                             </form>
                                         </button>';
+                }else{
+                    $actionDropDown = '';
                 }
                 $records['data'][$iterator] = [
                     $inventoryTransferData[$pagination]->inventoryComponent->projectSite->project->name,

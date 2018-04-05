@@ -6,6 +6,7 @@ use App\Client;
 use App\Http\Requests\ClientRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ClientController extends Controller
@@ -94,6 +95,7 @@ class ClientController extends Controller
 
     public function clientListing(Request $request){
         try{
+            $user = Auth::user();
             $clientData = Client::orderBy('id','desc')->get()->toArray();
             $iTotalRecords = count($clientData);
             $records = array();
@@ -106,13 +108,8 @@ class ClientController extends Controller
                     $client_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                $records['data'][$iterator] = [
-                    $clientData[$pagination]['company'],
-                    $clientData[$pagination]['email'],
-                    $clientData[$pagination]['mobile'],
-                    $client_status,
-                    date('d M Y',strtotime($clientData[$pagination]['created_at'])),
-                    '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-client')){
+                    $button = '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -127,7 +124,28 @@ class ClientController extends Controller
                                     <i class="icon-tag"></i> '.$status.' </a>
                             </li>
                         </ul>
-                    </div>'
+                    </div>';
+                }else{
+                    $button = '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/client/edit/'.$clientData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                            </li>
+                        </ul>
+                    </div>';
+                }
+                $records['data'][$iterator] = [
+                    $clientData[$pagination]['company'],
+                    $clientData[$pagination]['email'],
+                    $clientData[$pagination]['mobile'],
+                    $client_status,
+                    date('d M Y',strtotime($clientData[$pagination]['created_at'])),
+                    $button
                 ];
             }
             $records["draw"] = intval($request->draw);

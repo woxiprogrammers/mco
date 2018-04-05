@@ -248,6 +248,7 @@ trait ProductTrait{
 
     public function productListing(Request $request){
         try{
+            $user = Auth::user();
             if($request->has('search_product_name')){
                 $productData = Product::where('name','ilike','%'.$request->search_product_name.'%')->orderBy('name','asc')->get()->toArray();
             }else{
@@ -265,6 +266,83 @@ trait ProductTrait{
                 }else{
                     $product_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
+                }
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->hasPermissionTo('create-product')|| $user->hasPermissionTo('approve-product')){
+                    $records['data'][$iterator] = [
+                        $productData[$pagination]['name'],
+                        Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
+                        MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                        $product_status,
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/product/edit/'.$productData[$pagination]['id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/product/change-status/'.$productData[$pagination]['id'].'">
+                                        <i class="icon-tag"></i> '.$status.' </a>
+                                </li>
+                                <li>
+                                    <a href="/product/product-analysis-pdf/'.$productData[$pagination]['id'].'">
+                                        <i class="icon-cloud-download"></i> Download </a>
+                                </li>
+                                <li>
+                                    <a href="/product/copy/'.$productData[$pagination]['id'].'">
+                                        <i class="fa fa-files-o"></i> Copy Product</a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }elseif(Auth::user()->hasPermissionTo('edit-product')){
+                    $records['data'][$iterator] = [
+                        $productData[$pagination]['name'],
+                        Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
+                        MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                        $product_status,
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/product/product-analysis-pdf/'.$productData[$pagination]['id'].'">
+                                        <i class="icon-cloud-download"></i> Download </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        $productData[$pagination]['name'],
+                        Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
+                        MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
+                        $product_status,
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <ul class="dropdown-menu pull-left" role="menu">
+                                <li>
+                                    <a href="/product/edit/'.$productData[$pagination]['id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                </li>
+                                <li>
+                                    <a href="/product/product-analysis-pdf/'.$productData[$pagination]['id'].'">
+                                        <i class="icon-cloud-download"></i> Download </a>
+                                </li>
+                            </ul>
+                        </div>'
+                    ];
                 }
                 if(Auth::user()->hasPermissionTo('edit-product')){
                     $records['data'][$iterator] = [

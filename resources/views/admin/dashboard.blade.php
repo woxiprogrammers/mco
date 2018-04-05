@@ -33,7 +33,6 @@
 
                 <!-- END PAGE BREADCRUMBS -->
                 <!-- BEGIN PAGE CONTENT INNER -->
-                @if(($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                 <div class="page-content-inner">
                     <div class="row">
                         <fieldset>
@@ -90,7 +89,8 @@
                             @endfor
                         </fieldset>
                     </div>
-                    <div class="row" style="margin-top: 3%">
+                    @if(($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+                        <div class="row" style="margin-top: 3%">
                         <div class="col-md-4">
                             {!! $quotationStatus->render() !!}
                         </div>
@@ -116,9 +116,9 @@
                             </div>
                         </div>
                     </div>
-
+                    @endif
                 </div>
-                @endif
+
 
             </div>
         </div>

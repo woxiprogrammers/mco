@@ -85,6 +85,7 @@ trait ProjectTrait{
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
+            $user = Auth::user();
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                 if( $listingData[$pagination]['project_is_active'] == true){
                     $projectStatus = '<td><span class="label label-sm label-success"> Enabled </span></td>';
@@ -93,13 +94,8 @@ trait ProjectTrait{
                     $projectStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
-                if(Auth::user()->hasPermissionTo('edit-manage-sites')){
-                    $records['data'][$iterator] = [
-                        $listingData[$pagination]['company'],
-                        $listingData[$pagination]['project_name'],
-                        $listingData[$pagination]['project_site_name'],
-                        $projectStatus,
-                        '<div class="btn-group">
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-sites')){
+                    $button = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
@@ -114,26 +110,28 @@ trait ProjectTrait{
                                         <i class="icon-docs"></i> '.$status.' </a>
                                 </li>
                             </ul>
-                        </div>'
-                    ];
+                        </div>';
                 }else{
-                    $records['data'][$iterator] = [
-                        $listingData[$pagination]['company'],
-                        $listingData[$pagination]['project_name'],
-                        $listingData[$pagination]['project_site_name'],
-                        $projectStatus,
-                        '<div class="btn-group">
+                    $button = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
                             </button>
                             <ul class="dropdown-menu pull-left" role="menu">
-                            
+                                <li>
+                                    <a href="/project/edit/'.$listingData[$pagination]['project_id'].'">
+                                        <i class="icon-docs"></i> Edit </a>
+                                </li>
                             </ul>
-                        </div>'
-                    ];
+                        </div>';
                 }
-
+                $records['data'][$iterator] = [
+                    $listingData[$pagination]['company'],
+                    $listingData[$pagination]['project_name'],
+                    $listingData[$pagination]['project_site_name'],
+                    $projectStatus,
+                    $button
+                ];
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;

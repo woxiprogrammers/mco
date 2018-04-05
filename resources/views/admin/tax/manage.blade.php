@@ -19,7 +19,7 @@
                             <div class="page-title">
                                 <h1>Manage Tax</h1>
                             </div>
-                            @if($user->hasPermissionTo('create-tax'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-tax'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 84%">
                                     <a href="/tax/create" style="color: white">
                                         <i class="fa fa-plus"></i>

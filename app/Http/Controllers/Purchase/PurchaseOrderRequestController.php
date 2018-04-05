@@ -207,22 +207,27 @@ class PurchaseOrderRequestController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseOrderRequestsData); $iterator++,$pagination++ ){
                 $user = User::where('id',$purchaseOrderRequestsData[$pagination]['user_id'])->select('first_name','last_name')->first();
                 $purchaseRequestFormat = PurchaseRequest::where('id',$purchaseOrderRequestsData[$pagination]['purchase_request_id'])->pluck('format_id')->first();
-                $records['data'][] = [
-                    $iterator+1,
-                    $purchaseRequestFormat,
-                    $user['first_name'].' '.$user['last_name'],
-                    '<div class="btn-group">
+                $actionDropdown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
                                 <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
+                            </button>';
+                if($loggedInUser->roles[0]->role->slug == 'admin' || $loggedInUser->roles[0]->role->slug == 'superadmin' || $loggedInUser->customHasPermission('edit-purchase-order-request')
+                    || $loggedInUser->customHasPermission('create-purchase-order-request') || $loggedInUser->customHasPermission('view-purchase-order-request') || $loggedInUser->customHasPermission('approve-purchase-order')){
+                    $actionDropdown .='<ul class="dropdown-menu pull-left" role="menu">
                                 <li>
                                     <a href="/purchase/purchase-order-request/edit/'.$purchaseOrderRequestsData[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                                 </li>
-                            </ul>
-                        </div>'
+                            </ul>';
+                }
+                $actionDropdown .= '</div>';
+
+                $records['data'][] = [
+                    $iterator+1,
+                    $purchaseRequestFormat,
+                    $user['first_name'].' '.$user['last_name'],
+                    $actionDropdown
                 ];
             }
             $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')

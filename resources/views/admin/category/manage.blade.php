@@ -20,7 +20,7 @@
                             <div class="page-title">
                                 <h1>Manage Category</h1>
                             </div>
-                            @if($user->hasPermissionTo('edit-category'))
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-category'))
                                 <div id="sample_editable_1_new" class="btn yellow" style="margin-top: 1%; margin-left: 77%"><a href="/category/create" style="color: white">
                                         <i class="fa fa-plus"></i>
                                         Category

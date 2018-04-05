@@ -28,9 +28,12 @@
                                 <div class="page-title">
                                     <h1>Manage Checklist Project Site Assignments</h1>
                                 </div>
-                                <div id="sample_editable_1_new" class="btn yellow pull-right" style="margin-top: 1%">
-                                    <a href="/checklist/site-assignment/create" style="color: white"><i class="fa fa-plus"></i> Checklist Site Assignment</a>
-                                </div>
+                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-checklist-structure-site-assignment'))
+                                    <div id="sample_editable_1_new" class="btn yellow pull-right" style="margin-top: 1%">
+                                        <a href="/checklist/site-assignment/create" style="color: white"><i class="fa fa-plus"></i> Checklist Site Assignment</a>
+                                    </div>
+                                @endif
+
                             </div>
                         </div>
                         <div class="page-content">

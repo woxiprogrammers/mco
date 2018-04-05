@@ -419,6 +419,7 @@ trait BillTrait{
 
     public function ProjectSiteListing(Request $request){
         try{
+            $user = Auth::user();
             $iterator = 0;
             $listingData = array();
             $quotationIds = Bill::groupBy('quotation_id')->pluck('quotation_id')->toArray();
@@ -442,47 +443,43 @@ trait BillTrait{
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                if(Auth::user()->hasPermissionTo('create-billing')){
-                    $records['data'][$iterator] = [
-                        $listingData[$pagination]['company'],
-                        $listingData[$pagination]['project_name'],
-                        $listingData[$pagination]['project_site_name'],
-                        '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/bill/create/'.$listingData[$pagination]['project_site_id'].'">
-                                    <i class="icon-docs"></i> Create </a>
-                            </li>
-                            <li>
-                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
-                                    <i class="icon-docs"></i> Manage </a>
-                            </li>
-                        </ul>
-                    </div>'
-                    ];
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing')){
+                    $button = '<div class="btn-group">
+                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                    <i class="fa fa-angle-down"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-left" role="menu">
+                                    <li>
+                                        <a href="/bill/create/'.$listingData[$pagination]['project_site_id'].'">
+                                            <i class="icon-docs"></i> Create </a>
+                                    </li>
+                                    <li>
+                                        <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
+                                            <i class="icon-docs"></i> Manage </a>
+                                    </li>
+                                </ul>
+                             </div>';
                 }else{
-                    $records['data'][$iterator] = [
-                        $listingData[$pagination]['company'],
-                        $listingData[$pagination]['project_name'],
-                        $listingData[$pagination]['project_site_name'],
-                        '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
-                                    <i class="icon-docs"></i> Manage </a>
-                            </li>
-                        </ul>
-                    </div>'
-                    ];
+                    $button = '<div class="btn-group">
+                                <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                    <i class="fa fa-angle-down"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-left" role="menu">
+                                    <li>
+                                        <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
+                                            <i class="icon-docs"></i> Manage </a>
+                                    </li>
+                                </ul>
+                             </div>';
                 }
+                $records['data'][$iterator] = [
+                    $listingData[$pagination]['company'],
+                    $listingData[$pagination]['project_name'],
+                    $listingData[$pagination]['project_site_name'],
+                    $button
+                ];
 
             }
             $records["draw"] = intval($request->draw);
