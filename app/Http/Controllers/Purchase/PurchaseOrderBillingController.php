@@ -284,10 +284,10 @@ class PurchaseOrderBillingController extends Controller
 
     public function listing(Request $request){
         try{
+            Log::info($request);
             $records = array();
             $status = 200;
-            $records['data'] = array();
-            $records["draw"] = intval($request->draw);
+
             $postDataArray = array();
             $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
             $filterFlag = true;
@@ -340,50 +340,71 @@ class PurchaseOrderBillingController extends Controller
             }else{
                 $purchaseOrderBillData = array();
             }
-            $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
-            if($request->length == -1){
-                $length = $records["recordsTotal"];
-            }else{
-                $length = $request->length;
-            }
+
+
             $user = Auth::user();
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
-                $taxAmount = $purchaseOrderBillData[$pagination]['transportation_tax_amount'] + $purchaseOrderBillData[$pagination]['extra_tax_amount'] + $purchaseOrderBillData[$pagination]['tax_amount'];
-                $basicAmount = $purchaseOrderBillData[$pagination]['amount'] - $taxAmount;
-                $paidAmount = PurchaseOrderPayment::where('purchase_order_bill_id', $purchaseOrderBillData[$pagination]['id'])->sum('amount');
-                $pendingAmount = $purchaseOrderBillData[$pagination]['amount'] - $paidAmount;
-                $vendorName = Vendor::where('id', $purchaseOrderBillData[$pagination]['vendor_id'])->pluck('company')->first();
-                $entryDate = '';
-                if(isset($purchaseOrderBillData[$pagination]['bill_date'])){
-                    $entryDate = date('j M Y',strtotime($purchaseOrderBillData[$pagination]['bill_date']));
+            $total = 0;
+            $billTotals = 0;
+            $billPaidAmount = 0;
+            if ($request->has('get_total')) {
+                if ($filterFlag) {
+                    $total = $purchaseOrderBillData->sum('amount');
+                    $paidAmount = PurchaseOrderPayment::whereIn('purchase_order_bill_id', $purchaseOrderBillData->pluck('id'))->sum('amount');
+                    $billTotals = $total - $paidAmount;
+                    $billPaidAmount = PurchaseOrderPayment::whereIn('purchase_order_bill_id', $purchaseOrderBillData->pluck('id'))->sum('amount');;
                 }
-                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill') || $user->customHasPermission('edit-purchase-bill')){
-                    $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                $records['total'] = $total;
+                $records['billtotal'] = $billTotals;
+                $records['paidtotal'] = $billPaidAmount;
+            } else {
+                $records = array();
+                $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
+                $records['data'] = array();
+                $records["draw"] = intval($request->draw);
+                if($request->length == -1){
+                    $length = $records["recordsTotal"];
+                }else{
+                    $length = $request->length;
+                }
+                for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
+                    $taxAmount = $purchaseOrderBillData[$pagination]['transportation_tax_amount'] + $purchaseOrderBillData[$pagination]['extra_tax_amount'] + $purchaseOrderBillData[$pagination]['tax_amount'];
+                    $basicAmount = $purchaseOrderBillData[$pagination]['amount'] - $taxAmount;
+                    $paidAmount = PurchaseOrderPayment::where('purchase_order_bill_id', $purchaseOrderBillData[$pagination]['id'])->sum('amount');
+                    $pendingAmount = $purchaseOrderBillData[$pagination]['amount'] - $paidAmount;
+                    $vendorName = Vendor::where('id', $purchaseOrderBillData[$pagination]['vendor_id'])->pluck('company')->first();
+                    $entryDate = '';
+                    if(isset($purchaseOrderBillData[$pagination]['bill_date'])){
+                        $entryDate = date('j M Y',strtotime($purchaseOrderBillData[$pagination]['bill_date']));
+                    }
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill') || $user->customHasPermission('edit-purchase-bill')){
+                        $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
                         <a href="/purchase/purchase-order-bill/edit/'.$purchaseOrderBillData[$pagination]['id'].'" style="color: white"> Edit
                     </div>';
-                }else{
-                    $editButton = '';
+                    }else{
+                        $editButton = '';
+                    }
+                    $projectName = Project::join('project_sites','project_sites.project_id','=','projects.id')
+                        ->join('purchase_requests','purchase_requests.project_site_id','=','project_sites.id')
+                        ->join('purchase_orders','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                        ->where('purchase_orders.id',$purchaseOrderBillData[$pagination]['purchase_order_id'])
+                        ->pluck('projects.name')->first();
+                    $records['data'][] = [
+                        $projectName,
+                        $purchaseOrderBillData[$pagination]['serial_number'],
+                        date('j M Y',strtotime($purchaseOrderBillData[$pagination]['created_at'])),
+                        $entryDate,
+                        $purchaseOrderBillData[$pagination]['vendor_bill_number'],
+                        $vendorName,
+                        $basicAmount,
+                        $taxAmount,
+                        $purchaseOrderBillData[$pagination]['amount'],
+                        $pendingAmount,
+                        $paidAmount,
+                        $editButton
+                    ];
                 }
-                $projectName = Project::join('project_sites','project_sites.project_id','=','projects.id')
-                                    ->join('purchase_requests','purchase_requests.project_site_id','=','project_sites.id')
-                                    ->join('purchase_orders','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                                    ->where('purchase_orders.id',$purchaseOrderBillData[$pagination]['purchase_order_id'])
-                                    ->pluck('projects.name')->first();
-                $records['data'][] = [
-                    $projectName,
-                    $purchaseOrderBillData[$pagination]['serial_number'],
-                    date('j M Y',strtotime($purchaseOrderBillData[$pagination]['created_at'])),
-                    $entryDate,
-                    $purchaseOrderBillData[$pagination]['vendor_bill_number'],
-                    $vendorName,
-                    $basicAmount,
-                    $taxAmount,
-                    $purchaseOrderBillData[$pagination]['amount'],
-                    $pendingAmount,
-                    $paidAmount,
-                    $editButton
-                ];
             }
+
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get PO billing listings',
