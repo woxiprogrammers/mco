@@ -18,7 +18,9 @@ use App\UserProjectSiteRelation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
 
 class UserController extends Controller
 {
@@ -554,6 +556,47 @@ class UserController extends Controller
             ];
             Log::critical(json_encode($data));
             return null;
+        }
+    }
+
+    public function getChangePasswordView(Request $request){
+        try{
+            return view('change-password');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get change password view',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function changePassword(Request $request){
+        try{
+            $user = Auth::user();
+
+            if (Hash::check($request['old_password'], $user['password'])) {
+                $user->update([
+                    'password' => bcrypt($request['confirm_password'])
+                ]);
+                $message = "Password changed successfully";
+                Auth::logout();
+                $request->session()->flash('success', $message);
+                return redirect('/');
+            }else{
+                $message = "Old Password doesn't match";
+                return Redirect::back()->with('error', $message);
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Change Password',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }

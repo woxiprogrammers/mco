@@ -48,6 +48,13 @@
                                 <a href="/logout">
                                     <i class="icon-key"></i> Log Out </a>
                             </li>
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin')
+                                <li>
+                                    <a href="/user/change-password">
+                                        <i class="icon-key"></i> Change Password </a>
+                                </li>
+                            @endif
+
                         </ul>
                     </li>
                     <!-- END USER LOGIN DROPDOWN -->
