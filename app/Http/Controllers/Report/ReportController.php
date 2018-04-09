@@ -135,6 +135,8 @@ class ReportController extends Controller
                     }else{
                         $materialNames = Material::whereIn('id',$request['material_id'])->pluck('name')->toArray();
                     }
+                    $projectName = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$request['materialwise_purchase_report_site_id'])->pluck('projects.name')->first();
                     foreach ($materialNames as $materialName){
                         $purchaseOrderComponents[] = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
                             ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
@@ -223,9 +225,9 @@ class ReportController extends Controller
                             }
                         }
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $date, $projectName) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header, $companyHeader, $date, $projectName) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -264,9 +266,9 @@ class ReportController extends Controller
                             });
 
                             $sheet->mergeCells('A7:J7');
-                            $sheet->cell('A7', function($cell) {
+                            $sheet->cell('A7', function($cell) use($projectName){
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Material wise Purchase Report');
+                                $cell->setValue('Material wise Purchase Report - '.$projectName);
                             });
 
                             $sheet->mergeCells('A8:J8');
@@ -647,7 +649,7 @@ class ReportController extends Controller
 
                     $statusId = BillStatus::whereIn('slug',['approved','draft'])->get()->toArray();
                     $totalBillIds = Bill::where('quotation_id',$quotationId)->whereIn('bill_status_id',array_column($statusId,'id'))->orderBy('id')->pluck('id');
-
+                    $total['mobilise'] = $total['debit'] = $total['hold'] = $total['retention'] = $total['tds'] = $total['otherRecovery'] = $total['payableAmount'] = $total['checkAmount'] = $total['balance'] = 0;
                     foreach ($billTransactions as $billId => $billTransactionData){
                         $billNo = 1;
                         $billName = '-';
@@ -675,12 +677,21 @@ class ReportController extends Controller
                             $data[$row]['payable_amount'] = $data[$row]['total_amount'] + $data[$row]['mobilise'] + $data[$row]['debit'] + $data[$row]['hold'] + $data[$row]['retention'] + $data[$row]['tds'] + $data[$row]['other_recovery'];
                             $data[$row]['check_amount'] = ($billTransaction['paid_from_advanced'] == false) ? $billTransaction['amount'] : 0;
                             $data[$row]['balance'] = $data[$row]['payable_amount'] - $data[$row]['check_amount'] - $data[$row]['mobilise'];
+                            $total['mobilise'] += $data[$row]['mobilise'];
+                            $total['debit'] += $data[$row]['debit'];
+                            $total['hold'] += $data[$row]['hold'];
+                            $total['retention'] += $data[$row]['retention'];
+                            $total['tds'] += $data[$row]['tds'];
+                            $total['otherRecovery'] += $data[$row]['other_recovery'];
+                            $total['payableAmount'] += $data[$row]['payable_amount'];
+                            $total['checkAmount'] += $data[$row]['check_amount'];
+                            $total['balance'] += $data[$row]['balance'];
                             $row++;
                         }
                     }
-                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header,$companyHeader ,$date , $projectName) {
+                    Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header,$companyHeader ,$date , $projectName, $total) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);
-                        $excel->sheet($report_type, function($sheet) use($data, $header,$companyHeader, $date, $projectName) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header,$companyHeader, $date, $projectName, $total) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -747,14 +758,13 @@ class ReportController extends Controller
                                         $cell->setValue($cellData);
                                     });
                                 }
-                                /*$row++;
-
-                                $sheet->cell('C'.($row), function($cell) {
-                                    $cell->setAlignment('center')->setValignment('center');
-                                    $cell->setValue('Total');
-                                });
-                                $row++;*/
                             }
+                            $row++;
+                            if($row > 11){
+                                $sheet->row($row, ['','','','','',$total['mobilise'], $total['debit'], $total['hold'] , $total['retention'] , $total['tds'] , $total['otherRecovery'] , $total['payableAmount'] , $total['checkAmount'] , $total['balance']]);
+                                $sheet->setBorder('A9:N19', 'thin', "D8572C");
+                            }
+
                         });
                     })->export('xls');
 

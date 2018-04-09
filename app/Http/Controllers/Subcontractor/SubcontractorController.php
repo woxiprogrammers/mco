@@ -25,6 +25,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Client;
 use Illuminate\Support\Facades\Session;
@@ -607,49 +608,71 @@ class SubcontractorController extends Controller
                     ->orderBy('subcontractor_bills.id','asc')
                     ->select('subcontractor_bills.id','subcontractor_bills.qty','subcontractor_bills.subcontractor_bill_status_id','subcontractor_structure.sc_structure_type_id','subcontractor_structure.rate','subcontractor_structure.total_work_area')->get();
             }
-            $iTotalRecords = count($listingData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($listingData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                $action = '<div class="btn btn-xs green">
+            if ($request->has('get_total')) {
+                $finalAmount = $paidAmount = 0;
+                foreach($listingData as $data){
+                    $structureTypeSlug = SubcontractorStructureType::where('id',$data['sc_structure_type_id'])->pluck('slug')->first();
+                    if($structureTypeSlug == 'sqft'){
+                        $rate = $data['rate'];
+                        $basicAmount = $rate * $data['qty'];
+                    }else{
+                        $rate = $data['rate'] * $data['total_work_area'];
+                        $basicAmount = $rate * $data['qty'];
+                    }
+                    $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$data['id'])->sum('percentage');
+                    $taxAmount = $basicAmount * ($taxesApplied / 100);
+                    $finalAmount += $basicAmount + $taxAmount;
+                    $paidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id', $data['id'])->sum('total');
+                }
+                $records['final_amount'] = $finalAmount;
+                $records['paid_amount'] = $paidAmount;
+                $records['pending_amount'] = $finalAmount - $paidAmount;
+            }else{
+                $iTotalRecords = count($listingData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($listingData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                    $action = '<div class="btn btn-xs green">
                         <a href="/subcontractor/subcontractor-bills/view/'.$listingData[$pagination]->id.'" style="color: white">
                              View Bill
                         </a>
                     </div>';
-                $billStatus = $listingData[$pagination]->subcontractorBillStatus->name;
-                $structureTypeSlug = SubcontractorStructureType::where('id',$listingData[$pagination]['sc_structure_type_id'])->pluck('slug')->first();
-                if($structureTypeSlug == 'sqft'){
-                    $rate = $listingData[$pagination]['rate'];
-                    $basicAmount = $rate * $listingData[$pagination]['qty'];
-                }else{
-                    $rate = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
-                    $basicAmount = $rate * $listingData[$pagination]['qty'];
+                    $billStatus = $listingData[$pagination]->subcontractorBillStatus->name;
+                    $structureTypeSlug = SubcontractorStructureType::where('id',$listingData[$pagination]['sc_structure_type_id'])->pluck('slug')->first();
+                    if($structureTypeSlug == 'sqft'){
+                        $rate = $listingData[$pagination]['rate'];
+                        $basicAmount = $rate * $listingData[$pagination]['qty'];
+                    }else{
+                        $rate = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
+                        $basicAmount = $rate * $listingData[$pagination]['qty'];
+                    }
+                    if($billStatusSlug == 'disapproved'){
+                        $billNo = "-";
+                    }else{
+                        $billNo = "R. A. - ".($billArrayNo);
+                        $billArrayNo++;
+                    }
+                    $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$listingData[$pagination]['id'])->sum('percentage');
+                    $taxAmount = $basicAmount * ($taxesApplied / 100);
+                    $finalAmount = $basicAmount + $taxAmount;
+                    $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('total');
+                    $records['data'][$iterator] = [
+                        $billNo,
+                        $basicAmount,
+                        $taxAmount,
+                        $finalAmount,
+                        $paidAmount,
+                        $finalAmount - $paidAmount,
+                        $billStatus,
+                        $action
+                    ];
                 }
-                if($billStatusSlug == 'disapproved'){
-                    $billNo = "-";
-                }else{
-                    $billNo = "R. A. - ".($billArrayNo);
-                    $billArrayNo++;
-                }
-                $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$listingData[$pagination]['id'])->sum('percentage');
-                $taxAmount = $basicAmount * ($taxesApplied / 100);
-                $finalAmount = $basicAmount + $taxAmount;
-                $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('total');
-                $records['data'][$iterator] = [
-                    $billNo,
-                    $basicAmount,
-                    $taxAmount,
-                    $finalAmount,
-                    $paidAmount,
-                    $finalAmount - $paidAmount,
-                    $billStatus,
-                    $action
-                ];
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+
         }catch(\Exception $e){
             $records = array();
             $data = [

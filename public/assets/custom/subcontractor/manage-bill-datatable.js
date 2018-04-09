@@ -18,7 +18,72 @@ var BillListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
 
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    // Total over all pages
+                    $.ajax({
+                        url: "/subcontractor/subcontractor-bills/listing/"+subcontractorStructureId+"/"+bill_status+'?_token='+$("input[name=\'_token\']").val(),
+                        type: 'POST',
+                        data :{
+                            "get_total" : true
+                        },
+                        success: function(result){
+                            final_amount = result['final_amount'];
+
+                            // Total over this page
+                            pageTotal = api
+                                .column( 3, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 3 ).footer() ).html(
+                                pageTotal +' ( '+ final_amount +' total)'
+                            );
+
+                            paid_amount = result['paid_amount'];
+
+                            // Total over this page
+                            pageTotal = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 4 ).footer() ).html(
+                                pageTotal +' ( '+ paid_amount +' total)'
+                            );
+
+                            pending_amount = result['pending_amount'];
+
+                            // Total over this page
+                            pageTotal = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
+                                pageTotal +' ( '+ pending_amount +' total)'
+                            );
+                        }
+                    });
+                },
                 "lengthMenu": [
                     [50, 100, 150],
                     [50, 100, 150] // change per page values here
