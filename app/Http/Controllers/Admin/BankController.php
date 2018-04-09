@@ -48,7 +48,7 @@ class BankController extends Controller
             $data['is_active'] = (boolean)false;
             $bank = BankInfo::create($data);
             $request->session()->flash('success', 'Bank created successfully');
-            return redirect('/bank/create');
+            return redirect('/bank/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create new Client',
@@ -145,7 +145,7 @@ class BankController extends Controller
             $bankData['branch_name'] = $data['branch_name'];
             $bank->update($bankData);
             $request->session()->flash('success', 'Bank Edited successfully.');
-            return redirect('/bank/edit/'.$bank->id);
+            return redirect('/bank/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Bank',

@@ -270,7 +270,7 @@ class InventoryManageController extends Controller
             }
             $asset_type = Asset::join('asset_types','assets.asset_types_id','=','asset_types.id')
                             ->where('assets.id',$inventoryComponent['reference_id'])->select('assets.asset_types_id','asset_types.name','asset_types.slug')->first();
-            $transportationVendors = Vendor::where('for_transportation',true)->select('id','name')->get()->toArray();
+            $transportationVendors = Vendor::where('is_active',true)->where('for_transportation',true)->select('id','name')->get()->toArray();
             $siteOutGrns = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                 ->where('transfer_type_id',InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->pluck('id')->first())
                 ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
