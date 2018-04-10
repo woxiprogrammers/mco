@@ -109,7 +109,7 @@
                                                                         </div>
                                                                     </th>
                                                                     <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" class="form-control form-filter"> </th>
+                                                                    <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" id="vendor_name" class="form-control form-filter"> </th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
@@ -124,6 +124,15 @@
                                                                 <tbody>
 
                                                                 </tbody>
+                                                                <tfoot>
+                                                                <tr>
+                                                                    <th colspan="8" style="text-align:right">Total Page Wise: </th>
+                                                                    <th></th>
+                                                                    <th></th>
+                                                                    <th></th>
+                                                                    <th></th>
+                                                                </tr>
+                                                                </tfoot>
                                                             </table>
                                                         </div>
 

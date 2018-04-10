@@ -29,9 +29,11 @@ use InventoryTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
+
     public function getManageView(Request $request){
         return view('admin.asset.manage');
     }
+
     public function getCreateView(Request $request){
         try{
             $asset_types = AssetType::select('id','name')->get()->toArray();
@@ -46,6 +48,7 @@ use InventoryTrait;
         }
         return view('admin.asset.create')->with(compact('asset_types'));
     }
+
     public function getEditView(Request $request,$asset){
         try{
             $inventoryComponentTransfers = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
@@ -144,7 +147,7 @@ use InventoryTrait;
                 }
             }
             $request->session()->flash('success', 'Asset Created successfully.');
-            return redirect('/asset/create');
+            return redirect('/asset/manage');
         }catch (\Exception $e){
             $data = [
                 'action' => 'Create Asset',
@@ -215,7 +218,7 @@ use InventoryTrait;
             }
 
             $request->session()->flash('success', 'Asset Edited successfully.');
-            return redirect('/asset/edit/'.$asset->id);
+            return redirect('/asset/manage');
         }catch (Exception $e){
             $data = [
                 'action' => 'Edit Asset',

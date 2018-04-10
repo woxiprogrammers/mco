@@ -10,14 +10,16 @@
 |
 */
 Route::group(['domain' => env('DOMAIN_NAME')], function(){
-    Route::get('testing-pdf',array('uses' => 'Purchase\PurchaseRequestController@createVendorQuotationPdf'));
     Route::get('/',array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate',array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
+
     Route::get('/dashboard',array('uses' => 'Admin\DashboardController@index'));
     Route::post('/change-project-site',array('uses' => 'Auth\LoginController@changeProjectSite'));
 
     Route::group(['prefix' => 'user'],function (){
+        Route::get('change-password',array('uses' => 'User\UserController@getChangePasswordView'));
+        Route::post('change-password',array('uses' => 'User\UserController@changePassword'));
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
         Route::post('create',array('uses' => 'User\UserController@createUser'));
         Route::post('get-permission',array('uses' => 'User\UserController@getPermission'));

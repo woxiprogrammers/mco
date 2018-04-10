@@ -206,7 +206,7 @@ trait UnitsTrait{
             $data['unit_2_value'] = $request->to_value;
             $unitConversion = UnitConversion::create($data);
             $request->session()->flash('success','Conversion Saved successfully');
-            return redirect('/units/conversion/create');
+            return redirect('/units/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Conversion',
@@ -300,7 +300,7 @@ trait UnitsTrait{
             $units['unit_2_value'] = $request->to_value;
             $conversion->update($units);
             $request->session()->flash('success','Conversion Edited Successfully');
-            return redirect('/units/conversion/edit/'.$conversion->id);
+            return redirect('/units/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit Conversion',

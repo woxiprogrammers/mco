@@ -850,29 +850,34 @@ class PeticashController extends Controller
     public function masterAccountListing(Request $request){
         try{
             $user = Auth::user();
-            $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get()->toArray();;
+            $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get();
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
-            $iTotalRecords = count($masterAccountData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($masterAccountData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($masterAccountData); $iterator++,$pagination++ ){
-                $editdata = '';
-                if($user->hasPermissionTo('edit-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin')){
-                    $editdata =  '<li>
+            $total = 0;
+            if ($request->has('get_total')) {
+                $total = $masterAccountData->sum('amount');
+                $records['total'] = $total;
+            } else {
+                $iTotalRecords = count($masterAccountData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($masterAccountData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($masterAccountData); $iterator++,$pagination++ ){
+                    $editdata = '';
+                    if($user->hasPermissionTo('edit-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin')){
+                        $editdata =  '<li>
                                 <a href="/peticash/master-peticash-account/editpage/'.$masterAccountData[$pagination]['id'].'">
                                 <i class="icon-docs"></i> Edit </a>
                             </li>';
-                }
-                $records['data'][$iterator] = [
-                    $masterAccountData[$pagination]['id'],
-                    User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
-                    User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['last_name'],
-                    $masterAccountData[$pagination]['amount'],
-                    PaymentType::findOrFail($masterAccountData[$pagination]['payment_id'])->toArray()['name'],
-                    $masterAccountData[$pagination]['remark'],
-                    date('d M Y',strtotime($masterAccountData[$pagination]['date'])),
-                    '<div class="btn-group">
+                    }
+                    $records['data'][$iterator] = [
+                        $masterAccountData[$pagination]['id'],
+                        User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
+                        User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['last_name'],
+                        $masterAccountData[$pagination]['amount'],
+                        PaymentType::findOrFail($masterAccountData[$pagination]['payment_id'])->toArray()['name'],
+                        $masterAccountData[$pagination]['remark'],
+                        date('d M Y',strtotime($masterAccountData[$pagination]['date'])),
+                        '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -881,11 +886,13 @@ class PeticashController extends Controller
                            '.$editdata.'
                         </ul>
                     </div>'
-                ];
+                    ];
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+
         }catch(\Exception $e){
             $records = array();
             $data = [
@@ -904,33 +911,37 @@ class PeticashController extends Controller
             $user = Auth::user();
             if($request->has('search_name')){
                 $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request->search_name.'%')->select('project_sites.id')->get()->toArray();
-                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->whereIn('project_site_id',$projectSites)->orderBy('created_at','desc')->get()->toArray();;
+                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->whereIn('project_site_id',$projectSites)->orderBy('created_at','desc')->get();
             }else{
-                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->orderBy('created_at','desc')->get()->toArray();
+                $sitewiseAccountData = PeticashSiteTransfer::where('project_site_id','!=', 0)->orderBy('created_at','desc')->get();
             }
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
-            $iTotalRecords = count($sitewiseAccountData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($sitewiseAccountData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($sitewiseAccountData); $iterator++,$pagination++ ){
-                $editdata = '';
-                if($user->hasPermissionTo('edit-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin')){
-                    $editdata = '<li>
+            $total = 0;
+            if ($request->has('get_total')) {
+                $total = $sitewiseAccountData->sum('amount');
+                $records['total'] = $total;
+            } else {$iTotalRecords = count($sitewiseAccountData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($sitewiseAccountData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($sitewiseAccountData); $iterator++,$pagination++ ){
+                    $editdata = '';
+                    if($user->hasPermissionTo('edit-master-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin')){
+                        $editdata = '<li>
                                 <a href="/peticash/sitewise-peticash-account/editpage/'.$sitewiseAccountData[$pagination]['id'].'">
                                 <i class="icon-docs"></i> Edit </a>
                             </li>';
-                }
-                $records['data'][$iterator] = [
-                    $sitewiseAccountData[$pagination]['id'],
-                    User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
-                    User::findOrFail($sitewiseAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['user_id'])->toArray()['last_name'],
-                    Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.id',$sitewiseAccountData[$pagination]['project_site_id'])->pluck('projects.name')->first(),
-                    $sitewiseAccountData[$pagination]['amount'],
-                    PaymentType::findOrFail($sitewiseAccountData[$pagination]['payment_id'])->toArray()['name'],
-                    $sitewiseAccountData[$pagination]['remark'],
-                    date('d M Y',strtotime($sitewiseAccountData[$pagination]['date'])),
-                    '<div class="btn-group">
+                    }
+                    $records['data'][$iterator] = [
+                        $sitewiseAccountData[$pagination]['id'],
+                        User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
+                        User::findOrFail($sitewiseAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['user_id'])->toArray()['last_name'],
+                        Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.id',$sitewiseAccountData[$pagination]['project_site_id'])->pluck('projects.name')->first(),
+                        $sitewiseAccountData[$pagination]['amount'],
+                        PaymentType::findOrFail($sitewiseAccountData[$pagination]['payment_id'])->toArray()['name'],
+                        $sitewiseAccountData[$pagination]['remark'],
+                        date('d M Y',strtotime($sitewiseAccountData[$pagination]['date'])),
+                        '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -939,11 +950,12 @@ class PeticashController extends Controller
                             '.$editdata.'
                         </ul>
                     </div>'
-                ];
-            }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+                    ];
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;}
+
         }catch(\Exception $e){
             $records = array();
             $data = [

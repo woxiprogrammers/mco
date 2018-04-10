@@ -500,7 +500,7 @@ trait ProductTrait{
                 }
             }
             $request->session()->flash('success','Product Edited Successfully');
-            return redirect('/product/edit/'.$product->id);
+            return redirect('/product/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Edit',
