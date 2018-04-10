@@ -84,6 +84,16 @@
                                                 <tbody>
 
                                                 </tbody>
+                                                <tfoot>
+                                                <tr>
+                                                    <th colspan="4" style="text-align:right">Total Page Wise: </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                     </div>

@@ -7,7 +7,7 @@
 ?>
 
 @extends('layout.master')
-@section('title','Constro | Manage Materials')
+@section('title','Constro | Manage Site Transfer Bills')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -82,7 +82,7 @@
                                                                         </div>
                                                                     </th>
                                                                     <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> <input type="text" class="form-control form-filter" style="margin-left: 5% !important; width: 90% !important;" name="vendor_name"></th>
+                                                                    <th style="width: 11%"> <input type="text" class="form-control form-filter" style="margin-left: 5% !important; width: 90% !important;" name="vendor_name" id="vendor_name"></th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
@@ -97,6 +97,14 @@
                                                             <tbody>
 
                                                             </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <th colspan="8" style="text-align:right">Total Page Wise: </th>
+                                                                    <th></th>
+                                                                    <th></th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </tfoot>
                                                         </table>
                                                     </div>
                                                 </div>
@@ -170,7 +178,6 @@
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>

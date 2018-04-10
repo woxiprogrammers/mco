@@ -44,10 +44,17 @@
                             <span class="username username-hide-mobile">{{ Auth::user()->first_name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-default">
+                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin')
+                                <li>
+                                    <a href="/user/change-password">
+                                        <i class="icon-key"></i> Change Password </a>
+                                </li>
+                            @endif
                             <li>
                                 <a href="/logout">
                                     <i class="icon-key"></i> Log Out </a>
                             </li>
+
                         </ul>
                     </li>
                     <!-- END USER LOGIN DROPDOWN -->
