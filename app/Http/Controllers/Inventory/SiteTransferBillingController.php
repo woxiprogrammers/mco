@@ -157,43 +157,57 @@ class SiteTransferBillingController extends Controller
                 }
             }
             $siteTransferBillData = SiteTransferBill::whereIn('id', $siteTransferBillId)->get();
-            $records["recordsFiltered"] = $records["recordsTotal"] = count($siteTransferBillData);
-            if($request->length == -1){
-                $length = $records["recordsTotal"];
-            }else{
-                $length = $request->length;
-            }
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($siteTransferBillData); $iterator++,$pagination++ ){
-                $projectName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->inventoryComponent->projectSite->project->name;
-                $paidAmount = SiteTransferBillPayment::where('site_transfer_bill_id',$siteTransferBillData[$pagination]['id'])->sum('amount');
-                $pendingAmount = $siteTransferBillData[$pagination]['total'] - $paidAmount;
-                if($siteTransferBillData[$pagination]->inventoryComponentTransfer->vendor == null){
-                    $vendorName = '-';
-                }else{
-                    $vendorName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->vendor->company;
+            $total = 0;
+            $paidAmount = 0;
+            $pendingAmount = 0;
+            if ($request->has('get_total')) {
+                if ($filterFlag) {
+                    $total = $siteTransferBillData->sum('total');
+                    $paidAmount = SiteTransferBillPayment::whereIn('site_transfer_bill_id', $siteTransferBillData->pluck('id'))->sum('amount');
+                    $pendingAmount = $total - $paidAmount;
                 }
-                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-asset-maintenance-billing')){
-                    $actionButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
-                        <a href="/inventory/transfer/billing/edit/'.$siteTransferBillData[$pagination]['id'].'" style="color: white"> Edit
+                $records['total'] = $total;
+                $records['billtotal'] = $paidAmount;
+                $records['paidtotal'] = $pendingAmount;
+            } else {
+                $records["recordsFiltered"] = $records["recordsTotal"] = count($siteTransferBillData);
+                if ($request->length == -1) {
+                    $length = $records["recordsTotal"];
+                } else {
+                    $length = $request->length;
+                }
+                for ($iterator = 0, $pagination = $request->start; $iterator < $length && $iterator < count($siteTransferBillData); $iterator++, $pagination++) {
+                    $projectName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->inventoryComponent->projectSite->project->name;
+                    $paidAmount = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBillData[$pagination]['id'])->sum('amount');
+                    $pendingAmount = $siteTransferBillData[$pagination]['total'] - $paidAmount;
+                    if ($siteTransferBillData[$pagination]->inventoryComponentTransfer->vendor == null) {
+                        $vendorName = '-';
+                    } else {
+                        $vendorName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->vendor->company;
+                    }
+                    if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-asset-maintenance-billing')) {
+                        $actionButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
+                        <a href="/inventory/transfer/billing/edit/' . $siteTransferBillData[$pagination]['id'] . '" style="color: white"> Edit
                     </div>';
-                }else{
-                    $actionButton = '';
-                }
+                    } else {
+                        $actionButton = '';
+                    }
 
-                $records['data'][$iterator] = [
-                    $projectName,
-                    $pagination+1,
-                    date('j M Y',strtotime($siteTransferBillData[$pagination]['created_at'])),
-                    date('j M Y',strtotime($siteTransferBillData[$pagination]['bill_date'])),
-                    $siteTransferBillData[$pagination]['bill_number'],
-                    $vendorName,
-                    $siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount'],
-                    $siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount'],
-                    $siteTransferBillData[$pagination]['total'],
-                    $paidAmount,
-                    $pendingAmount,
-                    $actionButton
-                ];
+                    $records['data'][$iterator] = [
+                        $projectName,
+                        $pagination + 1,
+                        date('j M Y', strtotime($siteTransferBillData[$pagination]['created_at'])),
+                        date('j M Y', strtotime($siteTransferBillData[$pagination]['bill_date'])),
+                        $siteTransferBillData[$pagination]['bill_number'],
+                        $vendorName,
+                        $siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount'],
+                        $siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount'],
+                        $siteTransferBillData[$pagination]['total'],
+                        $paidAmount,
+                        $pendingAmount,
+                        $actionButton
+                    ];
+                }
             }
 
         }catch (\Exception $e){

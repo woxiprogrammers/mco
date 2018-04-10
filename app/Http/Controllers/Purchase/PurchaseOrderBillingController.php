@@ -284,7 +284,6 @@ class PurchaseOrderBillingController extends Controller
 
     public function listing(Request $request){
         try{
-            Log::info($request);
             $records = array();
             $status = 200;
 

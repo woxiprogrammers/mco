@@ -683,11 +683,13 @@ class ReportController extends Controller
                             $total['retention'] += $data[$row]['retention'];
                             $total['tds'] += $data[$row]['tds'];
                             $total['otherRecovery'] += $data[$row]['other_recovery'];
-                            $total['payableAmount'] += $data[$row]['payable_amount'];
+                            $total['balance'] = $data[$row]['balance'];
                             $total['checkAmount'] += $data[$row]['check_amount'];
-                            $total['balance'] += $data[$row]['balance'];
+
                             $row++;
                         }
+                        $total['payableAmount'] += $billData['total_amount_with_tax'];
+
                     }
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header,$companyHeader ,$date , $projectName, $total) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12)->setBold(true);

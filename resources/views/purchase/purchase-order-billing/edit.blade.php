@@ -186,10 +186,9 @@
                                                                     <div id="uploaded-image" class="row">
                                                                         @foreach($purchaseOrderBillImagePaths as $paths)
                                                                             <div class="col-md-2">
-                                                                                <img src="{{$paths}}" class="thumbimage" />
+                                                                                <a href="{{$paths}}"><img src="{{$paths}}" class="thumbimage"/>
                                                                             </div>
                                                                         @endforeach
-
                                                                     </div>
                                                                 </div>
                                                             </div>
