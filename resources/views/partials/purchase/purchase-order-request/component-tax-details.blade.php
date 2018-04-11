@@ -6,7 +6,7 @@
  */
 ?>
 
-<div class="row" style="height: 1000px">
+<div class="row" style="height: 1000000px">
     <div class="col-md-6" style="border-right: 1px solid grey;height: 100%;padding-top: 3%">
         <div class="row form-group">
             <div class="col-md-2">
@@ -236,12 +236,35 @@
                     <div class="panel-body" style="overflow:auto;">
                         <div class="form-group">
                             <label class="control-label">Select Vendor Quotation Images  :</label>
-                            <input id="imageupload" type="file" class="btn green" multiple />
+                            <img id="zoom1" src="http://constro.com/uploads/admindata/purchase/material_request/1b6453892473a467d07372d45eb05abc2031647a/68398431885b97cc0ef9c04758f16518c9d77360c54a5620e1.jpg" width="100px" height="250px">
+{{--                            <input id="imageupload" type="file" class="btn green" multiple />--}}
                             <br />
                             <div class="row">
-                                <div id="preview-image" class="row">
+                                <div id="preview-image" class="row" onmousemove="zoomIn(event)">
 
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" style="background-color: cornflowerblue">
+                    <h4 class="panel-title">
+                        <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_2" style="font-size: 16px;color: white">
+                            <b> Client Approval PDF </b>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse_3_2" class="panel-collapse in">
+                    <div class="panel-body" style="overflow-y:auto;">
+                        <div class="form-group">
+                            <label class="control-label">Select Client Approval PDF  :</label>
+                            <iframe id="myFrame" style="display:none" width="600" height="300"></iframe>
+                            <input type="button" value="Open PDF" onclick = "openPdf()"/>
+                            <br />
+                            <div class="row">
+
                             </div>
                         </div>
                     </div>
@@ -255,7 +278,7 @@
                         </a>
                     </h4>
                 </div>
-                <div id="collapse_3_2" class="panel-collapse collapse">
+                <div id="collapse_3_2" class="panel-collapse in">
                     <div class="panel-body" style="overflow-y:auto;">
                         <div class="form-group">
                             <label class="control-label">Select Client Approval Images  :</label>
@@ -281,7 +304,34 @@
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script>
+    function openPdf()
+    {
+        console.log(123);
+        var omyFrame = document.getElementById("myFrame");
+        omyFrame.style.display="block";
+        omyFrame.src = "http://constro.com/uploads/admindata/purchase/material_request/7719a1c782a1ba91c031a682a0a2f8658209adbf/2351217667e83d6d608872de366e429719da9ffc88f2858fa2.pdf";
+    }
+
+    function zoomIn(event) {
+        var pre = document.getElementById("preview");
+        pre.style.visibility = "visible";
+        if ($('#zoom1').is(':hover')) {
+            var img = document.getElementById("zoom1");
+            pre.style.backgroundImage = "url('pic1.jpg')";
+        }
+        if ($('#zoom2').is(':hover')){
+            var img = document.getElementById("zoom2");
+            pre.style.backgroundImage = "url('pic2.jpg')";
+        }
+
+    }
+
+    function zoomOut() {
+        var pre = document.getElementById("preview");
+        pre.style.visibility = "hidden";
+    }
     $(document).ready(function(){
+
         $('#expected_delivery_date').attr("readonly", "readonly");
         var date = new Date();
         $('#expected_delivery_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
@@ -300,7 +350,7 @@
                     for (var i = 0; i < countFiles; i++) {
                         var reader = new FileReader()
                         reader.onload = function (e) {
-                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="vendor_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
+                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="vendor_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px" onmousemove="zoomIn(event)" onmouseout="zoomOut()" /></div>';
                             image_holder.append(imagePreview);
                         };
                         image_holder.show();
@@ -325,7 +375,7 @@
                     for (var i = 0; i < countFiles; i++) {
                         var reader = new FileReader()
                         reader.onload = function (e) {
-                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="client_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
+                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="client_images[]"><a href="'+e.target.result+'"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></a></div>';
                             image_holder.append(imagePreview);
                         };
                         image_holder.show();
