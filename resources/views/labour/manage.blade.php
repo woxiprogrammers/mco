@@ -60,6 +60,18 @@
                                                         <th> Status </th>
                                                         <th> Actions </th>
                                                     </tr>
+                                                    <tr class="filter">
+                                                        <th style="width: 10%"> <input type="text" class="form-control form-filter" name="employee_id"> </th>
+                                                        <th style="width: 20%"> <input type="text" class="form-control form-filter" name="employee_name"> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                        <th>
+                                                            <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                            <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                        </th>
+                                                    </tr>
                                                     </thead>
                                                     <tbody>
 
@@ -88,6 +100,9 @@
     <script>
         $(document).ready(function() {
             $('#labourTable').DataTable();
+            $("input[name='employee_name'],input[name='employee_id']").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
         });
     </script>
 @endsection

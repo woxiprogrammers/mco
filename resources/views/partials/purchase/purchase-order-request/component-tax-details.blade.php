@@ -255,7 +255,7 @@
                         </a>
                     </h4>
                 </div>
-                <div id="collapse_3_2" class="panel-collapse collapse">
+                <div id="collapse_3_2" class="panel-collapse in">
                     <div class="panel-body" style="overflow-y:auto;">
                         <div class="form-group">
                             <label class="control-label">Select Client Approval Images  :</label>
