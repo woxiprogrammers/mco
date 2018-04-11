@@ -69,7 +69,7 @@ function componentTaxDetailSubmit(){
         if(value.name != 'vendor_images[]' && value.name != 'client_images[]'){
             $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"]["+value.name+"]'>");
         }else{
-            if(value.name != 'vendor_images[]'){
+            if(value.name == 'vendor_images[]'){
                 $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"][vendor_images][]'>");
             }else{
                 $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"][client_images][]'>");

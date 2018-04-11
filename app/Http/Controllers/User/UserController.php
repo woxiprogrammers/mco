@@ -602,7 +602,14 @@ class UserController extends Controller
 
     public function uploadPDF(Request $request){
         try{
-            dd($request->all());
+            Log::info('inside function');
+            Log::info($request->file());
+            $tempUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR;
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            Log::info('after dd');
         }catch(\Exception $e){
             $data = [
                 'action' => 'upload',

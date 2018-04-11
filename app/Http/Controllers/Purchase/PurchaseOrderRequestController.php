@@ -74,6 +74,7 @@ class PurchaseOrderRequestController extends Controller
 
     public function createPurchaseOrderRequest(Request $request){
         try{
+            dd($request->all());
             $user = Auth::user();
             $purchaseOrderRequestData = [
                 'purchase_request_id' => $request->purchase_request_id,
@@ -446,6 +447,7 @@ class PurchaseOrderRequestController extends Controller
                 $purchaseRequestComponentData['categories'] = Category::where('is_miscellaneous', true)->where('is_active', true)->select('id','name')->get()->toArray();
                 $purchaseRequestComponentData['hsn_code'] = '';
             }
+            $purchaseRequestComponentData['id'] = $purchaseRequestComponent->id;
             $purchaseRequestComponentData['name'] = $purchaseRequestComponent->materialRequestComponent->name;
             $purchaseRequestComponentData['unit'] = $purchaseRequestComponent->materialRequestComponent->unit->name;
             $purchaseRequestComponentData['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
@@ -636,6 +638,69 @@ class PurchaseOrderRequestController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function uploadTempFiles(Request $request,$purchaseOrderRequestID){
+        try{
+            $purchaseOrderRequestDirectoryName = sha1($purchaseOrderRequestID);
+            $tempUploadPath = public_path().env('PURCHASE_ORDER_REQUEST_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$purchaseOrderRequestDirectoryName;
+            /* Create Upload Directory If Not Exists */
+            if (!file_exists($tempImageUploadPath)) {
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            $path = env('PURCHASE_ORDER_REQUEST_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderRequestDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path
+            ];
+        }catch (\Exception $e){
+            $response = [
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => 101,
+                    'message' => 'Failed to open input stream.',
+                ],
+                'id' => 'id'
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function displayFiles(Request $request){
+        try{
+            Log::info('inside display function');
+            $fullPath = 'http://constro.com'.$request->path;
+            $path = $request->path;
+            $fileName = explode("/",$path);
+            $countOfFileName = count($fileName);
+            if(preg_match("/^.+\.(([pP][dD][fF])|([jJ][pP][gG]))$/", $fileName[$countOfFileName - 1]) == 1){
+                $isPDF = true;
+            }else{
+                $isPDF = false;
+            }
+            $count = $request->count;
+            $random = mt_rand(1,10000000000);
+        }catch (\Exception $e){
+            $path = null;
+            $count = null;
+        }
+        Log::info('sending view in display');
+        return view('partials.purchase.purchase-order-request.display-file')->with(compact('path','count','random','fullPath','isPDF'));
+    }
+
+    public function removeTempImage(Request $request){
+        try{
+            $sellerUploadPath = public_path().$request->path;
+            File::delete($sellerUploadPath);
+            return response(200);
+        }catch(\Exception $e){
+            return response(500);
         }
     }
 }

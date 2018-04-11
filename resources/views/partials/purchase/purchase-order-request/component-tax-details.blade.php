@@ -5,7 +5,6 @@
  * Time: 11:44 AM
  */
 ?>
-
 <div class="row" style="height: 1000000px">
     <div class="col-md-6" style="border-right: 1px solid grey;height: 100%;padding-top: 3%">
         <div class="row form-group">
@@ -13,6 +12,7 @@
                 <label class="control-label pull-right">Category :</label>
             </div>
             <input type="hidden" name="is_client" value="{{$purchaseRequestComponentData['is_client']}}">
+            <input type="hidden" id="purchaseRequestComponentId" name="purchaseRequestComponentId" value="{{$purchaseRequestComponentData['id']}}">
             <div class="col-md-6">
                 <select class="form-control" name="category_id">
                     @foreach($purchaseRequestComponentData['categories'] as $category)
@@ -224,7 +224,7 @@
     </div>
     <div class="col-md-6" style="height: 100%; padding-top: 1%">
         <div class="panel-group accordion" id="accordion3" style="margin-top: 3%">
-            <div class="panel panel-default">
+            {{--<div class="panel panel-default">
                 <div class="panel-heading" style="background-color: cornflowerblue">
                     <h4 class="panel-title">
                         <a class="accordion-toggle accordion-toggle-styled" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_1" style="font-size: 16px;color: white">
@@ -236,8 +236,7 @@
                     <div class="panel-body" style="overflow:auto;">
                         <div class="form-group">
                             <label class="control-label">Select Vendor Quotation Images  :</label>
-                            <img id="zoom1" src="http://constro.com/uploads/admindata/purchase/material_request/1b6453892473a467d07372d45eb05abc2031647a/68398431885b97cc0ef9c04758f16518c9d77360c54a5620e1.jpg" width="100px" height="250px">
-{{--                            <input id="imageupload" type="file" class="btn green" multiple />--}}
+                            <input id="imageupload" type="file" class="btn green" multiple />
                             <br />
                             <div class="row">
                                 <div id="preview-image" class="row" onmousemove="zoomIn(event)">
@@ -247,8 +246,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="panel panel-default">
+            </div>--}}
+            {{--<div class="panel panel-default">
                 <div class="panel-heading" style="background-color: cornflowerblue">
                     <h4 class="panel-title">
                         <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_2" style="font-size: 16px;color: white">
@@ -262,14 +261,14 @@
                             <label class="control-label">Select Client Approval PDF  :</label>
                             <input id="clientPDfUpload" type="file" class="btn green" />
                             <iframe id="myFrame" style="display:none" width="600" height="300"></iframe>
-                            <input type="button" value="upload PDF" onclick = "openPdf()"/>
+                            <input type="button" value="upload PDF" onclick = "uploadPdf()"/>
                             <br />
                             <div class="row">
 
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>--}}
                 {{--<div id="collapse_3_2" class="panel-collapse in">
                     <div class="panel-body" style="overflow-y:auto;">
                         <div class="form-group">
@@ -283,8 +282,77 @@
                         </div>
                     </div>
                 </div>--}}
+            <div class="panel panel-default">
+                <div class="panel-heading" style="background-color: cornflowerblue">
+                    <h4 class="panel-title">
+                        <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_2" style="font-size: 16px;color: white">
+                            <b> Client Approval File </b>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse_3_2" class="panel-collapse in">
+                    <div class="panel-body" style="overflow-y:auto;">
+                        <div class="form-group">
+                            <div class="row">
+                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                            </div>
+                            <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                    Browse</a>
+                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                    <i class="fa fa-share"></i> Upload Files </a>
+                            </div>
+                            <table class="table table-bordered table-hover" style="width: 700px">
+                                <thead>
+                                <tr role="row" class="heading">
+                                    <th> File </th>
+                                    <th> Action </th>
+                                </tr>
+                                </thead>
+                                <tbody id="show-product-images">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="panel panel-default">
+                <div class="panel-heading" style="background-color: cornflowerblue">
+                    <h4 class="panel-title">
+                        <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_2" style="font-size: 16px;color: white">
+                            <b> Vendor Approval File </b>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse_3_2" class="panel-collapse in">
+                    <div class="panel-body" style="overflow-y:auto;">
+                        <div class="form-group">
+                            <div class="row">
+                                <div id="tab_images_uploader_filelist_vendor" class="col-md-6 col-sm-12"> </div>
+                            </div>
+                            <div id="tab_images_uploader_container_vendor" class="col-md-offset-5">
+                                <a id="tab_images_uploader_pickfiles_vendor" href="javascript:;" class="btn green-meadow">
+                                    Browse</a>
+                                <a id="tab_images_uploader_uploadfiles_vendor" href="javascript:;" class="btn btn-primary">
+                                    <i class="fa fa-share"></i> Upload Files </a>
+                            </div>
+                            <table class="table table-bordered table-hover" style="width: 700px">
+                                <thead>
+                                <tr role="row" class="heading">
+                                    <th> File </th>
+                                    <th> Action </th>
+                                </tr>
+                                </thead>
+                                <tbody id="show-product-images-vendor">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{--<div class="panel panel-default">
                 <div class="panel-heading" style="background-color: cornflowerblue">
                     <h4 class="panel-title">
                         <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_2" style="font-size: 16px;color: white">
@@ -305,12 +373,17 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>--}}
             </div>
         </div>
     </div>
+    <input type="hidden" id="path" name="path" value="">
+    <input type="hidden" id="max_files_count" name="max_files_count" value="20">
 </div>
-
+<script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+<script src="/assets/custom/purchase/purchase-order-request/file-datatable.js"></script>
+<script src="/assets/custom/purchase/purchase-order-request/file-upload.js"></script>
 <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
 <link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
 <link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
@@ -318,33 +391,6 @@
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script>
-    function openPdf()
-    {
-        console.log($('#clientPDfUpload'));
-
-        console.log(form_data);
-        $.ajax({
-            url: "/user/upload-pdf",
-            data: {
-                'data' : new FormData($('#clientPDfUpload'))
-            },
-            async:false,
-            error: function(data) {
-                alert('something went wrong');
-            },
-            success: function(data, textStatus, xhr) {
-
-                alert('sghomething went wrong');
-            },
-            type: 'POST'
-        });
-        console.log(123);
-        /*var omyFrame = document.getElementById("myFrame");
-        omyFrame.style.display="block";
-        console.log($(this).val());
-        omyFrame.src = "http://constro.com/uploads/admindata/purchase/material_request/7719a1c782a1ba91c031a682a0a2f8658209adbf/2351217667e83d6d608872de366e429719da9ffc88f2858fa2.pdf";*/
-    }
-
     $(document).ready(function(){
 
         $('#expected_delivery_date').attr("readonly", "readonly");
@@ -365,7 +411,7 @@
                     for (var i = 0; i < countFiles; i++) {
                         var reader = new FileReader()
                         reader.onload = function (e) {
-                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="vendor_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px" onmousemove="zoomIn(event)" onmouseout="zoomOut()" /></div>';
+                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="vendor_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px" /></div>';
                             image_holder.append(imagePreview);
                         };
                         image_holder.show();
