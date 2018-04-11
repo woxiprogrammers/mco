@@ -599,4 +599,18 @@ class UserController extends Controller
             abort(500);
         }
     }
+
+    public function uploadPDF(Request $request){
+        try{
+            dd($request->all());
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'upload',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 }

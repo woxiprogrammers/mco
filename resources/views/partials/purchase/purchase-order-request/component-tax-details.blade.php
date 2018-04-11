@@ -260,6 +260,20 @@
                     <div class="panel-body" style="overflow-y:auto;">
                         <div class="form-group">
                             <label class="control-label">Select Client Approval PDF  :</label>
+                            <input id="clientPDfUpload" type="file" class="btn green" />
+                            <iframe id="myFrame" style="display:none" width="600" height="300"></iframe>
+                            <input type="button" value="upload PDF" onclick = "openPdf()"/>
+                            <br />
+                            <div class="row">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{--<div id="collapse_3_2" class="panel-collapse in">
+                    <div class="panel-body" style="overflow-y:auto;">
+                        <div class="form-group">
+                            <label class="control-label">Select Client Approval PDF  :</label>
                             <iframe id="myFrame" style="display:none" width="600" height="300"></iframe>
                             <input type="button" value="Open PDF" onclick = "openPdf()"/>
                             <br />
@@ -268,7 +282,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>--}}
             </div>
             <div class="panel panel-default">
                 <div class="panel-heading" style="background-color: cornflowerblue">
@@ -306,30 +320,31 @@
 <script>
     function openPdf()
     {
+        console.log($('#clientPDfUpload'));
+
+        console.log(form_data);
+        $.ajax({
+            url: "/user/upload-pdf",
+            data: {
+                'data' : new FormData($('#clientPDfUpload'))
+            },
+            async:false,
+            error: function(data) {
+                alert('something went wrong');
+            },
+            success: function(data, textStatus, xhr) {
+
+                alert('sghomething went wrong');
+            },
+            type: 'POST'
+        });
         console.log(123);
-        var omyFrame = document.getElementById("myFrame");
+        /*var omyFrame = document.getElementById("myFrame");
         omyFrame.style.display="block";
-        omyFrame.src = "http://constro.com/uploads/admindata/purchase/material_request/7719a1c782a1ba91c031a682a0a2f8658209adbf/2351217667e83d6d608872de366e429719da9ffc88f2858fa2.pdf";
+        console.log($(this).val());
+        omyFrame.src = "http://constro.com/uploads/admindata/purchase/material_request/7719a1c782a1ba91c031a682a0a2f8658209adbf/2351217667e83d6d608872de366e429719da9ffc88f2858fa2.pdf";*/
     }
 
-    function zoomIn(event) {
-        var pre = document.getElementById("preview");
-        pre.style.visibility = "visible";
-        if ($('#zoom1').is(':hover')) {
-            var img = document.getElementById("zoom1");
-            pre.style.backgroundImage = "url('pic1.jpg')";
-        }
-        if ($('#zoom2').is(':hover')){
-            var img = document.getElementById("zoom2");
-            pre.style.backgroundImage = "url('pic2.jpg')";
-        }
-
-    }
-
-    function zoomOut() {
-        var pre = document.getElementById("preview");
-        pre.style.visibility = "hidden";
-    }
     $(document).ready(function(){
 
         $('#expected_delivery_date').attr("readonly", "readonly");

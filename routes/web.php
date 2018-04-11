@@ -18,6 +18,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::post('/change-project-site',array('uses' => 'Auth\LoginController@changeProjectSite'));
 
     Route::group(['prefix' => 'user'],function (){
+        Route::post('upload-pdf',array('uses' => 'User\UserController@uploadPDF'));
         Route::get('change-password',array('uses' => 'User\UserController@getChangePasswordView'));
         Route::post('change-password',array('uses' => 'User\UserController@changePassword'));
         Route::get('create',array('uses' => 'User\UserController@getUserView'));
