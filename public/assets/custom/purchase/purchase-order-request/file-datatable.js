@@ -1,5 +1,4 @@
 var FileUpload = function() {
-    console.log('inside here 1');
     var purchaseRequestComponentId = $("#purchaseRequestComponentId").val();
     var e = function() {
         var e = new plupload.Uploader({
@@ -7,7 +6,7 @@ var FileUpload = function() {
             runtimes: "html5,html4",
             browse_button: document.getElementById("tab_images_uploader_pickfiles"),
             container: document.getElementById("tab_images_uploader_container"),
-            url: "/purchase/purchase-order-request/file-upload/forClient/"+purchaseRequestComponentId,
+            url: "/purchase/purchase-order-request/file-upload/"+purchaseRequestComponentId,
             async:false,
             multi_selection : true,
             filters: {
@@ -81,7 +80,6 @@ var FileUpload = function() {
     }
 }();
 var VendorFileUpload = function() {
-    console.log('inside here 2');
     var purchaseRequestComponentId = $("#purchaseRequestComponentId").val();
     var e = function() {
         var e = new plupload.Uploader({
@@ -89,7 +87,7 @@ var VendorFileUpload = function() {
             runtimes: "html5,html4",
             browse_button: document.getElementById("tab_images_uploader_pickfiles_vendor"),
             container: document.getElementById("tab_images_uploader_container_vendor"),
-            url: "/purchase/purchase-order-request/file-upload/forVendor/"+purchaseRequestComponentId,
+            url: "/purchase/purchase-order-request/file-upload/"+purchaseRequestComponentId,
             async:false,
             multi_selection : true,
             filters: {
@@ -127,8 +125,8 @@ var VendorFileUpload = function() {
                 FileUploaded: function(e, a, t) {
                     var t = $.parseJSON(t.response);
                     if (t.result && "OK" == t.result) {
-                        $('#path').val(t.path,e.files.length);
-                        $("#path").triggerHandler("change", [t.path,e.files.length]);
+                        $('#vendorPath').val(t.path,e.files.length);
+                        $("#vendorPath").triggerHandler("change", [t.path,e.files.length]);
                         $("#uploaded_file_" + a.id + " > .status").removeClass("label-info").addClass("label-success").html('<i class="fa fa-check"></i> Done')
                         closeInSeconds: 10
                     } else $("#uploaded_file_" + a.id + " > .status").removeClass("label-info").addClass("label-danger").html('<i class="fa fa-warning"></i> Failed'), App.alert({

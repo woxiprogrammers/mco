@@ -74,7 +74,6 @@ class PurchaseOrderRequestController extends Controller
 
     public function createPurchaseOrderRequest(Request $request){
         try{
-            dd($request->all());
             $user = Auth::user();
             $purchaseOrderRequestData = [
                 'purchase_request_id' => $request->purchase_request_id,
@@ -123,57 +122,67 @@ class PurchaseOrderRequestController extends Controller
                     'transportation_igst_percentage' => $componentData['transportation_igst_percentage']
                 ];
                 $purchaseOrderRequestComponent = PurchaseOrderRequestComponent::create($purchaseOrderRequestComponentData);
-                if(array_key_exists('client_images',$componentData)){
+
+                if(array_key_exists('client_images',$componentData)) {
                     $mainDirectoryName = sha1($purchaseOrderRequest->id);
                     $componentDirectoryName = sha1($purchaseOrderRequestComponent->id);
-                    $uploadPath = public_path().env('PURCHASE_ORDER_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
-                    if (!file_exists($uploadPath)) {
-                        File::makeDirectory($uploadPath, $mode = 0777, true, true);
-                    }
-                    foreach($componentData['client_images'] as $key => $clientImage){
-                        $imageArray = explode(';',$clientImage);
-                        $image = explode(',',$imageArray[1])[1];
-                        $pos  = strpos($clientImage, ';');
-                        $type = explode(':', substr($clientImage, 0, $pos))[1];
-                        $extension = explode('/',$type)[1];
-                        $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-                        $fileFullPath = $uploadPath.DIRECTORY_SEPARATOR.$filename;
-                        file_put_contents($fileFullPath,base64_decode($image));
+                    $userDirectoryName = sha1($user['id']);
+                    $tempImageUploadPath = public_path() . env('PURCHASE_ORDER_REQUEST_TEMP_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $userDirectoryName;
+                    $imageUploadPath = public_path() . env('PURCHASE_ORDER_REQUEST_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $mainDirectoryName . DIRECTORY_SEPARATOR . 'client_approval_images' . DIRECTORY_SEPARATOR . $componentDirectoryName;
+                    foreach ($componentData['client_images'] as $image) {
+
+                        $imageName = basename($image);
+                        $newTempImageUploadPath = $tempImageUploadPath . '/' . $imageName;
                         $imageData = [
-                            'purchase_order_request_component_id' => $purchaseOrderRequestComponent['id'] ,
-                            'name' => $filename,
+                            'purchase_order_request_component_id' => $purchaseOrderRequestComponent['id'],
+                            'name' => $imageName,
                             'caption' => '',
                             'is_vendor_approval' => false
                         ];
                         PurchaseOrderRequestComponentImage::create($imageData);
+                        if (!file_exists($imageUploadPath)) {
+                            File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                        }
+                        if (File::exists($newTempImageUploadPath)) {
+                            $imageUploadNewPath = $imageUploadPath . DIRECTORY_SEPARATOR . $imageName;
+                            File::move($newTempImageUploadPath, $imageUploadNewPath);
+                        }
+                    }
+                    if (count(scandir($tempImageUploadPath)) <= 2) {
+                        rmdir($tempImageUploadPath);
                     }
                 }
-                if(array_key_exists('vendor_images',$componentData)){
+
+                if(array_key_exists('vendor_images',$componentData)) {
                     $mainDirectoryName = sha1($purchaseOrderRequest->id);
                     $componentDirectoryName = sha1($purchaseOrderRequestComponent->id);
-                    $uploadPath = public_path().env('PURCHASE_ORDER_REQUEST_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
-                    if (!file_exists($uploadPath)) {
-                        File::makeDirectory($uploadPath, $mode = 0777, true, true);
-                    }
-                    foreach($componentData['vendor_images'] as $key => $vendorImage){
-                        $imageArray = explode(';',$vendorImage);
-                        $image = explode(',',$imageArray[1])[1];
-                        $pos  = strpos($vendorImage, ';');
-                        $type = explode(':', substr($vendorImage, 0, $pos))[1];
-                        $extension = explode('/',$type)[1];
-                        $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-                        $fileFullPath = $uploadPath.DIRECTORY_SEPARATOR.$filename;
-                        file_put_contents($fileFullPath,base64_decode($image));
+                    $userDirectoryName = sha1($user['id']);
+                    $tempImageUploadPath = public_path() . env('PURCHASE_ORDER_REQUEST_TEMP_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $userDirectoryName;
+                    $imageUploadPath = public_path() . env('PURCHASE_ORDER_REQUEST_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $mainDirectoryName . DIRECTORY_SEPARATOR . 'vendor_quotation_images' . DIRECTORY_SEPARATOR . $componentDirectoryName;
+                    foreach ($componentData['vendor_images'] as $image) {
+                        $imageName = basename($image);
+                        $newTempImageUploadPath = $tempImageUploadPath . '/' . $imageName;
                         $imageData = [
-                            'purchase_order_request_component_id' => $purchaseOrderRequestComponent['id'] ,
-                            'name' => $filename,
+                            'purchase_order_request_component_id' => $purchaseOrderRequestComponent['id'],
+                            'name' => $imageName,
                             'caption' => '',
                             'is_vendor_approval' => true
                         ];
                         PurchaseOrderRequestComponentImage::create($imageData);
+                        if (!file_exists($imageUploadPath)) {
+                            File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                        }
+                        if (File::exists($newTempImageUploadPath)) {
+                            $imageUploadNewPath = $imageUploadPath . DIRECTORY_SEPARATOR . $imageName;
+                            File::move($newTempImageUploadPath, $imageUploadNewPath);
+                        }
+                    }
+                    if (count(scandir($tempImageUploadPath)) <= 2) {
+                        rmdir($tempImageUploadPath);
                     }
                 }
-            }
+
+                }
             $request->session()->flash('success', "Purchase Order Request Created Successfully.");
             return redirect('/purchase/purchase-order-request/manage');
         }catch(\Exception $e){
@@ -641,11 +650,12 @@ class PurchaseOrderRequestController extends Controller
         }
     }
 
-    public function uploadTempFiles(Request $request,$purchaseOrderRequestID){
+    public function uploadTempFiles(Request $request,$purchaseRequestComponentId){
         try{
-            $purchaseOrderRequestDirectoryName = sha1($purchaseOrderRequestID);
+            $user = Auth::user();
+            $userDirectoryName = sha1($user['id']);
             $tempUploadPath = public_path().env('PURCHASE_ORDER_REQUEST_TEMP_IMAGE_UPLOAD');
-            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$purchaseOrderRequestDirectoryName;
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$userDirectoryName;
             /* Create Upload Directory If Not Exists */
             if (!file_exists($tempImageUploadPath)) {
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
@@ -653,7 +663,7 @@ class PurchaseOrderRequestController extends Controller
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
-            $path = env('PURCHASE_ORDER_REQUEST_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderRequestDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $path = env('PURCHASE_ORDER_REQUEST_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$userDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
@@ -672,14 +682,12 @@ class PurchaseOrderRequestController extends Controller
         return response()->json($response);
     }
 
-    public function displayFiles(Request $request){
+    public function displayFiles(Request $request,$forSlug){
         try{
-            Log::info('inside display function');
-            $fullPath = 'http://constro.com'.$request->path;
+            $fullPath = env('APP_URL').$request->path;
             $path = $request->path;
-            $fileName = explode("/",$path);
-            $countOfFileName = count($fileName);
-            if(preg_match("/^.+\.(([pP][dD][fF])|([jJ][pP][gG]))$/", $fileName[$countOfFileName - 1]) == 1){
+            $extension = pathinfo($request->path, PATHINFO_EXTENSION);
+            if($extension == 'pdf'){
                 $isPDF = true;
             }else{
                 $isPDF = false;
@@ -691,7 +699,7 @@ class PurchaseOrderRequestController extends Controller
             $count = null;
         }
         Log::info('sending view in display');
-        return view('partials.purchase.purchase-order-request.display-file')->with(compact('path','count','random','fullPath','isPDF'));
+        return view('partials.purchase.purchase-order-request.display-file')->with(compact('path','count','random','fullPath','isPDF','forSlug'));
     }
 
     public function removeTempImage(Request $request){

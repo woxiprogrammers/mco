@@ -4,7 +4,7 @@ $hello.on("change", function(event, path,count){
     if (typeof path !== "undefined") {
         var purchaseRequestComponentId = $("#purchaseRequestComponentId").val();
         $.ajax({
-            url: "/purchase/purchase-order-request/display-files/"+purchaseRequestComponentId,
+            url: "/purchase/purchase-order-request/display-files/forClient/"+purchaseRequestComponentId,
             data: {'path':path,'count':count},
             async:false,
             error: function(data) {
@@ -40,3 +40,24 @@ function removeProductImages(imageId,path,originalId){
         type: 'POST'
     });
 }
+
+var $vendorHello= $('#vendorPath');
+$vendorHello.on("change", function(event, path,count){
+    if (typeof path !== "undefined") {
+        var purchaseRequestComponentId = $("#purchaseRequestComponentId").val();
+        $.ajax({
+            url: "/purchase/purchase-order-request/display-files/forVendor/"+purchaseRequestComponentId,
+            data: {'path':path,'count':count},
+            async:false,
+            error: function(data) {
+                alert('something went wrong');
+            },
+            success: function(data, textStatus, xhr) {
+                $('#show-product-images-vendor').append(data);
+            },
+            type: 'POST'
+        });
+    }
+
+}).triggerHandler('change');
+

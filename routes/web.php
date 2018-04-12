@@ -348,8 +348,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@approvePurchaseOrderRequest'));
             Route::get('purchase-request-auto-suggest/{keyword}',array('uses' => 'Purchase\PurchaseOrderRequestController@purchaseRequestAutoSuggest'));
 
-            Route::post('file-upload/{purchaseOrderRequestID}',array('uses'=>'Purchase\PurchaseOrderRequestController@uploadTempFiles'));
-            Route::post('display-files/{purchaseOrderRequestID}',array('uses'=>'Purchase\PurchaseOrderRequestController@displayFiles'));
+            Route::post('file-upload/{purchaseRequestComponentId}',array('uses'=>'Purchase\PurchaseOrderRequestController@uploadTempFiles'));
+            Route::post('display-files/{forSlug}/{purchaseOrderRequestID}',array('uses'=>'Purchase\PurchaseOrderRequestController@displayFiles'));
             Route::post('delete-temp-file',array('uses'=>'Purchase\PurchaseOrderRequestController@removeTempImage'));
         });
     });

@@ -5,7 +5,7 @@
  * Time: 11:44 AM
  */
 ?>
-<div class="row" style="height: 1000000px">
+<div class="row" style="height: 10000px">
     <div class="col-md-6" style="border-right: 1px solid grey;height: 100%;padding-top: 3%">
         <div class="row form-group">
             <div class="col-md-2">
@@ -316,6 +316,8 @@
                         </div>
                     </div>
                 </div>
+                <input type="hidden" id="path" name="path" value="">
+                <input type="hidden" id="max_files_count" name="max_files_count" value="20">
             </div>
             <div class="panel panel-default">
                 <div class="panel-heading" style="background-color: cornflowerblue">
@@ -351,6 +353,8 @@
                         </div>
                     </div>
                 </div>
+                <input type="hidden" id="vendorPath" name="path" value="">
+                <input type="hidden" id="max_files_count" name="max_files_count" value="20">
             </div>
             {{--<div class="panel panel-default">
                 <div class="panel-heading" style="background-color: cornflowerblue">
@@ -377,8 +381,7 @@
             </div>
         </div>
     </div>
-    <input type="hidden" id="path" name="path" value="">
-    <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+
 </div>
 <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
