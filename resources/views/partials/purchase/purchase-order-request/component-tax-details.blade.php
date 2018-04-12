@@ -289,54 +289,5 @@
         $(".tax-modal-quantity").each(function(){
             calculateTaxes(this);
         });
-        $("#imageupload").on('change', function () {
-            var countFiles = $(this)[0].files.length;
-            var imgPath = $(this)[0].value;
-            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
-            var image_holder = $("#preview-image");
-            image_holder.empty();
-            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
-                if (typeof (FileReader) != "undefined") {
-                    for (var i = 0; i < countFiles; i++) {
-                        var reader = new FileReader()
-                        reader.onload = function (e) {
-                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="vendor_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
-                            image_holder.append(imagePreview);
-                        };
-                        image_holder.show();
-                        reader.readAsDataURL($(this)[0].files[i]);
-                    }
-                } else {
-                    alert("It doesn't supports");
-                }
-            } else {
-                alert("Select Only images");
-            }
-        });
-
-        $("#clientImageUpload").on('change', function () {
-            var countFiles = $(this)[0].files.length;
-            var imgPath = $(this)[0].value;
-            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
-            var image_holder = $("#client-preview-image");
-            image_holder.empty();
-            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
-                if (typeof (FileReader) != "undefined") {
-                    for (var i = 0; i < countFiles; i++) {
-                        var reader = new FileReader()
-                        reader.onload = function (e) {
-                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="client_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
-                            image_holder.append(imagePreview);
-                        };
-                        image_holder.show();
-                        reader.readAsDataURL($(this)[0].files[i]);
-                    }
-                } else {
-                    alert("It doesn't supports");
-                }
-            } else {
-                alert("Select Only images");
-            }
-        });
     });
 </script>
