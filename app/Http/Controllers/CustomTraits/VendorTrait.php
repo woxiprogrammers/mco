@@ -123,18 +123,22 @@ trait VendorTrait
                 ->toArray();
             $vendorCities = array_column(($vendor->cityRelations->toArray()),'city_id');
             $vendorMaterialInfo = array();
-            foreach($vendor->materialRelations as $material){
-                $vendorMaterialInfo[$material['material_id']] = array();
-                $vendorMaterialInfo[$material['material_id']]['name'] = $material->material->name;
-                $vendorMaterialInfo[$material['material_id']]['cities'] = VendorMaterialCityRelation::join('vendor_material_relation','vendor_material_relation.id','=','vendor_material_city_relation.vendor_material_relation_id')
-                                                                            ->join('vendor_city_relation','vendor_city_relation.id','=','vendor_material_city_relation.vendor_city_relation_id')
-                                                                            ->where('vendor_material_relation.material_id',$material['material_id'])
-                                                                            ->pluck('vendor_city_relation.city_id')
-                                                                            ->toArray();
+            $isTransportationVendor = ($vendor['for_transportation'] == true) ? true : false;
+            if($isTransportationVendor != true){
+                foreach($vendor->materialRelations as $material){
+                    $vendorMaterialInfo[$material['material_id']] = array();
+                    $vendorMaterialInfo[$material['material_id']]['name'] = $material->material->name;
+                    $vendorMaterialInfo[$material['material_id']]['cities'] = VendorMaterialCityRelation::join('vendor_material_relation','vendor_material_relation.id','=','vendor_material_city_relation.vendor_material_relation_id')
+                        ->join('vendor_city_relation','vendor_city_relation.id','=','vendor_material_city_relation.vendor_city_relation_id')
+                        ->where('vendor_material_relation.material_id',$material['material_id'])
+                        ->pluck('vendor_city_relation.city_id')
+                        ->toArray();
 
+                }
             }
-            return view('admin.vendors.edit')->with(compact('vendor','cityArray','categories','vendorCities','vendorMaterialInfo'));
-        } catch (\Exception $e) {
+
+
+            return view('admin.vendors.edit')->with(compact('vendor','cityArray','categories','vendorCities','vendorMaterialInfo','isTransportationVendor'));        } catch (\Exception $e) {
             $data = [
                 'action' => "Get vendor edit view",
                 'params' => $request->all(),

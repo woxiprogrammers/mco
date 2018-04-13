@@ -50,9 +50,12 @@
                                                     <li class="active">
                                                         <a href="#generaltab" data-toggle="tab"> General </a>
                                                     </li>
-                                                    <li>
-                                                        <a href="#materialassigntab" data-toggle="tab"> Material Assign </a>
-                                                    </li>
+                                                    @if($isTransportationVendor != true)
+                                                        <li>
+                                                            <a href="#materialassigntab" data-toggle="tab"> Material Assign </a>
+                                                        </li>
+                                                    @endif
+
                                                 </ul>
                                             </div>
                                             <div class="portlet-body form">

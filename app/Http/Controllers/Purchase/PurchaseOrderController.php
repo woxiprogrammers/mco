@@ -495,6 +495,7 @@ class PurchaseOrderController extends Controller
             if(count($images) > 0){
                 foreach ($images as $image){
                     $materialComponentImages[$j]['name'] = $uploadPath.'/'.$image['name'];
+                    $materialComponentImages[$j]['extension'] = pathinfo($image['name'], PATHINFO_EXTENSION);;
                     $j++;
                 }
                 $purchaseOrderComponentData['material_component_images'] = $materialComponentImages;
@@ -503,6 +504,7 @@ class PurchaseOrderController extends Controller
             if(count($imagesOfClient) > 0){
                 foreach ($imagesOfClient as $image){
                     $materialComponentImagesOfClientApproval[$j]['name'] = $uploadPathForClientImages.'/'.$image['name'];
+                    $materialComponentImagesOfClientApproval[$j]['extension'] = pathinfo($image['name'], PATHINFO_EXTENSION);
                     $j++;
                 }
                 $purchaseOrderComponentData['client_approval_images'] = $materialComponentImagesOfClientApproval;
