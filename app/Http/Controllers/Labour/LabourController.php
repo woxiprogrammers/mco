@@ -229,7 +229,6 @@ class LabourController extends Controller
             }else{
                 $updateLabourData = $request->except('_token','project_site_id','profile_image');
             }
-            $updateLabourData['employee_type_id'] = EmployeeType::where('slug','labour')->pluck('id')->first();
             Employee::where('id',$labour['id'])->update($updateLabourData);
             if($request->has('profile_image')){
                 $imageTypeId = EmployeeImageType::where('slug','profile')->pluck('id')->first();
