@@ -486,8 +486,8 @@ class PurchaseOrderController extends Controller
             $purchaseOrderComponentData['vendor_name'] = $vendorName;
             $mainDirectoryName = sha1($purchaseOrderComponent->purchaseOrder->id);
             $componentDirectoryName = sha1($purchaseOrderComponent['id']);
-            $uploadPath = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
-            $uploadPathForClientImages = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;;
+            $uploadPath = env('APP_URL').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+            $uploadPathForClientImages = env('APP_URL').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;;
             $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
             $imagesOfClient = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',false)->select('name')->get();
             $j = 0;
