@@ -486,8 +486,8 @@ class PurchaseOrderController extends Controller
             $purchaseOrderComponentData['vendor_name'] = $vendorName;
             $mainDirectoryName = sha1($purchaseOrderComponent->purchaseOrder->id);
             $componentDirectoryName = sha1($purchaseOrderComponent['id']);
-            $uploadPath = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
-            $uploadPathForClientImages = url('/').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;;
+            $uploadPath = env('APP_URL').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
+            $uploadPathForClientImages = env('APP_URL').env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'client_approval_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;;
             $images = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',true)->select('name')->get();
             $imagesOfClient = PurchaseOrderComponentImage::where('purchase_order_component_id',$purchaseOrderComponent['id'])->where('is_vendor_approval',false)->select('name')->get();
             $j = 0;
@@ -495,6 +495,7 @@ class PurchaseOrderController extends Controller
             if(count($images) > 0){
                 foreach ($images as $image){
                     $materialComponentImages[$j]['name'] = $uploadPath.'/'.$image['name'];
+                    $materialComponentImages[$j]['extension'] = pathinfo($image['name'], PATHINFO_EXTENSION);;
                     $j++;
                 }
                 $purchaseOrderComponentData['material_component_images'] = $materialComponentImages;
@@ -503,6 +504,7 @@ class PurchaseOrderController extends Controller
             if(count($imagesOfClient) > 0){
                 foreach ($imagesOfClient as $image){
                     $materialComponentImagesOfClientApproval[$j]['name'] = $uploadPathForClientImages.'/'.$image['name'];
+                    $materialComponentImagesOfClientApproval[$j]['extension'] = pathinfo($image['name'], PATHINFO_EXTENSION);
                     $j++;
                 }
                 $purchaseOrderComponentData['client_approval_images'] = $materialComponentImagesOfClientApproval;
@@ -1369,8 +1371,61 @@ class PurchaseOrderController extends Controller
                 'quantity' => $purchaseOrderComponent['quantity'],
                 'unit' => $purchaseOrderComponent->unit->name,
                 'hsn_code' => $purchaseOrderComponent->hsn_code,
-                'rate' => $purchaseOrderComponent->rate_per_unit
+                'rate' => $purchaseOrderComponent->rate_per_unit,
+                'due_date' => 'Due on '.date('j/n/Y',strtotime($purchaseOrderComponent['expected_delivery_date'])),
+                'subtotal' => MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']))
             ];
+            $iterator = 0;
+            if($purchaseOrderComponent['cgst_percentage'] == null || $purchaseOrderComponent['cgst_percentage'] == ''){
+                $vendorInfo['materials'][$iterator]['cgst_percentage'] = 0;
+            }else{
+                $vendorInfo['materials'][$iterator]['cgst_percentage'] = $purchaseOrderComponent['cgst_percentage'];
+            }
+            $vendorInfo['materials'][$iterator]['cgst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['cgst_percentage']/100);
+            if($purchaseOrderComponent['sgst_percentage'] == null || $purchaseOrderComponent['sgst_percentage'] == ''){
+                $vendorInfo['materials'][$iterator]['sgst_percentage'] = 0;
+            }else{
+                $vendorInfo['materials'][$iterator]['sgst_percentage'] = $purchaseOrderComponent['sgst_percentage'];
+            }
+            $vendorInfo['materials'][$iterator]['sgst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['sgst_percentage']/100);
+            if($purchaseOrderComponent['igst_percentage'] == null || $purchaseOrderComponent['igst_percentage'] == ''){
+                $vendorInfo['materials'][$iterator]['igst_percentage'] = 0;
+            }else{
+                $vendorInfo['materials'][$iterator]['igst_percentage'] = $purchaseOrderComponent['igst_percentage'];
+            }
+            $vendorInfo['materials'][$iterator]['igst_amount'] = $vendorInfo['materials'][$iterator]['subtotal'] * ($vendorInfo['materials'][$iterator]['igst_percentage']/100);
+            $vendorInfo['materials'][$iterator]['total'] = $vendorInfo['materials'][$iterator]['subtotal'] + $vendorInfo['materials'][$iterator]['cgst_amount'] + $vendorInfo['materials'][$iterator]['sgst_amount'] + $vendorInfo['materials'][$iterator]['igst_amount'];
+            if($purchaseOrderComponent['expected_delivery_date'] == null || $purchaseOrderComponent['expected_delivery_date'] == ''){
+                $vendorInfo['materials'][$iterator]['due_date'] = '';
+            }else{
+                $vendorInfo['materials'][$iterator]['due_date'] = 'Due on '.date('j/n/Y',strtotime($purchaseOrderComponent['expected_delivery_date']));
+            }
+            $purchaseOrderRequestComponent = $purchaseOrderComponent->purchaseOrderRequestComponent;
+            if($purchaseOrderRequestComponent['transportation_amount'] == null || $purchaseOrderRequestComponent['transportation_amount'] == ''){
+                $vendorInfo['materials'][$iterator]['transportation_amount'] = 0;
+            }else{
+                $vendorInfo['materials'][$iterator]['transportation_amount'] = $purchaseOrderRequestComponent['transportation_amount'];
+            }
+            if($purchaseOrderRequestComponent['transportation_cgst_percentage'] == null || $purchaseOrderRequestComponent['transportation_cgst_percentage'] == ''){
+                $vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] = 0;
+            }else{
+                $vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] = $purchaseOrderRequestComponent['transportation_cgst_percentage'];
+            }
+            if($purchaseOrderRequestComponent['transportation_sgst_percentage'] == null || $purchaseOrderRequestComponent['transportation_sgst_percentage'] == ''){
+                $vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] = 0;
+            }else{
+                $vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] = $purchaseOrderRequestComponent['transportation_sgst_percentage'];
+            }
+            if($purchaseOrderRequestComponent['transportation_igst_percentage'] == null || $purchaseOrderRequestComponent['transportation_igst_percentage'] == ''){
+                $vendorInfo['materials'][$iterator]['transportation_igst_percentage'] = 0;
+            }else{
+                $vendorInfo['materials'][$iterator]['transportation_igst_percentage'] = $purchaseOrderRequestComponent['transportation_igst_percentage'];
+            }
+            $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_cgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
+            $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
+            $vendorInfo['materials'][$iterator]['transportation_igst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_igst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
+            $vendorInfo['materials'][$iterator]['transportation_total_amount'] = $vendorInfo['materials'][$iterator]['transportation_amount'] + $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_igst_amount'];
+            //dd($vendorInfo);
             if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
                 $vendorInfo['materials'][0]['gst'] = '-';
             }else{
@@ -1379,9 +1434,12 @@ class PurchaseOrderController extends Controller
                     $vendorInfo['materials'][0]['gst'] = '-';
                 }
             }
+
             if($vendorInfo['email'] != null){
+                $pdfTitle = "Purchase Order";
+                $formatId = $purchaseOrder['format_id'];
                 $pdf = App::make('dompdf.wrapper');
-                $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag')));
+                $pdf->loadHTML(view('purchase.purchase-request.pdf.vendor-quotation')->with(compact('vendorInfo','projectSiteInfo','pdfFlag','pdfTitle','formatId')));
                 $pdfDirectoryPath = env('PURCHASE_VENDOR_ASSIGNMENT_PDF_FOLDER');
                 $pdfFileName = sha1($vendorInfo['id']).'.pdf';
                 $pdfUploadPath = public_path().$pdfDirectoryPath.'/'.$pdfFileName;
@@ -1393,8 +1451,9 @@ class PurchaseOrderController extends Controller
                     File::makeDirectory(public_path().$pdfDirectoryPath, $mode = 0777, true, true);
                 }
                 file_put_contents($pdfUploadPath,$pdfContent);
+                $mailMessage = 'Attached herewith the Purchase Order '.$purchaseOrder->format_id;
                 $mailData = ['path' => $pdfUploadPath, 'toMail' => $vendorInfo['email']];
-                Mail::send('purchase.purchase-request.email.vendor-quotation', [], function($message) use ($mailData){
+                Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData){
                     $message->subject('Testing with attachment');
                     $message->to($mailData['toMail']);
                     $message->from(env('MAIL_USERNAME'));

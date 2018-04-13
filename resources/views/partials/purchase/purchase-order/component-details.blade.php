@@ -131,11 +131,32 @@
                 Vendor Quotation Image
                 <!-- Wrapper for slides -->
                 <div id ="imagecorousel">
-                    @foreach($purchaseOrderComponentData['material_component_images'] as $vendorImages)
-                        <a href="{{$vendorImages['name']}}">
-                            <img id="image" src="{{$vendorImages['name']}}" style="text-align:left;height: 170px">
-                        </a>
-                    @endforeach
+                    <table class="table table-bordered table-hover" style="width: 50px">
+                        <thead>
+
+                        </thead>
+                        <tbody id="show-product-images-vendor">
+                            <tr role="row" class="heading">
+                                @foreach($purchaseOrderComponentData['material_component_images'] as $vendorImages)
+                                    <td>
+                                        @if($vendorImages['extension'] == 'pdf')
+                                            <span class="imageTag"><img src="/assets/global/img/pdf.png" height="30px" width="30px" onclick="openPdf(this,'{{$vendorImages['name']}}')"></span>
+                                            <iframe id="myFrame" style="display:none" width="600" height="170"></iframe>
+                                            <a href="javascript:void(0);"  class="btn btn-sm zoomOutButton" id="zoomOutButton" onclick = "closePdf(this,'{{$vendorImages['name']}}')">Close PDF</a>
+                                        @else
+                                            <span class="imageTag"><img src="/assets/global/img/image.png" height="30px" width="30px" onclick="openImage(this)"></span>
+                                            <a href="javascript:void(0);"  class="btn btn-sm zoomOutButton" id="zoomOutButton" onclick = "closeImage(this)">Close Image</a>
+                                            <div id="imageDiv" hidden>
+                                                <a href="{{$vendorImages['name']}}">
+                                                    <img id="image" src="{{$vendorImages['name']}}" style="text-align:left;height: 170px">
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </td>
+                                @endforeach
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -146,11 +167,33 @@
             <div class="col-md-12">
                 Client Approval Note Image
                 <div id ="imagecorouselForClientApproval">
-                    @foreach($purchaseOrderComponentData['client_approval_images'] as $clientImages)
-                        <a href="{{$clientImages['name']}}">
-                            <img id="image" src="{{$clientImages['name']}}" style="text-align:left;height: 170px">
-                        </a>
-                    @endforeach
+
+                    <table class="table table-bordered table-hover" style="width: 50px">
+                        <thead>
+
+                        </thead>
+                        <tbody id="show-product-images-vendor">
+                        <tr role="row" class="heading">
+                            @foreach($purchaseOrderComponentData['client_approval_images'] as $clientImages)
+                                <td>
+                                    @if($clientImages['extension'] == 'pdf')
+                                        <span class="imageTag"><img src="/assets/global/img/pdf.png" height="30px" width="30px" onclick="openPdf(this,'{{$clientImages['name']}}')"></span>
+                                        <iframe id="myFrame" style="display:none" width="600" height="170"></iframe>
+                                        <a href="javascript:void(0);"  class="btn btn-sm zoomOutButton" id="zoomOutButton" onclick = "closePdf(this,'{{$clientImages['name']}}')">Close PDF</a>
+                                    @else
+                                        <span class="imageTag"><img src="/assets/global/img/image.png" height="30px" width="30px" onclick="openImage(this)"></span>
+                                        <a href="javascript:void(0);"  class="btn btn-sm zoomOutButton" id="zoomOutButton" onclick = "closeImage(this)">Close Image</a>
+                                        <div id="imageDiv" hidden>
+                                            <a href="{{$clientImages['name']}}">
+                                                <img id="image" src="{{$clientImages['name']}}" style="text-align:left;height: 170px">
+                                            </a>
+                                        </div>
+                                    @endif
+                                </td>
+                            @endforeach
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -161,3 +204,25 @@
         </div>
     </div>
 </div>
+
+<script>
+
+    function openPdf(element,vendorImage){
+        var myFrameElement = $(element).closest('tr').find('#myFrame');
+        $(myFrameElement).attr('src',vendorImage);
+        $(myFrameElement).show();
+    }
+    function closePdf(element){
+        var myFrameElement = $(element).closest('tr').find('#myFrame');
+        $(myFrameElement).hide();
+    }
+
+    function openImage(element){
+        $(element).closest('tr').find('#imageDiv').show();
+    }
+
+    function closeImage(element){
+        $(element).closest('tr').find('#imageDiv').hide();
+    }
+
+</script>
