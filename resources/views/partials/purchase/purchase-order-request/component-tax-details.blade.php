@@ -5,7 +5,6 @@
  * Time: 11:44 AM
  */
 ?>
-
 <div class="row" style="height: 1000px">
     <div class="col-md-6" style="border-right: 1px solid grey;height: 100%;padding-top: 3%">
         <div class="row form-group">
@@ -13,6 +12,7 @@
                 <label class="control-label pull-right">Category :</label>
             </div>
             <input type="hidden" name="is_client" value="{{$purchaseRequestComponentData['is_client']}}">
+            <input type="hidden" id="purchaseRequestComponentId" name="purchaseRequestComponentId" value="{{$purchaseRequestComponentData['id']}}">
             <div class="col-md-6">
                 <select class="form-control" name="category_id">
                     @foreach($purchaseRequestComponentData['categories'] as $category)
@@ -227,53 +227,86 @@
             <div class="panel panel-default">
                 <div class="panel-heading" style="background-color: cornflowerblue">
                     <h4 class="panel-title">
-                        <a class="accordion-toggle accordion-toggle-styled" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_1" style="font-size: 16px;color: white">
-                            <b> Vendor Quotation Image </b>
+                        <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_2" style="font-size: 16px;color: white">
+                            <b> Client Approval File </b>
                         </a>
                     </h4>
                 </div>
-                <div id="collapse_3_1" class="panel-collapse in">
-                    <div class="panel-body" style="overflow:auto;">
+                <div id="collapse_3_2" class="panel-collapse in">
+                    <div class="panel-body" style="overflow-y:auto;">
                         <div class="form-group">
-                            <label class="control-label">Select Vendor Quotation Images  :</label>
-                            <input id="imageupload" type="file" class="btn green" multiple />
-                            <br />
                             <div class="row">
-                                <div id="preview-image" class="row">
-
-                                </div>
+                                <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
                             </div>
+                            <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                    Browse</a>
+                                <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                    <i class="fa fa-share"></i> Upload Files </a>
+                            </div>
+                            <table class="table table-bordered table-hover" style="width: 700px">
+                                <thead>
+                                <tr role="row" class="heading">
+                                    <th> File </th>
+                                    <th> Action </th>
+                                </tr>
+                                </thead>
+                                <tbody id="show-product-images">
+
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+                <input type="hidden" id="path" name="path" value="">
+                <input type="hidden" id="max_files_count" name="max_files_count" value="20">
             </div>
             <div class="panel panel-default">
                 <div class="panel-heading" style="background-color: cornflowerblue">
                     <h4 class="panel-title">
                         <a class="accordion-toggle accordion-toggle-styled collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3_2" style="font-size: 16px;color: white">
-                            <b> Client Approval Image </b>
+                            <b> Vendor Approval File </b>
                         </a>
                     </h4>
                 </div>
-                <div id="collapse_3_2" class="panel-collapse collapse">
+                <div id="collapse_3_2" class="panel-collapse in">
                     <div class="panel-body" style="overflow-y:auto;">
                         <div class="form-group">
-                            <label class="control-label">Select Client Approval Images  :</label>
-                            <input id="clientImageUpload" type="file" class="btn green" multiple />
-                            <br />
                             <div class="row">
-                                <div id="client-preview-image" class="row">
-
-                                </div>
+                                <div id="tab_images_uploader_filelist_vendor" class="col-md-6 col-sm-12"> </div>
                             </div>
+                            <div id="tab_images_uploader_container_vendor" class="col-md-offset-5">
+                                <a id="tab_images_uploader_pickfiles_vendor" href="javascript:;" class="btn green-meadow">
+                                    Browse</a>
+                                <a id="tab_images_uploader_uploadfiles_vendor" href="javascript:;" class="btn btn-primary">
+                                    <i class="fa fa-share"></i> Upload Files </a>
+                            </div>
+                            <table class="table table-bordered table-hover" style="width: 700px">
+                                <thead>
+                                <tr role="row" class="heading">
+                                    <th> File </th>
+                                    <th> Action </th>
+                                </tr>
+                                </thead>
+                                <tbody id="show-product-images-vendor">
+
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+                <input type="hidden" id="vendorPath" name="path" value="">
+                <input type="hidden" id="max_files_count" name="max_files_count" value="20">
             </div>
         </div>
     </div>
 </div>
 
+</div>
+<script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+<script src="/assets/custom/purchase/purchase-order-request/file-datatable.js"></script>
+<script src="/assets/custom/purchase/purchase-order-request/file-upload.js"></script>
 <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
 <link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
 <link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
@@ -282,6 +315,7 @@
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
+
         $('#expected_delivery_date').attr("readonly", "readonly");
         var date = new Date();
         $('#expected_delivery_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
@@ -289,54 +323,6 @@
         $(".tax-modal-quantity").each(function(){
             calculateTaxes(this);
         });
-        $("#imageupload").on('change', function () {
-            var countFiles = $(this)[0].files.length;
-            var imgPath = $(this)[0].value;
-            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
-            var image_holder = $("#preview-image");
-            image_holder.empty();
-            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
-                if (typeof (FileReader) != "undefined") {
-                    for (var i = 0; i < countFiles; i++) {
-                        var reader = new FileReader()
-                        reader.onload = function (e) {
-                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="vendor_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
-                            image_holder.append(imagePreview);
-                        };
-                        image_holder.show();
-                        reader.readAsDataURL($(this)[0].files[i]);
-                    }
-                } else {
-                    alert("It doesn't supports");
-                }
-            } else {
-                alert("Select Only images");
-            }
-        });
-
-        $("#clientImageUpload").on('change', function () {
-            var countFiles = $(this)[0].files.length;
-            var imgPath = $(this)[0].value;
-            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
-            var image_holder = $("#client-preview-image");
-            image_holder.empty();
-            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
-                if (typeof (FileReader) != "undefined") {
-                    for (var i = 0; i < countFiles; i++) {
-                        var reader = new FileReader()
-                        reader.onload = function (e) {
-                            var imagePreview = '<div class="col-md-4"><input type="hidden" value="'+e.target.result+'" name="client_images[]"><img src="'+e.target.result+'" style="height: 200px;width: 200px"/></div>';
-                            image_holder.append(imagePreview);
-                        };
-                        image_holder.show();
-                        reader.readAsDataURL($(this)[0].files[i]);
-                    }
-                } else {
-                    alert("It doesn't supports");
-                }
-            } else {
-                alert("Select Only images");
-            }
-        });
+        
     });
 </script>

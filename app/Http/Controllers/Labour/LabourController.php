@@ -101,7 +101,14 @@ class LabourController extends Controller
     public function labourListing(Request $request){
         try{
             $user = Auth::user();
-            $listingData = Employee::get();
+            if($request->has('employee_name')){
+                $employeeIds = Employee::where('name','ilike','%'.$request['employee_name'].'%')->pluck('id')->toArray();
+            }elseif($request->has('employee_id')){
+                $employeeIds = Employee::where('employee_id','ilike','%'.$request['employee_id'].'%')->pluck('id')->toArray();
+            }else{
+                $employeeIds = Employee::pluck('id');
+            }
+            $listingData = Employee::whereIn('id',$employeeIds)->orderBy('created_at','desc')->get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
