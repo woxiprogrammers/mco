@@ -119,6 +119,7 @@
                                                                     <thead>
                                                                     <tr>
                                                                         <th> Material Name </th>
+                                                                        <th> Consumed Quantity</th>
                                                                         <th> Quantity</th>
                                                                         <th> Unit </th>
                                                                         <th>Action</th>
@@ -128,7 +129,8 @@
                                                                     @foreach($materialList as $key => $materialData)
                                                                         <tr>
                                                                             <td> {{$materialData['material_component_name']}} </td>
-                                                                            <td>  {{$materialData['material_component_quantity']}} </td>
+                                                                            <td> {{$materialData['consumed_quantity']}} </td>
+                                                                            <td> {{$materialData['material_component_quantity']}} </td>
                                                                             <td> {{$materialData['material_component_unit_name']}} </td>
                                                                             <td><button class="component-view" value="{{$materialData['purchase_order_component_id']}}">View</button>
                                                                             </td>

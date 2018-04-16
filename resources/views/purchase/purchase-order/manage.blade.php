@@ -96,12 +96,14 @@
                                                                 <th> Project Name - Site Name</th>
                                                                 <th> Created At</th>
                                                                 <th> Approved Quantity</th>
+                                                                <th> Remaining Quantity</th>
                                                                 <th> Status </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th><input type="text" class="form-control form-filter" name="po_name" readonly></th>
                                                                 <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                <th></th>
                                                                 <th></th>
                                                                 <th></th>
                                                                 <th></th>
