@@ -80,7 +80,7 @@ $(document).ready(function(){
             var validForm = true;
             var formFields = $("#"+quotationFormId).serializeArray();
             $.each(formFields, function(i){
-                if(!($("#"+quotationFormId).validate().element("[name='"+formFields[i].name+"']"))){
+                if(!($("#"+quotationFormId).validate().element("[name='"+formFields[i].name+"']")) || formFields[i].value == ""){
                     validForm = false;
                 }
             });
@@ -122,6 +122,8 @@ $(document).ready(function(){
 
                     }
                 });
+            }else{
+                alert('Please fill all necessary form fields.')
             }
         }else{
             alert("Please add atleast one product");
