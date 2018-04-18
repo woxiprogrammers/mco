@@ -58,7 +58,7 @@
                                                 <div class="tab-pane fade in active" id="GeneralTab">
                                                     <fieldset class="row" style="text-align: right">
                                                         @if($quotation->quotation_status->slug == 'draft')
-                                                            <a class="btn green-meadow btn-xs" id="approve" data-toggle="tab" href="#workOrderTab">
+                                                            <a class="btn green-meadow btn-xs" id="approve" href="javascript:void(0);" onclick="openApproveTab()">
                                                                 <i class="fa fa-check-square-o"></i> Approve
                                                             </a>
                                                             <a class="btn btn-danger btn-xs" id="disapprove" onclick="openDisapproveModal()">

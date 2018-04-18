@@ -260,9 +260,17 @@ class UserController extends Controller
                 if($userData[$pagination]['is_active'] == true){
                     $user_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
+                    $changeStatusButton = '<li>
+                                <a href="/user/change-status/'.$userData[$pagination]['id'].'">
+                                    <i class="icon-tag"></i> Disabled </a>
+                            </li>';
                 }else{
                     $user_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
+                    $changeStatusButton = '<li>
+                                <a href="/user/change-status/'.$userData[$pagination]['id'].'">
+                                    <i class="icon-tag"></i> Enabled </a>
+                            </li>';
                 }
                 if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-user')){
                     $actionButton = '<div class="btn-group">
@@ -271,14 +279,11 @@ class UserController extends Controller
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
-                        <li>
+                            <li>
                                 <a href="/user/edit/'.$userData[$pagination]['id'].'">
                                     <i class="icon-docs"></i> Edit </a>
                             </li>
-                            <li>
-                                <a href="/user/change-status/'.$userData[$pagination]['id'].'">
-                                    <i class="icon-tag"></i> Approve / Disapprove </a>
-                            </li>
+                            '.$changeStatusButton.'
                         </ul>
                     </div>';
                 }else{
