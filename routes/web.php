@@ -482,6 +482,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{bank_info}', array('uses' => 'Admin\BankController@getEditView'));
         Route::put('edit/{bank_info}', array('uses' => 'Admin\BankController@editBank'));
         Route::get('change-status/{bank_info}', array('uses' => 'Admin\BankController@changeBankStatus'));
+        Route::post('create-transaction/{bank_info}',array('uses' => 'Admin\BankController@createTransaction'));
     });
 
     Route::group(['prefix' => 'checklist'], function(){
