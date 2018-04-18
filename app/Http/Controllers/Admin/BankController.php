@@ -186,6 +186,9 @@ class BankController extends Controller
             $bankTransactionData['bank_id'] = $bank['id'];
             $bankTransactionData['user_id'] = $user['id'];
             BankInfoTransaction::create($bankTransactionData);
+            $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+            $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+            $bank->update($bankData);
             $request->session()->flash('success','Transaction created successfully');
             return redirect('/bank/edit/'.$bank['id']);
         }catch(\Exception $e){
