@@ -222,18 +222,23 @@ trait VendorTrait
             $vendorMaterialData['vendor_id'] = $vendor->id;
             $vendorCityRelation = array();
             $currentVendorCities = array_column(($vendor->cityRelations->toArray()),'city_id');
-            $deletedCities = array_diff($currentVendorCities,$request->cities);
+            if($request->has('cities')){
+                $deletedCities = array_diff($currentVendorCities,$request->cities);
+                foreach($request->cities as $cityId){
+                    $vendorCity = VendorCityRelation::where('vendor_id',$vendor->id)->where('city_id',$cityId)->first();
+                    if($vendorCity == null){
+                        $vendorCityData['city_id'] = $cityId;
+                        $vendorCity = VendorCityRelation::create($vendorCityData);
+                    }
+                    $vendorCityRelation[$cityId] = $vendorCity->id;
+                }
+            }else{
+                $deletedCities = $currentVendorCities;
+            }
             $deletedCitiesId = VendorCityRelation::where('vendor_id',$vendor->id)->whereIn('city_id',$deletedCities)->pluck('id');
             VendorMaterialCityRelation::whereIn('vendor_city_relation_id',$deletedCitiesId)->delete();
             VendorCityRelation::where('vendor_id',$vendor->id)->whereIn('city_id',$deletedCities)->delete();
-            foreach($request->cities as $cityId){
-                $vendorCity = VendorCityRelation::where('vendor_id',$vendor->id)->where('city_id',$cityId)->first();
-                if($vendorCity == null){
-                    $vendorCityData['city_id'] = $cityId;
-                    $vendorCity = VendorCityRelation::create($vendorCityData);
-                }
-                $vendorCityRelation[$cityId] = $vendorCity->id;
-            }
+
             if($request ->has( 'material_city')) {
                 $materialIds = array_keys($request->material_city);
                 VendorMaterialRelation::where('vendor_id', $vendor->id)->whereNotIn('material_id', $materialIds)->delete();

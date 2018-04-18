@@ -156,6 +156,7 @@ trait RoleTrait{
                         $rolePermissionData['permission_id'] = $permissions;
                         RoleHasPermission::create($rolePermissionData);
                     }
+                    RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$request->web_permissions)->update(['is_web' => false]);
                 }
                 $webPermissions = $request->web_permissions;
             }else{
@@ -175,6 +176,7 @@ trait RoleTrait{
                         RoleHasPermission::create($rolePermissionData);
                     }
                 }
+                RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$request->mobile_permissions)->update(['is_mobile' => false]);
             }else{
                 $mobilePermissions = array();
             }

@@ -211,7 +211,14 @@ class PurchaseOrderController extends Controller
                      $project = $projectSite->project;
                      $purchaseOrderList[$iterator]['client_name'] = $project->client->company;
                      $purchaseOrderList[$iterator]['site_name'] = $projectSite->name;
-                     $purchaseOrderList[$iterator]['approved_quantity'] = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrder['id'])->sum('quantity');
+                     $purchaseOrderComponents = $purchaseOrder->purchaseOrderComponent;
+                     $purchaseOrderList[$iterator]['approved_quantity'] = $purchaseOrderComponents->sum('quantity');
+                     $quantity = ($purchaseOrderComponents->sum('quantity') + ($purchaseOrderComponents->sum('quantity') * (10/100)));
+                     $consumedQuantity = 0;
+                     foreach($purchaseOrderComponents as $purchaseOrderComponent){
+                         $consumedQuantity += $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
+                     }
+                     $purchaseOrderList[$iterator]['remaining_quantity'] = $quantity - $consumedQuantity;
                      $purchaseOrderList[$iterator]['project'] = $project->name;
                      $purchaseOrderList[$iterator]['chk_status'] = $purchaseOrder['is_approved'];
                      $purchaseOrderList[$iterator]['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
@@ -262,6 +269,7 @@ class PurchaseOrderController extends Controller
                     $purchaseOrderList[$pagination]['project']." - ".$purchaseOrderList[$pagination]['site_name'],
                     date('d M Y',strtotime($purchaseOrderList[$pagination]['created_at'])),
                     $purchaseOrderList[$pagination]['approved_quantity'],
+                    $purchaseOrderList[$pagination]['remaining_quantity'],
                     $purchaseOrderList[$pagination]['status'],
                     $actionData
                 ];
@@ -410,6 +418,7 @@ class PurchaseOrderController extends Controller
                 $quantityConsumed = $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
                 $quantityUnused = $purchaseOrderComponent['quantity'] - $quantityConsumed;
                 $materialList[$iterator]['material_component_remaining_quantity'] = (0.1 * ($quantityUnused)) + $quantityUnused;
+                $materialList[$iterator]['consumed_quantity'] = $quantityConsumed;
                 $mainDirectoryName = sha1($id);
                 $componentDirectoryName = sha1($purchaseOrderComponent['id']);
                 $uploadPath = url('/').public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$mainDirectoryName.DIRECTORY_SEPARATOR.'vendor_quotation_images'.DIRECTORY_SEPARATOR.$componentDirectoryName;
