@@ -14,6 +14,10 @@ class BankInfoTransaction extends Model
         return $this->belongsTo('App\User','user_id');
     }
 
+    public function bank(){
+        return $this->belongsTo('App\BankInfo','bank_id');
+    }
+
     public function paymentType(){
         return $this->belongsTo('App\PaymentType','payment_type_id');
     }

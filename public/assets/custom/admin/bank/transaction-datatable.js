@@ -1,13 +1,9 @@
-/**
- * Created by Ameya Joshi on 30/1/18.
- */
-
-var ProjectSiteAdvancePaymentListing = function () {
+var BankTransactionListing = function () {
     var handleOrders = function () {
         var grid = new Datatable();
-        var projectSiteId = $("#projectSiteId").val();
+        var bank_id = $("#bank_id").val();
         grid.init({
-            src: $("#advancePaymentTable"),
+            src: $("#bankTransactionTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -22,18 +18,23 @@ var ProjectSiteAdvancePaymentListing = function () {
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
                 "lengthMenu": [
-                    [10, 20, 50, 100, 150, -1],
-                    [10, 20, 50, 100, 150, "All"] // change per page values here
+                    [50, 100, 150],
+                    [50, 100, 150] // change per page values here
                 ],
-                "pageLength": 10, // default record count per page
+                "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/project/advance-payment/listing?project_site_id="+projectSiteId+"&_token="+$("input[name='_token']").val(), // ajax source
+                    "url": "/bank/transaction/listing", // ajax source
+                    "data" :{
+                        '_token' : $("input[name='_token']").val(),
+                        'bank_id' : bank_id
+                    }
                 },
                 "order": [
                     [1, "asc"]
                 ] // set first column as a default sort by asc
             }
         });
+
         // handle group actionsubmit button click
         grid.getTableWrapper().on('click', '.table-group-action-submit', function (e) {
             e.preventDefault();
@@ -62,15 +63,18 @@ var ProjectSiteAdvancePaymentListing = function () {
                 });
             }
         });
-    }
-    return {
 
+    }
+
+    return {
         //main function to initiate the module
         init: function () {
             handleOrders();
         }
     };
 }();
+
 jQuery(document).ready(function() {
-    ProjectSiteAdvancePaymentListing.init();
+    BankTransactionListing.init();
 });
+

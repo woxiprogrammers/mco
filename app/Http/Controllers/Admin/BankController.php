@@ -127,7 +127,7 @@ class BankController extends Controller
         try{
             $bank = $bank->toArray();
             $paymentModes = PaymentType::get();
-            $bankTransactions = BankInfoTransaction::orderBy('created_at','desc')->get();
+            $bankTransactions = BankInfoTransaction::where('bank_id',$bank['id'])->orderBy('created_at','desc')->get();
             return view('admin.bank.edit')->with(compact('bank','paymentModes','bankTransactions'));
         }catch(\Exception $e){
             $data = [
@@ -202,4 +202,40 @@ class BankController extends Controller
         abort(500);
     }
 
+    public function getBankTransactionListing(Request $request){
+        try{
+            $status = 200;
+            $bankTransactions = BankInfoTransaction::where('bank_id',$request['bank_id'])->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($bankTransactions);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($bankTransactions); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($bankTransactions[$pagination]['created_at'])),
+                    $bankTransactions[$pagination]->user->first_name,
+                    $bankTransactions[$pagination]['amount'],
+                    $bankTransactions[$pagination]->paymentType->name,
+                    $bankTransactions[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Bank Transaction Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 200;
+        }
+        return response()->json($records,$status);
+    }
 }

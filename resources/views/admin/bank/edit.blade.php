@@ -109,7 +109,63 @@
                                                     </form>
                                                 </div>
                                                 <div class="tab-pane fade in" id="transactionBankTab">
-                                                    <div class="row">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <div class="col-md-2">
+                                                                    <label style="color: darkblue;">Balance Amount</label>
+                                                                </div>
+                                                                <div>
+                                                                    <input type="text" class="form-control" name="po_id" value="12" readonly tabindex="-1">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label style="color: darkblue;">Balance Amount</label>
+                                                                <input type="text" class="form-control" name="po_id" value="12" readonly tabindex="-1">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <a class="btn yellow pull-right" href="javascript:void(0);" id="transactionButton">
+                                                                    <i class="fa fa-plus"></i>Transaction
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        {{--<div class="col-md-4">
+                                                            <div class="col-md-3">
+                                                                <label class="pull-right control-label">
+                                                                    Balance Amount :
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <input type="text" class="form-control" readonly --}}{{--value="{{$remainingHoldAmount}}"--}}{{-- value="1">
+                                                            </div>
+                                                        </div>--}}
+                                                        {{--<div class="col-md-3">
+                                                            <a class="btn yellow pull-right" href="javascript:void(0);" id="transactionButton">
+                                                                <i class="fa fa-plus"></i>Transaction
+                                                            </a>
+                                                        </div>--}}
+                                                    </div>
+                                                    <div class="table-scrollable">
+                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="bankTransactionTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th > Date </th>
+                                                                <th > User </th>
+                                                                <th > Amount </th>
+                                                                <th > Payment Method </th>
+                                                                <th > Reference Number </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    {{--<div class="row">
                                                         <div class="col-md-offset-9 col-md-3 ">
                                                             <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
                                                                 <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
@@ -144,7 +200,7 @@
                                                             </tr>
                                                         @endforeach
                                                         </tbody>
-                                                    </table>
+                                                    </table>--}}
                                                 </div>
                                             </div>
                                         </div>
@@ -163,7 +219,7 @@
                                             </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
-                                            <form id="transactionForm" action="/bank/create-transaction/{{$bank['id']}}" method="POST">
+                                            <form id="transactionForm" action="/bank/transaction/create/{{$bank['id']}}" method="POST">
                                                 {!! csrf_field() !!}
                                                 <div class="form-group row">
                                                     <div class="col-md-4">
@@ -238,6 +294,11 @@
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
+<script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+
+<script src="/assets/custom/admin/bank/transaction-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
         CreateBank.init();
