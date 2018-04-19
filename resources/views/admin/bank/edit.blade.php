@@ -42,7 +42,7 @@
                                             <input type="hidden" id="bank_id" value="{{$bank['id']}}">
                                             <ul class="nav nav-tabs nav-tabs-lg">
                                                 <li class="active">
-                                                    <a href="#editBankTab" data-toggle="tab"> Edit Bank </a>
+                                                    <a href="#editBank" data-toggle="tab"> Edit Bank </a>
                                                 </li>
                                                 <li>
                                                     <a href="#transactionBankTab" data-toggle="tab"> Transactions </a>
