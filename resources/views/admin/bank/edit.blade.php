@@ -109,22 +109,18 @@
                                                     </form>
                                                 </div>
                                                 <div class="tab-pane fade in" id="transactionBankTab">
-                                                    <div class="form-group row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <div class="col-md-2">
-                                                                    <label style="color: darkblue;">Balance Amount</label>
-                                                                </div>
-                                                                <div>
-                                                                    <input type="text" class="form-control" name="po_id" value="12" readonly tabindex="-1">
-                                                                </div>
-                                                            </div>
+                                                    <div class="col-md-12 table-actions-wrapper">
+                                                        <div class="col-md-2" style="text-align: right">
+                                                            <label for="name" class="control-label">Total Amount : </label>
                                                         </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label style="color: darkblue;">Balance Amount</label>
-                                                                <input type="text" class="form-control" name="po_id" value="12" readonly tabindex="-1">
-                                                            </div>
+                                                        <div class="col-md-2">
+                                                            <input type="text" class="form-control" id="total_amount" value="{{$bank['total_amount']}}">
+                                                        </div>
+                                                        <div class="col-md-2" style="text-align: right">
+                                                            <label for="name" class="control-label">Balance Amount : </label>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <input type="text" class="form-control" id="balance_amount" value="{{$bank['balance_amount']}}">
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="form-group">
@@ -133,21 +129,6 @@
                                                                 </a>
                                                             </div>
                                                         </div>
-                                                        {{--<div class="col-md-4">
-                                                            <div class="col-md-3">
-                                                                <label class="pull-right control-label">
-                                                                    Balance Amount :
-                                                                </label>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <input type="text" class="form-control" readonly --}}{{--value="{{$remainingHoldAmount}}"--}}{{-- value="1">
-                                                            </div>
-                                                        </div>--}}
-                                                        {{--<div class="col-md-3">
-                                                            <a class="btn yellow pull-right" href="javascript:void(0);" id="transactionButton">
-                                                                <i class="fa fa-plus"></i>Transaction
-                                                            </a>
-                                                        </div>--}}
                                                     </div>
                                                     <div class="table-scrollable">
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="bankTransactionTable">
@@ -165,42 +146,6 @@
                                                             </tbody>
                                                         </table>
                                                     </div>
-                                                    {{--<div class="row">
-                                                        <div class="col-md-offset-9 col-md-3 ">
-                                                            <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
-                                                                <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
-                                                                Transaction
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                    <table class="table table-striped table-bordered table-hover order-column" id="bankTransactions">
-                                                        <thead>
-                                                        <tr>
-                                                            <th> User </th>
-                                                            <th> Date </th>
-                                                            <th> Amount </th>
-                                                            <th> Payment Mode </th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        @foreach($bankTransactions as $key => $bankTransaction)
-                                                            <tr>
-                                                                <td>
-                                                                    {!! $bankTransaction->user->first_name !!}
-                                                                </td>
-                                                                <td>
-                                                                    {{$bankTransaction['date']}}
-                                                                </td>
-                                                                <td>
-                                                                    {!! $bankTransaction['amount'] !!}
-                                                                </td>
-                                                                <td>
-                                                                    {!! $bankTransaction->paymentType->name !!}
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                        </tbody>
-                                                    </table>--}}
                                                 </div>
                                             </div>
                                         </div>
