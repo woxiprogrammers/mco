@@ -42,7 +42,7 @@
                                             <input type="hidden" id="bank_id" value="{{$bank['id']}}">
                                             <ul class="nav nav-tabs nav-tabs-lg">
                                                 <li class="active">
-                                                    <a href="#editBankTab" data-toggle="tab"> Edit Bank </a>
+                                                    <a href="#editBank" data-toggle="tab"> Edit Bank </a>
                                                 </li>
                                                 <li>
                                                     <a href="#transactionBankTab" data-toggle="tab"> Transactions </a>
@@ -109,42 +109,43 @@
                                                     </form>
                                                 </div>
                                                 <div class="tab-pane fade in" id="transactionBankTab">
-                                                    <div class="row">
-                                                        <div class="col-md-offset-9 col-md-3 ">
-                                                            <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
-                                                                <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
-                                                                Transaction
-                                                            </a>
+                                                    <div class="col-md-12 table-actions-wrapper">
+                                                        <div class="col-md-2" style="text-align: right">
+                                                            <label for="name" class="control-label">Total Amount : </label>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <input type="text" class="form-control" id="total_amount" value="{{$bank['total_amount']}}">
+                                                        </div>
+                                                        <div class="col-md-2" style="text-align: right">
+                                                            <label for="name" class="control-label">Balance Amount : </label>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <input type="text" class="form-control" id="balance_amount" value="{{$bank['balance_amount']}}">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <a class="btn yellow pull-right" href="javascript:void(0);" id="transactionButton">
+                                                                    <i class="fa fa-plus"></i>Transaction
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <table class="table table-striped table-bordered table-hover order-column" id="bankTransactions">
-                                                        <thead>
-                                                        <tr>
-                                                            <th> User </th>
-                                                            <th> Date </th>
-                                                            <th> Amount </th>
-                                                            <th> Payment Mode </th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        @foreach($bankTransactions as $key => $bankTransaction)
+                                                    <div class="table-scrollable">
+                                                        <table class="table table-striped table-bordered table-hover table-checkable order-column" id="bankTransactionTable">
+                                                            <thead>
                                                             <tr>
-                                                                <td>
-                                                                    {!! $bankTransaction->user->first_name !!}
-                                                                </td>
-                                                                <td>
-                                                                    {{$bankTransaction['date']}}
-                                                                </td>
-                                                                <td>
-                                                                    {!! $bankTransaction['amount'] !!}
-                                                                </td>
-                                                                <td>
-                                                                    {!! $bankTransaction->paymentType->name !!}
-                                                                </td>
+                                                                <th > Date </th>
+                                                                <th > User </th>
+                                                                <th > Amount </th>
+                                                                <th > Payment Method </th>
+                                                                <th > Reference Number </th>
                                                             </tr>
-                                                        @endforeach
-                                                        </tbody>
-                                                    </table>
+                                                            </thead>
+                                                            <tbody>
+
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -163,7 +164,7 @@
                                             </div>
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
-                                            <form id="transactionForm" action="/bank/create-transaction/{{$bank['id']}}" method="POST">
+                                            <form id="transactionForm" action="/bank/transaction/create/{{$bank['id']}}" method="POST">
                                                 {!! csrf_field() !!}
                                                 <div class="form-group row">
                                                     <div class="col-md-4">
@@ -238,6 +239,11 @@
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
+<script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+
+<script src="/assets/custom/admin/bank/transaction-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
         CreateBank.init();
