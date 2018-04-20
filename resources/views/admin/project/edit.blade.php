@@ -215,7 +215,7 @@
             <div class="modal-header" style="padding-bottom:10px">
                 <div class="row">
                     <div class="col-md-4"></div>
-                    <div class="col-md-4"> Add Advacnce Payment</div>
+                    <div class="col-md-4"> Add Advance Payment</div>
                     <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                 </div>
             </div>
@@ -230,7 +230,7 @@
                             </label>
                         </div>
                         <div class="col-md-6">
-                            <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                            <select class="form-control" id="bank_id" name="bank_id">
                                 <option value="default">Select Bank</option>
                                 @foreach($banks as $bank)
                                     <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
@@ -250,7 +250,7 @@
                             </label>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="amount" name="amount" placeholder="Enter Amount" onkeyup="checkAmount()">
+                            <input type="text" class="form-control" id="amount" name="amount" placeholder="Enter Amount">
                         </div>
                     </div>
                     <div class="form-group row"id="paymentSelect">
@@ -352,22 +352,6 @@
         PaymentCreate.init();
         $("#hsnCode").trigger('change');
     });
-
-    function checkAmount(){
-        var selectedBankId = $('#bank_id').val();
-        if(selectedBankId == 'default'){
-            alert('Please select Bank');
-        }else{
-            var amount = parseFloat($('#amount').val());
-            if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
-               amount = 0;
-            }
-            var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
-            $("input[name='amount']").rules('add',{
-                max: allowedAmount
-            });
-        }
-    }
 </script>
 
 @endsection
