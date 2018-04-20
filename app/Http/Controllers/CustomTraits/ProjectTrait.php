@@ -281,30 +281,27 @@ trait ProjectTrait{
         try{
             $projectSite = ProjectSite::findOrFail($request['project_site_id']);
             $bank = BankInfo::where('id',$request['bank_id'])->first();
-            if($request['amount'] <= $bank['balance_amount']){
-                $advancePaymentData = $request->except('_token');
-                $advancePayment = ProjectSiteAdvancePayment::create($advancePaymentData);
-                if($projectSite->advanced_amount == null){
-                    $advanceAmount = $request['amount'];
-                }else{
-                    $advanceAmount = ((float)$projectSite->advanced_amount) + $request['amount'];
-                }
-                if($projectSite->advanced_balance == null){
-                    $advanceBalance = $request['amount'];
-                }else{
-                    $advanceBalance = ((float)$projectSite->advanced_balance) + $request['amount'];
-                }
-                $projectSite->update([
-                    'advanced_balance' => $advanceBalance,
-                    'advanced_amount' => $advanceAmount
-                ]);
-                $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
-                $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
-                $bank->update($bankData);
-                $request->session()->flash('success','Advance Payment Added Successfully.');
+            $advancePaymentData = $request->except('_token');
+            $advancePayment = ProjectSiteAdvancePayment::create($advancePaymentData);
+            if($projectSite->advanced_amount == null){
+                $advanceAmount = $request['amount'];
             }else{
-                $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                $advanceAmount = ((float)$projectSite->advanced_amount) + $request['amount'];
             }
+            if($projectSite->advanced_balance == null){
+                $advanceBalance = $request['amount'];
+            }else{
+                $advanceBalance = ((float)$projectSite->advanced_balance) + $request['amount'];
+            }
+            $projectSite->update([
+                'advanced_balance' => $advanceBalance,
+                'advanced_amount' => $advanceAmount
+            ]);
+            $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+            $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+            $bank->update($bankData);
+            $request->session()->flash('success','Advance Payment Added Successfully.');
+
             return redirect('/project/edit/'.$projectSite->project_id);
 
         }catch(\Exception $e){
