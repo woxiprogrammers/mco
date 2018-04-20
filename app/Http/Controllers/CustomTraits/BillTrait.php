@@ -588,7 +588,8 @@ trait BillTrait{
             $totalBillRetentionAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('retention_amount');
             $reconciledRetentionAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','retention')->sum('amount');
             $remainingRetentionAmount = $reconciledRetentionAmount - $totalBillRetentionAmount;
-            return view('admin.bill.view')->with(compact('extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount'));
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            return view('admin.bill.view')->with(compact('extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','banks'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -1600,8 +1601,9 @@ trait BillTrait{
 
     public function saveTransactionDetails(Request $request){
         try{
+            dd($request->all());
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $transactionData = $request->except('_token');
+            $transactionData = $request->except('_token','bank_id','payment_type_id');
             $projectSiteId = Quotation::join('bills','bills.quotation_id','=','quotations.id')
                                 ->where('bills.id',$request->bill_id)
                                 ->pluck('quotations.project_site_id')->first();
@@ -1686,19 +1688,29 @@ trait BillTrait{
             $totalTransactionAmount = BillTransaction::where('bill_id')->sum('amount');
             if(($totalTransactionAmount + $request->amount) > $final['current_bill_gross_total_amount']){
                 $request->session()->flash('error','Total Payment amount is greater than total bill amount');
+                return redirect('/bill/view/'.$request->bill_id);
             }else{
                 if($transactionData['paid_from_advanced'] == 'true'){
                     $transactionData['paid_from_advanced'] = true;
-                    $advanceBalanceAmount = $projectSite->advanced_balance;
+                    $advanceBalanceAmount = ($projectSite->advanced_balance != null) ? $projectSite->advanced_balance : 0 ;
+
                     if($advanceBalanceAmount < $request->amount){
                         $request->session()->flash('error','Transaction amount is greater that advance balance amount. Advance balance amount is '.$advanceBalanceAmount);
+                        return redirect('/bill/view/'.$request->bill_id);
                     }else{
                         $newAdvanceBalanceAmount = $advanceBalanceAmount - $request->amount;
                         $projectSite->update(['advanced_balance' => $newAdvanceBalanceAmount]);
                     }
                 }else{
                     $transactionData['paid_from_advanced'] = false;
+                    $transactionData['payment_type_id'] = $request['payment_type_id'];
+                    $transactionData['bank_id'] = $request['bank_id'];
+                    $bank = BankInfo::where('id',$request['bank_id'])->first();
+                    $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+                    $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+                    $bank->update($bankData);
                 }
+
                 BillTransaction::create($transactionData);
                 $request->session()->flash('success','Bill Transaction added successfully.');
             }
@@ -1729,7 +1741,7 @@ trait BillTrait{
                 if($transactionDetails[$pagination]['paid_from_advanced'] == true){
                     $paidFrom = 'Advance Payment';
                 }else{
-                    $paidFrom = 'Cheque';
+                    $paidFrom = 'Bank';
                 }
                 $records['data'][] = [
                     $pagination+1,
@@ -1812,8 +1824,13 @@ trait BillTrait{
     public function addReconcileTransaction(Request $request){
         try{
             $reconcileTransactionData = $request->except('_token');
+            $bank = BankInfo::where('id',$request['bank_id'])->first();
             $billReconcileTransaction = BillReconcileTransaction::create($reconcileTransactionData);
+            $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+            $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+            $bank->update($bankData);
             $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
+
             return redirect('/bill/view/'.$request->bill_id);
         }catch(\Exception $e){
             $data = [

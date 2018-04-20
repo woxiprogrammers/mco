@@ -223,7 +223,7 @@
                 <form id="paymentCreateForm" method="post" action="/project/advance-payment/create">
                     {!! csrf_field() !!}
                     <input type="hidden" name="project_site_id" id="projectSiteId" value="{{$projectData['project_site_id']}}">
-                    <div class="form-group row"id="bankSelect">
+                    <div class="form-group row" id="bankSelect">
                         <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Bank:
@@ -250,7 +250,7 @@
                             </label>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount" onkeyup="checkAmount()">
+                            <input type="text" class="form-control" id="amount" name="amount" placeholder="Enter Amount" onkeyup="checkAmount()">
                         </div>
                     </div>
                     <div class="form-group row"id="paymentSelect">
