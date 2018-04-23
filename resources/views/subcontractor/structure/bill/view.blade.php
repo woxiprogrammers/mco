@@ -254,7 +254,7 @@
                                                                                         </label>
                                                                                     </div>
                                                                                 </div>
-                                                                                {{--<div class="form-group row" id="paymentSelect">
+                                                                                <div class="form-group row" id="paymentSelect">
                                                                                     <div class="form-group row" id="bankSelect">
                                                                                         <div class="col-md-3">
                                                                                             <label class="pull-right control-label">
@@ -262,7 +262,7 @@
                                                                                             </label>
                                                                                         </div>
                                                                                         <div class="col-md-6">
-                                                                                            <select class="form-control" id="transaction_bank_id" name="bank_id" onchange="checkAmount()">
+                                                                                            <select class="form-control" id="transaction_bank_id" name="bank_id" >
                                                                                                 <option value="default">Select Bank</option>
                                                                                                 @foreach($banks as $bank)
                                                                                                     <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
@@ -272,7 +272,7 @@
                                                                                     </div>
                                                                                     <input type="hidden" id="allowedAmount">
                                                                                     @foreach($banks as $bank)
-                                                                                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                                                                                        <input type="hidden" id="transaction_balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
                                                                                     @endforeach
                                                                                     <div class="col-md-4">
                                                                                         <label class="pull-right control-label">
@@ -286,7 +286,7 @@
                                                                                             @endforeach
                                                                                         </select>
                                                                                     </div>
-                                                                                </div>--}}
+                                                                                </div>
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-3" style="text-align: right">
                                                                                         <label for="name" class="control-label"> Debit </label>
@@ -590,6 +590,50 @@
                 $("#subtotalAmount").rules('add',{
                     max: changedPayableAmount
                 });
+                var remainingBillAmount = parseFloat($("#pendingAmount").val());
+                if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){
+                    remainingBillAmount = 0;
+                }
+                if($("#isAdvanceCheckbox").is(':checked') == true){
+                    var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
+                    if(balanceAdvanceAmount == null || typeof balanceAdvanceAmount == 'undefined' || isNaN(balanceAdvanceAmount)){
+                        balanceAdvanceAmount = 0;
+                    }
+                    if(balanceAdvanceAmount < remainingBillAmount){
+                        $("#transactionTotal").rules('add',{
+                            max: balanceAdvanceAmount
+                        });
+                    }else{
+                        $("#transactionTotal").rules('add',{
+                            max: remainingBillAmount
+                        });
+                    }
+
+                }else{
+                    var selectedBankId = $('#transaction_bank_id').val();
+                    if(selectedBankId == ''){
+                        alert('Please select Bank');
+                    }else{
+                        var amount = parseFloat($('#transactionTotal').val());
+                        if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+                            amount = 0;
+                        }
+                        var allowedBankAmount = parseFloat($('#transaction_balance_amount_'+selectedBankId).val());
+                        if(allowedBankAmount < remainingBillAmount){
+                            $("#transactionTotal").rules('add',{
+                                max: allowedBankAmount
+                            });
+                        }else{
+                            $("#transactionTotal").rules('add',{
+                                max: remainingBillAmount
+                            });
+                        }
+
+                    }
+                }
+
+
+
             });
         });
         function openReconcilePaymentModal(transactionSlug){

@@ -114,13 +114,13 @@
                                                             <label for="name" class="control-label">Total Amount : </label>
                                                         </div>
                                                         <div class="col-md-2">
-                                                            <input type="text" class="form-control" id="total_amount" value="{{$bank['total_amount']}}">
+                                                            <input type="text" class="form-control" id="total_amount" value="{{$bank['total_amount']}}" readonly>
                                                         </div>
                                                         <div class="col-md-2" style="text-align: right">
                                                             <label for="name" class="control-label">Balance Amount : </label>
                                                         </div>
                                                         <div class="col-md-2">
-                                                            <input type="text" class="form-control" id="balance_amount" value="{{$bank['balance_amount']}}">
+                                                            <input type="text" class="form-control" id="balance_amount" value="{{$bank['balance_amount']}}" readonly>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="form-group">

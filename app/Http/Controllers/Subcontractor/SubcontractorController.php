@@ -917,19 +917,29 @@ class SubcontractorController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            dd($request->all());
-            $subcontractorBillTransactionData = $request->except('_token','remainingTotal');
+            $subcontractorBillTransactionData = $request->except('_token','remainingTotal','bank_id','payment_id');
             if($request->has('is_advance')){
                 $subcontractorBillTransactionData['is_advance'] = true;
-            }else{
-                $subcontractorBillTransactionData['is_advance'] = false;
-            }
-            $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
-            if($subcontractorBillTransaction->is_advance == true){
+                $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
                 $subcontractor = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->subcontractor;
                 $balanceAdvanceAmount = $subcontractor->balance_advance_amount;
                 $subcontractor->update(['balance_advance_amount' => $balanceAdvanceAmount - $subcontractorBillTransaction->total]);
+            }else{
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['total'] <= $bank['balance_amount']){
+                    $subcontractorBillTransactionData['is_advance'] = false;
+                    $subcontractorBillTransactionData['bank_id'] = $request['bank_id'];
+                    $subcontractorBillTransactionData['payment_type_id'] = $request['payment_id'];
+                    $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $subcontractorBillTransaction['total'];
+                    $bankData['total_amount'] = $bank['total_amount'] - $subcontractorBillTransaction['total'];
+                    $bank->update($bankData);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/subcontractor/subcontractor-bills/view/'.$request['subcontractor_bills_id']);
+                }
             }
+
             if($subcontractorBillTransaction != null){
                 $request->session()->flash('success','Transaction created successfully');
             }else{

@@ -369,7 +369,6 @@
         });
 
         function checkAmount(){
-            console.log('inside amount');
             var remainingBillAmount = parseFloat($("#remainingPaymentAmount").val());
             if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){
                 remainingBillAmount = 0;
@@ -380,12 +379,10 @@
                     balanceAdvanceAmount = 0;
                 }
                 if(balanceAdvanceAmount < remainingBillAmount){
-                    console.log('inside balance amount');
                     $("#amount").rules('add',{
                         max: balanceAdvanceAmount
                     });
                 }else{
-                    console.log('inside remainingBillAmount');
                     $("#amount").rules('add',{
                         max: remainingBillAmount
                     });
@@ -402,12 +399,10 @@
                     }
                     var allowedBankAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
                     if(allowedBankAmount < remainingBillAmount){
-                        console.log('inside bank val');
                         $("#amount").rules('add',{
                             max: allowedBankAmount
                         });
                     }else{
-                        console.log('inside advance amount');
                         $("#amount").rules('add',{
                             max: remainingBillAmount
                         });
