@@ -254,6 +254,39 @@
                                                                                         </label>
                                                                                     </div>
                                                                                 </div>
+                                                                                {{--<div class="form-group row" id="paymentSelect">
+                                                                                    <div class="form-group row" id="bankSelect">
+                                                                                        <div class="col-md-3">
+                                                                                            <label class="pull-right control-label">
+                                                                                                Bank:
+                                                                                            </label>
+                                                                                        </div>
+                                                                                        <div class="col-md-6">
+                                                                                            <select class="form-control" id="transaction_bank_id" name="bank_id" onchange="checkAmount()">
+                                                                                                <option value="default">Select Bank</option>
+                                                                                                @foreach($banks as $bank)
+                                                                                                    <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                                                                                @endforeach
+                                                                                            </select>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <input type="hidden" id="allowedAmount">
+                                                                                    @foreach($banks as $bank)
+                                                                                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                                                                                    @endforeach
+                                                                                    <div class="col-md-4">
+                                                                                        <label class="pull-right control-label">
+                                                                                            Payment Mode:
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <select class="form-control" name="payment_id" >
+                                                                                            @foreach($paymentTypes as $paymentType)
+                                                                                                <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
+                                                                                            @endforeach
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>--}}
                                                                                 <div class="form-group row">
                                                                                     <div class="col-md-3" style="text-align: right">
                                                                                         <label for="name" class="control-label"> Debit </label>
@@ -435,6 +468,21 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="modal-body" style="padding:40px 50px;">
+                                                                            <div class="form-group row" id="bankSelect">
+                                                                                <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                                                                                    <option value="">Select Bank</option>
+                                                                                    @foreach($banks as $bank)
+                                                                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+
+                                                                            <input type="hidden" id="allowedAmount">
+
+                                                                            @foreach($banks as $bank)
+                                                                                <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                                                                            @endforeach
+
                                                                             <div class="form-group row">
                                                                                 <select class="form-control" name="payment_type_id">
                                                                                     @foreach($paymentTypes as $type)
@@ -443,7 +491,7 @@
                                                                                 </select>
                                                                             </div>
                                                                             <div class="form-group row">
-                                                                                <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount">
+                                                                                <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount" onchange="checkAmount()">
                                                                             </div>
                                                                             <div class="form-group row">
                                                                                 <input type="text" class="form-control"  name="reference_number" placeholder="Enter Reference Number" >
@@ -486,6 +534,7 @@
     <script>
         $(document).ready(function(){
             CreateTransaction.init();
+            CreatePayment.init();
             $('#isAdvanceCheckbox').on('change', function(){
                 var pendingAmount = parseFloat($("#pendingAmount").val());
                 var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
@@ -505,10 +554,12 @@
                     $("#tds_tax_amount").prop('readonly', true);
                     $("#other_recovery").val(0);
                     $("#other_recovery").prop('readonly', true);
+                    $('#paymentSelect').hide();
                     $("#transactionTotal").rules('add',{
                         max: balanceAdvanceAmount
                     });
                 }else{
+                    $('#paymentSelect').show();
                     $("#debit").prop('readonly', false);
                     $("#hold").prop('readonly', false);
                     $("#retention_tax_amount").prop('readonly', false);
@@ -544,6 +595,22 @@
         function openReconcilePaymentModal(transactionSlug){
             $("#reconcileTransactionSlug").val(transactionSlug);
             $("#reconcilePaymentModal").modal('show');
+        }
+
+        function checkAmount(){
+            var selectedBankId = $('#bank_id').val();
+            if(selectedBankId == ''){
+                alert('Please select Bank');
+            }else{
+                var amount = parseFloat($('#bilAmount').val());
+                if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+                    amount = 0;
+                }
+                var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                $('#bilAmount').rules('add',{
+                    max: allowedAmount
+                });
+            }
         }
     </script>
 @endsection

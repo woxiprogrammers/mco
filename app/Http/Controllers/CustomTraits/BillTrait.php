@@ -1601,7 +1601,6 @@ trait BillTrait{
 
     public function saveTransactionDetails(Request $request){
         try{
-            dd($request->all());
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $transactionData = $request->except('_token','bank_id','payment_type_id');
             $projectSiteId = Quotation::join('bills','bills.quotation_id','=','quotations.id')
@@ -1706,8 +1705,8 @@ trait BillTrait{
                     $transactionData['payment_type_id'] = $request['payment_type_id'];
                     $transactionData['bank_id'] = $request['bank_id'];
                     $bank = BankInfo::where('id',$request['bank_id'])->first();
-                    $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
-                    $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+                    $bankData['balance_amount'] = $bank['balance_amount'] + $request['total'];
+                    $bankData['total_amount'] = $bank['total_amount'] + $request['total'];
                     $bank->update($bankData);
                 }
 
