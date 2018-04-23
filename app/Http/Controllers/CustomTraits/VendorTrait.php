@@ -276,11 +276,14 @@ trait VendorTrait
     public function vendorListing(Request $request){
         try {
             $user = Auth::user();
-            if ($request->has('search_name')) {
-                $vendorsData = Vendor::where('name', 'ilike', '%' . $request->search_name . '%')->orderBy('name', 'asc')->get()->toArray();
-            } else {
-                $vendorsData = Vendor::orderBy('name', 'asc')->get()->toArray();
+            $vendorId = Vendor::pluck('id')->toArray();
+            if($request->has('search_company')){
+                $vendorId = Vendor::whereIn('id',$vendorId)->where('company','ilike','%'.$request->search_company.'%')->pluck('id')->toArray();
             }
+            if ($request->has('search_name')) {
+                $vendorId = Vendor::whereIn('id',$vendorId)->where('name','ilike','%'.$request->search_name.'%')->pluck('id')->toArray();
+            }
+            $vendorsData = Vendor::whereIn('id', $vendorId)->orderBy('id','desc')->get();
             $iTotalRecords = count($vendorsData);
             $records = array();
             $records['data'] = array();
@@ -325,6 +328,7 @@ trait VendorTrait
                 </div>';
                 }
                 $records['data'][$iterator] = [
+                    $vendorsData[$pagination]['company'],
                     $vendorsData[$pagination]['name'],
                     $vendorsData[$pagination]['mobile'],
                     $vendor_status,
