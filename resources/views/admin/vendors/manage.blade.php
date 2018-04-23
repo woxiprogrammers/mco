@@ -50,14 +50,17 @@
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="vendorTable">
                                                     <thead>
                                                     <tr>
-                                                        <th style="width: 30%"> Name </th>
+                                                        <th style="width: 30%"> Comapny </th>
+                                                        <th > Name </th>
+
                                                         <th> Mobile Number </th>
 
                                                         <th> Status </th>
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
-                                                        <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
+                                                        <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_company"> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_mobile" readonly> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
                                                         <th>
@@ -93,6 +96,9 @@
    <script>
         $(document).ready(function() {
             $('#vendorTable').DataTable();
+            $(".form-filter").on('keyup', function(){
+                $(".filter-submit").trigger('click');
+            });
         });
     </script>
 @endsection
