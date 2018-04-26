@@ -803,7 +803,7 @@ class InventoryManageController extends Controller
                         $data['rate_per_unit'] = $request['rate_per_unit'];
                     }
                 }elseif($request->transfer_type =='user'){
-                    $data['source_name'] = $data['source_name'].'('.$request['employee_id'].')';
+                    //$data['source_name'] = $data['source_name'].'('.$request['employee_id'].')';
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                     $data['rate_per_unit'] = $request['rent'];
                 }else{
@@ -1020,7 +1020,7 @@ class InventoryManageController extends Controller
             $iterator = 0;
             foreach($employeeDetails as $key => $employeeDetail){
                 $data[$iterator]['employee_id'] = $employeeDetail['id'];
-                $data[$iterator]['employee_name'] = $employeeDetail['name'];
+                $data[$iterator]['employee_name'] = $employeeDetail['name'] .' - '. $employeeDetail['employee_id'];
             }
             $status = 200;
         }catch(\Exception $e){

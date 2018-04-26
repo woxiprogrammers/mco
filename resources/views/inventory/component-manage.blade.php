@@ -315,7 +315,6 @@
                                                 <div id="labour_form" hidden>
                                                     <div class="form-group">
                                                         <input type="text" name="source_name" id="sourceName" class="form-control typeahead" placeholder="Enter User's Name">
-                                                        <input type="hidden" name="employee_id" id="employee_id">
                                                     </div>
                                                     <div class="row form-group">
                                                         <div class="col-md-2">
@@ -1195,31 +1194,7 @@
             $('#inOutCheckbox').on('switchChange.bootstrapSwitch', function(event, state) {
                 changeType();
             });
-
-
-
-
-            /*$("#transfer_type").on('change', function () {
-                if($("#inOutCheckbox").is(':checked') == false) {
-                    $('#get_grn').hide();
-                    $('#rent').show();
-                    $('#site_out_rate').show();
-                    $('#site_cgst').show();
-                    $('#site_sgst').show();
-                    $('#site_igst').show();
-                    $('#total').show();
-                }else{
-                    $('#get_grn').show();
-                    $('#rent').hide();
-                    $('#site_out_rate').hide();
-                    $('#site_cgst').hide();
-                    $('#site_sgst').hide();
-                    $('#site_igst').hide();
-                    $('#total').hide();
-                }
-
-                });*/
-
+            
             if(typeof ($("#assetType").val()) != 'undefined'){
                 var assetType = $("#assetType").val();
                 switch(assetType){
@@ -1427,9 +1402,7 @@
                                 $("#header").addClass("fixed");
                             }
                             return $.map(x, function (data) {
-                                console.log(data);
                                 return {
-                                    employee_id:data.employee_id,
                                     employee_name: data.employee_name
                                 };
                             });
@@ -1454,8 +1427,6 @@
                 }).on('typeahead:selected', function (obj, datum) {
                     var POData = $.parseJSON(JSON.stringify(datum));
                     $('.typeahead').typeahead('val',POData.employee_name);
-                    var employeeId = POData.employee_id;
-                    $("#employee_id").val(employeeId);
                 })
                     .on('typeahead:open', function (obj, datum) {
 
