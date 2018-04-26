@@ -774,7 +774,7 @@ class InventoryManageController extends Controller
                 $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
                 return redirect('/inventory/component/manage/'.$inventoryComponent->id);
             }else{
-                $data = $request->except(['_token','work_order_images','project_site_id','grn','employee_id']);
+                $data = $request->except(['_token','work_order_images','project_site_id','grn']);
                 $data['inventory_component_id'] = $inventoryComponent->id;
                 $data['user_id'] = $user['id'];
                 $data['in_time'] = $data['out_time'] = $data['date'] = Carbon::now();
@@ -803,7 +803,6 @@ class InventoryManageController extends Controller
                         $data['rate_per_unit'] = $request['rate_per_unit'];
                     }
                 }elseif($request->transfer_type =='user'){
-                    //$data['source_name'] = $data['source_name'].'('.$request['employee_id'].')';
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                     $data['rate_per_unit'] = $request['rent'];
                 }else{
