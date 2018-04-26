@@ -154,8 +154,11 @@
                                     Total
                                 </th>
                             @else
-                                <th style="width: 450px">
+                                <th style="width: 380px">
                                     Item Name - Description
+                                </th>
+                                <th style="width: 80px">
+                                    HSN code
                                 </th>
                                 <th>
                                     Quantity
@@ -224,6 +227,9 @@
                                 @else
                                     <td style="text-align: left;padding-left: 5px" >
                                         {{$vendorInfo['materials'][$iterator]['item_name']}}
+                                    </td>
+                                    <td>
+
                                     </td>
                                     <td>
                                         {{$vendorInfo['materials'][$iterator]['quantity']}}
@@ -329,6 +335,9 @@
                                     <td>
 
                                     </td>
+                                    <td>
+
+                                    </td>
                                 @endif
                             </tr>
                         @endfor
@@ -367,6 +376,9 @@
                             @else
                                 <td style="text-align: left;padding-left: 5px" >
                                     Total
+                                </td>
+                                <td>
+
                                 </td>
                                 <td>
                                     {{$totalQuantity}}
