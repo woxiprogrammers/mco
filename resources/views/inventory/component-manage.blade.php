@@ -314,7 +314,7 @@
                                                 </div>
                                                 <div id="labour_form" hidden>
                                                     <div class="form-group">
-                                                        <input type="text" name="source_name" id="sourceName" class="form-control" placeholder="Enter User's Name">
+                                                        <input type="text" name="source_name" id="sourceName" class="form-control typeahead" placeholder="Enter User's Name">
                                                     </div>
                                                     <div class="row form-group">
                                                         <div class="col-md-2">
@@ -1155,6 +1155,8 @@
     <script src="/assets/custom/inventory/component-manage-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/inventory/component-reading-manage-datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
+    <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script>
         $(document).ready(function(){
 
@@ -1192,31 +1194,7 @@
             $('#inOutCheckbox').on('switchChange.bootstrapSwitch', function(event, state) {
                 changeType();
             });
-
-
-
-
-            /*$("#transfer_type").on('change', function () {
-                if($("#inOutCheckbox").is(':checked') == false) {
-                    $('#get_grn').hide();
-                    $('#rent').show();
-                    $('#site_out_rate').show();
-                    $('#site_cgst').show();
-                    $('#site_sgst').show();
-                    $('#site_igst').show();
-                    $('#total').show();
-                }else{
-                    $('#get_grn').show();
-                    $('#rent').hide();
-                    $('#site_out_rate').hide();
-                    $('#site_cgst').hide();
-                    $('#site_sgst').hide();
-                    $('#site_igst').hide();
-                    $('#total').hide();
-                }
-
-                });*/
-
+            
             if(typeof ($("#assetType").val()) != 'undefined'){
                 var assetType = $("#assetType").val();
                 switch(assetType){
@@ -1244,6 +1222,8 @@
             }
 
         });
+
+
         function clientChange(element){
             var clientId = $(element).val();
             if(clientId == ""){
@@ -1412,6 +1392,45 @@
             if($(this).val() == 'user'){
                 $("#dynamicForm").html($('#labour_form').clone().show(500));
                 $("#inOutSubmit").show();
+                var citiList = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/inventory/transfer/employee-auto-suggest/%QUERY",
+                        filter: function(x) {
+                            if($(window).width()<420){
+                                $("#header").addClass("fixed");
+                            }
+                            return $.map(x, function (data) {
+                                return {
+                                    employee_name: data.employee_name
+                                };
+                            });
+                        },
+                        wildcard: "%QUERY"
+                    }
+                });
+                citiList.initialize();
+                $('#dynamicForm .typeahead').typeahead(null, {
+                    displayKey: 'name',
+                    engine: Handlebars,
+                    source: citiList.ttAdapter(),
+                    limit: 30,
+                    templates: {
+                        empty: [
+                            '<div class="empty-suggest">',
+                            'Unable to find any Result that match the current query',
+                            '</div>'
+                        ].join('\n'),
+                        suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{employee_name}}</strong></div>')
+                    },
+                }).on('typeahead:selected', function (obj, datum) {
+                    var POData = $.parseJSON(JSON.stringify(datum));
+                    $('.typeahead').typeahead('val',POData.employee_name);
+                })
+                    .on('typeahead:open', function (obj, datum) {
+
+                    });
             }else if($(this).val() == 'site'){
                     if($('#inOutCheckbox').is(':checked') == true){
                         $("#dynamicForm").html($('#site_in_form').clone().removeAttr('hidden').show(500));
