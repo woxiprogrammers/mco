@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Inventory;
 use App\Asset;
 use App\AssetType;
 use App\Client;
+use App\Employee;
+use App\EmployeeType;
 use App\FuelAssetReading;
 use App\GRNCount;
 use App\Helper\UnitHelper;
@@ -772,7 +774,7 @@ class InventoryManageController extends Controller
                 $request->session()->flash('success','Inventory Component Transfer Saved Successfully!!');
                 return redirect('/inventory/component/manage/'.$inventoryComponent->id);
             }else{
-                $data = $request->except(['_token','work_order_images','project_site_id','grn']);
+                $data = $request->except(['_token','work_order_images','project_site_id','grn','employee_id']);
                 $data['inventory_component_id'] = $inventoryComponent->id;
                 $data['user_id'] = $user['id'];
                 $data['in_time'] = $data['out_time'] = $data['date'] = Carbon::now();
@@ -801,6 +803,7 @@ class InventoryManageController extends Controller
                         $data['rate_per_unit'] = $request['rate_per_unit'];
                     }
                 }elseif($request->transfer_type =='user'){
+                    $data['source_name'] = $data['source_name'].'('.$request['employee_id'].')';
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                     $data['rate_per_unit'] = $request['rent'];
                 }else{
@@ -1008,6 +1011,28 @@ class InventoryManageController extends Controller
             $status = 500;
         }
         return response()->json($response,$status);
+    }
+
+    public function employeeAutoSuggest(Request $request,$keyword){
+        try{
+            $employeeDetails = Employee::where('employee_id','ilike','%'.$keyword.'%')->orWhere('name','ilike','%'.$keyword.'%')->whereIn('employee_type_id',EmployeeType::whereIn('slug',['labour','staff','partner'])->pluck('id'))->where('is_active',true)->get()->toArray();
+            $data = array();
+            $iterator = 0;
+            foreach($employeeDetails as $key => $employeeDetail){
+                $data[$iterator]['employee_id'] = $employeeDetail['id'];
+                $data[$iterator]['employee_name'] = $employeeDetail['name'];
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory Transfer Employee Auto-suggest',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
+        return response()->json($data,$status);
     }
 
     public function getInventoryComponentTransferPDF(Request $request,$inventoryComponentTransferID){

@@ -381,6 +381,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@getSiteTransferRequestListing'));
             Route::post('check-quantity',array('uses'=> 'Inventory\InventoryManageController@checkAvailableQuantity'));
             Route::get('auto-suggest/{type}/{keyword}',array('uses' => 'Inventory\InventoryManageController@autoSuggest'));
+            Route::get('employee-auto-suggest/{keyword}',array('uses' => 'Inventory\InventoryManageController@employeeAutoSuggest'));
             Route::post('change-status/{status}/{inventoryTransferId}',array('uses'=> 'Inventory\InventoryManageController@changeStatus'));
             Route::post('upload-pre-grn-images',array('uses'=> 'Inventory\InventoryManageController@preGrnImageUpload'));
             Route::group(['prefix' => 'billing'], function(){
