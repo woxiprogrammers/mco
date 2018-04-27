@@ -6,6 +6,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">

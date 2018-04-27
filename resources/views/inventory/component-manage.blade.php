@@ -290,27 +290,6 @@
                                                     <div class="form-group">
                                                         <input type="text" class="form-control" id="remark" name="remark" placeholder="Enter Remark">
                                                     </div>
-                                                    <div class="form-group">
-                                                        <div class="row">
-                                                            <div class="col-md-12 col-sm-12 custom-file-list"> </div>
-                                                        </div>
-                                                        <div class="col-md-offset-5 custom-file-container">
-                                                            <a href="javascript:;" class="btn green-meadow custom-file-browse">
-                                                                Browse</a>
-                                                            <a href="javascript:;" class="btn btn-primary custom-upload-file">
-                                                                <i class="fa fa-share"></i> Upload Files </a>
-                                                        </div>
-                                                        <table class="table table-bordered table-hover">
-                                                            <thead>
-                                                            <tr role="row" class="heading">
-                                                                <th> Image </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody id="show-product-images">
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
                                                 </div>
                                                 <div id="labour_form" hidden>
                                                     <div class="form-group">
@@ -370,6 +349,27 @@
                                                     <div class="form-group">
                                                         <textarea name="remark" class="form-control" id="remark" placeholder="Remark"></textarea>
                                                     </div>
+                                                    <div class="form-group">
+                                                        <div class="row">
+                                                            <div class="col-md-12 col-sm-12 custom-file-list"> </div>
+                                                        </div>
+                                                        <div class="col-md-offset-5 custom-file-container">
+                                                            <a href="javascript:;" class="btn green-meadow custom-file-browse">
+                                                                Browse</a>
+                                                            <a href="javascript:;" class="btn btn-primary custom-upload-file">
+                                                                <i class="fa fa-share"></i> Upload Files </a>
+                                                        </div>
+                                                        <table class="table table-bordered table-hover">
+                                                            <thead>
+                                                            <tr role="row" class="heading">
+                                                                <th> Image </th>
+                                                                <th> Action </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="show-product-images">
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                                 <div id="subcontractor_form" hidden>
                                                     <div class="form-group">
@@ -413,27 +413,6 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <textarea class="form-control" placeholder="Remark" name="remark" id="remark"></textarea>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="row">
-                                                            <div class="col-md-12 col-sm-12 custom-file-list"> </div>
-                                                        </div>
-                                                        <div class="col-md-offset-5 custom-file-container">
-                                                            <a href="javascript:;" class="btn green-meadow custom-file-browse">
-                                                                Browse</a>
-                                                            <a href="javascript:;" class="btn btn-primary custom-upload-file">
-                                                                <i class="fa fa-share"></i> Upload Files </a>
-                                                        </div>
-                                                        <table class="table table-bordered table-hover">
-                                                            <thead>
-                                                            <tr role="row" class="heading">
-                                                                <th> Image </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody id="show-product-images">
-                                                            </tbody>
-                                                        </table>
                                                     </div>
                                                 </div>
                                                 <div id="site_form" hidden>
@@ -1157,6 +1136,8 @@
     <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
+    <script src="/assets/custom/inventory/image-datatable.js"></script>
+    <script src="/assets/custom/inventory/image-upload.js"></script>
     <script>
         $(document).ready(function(){
 
@@ -1251,7 +1232,7 @@
                     }
                 });
             }
-        };
+        }
 
         function initializeDateTimePicker(){
             $("#readingFormModel form .date").each(function(){
@@ -1264,7 +1245,7 @@
         function projectChange(element){
             var projectId = $(element).val();
             getProjectSites(projectId);
-        };
+        }
 
         function getProjectSites(projectId){
             $.ajax({
@@ -1391,7 +1372,12 @@
         $('#transfer_type').change(function(){
             if($(this).val() == 'user'){
                 $("#dynamicForm").html($('#labour_form').clone().show(500));
+                $("#dynamicForm .custom-file-list").attr('id','tab_images_uploader_filelist');
+                $("#dynamicForm .custom-file-container").attr('id','tab_images_uploader_container');
+                $("#dynamicForm .custom-file-browse").attr('id','tab_images_uploader_pickfiles');
+                $("#dynamicForm .custom-upload-file").attr('id','tab_images_uploader_uploadfiles');
                 $("#inOutSubmit").show();
+                InventoryComponentImageUpload.init();
                 var citiList = new Bloodhound({
                     datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                     queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -1520,7 +1506,7 @@
                 $("#inOutSubmit").hide();
             }
             CreateInventoryComponentTransfer.init();
-        })
+        });
 
         function calculateTaxes(element){
             var rate = parseFloat($(element).closest('.modal-body').find('.tax-modal-rate').val());
