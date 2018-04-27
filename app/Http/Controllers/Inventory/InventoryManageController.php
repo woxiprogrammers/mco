@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Inventory;
 use App\Asset;
 use App\AssetType;
 use App\Client;
+use App\Employee;
+use App\EmployeeType;
 use App\FuelAssetReading;
 use App\GRNCount;
 use App\Helper\UnitHelper;
@@ -1008,6 +1010,28 @@ class InventoryManageController extends Controller
             $status = 500;
         }
         return response()->json($response,$status);
+    }
+
+    public function employeeAutoSuggest(Request $request,$keyword){
+        try{
+            $employeeDetails = Employee::where('employee_id','ilike','%'.$keyword.'%')->orWhere('name','ilike','%'.$keyword.'%')->whereIn('employee_type_id',EmployeeType::whereIn('slug',['labour','staff','partner'])->pluck('id'))->where('is_active',true)->get()->toArray();
+            $data = array();
+            $iterator = 0;
+            foreach($employeeDetails as $key => $employeeDetail){
+                $data[$iterator]['employee_id'] = $employeeDetail['id'];
+                $data[$iterator]['employee_name'] = $employeeDetail['name'] .' - '. $employeeDetail['employee_id'];
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Inventory Transfer Employee Auto-suggest',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
+        return response()->json($data,$status);
     }
 
     public function getInventoryComponentTransferPDF(Request $request,$inventoryComponentTransferID){

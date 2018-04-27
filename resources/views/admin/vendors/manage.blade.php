@@ -52,9 +52,7 @@
                                                     <tr>
                                                         <th style="width: 30%"> Comapny </th>
                                                         <th > Name </th>
-
                                                         <th> Mobile Number </th>
-
                                                         <th> Status </th>
                                                         <th> Actions </th>
                                                     </tr>
