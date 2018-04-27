@@ -8,6 +8,9 @@ var  AddPayment = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
+                bank_id: {
+                    required: true
+                },
                 amount: {
                     required: true
                 },

@@ -1435,7 +1435,6 @@
                     if($('#inOutCheckbox').is(':checked') == true){
                         $("#dynamicForm").html($('#site_in_form').clone().removeAttr('hidden').show(500));
                         $("#imageupload").on('change',function () {
-                            console.log('inside here');
                             var countFiles = $(this)[0].files.length;
                             var imgPath = $(this)[0].value;
                             var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
@@ -1461,9 +1460,7 @@
                             }
                         });
                         $("#grnImageUplaodButton a").on('click',function(){
-                            console.log('inside grn upload');
                             var imageArray = $("#transactionForm .grn-images").val();
-                            console.log(imageArray);
                             $.ajax({
                                 url: '/inventory/transfer/upload-pre-grn-images',
                                 type: 'POST',

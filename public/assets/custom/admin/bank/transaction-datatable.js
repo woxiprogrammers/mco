@@ -1,9 +1,9 @@
-var BillHoldReconcileListing = function () {
+var BankTransactionListing = function () {
     var handleOrders = function () {
         var grid = new Datatable();
-        var billId = $("#subcontractorBillId").val();
+        var bank_id = $("#bank_id").val();
         grid.init({
-            src: $("#holdReconcileTable"),
+            src: $("#bankTransactionTable"),
             onSuccess: function (grid) {
                 // execute some code after table records loaded
             },
@@ -23,10 +23,10 @@ var BillHoldReconcileListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/subcontractor/subcontractor-bills/reconcile/hold-listing", // ajax source
+                    "url": "/bank/transaction/listing", // ajax source
                     "data" :{
                         '_token' : $("input[name='_token']").val(),
-                        'bill_id' : billId
+                        'bank_id' : bank_id
                     }
                 },
                 "order": [
@@ -75,59 +75,6 @@ var BillHoldReconcileListing = function () {
 }();
 
 jQuery(document).ready(function() {
-    BillHoldReconcileListing.init();
+    BankTransactionListing.init();
 });
-
-var  CreatePayment = function () {
-    var handleCreate = function() {
-        var form = $('#add_payment_form');
-        var error = $('.alert-danger', form);
-        var success = $('.alert-success', form);
-        form.validate({
-            errorElement: 'span', //default input error message container
-            errorClass: 'help-block', // default input error message class
-            focusInvalid: false, // do not focus the last invalid input
-            rules: {
-                bank_id: {
-                    required: true
-                },
-                amount: {
-                    required: true
-                }
-            },
-            messages: {
-                bank_id: {
-                    required: "Please select Bank."
-                }
-            },
-            invalidHandler: function (event, validator) { //display error alert on form submit
-                success.hide();
-                error.show();
-            },
-            highlight: function (element) { // hightlight error inputs
-                $(element)
-                    .closest('.form-group').addClass('has-error'); // set error class to the control group
-            },
-            unhighlight: function (element) { // revert the change done by hightlight
-                $(element)
-                    .closest('.form-group').removeClass('has-error'); // set error class to the control group
-            },
-            success: function (label) {
-                label
-                    .closest('.form-group').addClass('has-success');
-            },
-            submitHandler: function (form) {
-                $("button[type='submit']").prop('disabled', true);
-                success.show();
-                error.hide();
-                form.submit();
-            }
-        });
-    }
-    return {
-        init: function () {
-            handleCreate();
-        }
-    };
-}();
 
