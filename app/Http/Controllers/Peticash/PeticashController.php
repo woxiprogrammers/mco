@@ -1104,7 +1104,7 @@ class PeticashController extends Controller
             $data['admin_remark'] = ($salaryTransactionData->admin_remark == null) ? '' : $salaryTransactionData->admin_remark;
             $data['peticash_transaction_type'] = $salaryTransactionData->peticashTransactionType->name;
             $data['peticash_status_name'] = $salaryTransactionData->peticashStatus->name;
-            $data['payment_type'] = $salaryTransactionData->paymentType->name;
+            $data['payment_type'] = ($salaryTransactionData['payment_type_id'] != null) ? $salaryTransactionData->paymentType->name : '';
             $transactionImages = PeticashSalaryTransactionImages::where('peticash_salary_transaction_id',$request['txn_id'])->get();
             if(count($transactionImages) > 0){
                 $data['list_of_images'] = $this->getUploadedImages($transactionImages,$request['txn_id']);
@@ -1745,31 +1745,45 @@ class PeticashController extends Controller
 
     public function createSalaryCreate(Request $request){
         try{
-            dd($request->all());
             $projectSiteId = Session::get('global_project_site');
             $user = Auth::user();
-            $salaryData = $request->only('employee_id','amount','date','payable_amount','pf','pt','esic','tds');
+            $validationAmount = ($request['transaction_type'] == 'salary') ? $request['payable_amount'] : $request['amount'];
+            $bank = BankInfo::where('id',$request['bank_id'])->first();
+            $peticashApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->pluck('salary_amount_approved')->first();
+            $approvedAmount = (count($peticashApprovedAmount) > 0 && $peticashApprovedAmount != null) ? $peticashApprovedAmount : 0;
+            if($validationAmount > $bank['balance_amount']){
+                    $request->session()->flash('error', 'Bank Balance Amount is insufficient for this transaction');
+                    return redirect('peticash/peticash-management/salary/manage');
+            }elseif($validationAmount > $approvedAmount){
+                    $request->session()->flash('error', 'Approved Amount is insufficient for this transaction');
+                    return redirect('peticash/peticash-management/salary/manage');
+            }
+            $salaryData = $request->only('employee_id','amount','date','payable_amount','pf','pt','esic','tds','remark');
             $salaryData['reference_user_id'] = $user['id'];
             $salaryData['project_site_id'] = $projectSiteId;
             $salaryData['peticash_transaction_type_id'] = PeticashTransactionType::where('slug','ilike',$request['transaction_type'])->pluck('id')->first();
             $salaryData['days'] = $request['working_days'];
+            $salaryData['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
+            $salaryData['created_at'] = $salaryData['updated_at'] = Carbon::now();
             if($request['paid_from'] == 'bank'){
                 $salaryData['payment_type_id'] = $request['payment_id'];
                 $salaryData['bank_id'] = $request['bank_id'];
+                $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
+                $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                $bankData['total_amount'] = $bank['total_amount'] - $request['amount'];
+                $bank->update($bankData);
+            }else{
+                $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
             }
-            $salaryData['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
-            $salaryData['created_at'] = $salaryData['updated_at'] = Carbon::now();
-            $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
-            $salaryTransactionId = $salaryTransaction['id'];
             $peticashSiteApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->first();
             $updatedPeticashSiteApprovedAmount = $peticashSiteApprovedAmount['salary_amount_approved'] - $request['amount'];
             $peticashSiteApprovedAmount->update(['salary_amount_approved' => $updatedPeticashSiteApprovedAmount]);
             $officeSiteId = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
-            if($request['project_site_id'] == $officeSiteId){
+            if($projectSiteId == $officeSiteId){
                 $activeProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                     ->where('projects.is_active',true)
                     ->where('project_sites.id','!=',$officeSiteId)->get();
-                if($request['type'] == 'advance'){
+                if($request['transaction_type'] == 'advance'){
                     $distributedSiteWiseAmount =  $salaryTransaction['amount'] / count($activeProjectSites);
                 }else{
                     $distributedSiteWiseAmount = ($salaryTransaction['payable_amount'] + $salaryTransaction['pf'] + $salaryTransaction['pt'] + $salaryTransaction['tds'] + $salaryTransaction['esic']) / count($activeProjectSites) ;
@@ -1781,29 +1795,11 @@ class PeticashController extends Controller
                     ]);
                 }
             }
-
-            if(array_has($request,'images')){
-                $user = Auth::user();
-                $sha1UserId = sha1($user['id']);
-                $sha1SalaryTransactionId = sha1($salaryTransactionId);
-                foreach($request['images'] as $key1 => $imageName){
-                    $tempUploadFile = env('WEB_PUBLIC_PATH').env('PETICASH_SALARY_TRANSACTION_TEMP_IMAGE_UPLOAD').$sha1UserId.DIRECTORY_SEPARATOR.$imageName;
-                    if(File::exists($tempUploadFile)){
-                        $imageUploadNewPath = env('WEB_PUBLIC_PATH').env('PETICASH_SALARY_TRANSACTION_IMAGE_UPLOAD').$sha1SalaryTransactionId;
-                        if(!file_exists($imageUploadNewPath)) {
-                            File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
-                        }
-                        $imageUploadNewPath .= DIRECTORY_SEPARATOR.$imageName;
-                        File::move($tempUploadFile,$imageUploadNewPath);
-                        PeticashSalaryTransactionImages::create(['name' => $imageName,'peticash_salary_transaction_id' => $salaryTransactionId]);
-                    }
-                }
-            }
-            $status = 200;
-            $message = "Salary transaction created successfully";
+            $request->session()->flash('success', 'Salary transaction created successfully');
+            return redirect('peticash/peticash-management/salary/manage');
         }catch(\Exception $e){
             $data = [
-                'action' => 'Create Salary Request',
+                'action' => 'Create Salary',
                 'exception' => $e->getMessage(),
                 'request' => $request->all()
             ];
