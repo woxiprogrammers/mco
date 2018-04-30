@@ -240,14 +240,16 @@
                                         @endif
                                     </ul>
                                 </li>
-
-                                <li  aria-haspopup="true">
-                                    <a href="/bank/manage">
-                                        <i class="fa fa-building"></i> Manage Bank
-                                    </a>
-                                </li>
-                                </ul>
-                            </li>
+                                <?php $hasManageBankPermission = \App\Helper\ACLHelper::checkModuleAcl('manage-bank'); ?>
+                                @if($hasManageBankPermission)
+                                    <li  aria-haspopup="true">
+                                        <a href="/bank/manage">
+                                            <i class="fa fa-building"></i> Manage Bank
+                                        </a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </li>
                     @endif
 
                     <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
