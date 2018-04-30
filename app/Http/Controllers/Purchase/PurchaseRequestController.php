@@ -106,7 +106,7 @@ class PurchaseRequestController extends Controller
                 $materialRequestComponentIds = PurchaseRequestComponent::where('purchase_request_id',$id)->pluck('material_request_component_id');
                 $materialRequestComponentDetails = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','asc')->get();
                 $materialRequestComponentID = MaterialRequestComponentTypes::where('slug','quotation-material')->pluck('id')->first();
-                $allVendors = Vendor::where('is_active','true')->select('id','company')->get()->toArray();
+                $allVendors = Vendor::where('is_active','true')->orderBy('company','asc')->select('id','company')->get()->toArray();
                 $iterator = 0;
                 $assignedVendorData = array();
                 foreach($materialRequestComponentDetails as $key => $materialRequestComponent){
@@ -123,7 +123,7 @@ class PurchaseRequestController extends Controller
                         $material_id = Material::where('name','ilike',$materialRequestComponent->name)->pluck('id')->first();
                         $vendorAssignedIds = VendorMaterialRelation::where('material_id',$material_id)->pluck('vendor_id');
                         if(count($vendorAssignedIds) > 0){
-                            $materialRequestComponentDetails[$iterator]['vendors'] = Vendor::whereIn('id',$vendorAssignedIds)->select('id','company')->get()->toArray();
+                            $materialRequestComponentDetails[$iterator]['vendors'] = Vendor::whereIn('id',$vendorAssignedIds)->orderBy('company','asc')->select('id','company')->get()->toArray();
                         }else{
                             $materialRequestComponentDetails[$iterator]['vendors'] = $allVendors;
                         }
