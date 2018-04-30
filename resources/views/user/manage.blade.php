@@ -51,6 +51,7 @@
                                                     <th style="width:30%"> Name </th>
                                                     <th> Email </th>
                                                     <th> Contact Number </th>
+                                                    <th> Role </th>
                                                     <th> Status </th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>
