@@ -66,6 +66,7 @@ class BankController extends Controller
 
     public function bankListing(Request $request){
         try{
+            $user = Auth::user();
             if($request->has('search_name')){
                 $bankData = BankInfo::where('bank_name','ilike','%'.$request->search_name.'%')->orderBy('bank_name','asc')->get()->toArray();
             }else{
@@ -83,27 +84,43 @@ class BankController extends Controller
                     $bank_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
                 }
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-bank')){
+                    $actionButton =  '<div class="btn-group">
+                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+                                            <li>
+                                                <a href="/bank/edit/'.$bankData[$pagination]['id'].'">
+                                                <i class="icon-docs"></i> Edit </a>
+                                            </li>
+                                            <li>
+                                                <a href="/bank/change-status/'.$bankData[$pagination]['id'].'">
+                                                    <i class="icon-tag"></i> '.$status.' </a>
+                                            </li>
+                                        </ul>
+                                    </div>';
+                }else{
+                    $actionButton =  '<div class="btn-group">
+                                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                            <i class="fa fa-angle-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-left" role="menu">
+                                            <li>
+                                                <a href="/bank/edit/'.$bankData[$pagination]['id'].'">
+                                                <i class="icon-docs"></i> Edit </a>
+                                            </li>
+                                        </ul>
+                                    </div>';
+                }
 
                     $records['data'][$iterator] = [
                         $bankData[$pagination]['bank_name'],
                         $bankData[$pagination]['account_number'],
                         $bank_status,
-                        '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                            <ul class="dropdown-menu pull-left" role="menu">
-                                <li>
-                                    <a href="/bank/edit/'.$bankData[$pagination]['id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                                </li>
-                                <li>
-                                    <a href="/bank/change-status/'.$bankData[$pagination]['id'].'">
-                                        <i class="icon-tag"></i> '.$status.' </a>
-                                </li>
-                            </ul>
-                        </div>'
+                        $actionButton
                     ];
 
             }

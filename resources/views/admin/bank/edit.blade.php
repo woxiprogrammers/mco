@@ -147,6 +147,13 @@
                                                         </table>
                                                     </div>
                                                 </div>
+                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-manage-bank'))
+                                                    <div class="form-actions noborder row">
+                                                        <div class="col-md-offset-3" style="margin-left: 26%">
+                                                            <button type="submit" class="btn red" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                        </div>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

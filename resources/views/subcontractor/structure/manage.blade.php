@@ -38,6 +38,7 @@
                                 <div class="col-md-12">
                                     <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                     <div class="portlet light ">
+                                        <span style="color: red">(Note : All Sites data displayed)</span>
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
                                             <div class="row">

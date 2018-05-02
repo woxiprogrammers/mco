@@ -40,12 +40,14 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+
                                 <div class="row">
                                     <div class="col-md-12">
+
                                         <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                         <div class="portlet light ">
+                                            <span style="color: red">(Note : All Sites data displayed)</span>
                                             {!! csrf_field() !!}
-                                            <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
                                                         <table class="table table-striped table-bordered table-hover order-column" id="assetMaintenanceBillTable">
@@ -88,7 +90,6 @@
                                                     </div>
                                                     </form>
                                                 </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>

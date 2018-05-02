@@ -245,7 +245,7 @@ class UserController extends Controller
                             ->join('roles','roles.id','=','user_has_roles.role_id')
                             ->whereNotIn('roles.slug',['admin','superadmin'])
                             ->orderBy('users.id','asc')
-                            ->select('users.id as id','users.first_name as first_name','users.last_name as last_name','users.email as email','users.mobile as mobile','users.created_at as created_at','users.is_active as is_active')
+                            ->select('users.id as id','users.first_name as first_name','users.last_name as last_name','users.email as email','users.mobile as mobile','users.created_at as created_at','users.is_active as is_active','roles.name as role_name')
                             ->get();
 
             $iTotalRecords = count($userData);
@@ -304,6 +304,7 @@ class UserController extends Controller
                     $userData[$pagination]['first_name'].' '.$userData[$pagination]['last_name'] ,
                     $userData[$pagination]['email'],
                     $userData[$pagination]['mobile'],
+                    $userData[$pagination]['role_name'],
                     $user_status,
                     date('d M Y',strtotime($userData[$pagination]['created_at'])),
                     $actionButton

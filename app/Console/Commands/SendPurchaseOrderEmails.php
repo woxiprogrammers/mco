@@ -195,7 +195,7 @@ class SendPurchaseOrderEmails extends Command
                     PurchaseRequestComponentVendorMailInfo::insert($mailInfoData);
                     unlink($pdfUploadPath);
                 }
-                if(count($disapprovedVendorId) > 0){
+                /*if(count($disapprovedVendorId) > 0){
                     $disapprovedVendorId = array_unique($disapprovedVendorId);
                     $purchaseRequestFormatId = $purchaseOrder->purchaseRequest->format_id;
                     foreach($disapprovedVendorId as $vendorId){
@@ -213,7 +213,7 @@ class SendPurchaseOrderEmails extends Command
                         });
                         PurchaseRequestComponentVendorMailInfo::create($mailInfoData);
                     }
-                }
+                }*/
             }
 
         }catch(\Exception $e){
