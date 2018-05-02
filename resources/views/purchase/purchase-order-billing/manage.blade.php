@@ -51,8 +51,8 @@
                                     <div class="col-md-12">
                                         <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                         <div class="portlet light ">
+                                            <span style="color: red">(Note : All Sites data displayed)</span>
                                             {!! csrf_field() !!}
-                                            <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
                                                         <div class="row">
@@ -95,9 +95,9 @@
                                                                     <th style="width: 11%">Action</th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th style="width: 11%"></th>
-                                                                    <th style="width: 11%"></th>
-                                                                    <th style="width: 11%"> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                    <th style="width: 11%"><input style="width: 90%; margin-left: 5%" type="text" name="project_name" id="project_name" class="form-control form-filter search_filter"></th>
+                                                                    <th style="width: 11%"><input style="width: 90%; margin-left: 5%" type="text" name="system_bill_number" id="system_bill_number" class="form-control form-filter search_filter"></th>
+                                                                    <th style="width: 11%"> <input type="hidden" class="form-control form-filter search_filter" name="postdata" id="postdata"></th>
                                                                     <th style="width: 11%">
                                                                         <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" data-date-end-date="+0d">
                                                                             <input type="text" class="form-control form-filter" name="bill_date" style="font-size: 9px" readonly>
@@ -108,8 +108,8 @@
                                                                             </span>
                                                                         </div>
                                                                     </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" id="vendor_name" class="form-control form-filter"> </th>
+                                                                    <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="bill_number" id="bill_number" class="form-control form-filter search_filter"> </th>
+                                                                    <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" id="vendor_name" class="form-control form-filter search_filter"> </th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
@@ -139,7 +139,6 @@
                                                     </div>
                                                     </form>
                                                 </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -312,6 +312,33 @@ class PurchaseOrderBillingController extends Controller
                     $filterFlag = false;
                 }
             }
+            if($request->has('project_name') && $request->project_name != '' && $filterFlag == true){
+                $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->join('project_sites','purchase_requests.project_site_id','=','project_sites.id')
+                    ->join('projects','project_sites.project_id','=','projects.id')
+                    ->where('projects.name','ilike','%'.$request->project_name.'%')
+                    ->pluck('purchase_order_bills.id')->toArray();
+                if(count($purchaseOrderBillIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            if($request->has('system_bill_number') && $request->system_bill_number != '' && $filterFlag == true){
+                $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->where('purchase_order_bills.bill_number','ilike','%'.$request->system_bill_number.'%')
+                    ->pluck('purchase_order_bills.id')->toArray();
+                if(count($purchaseOrderBillIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            if($request->has('bill_number') && $request->bill_number != '' && $filterFlag == true){
+                $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->where('purchase_order_bills.vendor_bill_number','ilike','%'.$request->bill_number.'%')
+                    ->pluck('purchase_order_bills.id')->toArray();
+                if(count($purchaseOrderBillIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
             if($request->has('vendor_name') && $request->vendor_name != '' && $filterFlag == true){
                 $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                                             ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
