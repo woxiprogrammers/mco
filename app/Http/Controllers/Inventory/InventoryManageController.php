@@ -804,7 +804,7 @@ class InventoryManageController extends Controller
                     }
                 }elseif($request->transfer_type =='user'){
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
-                    $data['rate_per_unit'] = $request['rent'];
+                   // $data['rate_per_unit'] = $request['rent'];
                 }else{
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                 }
