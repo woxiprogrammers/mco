@@ -218,6 +218,29 @@
                                                                             </label>
                                                                         </div>
                                                                     </div>--}}
+                                                                    <div class="form-group row" id="bankSelect">
+                                                                        <div class="col-md-4">
+                                                                            <label class="pull-right control-label">
+                                                                                Bank :
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                                                                                <option value="">Select Bank</option>
+                                                                                @foreach($banks as $bank)
+                                                                                    <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                    <input type="hidden" id="allowedAmount">
+
+                                                                    @foreach($banks as $bank)
+                                                                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                                                                    @endforeach
+
                                                                     <div class="form-group row">
                                                                         <div class="col-md-4">
                                                                             <label class="pull-right control-label">
@@ -225,7 +248,7 @@
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount">
+                                                                            <input type="text" class="form-control" id="amount" name="amount" placeholder="Enter Amount">
                                                                         </div>
                                                                     </div>
 
@@ -293,6 +316,22 @@
         $(document).ready(function(){
             CreateAssetMaintenanceBillPayment.init();
         });
+        function checkAmount(){
+            console.log('inside funcvtion');
+            var selectedBankId = $('#bank_id').val();
+            if(selectedBankId == ''){
+                alert('Please select Bank');
+            }else{
+                var amount = parseFloat($('#amount').val());
+                if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+                    amount = 0;
+                }
+                var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                $("input[name='amount']").rules('add',{
+                    max: allowedAmount
+                });
+            }
+        }
     </script>
 @endsection
 

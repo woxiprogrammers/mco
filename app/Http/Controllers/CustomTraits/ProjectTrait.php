@@ -8,6 +8,7 @@
 namespace App\Http\Controllers\CustomTraits;
 
 
+use App\BankInfo;
 use App\Client;
 use App\HsnCode;
 use App\PaymentType;
@@ -239,7 +240,8 @@ trait ProjectTrait{
                 $iterator++;
             }
             $paymentTypes = PaymentType::orderBy('id')->get();
-            return view('admin.project.edit')->with(compact('projectData','hsnCodes','cityArray','paymentTypes'));
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            return view('admin.project.edit')->with(compact('projectData','hsnCodes','cityArray','paymentTypes','banks'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'change Project status',
@@ -277,9 +279,10 @@ trait ProjectTrait{
 
     public function addAdvancePayment(Request $request){
         try{
+            $projectSite = ProjectSite::findOrFail($request['project_site_id']);
+            $bank = BankInfo::where('id',$request['bank_id'])->first();
             $advancePaymentData = $request->except('_token');
             $advancePayment = ProjectSiteAdvancePayment::create($advancePaymentData);
-            $projectSite = ProjectSite::findOrFail($request['project_site_id']);
             if($projectSite->advanced_amount == null){
                 $advanceAmount = $request['amount'];
             }else{
@@ -294,8 +297,13 @@ trait ProjectTrait{
                 'advanced_balance' => $advanceBalance,
                 'advanced_amount' => $advanceAmount
             ]);
+            $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+            $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+            $bank->update($bankData);
             $request->session()->flash('success','Advance Payment Added Successfully.');
+
             return redirect('/project/edit/'.$projectSite->project_id);
+
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add project site advance payment',
@@ -395,4 +403,6 @@ trait ProjectTrait{
         }
         return response()->json($records, $status);
     }
+
+
 }

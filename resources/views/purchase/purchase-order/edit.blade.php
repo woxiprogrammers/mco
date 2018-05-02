@@ -199,6 +199,7 @@
                                                                     <input type="text" class="form-control" value="{{$purchaseOrderList['balance_advance_amount']}}" readonly>
                                                                 </div>
                                                             </div>
+
                                                             <div class="btn-group pull-right margin-top-15">
                                                                 <a id="sample_editable_1_new" class="btn yellow" href="#paymentModal" data-toggle="modal" >
                                                                     <i class="fa fa-plus"></i>  &nbsp; Advance Payment
@@ -257,6 +258,21 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal-body" style="padding:40px 50px;">
+                                                        <div class="form-group row" id="bankSelect">
+                                                            <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                                                                <option value="">Select Bank</option>
+                                                                @foreach($banks as $bank)
+                                                                    <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        <input type="hidden" id="allowedAmount">
+
+                                                        @foreach($banks as $bank)
+                                                            <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                                                        @endforeach
+
                                                         <div class="form-group row">
                                                             <select class="form-control" name="payment_id">
                                                                 @foreach($transaction_types as $type)
@@ -265,7 +281,7 @@
                                                             </select>
                                                         </div>
                                                         <div class="form-group row">
-                                                            <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount">
+                                                            <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount" onkeyup="checkAmount()">
                                                         </div>
                                                         <div class="form-group row">
                                                             <input type="number" class="form-control"  name="reference_number" placeholder="Enter Reference Number" >
@@ -625,6 +641,22 @@
             }else{
                 $("#ImageUpload .modal-body .quantity").closest('.form-group').addClass('has-error').removeClass('has-success');
                 alert('Please Enter digit only.');
+            }
+        }
+
+        function checkAmount(){
+            var selectedBankId = $('#bank_id').val();
+            if(selectedBankId == ''){
+                alert('Please select Bank');
+            }else{
+                var amount = parseFloat($('#amount').val());
+                if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+                    amount = 0;
+                }
+                var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                $("input[name='amount']").rules('add',{
+                    max: allowedAmount
+                });
             }
         }
     </script>

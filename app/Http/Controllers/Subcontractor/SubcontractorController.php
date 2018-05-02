@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Subcontractor;
 
+use App\BankInfo;
 use App\DprMainCategory;
 use App\Employee;
 use App\PaymentType;
@@ -735,7 +736,8 @@ class SubcontractorController extends Controller
             $remainingRetentionAmount = $reconciledRetentionAmount - $totalBillRetentionAmount;
             $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBill->id)->sum('total');
             $pendingAmount = $finalTotal - $paidAmount;
-            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount'));
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Bill View',
@@ -915,18 +917,29 @@ class SubcontractorController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            $subcontractorBillTransactionData = $request->except('_token','remainingTotal');
+            $subcontractorBillTransactionData = $request->except('_token','remainingTotal','bank_id','payment_id');
             if($request->has('is_advance')){
                 $subcontractorBillTransactionData['is_advance'] = true;
-            }else{
-                $subcontractorBillTransactionData['is_advance'] = false;
-            }
-            $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
-            if($subcontractorBillTransaction->is_advance == true){
+                $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
                 $subcontractor = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->subcontractor;
                 $balanceAdvanceAmount = $subcontractor->balance_advance_amount;
                 $subcontractor->update(['balance_advance_amount' => $balanceAdvanceAmount - $subcontractorBillTransaction->total]);
+            }else{
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['total'] <= $bank['balance_amount']){
+                    $subcontractorBillTransactionData['is_advance'] = false;
+                    $subcontractorBillTransactionData['bank_id'] = $request['bank_id'];
+                    $subcontractorBillTransactionData['payment_type_id'] = $request['payment_id'];
+                    $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $subcontractorBillTransaction['total'];
+                    $bankData['total_amount'] = $bank['total_amount'] - $subcontractorBillTransaction['total'];
+                    $bank->update($bankData);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/subcontractor/subcontractor-bills/view/'.$request['subcontractor_bills_id']);
+                }
             }
+
             if($subcontractorBillTransaction != null){
                 $request->session()->flash('success','Transaction created successfully');
             }else{
@@ -984,8 +997,17 @@ class SubcontractorController extends Controller
     public function addReconcileTransaction(Request $request){
         try{
             $reconcileTransactionData = $request->except('_token');
-            $billReconcileTransaction = SubcontractorBillReconcileTransaction::create($reconcileTransactionData);
-            $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
+            $bank = BankInfo::where('id',$request['bank_id'])->first();
+            if($request['amount'] <= $bank['balance_amount']){
+                $billReconcileTransaction = SubcontractorBillReconcileTransaction::create($reconcileTransactionData);
+                $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
+                $bankData['balance_amount'] = $bank['balance_amount'] - $billReconcileTransaction['amount'];
+                $bankData['total_amount'] = $bank['total_amount'] - $billReconcileTransaction['amount'];
+                $bank->update($bankData);
+            }else{
+                $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+            }
+
             return redirect('/subcontractor/subcontractor-bills/view/'.$request->subcontractor_bill_id);
         }catch(\Exception $e){
             $data = [

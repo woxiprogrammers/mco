@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\BankInfo;
+use App\BankInfoTransaction;
+use App\PaymentType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BankRequest;
@@ -141,7 +143,9 @@ class BankController extends Controller
     public function getEditView(Request $request,$bank){
         try{
             $bank = $bank->toArray();
-            return view('admin.bank.edit')->with(compact('bank'));
+            $paymentModes = PaymentType::get();
+            $bankTransactions = BankInfoTransaction::where('bank_id',$bank['id'])->orderBy('created_at','desc')->get();
+            return view('admin.bank.edit')->with(compact('bank','paymentModes','bankTransactions'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get bank edit view",
@@ -192,4 +196,63 @@ class BankController extends Controller
         }
     }
 
+    public function createTransaction(Request $request,$bank){
+        try{
+            $user = Auth::user();
+            $bankTransactionData = $request->except('_token');
+            $bankTransactionData['bank_id'] = $bank['id'];
+            $bankTransactionData['user_id'] = $user['id'];
+            BankInfoTransaction::create($bankTransactionData);
+            $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+            $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+            $bank->update($bankData);
+            $request->session()->flash('success','Transaction created successfully');
+            return redirect('/bank/edit/'.$bank['id']);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'create bank transaction',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+        }
+        Log::critical(json_encode($data));
+        abort(500);
+    }
+
+    public function getBankTransactionListing(Request $request){
+        try{
+            $status = 200;
+            $bankTransactions = BankInfoTransaction::where('bank_id',$request['bank_id'])->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($bankTransactions);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($bankTransactions); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    date('d M Y',strtotime($bankTransactions[$pagination]['created_at'])),
+                    $bankTransactions[$pagination]->user->first_name,
+                    $bankTransactions[$pagination]['amount'],
+                    $bankTransactions[$pagination]->paymentType->name,
+                    $bankTransactions[$pagination]['reference_number']
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Bank Transaction Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 200;
+        }
+        return response()->json($records,$status);
+    }
 }
