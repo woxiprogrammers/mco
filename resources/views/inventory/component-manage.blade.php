@@ -327,7 +327,7 @@
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    @if($isReadingApplicable)
+                                                    {{--@if($isReadingApplicable)
                                                         <div class="row form-group" id="rent">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">Rent</label>
@@ -345,7 +345,7 @@
                                                                 <input type="text" name="rate" id="rate" class="form-control" placeholder="Enter Rate" value="{!! $amount['rate_per_unit'] !!}" hidden>
                                                             </div>
                                                         </div>
-                                                    @endif
+                                                    @endif--}}
                                                     <div class="form-group">
                                                         <textarea name="remark" class="form-control" id="remark" placeholder="Remark"></textarea>
                                                     </div>

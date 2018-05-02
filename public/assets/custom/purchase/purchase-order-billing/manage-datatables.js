@@ -28,6 +28,9 @@ var PurchaseOrderListing = function () {
                     };
 
                     var vendor_name = $('#vendor_name').val();
+                    var system_bill_number = $('#system_bill_number').val();
+                    var bill_number = $('#bill_number').val();
+                    var project_name = $('#project_name').val();
 
 
                     // Total over all pages
@@ -37,6 +40,10 @@ var PurchaseOrderListing = function () {
                         data :{
                             "get_total" : true,
                             "vendor_name" : vendor_name,
+                            "system_bill_number" : system_bill_number,
+                            "bill_number" : bill_number,
+                            "project_name" : project_name
+
                         },
                         success: function(result){
                             total = result['total'];
@@ -154,7 +161,7 @@ var PurchaseOrderListing = function () {
 }();
 jQuery(document).ready(function() {
     PurchaseOrderListing.init();
-    $("input[name='vendor_name']").on('keyup', function(){
+    $(".search_filter").on('keyup', function(){
         $(".filter-submit").trigger('click');
     });
 });
