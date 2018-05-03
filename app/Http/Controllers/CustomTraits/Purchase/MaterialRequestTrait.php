@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Log;
 trait MaterialRequestTrait{
     public function createMaterialRequest($data,$user,$is_purchase_request){
         try{
-            $quotationId = Quotation::where('project_site_id',$data['project_site_id'])->pluck('id')->first();
+	    $quotationId = Quotation::where('project_site_id',$data['project_site_id'])->pluck('id')->first();
             $materialRequestData = array();
             $materialRequestData['project_site_id'] = $data['project_site_id'];
             $materialRequestData['user_id'] = $user['id'];
@@ -65,7 +65,6 @@ trait MaterialRequestTrait{
                     $materialComponentHistoryData['component_status_id'] = $materialRequestComponentVersionData['component_status_id'] = $pendingStatusId;
                 }
                 $materialRequestComponentData['component_type_id'] = $itemData['component_type_id'];
-                $materialRequestComponentData['component_status_id'] = $pendingStatusId;
                 $materialRequestComponentData['created_at'] = Carbon::now();
                 $materialRequestComponentData['updated_at'] = Carbon::now();
                 $materialRequestComponentCount = MaterialRequestComponents::whereDate('created_at',$today)->count();
