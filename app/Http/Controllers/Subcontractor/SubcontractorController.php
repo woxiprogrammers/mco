@@ -931,8 +931,7 @@ class SubcontractorController extends Controller
                     $subcontractorBillTransactionData['bank_id'] = $request['bank_id'];
                     $subcontractorBillTransactionData['payment_type_id'] = $request['payment_id'];
                     $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
-                    $bankData['balance_amount'] = $bank['balance_amount'] - $subcontractorBillTransaction['total'];
-                    $bankData['total_amount'] = $bank['total_amount'] - $subcontractorBillTransaction['total'];
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $subcontractorBillTransaction['subtotal'];
                     $bank->update($bankData);
                 }else{
                     $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
@@ -1002,7 +1001,6 @@ class SubcontractorController extends Controller
                 $billReconcileTransaction = SubcontractorBillReconcileTransaction::create($reconcileTransactionData);
                 $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
                 $bankData['balance_amount'] = $bank['balance_amount'] - $billReconcileTransaction['amount'];
-                $bankData['total_amount'] = $bank['total_amount'] - $billReconcileTransaction['amount'];
                 $bank->update($bankData);
             }else{
                 $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');

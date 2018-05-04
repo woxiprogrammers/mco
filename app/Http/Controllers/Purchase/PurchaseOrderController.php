@@ -670,7 +670,6 @@ class PurchaseOrderController extends Controller
                     'balance_advance_amount' => $balanceAdvanceAmount
                 ]);
                 $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
-                $bankData['total_amount'] = $bank['total_amount'] - $request['amount'];
                 $bank->update($bankData);
                 $request->session()->flash('success','Advance Payment added successfully');
             }else{

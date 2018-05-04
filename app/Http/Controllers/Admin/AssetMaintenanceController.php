@@ -811,7 +811,6 @@ class AssetMaintenanceController extends Controller{
                 $assetMaintenancePayment = AssetMaintenanceBillPayment::create($assetMaintenancePaymentData);
                 $assetMaintenancePaymentAmount = AssetMaintenanceBillPayment::where('asset_maintenance_bill_id',$request['asset_maintenance_bill_id'])->sum('amount');
                 $bankData['balance_amount'] = $bank['balance_amount'] - $assetMaintenancePayment['amount'];
-                $bankData['total_amount'] = $bank['total_amount'] - $assetMaintenancePayment['amount'];
                 $bank->update($bankData);
                 $request->session()->flash('success','Asset Maintenance Bill Payment Created Successfully');
             }else{

@@ -541,7 +541,6 @@ class PurchaseOrderBillingController extends Controller
                     $purchaseOrderPaymentData['is_advance'] = false;
                     $purchaseOrderPaymentData['payment_id'] = $request->payment_id;
                     $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
-                    $bankData['total_amount'] = $bank['total_amount'] - $request['amount'];
                     $bank->update($bankData);
                 }else{
                     $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
