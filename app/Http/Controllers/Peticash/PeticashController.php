@@ -260,7 +260,25 @@ class PeticashController extends Controller
             $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
             $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
             $balance = $masteraccountAmount - $sitewiseaccountAmount;
-            return view('peticash.sitewise-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance'));
+
+            $projectSiteId = Session::get('global_project_site');
+            $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+            $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
+            $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
+                ->where('project_site_id',$projectSiteId)
+                ->where('peticash_status_id',$approvedPeticashStatusId)
+                ->sum('payable_amount');
+            $totalAdvanceAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id')->first())
+                ->where('project_site_id',$projectSiteId)
+                ->where('peticash_status_id',$approvedPeticashStatusId)
+                ->sum('amount');
+            $totalPurchaseAmount = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','PURCHASE')->pluck('id'))
+                ->where('project_site_id',$projectSiteId)
+                ->where('peticash_status_id',$approvedPeticashStatusId)
+                ->sum('bill_amount');
+            $remainingAmount = $allocatedAmount - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount);
+
+            return view('peticash.sitewise-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance','allocatedAmount','remainingAmount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Peticash Sitewise Manage view',
@@ -1497,7 +1515,13 @@ class PeticashController extends Controller
                         $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
                         date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
                         $purchaseTransactionData[$pagination]->projectSite->project->name,
-                        '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>'
+                        '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>',
+                        '<div class="bootstrap-switch-container" style="height: 30px;width: 200px; margin-left: 0px;">
+                                                            <span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 88px;">&nbsp;&nbsp;&nbsp;</span>
+                                                            <span class="bootstrap-switch-label" style="width: 88px;">&nbsp;</span>
+                                                            <span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 88px;">&nbsp;&nbsp;</span>
+                                                            <input type="checkbox" class="make-switch" id="inOutCheckbox" name="in_or_out" data-on-text="&nbsp;In&nbsp;&nbsp;" data-off-text="&nbsp;Out&nbsp;">
+                                                        </div>'
                     ];
                 }
                 $records["draw"] = intval($request->draw);

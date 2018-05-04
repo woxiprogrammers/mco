@@ -95,6 +95,7 @@
                                                                 <th> Project Name - Site Name </th>
                                                                 <th> Created At</th>
                                                                 <th> Status  </th>
+                                                                <th> Material Status  </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
@@ -111,6 +112,7 @@
                                                                     </select>
                                                                     <input type="hidden" class="form-control form-filter" name="status" id="status">
                                                                 </th>
+                                                                <th> </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>

@@ -10,6 +10,9 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/clockface/css/clockface.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -97,6 +100,7 @@
                                                                 <th> Date </th>
                                                                 <th> Site </th>
                                                                 <th> Action </th>
+                                                                <th> Voucher </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
@@ -112,6 +116,7 @@
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                 </th>
+                                                                <th></th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -313,6 +318,12 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/peticash/purchase-manage-datatable.js"></script>
+    <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
+    <link rel="stylesheet"  href="/assets/global/css/app.css"/>
+    <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/moment.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/clockface/js/clockface.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
             peticashManagementListing.init();
