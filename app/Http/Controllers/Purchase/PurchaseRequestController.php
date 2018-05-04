@@ -441,11 +441,11 @@ class PurchaseRequestController extends Controller
                 $purchaseRequestComponentIds = $purchaseRequests[$pagination]->purchaseRequestComponents->pluck('id')->toArray();
                 $vendorAssignedCount = PurchaseRequestComponentVendorRelation::whereIn('purchase_request_component_id',$purchaseRequestComponentIds)->count();
                 $purchaseOrderRequestCount = PurchaseOrderRequest::where('purchase_request_id',$purchaseRequests[$pagination]['id'])->count();
-                if(count($isPurchaseOrderCreated) > 0){
+                if($isPurchaseOrderCreated > 0){
                     $materialStatus = "<span class=\"btn btn-xs btn-warning\"> Purchase Order Created </span>";
-                }elseif(count($purchaseOrderRequestCount) > 0){
+                }elseif($purchaseOrderRequestCount > 0){
                     $materialStatus = "<span class=\"btn btn-xs btn-warning\"> Purchase Order Requested </span>";
-                }elseif(count($vendorAssignedCount) > 0){
+                }elseif($vendorAssignedCount > 0){
                     $materialStatus = "<span class=\"btn btn-xs btn-warning\"> Vendor Assigned </span>";
                 }else{
                     $materialStatus = "<span class=\"btn btn-xs btn-warning\"> Purchase Request Created </span>";

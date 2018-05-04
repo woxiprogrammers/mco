@@ -100,7 +100,6 @@
                                                                 <th> Date </th>
                                                                 <th> Site </th>
                                                                 <th> Action </th>
-                                                                <th> Voucher </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
@@ -116,7 +115,6 @@
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                 </th>
-                                                                <th></th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
