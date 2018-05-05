@@ -22,21 +22,18 @@
                             </div>
                             <div class="pull-right">
                                 <div class="form-group" style="text-align: center">
-                                    <div id="sample_editable_1_new" class="btn yellow" >
-                                        <a href="javascript:void(0);" class="btn yellow" id="statistics" >
-                                            Statistics
+                                    <a href="javascript:void(0);" class="btn yellow" id="statistics" >
+                                        Statistics
+                                    </a>
+                                    @if($user->hasPermissionTo('create-sitewise-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+                                        <a href="createpage" id="sample_editable_1_new" class="btn yellow" style="margin: 20px">
+                                            <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                            Create
                                         </a>
-
-                                        @if($user->hasPermissionTo('create-sitewise-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
-                                            <a href="createpage" id="sample_editable_1_new" class="btn yellow" style="margin: 20px">
-                                                <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
-                                                Create
-                                            </a>
-                                        @endif
-                                    </div>
+                                    @endif
                                 </div>
                             <!-- BEGIN PAGE TITLE -->
-                        </div>
+                            </div>
                     </div>
                     <div class="page-content">
                         <div class="container">
@@ -46,19 +43,6 @@
                                     <div class="portlet light ">
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
-                                            <div class="table-toolbar">
-                                                <div class="row" style="text-align: center">
-                                                    <div class="col-md-4" style="background-color: #c2c2c2">
-                                                        Total Peticash Amount : {{$masteraccountAmount}}
-                                                    </div>
-                                                    <div class="col-md-4" style="background-color: #e2e2e2">
-                                                        Allocated Peticash : {{$sitewiseaccountAmount}}
-                                                    </div>
-                                                    <div class="col-md-4" style="background-color: #c2c2c2">
-                                                        Balance : {{$balance}}
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="sitewisePeticashTable">
                                                 <thead>
                                                 <tr>
@@ -132,7 +116,7 @@
                                                     <div class="row">
                                                         <div class="col-md-5 col-md-offset-1">
                                                             <label class="control-label pull-right">
-                                                                Remaining Amount :
+                                                                Balance Amount :
                                                             </label>
                                                         </div>
                                                         <div class="col-md-6">
