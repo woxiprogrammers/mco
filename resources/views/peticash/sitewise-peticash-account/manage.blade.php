@@ -21,6 +21,7 @@
                                 <h1>Manage Sitewise Peticash Account</h1>
                             </div>
                             <div class="pull-right">
+
                                 <div class="form-group " style="text-align: center">
                                     <a href="javascript:void(0);" class="btn yellow" id="statistics" >
                                         Statistics
@@ -32,6 +33,7 @@
                                         </a>
                                     @endif
                                 </div>
+
                             </div>
                             <!-- BEGIN PAGE TITLE -->
                         </div>
@@ -44,19 +46,6 @@
                                     <div class="portlet light ">
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
-                                            <div class="table-toolbar">
-                                                <div class="row" style="text-align: center">
-                                                    <div class="col-md-4" style="background-color: #c2c2c2">
-                                                        Total Peticash Amount : {{$masteraccountAmount}}
-                                                    </div>
-                                                    <div class="col-md-4" style="background-color: #e2e2e2">
-                                                        Allocated Peticash : {{$sitewiseaccountAmount}}
-                                                    </div>
-                                                    <div class="col-md-4" style="background-color: #c2c2c2">
-                                                        Balance : {{$balance}}
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="sitewisePeticashTable">
                                                 <thead>
                                                 <tr>
@@ -100,6 +89,47 @@
                                                 </tr>
                                                 </tfoot>
                                             </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal fade" id="statisticsModel" role="dialog">
+                                        <div class="modal-dialog">
+                                        <!-- Modal content-->
+                                            <div class="modal-content">
+                                                <div class="modal-header" style="padding-bottom:10px">
+                                                    <div class="row">
+                                                        <div class="col-md-7 col-md-offset-2">
+                                                            Statistics
+                                                        </div>
+                                                        <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-md-5 col-md-offset-1">
+                                                            <label class="control-label pull-right">
+                                                                    Allocated Amount :
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                           <label class="control-label pull-left">
+                                                                   {{$allocatedAmount}}
+                                                               </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-5 col-md-offset-1">
+                                                            <label class="control-label pull-right">
+                                                                Balance Amount :
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="control-label pull-left">
+                                                                {{$remainingAmount}}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
