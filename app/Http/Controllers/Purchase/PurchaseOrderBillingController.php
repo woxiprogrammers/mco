@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Purchase;
 
+use App\BankInfo;
 use App\Client;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
@@ -469,8 +470,9 @@ class PurchaseOrderBillingController extends Controller
             }
             $paymentRemainingAmount = $purchaseOrderBill['amount'] - $purchaseOrderBill->purchaseOrderPayment->sum('amount');
             $paymentTillToday = $purchaseOrderBill->purchaseOrder->total_advance_amount + $purchaseOrderBill->purchaseOrderPayment->where('is_advance',false)->sum('amount');
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $paymentTypes = PaymentType::select('id','name')->get();
-            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday'));
+            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday','banks'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get PO billing get edit view',
@@ -521,7 +523,7 @@ class PurchaseOrderBillingController extends Controller
             $purchaseOrderPaymentData = $request->except('_token','is_advance','payment_id');
             if($request->has('is_advance')){
                 $purchaseOrderPaymentData['is_advance'] = true;
-                $purchaseOrderId =PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                $purchaseOrderId = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                                         ->where('purchase_order_bills.id', $request->purchase_order_bill_id)
                                         ->pluck('purchase_orders.id as id')
                                         ->first();
@@ -534,8 +536,16 @@ class PurchaseOrderBillingController extends Controller
                     return redirect('/purchase/purchase-order-bill/edit/'.$request->purchase_order_bill_id);
                 }
             }else{
-                $purchaseOrderPaymentData['is_advance'] = false;
-                $purchaseOrderPaymentData['payment_id'] = $request->payment_id;
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+                    $purchaseOrderPaymentData['is_advance'] = false;
+                    $purchaseOrderPaymentData['payment_id'] = $request->payment_id;
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/purchase/purchase-order-bill/edit/'.$request->purchase_order_bill_id);
+                }
             }
             $purchaseOrderPayment = PurchaseOrderPayment::create($purchaseOrderPaymentData);
             $request->session()->flash('success','Purchase Order Payment Created Successfully');

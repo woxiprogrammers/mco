@@ -8,7 +8,7 @@ class SubcontractorBillReconcileTransaction extends Model
 {
     protected $table = 'subcontractor_bill_reconcile_transactions';
 
-    protected $fillable = ['subcontractor_bill_id','payment_type_id','amount','transaction_slug','reference_number','remark'];
+    protected $fillable = ['subcontractor_bill_id','payment_type_id','amount','transaction_slug','reference_number','remark','bank_id'];
 
     public function subcontractorBill(){
         return $this->belongsTo('App\SubcontractorBill','subcontractor_bill_id');

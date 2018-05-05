@@ -8,7 +8,7 @@ class PurchaseOrderAdvancePayment extends Model
 {
     protected $table = 'purchase_order_advance_payments';
 
-    protected $fillable = ['purchase_order_id','payment_id','amount','reference_number'];
+    protected $fillable = ['purchase_order_id','payment_id','amount','reference_number','bank_id'];
 
     public function purchaseOrder(){
         return $this->belongsTo('App\PurchaseOrder','purchase_order_id');

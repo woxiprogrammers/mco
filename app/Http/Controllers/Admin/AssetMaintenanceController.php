@@ -19,6 +19,7 @@ use App\AssetMaintenanceTransaction;
 use App\AssetMaintenanceTransactionImages;
 use App\AssetMaintenanceTransactionStatuses;
 use App\AssetMaintenanceVendorRelation;
+use App\BankInfo;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\PaymentType;
@@ -787,8 +788,9 @@ class AssetMaintenanceController extends Controller{
             foreach($assetMaintenanceBillImages as $image){
                 $assetMaintenanceBillImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
             }
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $paymentTypes = PaymentType::select('id','name')->get();
-            return view('asset-maintenance.bill.view')->with(compact('assetMaintenanceBill','assetMaintenanceBillImagePaths','paymentTypes','grn','remainingAmountToPay','pendingAmount'));
+            return view('asset-maintenance.bill.view')->with(compact('assetMaintenanceBill','assetMaintenanceBillImagePaths','paymentTypes','grn','remainingAmountToPay','pendingAmount','banks'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Asset Maintenance billing view',
@@ -802,11 +804,19 @@ class AssetMaintenanceController extends Controller{
 
     public function createPayment(Request $request){
         try{
-            $assetMaintenancePaymentData = $request->only('asset_maintenance_bill_id','payment_id','amount','reference_number');
-            $assetMaintenancePaymentData['is_advance'] = false;
-            $assetMaintenancePayment = AssetMaintenanceBillPayment::create($assetMaintenancePaymentData);
-            $assetMaintenancePaymentAmount = AssetMaintenanceBillPayment::where('asset_maintenance_bill_id',$request['asset_maintenance_bill_id'])->sum('amount');
-            $request->session()->flash('success','Asset Maintenance Bill Payment Created Successfully');
+            $bank = BankInfo::where('id',$request['bank_id'])->first();
+            if($request['amount'] <= $bank['balance_amount']){
+                $assetMaintenancePaymentData = $request->only('asset_maintenance_bill_id','payment_id','amount','reference_number','bank_id');
+                $assetMaintenancePaymentData['is_advance'] = false;
+                $assetMaintenancePayment = AssetMaintenanceBillPayment::create($assetMaintenancePaymentData);
+                $assetMaintenancePaymentAmount = AssetMaintenanceBillPayment::where('asset_maintenance_bill_id',$request['asset_maintenance_bill_id'])->sum('amount');
+                $bankData['balance_amount'] = $bank['balance_amount'] - $assetMaintenancePayment['amount'];
+                $bank->update($bankData);
+                $request->session()->flash('success','Asset Maintenance Bill Payment Created Successfully');
+            }else{
+                $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+            }
+
             return redirect('/asset/maintenance/request/bill/view/'.$request->asset_maintenance_bill_id);
         }catch (\Exception $e){
             $data = [
