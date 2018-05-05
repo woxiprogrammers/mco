@@ -14,6 +14,8 @@ use App\MaterialRequests;
 use App\Project;
 use App\ProjectSite;
 use App\PurchaseRequest;
+use App\PurchaseOrder;
+use App\PurchaseOrderRequest;
 use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentStatuses;
 use App\PurchaseRequestComponentVendorMailInfo;
@@ -324,7 +326,7 @@ class PurchaseRequestController extends Controller
                 }
             }
             if ($filterFlag) {
-                $purchaseRequests = PurchaseRequest::whereIn('id',$ids)->orderBy('created_at','desc')->get()->toArray();
+                $purchaseRequests = PurchaseRequest::whereIn('id',$ids)->orderBy('created_at','desc')->get();
             }
             $iTotalRecords = count($purchaseRequests);
             $records = array();
@@ -435,6 +437,19 @@ class PurchaseRequestController extends Controller
                         </div>';
                         break;
                 }
+                $isPurchaseOrderCreated = PurchaseOrder::where('purchase_request_id',$purchaseRequests[$pagination]['id'])->count();
+                $purchaseRequestComponentIds = $purchaseRequests[$pagination]->purchaseRequestComponents->pluck('id')->toArray();
+                $vendorAssignedCount = PurchaseRequestComponentVendorRelation::whereIn('purchase_request_component_id',$purchaseRequestComponentIds)->count();
+                $purchaseOrderRequestCount = PurchaseOrderRequest::where('purchase_request_id',$purchaseRequests[$pagination]['id'])->count();
+                if($isPurchaseOrderCreated > 0){
+                       $materialStatus = "<span class=\"btn btn-xs btn-warning\"> Purchase Order Created </span>";
+                    }elseif($purchaseOrderRequestCount > 0){
+                        $materialStatus = "<span class=\"btn btn-xs btn-warning\"> Purchase Order Requested </span>";
+                    }elseif($vendorAssignedCount > 0){
+                        $materialStatus = "<span class=\"btn btn-xs btn-warning\"> Vendor Assigned </span>";
+                    }else{
+                        $materialStatus = "<span class=\"btn btn-xs btn-warning\"> Purchase Request Created </span>";
+                    }
                 $projectdata = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                     ->join('clients','clients.id','=','projects.client_id')
                     ->where('project_sites.id','=',$purchaseRequests[$pagination]['project_site_id'])
@@ -447,6 +462,7 @@ class PurchaseRequestController extends Controller
                     $projectdata['proj_name']." - ".$projectdata['site_name'],
                     date('d M Y', strtotime($purchaseRequests[$pagination]['created_at'])),
                     $status,
+                    $materialStatus,
                     $action
                 ];
             }
