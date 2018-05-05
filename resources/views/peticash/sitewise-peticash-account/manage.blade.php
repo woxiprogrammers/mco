@@ -20,14 +20,19 @@
                             <div class="page-title">
                                 <h1>Manage Sitewise Peticash Account</h1>
                             </div>
-                            @if($user->hasPermissionTo('create-sitewise-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
-                            <div class="btn-group" style="float: right;margin-top:1%">
-                                <div id="sample_editable_1_new" class="btn yellow" ><a href="createpage" style="color: white"> ALLOCATE
-                                        <i class="fa fa-plus"></i>
+                            <div class="pull-right">
+                                <div class="form-group " style="text-align: center">
+                                    <a href="javascript:void(0);" class="btn yellow" id="statistics" >
+                                        Statistics
                                     </a>
+                                    @if($user->hasPermissionTo('create-sitewise-account') || ($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
+                                        <a href="createpage" id="sample_editable_1_new" class="btn yellow" style="margin: 20px">
+                                            <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
+                                            Create
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
-                            @endif
                             <!-- BEGIN PAGE TITLE -->
                         </div>
                     </div>
@@ -99,6 +104,45 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="modal fade" id="statisticsModel" role="dialog">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="padding-bottom:10px">
+                                            <div class="row">
+                                                <div class="col-md-7 col-md-offset-2"> Statistics </div>
+                                                <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-5 col-md-offset-1">
+                                                    <label class="control-label pull-right">
+                                                        Allocated Amount :
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="control-label pull-left">
+                                                        {{$allocatedAmount}}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-5 col-md-offset-1">
+                                                    <label class="control-label pull-right">
+                                                        Remaining Amount :
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="control-label pull-left">
+                                                        {{$remainingAmount}}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -117,6 +161,9 @@
 <script src="/assets/custom/peticash/peticash.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
+        $("#statistics").click(function(){
+            $("#statisticsModel").modal('show');
+        });
         sitewiseAccountListing.init();
         $('#sitewisePeticashTable').DataTable();
         $("input[name='search_name']").on('keyup',function(){

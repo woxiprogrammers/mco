@@ -964,14 +964,15 @@ class InventoryManageController extends Controller
                 }
             }
             $inventoryComponentReading = FuelAssetReading::create($data);
-            if(array_key_exists('top_up',$data)){
+            if(array_key_exists('top_up',$data) && $data['top_up'] != null){
                 $inventoryTransferData = [
                     'inventory_component_id' => $dieselcomponentId,
-                    'transfer_type_id' => InventoryTransferTypes::where('slug','labour')->where('type','ilike','OUT')->pluck('id')->first(),
+                    'transfer_type_id' => InventoryTransferTypes::where('slug','user')->where('type','ilike','OUT')->pluck('id')->first(),
                     'quantity' => $data['top_up'],
                     'unit_id' => Unit::where('slug','litre')->pluck('id')->first(),
                     'source_name' => $user->first_name.' '.$user->last_name,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
+                    'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first()
                 ];
                 $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryTransferData);
             }

@@ -65,7 +65,6 @@ trait MaterialRequestTrait{
                     $materialComponentHistoryData['component_status_id'] = $materialRequestComponentVersionData['component_status_id'] = $pendingStatusId;
                 }
                 $materialRequestComponentData['component_type_id'] = $itemData['component_type_id'];
-                $materialRequestComponentData['component_status_id'] = $pendingStatusId;
                 $materialRequestComponentData['created_at'] = Carbon::now();
                 $materialRequestComponentData['updated_at'] = Carbon::now();
                 $materialRequestComponentCount = MaterialRequestComponents::whereDate('created_at',$today)->count();
