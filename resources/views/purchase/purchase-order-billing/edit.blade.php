@@ -250,17 +250,27 @@
                                                                             </label>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="form-group row">
-                                                                        <div class="col-md-4">
-                                                                            <label class="pull-right control-label">
-                                                                                Amount
-                                                                            </label>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount" value="{{$paymentRemainingAmount}}">
-                                                                        </div>
-                                                                    </div>
+
                                                                     <div class="form-group row"id="paymentSelect">
+                                                                        <div class="form-group row" id="bankSelect">
+                                                                            <div class="col-md-4">
+                                                                                <label class="pull-right control-label">
+                                                                                    Bank:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                                                                                    <option value="default">Select Bank</option>
+                                                                                    @foreach($banks as $bank)
+                                                                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <input type="hidden" id="allowedAmount">
+                                                                        @foreach($banks as $bank)
+                                                                            <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                                                                        @endforeach
                                                                         <div class="col-md-4">
                                                                             <label class="pull-right control-label">
                                                                                 Payment Mode:
@@ -272,6 +282,16 @@
                                                                                     <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
                                                                                 @endforeach
                                                                             </select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-4">
+                                                                            <label class="pull-right control-label">
+                                                                                Amount
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount" value="{{$paymentRemainingAmount}}" onkeyup="checkAmount()">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group row">
@@ -342,13 +362,77 @@
                     });
                     $("#paymentSelect").hide();
                 }else{
-                    $("#amount").rules('add',{
-                        max: remainingBillAmount
-                    });
+
                     $("#paymentSelect").show();
                 }
             });
         });
+
+        function checkAmount(){
+            var remainingBillAmount = parseFloat($("#remainingPaymentAmount").val());
+            if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){
+                remainingBillAmount = 0;
+            }
+            if($("#isAdvanceCheckbox").is(':checked') == true){
+                var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
+                if(balanceAdvanceAmount == null || typeof balanceAdvanceAmount == 'undefined' || isNaN(balanceAdvanceAmount)){
+                    balanceAdvanceAmount = 0;
+                }
+                if(balanceAdvanceAmount < remainingBillAmount){
+                    $("#amount").rules('add',{
+                        max: balanceAdvanceAmount
+                    });
+                }else{
+                    $("#amount").rules('add',{
+                        max: remainingBillAmount
+                    });
+                }
+
+            }else{
+                var selectedBankId = $('#bank_id').val();
+                if(selectedBankId == ''){
+                    alert('Please select Bank');
+                }else{
+                    var amount = parseFloat($('#amount').val());
+                    if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+                        amount = 0;
+                    }
+                    var allowedBankAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                    if(allowedBankAmount < remainingBillAmount){
+                        $("#amount").rules('add',{
+                            max: allowedBankAmount
+                        });
+                    }else{
+                        $("#amount").rules('add',{
+                            max: remainingBillAmount
+                        });
+                    }
+
+                }
+            }
+
+        }
     </script>
 @endsection
 
+{{--
+var selectedBankId = $('#bank_id').val();
+var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+if(selectedBankId == ''){
+alert('Please select Bank');
+}else if(remainingBillAmount > allowedAmount){
+console.log('inside else if');
+var amount = parseFloat($('#amount').val());
+if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+amount = 0;
+}
+
+$("input[name='amount']").rules('add',{
+max: allowedAmount
+});
+}else{
+console.log('inside else');
+$("#amount").rules('add',{
+max: remainingBillAmount
+});
+}--}}
