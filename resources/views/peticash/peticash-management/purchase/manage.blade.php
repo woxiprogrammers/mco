@@ -97,6 +97,7 @@
                                                                 <th> Date </th>
                                                                 <th> Site </th>
                                                                 <th> Action </th>
+                                                                <th> Voucher Created </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
@@ -112,6 +113,7 @@
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                 </th>
+                                                                <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -296,6 +298,11 @@
                                         </form>
                                     </div>
                                 </div>
+                                <form method="post" action="/peticash/peticash-management/purchase/change-voucher-status" hidden>
+                                    {!! csrf_field() !!}
+                                    <input type="hidden" name="purchase_transaction_id" id="purchase_transaction_id">
+                                    <button type="submit" class="btn red voucher-submit" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -303,7 +310,7 @@
             </div>
         </div>
     </div>
-    </div>
+</div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
@@ -370,6 +377,14 @@
 
                 }
             });
+        }
+
+        function changeVoucherStatus(txnId){
+            var value = confirm('Are you sure?');
+            if(value){
+                $('#purchase_transaction_id').val(txnId);
+                $(".voucher-submit").trigger('click');
+            }
         }
     </script>
 @endsection
