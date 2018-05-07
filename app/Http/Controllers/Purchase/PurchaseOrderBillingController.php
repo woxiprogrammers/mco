@@ -468,11 +468,22 @@ class PurchaseOrderBillingController extends Controller
             foreach($purchaseOrderBillImages as $image){
                 $purchaseOrderBillImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
             }
-            $paymentRemainingAmount = $purchaseOrderBill['amount'] - $purchaseOrderBill->purchaseOrderPayment->sum('amount');
+            $purchaseOrderPayment = $purchaseOrderBill->purchaseOrderPayment;
+            if(count($purchaseOrderPayment) > 0){
+                $transactionEditAccess = false;
+            }else{
+                $transactionEditAccess = true;
+            }
+            $paymentRemainingAmount = $purchaseOrderBill['amount'] - $purchaseOrderPayment->sum('amount');
             $paymentTillToday = $purchaseOrderBill->purchaseOrder->total_advance_amount + $purchaseOrderBill->purchaseOrderPayment->where('is_advance',false)->sum('amount');
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $paymentTypes = PaymentType::select('id','name')->get();
-            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday','banks'));
+            $purchaseOrderComponents = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrderBill['purchase_order_id'])->get();
+            $extraTaxPercentage = $purchaseOrderComponents->max(function ($purchaseOrderComponent) {
+                return ($purchaseOrderComponent->cgst_percentage + $purchaseOrderComponent->sgst_percentage + $purchaseOrderComponent->igst_percentage);
+            });
+            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday','banks','transactionEditAccess','extraTaxPercentage'));
+
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get PO billing get edit view',
@@ -583,6 +594,24 @@ class PurchaseOrderBillingController extends Controller
             ];
             Log::critical(json_encode($data));
             return null;
+        }
+    }
+
+    public function editPurchaseOrderBill(Request $request,$purchaseOrderBill){
+        try{
+            $purchaseOrderBillData = $request->except('_token');
+            $purchaseOrderBill = PurchaseOrderBill::where('id',$purchaseOrderBill['id'])->first();
+            $purchaseOrderBill->update($purchaseOrderBillData);
+            $request->session()->flash('success','Purchase Order Bill Edited Successfully');
+            return redirect('/purchase/purchase-order-bill/edit/'.$purchaseOrderBill['id']);
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Edit Purchase Order Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }

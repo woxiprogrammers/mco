@@ -99,6 +99,7 @@
                                                                 <th> Created By </th>
                                                                 <th> Date </th>
                                                                 <th> Site </th>
+                                                                <th> Voucher Created </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
@@ -110,11 +111,13 @@
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_payable_amount" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_by" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
+                                                                <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
                                                                 <th>
                                                                     <input type="hidden" class="form-control form-filter" name="postdata" id="postdata">
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                 </th>
+
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -124,7 +127,7 @@
                                                             <tr>
                                                                 <th colspan="4" style="text-align:right">Total Page Wise: </th>
                                                                 <th></th>
-                                                                <th colspan="4"></th>
+                                                                <th colspan="5"></th>
                                                             </tr>
                                                             </tfoot>
                                                         </table>
@@ -299,6 +302,11 @@
                                         </form>
                                     </div>
                                 </div>
+                                <form method="post" action="/peticash/peticash-management/purchase/change-voucher-status" hidden>
+                                    {!! csrf_field() !!}
+                                    <input type="hidden" name="purchase_transaction_id" id="purchase_transaction_id">
+                                    <button type="submit" class="btn red voucher-submit" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -306,7 +314,7 @@
             </div>
         </div>
     </div>
-    </div>
+</div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
@@ -379,6 +387,14 @@
 
                 }
             });
+        }
+
+        function changeVoucherStatus(txnId){
+            var value = confirm('Are you sure?');
+            if(value){
+                $('#purchase_transaction_id').val(txnId);
+                $(".voucher-submit").trigger('click');
+            }
         }
     </script>
 @endsection

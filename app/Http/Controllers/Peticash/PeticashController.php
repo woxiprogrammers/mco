@@ -1515,6 +1515,13 @@ class PeticashController extends Controller
                 $records['data'] = array();
                 $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
                 for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
+                    if($purchaseTransactionData[$pagination]->is_voucher_created == true){
+                        $voucherButtonText = 'Delete';
+                        $voucherStatusTest = 'Yes';
+                    }else{
+                        $voucherButtonText = 'Create';
+                        $voucherStatusTest = 'No';
+                    }
                     $records['data'][] = [
                         $purchaseTransactionData[$pagination]->id,
                         ucwords($purchaseTransactionData[$pagination]->name),
@@ -1524,13 +1531,18 @@ class PeticashController extends Controller
                         $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
                         date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
                         $purchaseTransactionData[$pagination]->projectSite->project->name,
-                        '<a class="btn blue" href="javascript:void(0)" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')">Details</a>',
-                        '<div class="bootstrap-switch-container" style="height: 30px;width: 200px; margin-left: 0px;">
-                                                            <span class="bootstrap-switch-handle-on bootstrap-switch-primary" style="width: 88px;">&nbsp;&nbsp;&nbsp;</span>
-                                                            <span class="bootstrap-switch-label" style="width: 88px;">&nbsp;</span>
-                                                            <span class="bootstrap-switch-handle-off bootstrap-switch-default" style="width: 88px;">&nbsp;&nbsp;</span>
-                                                            <input type="checkbox" class="make-switch" id="inOutCheckbox" name="in_or_out" data-on-text="&nbsp;In&nbsp;&nbsp;" data-off-text="&nbsp;Out&nbsp;">
-                                                        </div>'
+                        '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
+                        '<button class="btn btn-xs blue"> 
+                            <a href="javascript:void(0);" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')" style="color: white">
+                                Details
+                            </a>
+                        </button>
+                        <button class="btn btn-xs default "> 
+                            <a href="javascript:void(0);" onclick="changeVoucherStatus('.$purchaseTransactionData[$pagination]->id.')" style="color: grey">
+                                '.$voucherButtonText.'
+                            </a>
+                        </button>'
+
                     ];
                 }
                 $records["draw"] = intval($request->draw);
@@ -1548,6 +1560,22 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($records,$status);
+    }
+
+    public function changeVoucherStatus(Request $request){
+        try{
+            $purchasePeticashTransaction = PurcahsePeticashTransaction::where('id',$request['purchase_transaction_id'])->first();
+            $purchasePeticashTransaction->update(['is_voucher_created' => !($purchasePeticashTransaction->is_voucher_created)]);
+            return redirect('/peticash/peticash-management/purchase/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Change Voucher Status',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            $status = 500;
+            Log::critical(json_encode($data));
+        }
     }
 
     public function salaryTransactionListing(Request $request){
