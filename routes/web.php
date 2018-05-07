@@ -15,6 +15,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::get('/logout',array('uses' => 'Auth\LoginController@logout'));
 
     Route::get('/dashboard',array('uses' => 'Admin\DashboardController@index'));
+
     Route::post('/change-project-site',array('uses' => 'Auth\LoginController@changeProjectSite'));
 
     Route::group(['prefix' => 'user'],function (){
@@ -57,6 +58,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
         Route::post('check-name',array('uses' => 'Admin\CategoryController@checkCategoryName'));
     });
+
     Route::group(['prefix' => 'role'],function() {
         Route::get('create', array('uses' => 'Admin\RoleController@getCreateView'));
         Route::post('create', array('uses' => 'Admin\RoleController@createRole'));
@@ -69,6 +71,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{role}', array('uses' => 'Admin\RoleController@changeRoleStatus'));
         Route::post('check-name', array('uses' => 'Admin\RoleController@checkRoleName'));
     });
+
     Route::group(['prefix' => 'extra-item'],function(){
         Route::get('create',array('uses' => 'Admin\ExtraItemController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\ExtraItemController@createExtraItem'));
@@ -79,6 +82,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{extra_item}',array('uses' => 'Admin\ExtraItemController@changeExtraItemStatus'));
         Route::post('check-name',array('uses' => 'Admin\ExtraItemController@checkExtraItemName'));
     });
+
     Route::group(['prefix' => 'material'],function(){
         Route::get('manage',array('uses' => 'Admin\MaterialController@getManageView'));
         Route::post('listing',array('uses' => 'Admin\MaterialController@materialListing'));
@@ -92,6 +96,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('basicrate_material', array('uses' => 'Admin\MaterialController@generateBasicRateMaterialPdf'));
 
     });
+
     Route::group(['prefix' => 'product'],function(){
         Route::get('manage',array('uses' => 'Admin\ProductController@getManageView'));
         Route::get('create',array('uses' => 'Admin\ProductController@getCreateView'));
@@ -107,6 +112,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('check-name',array('uses' => 'Admin\ProductController@checkProductName'));
         Route::get('product-analysis-pdf/{product}', array('uses' => 'Admin\ProductController@generateProductAnalysisPdf'));
     });
+
     Route::group(['prefix' => 'profit-margin'],function(){
         Route::get('manage',array('uses' => 'Admin\ProfitMarginController@getManageView'));
         Route::get('create',array('uses' => 'Admin\ProfitMarginController@getCreateView'));
@@ -117,6 +123,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{profit_margin}',array('uses' => 'Admin\ProfitMarginController@changeProfitMarginStatus'));
         Route::post('check-name',array('uses' => 'Admin\ProfitMarginController@checkProfitMarginName'));
     });
+
     Route::group(['prefix' => 'units'],function(){
         Route::get('manage',array('uses' => 'Admin\UnitsController@getManageView'));
         Route::post('listing',array('uses' => 'Admin\UnitsController@unitsListing'));
@@ -135,6 +142,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{unit}',array('uses' => 'Admin\UnitsController@changeUnitStatus'));
         Route::post('convert',array('uses' => 'Admin\UnitsController@convertUnits'));
     });
+
     Route::group(['prefix' => 'summary'],function(){
         Route::get('manage',array('uses' => 'Admin\SummaryController@getManageView'));
         Route::get('create',array('uses' => 'Admin\SummaryController@getCreateView'));
@@ -146,6 +154,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{summary}',array('uses' => 'Admin\SummaryController@changeSummaryStatus'));
         Route::post('check-name',array('uses' => 'Admin\SummaryController@checkSummaryName'));
     });
+
     Route::group(['prefix' => 'tax'],function(){
         Route::get('create',array('uses' => 'Admin\TaxController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\TaxController@createTax'));
@@ -252,6 +261,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Admin\ProjectController@indirectExpenseListing'));
         });
     });
+
     Route::group(['prefix' => 'purchase'], function(){
         Route::get('get-detail/{materialRequestComponentID}',array('uses' => 'User\PurchaseController@getPurchaseDetails'));
         Route::get('projects/{client_id}',array('uses' => 'User\PurchaseController@getProjects'));
@@ -271,6 +281,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
             Route::get('get-material-request-component-details/{materialRequestComponent}',array('uses' => 'User\PurchaseController@getMaterialRequestComponentDetail'));
         });
+
         Route::group(['prefix' => 'purchase-request'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseRequestController@getManageView'));
             Route::get('create',array('uses'=> 'Purchase\PurchaseRequestController@getCreateView'));
@@ -281,6 +292,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
             Route::get('get-detail/{purchaseRequestId}',array('uses' => 'Purchase\PurchaseRequestController@getPurchaseRequestDetails'));
         });
+
         Route::group(['prefix' => 'purchase-order'], function(){
             Route::get('manage',array('uses'=> 'Purchase\PurchaseOrderController@getManageView'));
             Route::get('create',array('uses'=> 'Purchase\PurchaseOrderController@getCreateView'));
@@ -315,6 +327,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getAdvancePaymentListing'));
             });
         });
+
         Route::group(['prefix' => 'purchase-order-bill'],function(){
             Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
             Route::get('create',array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
@@ -325,6 +338,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('get-transaction-subtotal',array('uses' => 'Purchase\PurchaseOrderBillingController@getTransactionSubtotal'));
             Route::post('listing',array('uses' => 'Purchase\PurchaseOrderBillingController@listing'));
             Route::get('edit/{purchaseOrderBill}',array('uses' => 'Purchase\PurchaseOrderBillingController@getEditView'));
+            Route::post('edit/{purchaseOrderBill}',array('uses' => 'Purchase\PurchaseOrderBillingController@editPurchaseOrderBill'));
             Route::group(['prefix' => 'payment'], function(){
                 Route::post('listing/{purchaseOrderBillId}',array('uses' => 'Purchase\PurchaseOrderBillingController@paymentListing'));
                 Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createPayment'));

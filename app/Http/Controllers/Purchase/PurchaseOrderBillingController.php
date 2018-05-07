@@ -467,10 +467,17 @@ class PurchaseOrderBillingController extends Controller
             foreach($purchaseOrderBillImages as $image){
                 $purchaseOrderBillImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
             }
-            $paymentRemainingAmount = $purchaseOrderBill['amount'] - $purchaseOrderBill->purchaseOrderPayment->sum('amount');
+            $purchaseOrderPayment = $purchaseOrderBill->purchaseOrderPayment;
+            if(count($purchaseOrderPayment) > 0){
+                $transactionEditAccess = false;
+            }else{
+                $transactionEditAccess = true;
+            }
+            $paymentRemainingAmount = $purchaseOrderBill['amount'] - $purchaseOrderPayment->sum('amount');
             $paymentTillToday = $purchaseOrderBill->purchaseOrder->total_advance_amount + $purchaseOrderBill->purchaseOrderPayment->where('is_advance',false)->sum('amount');
             $paymentTypes = PaymentType::select('id','name')->get();
-            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday'));
+            $extraTaxPercentage = ($purchaseOrderBill['extra_tax_amount'] * 100) / $purchaseOrderBill['extra_amount'];
+            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday','transactionEditAccess','extraTaxPercentage'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get PO billing get edit view',
@@ -573,6 +580,24 @@ class PurchaseOrderBillingController extends Controller
             ];
             Log::critical(json_encode($data));
             return null;
+        }
+    }
+
+    public function editPurchaseOrderBill(Request $request,$purchaseOrderBill){
+        try{
+            $purchaseOrderBillData = $request->except('_token');
+            $purchaseOrderBill = PurchaseOrderBill::where('id',$purchaseOrderBill['id'])->first();
+            $purchaseOrderBill->update($purchaseOrderBillData);
+            $request->session()->flash('success','Purchase Order Bill Edited Successfully');
+            return redirect('/purchase/purchase-order-bill/edit/'.$purchaseOrderBill['id']);
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Edit Purchase Order Bill',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }
