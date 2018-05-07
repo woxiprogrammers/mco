@@ -11,7 +11,7 @@ class PurcahsePeticashTransaction extends Model
     protected $fillable = ['name','project_site_id','component_type_id','reference_id','payment_type_id',
                 'peticash_transaction_type_id','source_name','quantity','unit_id','bill_number','bill_amount',
                 'vehicle_number','in_time','out_time','remark','date','reference_user_id','grn','peticash_status_id',
-                'reference_number','admin_remark'
+                'reference_number','admin_remark','is_voucher_created'
         ];
 
     public function projectSite(){
