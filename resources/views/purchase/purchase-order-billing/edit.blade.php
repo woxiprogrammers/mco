@@ -485,7 +485,7 @@
                     total += parseFloat(amount);
                 }
             });
-            $('#totalAmount').val(customRound(total));
+            $('#totalAmount').val(total);
 
         }
     </script>

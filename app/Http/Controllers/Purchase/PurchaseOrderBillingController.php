@@ -476,7 +476,10 @@ class PurchaseOrderBillingController extends Controller
             $paymentRemainingAmount = $purchaseOrderBill['amount'] - $purchaseOrderPayment->sum('amount');
             $paymentTillToday = $purchaseOrderBill->purchaseOrder->total_advance_amount + $purchaseOrderBill->purchaseOrderPayment->where('is_advance',false)->sum('amount');
             $paymentTypes = PaymentType::select('id','name')->get();
-            $extraTaxPercentage = ($purchaseOrderBill['extra_tax_amount'] * 100) / $purchaseOrderBill['extra_amount'];
+            $purchaseOrderComponents = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrderBill['purchase_order_id'])->get();
+            $extraTaxPercentage = $purchaseOrderComponents->max(function ($purchaseOrderComponent) {
+                return ($purchaseOrderComponent->cgst_percentage + $purchaseOrderComponent->sgst_percentage + $purchaseOrderComponent->igst_percentage);
+            });
             return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday','transactionEditAccess','extraTaxPercentage'));
         }catch(\Exception $e){
             $data = [
