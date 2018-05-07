@@ -96,8 +96,8 @@
                                                                 <th> Created By </th>
                                                                 <th> Date </th>
                                                                 <th> Site </th>
-                                                                <th> Action </th>
                                                                 <th> Voucher Created </th>
+                                                                <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
@@ -108,12 +108,13 @@
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_payable_amount" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_by" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
+                                                                <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
                                                                 <th>
                                                                     <input type="hidden" class="form-control form-filter" name="postdata" id="postdata">
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                 </th>
-                                                                <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
+
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -123,7 +124,7 @@
                                                             <tr>
                                                                 <th colspan="4" style="text-align:right">Total Page Wise: </th>
                                                                 <th></th>
-                                                                <th colspan="4"></th>
+                                                                <th colspan="5"></th>
                                                             </tr>
                                                             </tfoot>
                                                         </table>

@@ -1522,6 +1522,7 @@ class PeticashController extends Controller
                         $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
                         date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
                         $purchaseTransactionData[$pagination]->projectSite->project->name,
+                        '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
                         '<button class="btn btn-xs blue"> 
                             <a href="javascript:void(0);" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')" style="color: white">
                                 Details
@@ -1531,8 +1532,8 @@ class PeticashController extends Controller
                             <a href="javascript:void(0);" onclick="changeVoucherStatus('.$purchaseTransactionData[$pagination]->id.')" style="color: grey">
                                 '.$voucherButtonText.'
                             </a>
-                        </button>',
-                        '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>'
+                        </button>'
+
                     ];
                 }
                 $records["draw"] = intval($request->draw);
