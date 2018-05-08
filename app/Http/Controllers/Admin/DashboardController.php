@@ -16,6 +16,7 @@ use App\PurchaseOrder;
 use App\PurchaseOrderRequest;
 use App\PurchaseOrderTransaction;
 use App\PurchaseRequest;
+use App\PurchaseRequestComponentStatuses;
 use App\Quotation;
 use App\Http\Controllers\Controller;
 use App\UserLastLogin;
@@ -23,6 +24,7 @@ use ConsoleTVs\Charts\Facades\Charts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class DashboardController extends Controller
 {
@@ -32,6 +34,17 @@ class DashboardController extends Controller
 
     public function index()
     {
+        $projectSiteId = Session::get('global_project_site');
+        $purchaseRequestApprovedCount = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','purchase_requests.id')
+            ->join('purchase_request_component_vendor_relation','purchase_request_components.id','!=','purchase_request_component_vendor_relation.purchase_request_component_id')
+            ->whereIn('purchase_requests.purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+            ->whereNotIn('purchase_request_components.id',function($query) {
+                $query->pluck('purchase_request_component_vendor_relation.purchase_request_component_id');
+            })
+            ->where('purchase_requests.project_site_id',$projectSiteId)
+            ->distinct('purchase_request_components.id')
+            ->pluck('purchase_request_components.id');
+        dd($purchaseRequestApprovedCount);
         /*
          * Quotation Status Wise Chart
          */
@@ -322,6 +335,30 @@ class DashboardController extends Controller
                             ->where('material_requests.project_site_id', $projectSiteId)
                             ->where('purchase_order_transactions.created_at', '>=',$lastLoginForPO)
                             ->count('purchase_order_transactions.id');
+                    }
+                }
+                if($user->customHasPermission('create-vendor-assignment') ){
+                    $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                        ->where('modules.slug','purchase-request')
+                        ->where('user_last_logins.user_id',$user->id)
+                        ->pluck('user_last_logins.last_login')
+                        ->first();
+                    if($lastLogin == null){
+                        $purchaseRequestApprovedCount = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','purchase_requests.id')
+                                                            ->join('purchase_request_component_vendor_relation','purchase_request_components.id','!=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                                                            ->whereIn('purchase_requests.purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                                                            ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                                                            ->pluck('purchase_requests.id');
+                    }else{
+                        $purchaseRequestApprovedCount = MaterialRequests::join('material_request_components','material_requests.id','=','material_request_components.material_request_id')
+                            ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                            ->join('material_request_component_history_table','material_request_component_history_table.material_request_component_id','=','material_request_components.id')
+                            ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','material_request_components.component_status_id')
+                            ->whereIn('purchase_request_component_statuses.slug',['p-r-manager-disapproved','p-r-admin-disapproved'])
+                            ->where('material_request_component_history_table.created_at','>=',$lastLogin)
+                            ->where('material_requests.project_site_id', $projectSite['project_site_id'])
+                            ->count();
                     }
                 }
                 if($user->customHasPermission('approve-purchase-order-request')){
