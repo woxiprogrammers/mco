@@ -512,8 +512,8 @@ class PurchaseRequestController extends Controller
                                                     ->where('user_project_site_relation.project_site_id',$projectSiteId)
                                                     ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
                                                     ->get()->toArray();
-                    $webTokens = array_column($vendorAssignmentAclUserToken,'web_fcm_token');
-                    $mobileTokens = array_column($vendorAssignmentAclUserToken,'mobile_fcm_token');
+                    $webTokens = array_column($vendorAssignmentAclUserToken,'web_fcm_function');
+                    $mobileTokens = array_column($vendorAssignmentAclUserToken,'mobile_fcm_function');
                     $notificationString = '3 -'.$purchaseRequest->projectSite->project->name.' '.$purchaseRequest->projectSite->name;
                     $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Request Approved.';
                     $notificationString .= 'PR number: '.$purchaseRequest->format_id;
@@ -574,6 +574,7 @@ class PurchaseRequestController extends Controller
                             'material_request_component_id' => $materialComponentId,
                             'component_status_id' => $disapproveStatusId,
                             'quantity' => $materialRequestComponentData['quantity'],
+                            'user_id' => $user['id'],
                             'unit_id' => $materialRequestComponentData['unit_id'],
                             'remark' => $request->remark,
                         ];
