@@ -17,6 +17,7 @@ use App\PurchaseOrderRequest;
 use App\PurchaseOrderTransaction;
 use App\PurchaseRequest;
 use App\PurchaseRequestComponentStatuses;
+use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
 use App\Http\Controllers\Controller;
 use App\UserLastLogin;
@@ -34,17 +35,6 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $projectSiteId = Session::get('global_project_site');
-        $purchaseRequestApprovedCount = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','purchase_requests.id')
-            ->join('purchase_request_component_vendor_relation','purchase_request_components.id','!=','purchase_request_component_vendor_relation.purchase_request_component_id')
-            ->whereIn('purchase_requests.purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
-            ->whereNotIn('purchase_request_components.id',function($query) {
-                $query->pluck('purchase_request_component_vendor_relation.purchase_request_component_id');
-            })
-            ->where('purchase_requests.project_site_id',$projectSiteId)
-            ->distinct('purchase_request_components.id')
-            ->pluck('purchase_request_components.id');
-        dd($purchaseRequestApprovedCount);
         /*
          * Quotation Status Wise Chart
          */
@@ -120,7 +110,7 @@ class DashboardController extends Controller
             ];
             /*Purchase Module Notification counts*/
             $materialRequestCreateCount = $materialRequestDisapprovedCount = 0;
-            $purchaseRequestCreateCount = $purchaseRequestDisapprovedCount = 0;
+            $purchaseRequestCreateCount = $purchaseRequestDisapprovedCount = $purchaseRequestApprovedCount = 0;
             $purchaseOrderCreatedCount = $purchaseOrderBillCreateCount = 0;
             $purchaseOrderRequestCreateCount = $materialSiteOutTransferCreateCount = 0;
             $materialSiteOutTransferApproveCount = $checklistAssignedCount = 0;
@@ -170,6 +160,33 @@ class DashboardController extends Controller
                             ->where('material_requests.project_site_id', $projectSite['project_site_id'])
                             ->where('material_request_component_history_table.created_at','>=',$lastLogin)
                             ->count('material_request_component_history_table.id');
+                    }
+                }
+                if($user->customHasPermission('create-vendor-assignment') ){
+                    $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                        ->where('modules.slug','purchase-request')
+                        ->where('user_last_logins.user_id',$user->id)
+                        ->pluck('user_last_logins.last_login')
+                        ->first();
+                    if($lastLogin == null){
+                        $purchaseRequestIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                            ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                            ->distinct('purchase_requests.id')
+                            ->pluck('purchase_requests.id');
+                        $purchaseRequestApprovedCount = PurchaseRequest::whereIn('purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                            ->whereNotIn('id',$purchaseRequestIds)
+                            ->count();
+                    }else{
+                        $purchaseRequestIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                            ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                            ->where('purchase_request_component_vendor_relation.created_at','>=',$lastLogin)
+                            ->distinct('purchase_requests.id')
+                            ->pluck('purchase_requests.id');
+                        $purchaseRequestApprovedCount = PurchaseRequest::whereIn('purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                            ->whereNotIn('id',$purchaseRequestIds)
+                            ->count();
                     }
                 }
                 if($user->customHasPermission('create-material-request') || $user->customHasPermission('approve-material-request') || $user->customHasPermission('create-purchase-request') || $user->customHasPermission('approve-purchase-request')){
@@ -344,20 +361,23 @@ class DashboardController extends Controller
                         ->pluck('user_last_logins.last_login')
                         ->first();
                     if($lastLogin == null){
-                        $purchaseRequestApprovedCount = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','purchase_requests.id')
-                                                            ->join('purchase_request_component_vendor_relation','purchase_request_components.id','!=','purchase_request_component_vendor_relation.purchase_request_component_id')
-                                                            ->whereIn('purchase_requests.purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                        $purchaseRequestIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                                                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
                                                             ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                                                            ->distinct('purchase_requests.id')
                                                             ->pluck('purchase_requests.id');
+                        $purchaseRequestApprovedCount = PurchaseRequest::whereIn('purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                                                            ->whereNotIn('id',$purchaseRequestIds)
+                                                            ->count();
                     }else{
-                        $purchaseRequestApprovedCount = MaterialRequests::join('material_request_components','material_requests.id','=','material_request_components.material_request_id')
-                            ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')
+                        $purchaseRequestIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
                             ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
-                            ->join('material_request_component_history_table','material_request_component_history_table.material_request_component_id','=','material_request_components.id')
-                            ->join('purchase_request_component_statuses','purchase_request_component_statuses.id','=','material_request_components.component_status_id')
-                            ->whereIn('purchase_request_component_statuses.slug',['p-r-manager-disapproved','p-r-admin-disapproved'])
-                            ->where('material_request_component_history_table.created_at','>=',$lastLogin)
-                            ->where('material_requests.project_site_id', $projectSite['project_site_id'])
+                            ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                            ->where('purchase_request_component_vendor_relation.created_at','>=',$lastLogin)
+                            ->distinct('purchase_requests.id')
+                            ->pluck('purchase_requests.id');
+                        $purchaseRequestApprovedCount = PurchaseRequest::whereIn('purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                            ->whereNotIn('id',$purchaseRequestIds)
                             ->count();
                     }
                 }
@@ -491,7 +511,7 @@ class DashboardController extends Controller
                 [
                   'name' => 'Purchase',
                   'slug' => 'purchase',
-                  'notification_count' => $materialRequestCreateCount + $purchaseRequestCreateCount + $materialRequestDisapprovedCount + $purchaseRequestDisapprovedCount + $purchaseOrderRequestCreateCount + $purchaseOrderCreatedCount + $purchaseOrderBillCreateCount
+                  'notification_count' => $materialRequestCreateCount + $purchaseRequestCreateCount + $materialRequestDisapprovedCount + $purchaseRequestDisapprovedCount + $purchaseRequestApprovedCount + $purchaseOrderRequestCreateCount + $purchaseOrderCreatedCount + $purchaseOrderBillCreateCount
                 ],
                 [
                     'name' => 'Inventory',
