@@ -75,7 +75,7 @@ trait InventoryTrait{
                 $fromInventoryComponentId = InventoryComponent::where('project_site_id', $projectSiteId)
                     ->where('name','ilike', $inventoryComponentTransfer->inventoryComponent->name)
                     ->pluck('id')->first();
-                $siteOutTransferTypeId = InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->plcuk('id')->first();
+                $siteOutTransferTypeId = InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->pluck('id')->first();
                 $lastOutInventoryComponentTransfer = InventoryComponentTransfers::where('inventory_component_id', $fromInventoryComponentId)
                     ->where('transfer_type_id', $siteOutTransferTypeId)
                     ->where('source_name','ilike',$inventoryComponentTransfer->inventoryComponent->projectSite->project->name.'-'.$inventoryComponentTransfer->inventoryComponent->projectSite->name)
