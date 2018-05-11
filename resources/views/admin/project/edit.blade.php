@@ -215,7 +215,7 @@
             <div class="modal-header" style="padding-bottom:10px">
                 <div class="row">
                     <div class="col-md-4"></div>
-                    <div class="col-md-4"> Add Advacnce Payment</div>
+                    <div class="col-md-4"> Add Advance Payment</div>
                     <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                 </div>
             </div>
@@ -223,6 +223,26 @@
                 <form id="paymentCreateForm" method="post" action="/project/advance-payment/create">
                     {!! csrf_field() !!}
                     <input type="hidden" name="project_site_id" id="projectSiteId" value="{{$projectData['project_site_id']}}">
+                    <div class="form-group row" id="bankSelect">
+                        <div class="col-md-4">
+                            <label class="pull-right control-label">
+                                Bank:
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-control" id="bank_id" name="bank_id">
+                                <option value="default">Select Bank</option>
+                                @foreach($banks as $bank)
+                                    <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" id="allowedAmount">
+                    @foreach($banks as $bank)
+                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                    @endforeach
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label class="pull-right control-label">
@@ -230,7 +250,7 @@
                             </label>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount">
+                            <input type="text" class="form-control" id="amount" name="amount" placeholder="Enter Amount">
                         </div>
                     </div>
                     <div class="form-group row"id="paymentSelect">
@@ -329,7 +349,9 @@
 <script>
     $(document).ready(function() {
         EditProject.init();
+        PaymentCreate.init();
         $("#hsnCode").trigger('change');
     });
 </script>
+
 @endsection
