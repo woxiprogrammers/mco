@@ -538,12 +538,44 @@
                             </label>
                         </div>
                         <div class="col-md-10">
-                            <select class="form-control" name="paid_from_advanced">
+                            <select class="form-control" name="paid_from_advanced" id="paid_from_advanced" onchange="showBankData()">
+                                <option value="false"> Bank </option>
                                 <option value="true"> Advance Payments </option>
-                                <option value="false"> Cheque </option>
                             </select>
                         </div>
                     </div>
+                    <div id="bankData">
+                        <div class="form-group row" id="bankSelect">
+                            <div class="col-md-2">
+                                <label class="pull-right control-label">
+                                    Bank:
+                                </label>
+                            </div>
+                            <div class="col-md-10">
+                                <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                                    @foreach($banks as $bank)
+                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row" id="bankSelect">
+                            <div class="col-md-2">
+                                <label class="pull-right control-label">
+                                    Payment Type:
+                                </label>
+                            </div>
+                            <div class="col-md-10">
+                                <select class="form-control" name="payment_type_id">
+                                    @foreach($paymentTypes as $type)
+                                        <option value="{{$type['id']}}">{{$type['name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+
                     <div class="form-group row">
                         <div class="col-md-2">
                             <label class="pull-right control-label">
@@ -561,7 +593,7 @@
                             </label>
                         </div>
                         <div class="col-md-10">
-                            <input type="number" class="form-control calculatable-field" name="debit" placeholder="Enter Debit Amount">
+                            <input type="number" class="form-control calculatable-field" id="debit" name="debit" placeholder="Enter Debit Amount">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -571,7 +603,7 @@
                             </label>
                         </div>
                         <div class="col-md-10">
-                            <input type="number" class="form-control calculatable-field" name="hold" placeholder="Enter Hold Amount">
+                            <input type="number" class="form-control calculatable-field" id="hold" name="hold" placeholder="Enter Hold Amount">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -582,7 +614,7 @@
                         </div>
                         <div class="col-md-5">
                             <div class="input-group">
-                                <input type="number" class="form-control calculatable-field" name="retention_percent" placeholder="Enter Retention Percent">
+                                <input type="number" class="form-control calculatable-field" id="retention_percent" name="retention_percent" placeholder="Enter Retention Percent">
                                 <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
                             </div>
                         </div>
@@ -598,7 +630,7 @@
                         </div>
                         <div class="col-md-5">
                             <div class="input-group">
-                                <input type="number" class="form-control calculatable-field" name="tds_percent" placeholder="Enter TDS Percent">
+                                <input type="number" class="form-control calculatable-field" id="tds_percent" name="tds_percent" placeholder="Enter TDS Percent">
                                 <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
                             </div>
                         </div>
@@ -613,7 +645,7 @@
                             </label>
                         </div>
                         <div class="col-md-10">
-                            <input type="number" name="other_recovery_value" class="form-control calculatable-field">
+                            <input type="number" name="other_recovery_value" id="other_recovery_value" class="form-control calculatable-field">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -666,6 +698,20 @@
                 </div>
                 <div class="modal-body" style="padding:40px 50px;">
                     <div class="form-group row">
+                        <select class="form-control" id="bank_id" name="bank_id">
+                            <option value="">Select Bank</option>
+                            @foreach($banks as $bank)
+                                <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <input type="hidden" id="allowedAmount">
+                    @foreach($banks as $bank)
+                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                    @endforeach
+
+                    <div class="form-group row">
                         <select class="form-control" name="payment_type_id">
                             @foreach($paymentTypes as $type)
                                 <option value="{{$type['id']}}">{{$type['name']}}</option>
@@ -708,6 +754,7 @@
 <script>
     $(document).ready(function(){
         CreateBillPayment.init();
+        CreateBillReconcilePayment.init();
         $("#change_bill").on('change', function(){
             var bill_id = $(this).val();
             window.location.href = "/bill/view/"+bill_id;
@@ -718,8 +765,27 @@
     function openReconcilePaymentModal(transactionSlug){
         $("#reconcileTransactionSlug").val(transactionSlug);
         $("#reconcilePaymentModal").modal('show');
+
     }
 
+    function showBankData(){
+        var isAdvanceOption = $('#paid_from_advanced').val();
+        if(isAdvanceOption == 'true'){
+            $('#bankData').hide();
+            $('#debit').prop('readonly',true).val(0);
+            $('#hold').prop('readonly',true).val(0);
+            $('#retention_percent').prop('readonly',true).val(0);
+            $('#tds_percent').prop('readonly',true).val(0);
+            $('#other_recovery_value').prop('readonly',true).val(0);
+        }else{
+            $('#bankData').show();
+            $('#debit').prop('readonly',false);
+            $('#hold').prop('readonly',false);
+            $('#retention_percent').prop('readonly',false);
+            $('#tds_percent').prop('readonly',false);
+            $('#other_recovery_value').prop('readonly',false);
+        }
+    }
 </script>
 @endsection
 

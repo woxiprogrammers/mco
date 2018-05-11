@@ -8,7 +8,7 @@ class AssetMaintenanceBillPayment extends Model
 {
     protected $table = 'asset_maintenance_bill_payments';
 
-    protected $fillable = ['asset_maintenance_bill_id','amount','payment_id','reference_number','is_advance'];
+    protected $fillable = ['asset_maintenance_bill_id','amount','payment_id','reference_number','is_advance','bank_id'];
 
     public function assetMaintenanceBill(){
         return $this->belongsTo('App\AssetMaintenanceBill','asset_maintenance_bill_id');

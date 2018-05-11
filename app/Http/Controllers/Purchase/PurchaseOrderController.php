@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Purchase;
 
 use App\Asset;
 use App\AssetType;
+use App\BankInfo;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
@@ -461,8 +462,9 @@ class PurchaseOrderController extends Controller
             }
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
             $transaction_types = PaymentType::select('id','name')->where('slug','!=','peticash')->get();
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $purchaseOrderStatusSlug = $purchaseOrder->purchaseOrderStatus->slug;
-            return view('purchase/purchase-order/edit')->with(compact('userRole','purchaseOrderStatusSlug','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName'));
+            return view('purchase/purchase-order/edit')->with(compact('userRole','purchaseOrderStatusSlug','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName','banks'));
         }catch (\Exception $e){
                 $data = [
                     'action' => 'Get Purchase Order Edit View',
@@ -657,15 +659,23 @@ class PurchaseOrderController extends Controller
     public function createAdvancePayment(Request $request){
         try{
             $advancePaymentData = $request->except('_token');
-            PurchaseOrderAdvancePayment::create($advancePaymentData);
-            $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
-            $newAdvancePaymentAmount = $purchaseOrder->total_advance_amount + $request->amount;
-            $balanceAdvanceAmount = $purchaseOrder->balance_advance_amount + $request->amount;
-            $purchaseOrder->update([
-                'total_advance_amount' => $newAdvancePaymentAmount,
-                'balance_advance_amount' => $balanceAdvanceAmount
-            ]);
-            $request->session()->flash('success','Advance Payment added successfully');
+            $bank = BankInfo::where('id',$request['bank_id'])->first();
+            if($request['amount'] <= $bank['balance_amount']){
+                PurchaseOrderAdvancePayment::create($advancePaymentData);
+                $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
+                $newAdvancePaymentAmount = $purchaseOrder->total_advance_amount + $request->amount;
+                $balanceAdvanceAmount = $purchaseOrder->balance_advance_amount + $request->amount;
+                $purchaseOrder->update([
+                    'total_advance_amount' => $newAdvancePaymentAmount,
+                    'balance_advance_amount' => $balanceAdvanceAmount
+                ]);
+                $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                $bank->update($bankData);
+                $request->session()->flash('success','Advance Payment added successfully');
+            }else{
+                $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+            }
+
             return redirect('/purchase/purchase-order/edit/'.$purchaseOrder->id);
        }catch (\Exception $e){
             $data = [
