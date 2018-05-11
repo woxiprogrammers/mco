@@ -197,7 +197,6 @@ class InventoryManageController extends Controller
 
     public function getComponentManageView(Request $request,$inventoryComponent){
         try{
-            dd($inventoryComponent);
             $projectInfo = [
                 'project' => $inventoryComponent->projectSite->project->name,
                 'client' => $inventoryComponent->projectSite->project->client->company,
