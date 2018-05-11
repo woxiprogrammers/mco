@@ -637,7 +637,6 @@ class PurchaseOrderRequestController extends Controller
                         ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
                         ->get()->toArray();
                     $materialRequestUserToken = array_merge($materialRequestUserToken,$purchaseRequestApproveUserToken);
-                    $materialRequestUserToken = array_unique($materialRequestUserToken);
                     $webTokens = array_merge($webTokens, array_column($materialRequestUserToken,'web_fcm_function'));
                     $mobileTokens = array_merge($mobileTokens, array_column($materialRequestUserToken,'mobile_fcm_function'));
                     $notificationString = '3 -'.$purchaseOrder->purchaseRequest->projectSite->project->name.' '.$purchaseOrder->purchaseRequest->projectSite->name;
