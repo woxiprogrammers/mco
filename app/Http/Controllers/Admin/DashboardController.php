@@ -16,6 +16,8 @@ use App\PurchaseOrder;
 use App\PurchaseOrderRequest;
 use App\PurchaseOrderTransaction;
 use App\PurchaseRequest;
+use App\PurchaseRequestComponentStatuses;
+use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
 use App\Http\Controllers\Controller;
 use App\UserLastLogin;
@@ -23,6 +25,7 @@ use ConsoleTVs\Charts\Facades\Charts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class DashboardController extends Controller
 {
@@ -107,7 +110,7 @@ class DashboardController extends Controller
             ];
             /*Purchase Module Notification counts*/
             $materialRequestCreateCount = $materialRequestDisapprovedCount = 0;
-            $purchaseRequestCreateCount = $purchaseRequestDisapprovedCount = 0;
+            $purchaseRequestCreateCount = $purchaseRequestDisapprovedCount = $purchaseRequestApprovedCount = 0;
             $purchaseOrderCreatedCount = $purchaseOrderBillCreateCount = 0;
             $purchaseOrderRequestCreateCount = $materialSiteOutTransferCreateCount = 0;
             $materialSiteOutTransferApproveCount = $checklistAssignedCount = 0;
@@ -157,6 +160,33 @@ class DashboardController extends Controller
                             ->where('material_requests.project_site_id', $projectSite['project_site_id'])
                             ->where('material_request_component_history_table.created_at','>=',$lastLogin)
                             ->count('material_request_component_history_table.id');
+                    }
+                }
+                if($user->customHasPermission('create-vendor-assignment') ){
+                    $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                        ->where('modules.slug','purchase-request')
+                        ->where('user_last_logins.user_id',$user->id)
+                        ->pluck('user_last_logins.last_login')
+                        ->first();
+                    if($lastLogin == null){
+                        $purchaseRequestIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                            ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                            ->distinct('purchase_requests.id')
+                            ->pluck('purchase_requests.id');
+                        $purchaseRequestApprovedCount = PurchaseRequest::whereIn('purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                            ->whereNotIn('id',$purchaseRequestIds)
+                            ->count();
+                    }else{
+                        $purchaseRequestIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                            ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                            ->where('purchase_request_component_vendor_relation.created_at','>=',$lastLogin)
+                            ->distinct('purchase_requests.id')
+                            ->pluck('purchase_requests.id');
+                        $purchaseRequestApprovedCount = PurchaseRequest::whereIn('purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                            ->whereNotIn('id',$purchaseRequestIds)
+                            ->count();
                     }
                 }
                 if($user->customHasPermission('create-material-request') || $user->customHasPermission('approve-material-request') || $user->customHasPermission('create-purchase-request') || $user->customHasPermission('approve-purchase-request')){
@@ -324,6 +354,33 @@ class DashboardController extends Controller
                             ->count('purchase_order_transactions.id');
                     }
                 }
+                if($user->customHasPermission('create-vendor-assignment') ){
+                    $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                        ->where('modules.slug','purchase-request')
+                        ->where('user_last_logins.user_id',$user->id)
+                        ->pluck('user_last_logins.last_login')
+                        ->first();
+                    if($lastLogin == null){
+                        $purchaseRequestIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                                                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                                                            ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                                                            ->distinct('purchase_requests.id')
+                                                            ->pluck('purchase_requests.id');
+                        $purchaseRequestApprovedCount = PurchaseRequest::whereIn('purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                                                            ->whereNotIn('id',$purchaseRequestIds)
+                                                            ->count();
+                    }else{
+                        $purchaseRequestIds = PurchaseRequestComponentVendorRelation::join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_request_components.purchase_request_id')
+                            ->where('purchase_requests.project_site_id',$projectSite['project_site_id'])
+                            ->where('purchase_request_component_vendor_relation.created_at','>=',$lastLogin)
+                            ->distinct('purchase_requests.id')
+                            ->pluck('purchase_requests.id');
+                        $purchaseRequestApprovedCount = PurchaseRequest::whereIn('purchase_component_status_id',PurchaseRequestComponentStatuses::whereIn('slug',['p-r-manager-approved','p-r-admin-approved'])->pluck('id'))
+                            ->whereNotIn('id',$purchaseRequestIds)
+                            ->count();
+                    }
+                }
                 if($user->customHasPermission('approve-purchase-order-request')){
                     $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
                         ->where('modules.slug','purchase-order-request')
@@ -454,7 +511,7 @@ class DashboardController extends Controller
                 [
                   'name' => 'Purchase',
                   'slug' => 'purchase',
-                  'notification_count' => $materialRequestCreateCount + $purchaseRequestCreateCount + $materialRequestDisapprovedCount + $purchaseRequestDisapprovedCount + $purchaseOrderRequestCreateCount + $purchaseOrderCreatedCount + $purchaseOrderBillCreateCount
+                  'notification_count' => $materialRequestCreateCount + $purchaseRequestCreateCount + $materialRequestDisapprovedCount + $purchaseRequestDisapprovedCount + $purchaseRequestApprovedCount + $purchaseOrderRequestCreateCount + $purchaseOrderCreatedCount + $purchaseOrderBillCreateCount
                 ],
                 [
                     'name' => 'Inventory',
