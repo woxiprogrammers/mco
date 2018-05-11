@@ -26,6 +26,8 @@ use App\QuotationStatus;
 use App\Role;
 use App\Unit;
 use App\User;
+use App\UserHasPermission;
+use App\UserHasRole;
 use App\Vendor;
 use App\VendorMaterialRelation;
 use Carbon\Carbon;
@@ -498,9 +500,24 @@ class PurchaseRequestController extends Controller
                     }else{
                         $approveStatusId = PurchaseRequestComponentStatuses::where('slug','p-r-manager-approved')->pluck('id')->first();
                     }
-                    PurchaseRequest::where('id',$purchaseRequestId)->update([
+                    $purchaseRequest = PurchaseRequest::where('id',$purchaseRequestId)->first();
+                    $purchaseRequest->update([
                                         'purchase_component_status_id' => $approveStatusId
                                     ]);
+                    $projectSiteId = $purchaseRequest['project_site_id'];
+                    $vendorAssignmentAclUserToken = UserHasPermission::join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                                                    ->join('users','users.id','=','user_has_permissions.user_id')
+                                                    ->join('user_project_site_relation','user_project_site_relation.user_id','users.id')
+                                                    ->where('permissions.name','create-vendor-assignment')
+                                                    ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                                                    ->select('users.web_fcm_token as web_fcm_function','users.mobile_fcm_token as mobile_fcm_function')
+                                                    ->get()->toArray();
+                    $webTokens = array_column($vendorAssignmentAclUserToken,'web_fcm_function');
+                    $mobileTokens = array_column($vendorAssignmentAclUserToken,'mobile_fcm_function');
+                    $notificationString = '3 -'.$purchaseRequest->projectSite->project->name.' '.$purchaseRequest->projectSite->name;
+                    $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Purchase Request Approved.';
+                    $notificationString .= 'PR number: '.$purchaseRequest->format_id;
+                    $this->sendPushNotification('Manisha Construction',$notificationString,array_unique($webTokens),array_unique($mobileTokens),'p-r-a');
                     $materialComponentIds = PurchaseRequestComponent::where('purchase_request_id',$purchaseRequestId)->pluck('material_request_component_id')->toArray();
                     MaterialRequestComponents::whereIn('id',$materialComponentIds)->update(['component_status_id' => $approveStatusId]);
                     $materialComponentHistoryData['component_status_id'] = $approveStatusId;
@@ -557,6 +574,7 @@ class PurchaseRequestController extends Controller
                             'material_request_component_id' => $materialComponentId,
                             'component_status_id' => $disapproveStatusId,
                             'quantity' => $materialRequestComponentData['quantity'],
+                            'user_id' => $user['id'],
                             'unit_id' => $materialRequestComponentData['unit_id'],
                             'remark' => $request->remark,
                         ];

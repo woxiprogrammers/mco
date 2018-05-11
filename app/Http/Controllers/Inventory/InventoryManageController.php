@@ -273,10 +273,13 @@ class InventoryManageController extends Controller
             $asset_type = Asset::join('asset_types','assets.asset_types_id','=','asset_types.id')
                             ->where('assets.id',$inventoryComponent['reference_id'])->select('assets.asset_types_id','asset_types.name','asset_types.slug')->first();
             $transportationVendors = Vendor::where('is_active',true)->where('for_transportation',true)->select('id','name')->get()->toArray();
+            $sourceName = $inventoryComponent->projectSite->project->name.'-'.$inventoryComponent->projectSite->name;
             $siteOutGrns = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                 ->where('transfer_type_id',InventoryTransferTypes::where('slug','site')->where('type','ilike','out')->pluck('id')->first())
                 ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
-                ->where('inventory_components.project_site_id','!=',$request['project_site_id'])
+                ->where('inventory_component_transfers.source_name',$sourceName)
+                ->where('inventory_components.name',$inventoryComponent['name'])
+                ->where('inventory_components.project_site_id','!=',$inventoryComponent['project_site_id'])
                 ->whereNull('related_transfer_id')->select('inventory_component_transfers.id','inventory_component_transfers.grn')->get();
             return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_type','amount','transportationVendors','siteOutGrns'));
         }catch(\Exception $e){

@@ -810,7 +810,7 @@ class PurchaseController extends Controller
                         $materialRequestComponent->update(['component_status_id' => $adminDisapproveStatusId]);
                         $materialComponentHistoryData['material_request_component_id'] = $materialRequestComponentVersion['material_request_component_id'] = $componentId;
                         $materialRequestComponentVersion['quantity'] = $materialRequestComponent['quantity'];
-                        $materialRequestComponentVersion['user_id'] = $materialRequestComponent['user_id'];
+                        $materialRequestComponentVersion['unit_id'] = $materialRequestComponent['unit_id'];
                         MaterialRequestComponentHistory::create($materialComponentHistoryData);
                         MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                         $userTokens = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
