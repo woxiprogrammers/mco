@@ -11,6 +11,7 @@ use App\Client;
 use App\Helper\MaterialProductHelper;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
+use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
@@ -60,6 +61,7 @@ class PurchaseOrderController extends Controller
     use MaterialRequestTrait;
     use InventoryTrait;
     use NotificationTrait;
+    use PeticashTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -461,10 +463,12 @@ class PurchaseOrderController extends Controller
                 $iterator++;
             }
             $systemUsers = User::where('is_active',true)->select('id','first_name','last_name')->get();
-            $transaction_types = PaymentType::select('id','name')->where('slug','!=','peticash')->get();
+            $transaction_types = PaymentType::select('id','name')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
             $purchaseOrderStatusSlug = $purchaseOrder->purchaseOrderStatus->slug;
-            return view('purchase/purchase-order/edit')->with(compact('userRole','purchaseOrderStatusSlug','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName','banks'));
+            return view('purchase/purchase-order/edit')->with(compact('userRole','purchaseOrderStatusSlug','transaction_types','purchaseOrderList','materialList','purchaseOrderTransactionListing','systemUsers','vendorName','banks','cashAllowedLimit'));
         }catch (\Exception $e){
                 $data = [
                     'action' => 'Get Purchase Order Edit View',
@@ -659,22 +663,41 @@ class PurchaseOrderController extends Controller
     public function createAdvancePayment(Request $request){
         try{
             $advancePaymentData = $request->except('_token');
-            $bank = BankInfo::where('id',$request['bank_id'])->first();
-            if($request['amount'] <= $bank['balance_amount']){
-                PurchaseOrderAdvancePayment::create($advancePaymentData);
-                $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
-                $newAdvancePaymentAmount = $purchaseOrder->total_advance_amount + $request->amount;
-                $balanceAdvanceAmount = $purchaseOrder->balance_advance_amount + $request->amount;
-                $purchaseOrder->update([
-                    'total_advance_amount' => $newAdvancePaymentAmount,
-                    'balance_advance_amount' => $balanceAdvanceAmount
-                ]);
-                $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
-                $bank->update($bankData);
-                $request->session()->flash('success','Advance Payment added successfully');
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+                    PurchaseOrderAdvancePayment::create($advancePaymentData);
+                    $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
+                    $newAdvancePaymentAmount = $purchaseOrder->total_advance_amount + $request->amount;
+                    $balanceAdvanceAmount = $purchaseOrder->balance_advance_amount + $request->amount;
+                    $purchaseOrder->update([
+                        'total_advance_amount' => $newAdvancePaymentAmount,
+                        'balance_advance_amount' => $balanceAdvanceAmount
+                    ]);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success','Advance Payment added successfully');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                }
             }else{
-                $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['amount'] <= $cashAllowedLimit){
+                    PurchaseOrderAdvancePayment::create($advancePaymentData);
+                    $purchaseOrder = PurchaseOrder::findOrFail($request->purchase_order_id);
+                    $newAdvancePaymentAmount = $purchaseOrder->total_advance_amount + $request->amount;
+                    $balanceAdvanceAmount = $purchaseOrder->balance_advance_amount + $request->amount;
+                    $purchaseOrder->update([
+                        'total_advance_amount' => $newAdvancePaymentAmount,
+                        'balance_advance_amount' => $balanceAdvanceAmount
+                    ]);
+                    $request->session()->flash('success','Advance Payment added successfully');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                }
             }
+
 
             return redirect('/purchase/purchase-order/edit/'.$purchaseOrder->id);
        }catch (\Exception $e){
@@ -1345,7 +1368,7 @@ class PurchaseOrderController extends Controller
                 $records['data'][] = [
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]['amount'],
-                    $paymentData[$pagination]->paymentType->name,
+                    ($paymentData[$pagination]->paymentType != null) ? ucfirst($paymentData[$pagination]->paid_from_slug).' - '.$paymentData[$pagination]->paymentType->name : ucfirst($paymentData[$pagination]->paid_from_slug),
                     $paymentData[$pagination]['reference_number']
                 ];
             }
@@ -1444,7 +1467,6 @@ class PurchaseOrderController extends Controller
             $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_sgst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
             $vendorInfo['materials'][$iterator]['transportation_igst_amount'] = ($vendorInfo['materials'][$iterator]['transportation_igst_percentage'] * $vendorInfo['materials'][$iterator]['transportation_amount']) / 100 ;
             $vendorInfo['materials'][$iterator]['transportation_total_amount'] = $vendorInfo['materials'][$iterator]['transportation_amount'] + $vendorInfo['materials'][$iterator]['transportation_cgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_sgst_amount'] + $vendorInfo['materials'][$iterator]['transportation_igst_amount'];
-            //dd($vendorInfo);
             if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
                 $vendorInfo['materials'][0]['gst'] = '-';
             }else{
