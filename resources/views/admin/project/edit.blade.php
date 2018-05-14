@@ -223,19 +223,49 @@
                 <form id="paymentCreateForm" method="post" action="/project/advance-payment/create">
                     {!! csrf_field() !!}
                     <input type="hidden" name="project_site_id" id="projectSiteId" value="{{$projectData['project_site_id']}}">
-                    <div class="form-group row" id="bankSelect">
+                    <div class="form-group row" id="paidFromSlug">
                         <div class="col-md-4">
                             <label class="pull-right control-label">
-                                Bank:
+                                Paid From:
                             </label>
                         </div>
                         <div class="col-md-6">
-                            <select class="form-control" id="bank_id" name="bank_id">
-                                <option value="default">Select Bank</option>
-                                @foreach($banks as $bank)
-                                    <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
-                                @endforeach
+                            <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
+                                <option value="bank">Bank</option>
+                                <option value="cash">Cash</option>
                             </select>
+                        </div>
+                    </div>
+                    <div id="bankData">
+                        <div class="form-group row" id="bankSelect">
+                            <div class="col-md-4">
+                                <label class="pull-right control-label">
+                                    Bank:
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" id="bank_id" name="bank_id">
+                                    <option value="">Select Bank</option>
+                                    @foreach($banks as $bank)
+                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row"id="paymentSelect">
+                            <div class="col-md-4">
+                                <label class="pull-right control-label">
+                                    Payment Mode:
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" name="payment_id" >
+                                    <option value="">Select Payment Type</option>
+                                    @foreach($paymentTypes as $paymentType)
+                                        <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <input type="hidden" id="allowedAmount">
@@ -253,20 +283,7 @@
                             <input type="text" class="form-control" id="amount" name="amount" placeholder="Enter Amount">
                         </div>
                     </div>
-                    <div class="form-group row"id="paymentSelect">
-                        <div class="col-md-4">
-                            <label class="pull-right control-label">
-                                Payment Mode:
-                            </label>
-                        </div>
-                        <div class="col-md-6">
-                            <select class="form-control" name="payment_id" >
-                                @foreach($paymentTypes as $paymentType)
-                                    <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label class="pull-right control-label">
@@ -352,6 +369,15 @@
         PaymentCreate.init();
         $("#hsnCode").trigger('change');
     });
+
+    function changePaidFrom(element){
+        var paidFromSlug = $(element).val();
+        if(paidFromSlug == 'cash'){
+            $('#bankData').hide();
+        }else{
+            $('#bankData').show();
+        }
+    }
 </script>
 
 @endsection
