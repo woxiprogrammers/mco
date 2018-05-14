@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Subcontractor;
 use App\BankInfo;
 use App\DprMainCategory;
 use App\Employee;
+use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\PaymentType;
 use App\Project;
 use App\ProjectSite;
@@ -33,6 +34,7 @@ use Illuminate\Support\Facades\Session;
 
 class SubcontractorController extends Controller
 {
+    use PeticashTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -727,7 +729,7 @@ class SubcontractorController extends Controller
             $noOfFloors = $totalBills->count();
             $BillTransactionTotals = SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorBill->id)->pluck('total')->toArray();
             $remainingAmount = $finalTotal - array_sum($BillTransactionTotals);
-            $paymentTypes = PaymentType::orderBy('id')->get();
+            $paymentTypes = PaymentType::whereIn('slug',['cheque','neft','rtgs','internet-banking'])->orderBy('id')->get();
             $totalBillHoldAmount = SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('hold');
             $reconciledHoldAmount = SubcontractorBillReconcileTransaction::where('subcontractor_bill_id',$subcontractorStructureBillId)->where('transaction_slug','hold')->sum('amount');
             $remainingHoldAmount = $reconciledHoldAmount - $totalBillHoldAmount;
@@ -737,7 +739,9 @@ class SubcontractorController extends Controller
             $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBill->id)->sum('total');
             $pendingAmount = $finalTotal - $paidAmount;
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
-            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks'));
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+            return view('subcontractor.structure.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Bill View',
@@ -996,15 +1000,27 @@ class SubcontractorController extends Controller
     public function addReconcileTransaction(Request $request){
         try{
             $reconcileTransactionData = $request->except('_token');
-            $bank = BankInfo::where('id',$request['bank_id'])->first();
-            if($request['amount'] <= $bank['balance_amount']){
-                $billReconcileTransaction = SubcontractorBillReconcileTransaction::create($reconcileTransactionData);
-                $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
-                $bankData['balance_amount'] = $bank['balance_amount'] - $billReconcileTransaction['amount'];
-                $bank->update($bankData);
+            if($request['paid_from_slug'] == 'cash'){
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['amount'] <= $cashAllowedLimit){
+                    $billReconcileTransaction = SubcontractorBillReconcileTransaction::create($reconcileTransactionData);
+                    $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
+                }else{
+                    $request->session()->flash('success','Cash Amount is insufficient for this transaction');
+                }
             }else{
-                $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+                    $billReconcileTransaction = SubcontractorBillReconcileTransaction::create($reconcileTransactionData);
+                    $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $billReconcileTransaction['amount'];
+                    $bank->update($bankData);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                }
             }
+
 
             return redirect('/subcontractor/subcontractor-bills/view/'.$request->subcontractor_bill_id);
         }catch(\Exception $e){
@@ -1034,7 +1050,7 @@ class SubcontractorController extends Controller
                 $records['data'][] = [
                     date('d M Y',strtotime($billReconcileTransaction[$pagination]['created_at'])),
                     $billReconcileTransaction[$pagination]['amount'],
-                    $billReconcileTransaction[$pagination]->paymentType->name,
+                    ($billReconcileTransaction[$pagination]->paymentType != null) ? ucfirst($billReconcileTransaction[$pagination]->paid_from_slug).' - '.$billReconcileTransaction[$pagination]->paymentType->name : ucfirst($billReconcileTransaction[$pagination]->paid_from_slug),
                     $billReconcileTransaction[$pagination]['reference_number']
                 ];
             }
@@ -1071,7 +1087,7 @@ class SubcontractorController extends Controller
                 $records['data'][] = [
                     date('d M Y',strtotime($billReconcileTransaction[$pagination]['created_at'])),
                     $billReconcileTransaction[$pagination]['amount'],
-                    $billReconcileTransaction[$pagination]->paymentType->name,
+                    ($billReconcileTransaction[$pagination]->paymentType != null) ? ucfirst($billReconcileTransaction[$pagination]->paid_from_slug).' - '.$billReconcileTransaction[$pagination]->paymentType->name : ucfirst($billReconcileTransaction[$pagination]->paid_from_slug),
                     $billReconcileTransaction[$pagination]['reference_number']
                 ];
             }

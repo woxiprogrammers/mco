@@ -468,28 +468,40 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="modal-body" style="padding:40px 50px;">
-                                                                            <div class="form-group row" id="bankSelect">
-                                                                                <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
-                                                                                    <option value="">Select Bank</option>
-                                                                                    @foreach($banks as $bank)
-                                                                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
-                                                                                    @endforeach
+                                                                            <div class="form-group row">
+                                                                                <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
+                                                                                    <option value="bank">Bank</option>
+                                                                                    <option value="cash">Cash</option>
                                                                                 </select>
                                                                             </div>
+                                                                            <div id="bankData">
+                                                                                <div class="form-group row" id="bankSelect">
+                                                                                    <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                                                                                        <option value="">--- Select Bank ---</option>
+                                                                                        @foreach($banks as $bank)
+                                                                                            <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </div>
+                                                                                <div class="form-group row">
+                                                                                    <select class="form-control" name="payment_type_id">
+                                                                                        <option value="">--- Select Payment Type ---</option>
+                                                                                        @foreach($paymentTypes as $type)
+                                                                                            <option value="{{$type['id']}}">{{$type['name']}}</option>
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+
 
                                                                             <input type="hidden" id="allowedAmount">
+                                                                            <input type="hidden" id="cashAllowedLimit" value="{{$cashAllowedLimit}}">
 
                                                                             @foreach($banks as $bank)
                                                                                 <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
                                                                             @endforeach
 
-                                                                            <div class="form-group row">
-                                                                                <select class="form-control" name="payment_type_id">
-                                                                                    @foreach($paymentTypes as $type)
-                                                                                        <option value="{{$type['id']}}">{{$type['name']}}</option>
-                                                                                    @endforeach
-                                                                                </select>
-                                                                            </div>
+
                                                                             <div class="form-group row">
                                                                                 <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount" onchange="checkAmount()">
                                                                             </div>
@@ -642,18 +654,36 @@
         }
 
         function checkAmount(){
-            var selectedBankId = $('#bank_id').val();
-            if(selectedBankId == ''){
-                alert('Please select Bank');
-            }else{
-                var amount = parseFloat($('#bilAmount').val());
-                if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
-                    amount = 0;
+            var paidFromSlug = $('#paid_from_slug').val();
+            if(paidFromSlug == 'bank'){
+                var selectedBankId = $('#bank_id').val();
+                if(selectedBankId == ''){
+                    alert('Please select Bank');
+                }else{
+                    var amount = parseFloat($('#bilAmount').val());
+                    if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+                        amount = 0;
+                    }
+                    var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                    $('#bilAmount').rules('add',{
+                        max: allowedAmount
+                    });
                 }
-                var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+            }else{
+                var cashAllowedLimit = parseFloat($('#cashAllowedLimit').val());
                 $('#bilAmount').rules('add',{
-                    max: allowedAmount
+                    max: cashAllowedLimit
                 });
+            }
+
+        }
+
+        function changePaidFrom(element){
+            var paidFromSlug = $(element).val();
+            if(paidFromSlug == 'cash'){
+                $('#bankData').hide();
+            }else{
+                $('#bankData').show();
             }
         }
     </script>
