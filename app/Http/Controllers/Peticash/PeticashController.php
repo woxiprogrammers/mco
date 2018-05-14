@@ -14,6 +14,7 @@ use App\EmployeeImageType;
 use App\EmployeeType;
 use App\Helper\NumberHelper;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
+use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
@@ -53,6 +54,7 @@ use Illuminate\Support\Facades\Session;
 class PeticashController extends Controller
 {
     use NotificationTrait;
+    use PeticashTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -265,22 +267,9 @@ class PeticashController extends Controller
             $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
             $balance = $masteraccountAmount - $sitewiseaccountAmount;
 
-            $projectSiteId = Session::get('global_project_site');
-            $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
-            $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
-            $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
-                                    ->where('project_site_id',$projectSiteId)
-                                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                                    ->sum('payable_amount');
-            $totalAdvanceAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id')->first())
-                                        ->where('project_site_id',$projectSiteId)
-                                        ->where('peticash_status_id',$approvedPeticashStatusId)
-                                        ->sum('amount');
-            $totalPurchaseAmount = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','PURCHASE')->pluck('id'))
-                                        ->where('project_site_id',$projectSiteId)
-                                        ->where('peticash_status_id',$approvedPeticashStatusId)
-                                        ->sum('bill_amount');
-            $remainingAmount = $allocatedAmount - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount);
+            $statistics = $this->getSiteWiseStatistics();
+            $allocatedAmount  = $statistics['allocatedAmount'];
+            $remainingAmount = $statistics['remainingAmount'];
 
             return view('peticash.sitewise-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance','allocatedAmount','remainingAmount'));
         }catch(\Exception $e){

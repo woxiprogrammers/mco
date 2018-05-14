@@ -17,9 +17,7 @@ use App\ProjectSiteAdvancePayment;
 use App\PurcahsePeticashTransaction;
 use Illuminate\Support\Facades\Session;
 
-trait PeticashTrait
-{
-
+trait PeticashTrait{
 
     public function getSiteWiseStatistics(){
         $projectSiteId = Session::get('global_project_site');
@@ -46,10 +44,11 @@ trait PeticashTrait
                 'exception' => $e->getMessage(),
                 'params' => $projectSiteId
             ];
-            $remainingAmount = 0;
+            $remainingAmount = $allocatedAmount = 0;
         }
         $response = [
-            'remainingAmount' => $remainingAmount
+            'remainingAmount' => $remainingAmount,
+            'allocatedAmount' => $allocatedAmount
         ];
         return $response;
     }
