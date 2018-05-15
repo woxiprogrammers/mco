@@ -8,7 +8,7 @@ class SiteTransferBillPayment extends Model
 {
     protected $table = 'site_transfer_bill_payments';
 
-    protected $fillable = ['site_transfer_bill_id','payment_type_id','amount','reference_number','remark'];
+    protected $fillable = ['site_transfer_bill_id','payment_type_id','amount','reference_number','remark','paid_from_slug','bank_id'];
 
     public function siteTransferBill(){
         return $this->belongsTo('App\SiteTransferBill','site_transfer_bill_id');

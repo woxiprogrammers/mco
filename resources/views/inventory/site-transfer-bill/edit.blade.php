@@ -260,25 +260,64 @@
                                                                     <div class="form-group row">
                                                                         <div class="col-md-4">
                                                                             <label class="pull-right control-label">
+                                                                                Paid From :
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
+                                                                                <option value="bank">Bank</option>
+                                                                                <option value="cash">Cash</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div id="bankData">
+                                                                        <div class="form-group row" id="bankSelect">
+                                                                            <div class="col-md-4">
+                                                                                <label class="pull-right control-label">
+                                                                                    Bank :
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                                                                                    <option value="">--- Select Bank ---</option>
+                                                                                    @foreach($banks as $bank)
+                                                                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group row" id="paymentSelect">
+                                                                            <div class="col-md-4">
+                                                                                <label class="pull-right control-label">
+                                                                                    Payment Mode:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <select class="form-control" name="payment_type_id" >
+                                                                                    <option value="">--- Select Payment Type ---</option>
+                                                                                    @foreach($paymentTypes as $paymentType)
+                                                                                        <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+
+                                                                    <input type="hidden" id="allowedAmount">
+                                                                    <input type="hidden" id="cashAllowedAmount" value="{{$cashAllowedLimit}}">
+
+                                                                    @foreach($banks as $bank)
+                                                                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                                                                    @endforeach
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-4">
+                                                                            <label class="pull-right control-label">
                                                                                 Amount
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="form-group row"id="paymentSelect">
-                                                                        <div class="col-md-4">
-                                                                            <label class="pull-right control-label">
-                                                                                Payment Mode:
-                                                                            </label>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <select class="form-control" name="payment_type_id" >
-                                                                                @foreach($paymentTypes as $paymentType)
-                                                                                    <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
-                                                                                @endforeach
-                                                                            </select>
+                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount" onkeyup="checkAmount()">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group row">
@@ -339,5 +378,39 @@
                 }
             });
         });
+
+        function checkAmount(){
+            var paidFromSlug = $('#paid_from_slug').val();
+            if(paidFromSlug == 'bank'){
+                var selectedBankId = $('#bank_id').val();
+                if(selectedBankId == ''){
+                    alert('Please select Bank');
+                }else{
+                    var amount = parseFloat($('#amount').val());
+                    if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+                        amount = 0;
+                    }
+                    var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                    $("input[name='amount']").rules('add',{
+                        max: allowedAmount
+                    });
+                }
+            }else{
+                var cashAllowedAmount = parseFloat($('#cashAllowedAmount').val());
+                $("input[name='amount']").rules('add',{
+                    max: cashAllowedAmount
+                });
+            }
+        }
+
+        function changePaidFrom(element){
+            var paidFromSlug = $(element).val();
+            if(paidFromSlug == 'cash'){
+                $('#bankData').hide();
+            }else{
+                $('#bankData').show();
+            }
+
+        }
     </script>
 @endsection
