@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\CustomTraits;
 
 
+use App\BillReconcileTransaction;
 use App\PeticashSalaryTransaction;
 use App\PeticashSiteTransfer;
 use App\PeticashStatus;
@@ -23,6 +24,7 @@ trait PeticashTrait{
         $projectSiteId = Session::get('global_project_site');
         try{
             $projectSiteAdvancedAmount = ProjectSiteAdvancePayment::where('paid_from_slug','cash')->sum('amount');
+            $salesBillCashAmount = BillReconcileTransaction::where('paid_from_slug','cash')->sum('amount');
             $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
             $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
             $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
@@ -37,7 +39,7 @@ trait PeticashTrait{
                 ->where('project_site_id',$projectSiteId)
                 ->where('peticash_status_id',$approvedPeticashStatusId)
                 ->sum('bill_amount');
-            $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount);
+            $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount);
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Peticash sitewise statistics',

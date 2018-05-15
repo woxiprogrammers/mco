@@ -232,6 +232,9 @@ var  CreateBillReconcilePayment = function () {
                 },
                 amount: {
                     required: true
+                },
+                payment_type_id: {
+                    required : true
                 }
             },
             messages: {

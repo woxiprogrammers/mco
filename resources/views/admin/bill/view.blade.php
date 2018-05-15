@@ -698,26 +698,36 @@
                 </div>
                 <div class="modal-body" style="padding:40px 50px;">
                     <div class="form-group row">
-                        <select class="form-control" id="bank_id" name="bank_id">
-                            <option value="">Select Bank</option>
-                            @foreach($banks as $bank)
-                                <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
-                            @endforeach
+                        <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
+                            <option value="bank">Bank</option>
+                            <option value="cash">Cash</option>
                         </select>
                     </div>
+                    <div class="bankData">
+                        <div class="form-group row">
+                            <select class="form-control" id="bank_id" name="bank_id">
+                                <option value="">--- Select Bank ---</option>
+                                @foreach($banks as $bank)
+                                    <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                    <input type="hidden" id="allowedAmount">
-                    @foreach($banks as $bank)
-                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
-                    @endforeach
+                        <input type="hidden" id="allowedAmount">
+                        @foreach($banks as $bank)
+                            <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                        @endforeach
 
-                    <div class="form-group row">
-                        <select class="form-control" name="payment_type_id">
-                            @foreach($paymentTypes as $type)
-                                <option value="{{$type['id']}}">{{$type['name']}}</option>
-                            @endforeach
-                        </select>
+                        <div class="form-group row">
+                            <select class="form-control" name="payment_type_id">
+                                <option value="">--- Select Payment Type ---</option>
+                                @foreach($paymentTypes as $type)
+                                    <option value="{{$type['id']}}">{{$type['name']}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
+
                     <div class="form-group row">
                         <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount">
                     </div>
@@ -766,6 +776,15 @@
         $("#reconcileTransactionSlug").val(transactionSlug);
         $("#reconcilePaymentModal").modal('show');
 
+    }
+
+    function changePaidFrom(element){
+        var paidFromSlug = $(element).val();
+        if(paidFromSlug == 'cash'){
+            $(element).closest('.modal-body').find('.bankData').hide();
+        }else{
+            $(element).closest('.modal-body').find('.bankData').show();
+        }
     }
 
     function showBankData(){
