@@ -254,6 +254,19 @@
                                                                                         </label>
                                                                                     </div>
                                                                                 </div>
+                                                                                <div class="form-group row" id="paidFromSlug">
+                                                                                    <div class="col-md-3">
+                                                                                        <label class="pull-right control-label">
+                                                                                            Paid From :
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <select class="form-control" id="paid_from_slug" name="paid_from_slug" >
+                                                                                                <option value="bank">Bank</option>
+                                                                                                <option value="cash">Cash</option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>
                                                                                 <div class="form-group row" id="paymentSelect">
                                                                                     <div class="form-group row" id="bankSelect">
                                                                                         <div class="col-md-3">
@@ -274,7 +287,7 @@
                                                                                     @foreach($banks as $bank)
                                                                                         <input type="hidden" id="transaction_balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
                                                                                     @endforeach
-                                                                                    <div class="col-md-4">
+                                                                                    <div class="col-md-3">
                                                                                         <label class="pull-right control-label">
                                                                                             Payment Mode:
                                                                                         </label>

@@ -78,12 +78,15 @@ class PeticashController extends Controller
 
     public function getCreateViewForMasterPeticashAccount(Request $request){
         try{
-            $paymenttypes = PaymentType::get(['id','name'])->toArray();
+            $paymenttypes = PaymentType::select(['id','name'])->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $users = Role::join('user_has_roles','roles.id','=','user_has_roles.role_id')
                 ->join('users','user_has_roles.user_id','=','users.id')
                 ->whereIn('roles.slug',['admin','superadmin'])
                 ->select('users.id','users.first_name as name')->get()->toArray();
-            return view('peticash.master-peticash-account.create')->with(compact('paymenttypes','users'));
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+            return view('peticash.master-peticash-account.create')->with(compact('paymenttypes','users','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get Peticash Add Amount View",
@@ -129,14 +132,39 @@ class PeticashController extends Controller
             $fromuserid = $user->id;
             $accountData['user_id'] = $request->to_userid;
             $accountData['amount'] = $request->amount;
-            $accountData['payment_id'] = $request->payment_type;
             $accountData['date'] = $request->date;
             $accountData['received_from_user_id'] = $fromuserid;
             $accountData['remark'] = $request->remark;
             $accountData['project_site_id'] = 0; // VALUE 0 FOR MASTER ACCOUNT
-            $category = PeticashSiteTransfer::create($accountData);
-            $request->session()->flash('success', 'Amount Added successfully.');
-            return redirect('peticash/master-peticash-account/manage');
+            $accountData['paid_from_slug'] = $request['paid_from_slug'];
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+
+                    $accountData['payment_id'] = $request->payment_type;
+                    $accountData['bank_id'] = $request['bank_id'];
+                    PeticashSiteTransfer::create($accountData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success', 'Amount Added successfully.');
+                    return redirect('peticash/master-peticash-account/manage');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('peticash/master-peticash-account/manage');
+                }
+            }else{
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['amount'] <= $cashAllowedLimit){
+                    PeticashSiteTransfer::create($accountData);
+                    $request->session()->flash('success', 'Amount Added successfully.');
+                    return redirect('peticash/master-peticash-account/manage');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('peticash/master-peticash-account/manage');
+                }
+            }
+
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Master Peticash Account',
@@ -247,9 +275,33 @@ class PeticashController extends Controller
             $accountData['received_from_user_id'] = $fromuserid;
             $accountData['remark'] = $request->remark;
             $accountData['project_site_id'] = $request->project_site_id; // VALUE 0 FOR MASTER ACCOUNT
-            $category = PeticashSiteTransfer::create($accountData);
-            $request->session()->flash('success', 'Amount Added successfully.');
-            return redirect('/peticash/sitewise-peticash-account/manage');
+            $accountData['paid_from_slug'] = $request['paid_from_slug'];
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+                    PeticashSiteTransfer::create($accountData);
+                    $accountData['payment_id'] = $request->payment_type;
+                    $accountData['bank_id'] = $request['bank_id'];
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success', 'Amount Added successfully.');
+                    return redirect('/peticash/sitewise-peticash-account/manage');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/peticash/sitewise-peticash-account/manage');
+                }
+            }else{
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['amount'] <= $cashAllowedLimit){
+                    PeticashSiteTransfer::create($accountData);
+                    $request->session()->flash('success', 'Amount Added successfully.');
+                    return redirect('/peticash/sitewise-peticash-account/manage');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/peticash/sitewise-peticash-account/manage');
+                }
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Sitewise Peticash Account',
@@ -285,12 +337,15 @@ class PeticashController extends Controller
 
     public function getCreateViewForSitewisePeticashAccount(Request $request){
         try{
-            $paymenttypes = PaymentType::get(['id','name'])->toArray();
+            $paymenttypes = PaymentType::select(['id','name'])->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $users = array();
             $sites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                      ->where('projects.is_active', true)
                                      ->select('project_sites.id as id','projects.name as name')->get()->toArray();
-            return view('peticash.sitewise-peticash-account.create')->with(compact('paymenttypes','users','sites'));
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+            return view('peticash.sitewise-peticash-account.create')->with(compact('paymenttypes','users','sites','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get Peticash Add Amount Sitewise View",
@@ -888,7 +943,7 @@ class PeticashController extends Controller
                         User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
                         User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['last_name'],
                         $masterAccountData[$pagination]['amount'],
-                        PaymentType::findOrFail($masterAccountData[$pagination]['payment_id'])->toArray()['name'],
+                        ($masterAccountData[$pagination]->paymentType != null) ? ucfirst($masterAccountData[$pagination]->paid_from_slug).' - '.$masterAccountData[$pagination]->paymentType->name : ucfirst($masterAccountData[$pagination]->paid_from_slug),
                         $masterAccountData[$pagination]['remark'],
                         date('d M Y',strtotime($masterAccountData[$pagination]['date'])),
                         '<div class="btn-group">
