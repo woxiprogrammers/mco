@@ -921,24 +921,36 @@ class SubcontractorController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            $subcontractorBillTransactionData = $request->except('_token','remainingTotal','bank_id','payment_id');
+            $subcontractorBillTransactionData = $request->except('_token','remainingTotal','bank_id','payment_id','paid_from_slug');
             if($request->has('is_advance')){
                 $subcontractorBillTransactionData['is_advance'] = true;
                 $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
                 $subcontractor = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->subcontractor;
                 $balanceAdvanceAmount = $subcontractor->balance_advance_amount;
                 $subcontractor->update(['balance_advance_amount' => $balanceAdvanceAmount - $subcontractorBillTransaction->total]);
-            }else{
+            }elseif($request['paid_from_slug'] == 'bank'){
                 $bank = BankInfo::where('id',$request['bank_id'])->first();
                 if($request['total'] <= $bank['balance_amount']){
                     $subcontractorBillTransactionData['is_advance'] = false;
                     $subcontractorBillTransactionData['bank_id'] = $request['bank_id'];
                     $subcontractorBillTransactionData['payment_type_id'] = $request['payment_id'];
+                    $subcontractorBillTransactionData['paid_from_slug'] = $request['paid_from_slug'];
                     $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
                     $bankData['balance_amount'] = $bank['balance_amount'] - $subcontractorBillTransaction['subtotal'];
                     $bank->update($bankData);
                 }else{
                     $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/subcontractor/subcontractor-bills/view/'.$request['subcontractor_bills_id']);
+                }
+            }else{
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['total'] <= $cashAllowedLimit){
+                    $subcontractorBillTransactionData['is_advance'] = false;
+                    $subcontractorBillTransactionData['paid_from_slug'] = $request['paid_from_slug'];
+                    $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+                }else{
+                    $request->session()->flash('success','Cash Amount is insufficient for this transaction');
                     return redirect('/subcontractor/subcontractor-bills/view/'.$request['subcontractor_bills_id']);
                 }
             }
