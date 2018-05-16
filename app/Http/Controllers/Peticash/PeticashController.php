@@ -1755,7 +1755,7 @@ class PeticashController extends Controller
         try{
             $projectSiteId = Session::get('global_project_site');
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
-            $paymentTypes = PaymentType::select('id','name')->get();
+            $paymentTypes = PaymentType::select('id','name')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $transactionTypes = PeticashTransactionType::where('type','PAYMENT')->select('id','name','slug')->get();
             $peticashApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->pluck('salary_amount_approved')->first();
             if (count($peticashApprovedAmount) > 0 && $peticashApprovedAmount != null){
@@ -1863,7 +1863,6 @@ class PeticashController extends Controller
                 $salaryData['bank_id'] = $request['bank_id'];
                 $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
                 $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
-                $bankData['total_amount'] = $bank['total_amount'] - $request['amount'];
                 $bank->update($bankData);
             }else{
                 $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
