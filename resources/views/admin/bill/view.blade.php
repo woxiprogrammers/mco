@@ -539,8 +539,9 @@
                         </div>
                         <div class="col-md-10">
                             <select class="form-control" name="paid_from_advanced" id="paid_from_advanced" onchange="showBankData()">
-                                <option value="false"> Bank </option>
-                                <option value="true"> Advance Payments </option>
+                                <option value="bank"> Bank </option>
+                                <option value="advance"> Advance Payments </option>
+                                <option value="cash"> Cash </option>
                             </select>
                         </div>
                     </div>
@@ -789,7 +790,7 @@
 
     function showBankData(){
         var isAdvanceOption = $('#paid_from_advanced').val();
-        if(isAdvanceOption == 'true'){
+        if(isAdvanceOption != 'bank'){
             $('#bankData').hide();
             $('#debit').prop('readonly',true).val(0);
             $('#hold').prop('readonly',true).val(0);
