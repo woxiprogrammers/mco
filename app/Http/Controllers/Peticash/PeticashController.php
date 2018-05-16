@@ -1851,7 +1851,11 @@ class PeticashController extends Controller
             $salaryData['reference_user_id'] = $user['id'];
             $salaryData['project_site_id'] = $projectSiteId;
             $salaryData['peticash_transaction_type_id'] = PeticashTransactionType::where('slug','ilike',$request['transaction_type'])->pluck('id')->first();
-            $salaryData['days'] = $request['working_days'];
+            if($request['transaction_type'] == 'salary'){
+                $salaryData['days'] = $request['working_days'];
+            }else{
+                $salaryData['days'] = 0;
+            }
             $salaryData['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
             $salaryData['created_at'] = $salaryData['updated_at'] = Carbon::now();
             if($request['paid_from'] == 'bank'){
