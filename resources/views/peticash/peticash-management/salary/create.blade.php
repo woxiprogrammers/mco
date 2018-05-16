@@ -173,6 +173,15 @@
                                                             <input type="text" class="form-control calculate-payable-amount" id="amount" name="amount">
                                                         </div>
                                                     </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="amount" class="control-label">Remark</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="remark" name="remark">
+                                                        </div>
+                                                    </div>
                                                     <div id="salaryExtraFields" hidden>
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
@@ -219,15 +228,7 @@
                                                                 <input type="text" class="form-control" id="payable_amount" name="payable_amount" readonly>
                                                             </div>
                                                         </div>
-                                                        <div class="form-group row">
-                                                            <div class="col-md-3" style="text-align: right">
-                                                                <label for="amount" class="control-label">Remark</label>
-                                                                <span>*</span>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <input type="text" class="form-control" id="remark" name="remark">
-                                                            </div>
-                                                        </div>
+
                                                     </div>
 
                                                 </div>
