@@ -197,12 +197,6 @@
                     max: allowedAmount
                 });
             }
-        }else{
-            var cashAllowedAmount = parseFloat($('#cashAllowedAmount').val());
-            console.log(cashAllowedAmount);
-            $("input[name='amount']").rules('add',{
-                max: cashAllowedAmount
-            });
         }
     }
 </script>
