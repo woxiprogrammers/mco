@@ -87,7 +87,6 @@
                                                         @foreach($banks as $bank)
                                                             <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
                                                         @endforeach
-                                                        <input type="hidden" id="cashAllowedAmount" value="{{$cashAllowedLimit}}">
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
                                                                 <label for="type" class="control-label">Payment Type</label>

@@ -84,11 +84,7 @@ class PeticashController extends Controller
                 ->whereIn('roles.slug',['admin','superadmin'])
                 ->select('users.id','users.first_name as name')->get()->toArray();
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
-
-            $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
-            $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
-            $cashAllowedLimit = $masteraccountAmount - $sitewiseaccountAmount;
-            return view('peticash.master-peticash-account.create')->with(compact('paymenttypes','users','banks','cashAllowedLimit'));
+            return view('peticash.master-peticash-account.create')->with(compact('paymenttypes','users','banks'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get Peticash Add Amount View",
@@ -286,8 +282,9 @@ class PeticashController extends Controller
                     return redirect('/peticash/sitewise-peticash-account/manage');
                 }
             }else{
-                $statistics = $this->getSiteWiseStatistics();
-                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
+                $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
+                $cashAllowedLimit = $masteraccountAmount - $sitewiseaccountAmount;
                 if($request['amount'] <= $cashAllowedLimit){
                     PeticashSiteTransfer::create($accountData);
                     $request->session()->flash('success', 'Amount Added successfully.');
@@ -338,8 +335,9 @@ class PeticashController extends Controller
                                      ->where('projects.is_active', true)
                                      ->select('project_sites.id as id','projects.name as name')->get()->toArray();
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
-            $statistics = $this->getSiteWiseStatistics();
-            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+            $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
+            $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
+            $cashAllowedLimit = $masteraccountAmount - $sitewiseaccountAmount;
             return view('peticash.sitewise-peticash-account.create')->with(compact('paymenttypes','users','sites','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
