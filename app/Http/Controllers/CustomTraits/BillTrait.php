@@ -581,7 +581,7 @@ trait BillTrait{
 
             $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('total')->toArray();
             $remainingAmount = $final['current_bill_gross_total_amount'] - array_sum($BillTransactionTotals);
-            $paymentTypes = PaymentType::orderBy('id')->get();
+            $paymentTypes = PaymentType::orderBy('id')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $totalBillHoldAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('hold');
             $reconciledHoldAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','hold')->sum('amount');
             $remainingHoldAmount = $reconciledHoldAmount - $totalBillHoldAmount;
@@ -1689,7 +1689,7 @@ trait BillTrait{
                 $request->session()->flash('error','Total Payment amount is greater than total bill amount');
                 return redirect('/bill/view/'.$request->bill_id);
             }else{
-                if($transactionData['paid_from_advanced'] == 'true'){
+                if($transactionData['paid_from_advanced'] == 'advance'){
                     $transactionData['paid_from_advanced'] = true;
                     $advanceBalanceAmount = ($projectSite->advanced_balance != null) ? $projectSite->advanced_balance : 0 ;
 
@@ -1697,20 +1697,26 @@ trait BillTrait{
                         $request->session()->flash('error','Transaction amount is greater that advance balance amount. Advance balance amount is '.$advanceBalanceAmount);
                         return redirect('/bill/view/'.$request->bill_id);
                     }else{
+                        BillTransaction::create($transactionData);
                         $newAdvanceBalanceAmount = $advanceBalanceAmount - $request->amount;
                         $projectSite->update(['advanced_balance' => $newAdvanceBalanceAmount]);
                     }
-                }else{
+                }elseif($transactionData['paid_from_advanced'] == 'bank'){
                     $transactionData['paid_from_advanced'] = false;
+                    $transactionData['paid_from_slug'] = 'bank';
                     $transactionData['payment_type_id'] = $request['payment_type_id'];
                     $transactionData['bank_id'] = $request['bank_id'];
+                    BillTransaction::create($transactionData);
                     $bank = BankInfo::where('id',$request['bank_id'])->first();
                     $bankData['balance_amount'] = $bank['balance_amount'] + $request['total'];
                     $bankData['total_amount'] = $bank['total_amount'] + $request['total'];
                     $bank->update($bankData);
+                }else {
+                    $transactionData['paid_from_advanced'] = false;
+                    $transactionData['paid_from_slug'] = 'cash';
+                    BillTransaction::create($transactionData);
                 }
 
-                BillTransaction::create($transactionData);
                 $request->session()->flash('success','Bill Transaction added successfully.');
             }
             return redirect('/bill/view/'.$request->bill_id);
@@ -1739,8 +1745,10 @@ trait BillTrait{
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($transactionDetails); $iterator++,$pagination++ ){
                 if($transactionDetails[$pagination]['paid_from_advanced'] == true){
                     $paidFrom = 'Advance Payment';
+                }elseif($transactionDetails[$pagination]->payment_type_id != null){
+                    $paidFrom = ucfirst($transactionDetails[$pagination]->paid_from_slug).' - '.$transactionDetails[$pagination]->paymentType->name;
                 }else{
-                    $paidFrom = 'Bank';
+                    $paidFrom = ucfirst($transactionDetails[$pagination]->paid_from_slug);
                 }
                 $records['data'][] = [
                     $pagination+1,
@@ -1823,11 +1831,13 @@ trait BillTrait{
     public function addReconcileTransaction(Request $request){
         try{
             $reconcileTransactionData = $request->except('_token');
-            $bank = BankInfo::where('id',$request['bank_id'])->first();
             $billReconcileTransaction = BillReconcileTransaction::create($reconcileTransactionData);
-            $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
-            $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
-            $bank->update($bankData);
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+                $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+                $bank->update($bankData);
+            }
             $request->session()->flash('success','Bill Reconcile Transaction saved Successfully.');
 
             return redirect('/bill/view/'.$request->bill_id);
@@ -1858,7 +1868,7 @@ trait BillTrait{
                 $records['data'][] = [
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]['amount'],
-                    $paymentData[$pagination]->paymentType->name,
+                    ($paymentData[$pagination]->paymentType != null) ? ucfirst($paymentData[$pagination]->paid_from_slug).' - '.$paymentData[$pagination]->paymentType->name : ucfirst($paymentData[$pagination]->paid_from_slug),
                     $paymentData[$pagination]['reference_number']
                 ];
             }
@@ -1895,7 +1905,7 @@ trait BillTrait{
                 $records['data'][] = [
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]['amount'],
-                    $paymentData[$pagination]->paymentType->name,
+                    ($paymentData[$pagination]->paymentType != null) ? ucfirst($paymentData[$pagination]->paid_from_slug).' - '.$paymentData[$pagination]->paymentType->name : ucfirst($paymentData[$pagination]->paid_from_slug),
                     $paymentData[$pagination]['reference_number']
                 ];
             }

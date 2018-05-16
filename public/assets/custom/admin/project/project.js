@@ -193,6 +193,9 @@ var PaymentCreate = function () {
                 bank_id: {
                     required: true
                 },
+                payment_id : {
+                    required : true
+                },
                 amount: {
                     required: true
                 }
@@ -201,6 +204,9 @@ var PaymentCreate = function () {
             messages: {
                 bank_id: {
                     required: "Please select Bank."
+                },
+                payment_id : {
+                    required : "Please select Payment Type"
                 },
                 amount:{
                     max: "Balance Amount is less"

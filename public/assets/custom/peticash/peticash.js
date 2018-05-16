@@ -670,6 +670,12 @@ var  AddAmtToSitewiseAccount = function () {
                 },
                 date : {
                     customDate : true
+                },
+                payment_type : {
+                    required : true
+                },
+                bank_id : {
+                    required : true
                 }
             },
             messages: {
