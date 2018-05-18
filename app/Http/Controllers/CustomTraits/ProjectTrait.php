@@ -239,7 +239,7 @@ trait ProjectTrait{
                 $cityArray[$iterator]['name'] = $city->name.", ".$city->state->name.', '.$city->state->country->name;
                 $iterator++;
             }
-            $paymentTypes = PaymentType::orderBy('id')->get();
+            $paymentTypes = PaymentType::whereIn('slug',['cheque','neft','rtgs','internet-banking'])->orderBy('id')->get();
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             return view('admin.project.edit')->with(compact('projectData','hsnCodes','cityArray','paymentTypes','banks'));
         }catch(\Exception $e){
@@ -280,7 +280,6 @@ trait ProjectTrait{
     public function addAdvancePayment(Request $request){
         try{
             $projectSite = ProjectSite::findOrFail($request['project_site_id']);
-            $bank = BankInfo::where('id',$request['bank_id'])->first();
             $advancePaymentData = $request->except('_token');
             $advancePayment = ProjectSiteAdvancePayment::create($advancePaymentData);
             if($projectSite->advanced_amount == null){
@@ -297,9 +296,12 @@ trait ProjectTrait{
                 'advanced_balance' => $advanceBalance,
                 'advanced_amount' => $advanceAmount
             ]);
-            $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
-            $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
-            $bank->update($bankData);
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+                $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+                $bank->update($bankData);
+            }
             $request->session()->flash('success','Advance Payment Added Successfully.');
 
             return redirect('/project/edit/'.$projectSite->project_id);
@@ -331,7 +333,7 @@ trait ProjectTrait{
                 $records['data'][] = [
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]['amount'],
-                    $paymentData[$pagination]->paymentType->name,
+                    ($paymentData[$pagination]->paymentType != null) ? ucfirst($paymentData[$pagination]->paid_from_slug).' - '.$paymentData[$pagination]->paymentType->name : ucfirst($paymentData[$pagination]->paid_from_slug),
                     $paymentData[$pagination]['reference_number']
                 ];
             }

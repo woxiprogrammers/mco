@@ -22,6 +22,7 @@ use App\AssetMaintenanceVendorRelation;
 use App\BankInfo;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
+use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\PaymentType;
 use App\Vendor;
 use Carbon\Carbon;
@@ -33,6 +34,7 @@ use Illuminate\Support\Facades\Session;
 
 class AssetMaintenanceController extends Controller{
     use InventoryTrait;
+    use PeticashTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -789,8 +791,10 @@ class AssetMaintenanceController extends Controller{
                 $assetMaintenanceBillImagePaths[] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
             }
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
-            $paymentTypes = PaymentType::select('id','name')->get();
-            return view('asset-maintenance.bill.view')->with(compact('assetMaintenanceBill','assetMaintenanceBillImagePaths','paymentTypes','grn','remainingAmountToPay','pendingAmount','banks'));
+            $paymentTypes = PaymentType::select('id','name')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+            return view('asset-maintenance.bill.view')->with(compact('assetMaintenanceBill','assetMaintenanceBillImagePaths','paymentTypes','grn','remainingAmountToPay','pendingAmount','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Asset Maintenance billing view',
@@ -804,19 +808,30 @@ class AssetMaintenanceController extends Controller{
 
     public function createPayment(Request $request){
         try{
-            $bank = BankInfo::where('id',$request['bank_id'])->first();
-            if($request['amount'] <= $bank['balance_amount']){
-                $assetMaintenancePaymentData = $request->only('asset_maintenance_bill_id','payment_id','amount','reference_number','bank_id');
-                $assetMaintenancePaymentData['is_advance'] = false;
-                $assetMaintenancePayment = AssetMaintenanceBillPayment::create($assetMaintenancePaymentData);
-                $assetMaintenancePaymentAmount = AssetMaintenanceBillPayment::where('asset_maintenance_bill_id',$request['asset_maintenance_bill_id'])->sum('amount');
-                $bankData['balance_amount'] = $bank['balance_amount'] - $assetMaintenancePayment['amount'];
-                $bank->update($bankData);
-                $request->session()->flash('success','Asset Maintenance Bill Payment Created Successfully');
+            if($request['paid_from_slug'] == 'cash'){
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['amount'] <= $cashAllowedLimit){
+                    $assetMaintenancePaymentData = $request->only('asset_maintenance_bill_id','amount','reference_number','paid_from_slug');
+                    $assetMaintenancePaymentData['is_advance'] = false;
+                    $assetMaintenancePayment = AssetMaintenanceBillPayment::create($assetMaintenancePaymentData);
+                    $request->session()->flash('success','Asset Maintenance Bill Payment Created Successfully');
+                }else{
+                    $request->session()->flash('success','Cash Amount is insufficient for this transaction');
+                }
             }else{
-                $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+                    $assetMaintenancePaymentData = $request->only('asset_maintenance_bill_id','payment_id','amount','reference_number','bank_id','paid_from_slug');
+                    $assetMaintenancePaymentData['is_advance'] = false;
+                    $assetMaintenancePayment = AssetMaintenanceBillPayment::create($assetMaintenancePaymentData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $assetMaintenancePayment['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success','Asset Maintenance Bill Payment Created Successfully');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                }
             }
-
             return redirect('/asset/maintenance/request/bill/view/'.$request->asset_maintenance_bill_id);
         }catch (\Exception $e){
             $data = [
@@ -838,15 +853,10 @@ class AssetMaintenanceController extends Controller{
             $purchaseOrderPaymentData = AssetMaintenanceBillPayment::where('asset_maintenance_bill_id',$assetMaintenanceBillId)->orderBy('created_at','desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderPaymentData);
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderPaymentData); $iterator++,$pagination++ ){
-                if($purchaseOrderPaymentData[$pagination]->paymentType == null){
-                    $paymentType = 'Advance';
-                }else{
-                    $paymentType = $purchaseOrderPaymentData[$pagination]->paymentType->name;
-                }
                 $records['data'][] = [
                     date('d M Y',strtotime($purchaseOrderPaymentData[$pagination]['created_at'])),
                     $purchaseOrderPaymentData[$pagination]['amount'],
-                    $paymentType,
+                    ($purchaseOrderPaymentData[$pagination]->paymentType != null) ? ucfirst($purchaseOrderPaymentData[$pagination]->paid_from_slug).' - '.$purchaseOrderPaymentData[$pagination]->paymentType->name : ucfirst($purchaseOrderPaymentData[$pagination]->paid_from_slug),
                     $purchaseOrderPaymentData[$pagination]['reference_number'],
                 ];
             }

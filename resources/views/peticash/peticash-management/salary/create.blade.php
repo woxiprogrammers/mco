@@ -146,7 +146,7 @@
                                                     </div>
                                                     <input type="hidden" id="employee_id" name="employee_id">
                                                     <input type="hidden" id="balance">
-                                                    <div class="form-group row">
+                                                    <div class="form-group row" id="perDayWagesDiv">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="employee_name" class="control-label">Per Day Wages</label>
                                                             <span>*</span>
@@ -155,7 +155,7 @@
                                                             <input type="text" class="form-control calculate-payable-amount" id="per_day_wages" name="per_day_wages" readonly onchange="calculatePayableAmount()">
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
+                                                    <div class="form-group row" id="workingDaysDiv">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label for="working_days" class="control-label">Working Days</label>
                                                             <span>*</span>
@@ -170,7 +170,16 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control calculate-payable-amount" id="amount" name="amount" readonly>
+                                                            <input type="text" class="form-control calculate-payable-amount" id="amount" name="amount">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="amount" class="control-label">Remark</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="remark" name="remark">
                                                         </div>
                                                     </div>
                                                     <div id="salaryExtraFields" hidden>
@@ -219,15 +228,7 @@
                                                                 <input type="text" class="form-control" id="payable_amount" name="payable_amount" readonly>
                                                             </div>
                                                         </div>
-                                                        <div class="form-group row">
-                                                            <div class="col-md-3" style="text-align: right">
-                                                                <label for="amount" class="control-label">Remark</label>
-                                                                <span>*</span>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <input type="text" class="form-control" id="remark" name="remark">
-                                                            </div>
-                                                        </div>
+
                                                     </div>
 
                                                 </div>
@@ -273,6 +274,15 @@
             });
             $('#transaction_type').on('change',function(){
                 var transactionType = $(this).val();
+                if(transactionType == 'salary'){
+                    $('#perDayWagesDiv').show();
+                    $('#workingDaysDiv').show();
+                    $('#amount').prop('readonly',true);
+                }else{
+                    $('#perDayWagesDiv').hide();
+                    $('#workingDaysDiv').hide();
+                    $('#amount').prop('readonly',false);
+                }
                 if(typeof $(this).val() != 'undefined' && $(this).val() != '' && $(this).val() != null){
                     $('#employee_name').removeClass('typeahead');
                     $('#employee_name').typeahead('destroy');

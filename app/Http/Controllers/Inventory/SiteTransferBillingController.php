@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Inventory;
 
+use App\BankInfo;
+use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\InventoryComponentTransfers;
 use App\PaymentType;
 use App\SiteTransferBill;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Session;
 
 class SiteTransferBillingController extends Controller
 {
+    use PeticashTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -229,8 +232,11 @@ class SiteTransferBillingController extends Controller
         try{
             $totalPaidAmount = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBill->id)->sum('amount');
             $imageUploadPath = env('SITE_TRANSFER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.sha1($siteTransferBill->id).DIRECTORY_SEPARATOR;
-            $paymentTypes = PaymentType::select('id','name')->get()->toArray();
-            return view('inventory.site-transfer-bill.edit')->with(compact('siteTransferBill','paymentTypes','imageUploadPath','totalPaidAmount'));
+            $paymentTypes = PaymentType::select('id','name')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get()->toArray();
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+            return view('inventory.site-transfer-bill.edit')->with(compact('siteTransferBill','paymentTypes','imageUploadPath','totalPaidAmount','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get site transfer bill edit view',
@@ -245,9 +251,30 @@ class SiteTransferBillingController extends Controller
     public function createPayment(Request $request){
         try{
             $siteTransferBillPaymentData = $request->except('_token');
-            $siteTransferBillPayment = SiteTransferBillPayment::create($siteTransferBillPaymentData);
-            $request->session()->flash('success','Payment is created successfully.');
-            return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+                    $siteTransferBillPayment = SiteTransferBillPayment::create($siteTransferBillPaymentData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success','Payment is created successfully.');
+                    return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
+                }
+            }else{
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['amount'] <= $cashAllowedLimit){
+                    $siteTransferBillPayment = SiteTransferBillPayment::create($siteTransferBillPaymentData);
+                    $request->session()->flash('success','Payment is created successfully.');
+                    return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
+                }
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create site transfer bill payment',
@@ -276,7 +303,7 @@ class SiteTransferBillingController extends Controller
                 $records['data'][] = [
                     date('d M Y',strtotime($siteTransferBillPaymentData[$pagination]['created_at'])),
                     $siteTransferBillPaymentData[$pagination]['amount'],
-                    $paymentType,
+                    ($siteTransferBillPaymentData[$pagination]->paymentType != null) ? ucfirst($siteTransferBillPaymentData[$pagination]->paid_from_slug).' - '.$siteTransferBillPaymentData[$pagination]->paymentType->name : ucfirst($siteTransferBillPaymentData[$pagination]->paid_from_slug),
                     $siteTransferBillPaymentData[$pagination]['reference_number'],
                 ];
             }
