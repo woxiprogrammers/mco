@@ -165,6 +165,8 @@ class SendPurchaseOrderEmails extends Command
                     Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData, $purchaseRequestFormat){
                         $message->subject('Purchase Order for '.$purchaseRequestFormat);
                         $message->to($mailData['toMail']);
+                        $message->cc(env('PURCHASE_CC_MAIL'));
+                        $message->bcc('megha.woxi@gmail.com');
                         $message->from(env('MAIL_USERNAME'));
                         $message->attach($mailData['path']);
                     });
