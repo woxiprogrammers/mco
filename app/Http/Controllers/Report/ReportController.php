@@ -948,16 +948,16 @@ class ReportController extends Controller
                     }
 
                     $data = array(
-                        array('Total Sale Entry', 'Total Receipt Entry', 'Expences on', 'Total expence'),
+                        array('Total Sale Entry', 'Total Receipt Entry',$bankArray, 'Expenses on', 'Total expense'),
                         array($totalSalesEntry, $totalReceiptEntry, 'Total purchase' , $totalPurchase),
                         array(null, null, 'Total miscellaneous purchase' , $miscellaneousPurchaseAmount),
                         array(null, null, 'Subcontractor' , $subcontractor),
-                        array(null, null, 'SALARY' , $peticashSalaryAmount),
-                        array(null, null, 'Indirect Expences(GST,TDS Paid to government from Manisha)' , $indirectExpensesAmount),
+                        array(null, null, 'Salary' , $peticashSalaryAmount),
+                        array(null, null, 'Indirect Expenses(GST,TDS Paid to government from Manisha)' , $indirectExpensesAmount),
                         array(null, null),
                         array($totalSalesEntry, $totalReceiptEntry, null, $total),
                         array(null, null),
-                        array('Profit/ Loss Salewise', 'Profit/ Loss Receiptwise'),
+                        array('Profit/ Loss Sale wise', 'Profit/ Loss Receipt wise'),
                         array($profitLossSaleWise, $profitLossReceiptWise),
                     );
                     Excel::create($report_type."_".$curr_date, function($excel) use($data, $report_type, $header, $companyHeader, $projectName) {
