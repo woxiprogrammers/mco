@@ -342,6 +342,7 @@ trait QuotationTrait{
             }else{
                 $isEdit = false;
                 $hideSubmit = false;
+                $alreadyShowedProductIds = array();
                 if($request->has('profit_margins')){
                     foreach($request['profit_margins'] as $productId => $profitMargin){
                         $productProfitMargins[$productId]['products'] = Product::where('id',$productId)->pluck('name')->first();
@@ -349,8 +350,11 @@ trait QuotationTrait{
                             $productProfitMargins[$productId]['profit_margin'][$id] = $percentage;
                         }
                     }
-                }else{
-                    foreach($productIds as $id){
+                    $alreadyShowedProductIds = array_unique(array_keys($request['profit_margins']));
+                }
+
+                foreach($productIds as $id){
+                    if(!in_array($id, $alreadyShowedProductIds)){
                         $recentVersion = ProductVersion::where('product_id',$id)->orderBy('created_at','desc')->pluck('id')->first();
                         $productProfitMargins[$id]['products'] = Product::where('id',$id)->pluck('name')->first();
                         $productProfitMarginRelation = ProductProfitMarginRelation::join('profit_margin_versions','profit_margin_versions.id','=','products_profit_margins_relation.profit_margin_version_id')
