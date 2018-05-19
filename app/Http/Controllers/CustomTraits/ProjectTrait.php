@@ -241,7 +241,9 @@ trait ProjectTrait{
             }
             $paymentTypes = PaymentType::whereIn('slug',['cheque','neft','rtgs','internet-banking'])->orderBy('id')->get();
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
-            return view('admin.project.edit')->with(compact('projectData','hsnCodes','cityArray','paymentTypes','banks'));
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+            return view('admin.project.edit')->with(compact('projectData','hsnCodes','cityArray','paymentTypes','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'change Project status',
@@ -356,10 +358,31 @@ trait ProjectTrait{
     public function addIndirectExpense(Request $request){
         try{
             $projectId = ProjectSite::where('id', $request->project_site_id)->pluck('project_id')->first();
-            $projectSiteIndirectExpensesData = $request->except('_token');
-            ProjectSiteIndirectExpense::create($projectSiteIndirectExpensesData);
-            $request->session()->flash('success',"Indirect Expenses added successfully.");
-            return redirect('/project/edit/'.$projectId);
+            $projectSiteIndirectExpensesData = $request->except('_token','total');
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['total'] <= $bank['balance_amount']){
+                    ProjectSiteIndirectExpense::create($projectSiteIndirectExpensesData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success',"Indirect Expenses added successfully.");
+                    return redirect('/project/edit/'.$projectId);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/project/edit/'.$projectId);
+                }
+            }else{
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['total'] <= $cashAllowedLimit){
+                    ProjectSiteIndirectExpense::create($projectSiteIndirectExpensesData);
+                    $request->session()->flash('success',"Indirect Expenses added successfully.");
+                    return redirect('/project/edit/'.$projectId);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/project/edit/'.$projectId);
+                }
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add Project Site Indirect Expense',
@@ -388,6 +411,8 @@ trait ProjectTrait{
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]['gst'],
                     $paymentData[$pagination]['tds'],
+                    ($paymentData[$pagination]->paymentType != null) ? ucfirst($paymentData[$pagination]->paid_from_slug).' - '.$paymentData[$pagination]->paymentType->name : ucfirst($paymentData[$pagination]->paid_from_slug),
+                    $paymentData[$pagination]['reference_number']
                 ];
             }
             $records["draw"] = intval($request->draw);
