@@ -310,12 +310,9 @@ class PeticashController extends Controller
             $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
             $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
             $balance = $masteraccountAmount - $sitewiseaccountAmount;
-
-            $statistics = $this->getSiteWiseStatistics();
-            $allocatedAmount  = $statistics['allocatedAmount'];
-            $remainingAmount = $statistics['remainingAmount'];
-
-            return view('peticash.sitewise-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance','allocatedAmount','remainingAmount'));
+            $user = Auth::user();
+            $statistics = $this->getAllSitesStatistics($user);
+            return view('peticash.sitewise-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance','statistics'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Peticash Sitewise Manage view',

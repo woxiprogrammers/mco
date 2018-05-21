@@ -4,7 +4,19 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
-
+<style>
+    .statistic-view-modal{
+        position: fixed;
+        width: 60%;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0,0,0,.2);
+        z-index: 2;
+        cursor: pointer;
+        overflow: scroll;
+    }
+</style>
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -91,76 +103,38 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="modal fade" id="statisticsModel" role="dialog">
-                                        <div class="modal-dialog">
-                                        <!-- Modal content-->
-                                            <div class="modal-content">
-                                                <div class="modal-header" style="padding-bottom:10px">
-                                                    <div class="row">
-                                                        <div class="col-md-7 col-md-offset-2">
-                                                            Statistics
-                                                        </div>
-                                                        <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <div class="col-md-5 col-md-offset-1">
-                                                            <label class="control-label pull-right">
-                                                                    Allocated Amount :
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                           <label class="control-label pull-left">
-                                                                   {{$allocatedAmount}}
-                                                               </label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-5 col-md-offset-1">
-                                                            <label class="control-label pull-right">
-                                                                Balance Amount :
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="control-label pull-left">
-                                                                {{$remainingAmount}}
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+
                                 </div>
                             </div>
                             <div class="modal fade" id="statisticsModel" role="dialog">
-                                <div class="modal-dialog">
+                                <div class="modal-dialog statistic-view-modal">
                                     <!-- Modal content-->
                                     <div class="modal-content">
                                         <div class="modal-header" style="padding-bottom:10px">
                                             <div class="row">
-                                                <div class="col-md-7 col-md-offset-2"> Statistics </div>
+                                                <div class="col-md-4 col-md-offset-5">
+                                                    <h3><b>Statistics</b></h3>
+                                                </div>
                                                 <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
                                             </div>
                                         </div>
                                         <div class="modal-body">
-                                            <div class="row">
+                                            {{--<div class="row">
                                                 <div class="col-md-5 col-md-offset-1">
                                                     <label class="control-label pull-right">
-                                                        Allocated Amount :
+                                                            Allocated Amount :
                                                     </label>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="control-label pull-left">
-                                                        {{$allocatedAmount}}
-                                                    </label>
+                                                   <label class="control-label pull-left">
+                                                           {{$allocatedAmount}}
+                                                       </label>
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-5 col-md-offset-1">
                                                     <label class="control-label pull-right">
-                                                        Remaining Amount :
+                                                        Balance Amount :
                                                     </label>
                                                 </div>
                                                 <div class="col-md-6">
@@ -168,7 +142,35 @@
                                                         {{$remainingAmount}}
                                                     </label>
                                                 </div>
-                                            </div>
+                                            </div>--}}
+                                            <table class="table table-striped table-bordered table-hover" id="projectTable">
+                                                <thead>
+                                                <th scope="col" style="width:250px !important">
+                                                    Project
+                                                </th>
+                                                <th>
+                                                    Allocated Amount
+                                                </th>
+                                                <th>
+                                                    Balance Amount
+                                                </th>
+                                                </thead>
+                                                <tbody>
+                                                @foreach($statistics as $statistic)
+                                                    <tr>
+                                                        <td>
+                                                            {{$statistic['project']}}
+                                                        </td>
+                                                        <td>
+                                                            {{$statistic['allocatedAmount']}}
+                                                        </td>
+                                                        <td>
+                                                            {{$statistic['remainingAmount']}}
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>

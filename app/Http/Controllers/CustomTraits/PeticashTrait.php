@@ -15,8 +15,11 @@ use App\PeticashSalaryTransaction;
 use App\PeticashSiteTransfer;
 use App\PeticashStatus;
 use App\PeticashTransactionType;
+use App\Project;
+use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
 use App\PurcahsePeticashTransaction;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 trait PeticashTrait{
@@ -24,9 +27,19 @@ trait PeticashTrait{
     public function getSiteWiseStatistics(){
         $projectSiteId = Session::get('global_project_site');
         try{
-            $projectSiteAdvancedAmount = ProjectSiteAdvancePayment::where('paid_from_slug','cash')->sum('amount');
-            $salesBillCashAmount = BillReconcileTransaction::where('paid_from_slug','cash')->sum('amount');
-            $salesBillTransactions = BillTransaction::where('paid_from_slug','cash')->sum('total');
+            $projectSiteAdvancedAmount = ProjectSiteAdvancePayment::where('project_site_id',$projectSiteId)
+                                            ->where('paid_from_slug','cash')
+                                            ->sum('amount');
+            $salesBillCashAmount = BillReconcileTransaction::join('bills','bills.id','=','bill_reconcile_transactions.bill_id')
+                                            ->join('quotations','quotations.id','=','bills.quotation_id')
+                                            ->where('quotations.project_site_id', $projectSiteId)
+                                            ->where('bill_reconcile_transactions.paid_from_slug','cash')
+                                            ->sum('bill_reconcile_transactions.amount');
+            $salesBillTransactions = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
+                                            ->join('quotations','quotations.id','=','bills.quotation_id')
+                                            ->where('quotations.project_site_id', $projectSiteId)
+                                            ->where('bill_transactions.paid_from_slug','cash')
+                                            ->sum('total');
             $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
             $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
             $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
@@ -48,13 +61,79 @@ trait PeticashTrait{
                 'exception' => $e->getMessage(),
                 'params' => $projectSiteId
             ];
-            $remainingAmount = $allocatedAmount = 0;
+            Log::critical(json_encode($data));
+            $remainingAmount = $allocatedAmount = $salesBillCashAmount = $salesBillTransactions = $projectSiteAdvancedAmount = 0;
         }
         $response = [
             'remainingAmount' => $remainingAmount,
-            'allocatedAmount' => $allocatedAmount
+            'allocatedAmount' => $allocatedAmount + $salesBillCashAmount + $salesBillTransactions + $projectSiteAdvancedAmount
         ];
         return $response;
+    }
+
+    public function getAllSitesStatistics($user){
+        try{
+            if($user->roles[0]->role->slug == 'superadmin' || $user->roles[0]->role->slug == 'admin'){
+                $projectSiteIds = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                                        ->where('is_active', true)
+                                        ->pluck('project_sites.id')->toArray();
+            }else{
+                $projectSiteIds = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                    ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','project_sites.id')
+                    ->where('projects.is_active', true)
+                    ->where('user_project_site_relation.user_id', $user->id)
+                    ->pluck('project_sites.id')->toArray();
+            }
+            $statistics = array();
+            foreach($projectSiteIds as $projectSiteId){
+                $projectSiteAdvancedAmount = ProjectSiteAdvancePayment::where('project_site_id',$projectSiteId)
+                    ->where('paid_from_slug','cash')
+                    ->sum('amount');
+                $salesBillCashAmount = BillReconcileTransaction::join('bills','bills.id','=','bill_reconcile_transactions.bill_id')
+                    ->join('quotations','quotations.id','=','bills.quotation_id')
+                    ->where('quotations.project_site_id', $projectSiteId)
+                    ->where('bill_reconcile_transactions.paid_from_slug','cash')
+                    ->sum('bill_reconcile_transactions.amount');
+                $salesBillTransactions = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
+                    ->join('quotations','quotations.id','=','bills.quotation_id')
+                    ->where('quotations.project_site_id', $projectSiteId)
+                    ->where('bill_transactions.paid_from_slug','cash')
+                    ->sum('total');
+                $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+                $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
+                $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
+                    ->where('project_site_id',$projectSiteId)
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('payable_amount');
+                $totalAdvanceAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id')->first())
+                    ->where('project_site_id',$projectSiteId)
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('amount');
+                $totalPurchaseAmount = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','PURCHASE')->pluck('id'))
+                    ->where('project_site_id',$projectSiteId)
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->sum('bill_amount');
+                $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount);
+                $allocatedAmount = $allocatedAmount + $salesBillCashAmount + $salesBillTransactions + $projectSiteAdvancedAmount;
+                $projectName = Project::join('project_sites','projects.id','=','project_sites.project_id')
+                                        ->where('project_sites.id', $projectSiteId)
+                                        ->pluck('projects.name')->first();
+                $statistics[] = [
+                    'project' => $projectName,
+                    'remainingAmount' => $remainingAmount,
+                    'allocatedAmount' => $allocatedAmount
+                ];
+            }
+            return $statistics;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get All Sites Statistics',
+                'user' => $user,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return null;
+        }
     }
 
 }
