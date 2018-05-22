@@ -126,7 +126,6 @@ trait PeticashTrait{
             }
             return $statistics;
         }catch (\Exception $e){
-            dd($e->getMessage());
             $data = [
                 'action' => 'Get All Sites Statistics',
                 'user' => $user,

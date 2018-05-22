@@ -77,14 +77,9 @@ $(document).ready(function(){
             var productIds = [];
             $(".quotation-product").each(function(){
                 var productID = $(this).val();
-                console.log(productID);
-                console.log(productIds);
-                console.log($.inArray(productID, productIds));
                 if($.inArray(productID, productIds) != -1){
-                    console.log('in if');
                     duplicateProduct = true;
                 }else{
-                    console.log('in else');
                     productIds.push($(this).val());
                 }
             });
