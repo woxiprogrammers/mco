@@ -75,7 +75,7 @@ trait PeticashTrait{
         try{
             if($user->roles[0]->role->slug == 'superadmin' || $user->roles[0]->role->slug == 'admin'){
                 $projectSiteIds = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                                        ->where('is_active', true)
+                                        ->where('projects.is_active', true)
                                         ->pluck('project_sites.id')->toArray();
             }else{
                 $projectSiteIds = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
@@ -126,6 +126,7 @@ trait PeticashTrait{
             }
             return $statistics;
         }catch (\Exception $e){
+            dd($e->getMessage());
             $data = [
                 'action' => 'Get All Sites Statistics',
                 'user' => $user,

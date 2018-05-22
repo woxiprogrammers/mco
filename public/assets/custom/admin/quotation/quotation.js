@@ -77,9 +77,14 @@ $(document).ready(function(){
             var productIds = [];
             $(".quotation-product").each(function(){
                 var productID = $(this).val();
-                if($.inArray(productID, productIds)){
+                console.log(productID);
+                console.log(productIds);
+                console.log($.inArray(productID, productIds));
+                if($.inArray(productID, productIds) != -1){
+                    console.log('in if');
                     duplicateProduct = true;
                 }else{
+                    console.log('in else');
                     productIds.push($(this).val());
                 }
             });
@@ -407,7 +412,7 @@ function showProfitMargins(){
         var duplicateProduct = false;
         $(".quotation-product").each(function(){
             var productID = $(this).val();
-            if($.inArray(productID, productIds)){
+            if($.inArray(productID, productIds) != -1){
                 duplicateProduct = true;
             }else{
                 productIds.push($(this).val());
@@ -465,33 +470,40 @@ function viewProduct(row){
                 product_id: productId
             },
             success: function(data, textStatus, xhr){
-                $("#productView .modal-body").html(data);
-                $("#productView").modal('show');
-                calucalateProductViewTotal();
+                if(xhr.status == 200){
+                    $("#productView .modal-body").html(data);
+                    $("#productView").modal('show');
+                    calucalateProductViewTotal();
+                }else{
+                    getProductEditForm(productId);
+                }
+
             },
             error: function(){
 
             }
         });
     }else{
-        $.ajax({
-            url:'/product/edit/'+productId,
-            type: "GET",
-            async: false,
-            success: function(data, textStatus, xhr){
-                $("#productView .modal-body").html(data);
-                $("#productView").modal('show');
-                calucalateProductViewTotal();
-            },
-            error: function(){
-
-            }
-        });
+        getProductEditForm(productId);
     }
 
 
 }
+function getProductEditForm(productId){
+    $.ajax({
+        url:'/product/edit/'+productId,
+        type: "GET",
+        async: false,
+        success: function(data, textStatus, xhr){
+            $("#productView .modal-body").html(data);
+            $("#productView").modal('show');
+            calucalateProductViewTotal();
+        },
+        error: function(){
 
+        }
+    });
+}
 function calculateProductSubtotal(){
     var subtotal = 0;
     $(".product-discount-amount").each(function(){

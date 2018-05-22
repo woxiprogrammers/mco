@@ -84,7 +84,7 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
-                                                                <label for="name" class="control-label">Project Site Name</label>
+                                                                <label for="name" class="control-label">Location</label>
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
@@ -93,7 +93,7 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
-                                                                <label for="name" class="control-label">Project Site address</label>
+                                                                <label for="name" class="control-label">Location address</label>
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
