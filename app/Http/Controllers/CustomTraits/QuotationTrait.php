@@ -554,7 +554,15 @@ trait QuotationTrait{
                     $quotationProfitMarginData['profit_margin_id'] = $id;
                     $quotationProfitMarginData['percentage'] = $percentage;
                     $quotationProfitMarginData['quotation_product_id'] = $quotationProduct->id;
-                    QuotationProfitMarginVersion::create($quotationProfitMarginData);
+                    $quotationProfitMargin = QuotationProfitMarginVersion::where('quotation_product_id', $quotationProduct->id)
+                                                    ->where('profit_margin_id', $id)
+                                                    ->first();
+                    if($quotationProfitMargin == null){
+                        QuotationProfitMarginVersion::create($quotationProfitMarginData);
+
+                    }else{
+                        $quotationProfitMargin->update($quotationProfitMarginData);
+                    }
                     $profitMarginAmount = round($profitMarginAmount + ($productAmount * ($percentage / 100)),3);
                 }
                 if($request->has('clientSuppliedMaterial')){
@@ -1568,7 +1576,11 @@ trait QuotationTrait{
             $user = Auth::user();
             $quotationProduct = QuotationProduct::where('quotation_id',$data['quotation_id'])->where('product_id',$data['product_id'])->first();
             if($quotationProduct == null){
-                return redirect('/product/edit/'.$data['product_id']);
+                $responseData = [
+                    'message' => 'Not a quotation Material'
+                ];
+                $status = 201;
+                return response()->json($responseData, $status);
             }else{
                 $quotationDraftStatusId = QuotationStatus::where('slug','draft')->pluck('id')->first();
                 $quotation = Quotation::findOrFail($data['quotation_id']);

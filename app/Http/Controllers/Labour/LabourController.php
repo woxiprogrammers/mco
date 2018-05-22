@@ -101,12 +101,38 @@ class LabourController extends Controller
     public function labourListing(Request $request){
         try{
             $user = Auth::user();
+            $employeeIds = Employee::pluck('id')->toArray();
+            $filterFlag = true;
             if($request->has('employee_name')){
-                $employeeIds = Employee::where('name','ilike','%'.$request['employee_name'].'%')->pluck('id')->toArray();
-            }elseif($request->has('employee_id')){
-                $employeeIds = Employee::where('employee_id','ilike','%'.$request['employee_id'].'%')->pluck('id')->toArray();
-            }else{
-                $employeeIds = Employee::pluck('id');
+                $employeeIds = Employee::whereIn('id', $employeeIds)->where('name','ilike','%'.$request['employee_name'].'%')->pluck('id')->toArray();
+                if(count($employeeIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            if($request->has('employee_id') && $filterFlag){
+                $employeeIds = Employee::whereIn('id', $employeeIds)->where('employee_id','ilike','%'.$request['employee_id'].'%')->pluck('id')->toArray();
+                if(count($employeeIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            if($request->has('employee_contact') && $filterFlag){
+                $employeeIds = Employee::whereIn('id', $employeeIds)->where('mobile','ilike','%'.$request->employee_contact.'%')->pluck('id');
+                if(count($employeeIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            if($request->has('employee_wages') && $filterFlag){
+                $employeeIds = Employee::whereIn('id', $employeeIds)->where('per_day_wages',$request->employee_wages)->pluck('id');
+                if(count($employeeIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            if($request->has('employee_project') && $filterFlag){
+                $employeeIds = Employee::join('project_sites','employees.project_site_id','=','project_sites.id')
+                                        ->join('projects','projects.id','=','project_sites.project_id')
+                                        ->whereIn('employees.id', $employeeIds)
+                                        ->where('projects.name','ilike','%'.$request->employee_project.'%')
+                                        ->pluck('employees.id');
             }
             $listingData = Employee::whereIn('id',$employeeIds)->orderBy('created_at','desc')->get();
             $iTotalRecords = count($listingData);
@@ -120,6 +146,16 @@ class LabourController extends Controller
                 }else{
                     $labourStatus = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
                     $status = 'Enable';
+                }
+                $profilePic = EmployeeImage::join('employee_image_types','employee_image_types.id','=','employee_images.employee_image_type_id')
+                                        ->where('employee_image_types.slug', 'profile')
+                                        ->where('employee_images.employee_id', $listingData[$pagination]['id'])
+                                        ->pluck('employee_images.name')->first();
+                if($profilePic == null){
+                    $profilePicAddress = '/assets/layouts/layout3/img/no-user.jpg';
+                }else{
+                    $employeeDirectoryName = sha1($listingData[$pagination]['id']);
+                    $profilePicAddress = env('EMPLOYEE_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$employeeDirectoryName.DIRECTORY_SEPARATOR.'profile'.DIRECTORY_SEPARATOR.$profilePic;
                 }
                 $projectSiteName = ($listingData[$pagination]['project_site_id'] != null) ? $listingData[$pagination]->projectSite->project->name : '-';
                 if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-user')){
@@ -155,6 +191,7 @@ class LabourController extends Controller
                 }
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['employee_id'],
+                    '<img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;">',
                     $listingData[$pagination]['name'],
                     $listingData[$pagination]['mobile'],
                     $listingData[$pagination]['per_day_wages'],
