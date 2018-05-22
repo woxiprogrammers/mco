@@ -135,51 +135,108 @@ $(document).ready(function(){
     });
 
     $('#createMaterial').click(function(){
-        $('#searchbox').html('');
-        $('#qty').html('');
         var material_name = $('#searchbox').val();
         var quantity = $('#qty').val();
         var unitId = $('#materialUnit').val();
         var unitName = $('#materialUnit option[value="'+unitId+'"]').text();
-        var componentTypeId = $('#component_id').val();
-        var images = [];
-        var iterator = $('#iterator').val();
-        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+        var validFlag = true;
+        if(typeof material_name == 'undefined' || material_name == ''){
+            $("#searchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
+            validFlag = false;
+        }else{
+            $("#searchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
+        }
+        if(typeof quantity == 'undefined' || quantity == ''){
+            $("#qty").closest('.form-group').addClass('has-error').removeClass('has-success');
+            validFlag = false;
+        }else{
+            $("#qty").closest('.form-group').addClass('has-success').removeClass('has-error');
+        }
+        if(typeof unitId == 'undefined' || unitId == ''){
+            $("#materialUnit").closest('.form-group').addClass('has-error').removeClass('has-success');
+            validFlag = false;
+        }else{
+            $("#materialUnit").closest('.form-group').addClass('has-success').removeClass('has-error');
+        }
+        if(validFlag == true){
+            $('#searchbox').html('');
+            $('#qty').html('');
+            var componentTypeId = $('#component_id').val();
+            var images = [];
+            var iterator = $('#iterator').val();
+            var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
 
-        $('.img').each(function(i, el) {
-            var imageSrc = $(el).attr('src');
-            materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
-        });
-        materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
-        var rows = '<tr>'+materials+'</tr>';
-        $('#myModal').modal('hide');
-        $('#Materialrows').append(rows);
-        var iterator = parseInt(iterator) + 1;
-        $('#iterator').val(iterator);
-        $('#component_id').val(null);
+            $('.img').each(function(i, el) {
+                var imageSrc = $(el).attr('src');
+                materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+            });
+            materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
+            var rows = '<tr>'+materials+'</tr>';
+            $('#myModal').modal('hide');
+            $('#Materialrows').append(rows);
+            var iterator = parseInt(iterator) + 1;
+            $('#iterator').val(iterator);
+            $('#component_id').val(null);
+        }
     });
 
     $('#createAsset').click(function(){
-        $('#searchbox').html('');
-        $('#qty').html('');
         var asset_name = $('#Assetsearchbox').val();
         var quantity = $('#Assetqty').val();
         var unit = $('#AssetUnitsearchbox').val();
         var unitId = $('#nosUnitId').val();
-        var componentTypeId = $('#component_id').val();
-        var iterator = $('#iterator').val();
-        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
-        $('.img').each(function(i, el) {
-            var imageSrc = $(el).attr('src');
-            assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
-        })
-        assets += asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
-        var rows = '<tr>'+assets+'</tr>';
-        $('#myModal1').modal('hide');
-        $('#Assetrows').append(rows);
-        var iterator = parseInt(iterator) + 1;
-        $('#iterator').val(iterator);
-        $('#component_id').val(null);
+        var validFlag = true;
+        if(typeof asset_name == 'undefined' || asset_name == ''){
+            $("#Assetsearchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
+            validFlag = false;
+        }else{
+            $("#Assetsearchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
+        }
+        if(typeof quantity == 'undefined' || quantity == ''){
+            $("#Assetqty").closest('.form-group').addClass('has-error').removeClass('has-success');
+            validFlag = false;
+        }else{
+            $("#Assetqty").closest('.form-group').addClass('has-success').removeClass('has-error');
+        }
+        if(validFlag ==  true){
+            $('#searchbox').html('');
+            $('#qty').html('');
+            var componentTypeId = $('#component_id').val();
+            var iterator = $('#iterator').val();
+            var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+            $('.img').each(function(i, el) {
+                var imageSrc = $(el).attr('src');
+                assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+            })
+            assets += asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
+            var rows = '<tr>'+assets+'</tr>';
+            $('#myModal1').modal('hide');
+            $('#Assetrows').append(rows);
+            var iterator = parseInt(iterator) + 1;
+            $('#iterator').val(iterator);
+            $('#component_id').val(null);
+        }
+    });
+
+    $("#myModal").on("hidden.bs.modal", function () {
+        $('#qty').val('');
+        $('#qty').removeClass('has-error');
+        $('#qty').removeClass('has-success');
+        $('#materialUnit option[value=""]').prop('selected', true);
+        $(".typeahead").typeahead("destroy");
+        $("#searchbox").removeClass('typeahead');
+        $('#searchbox').removeClass('has-error').removeClass('has-success');
+        $("#searchbox").val('');
+    });
+
+    $("#myModal1").on("hidden.bs.modal", function () {
+        $('#Assetqty').val('');
+        $('#Assetsearchbox').val('');
+        $('#Assetqty').removeClass('has-error');
+        $('#Assetqty').removeClass('has-success');
+        $(".assetTypeahead").typeahead('destroy');
+        $("#Assetsearchbox").removeClass("assetTypeahead");
+        $('#Assetsearchbox').removeClass('has-error').removeClass('has-success');
     });
 });
 
@@ -197,3 +254,4 @@ function selectUser(id,id1) {
     $("#userSearchbox").val(id);
     $("#user-suggesstion-box").hide();
 }
+

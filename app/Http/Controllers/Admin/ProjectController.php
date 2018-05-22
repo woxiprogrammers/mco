@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Client;
+use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\Http\Controllers\CustomTraits\ProjectTrait;
 use App\Project;
 use App\ProjectSite;
@@ -16,4 +17,5 @@ class ProjectController extends Controller
         $this->middleware('custom.auth');
     }
     use ProjectTrait;
+    use PeticashTrait;
 }
