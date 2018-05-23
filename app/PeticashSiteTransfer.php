@@ -9,7 +9,7 @@ class PeticashSiteTransfer extends Model
     protected $table = 'peticash_site_transfers';
 
     protected $fillable = ['user_id','received_from_user_id','amount','date','remark','project_site_id',
-                    'payment_id'];
+                    'payment_id','bank_id','paid_from_slug'];
 
     public function user(){
         return $this->belongsTo('App\User','user_id');

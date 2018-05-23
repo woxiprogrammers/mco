@@ -413,7 +413,7 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'name' => 'create-quotation',
-                'module_id' => DB::table('modules')->where('slug','quotation')->pluck('id')->first(),
+                'module_id' => DB::table('modules')->where('slug','quotation')->pluck('id')->last(),
                 'is_mobile' => false,
                 'is_web' => true,
                 'type_id' => DB::table('permission_types')->where('slug','create')->pluck('id')->first(),
@@ -422,7 +422,7 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'name' => 'view-quotation',
-                'module_id' => DB::table('modules')->where('slug','quotation')->pluck('id')->first(),
+                'module_id' => DB::table('modules')->where('slug','quotation')->pluck('id')->last(),
                 'is_mobile' => false,
                 'is_web' => true,
                 'type_id' => DB::table('permission_types')->where('slug','view')->pluck('id')->first(),
@@ -431,7 +431,7 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'name' => 'edit-quotation',
-                'module_id' => DB::table('modules')->where('slug','quotation')->pluck('id')->first(),
+                'module_id' => DB::table('modules')->where('slug','quotation')->pluck('id')->last(),
                 'is_mobile' => false,
                 'is_web' => true,
                 'type_id' => DB::table('permission_types')->where('slug','edit')->pluck('id')->first(),
@@ -440,7 +440,7 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'name' => 'approve-quotation',
-                'module_id' => DB::table('modules')->where('slug','quotation')->pluck('id')->first(),
+                'module_id' => DB::table('modules')->where('slug','quotation')->pluck('id')->last(),
                 'is_mobile' => false,
                 'is_web' => true,
                 'type_id' => DB::table('permission_types')->where('slug','approve')->pluck('id')->first(),

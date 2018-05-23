@@ -81,6 +81,12 @@ var  CreateSiteTransferBillPayment = function () {
                     required: true,
                     min: 0.000001,
                     max: maxAmount
+                },
+                bank_id : {
+                    required : true
+                },
+                payment_type_id : {
+                    required : true
                 }
             },
             messages: {

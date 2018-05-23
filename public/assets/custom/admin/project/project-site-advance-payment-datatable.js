@@ -72,6 +72,5 @@ var ProjectSiteAdvancePaymentListing = function () {
     };
 }();
 jQuery(document).ready(function() {
-    console.log(123);
     ProjectSiteAdvancePaymentListing.init();
 });

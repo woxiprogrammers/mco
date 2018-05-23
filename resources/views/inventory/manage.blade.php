@@ -167,6 +167,7 @@
                                     $("#header").addClass("fixed");
                                 }
                                 return $.map(x, function (data) {
+                                    console.log(data);
                                     return {
                                         name:data.name,
                                         reference_id:data.reference_id

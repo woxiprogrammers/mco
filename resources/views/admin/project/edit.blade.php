@@ -84,7 +84,7 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
-                                                                <label for="name" class="control-label">Project Site Name</label>
+                                                                <label for="name" class="control-label">Location</label>
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
@@ -93,7 +93,7 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
-                                                                <label for="name" class="control-label">Project Site address</label>
+                                                                <label for="name" class="control-label">Location address</label>
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
@@ -190,6 +190,9 @@
                                                         <th style="width: 33%"> Date </th>
                                                         <th style="width: 33%"> GST </th>
                                                         <th style="width: 33%"> TDS </th>
+                                                        <th style="width: 33%"> Payment Type </th>
+                                                        <th style="width: 33%"> Reference No. </th>
+
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -215,7 +218,7 @@
             <div class="modal-header" style="padding-bottom:10px">
                 <div class="row">
                     <div class="col-md-4"></div>
-                    <div class="col-md-4"> Add Advacnce Payment</div>
+                    <div class="col-md-4"> Add Advance Payment</div>
                     <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                 </div>
             </div>
@@ -223,6 +226,56 @@
                 <form id="paymentCreateForm" method="post" action="/project/advance-payment/create">
                     {!! csrf_field() !!}
                     <input type="hidden" name="project_site_id" id="projectSiteId" value="{{$projectData['project_site_id']}}">
+                    <div class="form-group row" id="paidFromSlug">
+                        <div class="col-md-4">
+                            <label class="pull-right control-label">
+                                Paid From:
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
+                                <option value="bank">Bank</option>
+                                <option value="cash">Cash</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="bankData">
+                        <div class="form-group row" id="bankSelect">
+                            <div class="col-md-4">
+                                <label class="pull-right control-label">
+                                    Bank:
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" id="bank_id" name="bank_id">
+                                    <option value="">Select Bank</option>
+                                    @foreach($banks as $bank)
+                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row"id="paymentSelect">
+                            <div class="col-md-4">
+                                <label class="pull-right control-label">
+                                    Payment Mode:
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" name="payment_id" >
+                                    <option value="">Select Payment Type</option>
+                                    @foreach($paymentTypes as $paymentType)
+                                        <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="allowedAmount">
+                    @foreach($banks as $bank)
+                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                    @endforeach
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label class="pull-right control-label">
@@ -230,23 +283,10 @@
                             </label>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="amount" placeholder="Enter Amount">
+                            <input type="text" class="form-control" id="amount" name="amount" placeholder="Enter Amount">
                         </div>
                     </div>
-                    <div class="form-group row"id="paymentSelect">
-                        <div class="col-md-4">
-                            <label class="pull-right control-label">
-                                Payment Mode:
-                            </label>
-                        </div>
-                        <div class="col-md-6">
-                            <select class="form-control" name="payment_id" >
-                                @foreach($paymentTypes as $paymentType)
-                                    <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label class="pull-right control-label">
@@ -282,9 +322,56 @@
                 </div>
             </div>
             <div class="modal-body" style="padding:40px 50px;">
-                <form method="post" action="/project/indirect-expense/create">
+                <form method="post" action="/project/indirect-expense/create" id="indirectExpensesForm">
                     <input type="hidden" name="project_site_id" value="{{$projectData['project_site_id']}}">
                     {!! csrf_field() !!}
+                    <div class="form-group row" id="paidFromSlug">
+                        <div class="col-md-3">
+                            <label class="pull-right control-label">
+                                Paid From:
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-control" id="paid_from_slug_for_indirect_expenses" name="paid_from_slug" onchange="changePaidFrom(this)">
+                                <option value="bank">Bank</option>
+                                <option value="cash">Cash</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="bankData">
+                        <div class="form-group row" id="bankSelect">
+                            <div class="col-md-3">
+                                <label class="pull-right control-label">
+                                    Bank:
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" id="bank_id" name="bank_id">
+                                    <option value="">Select Bank</option>
+                                    @foreach($banks as $bank)
+                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row"id="paymentSelect">
+                            <div class="col-md-3">
+                                <label class="pull-right control-label">
+                                    Payment Mode:
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" name="payment_type_id" >
+                                    <option value="">Select Payment Type</option>
+                                    @foreach($paymentTypes as $paymentType)
+                                        <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="cashAllowedAmount" value="{{$cashAllowedLimit}}">
                     <div class="form-body">
                         <div class="form-group row">
                             <div class="col-md-3" style="text-align: right">
@@ -292,7 +379,7 @@
                                 <span>*</span>
                             </div>
                             <div class="col-md-6">
-                                <input name="gst" class="form-control">
+                                <input name="gst" id="gst" class="form-control" onkeyup="calculateTotal(this)">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -301,7 +388,26 @@
                                 <span>*</span>
                             </div>
                             <div class="col-md-6">
-                                <input name="tds" class="form-control">
+                                <input name="tds" id="tds" class="form-control" onkeyup="calculateTotal(this)">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">Total</label>
+                                <span>*</span>
+                            </div>
+                            <div class="col-md-6">
+                                <input name="total" id="total" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <label class="pull-right control-label">
+                                    Reference Number
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="reference_number" placeholder="Enter Reference Number">
                             </div>
                         </div>
                         <div class="form-group row" style="margin-top: 5%">
@@ -329,7 +435,50 @@
 <script>
     $(document).ready(function() {
         EditProject.init();
+        PaymentCreate.init();
+        IndirectExpenses.init();
         $("#hsnCode").trigger('change');
     });
+
+    function changePaidFrom(element){
+        var paidFromSlug = $(element).val();
+        if(paidFromSlug == 'cash'){
+            $(element).closest('.modal-body').find('#bankData').hide();
+        }else{
+            $(element).closest('.modal-body').find('#bankData').show();
+        }
+    }
+
+    function calculateTotal(element){
+        var tds = parseFloat($('#tds').val());
+        if(typeof tds == 'undefined' || tds == '' || tds == null || isNaN(tds)){
+            tds = 0;
+        }
+        console.log(tds);
+        var gst = parseFloat($('#gst').val());
+        if(typeof gst == 'undefined' || gst == '' || gst == null || isNaN(gst)){
+            gst = 0;
+        }
+        var total = tds + gst;
+        $('#total').val(total);
+        var paidFromSlug = $('#paid_from_slug_for_indirect_expenses').val();
+        if(paidFromSlug == 'bank'){
+            var selectedBankId = $(element).closest('.modal-body').find('#bank_id').val();
+            if(selectedBankId == ''){
+                alert('Please select Bank');
+            }else{
+                var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                $("input[name='total']").rules('add',{
+                    max: allowedAmount
+                });
+            }
+        }else{
+            var cashAllowedAmount = parseFloat($('#cashAllowedAmount').val());
+            $("input[name='total']").rules('add',{
+                max: cashAllowedAmount
+            });
+        }
+    }
 </script>
+
 @endsection

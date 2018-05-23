@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Peticash;
 
 use App\Asset;
 use App\AssetType;
+use App\BankInfo;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
 use App\Employee;
+use App\EmployeeImage;
+use App\EmployeeImageType;
+use App\EmployeeType;
 use App\Helper\NumberHelper;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
+use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
@@ -49,6 +54,7 @@ use Illuminate\Support\Facades\Session;
 class PeticashController extends Controller
 {
     use NotificationTrait;
+    use PeticashTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -72,12 +78,13 @@ class PeticashController extends Controller
 
     public function getCreateViewForMasterPeticashAccount(Request $request){
         try{
-            $paymenttypes = PaymentType::get(['id','name'])->toArray();
+            $paymenttypes = PaymentType::select(['id','name'])->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $users = Role::join('user_has_roles','roles.id','=','user_has_roles.role_id')
                 ->join('users','user_has_roles.user_id','=','users.id')
                 ->whereIn('roles.slug',['admin','superadmin'])
                 ->select('users.id','users.first_name as name')->get()->toArray();
-            return view('peticash.master-peticash-account.create')->with(compact('paymenttypes','users'));
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            return view('peticash.master-peticash-account.create')->with(compact('paymenttypes','users','banks'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get Peticash Add Amount View",
@@ -123,14 +130,32 @@ class PeticashController extends Controller
             $fromuserid = $user->id;
             $accountData['user_id'] = $request->to_userid;
             $accountData['amount'] = $request->amount;
-            $accountData['payment_id'] = $request->payment_type;
             $accountData['date'] = $request->date;
             $accountData['received_from_user_id'] = $fromuserid;
             $accountData['remark'] = $request->remark;
             $accountData['project_site_id'] = 0; // VALUE 0 FOR MASTER ACCOUNT
-            $category = PeticashSiteTransfer::create($accountData);
-            $request->session()->flash('success', 'Amount Added successfully.');
-            return redirect('peticash/master-peticash-account/manage');
+            $accountData['paid_from_slug'] = $request['paid_from_slug'];
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+
+                    $accountData['payment_id'] = $request->payment_type;
+                    $accountData['bank_id'] = $request['bank_id'];
+                    PeticashSiteTransfer::create($accountData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success', 'Amount Added successfully.');
+                    return redirect('peticash/master-peticash-account/manage');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('peticash/master-peticash-account/manage');
+                }
+            }else{
+                PeticashSiteTransfer::create($accountData);
+                $request->session()->flash('success', 'Amount Added successfully.');
+                return redirect('peticash/master-peticash-account/manage');
+            }
+
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Master Peticash Account',
@@ -241,9 +266,34 @@ class PeticashController extends Controller
             $accountData['received_from_user_id'] = $fromuserid;
             $accountData['remark'] = $request->remark;
             $accountData['project_site_id'] = $request->project_site_id; // VALUE 0 FOR MASTER ACCOUNT
-            $category = PeticashSiteTransfer::create($accountData);
-            $request->session()->flash('success', 'Amount Added successfully.');
-            return redirect('/peticash/sitewise-peticash-account/manage');
+            $accountData['paid_from_slug'] = $request['paid_from_slug'];
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+                    PeticashSiteTransfer::create($accountData);
+                    $accountData['payment_id'] = $request->payment_type;
+                    $accountData['bank_id'] = $request['bank_id'];
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success', 'Amount Added successfully.');
+                    return redirect('/peticash/sitewise-peticash-account/manage');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/peticash/sitewise-peticash-account/manage');
+                }
+            }else{
+                $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
+                $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
+                $cashAllowedLimit = $masteraccountAmount - $sitewiseaccountAmount;
+                if($request['amount'] <= $cashAllowedLimit){
+                    PeticashSiteTransfer::create($accountData);
+                    $request->session()->flash('success', 'Amount Added successfully.');
+                    return redirect('/peticash/sitewise-peticash-account/manage');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/peticash/sitewise-peticash-account/manage');
+                }
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Create Sitewise Peticash Account',
@@ -260,23 +310,9 @@ class PeticashController extends Controller
             $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
             $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
             $balance = $masteraccountAmount - $sitewiseaccountAmount;
-            $projectSiteId = Session::get('global_project_site');
-            $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
-            $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
-            $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
-                                    ->where('project_site_id',$projectSiteId)
-                                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                                    ->sum('payable_amount');
-            $totalAdvanceAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id')->first())
-                                        ->where('project_site_id',$projectSiteId)
-                                        ->where('peticash_status_id',$approvedPeticashStatusId)
-                                        ->sum('amount');
-            $totalPurchaseAmount = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','PURCHASE')->pluck('id'))
-                                        ->where('project_site_id',$projectSiteId)
-                                        ->where('peticash_status_id',$approvedPeticashStatusId)
-                                        ->sum('bill_amount');
-            $remainingAmount = $allocatedAmount - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount);
-            return view('peticash.sitewise-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance','allocatedAmount','remainingAmount'));
+            $user = Auth::user();
+            $statistics = $this->getAllSitesStatistics($user);
+            return view('peticash.sitewise-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance','statistics'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Peticash Sitewise Manage view',
@@ -290,12 +326,16 @@ class PeticashController extends Controller
 
     public function getCreateViewForSitewisePeticashAccount(Request $request){
         try{
-            $paymenttypes = PaymentType::get(['id','name'])->toArray();
+            $paymenttypes = PaymentType::select(['id','name'])->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $users = array();
             $sites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                      ->where('projects.is_active', true)
                                      ->select('project_sites.id as id','projects.name as name')->get()->toArray();
-            return view('peticash.sitewise-peticash-account.create')->with(compact('paymenttypes','users','sites'));
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
+            $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
+            $cashAllowedLimit = $masteraccountAmount - $sitewiseaccountAmount;
+            return view('peticash.sitewise-peticash-account.create')->with(compact('paymenttypes','users','sites','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get Peticash Add Amount Sitewise View",
@@ -554,6 +594,7 @@ class PeticashController extends Controller
         }
         return response()->json($records);
     }
+
     public function salaryApprovalListing(Request $request){
         try{
             $user = Auth::user();
@@ -782,6 +823,7 @@ class PeticashController extends Controller
         }
           return response()->json($message,$status);
     }
+
     public function salaryRequestedChangeStatus(Request $request){
         try{
             $status = 200;
@@ -827,6 +869,7 @@ class PeticashController extends Controller
         }
         return response()->json($message,$status);
     }
+
     public function changePurchaseStatus(Request $request){
         try{
             $status = 200;
@@ -890,7 +933,7 @@ class PeticashController extends Controller
                         User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['received_from_user_id'])->toArray()['last_name'],
                         User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($masterAccountData[$pagination]['user_id'])->toArray()['last_name'],
                         $masterAccountData[$pagination]['amount'],
-                        PaymentType::findOrFail($masterAccountData[$pagination]['payment_id'])->toArray()['name'],
+                        ($masterAccountData[$pagination]->paymentType != null) ? ucfirst($masterAccountData[$pagination]->paid_from_slug).' - '.$masterAccountData[$pagination]->paymentType->name : ucfirst($masterAccountData[$pagination]->paid_from_slug),
                         $masterAccountData[$pagination]['remark'],
                         date('d M Y',strtotime($masterAccountData[$pagination]['date'])),
                         '<div class="btn-group">
@@ -1113,7 +1156,7 @@ class PeticashController extends Controller
             $data['admin_remark'] = ($salaryTransactionData->admin_remark == null) ? '' : $salaryTransactionData->admin_remark;
             $data['peticash_transaction_type'] = $salaryTransactionData->peticashTransactionType->name;
             $data['peticash_status_name'] = $salaryTransactionData->peticashStatus->name;
-            $data['payment_type'] = $salaryTransactionData->paymentType->name;
+            $data['payment_type'] = ($salaryTransactionData['payment_type_id'] != null) ? $salaryTransactionData->paymentType->name : '';
             $transactionImages = PeticashSalaryTransactionImages::where('peticash_salary_transaction_id',$request['txn_id'])->get();
             if(count($transactionImages) > 0){
                 $data['list_of_images'] = $this->getUploadedImages($transactionImages,$request['txn_id']);
@@ -1703,5 +1746,153 @@ class PeticashController extends Controller
         Log::critical(json_encode($data));
         abort(500,$e->getMessage());
 
+    }
+
+    public function getSalaryCreateView(Request $request){
+        try{
+            $projectSiteId = Session::get('global_project_site');
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $paymentTypes = PaymentType::select('id','name')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
+            $transactionTypes = PeticashTransactionType::where('type','PAYMENT')->select('id','name','slug')->get();
+            $peticashApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->pluck('salary_amount_approved')->first();
+            if (count($peticashApprovedAmount) > 0 && $peticashApprovedAmount != null){
+                $approvedAmount = $peticashApprovedAmount;
+            }else{
+                $approvedAmount = '0';
+            }
+            return view('peticash.peticash-management.salary.create')->with(compact('banks','paymentTypes','transactionTypes','approvedAmount'));
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Labour Create View',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function autoSuggest(Request $request,$type,$keyword){
+        try{
+            $projectSiteId = Session::get('global_project_site');
+            $response = array();
+            $iterator = 0;
+            $employeeDetails = Employee::where('employee_id','ilike','%'.$keyword.'%')->orWhere('name','ilike','%'.$keyword.'%')->whereIn('employee_type_id',EmployeeType::whereIn('slug',['labour','staff','partner'])->pluck('id'))->where('is_active',true)->get()->toArray();
+            $data = array();
+            foreach($employeeDetails as $key => $employeeDetail){
+                $data[$iterator]['employee_id'] = $employeeDetail['id'];
+                $data[$iterator]['format_employee_id'] = $employeeDetail['employee_id'];
+                $data[$iterator]['employee_name'] = $employeeDetail['name'];
+                $data[$iterator]['per_day_wages'] = (int)$employeeDetail['per_day_wages'];
+                $data[$iterator]['employee_profile_picture'] = '/assets/global/img/logo.jpg';
+                $profilePicTypeId = EmployeeImageType::where('slug','profile')->pluck('id')->first();
+                $employeeProfilePic = EmployeeImage::where('employee_id',$employeeDetail['id'])->where('employee_image_type_id',$profilePicTypeId)->first();
+                if($employeeProfilePic == null){
+                    $data[$iterator]['employee_profile_picture'] = "";
+                }else{
+                    $employeeDirectoryName = sha1($employeeDetail['id']);
+                    $imageUploadPath = env('EMPLOYEE_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$employeeDirectoryName.DIRECTORY_SEPARATOR.'profile';
+                    $data[$iterator]['employee_profile_picture'] = $imageUploadPath.DIRECTORY_SEPARATOR.$employeeProfilePic->name;
+                }
+                $peticashStatus = PeticashStatus::whereIn('slug',['approved','pending'])->select('id','slug')->get();
+                $transactionPendingCount = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)->where('employee_id',$employeeDetail['id'])->where('peticash_status_id',$peticashStatus->where('slug','pending')->pluck('id')->first())->count();
+                $data[$iterator]['is_transaction_pending'] = ($transactionPendingCount > 0) ? true : false;
+                $salaryTransactions = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)->where('employee_id',$employeeDetail['id'])->where('peticash_status_id',$peticashStatus->where('slug','approved')->pluck('id')->first())->select('id','amount','payable_amount','peticash_transaction_type_id','pf','pt','esic','tds','created_at')->get();
+                $paymentSlug = PeticashTransactionType::where('type','PAYMENT')->select('id','slug')->get();
+                $advanceSalaryTotal = $salaryTransactions->where('peticash_transaction_type_id',$paymentSlug->where('slug','advance')->pluck('id')->first())->sum('amount');
+                $actualSalaryTotal = $salaryTransactions->where('peticash_transaction_type_id',$paymentSlug->where('slug','salary')->pluck('id')->first())->sum('amount');
+                $payableSalaryTotal = $salaryTransactions->sum('payable_amount');
+                $pfTotal = $salaryTransactions->sum('pf');
+                $ptTotal = $salaryTransactions->sum('pt');
+                $esicTotal = $salaryTransactions->sum('esic');
+                $tdsTotal = $salaryTransactions->sum('tds');
+                $data[$iterator]['balance'] = $actualSalaryTotal - $advanceSalaryTotal - $payableSalaryTotal-$pfTotal-$ptTotal-$esicTotal-$tdsTotal ;
+                $lastSalaryId = $salaryTransactions->where('peticash_transaction_type_id',$paymentSlug->where('slug','salary')->pluck('id')->first())->sortByDesc('created_at')->pluck('id')->first();
+                $advanceAfterLastSalary = $salaryTransactions->where('peticash_transaction_type_id',$paymentSlug->where('slug','advance')->pluck('id')->first())->where('id','>',$lastSalaryId)->sum('amount');
+                $data[$iterator]['advance_after_last_salary'] = $advanceAfterLastSalary;
+                $iterator++;
+            }
+            $status = 200;
+        }catch(\Exception $e){
+            $response = array();
+            $data = [
+                'action' => 'Peticash salary Auto-suggest',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+        }
+        $response = [
+            "data" => $data,
+        ];
+        return response()->json($data,$status);
+    }
+
+    public function createSalaryCreate(Request $request){
+        try{
+            $projectSiteId = Session::get('global_project_site');
+            $user = Auth::user();
+            $validationAmount = ($request['transaction_type'] == 'salary') ? $request['payable_amount'] : $request['amount'];
+            $bank = BankInfo::where('id',$request['bank_id'])->first();
+            $peticashApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->pluck('salary_amount_approved')->first();
+            $approvedAmount = (count($peticashApprovedAmount) > 0 && $peticashApprovedAmount != null) ? $peticashApprovedAmount : 0;
+            if($validationAmount > $bank['balance_amount']){
+                    $request->session()->flash('error', 'Bank Balance Amount is insufficient for this transaction');
+                    return redirect('peticash/peticash-management/salary/manage');
+            }elseif($validationAmount > $approvedAmount){
+                    $request->session()->flash('error', 'Approved Amount is insufficient for this transaction');
+                    return redirect('peticash/peticash-management/salary/manage');
+            }
+            $salaryData = $request->only('employee_id','amount','date','payable_amount','pf','pt','esic','tds','remark');
+            $salaryData['reference_user_id'] = $user['id'];
+            $salaryData['project_site_id'] = $projectSiteId;
+            $salaryData['peticash_transaction_type_id'] = PeticashTransactionType::where('slug','ilike',$request['transaction_type'])->pluck('id')->first();
+            if($request['transaction_type'] == 'salary'){
+                $salaryData['days'] = $request['working_days'];
+            }else{
+                $salaryData['days'] = 0;
+            }
+            $salaryData['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
+            $salaryData['created_at'] = $salaryData['updated_at'] = Carbon::now();
+            if($request['paid_from'] == 'bank'){
+                $salaryData['payment_type_id'] = $request['payment_id'];
+                $salaryData['bank_id'] = $request['bank_id'];
+                $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
+                $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                $bank->update($bankData);
+            }else{
+                $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
+            }
+            $peticashSiteApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->first();
+            $updatedPeticashSiteApprovedAmount = $peticashSiteApprovedAmount['salary_amount_approved'] - $request['amount'];
+            $peticashSiteApprovedAmount->update(['salary_amount_approved' => $updatedPeticashSiteApprovedAmount]);
+            $officeSiteId = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+            if($projectSiteId == $officeSiteId){
+                $activeProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                    ->where('projects.is_active',true)
+                    ->where('project_sites.id','!=',$officeSiteId)->get();
+                if($request['transaction_type'] == 'advance'){
+                    $distributedSiteWiseAmount =  $salaryTransaction['amount'] / count($activeProjectSites);
+                }else{
+                    $distributedSiteWiseAmount = ($salaryTransaction['payable_amount'] + $salaryTransaction['pf'] + $salaryTransaction['pt'] + $salaryTransaction['tds'] + $salaryTransaction['esic']) / count($activeProjectSites) ;
+                }
+                foreach ($activeProjectSites as $key => $projectSite){
+                    $distributedSalaryAmount = $projectSite['distributed_salary_amount'] + $distributedSiteWiseAmount;
+                    $projectSite->update([
+                        'distributed_salary_amount' => $distributedSalaryAmount
+                    ]);
+                }
+            }
+            $request->session()->flash('success', 'Salary transaction created successfully');
+            return redirect('peticash/peticash-management/salary/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Salary',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 }

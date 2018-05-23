@@ -497,6 +497,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{bank_info}', array('uses' => 'Admin\BankController@getEditView'));
         Route::put('edit/{bank_info}', array('uses' => 'Admin\BankController@editBank'));
         Route::get('change-status/{bank_info}', array('uses' => 'Admin\BankController@changeBankStatus'));
+        Route::group(['prefix' => 'transaction'], function(){
+            Route::post('create/{bank_info}',array('uses' => 'Admin\BankController@createTransaction'));
+            Route::post('listing', array('uses' => 'Admin\BankController@getBankTransactionListing'));
+        });
+
+
     });
 
     Route::group(['prefix' => 'checklist'], function(){
@@ -693,6 +699,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('change-voucher-status',array('uses' => 'Peticash\PeticashController@changeVoucherStatus'));
             });
             Route::group(['prefix' => 'salary'], function(){
+                Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryCreateView'));
+                Route::get('auto-suggest/{type}/{keyword}',array('uses' => 'Peticash\PeticashController@autoSuggest'));
+                Route::post('create',array('uses' => 'Peticash\PeticashController@createSalaryCreate'));
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
                 Route::post('listing',array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
                 Route::get('payment-voucher-pdf/{salaryTransactionId}',array('uses' => 'Peticash\PeticashController@getPaymentVoucherPdf'));

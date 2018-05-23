@@ -18,6 +18,12 @@ var  CreateAssetMaintenanceBillPayment = function () {
                     required: true,
                     min: 0.000001,
                     max: maxAmount
+                },
+                bank_id: {
+                  required : true
+                },
+                payment_id:{
+                    required : true
                 }
             },
             messages: {

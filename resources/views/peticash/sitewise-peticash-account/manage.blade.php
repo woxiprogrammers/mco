@@ -4,7 +4,20 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
-
+<style>
+    .statistic-view-modal{
+        position: fixed;
+        width: 60%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0,0,0,0);
+        z-index: 2;
+        cursor: pointer;
+        overflow: scroll;
+    }
+</style>
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -21,7 +34,8 @@
                                 <h1>Manage Sitewise Peticash Account</h1>
                             </div>
                             <div class="pull-right">
-                                <div class="form-group" style="text-align: center">
+
+                                <div class="form-group " style="text-align: center">
                                     <a href="javascript:void(0);" class="btn yellow" id="statistics" >
                                         Statistics
                                     </a>
@@ -32,8 +46,10 @@
                                         </a>
                                     @endif
                                 </div>
-                            <!-- BEGIN PAGE TITLE -->
+
                             </div>
+                            <!-- BEGIN PAGE TITLE -->
+                        </div>
                     </div>
                     <div class="page-content">
                         <div class="container">
@@ -88,45 +104,74 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="modal fade" id="statisticsModel" role="dialog">
-                                        <div class="modal-dialog">
-                                        <!-- Modal content-->
-                                            <div class="modal-content">
-                                                <div class="modal-header" style="padding-bottom:10px">
-                                                    <div class="row">
-                                                        <div class="col-md-7 col-md-offset-2">
-                                                            Statistics
-                                                        </div>
-                                                        <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="modal fade" id="statisticsModel" role="dialog">
+                                <div class="modal-dialog statistic-view-modal">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="padding-bottom:10px">
+                                            <div class="row">
+                                                <div class="col-md-4 col-md-offset-5">
+                                                    <h3><b>Statistics</b></h3>
                                                 </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <div class="col-md-5 col-md-offset-1">
-                                                            <label class="control-label pull-right">
-                                                                    Allocated Amount :
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                           <label class="control-label pull-left">
-                                                                   {{$allocatedAmount}}
-                                                               </label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-5 col-md-offset-1">
-                                                            <label class="control-label pull-right">
-                                                                Balance Amount :
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="control-label pull-left">
-                                                                {{$remainingAmount}}
-                                                            </label>
-                                                        </div>
-                                                    </div>
+                                                <div class="col-md-3"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-body">
+                                            {{--<div class="row">
+                                                <div class="col-md-5 col-md-offset-1">
+                                                    <label class="control-label pull-right">
+                                                            Allocated Amount :
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-6">
+                                                   <label class="control-label pull-left">
+                                                           {{$allocatedAmount}}
+                                                       </label>
                                                 </div>
                                             </div>
+                                            <div class="row">
+                                                <div class="col-md-5 col-md-offset-1">
+                                                    <label class="control-label pull-right">
+                                                        Balance Amount :
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="control-label pull-left">
+                                                        {{$remainingAmount}}
+                                                    </label>
+                                                </div>
+                                            </div>--}}
+                                            <table class="table table-striped table-bordered table-hover" id="projectTable">
+                                                <thead>
+                                                <th scope="col" style="width:250px !important">
+                                                    Project
+                                                </th>
+                                                <th>
+                                                    Allocated Amount
+                                                </th>
+                                                <th>
+                                                    Balance Amount
+                                                </th>
+                                                </thead>
+                                                <tbody>
+                                                @foreach($statistics as $statistic)
+                                                    <tr>
+                                                        <td>
+                                                            {{$statistic['project']}}
+                                                        </td>
+                                                        <td>
+                                                            {{$statistic['allocatedAmount']}}
+                                                        </td>
+                                                        <td>
+                                                            {{$statistic['remainingAmount']}}
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
