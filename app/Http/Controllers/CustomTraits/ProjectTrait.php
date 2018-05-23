@@ -363,7 +363,7 @@ trait ProjectTrait{
                 $bank = BankInfo::where('id',$request['bank_id'])->first();
                 if($request['total'] <= $bank['balance_amount']){
                     ProjectSiteIndirectExpense::create($projectSiteIndirectExpensesData);
-                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['total'];
                     $bank->update($bankData);
                     $request->session()->flash('success',"Indirect Expenses added successfully.");
                     return redirect('/project/edit/'.$projectId);

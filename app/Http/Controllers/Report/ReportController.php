@@ -1384,17 +1384,25 @@ class ReportController extends Controller
                 $indirectExpenseAmount += $projectSiteIndirectExpense['tds'] + $projectSiteIndirectExpense['gst'];
             }
             $finalArray[0] = $indirectExpenseAmount;
+
             $bankIterator = 1;
             foreach($bankIds as $bankId){
-                /*foreach ($projectSiteIndirectExpenseData->where('bank_id',$bankId) as $key => $projectSiteIndirectExpense){
-                    $indirectExpenseAmount += $projectSiteIndirectExpense['tds'] + $projectSiteIndirectExpense['gst'];
-                }*/
-                $indirectExpenseAmount = 0;
-                $finalArray[$bankIterator] = $indirectExpenseAmount;
+                $projectSiteIndirectExpenseDataForBank = $projectSiteIndirectExpenseData->where('bank_id',$bankId)->get();
+                $indirectExpenseAmountForBank = 0;
+                foreach ($projectSiteIndirectExpenseDataForBank as $key => $projectSiteIndirectExpense){
+                    $indirectExpenseAmountForBank += $projectSiteIndirectExpense['tds'] + $projectSiteIndirectExpense['gst'];
+                }
+
+                $finalArray[$bankIterator] = $indirectExpenseAmountForBank;
                 $bankIterator ++ ;
             }
-            // calutation remaining for bank & cash
-            $finalArray[$bankIterator] = 0;
+
+            $projectSiteIndirectExpenseDataForCash = $projectSiteIndirectExpenseData->where('paid_from_slug','cash')->get();
+            $indirectExpenseAmountForCash = 0;
+            foreach ($projectSiteIndirectExpenseDataForCash as $key => $projectSiteIndirectExpense){
+                $indirectExpenseAmountForCash += $projectSiteIndirectExpense['tds'] + $projectSiteIndirectExpense['gst'];
+            }
+            $finalArray[$bankIterator] = $indirectExpenseAmountForCash;
         }catch (\Exception $e){
             $finalArray = array_fill(0,(count($bankIds) + 2),0);
             $data = [
