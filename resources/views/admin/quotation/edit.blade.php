@@ -675,7 +675,7 @@
                                                                     </label>
                                                                 </div>
                                                                 <div class="col-md-5">
-                                                                    <input class="form-control" name="open_expenses" id="open_expenses" value=0 >
+                                                                    <input class="form-control" name="open_expenses" id="open_expenses" value="{{$quotation->opening_expenses}}">
                                                                 </div>
                                                             </div>
                                                         </div>

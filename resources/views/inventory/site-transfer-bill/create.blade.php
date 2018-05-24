@@ -311,7 +311,7 @@
                 $("#extra_amount_cgst_amount").val(cgstAmount.toFixed(2));
                 $("#extra_amount_sgst_amount").val(sgstAmount.toFixed(2));
                 $("#extra_amount_igst_amount").val(igstAmount.toFixed(2));
-                var subtotal = parseFloat($("#subtotal").val());
+                var subtotal = parseFloat($("#subTotal").val());
                 if(isNaN(subtotal)){
                     subtotal = 0;
                 }
