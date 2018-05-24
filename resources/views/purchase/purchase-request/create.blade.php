@@ -209,7 +209,7 @@
                                                 <input type="number" class="form-control empty" id="qty"  placeholder="Enter quantity">
                                             </div>
                                             <div class="form-group" id="unitDrpdn">
-                                                <select id="materialUnit" style="width: 80%;height: 20px;text-align: center">
+                                                <select id="materialUnit" class="form-control">
                                                     @foreach($units as $unit)
                                                         <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                     @endforeach
