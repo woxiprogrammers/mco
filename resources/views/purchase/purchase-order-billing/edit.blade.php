@@ -369,17 +369,40 @@
                                                                             </label>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="form-group row">
+                                                                    <div class="form-group row" id="paidFromDiv">
                                                                         <div class="col-md-4">
                                                                             <label class="pull-right control-label">
-                                                                                Amount
+                                                                                Paid from :
                                                                             </label>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount" value="{{$paymentRemainingAmount}}">
+                                                                            <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom()">
+                                                                                <option value="cash">Cash</option>
+                                                                                <option value="bank">Bank</option>
+                                                                            </select>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="form-group row"id="paymentSelect">
+                                                                    <div class="form-group row"id="paymentSelect" hidden>
+                                                                        <div class="form-group row" id="bankSelect">
+                                                                            <div class="col-md-4">
+                                                                                <label class="pull-right control-label">
+                                                                                    Bank:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
+                                                                                    <option value="">--- Select Bank --- </option>
+                                                                                    @foreach($banks as $bank)
+                                                                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <input type="hidden" id="allowedAmount">
+                                                                        <input type="hidden" id="cashAllowedAmount" value="{{$cashAllowedLimit}}">
+                                                                        @foreach($banks as $bank)
+                                                                            <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                                                                        @endforeach
                                                                         <div class="col-md-4">
                                                                             <label class="pull-right control-label">
                                                                                 Payment Mode:
@@ -387,10 +410,21 @@
                                                                         </div>
                                                                         <div class="col-md-6">
                                                                             <select class="form-control" name="payment_id" >
+                                                                                <option value="">--- Select Payment ---</option>
                                                                                 @foreach($paymentTypes as $paymentType)
                                                                                     <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
                                                                                 @endforeach
                                                                             </select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group row">
+                                                                        <div class="col-md-4">
+                                                                            <label class="pull-right control-label">
+                                                                                Amount
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount" value="{{$paymentRemainingAmount}}" onkeyup="checkAmount()">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group row">
@@ -463,12 +497,11 @@
                     $("#amount").rules('add',{
                         max: balanceAdvanceAmount
                     });
-                    $("#paymentSelect").hide();
+                    $("#paidFromDiv").hide();
+                    $('#paymentSelect').hide();
                 }else{
-                    $("#amount").rules('add',{
-                        max: remainingBillAmount
-                    });
-                    $("#paymentSelect").show();
+                    $("#paidFromDiv").show();
+                    changePaidFrom();
                 }
             });
         });
@@ -486,8 +519,74 @@
                 }
             });
             $('#totalAmount').val(total);
+        }
 
+        function checkAmount(){
+            var remainingBillAmount = parseFloat($("#remainingPaymentAmount").val());
+            if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){
+                remainingBillAmount = 0;
+            }
+            if($("#isAdvanceCheckbox").is(':checked') == true){
+                var balanceAdvanceAmount = parseFloat($("#balanceAdvanceAmount").val());
+                if(balanceAdvanceAmount == null || typeof balanceAdvanceAmount == 'undefined' || isNaN(balanceAdvanceAmount)){
+                    balanceAdvanceAmount = 0;
+                }
+                if(balanceAdvanceAmount < remainingBillAmount){
+                    $("#amount").rules('add',{
+                        max: balanceAdvanceAmount
+                    });
+                }else{
+                    $("#amount").rules('add',{
+                        max: remainingBillAmount
+                    });
+                }
+
+            }else{
+                var paidFromSlug = $('#paid_from_slug').val();
+                if(paidFromSlug == 'cash'){
+                    var cashAllowedAmount = $('#cashAllowedAmount').val();
+                    if(cashAllowedAmount < remainingBillAmount){
+                        $("#amount").rules('add',{
+                            max: cashAllowedAmount
+                        });
+                    }else{
+                        $("#amount").rules('add',{
+                            max: remainingBillAmount
+                        });
+                    }
+                }else{
+                    var selectedBankId = $('#bank_id').val();
+                    if(selectedBankId == ''){
+                        alert('Please select Bank');
+                    }else{
+                        var amount = parseFloat($('#amount').val());
+                        if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
+                            amount = 0;
+                        }
+                        var allowedBankAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                        if(allowedBankAmount < remainingBillAmount){
+                            $("#amount").rules('add',{
+                                max: allowedBankAmount
+                            });
+                        }else{
+                            $("#amount").rules('add',{
+                                max: remainingBillAmount
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        function changePaidFrom(){
+          var paidFromSlug = $('#paid_from_slug').val();
+          if(paidFromSlug == 'cash'){
+              $("#paymentSelect").hide();
+          }else{
+              $("#paymentSelect").show();
+          }
         }
     </script>
 @endsection
+
 

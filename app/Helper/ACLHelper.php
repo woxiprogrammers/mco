@@ -11,6 +11,8 @@ use App\Module;
 use App\PermissionType;
 use App\UserHasPermission;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ACLHelper{
 
@@ -60,7 +62,6 @@ class ACLHelper{
 
     public static function getPermissions($moduleIds){
         try{
-
             $webModules = Module::join('permissions','modules.id','=','permissions.module_id')
                 ->whereIn('modules.module_id',$moduleIds)
                 ->where('permissions.is_web',true)

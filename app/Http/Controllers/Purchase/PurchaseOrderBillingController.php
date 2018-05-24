@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Purchase;
 
+use App\BankInfo;
 use App\Client;
 use App\Helper\UnitHelper;
+use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\PaymentType;
 use App\Project;
@@ -28,6 +30,7 @@ use Illuminate\Support\Facades\Session;
 
 class PurchaseOrderBillingController extends Controller
 {
+    use PeticashTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -475,12 +478,16 @@ class PurchaseOrderBillingController extends Controller
             }
             $paymentRemainingAmount = $purchaseOrderBill['amount'] - $purchaseOrderPayment->sum('amount');
             $paymentTillToday = $purchaseOrderBill->purchaseOrder->total_advance_amount + $purchaseOrderBill->purchaseOrderPayment->where('is_advance',false)->sum('amount');
-            $paymentTypes = PaymentType::select('id','name')->get();
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $paymentTypes = PaymentType::whereIn('slug',['cheque','neft','rtgs','internet-banking'])->select('id','name')->get();
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
             $purchaseOrderComponents = PurchaseOrderComponent::where('purchase_order_id',$purchaseOrderBill['purchase_order_id'])->get();
             $extraTaxPercentage = $purchaseOrderComponents->max(function ($purchaseOrderComponent) {
                 return ($purchaseOrderComponent->cgst_percentage + $purchaseOrderComponent->sgst_percentage + $purchaseOrderComponent->igst_percentage);
             });
-            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday','transactionEditAccess','extraTaxPercentage'));
+            return view('purchase.purchase-order-billing.edit')->with(compact('purchaseOrderBill','purchaseOrderBillImagePaths','subTotalAmount','paymentTypes','grn','paymentRemainingAmount','paymentTillToday','banks','transactionEditAccess','extraTaxPercentage','cashAllowedLimit'));
+
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get PO billing get edit view',
@@ -501,10 +508,12 @@ class PurchaseOrderBillingController extends Controller
             $purchaseOrderPaymentData = PurchaseOrderPayment::where('purchase_order_bill_id',$purchaseOrderBillId)->orderBy('created_at','desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderPaymentData);
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderPaymentData); $iterator++,$pagination++ ){
-                if($purchaseOrderPaymentData[$pagination]->paymentType == null){
+                if($purchaseOrderPaymentData[$pagination]->is_advance == true){
                     $paymentType = 'Advance';
+                }elseif($purchaseOrderPaymentData[$pagination]->paymentType != null){
+                    $paymentType = ucfirst($purchaseOrderPaymentData[$pagination]->paid_from_slug).' - '.$purchaseOrderPaymentData[$pagination]->paymentType->name;
                 }else{
-                    $paymentType = $purchaseOrderPaymentData[$pagination]->paymentType->name;
+                    $paymentType = ucfirst($purchaseOrderPaymentData[$pagination]->paid_from_slug);
                 }
                 $records['data'][] = [
                     date('d M Y',strtotime($purchaseOrderPaymentData[$pagination]['created_at'])),
@@ -528,10 +537,10 @@ class PurchaseOrderBillingController extends Controller
 
     public function createPayment(Request $request){
         try{
-            $purchaseOrderPaymentData = $request->except('_token','is_advance','payment_id');
+            $purchaseOrderPaymentData = $request->except('_token','is_advance','payment_id','paid_from_slug');
             if($request->has('is_advance')){
                 $purchaseOrderPaymentData['is_advance'] = true;
-                $purchaseOrderId =PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                $purchaseOrderId = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                                         ->where('purchase_order_bills.id', $request->purchase_order_bill_id)
                                         ->pluck('purchase_orders.id as id')
                                         ->first();
@@ -544,8 +553,33 @@ class PurchaseOrderBillingController extends Controller
                     return redirect('/purchase/purchase-order-bill/edit/'.$request->purchase_order_bill_id);
                 }
             }else{
-                $purchaseOrderPaymentData['is_advance'] = false;
-                $purchaseOrderPaymentData['payment_id'] = $request->payment_id;
+                if($request['paid_from_slug'] == 'bank'){
+                    $bank = BankInfo::where('id',$request['bank_id'])->first();
+                    if($request['payment_id'] == null){
+                        $request->session()->flash('success','Payment Type not selected');
+                        return redirect('/purchase/purchase-order-bill/edit/'.$request->purchase_order_bill_id);
+                    }elseif($request['amount'] <= $bank['balance_amount']){
+                        $purchaseOrderPaymentData['is_advance'] = false;
+                        $purchaseOrderPaymentData['paid_from_slug'] = $request['paid_from_slug'];
+                        $purchaseOrderPaymentData['payment_id'] = $request->payment_id;
+                        $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                        $bank->update($bankData);
+                    }else{
+                        $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                        return redirect('/purchase/purchase-order-bill/edit/'.$request->purchase_order_bill_id);
+                    }
+                }else{
+                    $statistics = $this->getSiteWiseStatistics();
+                    $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                    if($request['amount'] <= $cashAllowedLimit){
+                        $purchaseOrderPaymentData['paid_from_slug'] = $request['paid_from_slug'];
+                        $purchaseOrderPaymentData['is_advance'] = false;
+                    }else{
+                        $request->session()->flash('success','Amount is insufficient for this transaction');
+                        return redirect('/purchase/purchase-order-bill/edit/'.$request->purchase_order_bill_id);
+                    }
+                }
+
             }
             $purchaseOrderPayment = PurchaseOrderPayment::create($purchaseOrderPaymentData);
             $request->session()->flash('success','Purchase Order Payment Created Successfully');
