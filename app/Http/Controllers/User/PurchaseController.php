@@ -54,13 +54,18 @@ class PurchaseController extends Controller
     }
 
     public function getCreateView(Request $request){
+        $user = Auth::user();
+        $userData = array(
+            "id" => $user['id'],
+            "username" => $user['first_name']." ".$user['last_name']
+        );
         $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
         $units = Unit::select('id','name')->get()->toArray();
         $unitOptions = '';
         foreach($units as $unit){
             $unitOptions .= '<option value="'.$unit['id'].'">'.$unit['name'].'</option>';
         }
-        return view('purchase/material-request/create')->with(compact('nosUnitId','units','unitOptions'));
+        return view('purchase/material-request/create')->with(compact('nosUnitId','units','unitOptions','userData'));
     }
 
     public function getMaterialRequestListing(Request $request){
