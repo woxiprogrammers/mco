@@ -44,37 +44,38 @@
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
+                                                            <label>Client Name : </label>
                                                             <input type="text" class="form-control empty" id="clientSearchbox" value="{{$globalProjectSite->project->client->company}}" placeholder="Enter client name" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
+                                                            <label>Site Name : </label>
                                                             <input type="text" class="form-control empty" id="projectSearchbox" value="{{$globalProjectSite->project->name}} - {{$globalProjectSite->name}}" placeholder="Enter project site name" readonly>
                                                             <input type="hidden"  id="project_site_id" name="project_site_id" value="{{$globalProjectSite->id}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter username" name="user_name" >
-                                                            <input type="hidden" name="user_id" id="user_id_">
+                                                            <label>User Name : </label>
+                                                            <!--<input type="text" class="form-control empty" id="userSearchbox"  placeholder="Enter username" name="user_name" >
+                                                            <input type="hidden" name="user_id" id="user_id_">-->
+                                                            <input type="text" class="form-control empty" value="{{$userData['username']}}" readonly name="user_name">
+                                                            <input type="hidden" name="user_id" id="user_id_" value="{{$userData['id']}}">
                                                             <div id="user-suggesstion-box"></div>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-md-6">
-                                                        <a href="#" class="btn btn-set yellow pull-right"  id="assetBtn">
+                                                    <div class="col-md-12">
+                                                        <a href="#" class="btn btn-set yellow pull-right" style="margin-left: 10px;" id="assetBtn">
                                                             <i class="fa fa-plus" style="font-size: large"></i>
                                                             Asset&nbsp &nbsp &nbsp &nbsp
                                                         </a>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group " style="text-align: center">
-                                                            <a href="#" class="btn btn-set yellow pull-left"  id="myBtn">
-                                                                <i class="fa fa-plus" style="font-size: large"></i>
-                                                                Material
-                                                            </a>&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
-                                                        </div>
+                                                        <a href="#" class="btn btn-set yellow pull-right"  id="myBtn">
+                                                            <i class="fa fa-plus" style="font-size: large"></i>
+                                                            Material
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>

@@ -54,13 +54,18 @@ class PurchaseController extends Controller
     }
 
     public function getCreateView(Request $request){
+        $user = Auth::user();
+        $userData = array(
+            "id" => $user['id'],
+            "username" => $user['first_name']." ".$user['last_name']
+        );
         $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
         $units = Unit::select('id','name')->get()->toArray();
         $unitOptions = '';
         foreach($units as $unit){
             $unitOptions .= '<option value="'.$unit['id'].'">'.$unit['name'].'</option>';
         }
-        return view('purchase/material-request/create')->with(compact('nosUnitId','units','unitOptions'));
+        return view('purchase/material-request/create')->with(compact('nosUnitId','units','unitOptions','userData'));
     }
 
     public function getMaterialRequestListing(Request $request){
@@ -214,6 +219,7 @@ class PurchaseController extends Controller
                             $unitEditable = 'true';
                         }
                         $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'">';
+                        $checkboxComponentMoveToIndent = '<input type="checkbox" class="multiple-select-checkbox-mti" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
                         $user_status = '<td><span class="label label-sm label-danger">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                         $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -234,6 +240,7 @@ class PurchaseController extends Controller
 
                     case 'admin-approved':
                         $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
+                        $checkboxComponentMoveToIndent = '<input type="checkbox" class="multiple-select-checkbox-mti" value="'.$materialRequestList[$pagination]['material_request_component_id'].'">';
                         $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                         $actionDropDown = '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -254,6 +261,7 @@ class PurchaseController extends Controller
 
                     case 'admin-disapproved':
                         $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
+                        $checkboxComponentMoveToIndent = '<input type="checkbox" class="multiple-select-checkbox-mti" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
                         $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                         $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -267,6 +275,7 @@ class PurchaseController extends Controller
 
                     case 'in-indent':
                         $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
+                        $checkboxComponentMoveToIndent = '<input type="checkbox" class="multiple-select-checkbox-mti" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
                         $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                         $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -280,6 +289,7 @@ class PurchaseController extends Controller
 
                     default:
                         $checkboxComponent = '<input type="checkbox" class="multiple-select-checkbox" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
+                        $checkboxComponentMoveToIndent = '<input type="checkbox" class="multiple-select-checkbox-mti" value="'.$materialRequestList[$pagination]['material_request_component_id'].'" disabled>';
                         $user_status = '<td><span class="label label-sm label-success">'. $materialRequestList[$pagination]['component_status_name'].' </span></td>';
                         $actionDropDown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -293,6 +303,7 @@ class PurchaseController extends Controller
                 }
                 $records['data'][$iterator] = [
                     $checkboxComponent,
+                    $checkboxComponentMoveToIndent,
                     $materialRequestList[$pagination]['mr_id'],
                     $materialRequestList[$pagination]['name'],
                     $materialRequestList[$pagination]['quantity'],
@@ -835,7 +846,7 @@ class PurchaseController extends Controller
                     $materialRequestComponentVersion['component_status_id'] = $inIndentStatusId;
                     $materialRequestComponentVersion['user_id'] = $user['id'];
                     $materialRequestComponentVersion['quantity'] = ($request->has('quantity')) ? $request->quantity : $materialRequestComponent['quantity'];
-                    $materialRequestComponentVersion['unit_id'] = ($request->has('unit_id')) ? $request->unit_id : $materialRequestComponent['unit'];
+                    $materialRequestComponentVersion['unit_id'] = ($request->has('unit_id')) ? $request->unit_id : $materialRequestComponent['unit_id'];
                     $materialRequestComponentVersion['remark'] = $request->remark;
                     MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                     MaterialRequestComponents::where('id',$request['component_id'])->update(['component_status_id' => $inIndentStatusId,'quantity' => $request->quantity,'unit_id' => $request->unit_id]);
@@ -851,6 +862,38 @@ class PurchaseController extends Controller
         }catch(\Exception $e){
             $data = [
                 'action' => 'Change Material Request Component Statuses',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function changeMaterialRequestComponentStatustoMTI(Request $request){
+        try{
+            $user = Auth::user();
+            $componentIds = $request->bulk_component_id;
+            $inIndentStatusId = PurchaseRequestComponentStatuses::where('slug','in-indent')->pluck('id')->first();
+            foreach($componentIds as $componentId){
+                $materialRequestComponent = MaterialRequestComponents::where('id',$componentId)->first();
+                $materialRequestComponentVersion['material_request_component_id'] = $componentId;
+                $materialRequestComponentVersion['component_status_id'] = $inIndentStatusId;
+                $materialRequestComponentVersion['user_id'] = $user['id'];
+                $materialRequestComponentVersion['quantity'] = ($request->has('quantity')) ? $request->quantity : $materialRequestComponent['quantity'];
+                $materialRequestComponentVersion['unit_id'] = ($request->has('unit_id')) ? $request->unit_id : $materialRequestComponent['unit_id'];
+                $materialRequestComponentVersion['remark'] = $request->remark;
+                MaterialRequestComponentVersion::create($materialRequestComponentVersion);
+                MaterialRequestComponents::where('id',$componentId)->update(['component_status_id' => $inIndentStatusId,'quantity' => $materialRequestComponentVersion['quantity'],'unit_id' => $materialRequestComponentVersion['unit_id']]);
+                $materialComponentHistoryData['component_status_id'] = $inIndentStatusId;
+                $materialComponentHistoryData['user_id'] = $user['id'];
+                $materialComponentHistoryData['material_request_component_id'] = $componentId;
+                MaterialRequestComponentHistory::create($materialComponentHistoryData);
+            }
+            $request->session()->flash('success', "Bulk Move to Indent Status updated successfully.");
+            return redirect('/purchase/material-request/manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Change Material Request Component Statuses to Move to Indent (Bulk)',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
