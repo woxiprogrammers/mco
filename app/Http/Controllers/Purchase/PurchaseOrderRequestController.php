@@ -201,14 +201,20 @@ class PurchaseOrderRequestController extends Controller
             $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
-                $purchaseOrderRequestsData = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
-                                                        ->where('purchase_requests.project_site_id', $projectSiteId)
-                                                        ->select('purchase_order_requests.id as id','purchase_order_requests.purchase_request_id as purchase_request_id','purchase_order_requests.user_id as user_id')
-                                                        ->orderBy('id','desc')
-                                                        ->get();
+                $purchaseOrderRequestIds  = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
+                ->where('purchase_requests.project_site_id', $projectSiteId)
+                ->orderBy('purchase_order_requests.id','desc')
+                ->pluck('purchase_order_requests.id');
             }else{
-                $purchaseOrderRequestsData = PurchaseOrderRequest::orderBy('id','desc')->get();
+                $purchaseOrderRequestIds = PurchaseOrderRequest::orderBy('id','desc')->pluck('id');
             }
+            if($request->has('purchase_request_format')){
+                $purchaseOrderRequestIds = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
+                                            ->whereIn('purchase_order_requests.id', $purchaseOrderRequestIds)
+                                            ->where('purchase_requests.format_id','ilike','%'.trim($request->purchase_request_format).'%')
+                                            ->pluck('purchase_order_requests.id');
+            }
+            $purchaseOrderRequestsData = PurchaseOrderRequest::whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
             $records = array();
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
@@ -216,7 +222,7 @@ class PurchaseOrderRequestController extends Controller
             $end = $request->length < 0 ? count($purchaseOrderRequestsData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseOrderRequestsData); $iterator++,$pagination++ ){
                 $user = User::where('id',$purchaseOrderRequestsData[$pagination]['user_id'])->select('first_name','last_name')->first();
-                $purchaseRequestFormat = PurchaseRequest::where('id',$purchaseOrderRequestsData[$pagination]['purchase_request_id'])->pluck('format_id')->first();
+                $purchaseRequestFormat = $purchaseOrderRequestsData[$pagination]->purchaseRequest->format_id;
                 $actionDropdown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -232,9 +238,8 @@ class PurchaseOrderRequestController extends Controller
                             </ul>';
                 }
                 $actionDropdown .= '</div>';
-
                 $records['data'][] = [
-                    $iterator+1,
+                    $purchaseOrderRequestsData[$pagination]['id'],
                     $purchaseRequestFormat,
                     $user['first_name'].' '.$user['last_name'],
                     $actionDropdown
@@ -280,6 +285,7 @@ class PurchaseOrderRequestController extends Controller
                         $purchaseOrderRequestComponents[$purchaseRequestComponentId]['name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->name;
                         $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'] = $purchaseOrderRequestComponent->quantity;
                         $purchaseOrderRequestComponents[$purchaseRequestComponentId]['unit'] = $purchaseOrderRequestComponent->unit->name;
+                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
                     }
                     $rateWithTax = $purchaseOrderRequestComponent->rate_per_unit;
                     $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
@@ -720,6 +726,29 @@ class PurchaseOrderRequestController extends Controller
             return response(200);
         }catch(\Exception $e){
             return response(500);
+        }
+    }
+
+    public function disapproveComponent(Request $request, $purchaseOrderRequest, $purchaseRequestComponent){
+        try{
+            $purchaseOrderRequestComponentId = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
+                                                ->where('purchase_order_request_components.purchase_order_request_id', $purchaseOrderRequest->id)
+                                                ->where('purchase_request_component_vendor_relation.purchase_request_component_id', $purchaseRequestComponent->id)
+                                                ->pluck('purchase_order_request_components.id');
+            PurchaseOrderRequestComponent::whereIn('id', $purchaseOrderRequestComponentId)->update(['is_approved' => false]);
+            $request->session()->flash('success', "Material / Asset removed successfully !!");
+            return redirect('/purchase/purchase-order-request/edit/'.$purchaseOrderRequest->id);
+        }catch(\Exception $e){
+            dd($e->getMessage());
+            $data = [
+                'action' => 'Disapprove Purchase Order Request Component',
+                'params' => $request->all(),
+                'purchase_order' => $purchaseOrderRequest,
+                'purchase_request_component' => $purchaseRequestComponent,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }

@@ -99,15 +99,15 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrderRequestTable">
                                                             <thead>
                                                             <tr>
-                                                                <th style="width: 10%;"> No. </th>
-                                                                <th> Purchase Request Id </th>
+                                                                <th style="width: 10%;"> ID. </th>
+                                                                <th> Purchase Request ID </th>
                                                                 <th> Created By </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th></th>
-                                                                <th><input type="text" class="form-control form-filter" readonly></th>
-                                                                <th><input type="text" class="form-control form-filter" readonly></th>
+                                                                <th><input type="text" class="form-control form-filter" name="purchase_request_format"></th>
+                                                                <th></th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -141,5 +141,12 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order-request/manage-datatable.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function(){
+            $(".form-filter").on('keyup', function(){
+                    $(".filter-submit").trigger('click');
+            });
+        });
+    </script>
 @endsection
 
