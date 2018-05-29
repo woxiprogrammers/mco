@@ -940,9 +940,10 @@ class ReportController extends Controller
                     $assetMaintenancePaidAmount = $this->getAssetMaintenancePaidAmount($projectSiteId,$bankIds);
                     $peticashSalaryAmount = $this->getPeticashSalaryAmount($projectSiteId,$bankIds);
                     $siteTransferAmount = $this->getSiteTransferAmount($projectSiteId,$bankIds);
+                    $quotationOpeningExpenseAmount = $this->getQuotationOpeningExpenseAmount($projectSiteId);
                     $totalPurchase = $total = array();
                     for($iterator = 0; $iterator < (count($bankIds) + 2) ; $iterator++){
-                        $totalPurchase[$iterator] = $purchasePaidAmount[$iterator] + $assetMaintenancePaidAmount[$iterator] + $assetRentAmount[$iterator] + $siteTransferAmount[$iterator];
+                        $totalPurchase[$iterator] = $purchasePaidAmount[$iterator] + $assetMaintenancePaidAmount[$iterator] + $assetRentAmount[$iterator] + $siteTransferAmount[$iterator] + $quotationOpeningExpenseAmount;
                         $total[$iterator] = $totalPurchase[$iterator] + $miscellaneousPurchaseAmount[$iterator] + $subcontractor[$iterator] + $indirectExpensesAmount[$iterator] + $peticashSalaryAmount[$iterator];
                     }
                     $profitLossSaleWise = $totalSalesEntry - $total[0];
@@ -979,37 +980,37 @@ class ReportController extends Controller
                             $objDrawing->setCoordinates('A1');
                             $objDrawing->setWorksheet($sheet);
 
-                            $sheet->mergeCells('A2:D2');
+                            $sheet->mergeCells('A2:'.$excelLastColumn.'2');
                             $sheet->cell('A2', function($cell) use($companyHeader) {
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue($companyHeader['company_name']);
                             });
 
-                            $sheet->mergeCells('A3:D3');
+                            $sheet->mergeCells('A3:'.$excelLastColumn.'3');
                             $sheet->cell('A3', function($cell) use($companyHeader) {
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue($companyHeader['designation']);
                             });
 
-                            $sheet->mergeCells('A4:D4');
+                            $sheet->mergeCells('A4:'.$excelLastColumn.'4');
                             $sheet->cell('A4', function($cell) use($companyHeader) {
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue($companyHeader['address']);
                             });
 
-                            $sheet->mergeCells('A5:D5');
+                            $sheet->mergeCells('A5:'.$excelLastColumn.'5');
                             $sheet->cell('A5', function($cell) use($companyHeader) {
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue($companyHeader['contact_no']);
                             });
 
-                            $sheet->mergeCells('A6:D6');
+                            $sheet->mergeCells('A6:'.$excelLastColumn.'6');
                             $sheet->cell('A6', function($cell) use($companyHeader) {
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue($companyHeader['gstin_number']);
                             });
 
-                            $sheet->mergeCells('A7:D7');
+                            $sheet->mergeCells('A7:'.$excelLastColumn.'7');
                             $sheet->cell('A7', function($cell) use($projectName) {
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Profit and Loss Report - '.$projectName);
@@ -1308,7 +1309,9 @@ class ReportController extends Controller
                     $debitTotal = $subcontractorBillTransaction->sum('debit');
                     $holdTotal = $subcontractorBillTransaction->sum('hold') - $subcontractorBillReconcileTransaction->where('transaction_slug','hold')->sum('amount');
                     $retentionTotal = $subcontractorBillTransaction->sum('retention_amount') - $subcontractorBillReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                    $finalTotal = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
+                    $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
+                    $reconcileTotal = $subcontractorBill->subcontractorBillTransaction->subcontractorBillReconcileTransaction->sum('amount');
+                    $finalTotal = $reconcileTotal + $totalTransaction;
                     $billPaidAmount += $finalTotal;
                 }
                 $subcontractorAmount += $billPaidAmount;
@@ -1316,6 +1319,8 @@ class ReportController extends Controller
             $subcontractorAmount += $advanceAmount;
 
             $finalArray[0] = $subcontractorAmount;
+
+            //for bank
             $bankIterator = 1;
             foreach($bankIds as $bankId){
                 foreach ($subcontractorStructureData as $key => $subcontractorStructure){
@@ -1330,16 +1335,19 @@ class ReportController extends Controller
                         $debitTotal = $subcontractorBillTransaction->sum('debit');
                         $holdTotal = $subcontractorBillTransaction->sum('hold') - $subcontractorBillReconcileTransaction->where('transaction_slug','hold')->sum('amount');
                         $retentionTotal = $subcontractorBillTransaction->sum('retention_amount') - $subcontractorBillReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                        $finalTotal = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
+                        $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
+                        $reconcileTotal = $subcontractorBill->subcontractorBillTransaction->subcontractorBillReconcileTransaction->where('bank_id',$bankId)->sum('amount');
+                        $finalTotal = $reconcileTotal + $totalTransaction;
                         $billPaidAmount += $finalTotal;
                     }
                     $subcontractorAmount += $billPaidAmount;
                 }
-                $subcontractorAmount += $advanceAmount;
 
                 $finalArray[$bankIterator] = $subcontractorAmount;
                 $bankIterator++;
             }
+
+            //for cash
             foreach ($subcontractorStructureData as $key => $subcontractorStructure){
                 $subcontractorBillIds = $subcontractorStructure->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
                 $billPaidCashAmount = 0;
@@ -1352,12 +1360,13 @@ class ReportController extends Controller
                     $debitTotal = $subcontractorBillTransaction->sum('debit');
                     $holdTotal = $subcontractorBillTransaction->sum('hold') - $subcontractorBillReconcileTransaction->where('transaction_slug','hold')->sum('amount');
                     $retentionTotal = $subcontractorBillTransaction->sum('retention_amount') - $subcontractorBillReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                    $finalTotal = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
+                    $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
+                    $reconcileTotal = $subcontractorBill->subcontractorBillTransaction->subcontractorBillReconcileTransaction->where('paid_from_slug','cash')->sum('amount');
+                    $finalTotal = $reconcileTotal + $totalTransaction;
                     $billPaidCashAmount += $finalTotal;
                 }
                 $subcontractorCashAmount += $billPaidCashAmount;
             }
-            $subcontractorCashAmount += $advanceAmount;
 
             $finalArray[$bankIterator] = $subcontractorCashAmount;
         }catch(\Exception $e){
@@ -1385,6 +1394,7 @@ class ReportController extends Controller
             }
             $finalArray[0] = $indirectExpenseAmount;
 
+            //for bank
             $bankIterator = 1;
             foreach($bankIds as $bankId){
                 $projectSiteIndirectExpenseDataForBank = $projectSiteIndirectExpenseData->where('bank_id',$bankId);
@@ -1397,6 +1407,7 @@ class ReportController extends Controller
                 $bankIterator ++ ;
             }
 
+            //for cash
             $projectSiteIndirectExpenseDataForCash = $projectSiteIndirectExpenseData->where('paid_from_slug','cash');
             $indirectExpenseAmountForCash = 0;
             foreach ($projectSiteIndirectExpenseDataForCash as $key => $projectSiteIndirectExpense){
@@ -1428,18 +1439,9 @@ class ReportController extends Controller
                 $miscellaneousPurchaseAmount = $purchasePeticashTransactionAmount + $officeSiteDistributedAmount;
             }
             $finalArray[0] = $miscellaneousPurchaseAmount;
-            $bankIterator = 1;
-            foreach($bankIds as $bankId){
-                if($projectSiteId == 'all'){
-                    $miscellaneousPurchaseAmount = 0;
-                }else{
-                    $miscellaneousPurchaseAmount = 0;
-                }
-                $finalArray[$bankIterator] = $miscellaneousPurchaseAmount;
-                $bankIterator++;
-            }
-            //hard coded given for cash & bank
-            $finalArray[$bankIterator] = 0;
+
+            //for bank & cash
+            $finalArray = array_merge($finalArray,array_fill(0,count($bankIds) + 1,0));
         }catch(\Exception $e){
             $finalArray = array_fill(0,(count($bankIds) + 2),0);
             $data = [
@@ -1517,11 +1519,11 @@ class ReportController extends Controller
             }
             $finalArray[0] = $totalReceiptEntry;
 
+            //for bank
             $bankIterator = 1;
             foreach($bankIds as $bankId){
                 $totalReceiptEntry = 0;
                 foreach($quotations as $key4 => $quotation){
-                    $balanceAdvancedAmount = /*ProjectSite::where('id',$quotation['project_site_id'])->where('bank_id',$bankId)->pluck('advanced_balance')->first()*/0;
                     $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
                     foreach($bills as $key => $bill){
                         $billTransaction = $bill->transactions->where('bank_id',$bankId);
@@ -1534,12 +1536,10 @@ class ReportController extends Controller
                         $billTransactionTotal = $billTransactionSubTotal - ($billTransactionDebit + $billTransactionTds + $billTransactionHold + $billTransactionRetention);
                         $totalReceiptEntry += $billTransactionTotal;
                     }
-                    $totalReceiptEntry += $balanceAdvancedAmount;
                 }
                 $finalArray[$bankIterator] = $totalReceiptEntry;
                 $bankIterator++;
             }
-
         }catch(\Exception $e){
             $finalArray = array_fill(0,(count($bankIds) + 1),0);
             $data = [
@@ -1569,33 +1569,33 @@ class ReportController extends Controller
 
             $purchasePaidAmount = $purchasePaymentAmount + $advancedAmounts;
             $finalArray[0] = $purchasePaidAmount;
+
+            //for bank
             $bankIterator = 1;
             foreach($bankIds as $bankId){
                 if($projectSiteId == 'all'){
                     $purchasePaymentBankAmount = PurchaseOrderPayment::where('bank_id',$bankId)->sum('amount');
-                    $advancedAmounts = 0;
                 }else{
                     $purchasePaymentBankAmount = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
                         ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                         ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                         ->where('purchase_requests.project_site_id',$projectSiteId)->where('purchase_order_payments.bank_id',$bankId)->sum('purchase_order_payments.amount');
-                    $advancedAmounts = 0;
                 }
-                $purchasePaidBankAmount = $purchasePaymentBankAmount + $advancedAmounts;
+                $purchasePaidBankAmount = $purchasePaymentBankAmount;
                 $finalArray[$bankIterator] = $purchasePaidBankAmount;
                 $bankIterator++;
             }
+
+            //for cash
             if($projectSiteId == 'all'){
                 $purchasePaymentCashAmount = PurchaseOrderPayment::where('paid_from_slug','cash')->sum('amount');
-                $advancedAmounts = 0;
             }else{
                 $purchasePaymentCashAmount = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
                     ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                     ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                     ->where('purchase_requests.project_site_id',$projectSiteId)->where('purchase_order_payments.paid_from_slug','cash')->sum('purchase_order_payments.amount');
-                $advancedAmounts = 0;
             }
-            $purchasePaidCashAmount = $purchasePaymentCashAmount + $advancedAmounts;
+            $purchasePaidCashAmount = $purchasePaymentCashAmount;
             $finalArray[$bankIterator] = $purchasePaidCashAmount;
         }catch(\Exception $e){
             $finalArray = array_fill(0,(count($bankIds) + 2),0);
@@ -1624,6 +1624,8 @@ class ReportController extends Controller
                     ->sum('asset_maintenance_bill_payments.amount');
             }
             $finalArray[0] = $assetMaintenanceBillAmount;
+
+            //for bank
             $bankIterator = 1;
             foreach($bankIds as $bankId){
                 if($projectSiteId == 'all'){
@@ -1643,6 +1645,8 @@ class ReportController extends Controller
                 $finalArray[$bankIterator] = $assetMaintenanceBillBankAmount;
                 $bankIterator++;
             }
+
+            //for cash
             if($projectSiteId == 'all'){
                 $assetMaintenanceBillCashAmount = AssetMaintenanceBillPayment::join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                     ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
@@ -1699,7 +1703,7 @@ class ReportController extends Controller
                 }
             }
             $finalArray[0] = $assetRentAmount;
-            //cash consider in bank+1
+            //for bank & cash
             $finalArray = array_merge($finalArray,array_fill(1,count($bankIds) + 1 ,0));
         }catch(\Exception $e){
             $finalArray = array_fill(0,(count($bankIds) + 2),0);
@@ -1724,6 +1728,9 @@ class ReportController extends Controller
                                                                     ->where('inventory_components.project_site_id',$projectSiteId)->sum('site_transfer_bill_payments.amount');
             }
             $finalArray[0] = $siteTransferAmount;
+
+
+            //for bank
             $bankIterator = 1;
             foreach($bankIds as $bankId){
                 if($projectSiteId == 'all'){
@@ -1738,6 +1745,8 @@ class ReportController extends Controller
                 $finalArray[$bankIterator] = $siteTransferBankAmount;
                 $bankIterator++;
             }
+
+            //for cash
             if($projectSiteId == 'all'){
                 $siteTransferCashAmount = SiteTransferBillPayment::where('paid_from_slug','cash')->sum('amount');
             }else{
@@ -1770,73 +1779,44 @@ class ReportController extends Controller
             $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
             $officeSiteId = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
             if($projectSiteId == 'all'){
-                $advanceAmountTotal = PeticashSalaryTransaction::
-                    where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','advance')->pluck('id')->first())
+                $peticashTransactions = PeticashSalaryTransaction::where('project_site_id','!=',$officeSiteId)
                     ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('amount');
+                    ->get();
+                $advanceAmountTotal = $peticashTransactions
+                            ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','advance')->pluck('id')->first())
+                            ->sum('amount');
 
-                $salaryPayableAmountTotal = PeticashSalaryTransaction::
-                    where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('payable_amount');
-                $salaryPfAmountTotal = PeticashSalaryTransaction::
-                    where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('pf');
-                $salaryTdsAmountTotal = PeticashSalaryTransaction::
-                    where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('tds');
-                $salaryPtAmountTotal = PeticashSalaryTransaction::
-                    where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('pt');
-                $salaryEsicAmountTotal = PeticashSalaryTransaction::
-                    where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('esic');
+                $salaryTransactions = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
+
+                $salaryPayableAmountTotal = $salaryTransactions->sum('payable_amount');
+
+                $salaryPfAmountTotal = $salaryTransactions->sum('pf');
+
+                $salaryTdsAmountTotal = $salaryTransactions->sum('tds');
+
+                $salaryPtAmountTotal = $salaryTransactions->sum('pt');
+
+                $salaryEsicAmountTotal = $salaryTransactions->sum('esic');
 
                 $salaryAmountTotal = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
                 $officeSiteDistributedAmount = ProjectSite::sum('distributed_salary_amount');
                 $peticashSalaryAmount = $salaryAmountTotal + $advanceAmountTotal + $officeSiteDistributedAmount;
             }else{
-                $advanceAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                $peticashTransactions = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
                                 ->where('project_site_id','!=',$officeSiteId)
-                                ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','PAYMENT')->where('slug','advance')->pluck('id')->first())
                                 ->where('peticash_status_id',$approvedPeticashStatusId)
-                                ->sum('amount');
+                                ->get();
 
-                $salaryPayableAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
-                    ->where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('payable_amount');
-                $salaryPfAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
-                    ->where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('pf');
-                $salaryTdsAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
-                    ->where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('tds');
-                $salaryPtAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
-                    ->where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('pt');
-                $salaryEsicAmountTotal = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
-                    ->where('project_site_id','!=',$officeSiteId)
-                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first())
-                    ->where('peticash_status_id',$approvedPeticashStatusId)
-                    ->sum('esic');
+                $advanceAmountTotal = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','PAYMENT')->where('slug','advance')->pluck('id')->first())
+                                        ->sum('amount');
+
+                $salaryTransactions = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
+
+                $salaryPayableAmountTotal = $salaryTransactions->sum('payable_amount');
+                $salaryPfAmountTotal = $salaryTransactions->sum('pf');
+                $salaryTdsAmountTotal = $salaryTransactions->sum('tds');
+                $salaryPtAmountTotal = $salaryTransactions->sum('pt');
+                $salaryEsicAmountTotal = $salaryTransactions->sum('esic');
 
                 $salaryAmountTotal = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
                 $officeSiteDistributedAmount = ProjectSite::where('id',$projectSiteId)->pluck('distributed_salary_amount')->first();
@@ -1844,13 +1824,61 @@ class ReportController extends Controller
                 $peticashSalaryAmount = $salaryAmountTotal + $advanceAmountTotal + $officeSiteDistributedAmount;
             }
             $finalArray[0] = $peticashSalaryAmount;
+
+            //for bank
             $bankIterator = 1;
             foreach($bankIds as $bankId){
-                $finalArray[$bankIterator] = 0;
+                if($projectSiteId == 'all'){
+                    $peticashTransactions = PeticashSalaryTransaction::where('project_site_id','!=',$officeSiteId)
+                        ->where('peticash_status_id',$approvedPeticashStatusId)
+                        ->where('bank_id',$bankId)
+                        ->get();
+
+                    $advanceAmountTotalForBank = $peticashTransactions
+                        ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','advance')->pluck('id')->first())
+                        ->sum('amount');
+
+                    $salaryTransactions = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
+
+                    $salaryPayableAmountTotal = $salaryTransactions->sum('payable_amount');
+
+                    $salaryPfAmountTotal = $salaryTransactions->sum('pf');
+
+                    $salaryTdsAmountTotal = $salaryTransactions->sum('tds');
+
+                    $salaryPtAmountTotal = $salaryTransactions->sum('pt');
+
+                    $salaryEsicAmountTotal = $salaryTransactions->sum('esic');
+
+                    $salaryAmountTotalForBank = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
+                    $peticashSalaryBankAmount = $salaryAmountTotalForBank + $advanceAmountTotalForBank;
+                }else{
+                    $peticashTransactions = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                        ->where('project_site_id','!=',$officeSiteId)
+                        ->where('peticash_status_id',$approvedPeticashStatusId)
+                        ->where('bank_id',$bankId)
+                        ->get();
+
+                    $advanceAmountTotalForBank = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','PAYMENT')->where('slug','advance')->pluck('id')->first())
+                        ->sum('amount');
+
+                    $salaryTransactions = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
+
+                    $salaryPayableAmountTotal = $salaryTransactions->sum('payable_amount');
+                    $salaryPfAmountTotal = $salaryTransactions->sum('pf');
+                    $salaryTdsAmountTotal = $salaryTransactions->sum('tds');
+                    $salaryPtAmountTotal = $salaryTransactions->sum('pt');
+                    $salaryEsicAmountTotal = $salaryTransactions->sum('esic');
+
+                    $salaryAmountTotalForBank = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
+                    $peticashSalaryBankAmount = $salaryAmountTotalForBank + $advanceAmountTotalForBank;
+                }
+                $finalArray[$bankIterator] = $peticashSalaryBankAmount;
                 $bankIterator++;
             }
-            $finalArray[$bankIterator] = 0;
-            //calculation remaining for cash & bank
+
+            //for cash
+            $finalArray[$bankIterator] = $salaryAmountTotal + $advanceAmountTotal;
         }catch(\Exception $e){
             $finalArray = array_fill(0,(count($bankIds) + 2),0);
             $data = [
@@ -1861,5 +1889,25 @@ class ReportController extends Controller
             Log::critical(json_encode($data));
         }
         return $finalArray;
+    }
+
+    public function getQuotationOpeningExpenseAmount($projectSiteId){
+        try{
+            $openingExpenseAmount = 0;
+            if($projectSiteId == 'all'){
+                $openingExpenseAmount = Quotation::sum('opening_expenses');
+            }else{
+                $openingExpenseAmount = Quotation::where('project_site_id',$projectSiteId)->pluck('opening_expenses')->first();
+            }
+        }catch(\Exception $e){
+            $openingExpenseAmount = 0;
+            $data = [
+                'action' => 'Get Opening Expenses for Report',
+                'exception' => $e->getMessage(),
+                'project_site_id' => $projectSiteId,
+            ];
+            Log::critical(json_encode($data));
+        }
+        return $openingExpenseAmount;
     }
 }
