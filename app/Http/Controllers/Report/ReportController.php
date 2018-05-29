@@ -1387,7 +1387,7 @@ class ReportController extends Controller
 
             $bankIterator = 1;
             foreach($bankIds as $bankId){
-                $projectSiteIndirectExpenseDataForBank = $projectSiteIndirectExpenseData->where('bank_id',$bankId)->get();
+                $projectSiteIndirectExpenseDataForBank = $projectSiteIndirectExpenseData->where('bank_id',$bankId);
                 $indirectExpenseAmountForBank = 0;
                 foreach ($projectSiteIndirectExpenseDataForBank as $key => $projectSiteIndirectExpense){
                     $indirectExpenseAmountForBank += $projectSiteIndirectExpense['tds'] + $projectSiteIndirectExpense['gst'];
@@ -1397,7 +1397,7 @@ class ReportController extends Controller
                 $bankIterator ++ ;
             }
 
-            $projectSiteIndirectExpenseDataForCash = $projectSiteIndirectExpenseData->where('paid_from_slug','cash')->get();
+            $projectSiteIndirectExpenseDataForCash = $projectSiteIndirectExpenseData->where('paid_from_slug','cash');
             $indirectExpenseAmountForCash = 0;
             foreach ($projectSiteIndirectExpenseDataForCash as $key => $projectSiteIndirectExpense){
                 $indirectExpenseAmountForCash += $projectSiteIndirectExpense['tds'] + $projectSiteIndirectExpense['gst'];
