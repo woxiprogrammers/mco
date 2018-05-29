@@ -484,9 +484,9 @@ class InventoryManageController extends Controller
                                     <a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
                                         Details
                                     </a>
-                                    <a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
+                                   <!-- <a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true">
                                         Make Payment
-                                    </a>';
+                                    </a>-->';
                     }elseif ($inventoryComponentTransfers[$pagination]->transferType->slug == 'site'){
                         $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
                                         Details

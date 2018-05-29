@@ -59,6 +59,12 @@ class PurchaseRequestController extends Controller
 
     public function getCreateView(Request $request){
         try{
+
+            $user = Auth::user();
+            $userData = array(
+                "id" => $user['id'],
+                "username" => $user['first_name']." ".$user['last_name']
+            );
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
             }else{
@@ -90,7 +96,7 @@ class PurchaseRequestController extends Controller
             foreach($units as $unit){
                 $unitOptions .= '<option value="'.$unit['id'].'">'.$unit['name'].'</option>';
             }
-            return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId','units','unitOptions'));
+            return view('purchase/purchase-request/create')->with(compact('materialRequestList','nosUnitId','units','unitOptions','userData'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Request create view',
