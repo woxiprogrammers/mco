@@ -358,8 +358,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses' => 'Purchase\PurchaseOrderRequestController@listing'));
             Route::post('get-purchase-request-component-details',array('uses' => 'Purchase\PurchaseOrderRequestController@getPurchaseRequestComponentDetails'));
             Route::post('get-component-tax-details/{purchaseComponentVendorRelation}',array('uses' => 'Purchase\PurchaseOrderRequestController@getComponentTaxDetails'));
+            Route::post('get-purchase-order-request-component-tax-details/{purchaseOrderRequestComponent}',array('uses' => 'Purchase\PurchaseOrderRequestController@getPurchaseOrderRequestComponentTaxDetails'));
             Route::get('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@getEditView'));
-            Route::post('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@approvePurchaseOrderRequest'));
+            Route::get('approve/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@getApproveView'));
+            Route::post('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@editPurchaseOrderRequest'));
+            Route::post('approve/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@approvePurchaseOrderRequest'));
             Route::get('purchase-request-auto-suggest/{keyword}',array('uses' => 'Purchase\PurchaseOrderRequestController@purchaseRequestAutoSuggest'));
 
             Route::post('file-upload/{purchaseRequestComponentId}',array('uses'=>'Purchase\PurchaseOrderRequestController@uploadTempFiles'));

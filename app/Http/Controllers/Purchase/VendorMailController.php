@@ -54,7 +54,8 @@ class VendorMailController extends Controller
                 'recordsTotal' => $iTotalRecords,
                 'recordsFiltered' => $iTotalRecords
             ];
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($vendorMailData); $iterator++,$pagination++ ){
+            Log::info($request->start);
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($vendorMailData); $iterator++,$pagination++ ){
                 switch($vendorMailData[$pagination]['type_slug']){
                     case 'for-quotation':
                         $slug = 'For Quotation';
