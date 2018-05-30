@@ -1855,51 +1855,36 @@ class PeticashController extends Controller
             }
             $salaryData['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
             $salaryData['created_at'] = $salaryData['updated_at'] = Carbon::now();
-            $officeSiteId = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+
             if($request['paid_from'] == 'bank'){
                 $salaryData['payment_type_id'] = $request['payment_id'];
                 $salaryData['bank_id'] = $request['bank_id'];
                 $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
                 $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
                 $bank->update($bankData);
-                if($projectSiteId == $officeSiteId){
-                    $activeProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                        ->where('projects.is_active',true)
-                        ->where('project_sites.id','!=',$officeSiteId)->get();
-                    if($request['transaction_type'] == 'advance'){
-                        $distributedSiteWiseAmount =  $salaryTransaction['amount'] / count($activeProjectSites);
-                    }else{
-                        $distributedSiteWiseAmount = ($salaryTransaction['payable_amount'] + $salaryTransaction['pf'] + $salaryTransaction['pt'] + $salaryTransaction['tds'] + $salaryTransaction['esic']) / count($activeProjectSites) ;
-                    }
-                    foreach ($activeProjectSites as $key => $projectSite){
-                        $distributedSalaryAmount = $projectSite['bank_distributed_salary_amount'] + $distributedSiteWiseAmount;
-                        $projectSite->update([
-                            'bank_distributed_salary_amount' => $distributedSalaryAmount
-                        ]);
-                    }
-                }
             }else{
                 $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
-                if($projectSiteId == $officeSiteId){
-                    $activeProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                        ->where('projects.is_active',true)
-                        ->where('project_sites.id','!=',$officeSiteId)->get();
-                    if($request['transaction_type'] == 'advance'){
-                        $distributedSiteWiseAmount =  $salaryTransaction['amount'] / count($activeProjectSites);
-                    }else{
-                        $distributedSiteWiseAmount = ($salaryTransaction['payable_amount'] + $salaryTransaction['pf'] + $salaryTransaction['pt'] + $salaryTransaction['tds'] + $salaryTransaction['esic']) / count($activeProjectSites) ;
-                    }
-                    foreach ($activeProjectSites as $key => $projectSite){
-                        $distributedSalaryAmount = $projectSite['distributed_salary_amount'] + $distributedSiteWiseAmount;
-                        $projectSite->update([
-                            'distributed_salary_amount' => $distributedSalaryAmount
-                        ]);
-                    }
-                }
             }
             $peticashSiteApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->first();
             $updatedPeticashSiteApprovedAmount = $peticashSiteApprovedAmount['salary_amount_approved'] - $request['amount'];
             $peticashSiteApprovedAmount->update(['salary_amount_approved' => $updatedPeticashSiteApprovedAmount]);
+            $officeSiteId = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+            if($projectSiteId == $officeSiteId){
+                $activeProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                    ->where('projects.is_active',true)
+                    ->where('project_sites.id','!=',$officeSiteId)->get();
+                if($request['transaction_type'] == 'advance'){
+                    $distributedSiteWiseAmount =  $salaryTransaction['amount'] / count($activeProjectSites);
+                }else{
+                    $distributedSiteWiseAmount = ($salaryTransaction['payable_amount'] + $salaryTransaction['pf'] + $salaryTransaction['pt'] + $salaryTransaction['tds'] + $salaryTransaction['esic']) / count($activeProjectSites) ;
+                }
+                foreach ($activeProjectSites as $key => $projectSite){
+                    $distributedSalaryAmount = $projectSite['distributed_salary_amount'] + $distributedSiteWiseAmount;
+                    $projectSite->update([
+                        'distributed_salary_amount' => $distributedSalaryAmount
+                    ]);
+                }
+            }
             $request->session()->flash('success', 'Salary transaction created successfully');
             return redirect('peticash/peticash-management/salary/manage');
         }catch(\Exception $e){
