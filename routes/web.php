@@ -364,7 +364,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@editPurchaseOrderRequest'));
             Route::post('approve/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@approvePurchaseOrderRequest'));
             Route::get('purchase-request-auto-suggest/{keyword}',array('uses' => 'Purchase\PurchaseOrderRequestController@purchaseRequestAutoSuggest'));
-
+            Route::get('make-ready-to-approve/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@makeReadyToApprove'));
             Route::post('file-upload/{purchaseRequestComponentId}',array('uses'=>'Purchase\PurchaseOrderRequestController@uploadTempFiles'));
             Route::post('display-files/{forSlug}/{purchaseOrderRequestID}',array('uses'=>'Purchase\PurchaseOrderRequestController@displayFiles'));
             Route::post('delete-temp-file',array('uses'=>'Purchase\PurchaseOrderRequestController@removeTempImage'));
@@ -376,8 +376,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses'=> 'Inventory\InventoryManageController@getManageView'));
         Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@inventoryListing'));
         Route::post('get-project-sites',array('uses'=> 'Inventory\InventoryManageController@getProjectSites'));
-       /* Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
-        Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));*/
         Route::group(['prefix' => 'component'], function(){
             Route::post('create',array('uses' => 'Inventory\InventoryManageController@createInventoryComponent'));
             Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentListing'));

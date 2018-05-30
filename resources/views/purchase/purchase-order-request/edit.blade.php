@@ -29,7 +29,7 @@
                                     <h1>Edit Purchase Order Request</h1>
                                 </div>
                                 <div class="pull-right">
-                                    <a class="btn blue" style="margin-top: 10%">
+                                    <a class="btn blue" style="margin-top: 10%" onclick="readyToApprove()">
                                         Ready To Approve
                                     </a>
                                 </div>
@@ -54,7 +54,7 @@
                                         <div class="portlet-body form">
                                             <form role="form" id="editPurchaseOrderRequest" class="form-horizontal" method="post" action="/purchase/purchase-order-request/edit/{{$purchaseOrderRequest->id}}">
                                                 {!! csrf_field() !!}
-                                                <input type="hidden" name="purchase_order_request_id" id="purchaseOrderRequestId">
+                                                <input type="hidden" name="purchase_order_request_id" id="purchaseOrderRequestId" value="{{$purchaseOrderRequest->id}}">
                                                 <div class="form-actions noborder row">
                                                     <div class="form-group">
                                                         <div class="col-md-3">
@@ -146,67 +146,22 @@
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script src="/assets/custom/purchase/purchase-order-request/edit-purchase-order-request.js"></script>
-    {{--<script>
-        $(document).ready(function(){
-            CreatePurchaseOrderRequest.init();
-        });
-        var  CreatePurchaseOrderRequest = function () {
-            var handleCreate = function() {
-                var form = $('#createPurchaseOrderRequest');
-                var error = $('.alert-danger', form);
-                var success = $('.alert-success', form);
-                form.validate({
-                    errorElement: 'span', //default input error message container
-                    errorClass: 'help-block', // default input error message class
-                    focusInvalid: false, // do not focus the last invalid input
-                    rules: {
-                        purchaseRequest: {
-                            required: true
-                        }
-                    },
+    <script>
+        function openPdf(random,fullPath){
+            $("#image-"+random+" #myFrame").attr('src',fullPath);
+            $("#image-"+random+" #myFrame").show();
+        }
+        function closePdf(random,fullPath){
+            $("#image-"+random+" #myFrame").hide();
+        }
 
-                    messages: {
-                        purchaseRequest: {
-                            required: "Purchase Request required"
-                        }
-                    },
-
-                    invalidHandler: function (event, validator) { //display error alert on form submit
-                        success.hide();
-                        error.show();
-                    },
-
-                    highlight: function (element) { // hightlight error inputs
-                        $(element)
-                            .closest('.form-group').addClass('has-error'); // set error class to the control group
-                    },
-
-                    unhighlight: function (element) { // revert the change done by hightlight
-                        $(element)
-                            .closest('.form-group').removeClass('has-error'); // set error class to the control group
-                    },
-
-                    success: function (label) {
-                        label
-                            .closest('.form-group').addClass('has-success');
-                    },
-
-                    submitHandler: function (form) {
-                        $("button[type='submit']").prop('disabled', true);
-                        success.show();
-                        error.hide();
-                        form.submit();
-                    }
-                });
-            };
-
-            return {
-                init: function () {
-                    handleCreate();
-                }
-            };
-        }();
-
-    </script>--}}
+        function readyToApprove(){
+            var flag = confirm('Do you want to make Purchase Order Request ready for approval ?');
+            if(flag == true){
+                var purchaseOrderRequestId = $("#purchaseOrderRequestId").val();
+                window.location.href = '/purchase/purchase-order-request/make-ready-to-approve/'+purchaseOrderRequestId;
+            }
+        }
+    </script>
 @endsection
 

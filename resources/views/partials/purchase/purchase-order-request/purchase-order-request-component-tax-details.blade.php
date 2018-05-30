@@ -267,12 +267,13 @@
 
                                                     <iframe id="myFrame" style="display:none" width="600" height="300"></iframe>
                                                     <a href="javascript:void(0);" class="btn btn-sm" onclick = "openPdf('{{$clientApprovalFile['random']}}','{{$clientApprovalFile['fullPath']}}')">Zoom In</a>
-                                                    <input type="hidden" class="product-image-name" name="client_images[]" id="product-image-name-{{$clientApprovalFile['random']}}" value="{{$clientApprovalFile['path']}}"/>
+                                                    <input type="hidden" class="product-image-name" name="existing_client_file[{{$purchaseOrderRequestComponentData['id']}}][]" id="product-image-name-{{$clientApprovalFile['random']}}" value="{{$clientApprovalFile['path']}}"/>
                                                     <a href="javascript:void(0);"  class="btn btn-sm" onclick = "closePdf('{{$clientApprovalFile['random']}}','{{$clientApprovalFile['fullPath']}}')">Zoom Out</a>
                                                 </td>
                                                 <td>
                                                     <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$clientApprovalFile['random']}}","{{$clientApprovalFile['path']}}",0);'>
-                                                        <i class="fa fa-times"></i> Remove </a>
+                                                        <i class="fa fa-times"></i> Remove
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @endif
@@ -325,12 +326,13 @@
 
                                                     <iframe id="myFrame" style="display:none" width="600" height="300"></iframe>
                                                     <a href="javascript:void(0);" class="btn btn-sm" onclick = "openPdf('{{$clientApprovalFile['random']}}','{{$clientApprovalFile['fullPath']}}')">Zoom In</a>
-                                                    <input type="hidden" class="product-image-name" name="client_images[]" id="product-image-name-{{$clientApprovalFile['random']}}" value="{{$clientApprovalFile['path']}}"/>
+                                                    <input type="hidden" class="product-image-name" name="existing_vendor_file[{{$purchaseOrderRequestComponentData['id']}}][]"  id="product-image-name-{{$clientApprovalFile['random']}}" value="{{$clientApprovalFile['path']}}"/>
                                                     <a href="javascript:void(0);"  class="btn btn-sm" onclick = "closePdf('{{$clientApprovalFile['random']}}','{{$clientApprovalFile['fullPath']}}')">Zoom Out</a>
                                                 </td>
                                                 <td>
                                                     <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$clientApprovalFile['random']}}","{{$clientApprovalFile['path']}}",0);'>
-                                                        <i class="fa fa-times"></i> Remove </a>
+                                                        <i class="fa fa-times"></i> Remove
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @endif
