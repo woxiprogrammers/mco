@@ -53,6 +53,7 @@ use InventoryTrait;
         try{
             $inventoryComponentTransfers = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                 ->where('inventory_components.reference_id',$asset['id'])
+                ->where('inventory_components.is_material',false)
                 ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                 ->orderBy('inventory_component_transfers.created_at','asc')->select('inventory_component_transfers.id','inventory_component_transfers.transfer_type_id','inventory_component_transfers.quantity')->get();
             $isAssigned = false;
@@ -390,6 +391,7 @@ use InventoryTrait;
             //here
             $inventoryComponentTransfer = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                                                                         ->where('inventory_components.reference_id',$assetId)
+                                                                        ->where('inventory_components.is_material',false)
                                                                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                                                                         ->orderBy('inventory_component_transfers.created_at','desc')->get();
             $status = 200;

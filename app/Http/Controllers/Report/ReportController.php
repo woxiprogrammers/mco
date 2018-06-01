@@ -940,10 +940,10 @@ class ReportController extends Controller
                     $assetMaintenancePaidAmount = $this->getAssetMaintenancePaidAmount($projectSiteId,$bankIds);
                     $peticashSalaryAmount = $this->getPeticashSalaryAmount($projectSiteId,$bankIds);
                     $siteTransferAmount = $this->getSiteTransferAmount($projectSiteId,$bankIds);
-                    $quotationOpeningExpenseAmount = $this->getQuotationOpeningExpenseAmount($projectSiteId);
+                    $quotationOpeningExpenseAmount = $this->getQuotationOpeningExpenseAmount($projectSiteId,$bankIds);
                     $totalPurchase = $total = array();
                     for($iterator = 0; $iterator < (count($bankIds) + 2) ; $iterator++){
-                        $totalPurchase[$iterator] = $purchasePaidAmount[$iterator] + $assetMaintenancePaidAmount[$iterator] + $assetRentAmount[$iterator] + $siteTransferAmount[$iterator] + $quotationOpeningExpenseAmount;
+                        $totalPurchase[$iterator] = $purchasePaidAmount[$iterator] + $assetMaintenancePaidAmount[$iterator] + $assetRentAmount[$iterator] + $siteTransferAmount[$iterator] + $quotationOpeningExpenseAmount[$iterator];
                         $total[$iterator] = $totalPurchase[$iterator] + $miscellaneousPurchaseAmount[$iterator] + $subcontractor[$iterator] + $indirectExpensesAmount[$iterator] + $peticashSalaryAmount[$iterator];
                     }
                     $profitLossSaleWise = $totalSalesEntry - $total[0];
@@ -1296,7 +1296,7 @@ class ReportController extends Controller
             }
             $subcontractorIDs = $subcontractorStructureData->unique('subcontractor_id')->pluck('subcontractor_id');
             $advanceAmount = Subcontractor::whereIn('id',$subcontractorIDs)->sum('balance_advance_amount');
-            $subcontractorAmount = $subcontractorCashAmount = 0;
+            $subcontractorAmount = $subcontractorCashAmount = $subcontractorAmountForBank = 0;
             foreach ($subcontractorStructureData as $key => $subcontractorStructure){
                 $subcontractorBillIds = $subcontractorStructure->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
                 $billPaidAmount = 0;
@@ -1305,12 +1305,13 @@ class ReportController extends Controller
                     $subcontractorBillTransaction = $subcontractorBill->subcontractorBillTransaction;
                     $subcontractorBillReconcileTransaction = $subcontractorBill->subcontractorBillReconcileTransaction;
                     $transactionTotal = $subcontractorBillTransaction->sum('total');
-                    $tdsTotal = $subcontractorBillTransaction->sum('tds');
+                    $tdsTotal = $subcontractorBillTransaction->sum('tds_amount');
                     $debitTotal = $subcontractorBillTransaction->sum('debit');
-                    $holdTotal = $subcontractorBillTransaction->sum('hold') - $subcontractorBillReconcileTransaction->where('transaction_slug','hold')->sum('amount');
-                    $retentionTotal = $subcontractorBillTransaction->sum('retention_amount') - $subcontractorBillReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                    $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
-                    $reconcileTotal = $subcontractorBill->subcontractorBillTransaction->subcontractorBillReconcileTransaction->sum('amount');
+                    $otherRecoveryTotal = $subcontractorBillTransaction->sum('other_recovery');
+                    $holdTotal = $subcontractorBillTransaction->sum('hold');
+                    $retentionTotal = $subcontractorBillTransaction->sum('retention_amount');
+                    $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal + $otherRecoveryTotal);
+                    $reconcileTotal = $subcontractorBillReconcileTransaction->sum('amount');
                     $finalTotal = $reconcileTotal + $totalTransaction;
                     $billPaidAmount += $finalTotal;
                 }
@@ -1325,47 +1326,49 @@ class ReportController extends Controller
             foreach($bankIds as $bankId){
                 foreach ($subcontractorStructureData as $key => $subcontractorStructure){
                     $subcontractorBillIds = $subcontractorStructure->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
-                    $billPaidAmount = 0;
+                    $billPaidAmountForBank = 0;
                     foreach ($subcontractorBillIds as $subcontractorStructureBillId){
                         $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
                         $subcontractorBillTransaction = $subcontractorBill->subcontractorBillTransaction->where('bank_id',$bankId);
                         $subcontractorBillReconcileTransaction = $subcontractorBill->subcontractorBillReconcileTransaction->where('bank_id',$bankId);
                         $transactionTotal = $subcontractorBillTransaction->sum('total');
-                        $tdsTotal = $subcontractorBillTransaction->sum('tds');
+                        $tdsTotal = $subcontractorBillTransaction->sum('tds_amount');
                         $debitTotal = $subcontractorBillTransaction->sum('debit');
-                        $holdTotal = $subcontractorBillTransaction->sum('hold') - $subcontractorBillReconcileTransaction->where('transaction_slug','hold')->sum('amount');
-                        $retentionTotal = $subcontractorBillTransaction->sum('retention_amount') - $subcontractorBillReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                        $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
-                        $reconcileTotal = $subcontractorBill->subcontractorBillTransaction->subcontractorBillReconcileTransaction->where('bank_id',$bankId)->sum('amount');
+                        $otherRecoveryTotal = $subcontractorBillTransaction->sum('other_recovery');
+                        $holdTotal = $subcontractorBillTransaction->sum('hold');
+                        $retentionTotal = $subcontractorBillTransaction->sum('retention_amount');
+                        $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal + $otherRecoveryTotal);
+                        $reconcileTotal = $subcontractorBillReconcileTransaction->where('bank_id',$bankId)->sum('amount');
                         $finalTotal = $reconcileTotal + $totalTransaction;
-                        $billPaidAmount += $finalTotal;
+                        $billPaidAmountForBank += $finalTotal;
                     }
-                    $subcontractorAmount += $billPaidAmount;
+                    $subcontractorAmountForBank += $billPaidAmountForBank;
                 }
 
-                $finalArray[$bankIterator] = $subcontractorAmount;
+                $finalArray[$bankIterator] = $subcontractorAmountForBank;
                 $bankIterator++;
             }
 
             //for cash
             foreach ($subcontractorStructureData as $key => $subcontractorStructure){
                 $subcontractorBillIds = $subcontractorStructure->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
-                $billPaidCashAmount = 0;
+                $billPaidCashAmountForCash = 0;
                 foreach ($subcontractorBillIds as $subcontractorStructureBillId){
                     $subcontractorBill = SubcontractorBill::where('id',$subcontractorStructureBillId)->first();
                     $subcontractorBillTransaction = $subcontractorBill->subcontractorBillTransaction->where('paid_from_slug','cash');
                     $subcontractorBillReconcileTransaction = $subcontractorBill->subcontractorBillReconcileTransaction->where('paid_from_slug','cash');
                     $transactionTotal = $subcontractorBillTransaction->sum('total');
-                    $tdsTotal = $subcontractorBillTransaction->sum('tds');
+                    $tdsTotal = $subcontractorBillTransaction->sum('tds_amount');
                     $debitTotal = $subcontractorBillTransaction->sum('debit');
-                    $holdTotal = $subcontractorBillTransaction->sum('hold') - $subcontractorBillReconcileTransaction->where('transaction_slug','hold')->sum('amount');
-                    $retentionTotal = $subcontractorBillTransaction->sum('retention_amount') - $subcontractorBillReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                    $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal);
-                    $reconcileTotal = $subcontractorBill->subcontractorBillTransaction->subcontractorBillReconcileTransaction->where('paid_from_slug','cash')->sum('amount');
+                    $holdTotal = $subcontractorBillTransaction->sum('hold');
+                    $otherRecoveryTotal = $subcontractorBillTransaction->sum('other_recovery');
+                    $retentionTotal = $subcontractorBillTransaction->sum('retention_amount');
+                    $totalTransaction = $transactionTotal - ($tdsTotal + $debitTotal + $holdTotal + $retentionTotal + $otherRecoveryTotal);
+                    $reconcileTotal = $subcontractorBillReconcileTransaction->where('paid_from_slug','cash')->sum('amount');
                     $finalTotal = $reconcileTotal + $totalTransaction;
-                    $billPaidCashAmount += $finalTotal;
+                    $billPaidCashAmountForCash += $finalTotal;
                 }
-                $subcontractorCashAmount += $billPaidCashAmount;
+                $subcontractorCashAmount += $billPaidCashAmountForCash;
             }
 
             $finalArray[$bankIterator] = $subcontractorCashAmount;
@@ -1471,11 +1474,11 @@ class ReportController extends Controller
                     $billTransaction = $bill->transactions;
                     $billReconcileTransaction = $bill->billReconcileTransaction;
                     $billTransactionSubTotal = $billTransaction->sum('total');
-                    $billTransactionDebit = $billTransaction->sum('debit');
+                    /*$billTransactionDebit = $billTransaction->sum('debit');
                     $billTransactionTds = $billTransaction->sum('tds_amount');
                     $billTransactionHold = $billTransaction->sum('hold') - $billReconcileTransaction->where('transaction_slug','hold')->sum('amount');
-                    $billTransactionRetention = $billTransaction->sum('retention_amount') - $billReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                    $billTransactionTotal = $billTransactionSubTotal - ($billTransactionDebit + $billTransactionTds + $billTransactionHold + $billTransactionRetention);
+                    $billTransactionRetention = $billTransaction->sum('retention_amount') - $billReconcileTransaction->where('transaction_slug','retention')->sum('amount');*/
+                    $billTransactionTotal = $billTransactionSubTotal + $billReconcileTransaction->where('transaction_slug','hold')->sum('amount') + $billReconcileTransaction->where('transaction_slug','retention')->sum('amount');
                     $totalReceiptEntry += $billTransactionTotal;
                 }
                 $totalReceiptEntry += $balanceAdvancedAmount;
@@ -1492,12 +1495,12 @@ class ReportController extends Controller
                         $billTransaction = $bill->transactions->where('bank_id',$bankId);
                         $billReconcileTransaction = $bill->billReconcileTransaction->where('bank_id',$bankId);
                         $billTransactionSubTotal = $billTransaction->sum('total');
-                        $billTransactionDebit = $billTransaction->sum('debit');
+                        /*$billTransactionDebit = $billTransaction->sum('debit');
                         $billTransactionTds = $billTransaction->sum('tds_amount');
                         $billTransactionHold = $billTransaction->sum('hold') - $billReconcileTransaction->where('transaction_slug','hold')->sum('amount');
-                        $billTransactionRetention = $billTransaction->sum('retention_amount') - $billReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                        $billTransactionTotal = $billTransactionSubTotal - ($billTransactionDebit + $billTransactionTds + $billTransactionHold + $billTransactionRetention);
-                        $totalReceiptEntry += $billTransactionTotal;
+                        $billTransactionRetention = $billTransaction->sum('retention_amount') - $billReconcileTransaction->where('transaction_slug','retention')->sum('amount');*/
+                        $billTransactionTotal = $billTransactionSubTotal + $billReconcileTransaction->where('transaction_slug','hold')->where('bank_id',$bankId)->sum('amount') + $billReconcileTransaction->where('transaction_slug','retention')->where('bank_id',$bankId)->sum('amount')/*- ($billTransactionDebit + $billTransactionTds + $billTransactionHold + $billTransactionRetention)*/;
+                        $totalReceiptEntry += $billTransactionTotal ;
                     }
                 }
                 $finalArray[$bankIterator] = $totalReceiptEntry;
@@ -1693,9 +1696,10 @@ class ReportController extends Controller
                                                                     ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
                                                                     ->join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                                                                     ->where('inventory_components.project_site_id',$projectSiteId)->sum('site_transfer_bill_payments.amount');
-                $siteInTransferTotal = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.id')
+                $siteInTransferTotal = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                                                                         ->where('inventory_components.project_site_id',$projectSiteId)->where('inventory_component_transfers.transfer_type_id',$inOutTransferTypes->where('type','IN')->pluck('id')->first())->sum('inventory_component_transfers.total');
-                $siteOutTransferTotal = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.id')
+                $siteOutTransferTotal = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+
                                                                         ->where('inventory_components.project_site_id',$projectSiteId)->where('inventory_component_transfers.transfer_type_id',$inOutTransferTypes->where('type','OUT')->pluck('id')->first())->sum('inventory_component_transfers.total');
                 $siteTransferAmount = $siteTransferBillAmount + $siteInTransferTotal - $siteOutTransferTotal;
             }
@@ -1863,7 +1867,7 @@ class ReportController extends Controller
         return $finalArray;
     }
 
-    public function getQuotationOpeningExpenseAmount($projectSiteId){
+    public function getQuotationOpeningExpenseAmount($projectSiteId,$bankIds){
         try{
             $openingExpenseAmount = 0;
             if($projectSiteId == 'all'){
@@ -1871,8 +1875,10 @@ class ReportController extends Controller
             }else{
                 $openingExpenseAmount = Quotation::where('project_site_id',$projectSiteId)->pluck('opening_expenses')->first();
             }
+            $finalArray[0] = $openingExpenseAmount;
+            $finalArray = array_merge($finalArray,array_fill(1,count($bankIds) + 1 ,0));
         }catch(\Exception $e){
-            $openingExpenseAmount = 0;
+            $finalArray = array_fill(0,(count($bankIds) + 2),0);
             $data = [
                 'action' => 'Get Opening Expenses for Report',
                 'exception' => $e->getMessage(),
@@ -1880,6 +1886,6 @@ class ReportController extends Controller
             ];
             Log::critical(json_encode($data));
         }
-        return $openingExpenseAmount;
+        return $finalArray;
     }
 }
