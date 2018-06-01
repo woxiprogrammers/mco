@@ -1855,6 +1855,7 @@ class PeticashController extends Controller
             }
             $salaryData['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
             $salaryData['created_at'] = $salaryData['updated_at'] = Carbon::now();
+
             if($request['paid_from'] == 'bank'){
                 $salaryData['payment_type_id'] = $request['payment_id'];
                 $salaryData['bank_id'] = $request['bank_id'];

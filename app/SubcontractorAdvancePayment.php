@@ -8,7 +8,7 @@ class SubcontractorAdvancePayment extends Model
 {
     protected $table = 'subcontractor_advance_payments';
 
-    protected $fillable = ['subcontractor_id','payment_id','amount','reference_number'];
+    protected $fillable = ['subcontractor_id','payment_id','amount','reference_number','paid_from_slug','bank_id'];
 
     public function paymentType(){
         return $this->belongsTo('App\PaymentType','payment_id');

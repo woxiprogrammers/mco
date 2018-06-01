@@ -178,8 +178,11 @@ class SubcontractorController extends Controller
 
     public function getEditView(Request $request, $subcontractor){
         try{
-            $transaction_types = PaymentType::get();
-            return view('subcontractor.edit')->with(compact('subcontractor','transaction_types'));
+            $transaction_types = PaymentType::whereIn('slug',['cheque','neft','rtgs','internet-banking'])->orderBy('id')->get();
+            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $statistics = $this->getSiteWiseStatistics();
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+            return view('subcontractor.edit')->with(compact('subcontractor','transaction_types','banks','cashAllowedLimit'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -1122,18 +1125,42 @@ class SubcontractorController extends Controller
     public function addAdvancePayment(Request $request){
         try{
             $advancePaymentData = $request->all();
-            $subcontractorAdvanceAmount = SubcontractorAdvancePayment::create($advancePaymentData);
-            $subcontractor = Subcontractor::findOrFail($request->subcontractor_id);
-            if(!isset($subcontractor->total_advance_amount)){
-                $newBalanceadvanceAmount = $newTotaladvanceAmount = $request->amount;
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['amount'] <= $bank['balance_amount']){
+                    $subcontractorAdvanceAmount = SubcontractorAdvancePayment::create($advancePaymentData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
+                    $bank->update($bankData);
+                    $request->session()->flash('success','Advance Amount added successfully.');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/subcontractor/edit/'.$request->subcontractor_id);
+                }
             }else{
-                $newBalanceadvanceAmount = $subcontractor->balance_advance_amount + $request->amount;
-                $newTotaladvanceAmount = $subcontractor->total_advance_amount + $request->amount;
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['amount'] <= $cashAllowedLimit){
+                    $subcontractorAdvanceAmount = SubcontractorAdvancePayment::create($advancePaymentData);
+                    $request->session()->flash('success','Advance Payment added successfully');
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/subcontractor/edit/'.$request->subcontractor_id);
+                }
             }
-            $subcontractor->update([
-                'total_advance_amount' => $newTotaladvanceAmount,
-                'balance_advance_amount' => $newBalanceadvanceAmount
-            ]);
+
+            if($subcontractorAdvanceAmount != null){
+                $subcontractor = Subcontractor::findOrFail($request->subcontractor_id);
+                if(!isset($subcontractor->total_advance_amount)){
+                    $newBalanceadvanceAmount = $newTotaladvanceAmount = $request->amount;
+                }else{
+                    $newBalanceadvanceAmount = $subcontractor->balance_advance_amount + $request->amount;
+                    $newTotaladvanceAmount  = $subcontractor->total_advance_amount + $request->amount;
+                }
+                $subcontractor->update([
+                    'total_advance_amount' => $newTotaladvanceAmount,
+                    'balance_advance_amount' => $newBalanceadvanceAmount
+                ]);
+            }
             $request->session()->flash('success','Advance Amount added successfully.');
             return redirect('/subcontractor/edit/'.$request->subcontractor_id);
         }catch(\Exception $e){
