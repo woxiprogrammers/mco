@@ -92,8 +92,11 @@
                                                                     </div>
                                                                     <h4 class="panel-title" style="margin-left: 2%">
                                                                         <a class="accordion-toggle accordion-toggle-styled" data-parent="#accordion3" href="#collapse_{{$purchaseOrderRequestComponentId}}" style="font-size: 16px;color: white">
-                                                                            <b> {{$purchaseOrderRequestComponentData['name']}} </b><br>
+                                                                            <b> {{$purchaseOrderRequestComponentData['name']}} </b>
+                                                                            <span class="pull-right btn btn-danger" onclick="disapproveMaterial({{$purchaseOrderRequest->id}},{{$purchaseOrderRequestComponentData['purchase_request_component_id']}})">Disapprove</span>
+                                                                            <br>
                                                                             {{$purchaseOrderRequestComponentData['quantity']}} {{$purchaseOrderRequestComponentData['unit']}}
+
                                                                         </a>
                                                                     </h4>
                                                                 </div>
@@ -215,6 +218,13 @@
                     $(this).attr('checked', false)
                 });
             }
+        }
+
+        function disapproveMaterial(purchaseOrderRequestId, purchaseRequestComponentId){
+            var r = confirm("Do you want to disapprove the selected material ?");
+            if (r == true) {
+                window.location.href = '/purchase/purchase-order-request/disapprove-component/'+purchaseOrderRequestId+'/'+purchaseRequestComponentId;
+            } 
         }
     </script>
 @endsection

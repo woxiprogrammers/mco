@@ -19,9 +19,6 @@
             </td>
         </tr>
     @endif
-
-
-
 @else
     @if($path!=null)
         <tr id="image-{{$random}}">

@@ -96,7 +96,7 @@
                                                             </div>
                                                         </div>
 
-                                                        <div class="form-group row">
+                                                        <div class="form-group row" hidden>
                                                             <div class="col-md-3" style="text-align: right">
                                                                 <label for="employee_name" class="control-label">Bank Balance Amount</label>
                                                                 <span>*</span>

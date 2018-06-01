@@ -279,6 +279,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('material-requestWise-listing',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListing'));
             Route::get('material-requestWise-listing-view',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListingView'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
+            Route::post('change-status-mti',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatustoMTI'));
             Route::get('get-material-request-component-details/{materialRequestComponent}',array('uses' => 'User\PurchaseController@getMaterialRequestComponentDetail'));
         });
 
@@ -357,10 +358,14 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses' => 'Purchase\PurchaseOrderRequestController@listing'));
             Route::post('get-purchase-request-component-details',array('uses' => 'Purchase\PurchaseOrderRequestController@getPurchaseRequestComponentDetails'));
             Route::post('get-component-tax-details/{purchaseComponentVendorRelation}',array('uses' => 'Purchase\PurchaseOrderRequestController@getComponentTaxDetails'));
+            Route::post('get-purchase-order-request-component-tax-details/{purchaseOrderRequestComponent}',array('uses' => 'Purchase\PurchaseOrderRequestController@getPurchaseOrderRequestComponentTaxDetails'));
             Route::get('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@getEditView'));
-            Route::post('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@approvePurchaseOrderRequest'));
+            Route::get('approve/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@getApproveView'));
+            Route::post('edit/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@editPurchaseOrderRequest'));
+            Route::post('approve/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@approvePurchaseOrderRequest'));
             Route::get('purchase-request-auto-suggest/{keyword}',array('uses' => 'Purchase\PurchaseOrderRequestController@purchaseRequestAutoSuggest'));
-
+            Route::get('make-ready-to-approve/{purchaseOrderRequest}',array('uses' => 'Purchase\PurchaseOrderRequestController@makeReadyToApprove'));
+            Route::get('disapprove-component/{purchaseOrderRequest}/{purchaseRequestComponent}',array('uses' => 'Purchase\PurchaseOrderRequestController@disapproveComponent'));
             Route::post('file-upload/{purchaseRequestComponentId}',array('uses'=>'Purchase\PurchaseOrderRequestController@uploadTempFiles'));
             Route::post('display-files/{forSlug}/{purchaseOrderRequestID}',array('uses'=>'Purchase\PurchaseOrderRequestController@displayFiles'));
             Route::post('delete-temp-file',array('uses'=>'Purchase\PurchaseOrderRequestController@removeTempImage'));
@@ -372,8 +377,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses'=> 'Inventory\InventoryManageController@getManageView'));
         Route::post('listing',array('uses'=> 'Inventory\InventoryManageController@inventoryListing'));
         Route::post('get-project-sites',array('uses'=> 'Inventory\InventoryManageController@getProjectSites'));
-       /* Route::get('create',array('uses'=> 'Inventory\InventoryManageController@getCreateView'));
-        Route::get('edit',array('uses'=> 'Purchase\PurchaseOrderController@getEditView'));*/
         Route::group(['prefix' => 'component'], function(){
             Route::post('create',array('uses' => 'Inventory\InventoryManageController@createInventoryComponent'));
             Route::post('listing/{inventoryComponent}',array('uses'=> 'Inventory\InventoryManageController@inventoryComponentListing'));
