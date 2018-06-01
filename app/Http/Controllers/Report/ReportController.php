@@ -1454,43 +1454,6 @@ class ReportController extends Controller
         return $finalArray;
     }
 
-    /*public function getBillTransactionsAmount($projectSiteId){
-        try{
-            if($projectSiteId == 'all'){
-                $quotations = Quotation::get();
-            }else{
-                $quotations = Quotation::where('project_site_id',$projectSiteId)->get();
-            }
-            $totalReceiptEntry = 0;
-            foreach($quotations as $key4 => $quotation){
-                $balanceAdvancedAmount = ProjectSite::where('id',$quotation['project_site_id'])->pluck('advanced_balance')->first();
-                $statusId = BillStatus::where('slug','approved')->pluck('id')->first();
-                $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
-                foreach($bills as $key => $bill){
-                    $billTransaction = $bill->transactions;
-                    $billReconcileTransaction = $bill->billReconcileTransaction;
-                    $billTransactionSubTotal = $billTransaction->sum('total');
-                    $billTransactionDebit = $billTransaction->sum('debit');
-                    $billTransactionTds = $billTransaction->sum('tds_amount');
-                    $billTransactionHold = $billTransaction->sum('hold') - $billReconcileTransaction->where('transaction_slug','hold')->sum('amount');
-                    $billTransactionRetention = $billTransaction->sum('retention_amount') - $billReconcileTransaction->where('transaction_slug','retention')->sum('amount');
-                    $billTransactionTotal = $billTransactionSubTotal - ($billTransactionDebit + $billTransactionTds + $billTransactionHold + $billTransactionRetention);
-                    $totalReceiptEntry += $billTransactionTotal;
-                }
-                $totalReceiptEntry += $balanceAdvancedAmount;
-            }
-        }catch(\Exception $e){
-            $totalReceiptEntry = 0;
-            $data = [
-                'action' => 'Get Bill Transaction Amount for Report',
-                'exception' => $e->getMessage(),
-                'project_site_id' => $projectSiteId,
-            ];
-            Log::critical(json_encode($data));
-        }
-        return $totalReceiptEntry;
-    }*/
-
     public function getBillTransactionsAmount($projectSiteId,$bankIds){
         try{
             if($projectSiteId == 'all'){
