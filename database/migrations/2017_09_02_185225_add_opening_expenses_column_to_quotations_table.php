@@ -14,7 +14,7 @@ class AddOpeningExpensesColumnToQuotationsTable extends Migration
     public function up()
     {
         Schema::table('quotations', function (Blueprint $table) {
-            $table->string('opening_expenses')->nullable();
+            $table->double('opening_expenses')->nullable();
         });
     }
 
