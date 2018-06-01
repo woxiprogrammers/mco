@@ -189,7 +189,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control calculate-payable-amount" id="pt" name="pt" onchange="calculatePayableAmount()">
+                                                                <input type="text" class="form-control calculate-payable-amount" id="pt" name="pt" value="0" onchange="calculatePayableAmount()">
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -198,7 +198,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control calculate-payable-amount" id="pf" name="pf" onchange="calculatePayableAmount()">
+                                                                <input type="text" class="form-control calculate-payable-amount" id="pf" name="pf" value="0" onchange="calculatePayableAmount()">
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -207,7 +207,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control calculate-payable-amount" id="tds" name="tds" onchange="calculatePayableAmount()">
+                                                                <input type="text" class="form-control calculate-payable-amount" id="tds" name="tds" value="0" onchange="calculatePayableAmount()">
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -216,7 +216,7 @@
                                                                 <span>*</span>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control calculate-payable-amount" id="esic" name="esic" onchange="calculatePayableAmount()">
+                                                                <input type="text" class="form-control calculate-payable-amount" id="esic" name="esic" value="0" onchange="calculatePayableAmount()">
                                                             </div>
                                                         </div>
                                                         <div class="form-group row">
@@ -427,16 +427,9 @@
                         alert('Please select Bank');
                     }else{
                         var allowedBankAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
-                        if(allowedBankAmount < approved_amount){
-                            $(element).rules('add',{
-                                max: allowedBankAmount
-                            });
-                        }else{
-                            $(element).rules('add',{
-                                max: approved_amount
-                            });
-                        }
-
+                        $(element).rules('add',{
+                            max: allowedBankAmount
+                        });
                     }
                 }else{
                     $(element).rules('add',{
