@@ -1682,13 +1682,22 @@ class ReportController extends Controller
 
     public function getSiteTransferAmount($projectSiteId,$bankIds){
         try{
+            $inOutTransferTypes = InventoryTransferTypes::where('slug','site')->whereIn('type',['IN','OUT'])->select('id','type')->get();
             if($projectSiteId == 'all'){
-                $siteTransferAmount = SiteTransferBillPayment::sum('amount');
+                $siteTransferBillAmount = SiteTransferBillPayment::sum('amount');
+                $siteInTransferTotal = InventoryComponentTransfers::where('transfer_type_id',$inOutTransferTypes->where('type','IN')->pluck('id')->first())->sum('total');
+                $siteOutTransferTotal = InventoryComponentTransfers::where('transfer_type_id',$inOutTransferTypes->where('type','OUT')->pluck('id')->first())->sum('total');
+                $siteTransferAmount = $siteTransferBillAmount + $siteInTransferTotal - $siteOutTransferTotal;
             }else{
-                $siteTransferAmount = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
+                $siteTransferBillAmount = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
                                                                     ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
                                                                     ->join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                                                                     ->where('inventory_components.project_site_id',$projectSiteId)->sum('site_transfer_bill_payments.amount');
+                $siteInTransferTotal = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.id')
+                                                                        ->where('inventory_components.project_site_id',$projectSiteId)->where('inventory_component_transfers.transfer_type_id',$inOutTransferTypes->where('type','IN')->pluck('id')->first())->sum('inventory_component_transfers.total');
+                $siteOutTransferTotal = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.id')
+                                                                        ->where('inventory_components.project_site_id',$projectSiteId)->where('inventory_component_transfers.transfer_type_id',$inOutTransferTypes->where('type','OUT')->pluck('id')->first())->sum('inventory_component_transfers.total');
+                $siteTransferAmount = $siteTransferBillAmount + $siteInTransferTotal - $siteOutTransferTotal;
             }
             $finalArray[0] = $siteTransferAmount;
 
