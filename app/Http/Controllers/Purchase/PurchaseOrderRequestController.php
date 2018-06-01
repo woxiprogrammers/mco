@@ -739,7 +739,6 @@ class PurchaseOrderRequestController extends Controller
             $request->session()->flash('success', "Material / Asset removed successfully !!");
             return redirect('/purchase/purchase-order-request/edit/'.$purchaseOrderRequest->id);
         }catch(\Exception $e){
-            dd($e->getMessage());
             $data = [
                 'action' => 'Disapprove Purchase Order Request Component',
                 'params' => $request->all(),
