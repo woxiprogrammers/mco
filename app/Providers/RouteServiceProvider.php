@@ -24,6 +24,7 @@ use App\ProjectSiteChecklist;
 use App\PurchaseOrder;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderRequest;
+use App\PurchaseOrderRequestComponent;
 use App\PurchaseOrderTransaction;
 use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentVendorRelation;
@@ -100,6 +101,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('purchaseRequestComponent',PurchaseRequestComponent::class);
         Route::model('purchaseOrderRequest',PurchaseOrderRequest::class);
         Route::model('purchaseComponentVendorRelation',PurchaseRequestComponentVendorRelation::class);
+        Route::model('purchaseOrderRequestComponent',PurchaseOrderRequestComponent::class);
         Route::model('subcontractorStructure',SubcontractorStructure::class);
         Route::model('siteTransferBill',SiteTransferBill::class);
     }
