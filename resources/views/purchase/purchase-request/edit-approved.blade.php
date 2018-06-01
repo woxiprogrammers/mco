@@ -399,6 +399,7 @@
                         vendor.push(newVendor);
                     }
                 });
+                console.log(vendor);
                 var modalBodyString = '';
                 $.each(vendor, function(i,v){
                     modalBodyString += '<div class="panel panel-default">\n' +

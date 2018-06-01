@@ -200,14 +200,20 @@ class PurchaseOrderRequestController extends Controller
             $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
-                $purchaseOrderRequestsData = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
-                                                        ->where('purchase_requests.project_site_id', $projectSiteId)
-                                                        ->select('purchase_order_requests.id as id','purchase_order_requests.purchase_request_id as purchase_request_id','purchase_order_requests.user_id as user_id','purchase_order_requests.ready_to_approve as ready_to_approve')
-                                                        ->orderBy('id','desc')
-                                                        ->get();
+                $purchaseOrderRequestIds  = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
+                ->where('purchase_requests.project_site_id', $projectSiteId)
+                ->orderBy('purchase_order_requests.id','desc')
+                ->pluck('purchase_order_requests.id');
             }else{
-                $purchaseOrderRequestsData = PurchaseOrderRequest::orderBy('id','desc')->get();
+                $purchaseOrderRequestIds = PurchaseOrderRequest::orderBy('id','desc')->pluck('id');
             }
+            if($request->has('purchase_request_format')){
+                $purchaseOrderRequestIds = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
+                                            ->whereIn('purchase_order_requests.id', $purchaseOrderRequestIds)
+                                            ->where('purchase_requests.format_id','ilike','%'.trim($request->purchase_request_format).'%')
+                                            ->pluck('purchase_order_requests.id');
+            }
+            $purchaseOrderRequestsData = PurchaseOrderRequest::whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
             $records = array();
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
@@ -215,7 +221,7 @@ class PurchaseOrderRequestController extends Controller
             $end = $request->length < 0 ? count($purchaseOrderRequestsData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseOrderRequestsData); $iterator++,$pagination++ ){
                 $user = User::where('id',$purchaseOrderRequestsData[$pagination]['user_id'])->select('first_name','last_name')->first();
-                $purchaseRequestFormat = PurchaseRequest::where('id',$purchaseOrderRequestsData[$pagination]['purchase_request_id'])->pluck('format_id')->first();
+                $purchaseRequestFormat = $purchaseOrderRequestsData[$pagination]->purchaseRequest->format_id;
                 $actionDropdown = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions
@@ -242,7 +248,7 @@ class PurchaseOrderRequestController extends Controller
                 }
                 $actionDropdown .= '</div>';
                 $records['data'][] = [
-                    $iterator+1,
+                    $purchaseOrderRequestsData[$pagination]['id'],
                     $purchaseRequestFormat,
                     $user['first_name'].' '.$user['last_name'],
                     $actionDropdown
@@ -323,6 +329,7 @@ class PurchaseOrderRequestController extends Controller
                         $purchaseOrderRequestComponents[$purchaseRequestComponentId]['name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->name;
                         $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'] = $purchaseOrderRequestComponent->quantity;
                         $purchaseOrderRequestComponents[$purchaseRequestComponentId]['unit'] = $purchaseOrderRequestComponent->unit->name;
+                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
                     }
                     $rateWithTax = $purchaseOrderRequestComponent->rate_per_unit;
                     $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
@@ -372,12 +379,13 @@ class PurchaseOrderRequestController extends Controller
                 $purchaseOrderCreatedComponentIds = PurchaseOrderRequestComponent::join('purchase_order_requests','purchase_order_requests.id','=','purchase_order_request_components.purchase_order_request_id')
                     ->join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
                     ->join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                    ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                     ->where('purchase_requests.project_site_id',$projectSiteId)
-                    ->pluck('purchase_request_components.id')
+                    ->pluck('purchase_request_component_vendor_relation.id')
                     ->toArray();
                 $purchaseRequests = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
                     ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
-                    ->whereNotIn('purchase_request_components.id',$purchaseOrderCreatedComponentIds)
+                    ->whereNotIn('purchase_request_component_vendor_relation.id',$purchaseOrderCreatedComponentIds)
                     ->where('purchase_requests.format_id','ilike','%'.$keyword.'%')
                     ->where('purchase_requests.project_site_id',$projectSiteId)
                     ->select('purchase_requests.id as id','purchase_requests.format_id as format_id')
@@ -385,13 +393,10 @@ class PurchaseOrderRequestController extends Controller
                     ->get()
                     ->toArray();
             }else{
-                $purchaseOrderCreatedComponentIds = PurchaseOrderRequestComponent::join('purchase_order_requests','purchase_order_requests.id','=','purchase_order_request_components.purchase_order_request_id')
-                    ->join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
-                    ->pluck('purchase_order_request_components.purchase_request_component_id')
-                    ->toArray();
+                $purchaseOrderCreatedComponentIds = PurchaseOrderRequestComponent::pluck('purchase_request_component_vendor_relation.id')->toArray();
                 $purchaseRequests = PurchaseRequest::join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
                     ->join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.purchase_request_component_id','=','purchase_request_components.id')
-                    ->whereNotIn('purchase_request_components.id',$purchaseOrderCreatedComponentIds)
+                    ->whereNotIn('purchase_request_component_vendor_relation.id',$purchaseOrderCreatedComponentIds)
                     ->where('purchase_requests.format_id','ilike','%'.$keyword.'%')
                     ->select('purchase_requests.id as id','purchase_requests.format_id as format_id')
                     ->distinct('format_id')
@@ -419,44 +424,47 @@ class PurchaseOrderRequestController extends Controller
             $purchaseRequestComponentData = array();
             foreach($purchaseRequestComponents as $purchaseRequestComponent){
                 foreach ($purchaseRequestComponent->vendorRelations as $vendorRelation){
-                    $purchaseRequestComponentData[$iterator]['vendor_relation_id'] = $vendorRelation->id;
-                    $purchaseRequestComponentData[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
-                    $purchaseRequestComponentData[$iterator]['name'] = $purchaseRequestComponent->materialRequestComponent->name;
-                    $purchaseRequestComponentData[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
-                    $purchaseRequestComponentData[$iterator]['unit'] = $purchaseRequestComponent->materialRequestComponent->unit->name;
-                    $purchaseRequestComponentData[$iterator]['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
-                    if($vendorRelation['is_client'] == true){
-                        $purchaseRequestComponentData[$iterator]['vendor_name'] = $vendorRelation->client->company;
-                        $purchaseRequestComponentData[$iterator]['is_client'] = true;
-                        $purchaseRequestComponentData[$iterator]['rate_per_unit'] = '-';
-                    }else{
-                        $purchaseRequestComponentData[$iterator]['vendor_name'] = $vendorRelation->vendor->company;
-                        $purchaseRequestComponentData[$iterator]['is_client'] = false;
-                        $lastPurchaseOrderRateInfo = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
-                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
-                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
-                            ->where('material_request_components.name','ilike', $purchaseRequestComponentData[$iterator]['name'])
-                            ->where('purchase_orders.is_approved', true)
-                            ->orderBy('purchase_orders.created_at','desc')
-                            ->select('purchase_order_components.rate_per_unit as rate_per_unit','purchase_order_components.unit_id as unit_id')
-                            ->first();
-                        if($lastPurchaseOrderRateInfo == null){
-                            $systemAssetTypeId = MaterialRequestComponentTypes::where('slug','system-asset')->pluck('id')->first();
-                            $materialTypeIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material'])->pluck('id')->toArray();
-                            if($purchaseRequestComponent->materialRequestComponent->component_type_id == $systemAssetTypeId){
-                                $lastPurchaseOrderRate = Asset::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->pluck('price')->first();
-                            }elseif(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$materialTypeIds)){
-                                $materialInfo = Material::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->select('id','rate_per_unit','unit_id')->first();
-                                $lastPurchaseOrderRate = UnitHelper::unitConversion($materialInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$materialInfo['rate_per_unit']);
-                            }else{
-                                $lastPurchaseOrderRate = 0;
-                            }
+                    $vendorRelationAlreadyExists = PurchaseOrderRequestComponent::where('purchase_request_component_vendor_relation_id', $vendorRelation->id)->first();
+                    if($vendorRelationAlreadyExists == null){
+                        $purchaseRequestComponentData[$iterator]['vendor_relation_id'] = $vendorRelation->id;
+                        $purchaseRequestComponentData[$iterator]['purchase_request_component_id'] = $purchaseRequestComponent->id;
+                        $purchaseRequestComponentData[$iterator]['name'] = $purchaseRequestComponent->materialRequestComponent->name;
+                        $purchaseRequestComponentData[$iterator]['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
+                        $purchaseRequestComponentData[$iterator]['unit'] = $purchaseRequestComponent->materialRequestComponent->unit->name;
+                        $purchaseRequestComponentData[$iterator]['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
+                        if($vendorRelation['is_client'] == true){
+                            $purchaseRequestComponentData[$iterator]['vendor_name'] = $vendorRelation->client->company;
+                            $purchaseRequestComponentData[$iterator]['is_client'] = true;
+                            $purchaseRequestComponentData[$iterator]['rate_per_unit'] = '-';
                         }else{
-                            $lastPurchaseOrderRate = UnitHelper::unitConversion($lastPurchaseOrderRateInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$lastPurchaseOrderRateInfo['rate_per_unit']);
+                            $purchaseRequestComponentData[$iterator]['vendor_name'] = $vendorRelation->vendor->company;
+                            $purchaseRequestComponentData[$iterator]['is_client'] = false;
+                            $lastPurchaseOrderRateInfo = PurchaseOrderComponent::join('purchase_request_components','purchase_request_components.id','=','purchase_order_components.purchase_request_component_id')
+                                ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                                ->join('purchase_orders','purchase_orders.id','=','purchase_order_components.purchase_order_id')
+                                ->where('material_request_components.name','ilike', $purchaseRequestComponentData[$iterator]['name'])
+                                ->where('purchase_orders.is_approved', true)
+                                ->orderBy('purchase_orders.created_at','desc')
+                                ->select('purchase_order_components.rate_per_unit as rate_per_unit','purchase_order_components.unit_id as unit_id')
+                                ->first();
+                            if($lastPurchaseOrderRateInfo == null){
+                                $systemAssetTypeId = MaterialRequestComponentTypes::where('slug','system-asset')->pluck('id')->first();
+                                $materialTypeIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material'])->pluck('id')->toArray();
+                                if($purchaseRequestComponent->materialRequestComponent->component_type_id == $systemAssetTypeId){
+                                    $lastPurchaseOrderRate = Asset::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->pluck('price')->first();
+                                }elseif(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$materialTypeIds)){
+                                    $materialInfo = Material::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->select('id','rate_per_unit','unit_id')->first();
+                                    $lastPurchaseOrderRate = UnitHelper::unitConversion($materialInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$materialInfo['rate_per_unit']);
+                                }else{
+                                    $lastPurchaseOrderRate = 0;
+                                }
+                            }else{
+                                $lastPurchaseOrderRate = UnitHelper::unitConversion($lastPurchaseOrderRateInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$lastPurchaseOrderRateInfo['rate_per_unit']);
+                            }
+                            $purchaseRequestComponentData[$iterator]['rate_per_unit'] = $lastPurchaseOrderRate;
                         }
-                        $purchaseRequestComponentData[$iterator]['rate_per_unit'] = $lastPurchaseOrderRate;
+                        $iterator++;
                     }
-                    $iterator++;
                 }
             }
             return view('partials.purchase.purchase-order-request.component-listing')->with(compact('purchaseRequestComponentData'));
@@ -621,6 +629,7 @@ class PurchaseOrderRequestController extends Controller
                         $disapprovedPurchaseOrderRequestComponentIds = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                                 ->where('purchase_request_component_vendor_relation.purchase_request_component_id',$purchaseRequestComponentId)
                                 ->where('purchase_order_request_components.id','!=',$purchaseOrderRequestComponent->id)
+                                ->where('purchase_order_request_components.purchase_order_request_id', $purchaseOrderRequestComponent->purchase_order_request_id)
                                 ->pluck('purchase_order_request_components.id')
                                 ->toArray();
                         if(count($disapprovedPurchaseOrderRequestComponentIds) > 0){
@@ -963,6 +972,27 @@ class PurchaseOrderRequestController extends Controller
             $data = [
                 'action' => 'Make Ready To approve Purchase Order Request',
                 'purchase_order_request' => $purchaseOrderRequest,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+    public function disapproveComponent(Request $request, $purchaseOrderRequest, $purchaseRequestComponent){
+        try{
+            $purchaseOrderRequestComponentId = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
+                                                ->where('purchase_order_request_components.purchase_order_request_id', $purchaseOrderRequest->id)
+                                                ->where('purchase_request_component_vendor_relation.purchase_request_component_id', $purchaseRequestComponent->id)
+                                                ->pluck('purchase_order_request_components.id');
+            PurchaseOrderRequestComponent::whereIn('id', $purchaseOrderRequestComponentId)->update(['is_approved' => false]);
+            $request->session()->flash('success', "Material / Asset removed successfully !!");
+            return redirect('/purchase/purchase-order-request/edit/'.$purchaseOrderRequest->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Disapprove Purchase Order Request Component',
+                'params' => $request->all(),
+                'purchase_order' => $purchaseOrderRequest,
+                'purchase_request_component' => $purchaseRequestComponent,
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
