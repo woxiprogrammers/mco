@@ -15,4 +15,8 @@ class SubcontractorBillTransaction extends Model
     public function subcontractorBill(){
         return $this->belongsTo('App\SubcontractorBill','subcontractor_bills_id');
     }
+
+    public function subcontractorBillReconcileTransaction(){
+        return $this->hasMany('App\SubcontractorBillReconcileTransaction','subcontractor_bill_id');
+    }
 }

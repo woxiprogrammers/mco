@@ -336,20 +336,49 @@
                         <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                     </div>
                 </div>
+
                 <div class="modal-body" style="padding:40px 50px;">
-                    <div class="form-group row">
-                        <select class="form-control" name="payment_id">
-                            @foreach($transaction_types as $type)
-                                <option value="{{$type['id']}}">{{$type['name']}}</option>
-                            @endforeach
+                    <div class="form-group row" id="paidFromSlug">
+                        <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
+                            <option value="bank">Bank</option>
+                            <option value="cash">Cash</option>
                         </select>
                     </div>
-                    <div class="form-group row">
-                        <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount">
+
+                    <div id="bankData">
+                        <div class="form-group row" id="bankSelect">
+                            <select class="form-control" id="bank_id" name="bank_id">
+                                <option value="">Select Bank</option>
+                                @foreach($banks as $bank)
+                                    <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group row">
+                            <select class="form-control" name="payment_id">
+                                @foreach($transaction_types as $type)
+                                    <option value="{{$type['id']}}">{{$type['name']}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
+
+                    <input type="hidden" id="allowedAmount">
+                    <input type="hidden" id="cashAllowedAmount" value="{{$cashAllowedLimit}}">
+
+                    @foreach($banks as $bank)
+                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                    @endforeach
+
+                    <div class="form-group row">
+                        <input type="number" class="form-control" id="bilAmount" name="amount" placeholder="Enter Amount" onkeyup="calculateTotal()">
+                    </div>
+
                     <div class="form-group row">
                         <input type="number" class="form-control"  name="reference_number" placeholder="Enter Reference Number" >
                     </div>
+
                     <button class="btn btn-set red pull-right" type="submit">
                         <i class="fa fa-check" style="font-size: large"></i>
                         Add &nbsp; &nbsp; &nbsp;
@@ -375,6 +404,7 @@
 <script>
     $(document).ready(function() {
         EditSubcontractor.init();
+        PaymentCreate.init();
         $("#removeButton").on('click',function(){
             if($("#dprCategoryTable tbody input:checkbox:checked").length > 0){
                 $("#dprCategoryTable tbody input:checkbox:checked").each(function(){
@@ -437,5 +467,38 @@
 
             });
     });
+
+    function changePaidFrom(element){
+        var paidFromSlug = $(element).val();
+        if(paidFromSlug == 'cash'){
+            $('#bankData').hide();
+        }else{
+            $('#bankData').show();
+        }
+    }
+
+    function calculateTotal(){
+        var bilAmount = parseFloat($('#bilAmount').val());
+        if(typeof bilAmount == 'undefined' || bilAmount == '' || bilAmount == null || isNaN(bilAmount)){
+            bilAmount = 0;
+        }
+        var paidFromSlug = $('#paid_from_slug').val();
+        if(paidFromSlug == 'bank'){
+            var selectedBankId = $('#bank_id').val();
+            if(selectedBankId == ''){
+                alert('Please select Bank');
+            }else{
+                var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
+                $("input[name='amount']").rules('add',{
+                    max: allowedAmount
+                });
+            }
+        }else{
+            var cashAllowedAmount = parseFloat($('#cashAllowedAmount').val());
+            $("input[name='amount']").rules('add',{
+                max: cashAllowedAmount
+            });
+        }
+    }
 </script>
 @endsection
