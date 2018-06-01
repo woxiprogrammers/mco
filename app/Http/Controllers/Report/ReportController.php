@@ -1699,6 +1699,7 @@ class ReportController extends Controller
                 $siteInTransferTotal = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                                                                         ->where('inventory_components.project_site_id',$projectSiteId)->where('inventory_component_transfers.transfer_type_id',$inOutTransferTypes->where('type','IN')->pluck('id')->first())->sum('inventory_component_transfers.total');
                 $siteOutTransferTotal = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+
                                                                         ->where('inventory_components.project_site_id',$projectSiteId)->where('inventory_component_transfers.transfer_type_id',$inOutTransferTypes->where('type','OUT')->pluck('id')->first())->sum('inventory_component_transfers.total');
                 $siteTransferAmount = $siteTransferBillAmount + $siteInTransferTotal - $siteOutTransferTotal;
             }
