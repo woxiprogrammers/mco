@@ -36,7 +36,7 @@
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);">Edit Purchase Order Request</a>
+                                        <a href="javascript:void(0);">Approval Purchase Order Request</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
@@ -127,6 +127,9 @@
                                                                                     <th>
                                                                                         Transportation w/ Tax
                                                                                     </th>
+                                                                                    <th>
+                                                                                        Action
+                                                                                    </th>
                                                                                 </tr>
                                                                                 </thead>
                                                                                 <tbody>
@@ -138,7 +141,7 @@
                                                                                         <td>
                                                                                             {{$vendorRelation['vendor_name']}}
                                                                                         </td>
-                                                                                        <td>
+                                                                                        <td class="rate-without-tax">
                                                                                             {{$vendorRelation['rate_without_tax']}}
                                                                                         </td>
                                                                                         <td>
@@ -152,6 +155,9 @@
                                                                                         </td>
                                                                                         <td>
                                                                                             {{$vendorRelation['transportation_with_tax']}}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <a class="btn blue" href="javascript:void(0);" onclick="getComponentDetails(this, {{$vendorRelation['purchase_order_request_component_id']}})">View Details</a>
                                                                                         </td>
                                                                                     </tr>
                                                                                 @endforeach
@@ -186,6 +192,25 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade " id="detailsModal"  role="dialog">
+        <div class="modal-dialog" style="width: 98%; height: 800px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4" style="font-size: 21px"> Details </div>
+                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                    </div>
+                </div>
+                <form id="componentDetailForm">
+                    {!! csrf_field() !!}
+                    <div class="modal-body">
+
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -225,6 +250,66 @@
             if (r == true) {
                 window.location.href = '/purchase/purchase-order-request/disapprove-component/'+purchaseOrderRequestId+'/'+purchaseRequestComponentId;
             } 
+        }
+
+        function getComponentDetails(element, purchaseOrderRequestComponentId){
+            var rate = $(element).closest('tr').find('.rate-without-tax').text();
+            $.ajax({
+                url: '/purchase/purchase-order-request/get-purchase-order-request-component-tax-details/'+purchaseOrderRequestComponentId+'?_token='+$("input[name='_token']").val(),
+                type: 'POST',
+                data:{
+                    _token: $("input[name='_token']").val(),
+                    rate: rate,
+                    from_approval: true
+                },
+                success: function(data, textStatus, xhr){
+                    $("#detailsModal .modal-body").html(data);
+                    $("#detailsModal").modal('show');
+                },
+                error: function(errorData){
+
+                }
+            });
+        }
+        function calculateTaxes(element){
+            var rate = parseFloat($(element).closest('.modal-body').find('.tax-modal-rate').val());
+            if(typeof rate == 'undefined' || rate == '' || isNaN(rate)){
+                rate = 0;
+            }
+            var quantity = parseFloat($(element).closest('.modal-body').find('.tax-modal-quantity').val());
+            if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
+                quantity = 0;
+            }
+            var subtotal = rate * quantity;
+            $(element).closest('.modal-body').find('.tax-modal-subtotal').val(subtotal);
+            var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-cgst-percentage').val());
+            if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
+                cgstPercentage = 0;
+            }
+            var sgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-sgst-percentage').val());
+            if(typeof sgstPercentage == 'undefined' || sgstPercentage == '' || isNaN(sgstPercentage)){
+                sgstPercentage = 0;
+            }
+            var igstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-igst-percentage').val());
+            if(typeof igstPercentage == 'undefined' || igstPercentage == '' || isNaN(igstPercentage)){
+                igstPercentage = 0;
+            }
+            var cgstAmount = customRound(subtotal * (cgstPercentage / 100));
+            var sgstAmount = customRound(subtotal * (sgstPercentage / 100));
+            var igstAmount = customRound(subtotal * (igstPercentage / 100));
+            $(element).closest('.modal-body').find('.tax-modal-cgst-amount').val(cgstAmount);
+            $(element).closest('.modal-body').find('.tax-modal-sgst-amount').val(sgstAmount);
+            $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
+            var total = customRound(subtotal + cgstAmount + sgstAmount + igstAmount);
+            $(element).closest('.modal-body').find('.tax-modal-total').val(total);
+        }
+
+        function openPdf(random,fullPath){
+            $("#image-"+random+" #myFrame").attr('src',fullPath);
+            $("#image-"+random+" #myFrame").show();
+        }
+        function closePdf(random,fullPath){
+            $("#image-"+random+" #myFrame").hide();
         }
     </script>
 @endsection
