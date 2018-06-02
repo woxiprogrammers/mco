@@ -44,7 +44,7 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
-                                            <form role="form" id="editPurchaseOrderRequest" class="form-horizontal" method="post" action="/purchase/purchase-order-request/edit/{{$purchaseOrderRequest->id}}">
+                                            <form role="form" id="editPurchaseOrderRequest" class="form-horizontal" method="post" action="/purchase/purchase-order-request/approve/{{$purchaseOrderRequest->id}}">
                                                 {!! csrf_field() !!}
                                                 <div class="form-group">
                                                     <div class="col-md-3">

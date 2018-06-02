@@ -325,41 +325,38 @@ class PurchaseOrderRequestController extends Controller
             $draftPurchaseOrderRequestComponents = PurchaseOrderRequestComponent::where('purchase_order_request_id',$purchaseOrderRequest->id)->whereNull('is_approved')->get();
             foreach($draftPurchaseOrderRequestComponents as $purchaseOrderRequestComponent){
                 $purchaseRequestComponentId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
-                $purchaseOrderCount = PurchaseOrderComponent::where('purchase_request_component_id', $purchaseRequestComponentId)->count();
-                if($purchaseOrderCount <= 0){
-                    if(!array_key_exists($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id,$purchaseOrderRequestComponents)){
-                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->name;
-                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'] = $purchaseOrderRequestComponent->quantity;
-                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['unit'] = $purchaseOrderRequestComponent->unit->name;
-                        $purchaseOrderRequestComponents[$purchaseRequestComponentId]['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
-                    }
-                    $rateWithTax = $purchaseOrderRequestComponent->rate_per_unit;
-                    $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
-                    $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->sgst_percentage / 100));
-                    $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->igst_percentage / 100));
-                    if($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->is_client == true){
-                        $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->company;
-                        $vendorId = 'client_'.$purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->id;
-                    }else{
-                        $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->company;
-                        $vendorId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->id;
-                    }
-                    $transportationWithTax = $purchaseOrderRequestComponent->transportation_amount;
-                    $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_cgst_percentage / 100));
-                    $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_sgst_percentage / 100));
-                    $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_igst_percentage / 100));
-                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['vendor_relations'][] = [
-                        'component_vendor_relation_id' => $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id,
-                        'purchase_order_request_component_id' => $purchaseOrderRequestComponent->id,
-                        'vendor_name' => $vendorName,
-                        'vendor_id' => $vendorId,
-                        'rate_without_tax' => $purchaseOrderRequestComponent->rate_per_unit,
-                        'rate_with_tax' => $rateWithTax,
-                        'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'],
-                        'transportation_without_tax' => $purchaseOrderRequestComponent->transportation_amount,
-                        'transportation_with_tax' => $transportationWithTax
-                    ];
+                if(!array_key_exists($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id,$purchaseOrderRequestComponents)){
+                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->name;
+                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'] = $purchaseOrderRequestComponent->quantity;
+                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['unit'] = $purchaseOrderRequestComponent->unit->name;
+                    $purchaseOrderRequestComponents[$purchaseRequestComponentId]['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
                 }
+                $rateWithTax = $purchaseOrderRequestComponent->rate_per_unit;
+                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
+                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->sgst_percentage / 100));
+                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->igst_percentage / 100));
+                if($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->is_client == true){
+                    $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->company;
+                    $vendorId = 'client_'.$purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->id;
+                }else{
+                    $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->company;
+                    $vendorId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->id;
+                }
+                $transportationWithTax = $purchaseOrderRequestComponent->transportation_amount;
+                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_cgst_percentage / 100));
+                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_sgst_percentage / 100));
+                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_igst_percentage / 100));
+                $purchaseOrderRequestComponents[$purchaseRequestComponentId]['vendor_relations'][] = [
+                    'component_vendor_relation_id' => $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id,
+                    'purchase_order_request_component_id' => $purchaseOrderRequestComponent->id,
+                    'vendor_name' => $vendorName,
+                    'vendor_id' => $vendorId,
+                    'rate_without_tax' => $purchaseOrderRequestComponent->rate_per_unit,
+                    'rate_with_tax' => $rateWithTax,
+                    'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'],
+                    'transportation_without_tax' => $purchaseOrderRequestComponent->transportation_amount,
+                    'transportation_with_tax' => $transportationWithTax
+                ];
             }
             return view('purchase.purchase-order-request.approve')->with(compact('purchaseOrderRequest','purchaseOrderRequestComponents'));
         }catch(\Exception $e){
