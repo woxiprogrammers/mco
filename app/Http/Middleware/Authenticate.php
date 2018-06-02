@@ -25,7 +25,6 @@ class Authenticate
         try{
             if (Auth::guard($guard)->check()) {
                 $user = Auth::user();
-                $globalProjectSite = $selectGlobalProjectSite = array();
                 if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
                     $globalProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                         ->where('projects.is_active', true)
@@ -41,26 +40,23 @@ class Authenticate
                         ->orderBy('project_site_id','desc')
                         ->get();
                 }
-                if(empty($globalProjectSites)){
-                    if(Session::has('global_project_site')){
-                        if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
-                            $selectGlobalProjectSite = Session::get('global_project_site');
-                        }else{
-                            $selectGlobalProjectSite = Session::get('global_project_site');
-                            $projectSiteRelationExists = UserProjectSiteRelation::where('user_id',$user->id)->where('project_site_id',$selectGlobalProjectSite)->first();
-                            if($projectSiteRelationExists == null){
-                                $selectGlobalProjectSite = $globalProjectSites[0]->project_site_id;
-                                Session::put('global_project_site',$selectGlobalProjectSite);
-                            }
-                        }
+                if(Session::has('global_project_site')){
+                    if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
+                        $selectGlobalProjectSite = Session::get('global_project_site');
                     }else{
-                        $selectGlobalProjectSite = $globalProjectSites[0]->project_site_id;
-                        Session::put('global_project_site',$selectGlobalProjectSite);
+                        $selectGlobalProjectSite = Session::get('global_project_site');
+                        $projectSiteRelationExists = UserProjectSiteRelation::where('user_id',$user->id)->where('project_site_id',$selectGlobalProjectSite)->first();
+                        if($projectSiteRelationExists == null){
+                            $selectGlobalProjectSite = $globalProjectSites[0]->project_site_id;
+                            Session::put('global_project_site',$selectGlobalProjectSite);
+                        }
                     }
-
+                }else{
+                    $selectGlobalProjectSite = $globalProjectSites[0]->project_site_id;
+                    Session::put('global_project_site',$selectGlobalProjectSite);
+                }
 
                 $globalProjectSite = ProjectSite::findOrFail(Session::get('global_project_site'));
-                }
                 View::share(compact('user','globalProjectSites','selectGlobalProjectSite','globalProjectSite'));
                 return $next($request);
             }else{
