@@ -234,7 +234,7 @@ use InventoryTrait;
     public function assignProjectSite(Request $request,$asset){
         try{
             $user = Auth::user();
-            $inventoryComponentId = InventoryComponent::where('project_site_id',$request['project_site_id'])->where('reference_id',$asset['id'])->pluck('id')->first();
+            $inventoryComponentId = InventoryComponent::where('project_site_id',$request['project_site_id'])->where('reference_id',$asset['id'])->where('is_material',false)->pluck('id')->first();
             if($inventoryComponentId == null){
                 $inventoryComponentData['name'] = $asset['name'];
                 $inventoryComponentData['is_material'] = false;
