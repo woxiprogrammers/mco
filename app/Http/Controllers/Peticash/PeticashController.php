@@ -1837,7 +1837,7 @@ class PeticashController extends Controller
             $bank = BankInfo::where('id',$request['bank_id'])->first();
             $peticashApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->pluck('salary_amount_approved')->first();
             $approvedAmount = (count($peticashApprovedAmount) > 0 && $peticashApprovedAmount != null) ? $peticashApprovedAmount : 0;
-            if($validationAmount > $bank['balance_amount']){
+            if($validationAmount > $bank['balance_amount'] && $request['paid_from'] == 'bank'){
                     $request->session()->flash('error', 'Bank Balance Amount is insufficient for this transaction');
                     return redirect('peticash/peticash-management/salary/manage');
             }elseif($validationAmount > $approvedAmount){
