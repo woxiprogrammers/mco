@@ -848,7 +848,11 @@ class PurchaseOrderRequestController extends Controller
                     }
                 }
             }
-            return view('partials.purchase.purchase-order-request.purchase-order-request-component-tax-details')->with(compact('date','purchaseOrderRequestComponentData','purchaseOrderRequestComponent'));
+            if($request->has('from_approval') && $request->from_approval == true){
+                return view('partials.purchase.purchase-order-request.component-tax-details-approval')->with(compact('date','purchaseOrderRequestComponentData','purchaseOrderRequestComponent'));
+            }else{
+                return view('partials.purchase.purchase-order-request.purchase-order-request-component-tax-details')->with(compact('date','purchaseOrderRequestComponentData','purchaseOrderRequestComponent'));
+            }
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Purchase Order Request Component tax details',
