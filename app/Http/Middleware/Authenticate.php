@@ -40,7 +40,6 @@ class Authenticate
                         ->orderBy('project_site_id','desc')
                         ->get();
                 }
-
                 if(Session::has('global_project_site')){
                     if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
                         $selectGlobalProjectSite = Session::get('global_project_site');
@@ -56,6 +55,7 @@ class Authenticate
                     $selectGlobalProjectSite = $globalProjectSites[0]->project_site_id;
                     Session::put('global_project_site',$selectGlobalProjectSite);
                 }
+
                 $globalProjectSite = ProjectSite::findOrFail(Session::get('global_project_site'));
                 View::share(compact('user','globalProjectSites','selectGlobalProjectSite','globalProjectSite'));
                 return $next($request);
