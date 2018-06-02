@@ -1857,7 +1857,7 @@ class PeticashController extends Controller
             $salaryData['created_at'] = $salaryData['updated_at'] = Carbon::now();
 
             if($request['paid_from'] == 'bank'){
-                if($request['amount'] < $bank['balance_amount']){
+                if($request['amount'] > $bank['balance_amount']){
                     $salaryData['payment_type_id'] = $request['payment_id'];
                     $salaryData['bank_id'] = $request['bank_id'];
                     $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
