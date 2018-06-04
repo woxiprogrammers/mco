@@ -8,11 +8,12 @@ $('#mainCategoryId').change(function(){
             'id' : main_category_id,
         },
         success: function(data,textStatus,xhr){
+            var option = '<option>Select Sub Category</option>'
             $.each(data.categories, function( index, value ) {
-                var option = '<option>Select Sub Category</option>'
                 option += '<option value="'+value.id+'">'+value.name+'</option>';
-                $('#subCategoryId').html(option);
             });
+            console.log(option);
+            $('#subCategoryId').html(option);
         },
         error: function(data, textStatus, xhr){
 

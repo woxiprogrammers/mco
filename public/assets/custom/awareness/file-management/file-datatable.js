@@ -19,12 +19,8 @@ var QuotationImageUpload = function() {
                 max_file_size: "10mb",
                 mime_types: [{
                     title: "Image files",
-                    extensions: "jpg,jpeg,png"
-                },
-                    {
-                        title: "Files",
-                        extensions: "pdf,mp4"
-                    }]
+                    extensions: "jpg,jpeg,png,mp4,pdf"
+                }]
             },
             flash_swf_url: "/assets/global/plugins/plupload/js/Moxie.swf",
             silverlight_xap_url: "/assets/global/plugins/plupload/js/Moxie.xap",
