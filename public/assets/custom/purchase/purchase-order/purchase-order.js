@@ -68,20 +68,6 @@ $(document).ready(function(){
         });
         $("#viewDetailModal").modal();
     });
-    $('#poCloseBtn').click(function (){
-        var po_id = $('#po_id').val();
-        var vendor_id = $('#vendor_id').val();
-        $.ajax({
-            type: "POST",
-            url: "/purchase/purchase-order/close-purchase-order",
-            data:{po_id : po_id , vendor_id:vendor_id},
-            beforeSend: function(){
-            },
-            success: function(data){
-                location.reload();
-            }
-        });
-    });
     $('#poReopenBtn').click(function (){
         var po_id = $('#po_id').val();
         var vendor_id = $('#vendor_id').val();
@@ -99,3 +85,35 @@ $(document).ready(function(){
     });
 
 });
+
+function submitPOPassword(){
+    var po_id = $('#po_id').val();
+    var vendor_id = $('#vendor_id').val();
+    var password = $.trim($("#POPassword").val());
+    if(password.length > 0){
+        $.ajax({
+            type: "POST",
+            url: "/purchase/purchase-order/authenticate-purchase-order-close",
+            data:{password : password, _token: $("input[name='_token']").val()},
+            success: function(data){
+                $.ajax({
+                    type: "POST",
+                    url: "/purchase/purchase-order/close-purchase-order",
+                    data:{po_id : po_id , vendor_id:vendor_id},
+                    beforeSend: function(){
+                    },
+                    success: function(data){
+                        location.reload();
+                    }
+                });
+            },
+            error: function(xhr){
+                if(xhr.status == 401){
+                    alert("You are not authorised to close this purchase order.");
+                }
+            }
+        });
+    }else{
+        alert('Please enter valid password');
+    }
+}

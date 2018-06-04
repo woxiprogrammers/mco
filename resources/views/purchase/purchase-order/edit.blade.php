@@ -24,10 +24,10 @@
                                 </div>
                                 @if($purchaseOrderStatusSlug != 'close')
                                     <div class="form-group " style="text-align: center">
-                                        <button id="poCloseBtn" type="submit" class="btn red pull-right margin-top-15">
+                                        <a class="btn red pull-right margin-top-15" data-toggle="modal" href="#closePOAuthModal">
                                             <i class="fa fa-close" style="font-size: large"></i>
-                                            Close
-                                        </button>
+                                            Close Purchase Order
+                                        </a>
                                     </div>
                                 @elseif($purchaseOrderStatusSlug == 'close' && $userRole == 'superadmin')
                                     <div class="form-group " style="text-align: center">
@@ -461,6 +461,39 @@
         </div>
     </div>
 </div>
+    <div class="modal fade " id="closePOAuthModal"  role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4" style="font-size: 18px"> Close Purchase Order</div>
+                        <div class="col-md-4 "><button type="button" class="close" data-dismiss="modal">X</button></div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding:40px 50px;">
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label class="control-label pull-right">
+                                Enter Password :
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="password" id="POPassword" class="form-control" name="password">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-3 col-md-offset-4">
+                            <a class="btn btn-set red" href="javascript:void(0);" onclick="submitPOPassword()">
+                                <i class="fa fa-check" style="font-size: large"></i>
+                                Submit &nbsp; &nbsp; &nbsp;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
