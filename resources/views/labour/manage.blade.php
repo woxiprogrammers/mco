@@ -57,6 +57,7 @@
                                                         <th> Employee Name </th>
                                                         <th> Contact No </th>
                                                         <th> Per Day wages </th>
+                                                        <th> Monthly wages(30 days) </th>
                                                         <th> Project Name </th>
                                                         <th> Status </th>
                                                         <th> Actions </th>
@@ -67,6 +68,7 @@
                                                         <th style="width: 20%"> <input type="text" class="form-control form-filter" name="employee_name"> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="employee_contact" > </th>
                                                         <th> <input type="text" class="form-control form-filter" name="employee_wages" > </th>
+                                                        <th> <input type="text" class="form-control form-filter" disabled="" > </th>
                                                         <th> <input type="text" class="form-control form-filter" name="employee_project"> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
                                                         <th>
