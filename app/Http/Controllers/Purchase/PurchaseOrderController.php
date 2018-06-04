@@ -44,6 +44,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use App\PurchaseOrderComponentImage;
@@ -1550,5 +1551,31 @@ class PurchaseOrderController extends Controller
             Log::critical(json_encode($data));
             return response()->json([],500);
         }
+    }
+
+    public function authenticatePOClose(Request $request){
+        try{
+            $password = $request->password;
+            if(Hash::check($password, env('CLOSE_PURCHASE_ORDER_PASSWORD'))){
+                $status = 200;
+                $message = 'Authentication successful !!';
+            }else{
+                $status = 401;
+                $message = 'You are not authorised to close this purchase order.';
+            }
+        }catch (\Exception $e){
+            $message = 'Fail';
+            $status = 500;
+            $data = [
+                'action' => 'Authenticate Purchase Order Close',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+        }
+        $response = [
+            'message' => $message,
+        ];
+        return response()->json($response,$status);
     }
 }

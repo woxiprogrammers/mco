@@ -195,6 +195,7 @@ class LabourController extends Controller
                     $listingData[$pagination]['name'],
                     $listingData[$pagination]['mobile'],
                     $listingData[$pagination]['per_day_wages'],
+                    $listingData[$pagination]['per_day_wages'] * 30,
                     $projectSiteName,
                     $labourStatus,
                     $actionButton

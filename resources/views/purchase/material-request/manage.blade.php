@@ -18,8 +18,10 @@
                             <!-- BEGIN PAGE TITLE -->
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="page-title">
-                                        <h1>Manage Material</h1>
+                                    <div>
+                                        <div class="page-title col-md-12">
+                                            <h1>Manage Material</h1>
+                                        </div>
                                     </div>
                                 </div>
                                 @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-material-request'))
@@ -105,11 +107,11 @@
                                                           <option value="12">Dec</option>
                                                       </select>
                                                   </div>
-                                                  <div class="col-md-1" style="display: show">
+                                                  <div class="col-md-2" style="display: show">
                                                       <label>MR Id :</label>
                                                       <input  class="form-control" type="number" id="m_count" name="m_count"/>
                                                   </div>
-                                                  <div class="col-md-1">
+                                                  <div class="col-md-6" style="padding-top: 25px;">
                                                       <label>&nbsp;</label>
                                                       <div class="btn-group">
                                                           <div id="search-withfilter" class="btn blue" >
@@ -117,6 +119,9 @@
                                                                   <i class="fa fa-plus"></i>
                                                               </a>
                                                           </div>
+                                                          <a class="btn red" style="margin-left: 10px;" href="javascript:void(0);" id="bulkMultipleStatusChangeSubmit">
+                                                              <i class="fa fa-check"></i>Bulk Move To Indent
+                                                          </a>
                                                       </div>
                                                   </div>
                                               </div>
@@ -125,7 +130,8 @@
                                           <table class="table table-striped table-bordered table-hover table-checkable order-column" id="materialRequest">
                                               <thead>
                                               <tr>
-                                                  <th></th>
+                                                  <th data-width="10%"> Bulk Approval</th>
+                                                  <th> Bulk Move to Indent</th>
                                                   <th> MR Id </th>
                                                   <th> Material Name </th>
                                                   <th> Quantity</th>
@@ -136,6 +142,7 @@
                                                   <th> Detail </th>
                                               </tr>
                                               <tr class="filter">
+                                                  <th></th>
                                                   <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
                                                   <th><input type="text" class="form-control form-filter custom_filter" name="m_id" id="m_id" ></th>
                                                   <th><input type="text" class="form-control form-filter custom_filter" name="m_name" id="m_name" ></th>
@@ -264,6 +271,35 @@
                                                       </form>
                                                   </div>
                                           </div>
+                                              <div class="modal fade" id="BulkIndentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                                                  <div class="modal-dialog">
+                                                      <form class="modal-content" method="post" id="bulkMoveToIndentFormId">
+                                                          {!! csrf_field() !!}
+                                                          <div class="modal-header">
+                                                              <div class="row">
+                                                                  <div class="col-md-8"><center><h4 class="modal-title" id="exampleModalLongTitle">BULK Move to Indent Form</h4></center></div>
+                                                                  <div class="col-md-4"><button type="button" class="btn btn-warning pull-right" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="modal-body">
+                                                              <div class="form-body">
+                                                                  <div class="form-group row">
+                                                                     <div class="form-group row">
+                                                                      <div class="col-md-3" style="text-align: right">
+                                                                          <label for="company" class="control-label">Remark</label>
+                                                                      </div>
+                                                                      <div class="col-md-6">
+                                                                          <input type="text" class="form-control" id="remark" name="remark" required="required">
+                                                                      </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="modal-footer">
+                                                              <a class="btn blue bulk-mti-modal-footer-buttons">Submit</a>
+                                                          </div>
+                                                      </form>
+                                                  </div>
+                                              </div>
                                       </div>
                                   </div>
                               </div>
@@ -348,8 +384,26 @@
                 });
                 $('#multipleStatusChangeSubmit').closest('form').submit();
             }else{
-                alert(' Please select atleast one material request component.!')
+                alert(' Please select atleast one material for Bulk Approve/Disapprove.!')
             }
+        });
+
+        $('#bulkMultipleStatusChangeSubmit').on('click', function(){
+            if($(".multiple-select-checkbox-mti:checkbox:checked").length > 0){
+                openBulkMoveToIndent();
+                $(".multiple-select-checkbox-mti:checkbox:checked").each(function(){
+                    $('#bulkMoveToIndentFormId').closest('form').append('<input type="hidden" name="bulk_component_id[]" value="'+$(this).val()+'">');
+                });
+               // $('#bulkMoveToIndentFormId').closest('form').submit();
+            }else{
+                alert(' Please select atleast one material for Bulk Move to Indent.!')
+            }
+        });
+
+        $(".bulk-mti-modal-footer-buttons").on('click',function(){
+            var action = "/purchase/material-request/change-status-mti";
+            $(this).closest('form').attr('action',action);
+            $(this).closest('form').submit();
         });
 
         $("#status_id").on('change',function(){
@@ -423,6 +477,10 @@
             $(".filter-submit").trigger('click');
         });
     });
+
+    function openBulkMoveToIndent() {
+        $("#BulkIndentModal").modal('show');
+    }
 
     function openApproveModal(componentId){
         $.ajax({

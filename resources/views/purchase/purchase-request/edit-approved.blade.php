@@ -114,11 +114,11 @@
                                                             <th> Quantity </th>
                                                             <th> Unit </th>
                                                             @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
-                                                                <th> Action </th>
+                                                                <th width="50%"> Action </th>
                                                             @endif
                                                         </tr>
                                                         </thead>
-                                                        <tbody style="height: 500px">
+                                                        <tbody>
                                                             @for($iterator = 0 ; $iterator < count($materialRequestComponentDetails); $iterator++)
                                                                 <tr>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['id']}} </td>
@@ -128,7 +128,7 @@
                                                                     @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
                                                                         <td>
                                                                             <div>
-                                                                                <select class="example-getting-started" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden">
+                                                                                <select class="form-control input-lg select2-multiple" id="select2-multiple-input-lg" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden" data-placeholder="Select Vendor">
                                                                                     @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
                                                                                         @if(array_key_exists('is_client',$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]) && $materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['is_client'] == true)
 
@@ -315,7 +315,11 @@
     <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
     <link rel="stylesheet"  href="/assets/global/css/app.css"/>
     <link rel="stylesheet" href="/assets/global/plugins/bootstrap/css/bootstrap.min.css" type="text/css"/>
+<link href="/assets/global/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
+    <script src="/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
     <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
     <script>
         $(document).ready(function(){
@@ -335,9 +339,16 @@
 
             $("#previewBtn").click(function(){
                 var vendor = [];
-                $(".multiselect-container li.active").each(function(){
-                    var vendorName = $(this).find('label').text();
-                    var vendorId = $(this).find('input').attr('value');
+                $(".select2-selection--multiple .select2-selection__choice").each(function(){
+                    var vendorName = $(this).attr('title');
+                    var vendorId;
+                    $("#select2-multiple-input-lg option").each(function(){
+                        if (vendorName == $(this).text()) {
+                            vendorId = $(this).attr('value');
+                        }
+                    });
+
+
                     var materialId = $(this).closest('tr').find('td:nth-child(1)').text();
                     var materialName = $(this).closest('tr').find('td:nth-child(2)').text();
                     var materialQuantity = $(this).closest('tr').find('td:nth-child(3)').text();
@@ -388,6 +399,7 @@
                         vendor.push(newVendor);
                     }
                 });
+                console.log(vendor);
                 var modalBodyString = '';
                 $.each(vendor, function(i,v){
                     modalBodyString += '<div class="panel panel-default">\n' +

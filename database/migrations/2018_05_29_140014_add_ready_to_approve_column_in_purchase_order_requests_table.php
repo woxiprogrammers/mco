@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddOpeningExpensesColumnToQuotationsTable extends Migration
+class AddReadyToApproveColumnInPurchaseOrderRequestsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddOpeningExpensesColumnToQuotationsTable extends Migration
      */
     public function up()
     {
-        Schema::table('quotations', function (Blueprint $table) {
-            $table->double('opening_expenses')->nullable();
+        Schema::table('purchase_order_requests', function (Blueprint $table) {
+            $table->boolean('ready_to_approve')->nullable()->default(false);
         });
     }
 
@@ -25,8 +25,8 @@ class AddOpeningExpensesColumnToQuotationsTable extends Migration
      */
     public function down()
     {
-        Schema::table('quotations', function (Blueprint $table) {
-            $table->dropColumn('opening_expenses');
+        Schema::table('purchase_order_requests', function (Blueprint $table) {
+            $table->dropColumn('ready_to_approve');
         });
     }
 }
