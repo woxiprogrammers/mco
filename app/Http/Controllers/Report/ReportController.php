@@ -13,6 +13,7 @@ use App\BillTax;
 use App\BillTransaction;
 use App\Category;
 use App\Employee;
+use App\EmployeeType;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\BillTrait;
 use App\InventoryComponent;
@@ -82,7 +83,8 @@ class ReportController extends Controller
             $categories = Category::where('is_active', true)->get(['id','name','slug'])->toArray();
             $materials = Material::get(['id','name'])->toArray();
             $subcontractors = Subcontractor::get(['id','company_name'])->toArray();
-            $employees = Employee::where('employee_type_id', 1)->get(['id','name','employee_id'])->toArray();
+            $employeeTypeId = EmployeeType::whereIn('slug',['labour','staff'])->pluck('id')->toArray();
+            $employees = Employee::whereIn('employee_type_id', $employeeTypeId)->get(['id','name','employee_id'])->toArray();
             $vendors = Vendor::get(['id','name','company'])->toArray();
             return view('report.mainreport')->with(compact('vendors','employees','subcontractors','sites','categories','start_date','end_date','materials','billProjectSites'));
         } catch(\Exception $e) {
@@ -1783,8 +1785,6 @@ class ReportController extends Controller
                                 ->where('peticash_status_id',$approvedPeticashStatusId)
                                 ->get();
 
-                $advanceAmountTotal = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','PAYMENT')->where('slug','advance')->pluck('id')->first())
-                                        ->sum('amount');
 
                 $salaryTransactions = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
 
@@ -1797,7 +1797,7 @@ class ReportController extends Controller
                 $salaryAmountTotal = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
                 $officeSiteDistributedAmount = ProjectSite::where('id',$projectSiteId)->pluck('distributed_salary_amount')->first();
                 $officeSiteDistributedAmount = ($officeSiteDistributedAmount != null) ? $officeSiteDistributedAmount : 0;
-                $peticashSalaryAmount = $salaryAmountTotal + $advanceAmountTotal + $officeSiteDistributedAmount;
+                $peticashSalaryAmount = $salaryAmountTotal + $officeSiteDistributedAmount;
             }
             $finalArray[0] = $peticashSalaryAmount;
 
@@ -1810,10 +1810,6 @@ class ReportController extends Controller
                         ->where('bank_id',$bankId)
                         ->get();
 
-                    $advanceAmountTotalForBank = $peticashTransactions
-                        ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','advance')->pluck('id')->first())
-                        ->sum('amount');
-
                     $salaryTransactions = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
 
                     $salaryPayableAmountTotal = $salaryTransactions->sum('payable_amount');
@@ -1827,7 +1823,7 @@ class ReportController extends Controller
                     $salaryEsicAmountTotal = $salaryTransactions->sum('esic');
 
                     $salaryAmountTotalForBank = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
-                    $peticashSalaryBankAmount = $salaryAmountTotalForBank + $advanceAmountTotalForBank;
+                    $peticashSalaryBankAmount = $salaryAmountTotalForBank ;
                 }else{
                     $peticashTransactions = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
                         ->where('project_site_id','!=',$officeSiteId)
@@ -1835,8 +1831,6 @@ class ReportController extends Controller
                         ->where('bank_id',$bankId)
                         ->get();
 
-                    $advanceAmountTotalForBank = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','PAYMENT')->where('slug','advance')->pluck('id')->first())
-                        ->sum('amount');
 
                     $salaryTransactions = $peticashTransactions->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
 
@@ -1847,14 +1841,55 @@ class ReportController extends Controller
                     $salaryEsicAmountTotal = $salaryTransactions->sum('esic');
 
                     $salaryAmountTotalForBank = $salaryPayableAmountTotal + $salaryPfAmountTotal + $salaryTdsAmountTotal + $salaryPtAmountTotal + $salaryEsicAmountTotal;
-                    $peticashSalaryBankAmount = $salaryAmountTotalForBank + $advanceAmountTotalForBank;
+                    $peticashSalaryBankAmount = $salaryAmountTotalForBank;
                 }
                 $finalArray[$bankIterator] = $peticashSalaryBankAmount;
                 $bankIterator++;
             }
 
             //for cash
-            $finalArray[$bankIterator] = $salaryAmountTotal + $advanceAmountTotal;
+            if($projectSiteId == 'all'){
+                $peticashTransactionsForCash = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->where('bank_id',null)
+                    ->get();
+
+                $salaryTransactionsForCash = $peticashTransactionsForCash->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
+
+                $salaryPayableAmountTotalForCash = $salaryTransactionsForCash->sum('payable_amount');
+                $salaryPfAmountTotalForCash = $salaryTransactionsForCash->sum('pf');
+                $salaryTdsAmountTotalForCash = $salaryTransactionsForCash->sum('tds');
+                $salaryPtAmountTotalForCash = $salaryTransactionsForCash->sum('pt');
+                $salaryEsicAmountTotalForCash = $salaryTransactionsForCash->sum('esic');
+
+                $salaryAmountTotalForCash = $salaryPayableAmountTotalForCash + $salaryPfAmountTotalForCash + $salaryTdsAmountTotalForCash + $salaryPtAmountTotalForCash + $salaryEsicAmountTotalForCash;
+                $advanceAmountTotalForCash = $peticashTransactionsForCash
+                    ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','advance')->pluck('id')->first())
+                    ->where('bank_id',null)
+                    ->sum('amount');
+            }else{
+                $peticashTransactionsForCash = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                    ->where('project_site_id','!=',$officeSiteId)
+                    ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->where('bank_id',null)
+                    ->get();
+
+
+                $salaryTransactionsForCash = $peticashTransactionsForCash->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','salary')->pluck('id')->first());
+
+                $salaryPayableAmountTotalForCash = $salaryTransactionsForCash->sum('payable_amount');
+                $salaryPfAmountTotalForCash = $salaryTransactionsForCash->sum('pf');
+                $salaryTdsAmountTotalForCash = $salaryTransactionsForCash->sum('tds');
+                $salaryPtAmountTotalForCash = $salaryTransactionsForCash->sum('pt');
+                $salaryEsicAmountTotalForCash = $salaryTransactionsForCash->sum('esic');
+
+                $salaryAmountTotalForCash = $salaryPayableAmountTotalForCash + $salaryPfAmountTotalForCash + $salaryTdsAmountTotalForCash + $salaryPtAmountTotalForCash + $salaryEsicAmountTotalForCash;
+                $advanceAmountTotalForCash = $peticashTransactionsForCash
+                                        ->where('peticash_transaction_type_id',PeticashTransactionType::where('type','ilike','payment')->where('slug','advance')->pluck('id')->first())
+                                        ->where('bank_id',null)
+                                        ->sum('amount');
+            }
+            $finalArray[$bankIterator] = $salaryAmountTotalForCash + $advanceAmountTotalForCash;
         }catch(\Exception $e){
             $finalArray = array_fill(0,(count($bankIds) + 2),0);
             $data = [
