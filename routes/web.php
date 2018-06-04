@@ -316,6 +316,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('get-purchase-order-details/{purchaseRequestId}',array('uses'=> 'Purchase\PurchaseOrderController@getOrderDetails'));
             Route::post('get-tax-details/{purchaseRequestComponent}',array('uses' => 'Purchase\PurchaseOrderController@getComponentTaxData'));
             Route::get('get-detail/{purchaseOrderId}',array('uses' => 'Purchase\PurchaseOrderController@getPurchaseOrderDetails'));
+            Route::post('authenticate-purchase-order-close',array('uses' => 'Purchase\PurchaseOrderController@authenticatePOClose'));
+
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('upload-pre-grn-images',array('uses'=> 'Purchase\PurchaseOrderController@preGrnImageUpload'));
                 Route::post('create',array('uses'=> 'Purchase\PurchaseOrderController@createTransaction'));
