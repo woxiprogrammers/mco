@@ -156,7 +156,7 @@
                                                 <input type="number" class="form-control empty" id="qty"  placeholder="Enter quantity">
                                             </div>
                                             <div class="form-group" id="unitDrpdn">
-                                                <select id="materialUnit" style="width: 80%;height: 20px;text-align: center">
+                                                <select id="materialUnit" class="form-control">
                                                     @foreach($units as $unit)
                                                         <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                     @endforeach
@@ -254,7 +254,7 @@
         //Check File API support
         if (window.File && window.FileList && window.FileReader) {
             var files = event.target.files; //FileList object
-            var output = document.getElementById("result");
+            var output = document.getElementById("resultAsset");
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
                 //Only pics
@@ -263,7 +263,7 @@
                 picReader.addEventListener("load", function (event) {
                     var picFile = event.target;
                     var div = document.createElement("div");
-                    div.innerHTML = "<img class='thumbnail assetImg' src='" + picFile.resultAsset + "'" + "title='" + picFile.name + "'/>";
+                    div.innerHTML = "<img class='thumbnail assetImg' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
                     output.insertBefore(div, null);
                 });
                 //Read the image

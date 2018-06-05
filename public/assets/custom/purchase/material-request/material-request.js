@@ -173,6 +173,7 @@ $(document).ready(function(){
             materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
             var rows = '<tr>'+materials+'</tr>';
             $('#myModal').modal('hide');
+            $('#myModal output').html('');
             $('#Materialrows').append(rows);
             var iterator = parseInt(iterator) + 1;
             $('#iterator').val(iterator);
@@ -204,13 +205,14 @@ $(document).ready(function(){
             var componentTypeId = $('#component_id').val();
             var iterator = $('#iterator').val();
             var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
-            $('.img').each(function(i, el) {
+            $('.assetImg').each(function(i, el) {
                 var imageSrc = $(el).attr('src');
                 assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
             })
             assets += asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
             var rows = '<tr>'+assets+'</tr>';
             $('#myModal1').modal('hide');
+            $('#myModal1 output').html('');
             $('#Assetrows').append(rows);
             var iterator = parseInt(iterator) + 1;
             $('#iterator').val(iterator);
@@ -227,16 +229,17 @@ $(document).ready(function(){
         $("#searchbox").removeClass('typeahead');
         $('#searchbox').removeClass('has-error').removeClass('has-success');
         $("#searchbox").val('');
+        $("#myModal output").html('');
     });
 
     $("#myModal1").on("hidden.bs.modal", function () {
-        $('#Assetqty').val('');
         $('#Assetsearchbox').val('');
         $('#Assetqty').removeClass('has-error');
         $('#Assetqty').removeClass('has-success');
         $(".assetTypeahead").typeahead('destroy');
         $("#Assetsearchbox").removeClass("assetTypeahead");
         $('#Assetsearchbox').removeClass('has-error').removeClass('has-success');
+        $("#myModal1 output").html('');
     });
 });
 
