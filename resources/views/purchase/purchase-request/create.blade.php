@@ -211,6 +211,7 @@
                                             </div>
                                             <div class="form-group" id="unitDrpdn">
                                                 <select id="materialUnit" class="form-control">
+                                                    <option value="">Select Unit</option>
                                                     @foreach($units as $unit)
                                                         <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                     @endforeach
