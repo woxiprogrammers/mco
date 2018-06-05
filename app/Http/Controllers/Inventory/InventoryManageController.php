@@ -583,6 +583,7 @@ class InventoryManageController extends Controller
 
     public function uploadTempImages(Request $request,$inventoryComponent){
         try{
+            Log::info('inside upload images');
             $user = Auth::user();
             $userDirectoryName = sha1($user->id);
             $inventoryComponentDirectoryName = sha1($inventoryComponent->id);
@@ -705,8 +706,6 @@ class InventoryManageController extends Controller
                 file_put_contents($fileFullPath,base64_decode($image));
                 InventoryComponentTransferImage::create(['name' => $filename, 'inventory_component_transfer_id' => $inventoryComponentTransfer['id']]);
             }
-            $status = 200;
-            $message = "Success";
             $response = [
                 'inventory_component_transfer_id' => $inventoryComponentTransfer['id'],
                 'grn' => $grn
@@ -737,21 +736,23 @@ class InventoryManageController extends Controller
                     'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first(),
                     'remark' => $request['remark']
                 ]);
-                if ($request->has('post_grn_image')) {
-                    $sha1UserId = sha1($user['id']);
-                    $sha1InventoryTransferId = sha1($inventoryComponentTransfer['id']);
-                    $sha1InventoryComponentId = sha1($inventoryComponentTransfer['inventory_component_id']);
+                $sha1InventoryComponentId = sha1($inventoryComponentTransfer['inventory_component_id']);
+                $sha1InventoryTransferId = sha1($inventoryComponentTransfer['id']);
+                $imageUploadPath = public_path() . env('INVENTORY_COMPONENT_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $sha1InventoryComponentId . DIRECTORY_SEPARATOR . 'transfers' . DIRECTORY_SEPARATOR . $sha1InventoryTransferId;
+                if (!file_exists($imageUploadPath)) {
+                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                }
+                if ($request->has('post_grn_image') && count($request->post_grn_image) > 0) {
                     foreach ($request['post_grn_image'] as $key1 => $imageName) {
-                        $tempUploadFile = env('WEB_PUBLIC_PATH') . env('INVENTORY_TRANSFER_TEMP_IMAGE_UPLOAD') . $sha1UserId . DIRECTORY_SEPARATOR . $imageName;
-                        if (File::exists($tempUploadFile)) {
-                            $imageUploadNewPath = env('WEB_PUBLIC_PATH') . env('INVENTORY_TRANSFER_IMAGE_UPLOAD') . $sha1InventoryComponentId . DIRECTORY_SEPARATOR . 'transfers' . DIRECTORY_SEPARATOR . $sha1InventoryTransferId;
-                            if (!file_exists($imageUploadNewPath)) {
-                                File::makeDirectory($imageUploadNewPath, $mode = 0777, true, true);
-                            }
-                            $imageUploadNewPath .= DIRECTORY_SEPARATOR . $imageName;
-                            File::move($tempUploadFile, $imageUploadNewPath);
-                            InventoryComponentTransferImage::create(['name' => $imageName, 'inventory_component_transfer_id' => $inventoryComponentTransfer['id']]);
-                        }
+                        $imageArray = explode(';',$imageName);
+                        $image = explode(',',$imageArray[1])[1];
+                        $pos  = strpos($imageName, ';');
+                        $type = explode(':', substr($imageName, 0, $pos))[1];
+                        $extension = explode('/',$type)[1];
+                        $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+                        $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                        file_put_contents($fileFullPath,base64_decode($image));
+                        InventoryComponentTransferImage::create(['name' => $filename, 'inventory_component_transfer_id' => $inventoryComponentTransfer['id']]);
                     }
                 }
                 $fromProjectSitesArray = explode('-', $inventoryComponentTransfer->source_name);
