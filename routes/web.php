@@ -729,6 +729,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('sub-category-listing',array('uses' => 'Awareness\CategoryManagementController@subCategoryListing'));
                 Route::get('sub-category-manage',array('uses' => 'Awareness\CategoryManagementController@getSubManageView'));
                 Route::get('sub-category-create',array('uses' => 'Awareness\CategoryManagementController@getSubCategoryCreateView'));
+                Route::get('change-status/{slug}/{categoryId}',array('uses' => 'Awareness\CategoryManagementController@changeCategoryStatus'));
           });
         Route::group(['prefix' => 'file-management'], function(){
             Route::get('manage',array('uses' => 'Awareness\FileManagementController@getManageView'));
