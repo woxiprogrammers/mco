@@ -8,5 +8,5 @@ class AwarenessMainCategory extends Model
 {
     protected $table = 'awareness_main_category';
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name','is_active'];
 }

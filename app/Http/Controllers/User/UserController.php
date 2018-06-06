@@ -108,6 +108,7 @@ class UserController extends Controller
 
     public function getEditView(Request $request,$userEdit){
         try{
+            $roles = Role::whereNotIn('slug',['admin','superadmin'])->get()->toArray();
             $subModuleIds = UserHasPermission::join('permissions','permissions.id','=','user_has_permissions.permission_id')
                 ->join('modules','modules.id','=','permissions.module_id')
                 ->where('user_has_permissions.user_id',$userEdit->id)
@@ -169,6 +170,7 @@ class UserController extends Controller
     public function editUser(UserRequest $request, $user){
         try{
             $data = $request->except('role_id','web_permissions','mobile_permissions');
+            UserHasRole::where('user_id', $user->id)->update(['role_id' => $request->role_id]);
             $user->update($data);
             if($request->has('web_permissions')){
                 $userPermissionData = array();

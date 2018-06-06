@@ -61,7 +61,15 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" id="role" value="{{$userEdit->roles[0]->role->name}}" class="form-control" disabled>
+                                                            <select class="form-control" id="role_id" name="role_id">
+                                                                @foreach($roles as $role)
+                                                                    @if($userEdit->roles[0]->role_id == $role['id'])
+                                                                        <option value="{{$role['id']}}" selected>{{$role['name']}}</option>
+                                                                    @else
+                                                                        <option value="{{$role['id']}}">{{$role['name']}}</option>
+                                                                    @endif
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row">
@@ -344,6 +352,7 @@
 
 @section('javascript')
 <script src="/assets/custom/user/user.js" type="application/javascript"></script>
+<script src="/assets/custom/user/user-management.js" type="application/javascript"></script>
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script>
