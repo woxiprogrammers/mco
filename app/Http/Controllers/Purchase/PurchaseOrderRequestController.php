@@ -291,8 +291,8 @@ class PurchaseOrderRequestController extends Controller
                 $purchaseOrderRequestComponentData[$iterator]['vendor_relation_id'] = $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id;
                 $purchaseOrderRequestComponentData[$iterator]['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->id;
                 $purchaseOrderRequestComponentData[$iterator]['name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->name;
-                $purchaseOrderRequestComponentData[$iterator]['quantity'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->quantity;
-                $purchaseOrderRequestComponentData[$iterator]['unit'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->unit->name;
+                $purchaseOrderRequestComponentData[$iterator]['quantity'] = $purchaseOrderRequestComponent->quantity;
+                $purchaseOrderRequestComponentData[$iterator]['unit'] = $purchaseOrderRequestComponent->unit->name;
                 $purchaseOrderRequestComponentData[$iterator]['unit_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->unit_id;
                 $purchaseOrderRequestComponentData[$iterator]['rate_per_unit'] = $purchaseOrderRequestComponent->rate_per_unit;
                 $purchaseOrderRequestComponentData[$iterator]['total'] = $purchaseOrderRequestComponent->total;

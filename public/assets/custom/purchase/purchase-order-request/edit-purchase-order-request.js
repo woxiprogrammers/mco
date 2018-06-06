@@ -28,7 +28,8 @@ function componentTaxDetailSubmit(){
         $("#componentRow-"+componentRelationId+" .rate-with-tax").text(customRound(rate_with_tax));
         $("#componentRow-"+componentRelationId+" .total-with-tax").text(customRound($("input[name='data["+componentRelationId+"][total]'").val()));
     }
-
+    var quantity = $(".tax-modal-quantity").val();
+    $("#componentRow-"+componentRelationId+" .quantity").text(quantity);
     $('#detailsModal').modal('toggle');
 }
 function openDetailsModal(element, purchaseOrderRequestComponentId){
