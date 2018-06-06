@@ -124,16 +124,17 @@ $(document).ready(function(){
         $("#searchbox").removeClass('typeahead');
         $('#searchbox').removeClass('has-error').removeClass('has-success');
         $("#searchbox").val('');
+        $("#myModal output").html('');
     });
 
     $("#myModal1").on("hidden.bs.modal", function () {
-        $('#Assetqty').val('');
         $('#Assetsearchbox').val('');
         $('#Assetqty').removeClass('has-error');
         $('#Assetqty').removeClass('has-success');
         $(".assetTypeahead").typeahead('destroy');
         $("#Assetsearchbox").removeClass("assetTypeahead");
         $('#Assetsearchbox').removeClass('has-error').removeClass('has-success');
+        $("#myModal1 output").html('');
     });
 });
 function selectAsset(id) {
@@ -205,13 +206,14 @@ $('#createMaterial').click(function(){
         materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
         var rows = '<tr>'+materials+'</tr>';
         $('#myModal').modal('hide');
+        $("#myModal output").html('');
         $('#Materialrows').append(rows);
         var iterator = parseInt(iterator) + 1;
         $('#iterator').val(iterator);
         $('#deleteRowButton').click(DeleteRow);
         $('#component_id').val(null);
         $('#searchbox').html('');
-        $('#qty').html('');
+        $('#qty').val('');
     }
 });
 $('#createAsset').click(function(){
@@ -234,7 +236,6 @@ $('#createAsset').click(function(){
     }
     if(validFlag == true){
         $('#searchbox').html('');
-        $('#qty').html('');
         var componentTypeId = $('#component_id').val();
         var iterator = $('#iterator').val();
         var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
@@ -245,6 +246,7 @@ $('#createAsset').click(function(){
         assets += asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
         var rows = '<tr>'+assets+'</tr>';
         $('#myModal1').modal('hide');
+        $("#myModal1 output").html('');
         $('#Assetrows').append(rows);
         var iterator = parseInt(iterator) + 1;
         $('#iterator').val(iterator);
