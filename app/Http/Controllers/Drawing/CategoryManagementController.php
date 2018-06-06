@@ -294,8 +294,8 @@ class CategoryManagementController extends Controller
                 }
                 $records['data'][$iterator] = [
                     $subCategories[$pagination]['id'],
-                    $subCategories[$pagination]['name'],
                     DrawingCategory::where('id',$subCategories[$pagination]['drawing_category_id'])->pluck('name')->first(),
+                    $subCategories[$pagination]['name'],
                     $status,
                     $actionButton
                 ];
