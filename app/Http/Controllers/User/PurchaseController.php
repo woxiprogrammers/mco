@@ -396,8 +396,8 @@ class PurchaseController extends Controller
                             $materialList[$iterator]['material_request_component_type_id'] = $quotationMaterialSlug->id;
                             $iterator++;
                         }
-                        //$structureMaterials = Material::whereNotIn('id',$quotationMaterialId)->where('name','ilike','%'.$request->keyword.'%')->get();
-                    }/*else{
+                        $structureMaterials = Material::whereNotIn('id',$quotationMaterialId)->where('name','ilike','%'.$request->keyword.'%')->get();
+                    }else{
                         $structureMaterials = Material::where('name','ilike','%'.$request->keyword.'%')->get();
                     }
                     $structureMaterialSlug = MaterialRequestComponentTypes::where('slug','structure-material')->first();
@@ -422,7 +422,7 @@ class PurchaseController extends Controller
                         $iterator++;
                     }
                     if(count($materialList) == 0){
-                        $materialList[$iterator]['material_name'] = null;
+                        $materialList[$iterator]['material_name'] = $request->keyword;
                         $systemUnits = Unit::where('is_active',true)->get();
                         $j = 0;
                         foreach($systemUnits as $key2 => $unit){
@@ -434,8 +434,8 @@ class PurchaseController extends Controller
                         $newMaterialSlug = MaterialRequestComponentTypes::where('slug','new-material')->first();
                         $materialList[$iterator]['material_request_component_type_slug'] = $newMaterialSlug->slug;
                         $materialList[$iterator]['material_request_component_type_id'] = $newMaterialSlug->id;
-                    }*/
-                    $data= $materialList;
+                    }
+                    $data = $materialList;
                     break;
                 case "asset" :
                     $assetList = array();
@@ -450,14 +450,14 @@ class PurchaseController extends Controller
                         $assetList[$iterator]['material_request_component_type_id'] = $systemAssetStatus->id;
                         $iterator++;
                     }
-                   /* if(count($assetList) == 0){
+                    if(count($assetList) == 0){
                         $assetList[$iterator]['asset_id'] = null;
-                        $assetList[$iterator]['asset_name'] = null;
+                        $assetList[$iterator]['asset_name'] = $request['keyword'];
                         $assetList[$iterator]['asset_unit'] = $assetUnit;
                         $newAssetSlug = MaterialRequestComponentTypes::where('slug','new-asset')->first();
                         $assetList[$iterator]['material_request_component_type_slug'] = $newAssetSlug->slug;
                         $assetList[$iterator]['material_request_component_type_id'] = $newAssetSlug->id;
-                    }*/
+                    }
                     $data = $assetList;
                     break;
             }
