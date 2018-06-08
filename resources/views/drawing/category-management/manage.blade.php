@@ -54,11 +54,13 @@
                                                                 <tr>
                                                                     <th style="width: 30%"> Sr. No. </th>
                                                                     <th> Name of Main Category </th>
+                                                                    <th> Status </th>
                                                                     <th> Actions </th>
                                                                 </tr>
                                                                 <tr class="filter">
                                                                     <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_sr" readonly> </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
+                                                                    <th>  </th>
                                                                     <th>
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>

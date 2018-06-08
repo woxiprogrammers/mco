@@ -416,9 +416,9 @@ class PurchaseOrderController extends Controller
                 $materialList[$iterator]['purchase_order_component_id'] = $purchaseOrderComponent['id'];
                 $materialList[$iterator]['material_request_component_id'] = $materialRequestComponent['id'];
                 $materialList[$iterator]['material_component_name'] = $materialRequestComponent['name'];
-                $materialList[$iterator]['material_component_unit_id'] = $materialRequestComponent['unit_id'];
-                $materialList[$iterator]['material_component_unit_name'] = $materialRequestComponent->unit->name;
-                $materialList[$iterator]['material_component_quantity'] = $materialRequestComponent->quantity;
+                $materialList[$iterator]['material_component_unit_id'] = $purchaseOrderComponent['unit_id'];
+                $materialList[$iterator]['material_component_unit_name'] = $purchaseOrderComponent->unit->name;
+                $materialList[$iterator]['material_component_quantity'] = $purchaseOrderComponent->quantity;
                 $quantityConsumed = $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
                 $quantityUnused = $purchaseOrderComponent['quantity'] - $quantityConsumed;
                 $materialList[$iterator]['material_component_remaining_quantity'] = (0.1 * ($quantityUnused)) + $quantityUnused;

@@ -87,7 +87,7 @@
                                                                     <tr class="component-row" id="componentRow-{{$purchaseOrderRequestComponent['id']}}">
                                                                         <td style="width: 12%"><input type="hidden" name="component_vendor_relations[{{$purchaseOrderRequestComponent['purchase_request_component_id']}}][]" class="component-vendor-relation" value="{{$purchaseOrderRequestComponent['vendor_relation_id']}}"><span> {{$purchaseOrderRequestComponent['vendor_name']}} </span></td>
                                                                         <td style="width: 15%"><span> {{$purchaseOrderRequestComponent['name']}} </span></td>
-                                                                        <td style="width: 10%"><span> {{$purchaseOrderRequestComponent['quantity']}} </span></td>
+                                                                        <td style="width: 10%"><span class="quantity"> {{$purchaseOrderRequestComponent['quantity']}} </span></td>
                                                                         <td style="width: 10%;"><span> {{$purchaseOrderRequestComponent['unit']}} </span></td>
                                                                         <td style="width: 10%"><span class="rate-without-tax">{!!  \App\Helper\MaterialProductHelper::customRound($purchaseOrderRequestComponent['rate_per_unit']) !!} </span></td>
                                                                         <td style="width: 10%"><span class="rate-with-tax"> {!!  ($purchaseOrderRequestComponent['rate_with_tax']) !!} </span></td>

@@ -46,7 +46,7 @@
                                                 <div class="portlet-body">
                                                     <div class="row">
                                                          <div class="col-md-6">
-                                                             <select class="bs-select form-control" id="mainCategoryId" name="main_category_id" required>
+                                                             <select class="form-control" id="mainCategoryId" name="main_category_id" required>
                                                                  <option value="">Select Main Category</option>
                                                                 @foreach($main_categories as $category)
                                                                  <option value="{{$category['id']}}">{{$category['name']}}</option>
@@ -54,7 +54,7 @@
                                                              </select>
                                                          </div>
                                                         <div class="col-md-6">
-                                                            <select class="bs-select form-control" id="subCategoryId" name="sub_category_id" required>
+                                                            <select class="form-control" id="subCategoryId" name="sub_category_id" required>
                                                                 <option value="">Select Sub Category</option>
                                                             </select>
                                                         </div>
@@ -94,9 +94,7 @@
             <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
             <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
             <script src="/assets/custom/awareness/edit.js" type="text/javascript"></script>
-            <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
             <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
-            <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
             <script src="/assets/custom/awareness/file-management/file-datatable.js"></script>
             <script src="/assets/custom/awareness/file-management/upload-file.js"></script>
 @endsection
