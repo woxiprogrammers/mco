@@ -243,13 +243,34 @@ class UserController extends Controller
     public function userListing(Request $request){
         try{
             $user = Auth::user();
-            $userData = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+            $userId = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                ->join('roles','roles.id','=','user_has_roles.role_id')
+                ->whereNotIn('roles.slug',['admin','superadmin'])
+                ->select('users.id as id')
+                ->get()->toArray();
+            if($request->has('search_name')){
+                $userId = User::whereIn('id',$userId)->where('first_name','ilike','%'.$request->search_name.'%')->orWhere('last_name','ilike','%'.$request->search_name.'%')->pluck('id')->toArray();
+            }
+            if($request->has('search_email')){
+                $userId = User::whereIn('id',$userId)->where('email','ilike','%'.$request->search_email.'%')->pluck('id')->toArray();
+            }
+            if($request->has('search_mobile')){
+                $userId = User::whereIn('id',$userId)->where('mobile','ilike','%'.$request->search_mobile.'%')->pluck('id')->toArray();
+            }
+            if($request->has('search_role')){
+                $userId = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
                             ->join('roles','roles.id','=','user_has_roles.role_id')
                             ->whereNotIn('roles.slug',['admin','superadmin'])
+                            ->where('roles.name','ilike','%'.$request->search_role.'%')
+                            ->select('users.id as id')
+                            ->get()->toArray();
+            }
+            $userData = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                            ->join('roles','roles.id','=','user_has_roles.role_id')
+                            ->whereIn('users.id',$userId)
                             ->orderBy('users.id','asc')
                             ->select('users.id as id','users.first_name as first_name','users.last_name as last_name','users.email as email','users.mobile as mobile','users.created_at as created_at','users.is_active as is_active','roles.name as role_name')
                             ->get();
-
             $iTotalRecords = count($userData);
             $records = array();
             if(count($userData) > 0){

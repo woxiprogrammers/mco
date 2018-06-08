@@ -24,10 +24,7 @@ var UserListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/user/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
+                    "url": "/user/listing?_token="+$("input[name='_token']").val() // ajax source
                 },
                 "order": [
                     [1, "asc"]
@@ -79,4 +76,5 @@ var UserListing = function () {
 
 jQuery(document).ready(function() {
     UserListing.init();
+
 });
