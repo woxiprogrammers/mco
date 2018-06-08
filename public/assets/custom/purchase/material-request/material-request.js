@@ -42,7 +42,7 @@ $(document).ready(function(){
             limit: 30,
             templates: {
                 suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
-            },
+            }
         }).on('typeahead:selected', function (obj, datum) {
             var POData = datum.unit;
             var componentTypeId = datum.component_type_id;
