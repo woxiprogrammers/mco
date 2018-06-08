@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Purchase;
 
 use App\Client;
+use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
+use App\InventoryComponent;
+use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
 use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
@@ -806,4 +810,109 @@ class PurchaseRequestController extends Controller
             return response()->json([],500);
         }
     }
+
+    public function getMaterialInventoryQuantity(Request $request){
+        try{
+            $status = 200;
+            $response = array();
+            $materialName = MaterialRequestComponents::where('id',$request->material_request_component_id)->pluck('name')->first();
+            $inventoryComponents = InventoryComponent::where('name','ilike',$materialName)->get();
+            $projectSiteInfo = array();
+            if(count($inventoryComponents) > 0){
+                foreach($inventoryComponents as $inventoryComponent){
+                    if($inventoryComponent->is_material == true){
+                        $materialUnit = Material::where('id',$inventoryComponent['reference_id'])->pluck('unit_id')->first();
+                        $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                            ->where('inventory_transfer_types.type','ilike','in')
+                            ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                            ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                            ->get();
+                        $outTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                            ->where('inventory_transfer_types.type','ilike','out')
+                            ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                            ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                            ->get();
+                        $inQuantity = $outQuantity = 0;
+                        foreach($inTransferQuantities as $inTransferQuantity){
+                            $unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$materialUnit,$inTransferQuantity['quantity']);
+                            if(!is_array($unitConversionQuantity)){
+                                $inQuantity += $unitConversionQuantity;
+                            }
+                        }
+                        foreach($outTransferQuantities as $outTransferQuantity){
+                            $unitConversionQuantity = UnitHelper::unitQuantityConversion($outTransferQuantity['unit_id'],$materialUnit,$outTransferQuantity['quantity']);
+                            if(!is_array($unitConversionQuantity)){
+                                $outQuantity += $unitConversionQuantity;
+                            }
+                        }
+                    }else{
+                        $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                            ->where('inventory_transfer_types.type','ilike','in')
+                            ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                            ->sum('inventory_component_transfers.quantity');
+                        $outQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                            ->where('inventory_transfer_types.type','ilike','out')
+                            ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                            ->sum('inventory_component_transfers.quantity');
+                    }
+                    $availableQuantity = $inQuantity - $outQuantity;
+                    $projectSiteInfo[] = [
+                        'quantity' => $availableQuantity,
+                        'project' => $inventoryComponent->projectSite->project->name,
+                        'project_site' => $inventoryComponent->projectSite->name
+                    ];
+                }
+                return view('partials.purchase.purchase-request.inventory-quantity')->with(compact('projectSiteInfo'));
+            }else{
+                return response()->json(['message' => 'Material isn not available at any other site'] , 201);
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get material inventory quantity',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return response()->json([], 500);
+        }
+    }
+
+    public function editComponentQuantity(Request $request){
+        try{
+            $user = Auth::user();
+            $materialRequestComponent = MaterialRequestComponents::findOrFail($request->material_request_component_id);
+            $materialRequestComponent->update(['quantity' => $request->quantity]);
+            $materialRequestComponentVersionData = [
+                'material_request_component_id' => $materialRequestComponent->id,
+                'component_status_id' => $materialRequestComponent->component_status_id,
+                'quantity' => $request->quantity,
+                'unit_id' => $materialRequestComponent['unit_id'],
+                'user_id' => $user['id'],
+                'remark' => $request->remark
+            ];
+            $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
+            $status = 200;
+            $response = [
+                'message' => 'Quantity for component edited successfully',
+                'quantity' => $request->quantity
+            ];
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Edit Purchase Request Component quantity',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = [
+                'message' => 'Something went wrong.'
+            ];
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response, $status);
+    }
+
 }
