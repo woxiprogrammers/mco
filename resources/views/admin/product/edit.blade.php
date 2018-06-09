@@ -196,7 +196,7 @@
                                                                             @if(isset($productProfitMargins[$profitMargin['id']]))
                                                                                 <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
                                                                             @else
-                                                                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="0" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
                                                                             @endif
                                                                         </td>
                                                                         <td class="profit-margin-amount">

@@ -133,6 +133,22 @@
                                                             <input type="number" class="form-control" id="rent_per_day" name="rent_per_day">
                                                         </div>
                                                     </div>
+                                                    <div class="form-group row" id="maintenancePeriodDiv" hidden>
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="number" class="control-label">Maintenance Period</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <input type="number" class="form-control" id="maintenance_period" name="maintenance_period">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <select class="form-control" id="maintenance_period_type" name="maintenance_period_type">
+                                                                <option value=""> Select type </option>
+                                                                <option value="day_wise">Day</option>
+                                                                <option value="hour_wise">Hrs</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                     <div class="form-group">
                                                         <div class="row">
                                                             <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
@@ -220,9 +236,17 @@
                $('#electricity_per_unit').rules('remove');
                $('#qty').val(1);
                $('#exp_date').show();
-               $('#exp_date').rules('add', {
+               $('#exp_date input[name="expiry_date"]').rules('add', {
                    required: true   // set a new rule
                });
+               $("#maintenancePeriodDiv").show();
+               $("#maintenance_period").rules('add',{
+                   required: true
+               });
+               $("#maintenance_period_type").rules('add',{
+                   required: true
+               });
+               $("#maintenance_period").val('');
            }else if(asset_type == 2){
                $('#espu').show();
                $('#lpu').hide();
@@ -232,9 +256,17 @@
                $('#litre_per_unit').rules('remove');
                $('#qty').val(1);
                $('#exp_date').show();
-               $('#exp_date').rules('add', {
+               $('#exp_date  input[name="expiry_date"]').rules('add', {
                    required: true   // set a new rule
                });
+               $("#maintenancePeriodDiv").show();
+               $("#maintenance_period").rules('add',{
+                   required: true
+               });
+               $("#maintenance_period_type").rules('add',{
+                   required: true
+               });
+               $("#maintenance_period").val('');
            }else if(asset_type == 3){
                $('#espu').show();
                $('#electricity_per_unit').rules('add', {
@@ -245,15 +277,30 @@
                });
                $('#lpu').show();
                $('#exp_date').show();
+               $('#exp_date  input[name="expiry_date"]').rules('add', {
+                   required: true   // set a new rule
+               });
                $('#qty').val(1);
+               $("#maintenancePeriodDiv").show();
+               $("#maintenance_period").rules('add',{
+                   required: true
+               });
+               $("#maintenance_period_type").rules('add',{
+                   required: true
+               });
+               $("#maintenance_period").val('');
            }else if(asset_type == 4){
                $('#espu').hide();
                $('#electricity_per_unit').rules('remove');
                $('#litre_per_unit').rules('remove');
                $('#lpu').hide();
                $('#exp_date').hide();
-               $('#exp_date').rules('remove');
+               $('#exp_date  input[name="expiry_date"]').rules('remove');
                $('#qty').val('');
+               $("#maintenancePeriodDiv").hide();
+               $("#maintenance_period").rules('remove');
+               $("#maintenance_period_type").rules('remove');
+               $("#maintenance_period").val('');
            }else{
                $('#electricity_per_unit').rules('remove');
                $('#litre_per_unit').rules('remove');
@@ -261,6 +308,10 @@
                $('#lpu').hide();
                $('#exp_date').hide();
                $('#exp_date').rules('remove');
+               $("#maintenancePeriodDiv").hide();
+               $("#maintenance_period_type").rules('remove');
+               $("#maintenance_period_type").rules('remove');
+               $("#maintenance_period").val('');
            }
         })
     </script>

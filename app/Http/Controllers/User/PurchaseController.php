@@ -566,6 +566,7 @@ class PurchaseController extends Controller
 
     public function createMaterialList(Request $request){
         try{
+            dd($request->all());
             $data = $request->all();
             $user = Auth::user();
             $materialRequestComponentId = $this->createMaterialRequest($data,$user,false);

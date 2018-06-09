@@ -161,7 +161,11 @@
                 <label class="control-label pull-right">Transportation Amount</label>
             </div>
             <div class="col-md-6">
-                <input type="text" class="form-control calculate-transportation-amount" name="transportation_amount" value="0" onkeyup="calculateTransportationTaxes(this)">
+                @if($purchaseRequestComponentData['is_client'] == true)
+                    <input type="text" class="form-control calculate-transportation-amount" name="transportation_amount" value="0" onkeyup="calculateTransportationTaxes(this)" readonly>
+                @else
+                    <input type="text" class="form-control calculate-transportation-amount" name="transportation_amount" value="0" onkeyup="calculateTransportationTaxes(this)">
+                @endif
             </div>
         </div>
         <div class="row form-group">
@@ -170,8 +174,13 @@
             </div>
             <div class="col-md-5">
                 <div class="input-group" >
-                    <input type="text" class="form-control calculate-transportation-cgst-percentage" name="transportation_cgst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
-                    <span class="input-group-addon">%</span>
+                    @if($purchaseRequestComponentData['is_client'] == true)
+                        <input type="text" class="form-control calculate-transportation-cgst-percentage" name="transportation_cgst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)" readonly>
+                        <span class="input-group-addon">%</span>
+                    @else
+                        <input type="text" class="form-control calculate-transportation-cgst-percentage" name="transportation_cgst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
+                        <span class="input-group-addon">%</span>
+                    @endif
                 </div>
             </div>
             <div class="col-md-5">
@@ -184,8 +193,13 @@
             </div>
             <div class="col-md-5">
                 <div class="input-group" >
-                    <input type="text" class="form-control calculate-transportation-sgst-percentage" name="transportation_sgst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
-                    <span class="input-group-addon">%</span>
+                    @if($purchaseRequestComponentData['is_client'] == true)
+                        <input type="text" class="form-control calculate-transportation-sgst-percentage" name="transportation_sgst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)" readonly>
+                        <span class="input-group-addon">%</span>
+                    @else
+                        <input type="text" class="form-control calculate-transportation-sgst-percentage" name="transportation_sgst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
+                        <span class="input-group-addon">%</span>
+                    @endif
                 </div>
             </div>
             <div class="col-md-5">
@@ -198,8 +212,13 @@
             </div>
             <div class="col-md-5">
                 <div class="input-group" >
-                    <input type="text" class="form-control calculate-transportation-igst-percentage" name="transportation_igst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
-                    <span class="input-group-addon">%</span>
+                    @if($purchaseRequestComponentData['is_client'] == true)
+                        <input type="text" class="form-control calculate-transportation-igst-percentage" name="transportation_igst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)" readonly>
+                        <span class="input-group-addon">%</span>
+                    @else
+                        <input type="text" class="form-control calculate-transportation-igst-percentage" name="transportation_igst_percentage" value="0" onkeyup="calculateTransportationTaxes(this)">
+                        <span class="input-group-addon">%</span>
+                    @endif
                 </div>
             </div>
             <div class="col-md-5">
