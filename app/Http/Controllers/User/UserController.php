@@ -108,6 +108,7 @@ class UserController extends Controller
 
     public function getEditView(Request $request,$userEdit){
         try{
+            $roles = Role::whereNotIn('slug',['admin','superadmin'])->get()->toArray();
             $subModuleIds = UserHasPermission::join('permissions','permissions.id','=','user_has_permissions.permission_id')
                 ->join('modules','modules.id','=','permissions.module_id')
                 ->where('user_has_permissions.user_id',$userEdit->id)
@@ -169,6 +170,7 @@ class UserController extends Controller
     public function editUser(UserRequest $request, $user){
         try{
             $data = $request->except('role_id','web_permissions','mobile_permissions');
+            UserHasRole::where('user_id', $user->id)->update(['role_id' => $request->role_id]);
             $user->update($data);
             if($request->has('web_permissions')){
                 $userPermissionData = array();
@@ -241,13 +243,34 @@ class UserController extends Controller
     public function userListing(Request $request){
         try{
             $user = Auth::user();
-            $userData = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+            $userId = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                ->join('roles','roles.id','=','user_has_roles.role_id')
+                ->whereNotIn('roles.slug',['admin','superadmin'])
+                ->select('users.id as id')
+                ->get()->toArray();
+            if($request->has('search_name')){
+                $userId = User::whereIn('id',$userId)->where('first_name','ilike','%'.$request->search_name.'%')->orWhere('last_name','ilike','%'.$request->search_name.'%')->pluck('id')->toArray();
+            }
+            if($request->has('search_email')){
+                $userId = User::whereIn('id',$userId)->where('email','ilike','%'.$request->search_email.'%')->pluck('id')->toArray();
+            }
+            if($request->has('search_mobile')){
+                $userId = User::whereIn('id',$userId)->where('mobile','ilike','%'.$request->search_mobile.'%')->pluck('id')->toArray();
+            }
+            if($request->has('search_role')){
+                $userId = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
                             ->join('roles','roles.id','=','user_has_roles.role_id')
                             ->whereNotIn('roles.slug',['admin','superadmin'])
+                            ->where('roles.name','ilike','%'.$request->search_role.'%')
+                            ->select('users.id as id')
+                            ->get()->toArray();
+            }
+            $userData = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                            ->join('roles','roles.id','=','user_has_roles.role_id')
+                            ->whereIn('users.id',$userId)
                             ->orderBy('users.id','asc')
                             ->select('users.id as id','users.first_name as first_name','users.last_name as last_name','users.email as email','users.mobile as mobile','users.created_at as created_at','users.is_active as is_active','roles.name as role_name')
                             ->get();
-
             $iTotalRecords = count($userData);
             $records = array();
             if(count($userData) > 0){
@@ -358,7 +381,12 @@ class UserController extends Controller
             $subModuleIds = array_column($subModuleIds,'module_id');
             $moduleIds = Module::whereIn('id',$subModuleIds)->select('module_id')->distinct()->get()->toArray();
             $moduleIds = array_column($moduleIds,'module_id');
-            $data = ACLHelper::getPermissions($moduleIds);
+            if($userRole == 'superadmin'){
+                $isSuperadmin = true;
+            }else{
+                $isSuperadmin = false;
+            }
+            $data = ACLHelper::getPermissions($moduleIds, $isSuperadmin);
             $roleWebPermissions = RoleHasPermission::where('role_id',$roleId)->where('is_web', true)->pluck('permission_id')->toArray();
             $roleMobilePermissions = RoleHasPermission::where('role_id',$roleId)->where('is_mobile', true)->pluck('permission_id')->toArray();
             $webModuleResponse = $data['webModuleResponse'];

@@ -75,18 +75,38 @@ class CategoryManagementController extends Controller
     }
     public function mainCategoryListing(Request $request){
         try{
-            $mainCategories = AwarenessMainCategory::select('id','name')->get();
+            $mainCategories = AwarenessMainCategory::select('id','name','is_active')->get();
             $iTotalRecords = count($mainCategories);
             $records = array();
             $records['data'] = array();
-            $end = $request->length < 0 ? count($mainCategories) : $request->length;
-            $categories = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($mainCategories); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($mainCategories); $iterator++,$pagination++ ){
+                if($mainCategories[$pagination]['is_active'] == true){
+                    $category_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                    $status = 'Disable';
+                }else{
+                    $category_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                    $status = 'Enable';
+                }
                 $records['data'][$iterator] = [
                     $mainCategories[$pagination]['id'],
                     $mainCategories[$pagination]['name'],
-                    '<div class="btn btn-xs blue"><a href="/awareness/category-management/main-category-edit/'.$mainCategories[$pagination]['id'].'"> Edit</a> </div>'
-
+                    $category_status,
+                    '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/awareness/category-management/main-category-edit/'.$mainCategories[$pagination]['id'].'">
+                                <i class="icon-docs"></i> Edit </a>
+                            </li>
+                            <li>
+                                <a href="/awareness/category-management/change-status/main-category/'.$mainCategories[$pagination]['id'].'">
+                                    <i class="icon-tag"></i> '.$status.' </a>
+                            </li>
+                        </ul>
+                    </div>'
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -110,14 +130,36 @@ class CategoryManagementController extends Controller
             $iTotalRecords = count($subCategories);
             $records = array();
             $records['data'] = array();
-            $end = $request->length < 0 ? count($subCategories) : $request->length;
-            $categories = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($subCategories); $iterator++,$pagination++ ){
+                if($subCategories[$pagination]['is_active'] == true){
+                    $category_status = '<span class="label label-sm label-success"> Enabled </span>';
+                    $status = 'Disable';
+                }else{
+                    $category_status = '<span class="label label-sm label-danger"> Disabled</span>';
+                    $status = 'Enable';
+                }
                 $records['data'][$iterator] = [
                     $subCategories[$pagination]['id'],
-                    $subCategories[$pagination]['name'],
                     $subCategories[$pagination]->awarenessMainCategory->name,
-                    '<div class="btn btn-xs blue"><a href="/awareness/category-management/sub-category-edit/'.$subCategories[$pagination]['id'].'"> Edit</a> </div>'
+                    $subCategories[$pagination]['name'],
+                    $category_status,
+                    '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/awareness/category-management/sub-category-edit/'.$subCategories[$pagination]['id'].'">
+                                <i class="icon-docs"></i> Edit </a>
+                            </li>
+                            <li>
+                                <a href="/awareness/category-management/change-status/sub-category/'.$subCategories [$pagination]['id'].'">
+                                    <i class="icon-tag"></i> '.$status.' </a>
+                            </li>
+                        </ul>
+                    </div>'
+
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -192,6 +234,35 @@ class CategoryManagementController extends Controller
         }catch (\Exception $e){
             $data = [
                 'action' => 'Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function changeCategoryStatus(Request $request, $slug,$categoryId){
+        try{
+            if($slug == 'main-category'){
+                $category = AwarenessMainCategory::findOrFail($categoryId);
+                $status = !$category->is_active;
+                AwarenessMainCategory::where('id', $categoryId)->update(['is_active' => ($status)]);
+                $redirect = '/awareness/category-management/main-category-manage';
+            }elseif($slug == 'sub-category'){
+                $category = AwarenessSubCategory::findOrFail($categoryId);
+                $status = !$category->is_active;
+                AwarenessSubCategory::where('id', $categoryId)->update(['is_active' => ($status)]);
+                $redirect = '/awareness/category-management/sub-category-manage';
+            }else{
+                $request->session()->flash('error','Invalid slug sent.');
+                return redirect('/awareness/category-management/main-category-manage');
+            }
+            $request->session()->flash('success','Status change successfully');
+            return redirect($redirect);
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Awareness category change status',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];

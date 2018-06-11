@@ -207,25 +207,39 @@ class DprController extends Controller
         try{
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
-                $dprDetails = DprDetail::where('project_site_id',$projectSiteId)->orderBy('created_at','desc')->get();
+                $dprDetailIds = DprDetail::where('project_site_id',$projectSiteId)->orderBy('id','desc')->pluck('id');
             }else{
-                $dprDetails = DprDetail::orderBy('created_at','desc')->get();
+                $dprDetailIds = DprDetail::orderBy('id','desc')->pluck('id');
             }
+            if($request->has('search_date') && $request->search_date != ''){
+                $date = date('Y-m-d', strtotime($request->search_date));
+                $dprDetailIds = DprDetail::whereDate('created_at', $date)->pluck('id');
+            }
+            $dprDetails = DprDetail::whereIn('id', $dprDetailIds)->orderBy('created_at','desc')->get();
             $records = array();
             $records['data'] = array();
             $dprListingData = array();
+            $tempDprListingData = array();
             foreach($dprDetails as $dprDetail){
                 $date = date('j-n-Y',strtotime($dprDetail['created_at']));
-                if(!array_key_exists($date,$dprListingData)){
-                    $dprListingData[$date] = [
+                if(!array_key_exists($date,$tempDprListingData)){
+                    $tempDprListingData[$date][$dprDetail->subcontractorDprCategoryRelation->subcontractor->id] = [
                         'subcontractor_name' => $dprDetail->subcontractorDprCategoryRelation->subcontractor->company_name,
                         'subcontractor_id' => $dprDetail->subcontractorDprCategoryRelation->subcontractor->id,
                         'date' => date('j F Y', strtotime($dprDetail['created_at'])),
                         'param_date' => $dprDetail['created_at']
                     ];
+                    $dprListingData[] = $tempDprListingData[$date][$dprDetail->subcontractorDprCategoryRelation->subcontractor->id];
+                }elseif(!array_key_exists($dprDetail->subcontractorDprCategoryRelation->subcontractor->id, $tempDprListingData[$date])){
+                    $tempDprListingData[$date][$dprDetail->subcontractorDprCategoryRelation->subcontractor->id] = [
+                        'subcontractor_name' => $dprDetail->subcontractorDprCategoryRelation->subcontractor->company_name,
+                        'subcontractor_id' => $dprDetail->subcontractorDprCategoryRelation->subcontractor->id,
+                        'date' => date('j F Y', strtotime($dprDetail['created_at'])),
+                        'param_date' => $dprDetail['created_at']
+                    ];
+                    $dprListingData[] = $tempDprListingData[$date][$dprDetail->subcontractorDprCategoryRelation->subcontractor->id];
                 }
             }
-            $dprListingData = array_values($dprListingData);
             $iTotalRecords = count($dprListingData);
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($dprListingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [

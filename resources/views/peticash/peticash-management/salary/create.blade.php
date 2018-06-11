@@ -144,6 +144,15 @@
                                                             <input type="text" class="form-control" id="employee_name" name="employee_name">
                                                         </div>
                                                     </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label for="employee_name" class="control-label">Advance Balance Amount</label>
+                                                            <span>*</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="advance_balance_amount" readonly>
+                                                        </div>
+                                                    </div>
                                                     <input type="hidden" id="employee_id" name="employee_id">
                                                     <input type="hidden" id="balance">
                                                     <div class="form-group row" id="perDayWagesDiv">
@@ -301,7 +310,8 @@
                                         name:data.employee_name,
                                         employee_id:data.employee_id,
                                         per_day_wages:data.per_day_wages,
-                                        balance:data.balance
+                                        balance:data.balance,
+                                        advance_balance:data.advance_after_last_salary
                                     };
                                 });
                             },
@@ -329,7 +339,7 @@
                         $("#per_day_wages").val(POData.per_day_wages);
                         $("#balance").val(POData.balance);
                         $("#employee_id").val(POData.employee_id);
-                        console.log(transactionType);
+                        $("#advance_balance_amount").val(POData.advance_balance);
                         if(transactionType == 'salary'){
                             $('#salaryExtraFields').show();
                         }else{

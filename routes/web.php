@@ -291,6 +291,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
             Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
+            Route::post('get-material-inventory-quantity',array('uses' => 'Purchase\PurchaseRequestController@getMaterialInventoryQuantity'));
+            Route::post('edit-quantity',array('uses' => 'Purchase\PurchaseRequestController@editComponentQuantity'));
             Route::get('get-detail/{purchaseRequestId}',array('uses' => 'Purchase\PurchaseRequestController@getPurchaseRequestDetails'));
         });
 
@@ -729,6 +731,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('sub-category-listing',array('uses' => 'Awareness\CategoryManagementController@subCategoryListing'));
                 Route::get('sub-category-manage',array('uses' => 'Awareness\CategoryManagementController@getSubManageView'));
                 Route::get('sub-category-create',array('uses' => 'Awareness\CategoryManagementController@getSubCategoryCreateView'));
+                Route::get('change-status/{slug}/{categoryId}',array('uses' => 'Awareness\CategoryManagementController@changeCategoryStatus'));
           });
         Route::group(['prefix' => 'file-management'], function(){
             Route::get('manage',array('uses' => 'Awareness\FileManagementController@getManageView'));

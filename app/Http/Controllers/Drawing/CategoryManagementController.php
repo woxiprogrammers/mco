@@ -134,6 +134,21 @@ class CategoryManagementController extends Controller
             $end = $request->length < 0 ? count($subCategories) : $request->length;
             $categories = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
+                if($subCategories[$pagination]['is_active'] == true){
+                    $status = '<span class="label label-sm label-success"> Enabled </span>';;
+                    $action = '<li>
+                                    <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/false">'
+                        .'<i class="icon-docs"></i> Disable 
+                                    </a>'
+                        .'</li>';
+                }else{
+                    $status = '<span class="label label-sm label-danger"> Disabled </span>';;
+                    $action = '<li>
+                                    <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/true">'
+                                        .'<i class="icon-docs"></i> Enable 
+                                    </a>'
+                                .'</li>';
+                }
                 if($user->customHasPermission('view-drawing-category')){
                     $actionButton = '<div class="btn-group">
                                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -153,17 +168,8 @@ class CategoryManagementController extends Controller
                                             Actions
                                             <i class="fa fa-angle-down"></i>
                                         </button>
-                                        <ul class="dropdown-menu pull-left" role="menu">
-                                            <li>
-                                                <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/TRUE">'
-                                                    .'<i class="icon-docs"></i> Enable 
-                                                </a>'
-                                            .'</li>'
-                                            .'<li>'
-                                                .'<a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/FALSE">'
-                                                    .'<i class="icon-tag"></i> Disable 
-                                                </a>'
-                                            .'</li>'
+                                        <ul class="dropdown-menu pull-left" role="menu">'
+                                            .$action
                                             .'<li>'
                                                 .'<a href="/drawing/category-management/edit/'.$subCategories[$pagination]['id'].'">'
                                                     .'<i class="icon-tag"></i> Edit </a>'
@@ -174,6 +180,7 @@ class CategoryManagementController extends Controller
                 $records['data'][$iterator] = [
                     $subCategories[$pagination]['id'],
                     $subCategories[$pagination]['name'],
+                    $status,
                     $actionButton
                 ];
             }
@@ -195,10 +202,14 @@ class CategoryManagementController extends Controller
 
     public function changeStatus(Request $request,$id,$status){
         try {
-               $categoryData['is_active'] = (bool)$status;
-               $query = DrawingCategory::where('id',$id)->update($categoryData);
-               $request->session()->flash('success', 'Status changed successfully.');
-               return redirect('/drawing/category-management/manage');
+            if($status == 'false'){
+                $status = false;
+            }else{
+                $status = true;
+            }
+            $query = DrawingCategory::where('id',$id)->update(['is_active' => $status]);
+            $request->session()->flash('success', 'Status changed successfully.');
+            return redirect('/drawing/category-management/manage');
         }catch(\Exception $e){
                 $data = [
                     'action' => 'Listing',
@@ -238,6 +249,21 @@ class CategoryManagementController extends Controller
             $end = $request->length < 0 ? count($subCategories) : $request->length;
             $categories = array();
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
+                if($subCategories[$pagination]['is_active'] == true){
+                    $status = '<span class="label label-sm label-success"> Enabled </span>';;
+                    $action = '<li>
+                                    <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/false">'
+                        .'<i class="icon-docs"></i> Disable 
+                                    </a>'
+                        .'</li>';
+                }else{
+                    $status = '<span class="label label-sm label-danger"> Disabled </span>';;
+                    $action = '<li>
+                                    <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/true">'
+                        .'<i class="icon-docs"></i> Enable 
+                                    </a>'
+                        .'</li>';
+                }
                 if($user->customHasPermission('view-drawing-category')){
                     $actionButton = '<div class="btn-group">
                                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -257,15 +283,8 @@ class CategoryManagementController extends Controller
                                             Actions
                                             <i class="fa fa-angle-down"></i>
                                         </button>
-                                        <ul class="dropdown-menu pull-left" role="menu">
-                                            <li>
-                                                <a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/TRUE">'
-                                                    .'<i class="icon-docs"></i> Enable </a>'
-                                            .'</li>'
-                                            .'<li>'
-                                                .'<a href="/drawing/category-management/change-status/'.$subCategories[$pagination]['id'].'/FALSE">'
-                                                .'<i class="icon-tag"></i> Disable </a>'
-                                            .'</li>'
+                                        <ul class="dropdown-menu pull-left" role="menu">'
+                                            .$action
                                             .'<li>'
                                                 .'<a href="/drawing/category-management/edit-sub/'.$subCategories[$pagination]['id'].'">'
                                                     .'<i class="icon-tag"></i> Edit </a>'
@@ -275,8 +294,9 @@ class CategoryManagementController extends Controller
                 }
                 $records['data'][$iterator] = [
                     $subCategories[$pagination]['id'],
-                    $subCategories[$pagination]['name'],
                     DrawingCategory::where('id',$subCategories[$pagination]['drawing_category_id'])->pluck('name')->first(),
+                    $subCategories[$pagination]['name'],
+                    $status,
                     $actionButton
                 ];
             }

@@ -213,7 +213,7 @@ trait VendorTrait
 
     public function editVendor(Request $request, $vendor){
         try {
-             $data = $request->except(['cities','material','material_city','_token','_method']);
+            $data = $request->except(['cities','material','material_city','_token','_method']);
             $data['name'] = ucwords(trim($data['name']));
             $vendor->update($data);
             $vendorCityData = array();
@@ -252,12 +252,21 @@ trait VendorTrait
                     $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
                     foreach ($request->material_city[$materialId] as $materialCityId) {
                         $vendorMaterialCity = VendorMaterialCityRelation::where('vendor_material_relation_id', $vendorMaterial->id)->where('vendor_city_relation_id', $vendorCityRelation[$materialCityId])->first();
-                        VendorMaterialCityRelation::whereNotIn('vendor_city_relation_id', $vendorCityRelation)->delete();
+                        $deletedCityRelation = VendorCityRelation::where('vendor_id',$vendor->id)->whereNotIn('city_id', $request->material_city[$materialId])->pluck('id')->toArray();
+                        VendorMaterialCityRelation::where('vendor_material_relation_id', $vendorMaterial->id)->whereIn('vendor_city_relation_id', $deletedCityRelation)->delete();
                         if ($vendorMaterialCity == null) {
                             $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
                             VendorMaterialCityRelation::create($vendorMaterialCityData);
                         }
                     }
+                }
+            }else{
+                $vendorMaterialRelations = VendorMaterialRelation::where('vendor_id', $vendor->id)->get();
+                foreach($vendorMaterialRelations as $vendorMaterialRelation){
+                    foreach($vendorMaterialRelation->vendorCityRelation as $vendorCityRelation){
+                        VendorMaterialCityRelation::where('id', $vendorCityRelation->id)->delete();
+                    }
+                    VendorMaterialRelation::where('id', $vendorMaterialRelation->id)->delete();
                 }
             }
             $request->session()->flash('success', 'Vendor Edited successfully.');
