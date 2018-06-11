@@ -58,7 +58,7 @@ var PurchaseOrderListing = function () {
 
                             // Update footer
                             $( api.column( 8 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                customRound(pageTotal) +' ( '+ total +' total)'
                             );
 
                             billtotal = result['billtotal'];
@@ -73,7 +73,7 @@ var PurchaseOrderListing = function () {
 
                             // Update footer
                             $( api.column( 9 ).footer() ).html(
-                                pageBillTotal +' ( '+ billtotal +' total)'
+                                customRound(pageBillTotal) +' ( '+ billtotal +' total)'
                             );
 
                             paidtotal = result['paidtotal'];
@@ -88,7 +88,7 @@ var PurchaseOrderListing = function () {
 
                             // Update footer
                             $( api.column( 10 ).footer() ).html(
-                                pagePaidTotal +' ( '+ paidtotal +' total)'
+                                customRound(pagePaidTotal) +' ( '+ paidtotal +' total)'
                             );
 
                             /*balancetotal = result['balancetotal'];
