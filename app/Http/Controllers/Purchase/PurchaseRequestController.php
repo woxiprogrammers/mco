@@ -868,7 +868,7 @@ class PurchaseRequestController extends Controller
                 }
                 return view('partials.purchase.purchase-request.inventory-quantity')->with(compact('projectSiteInfo'));
             }else{
-                return response()->json(['message' => 'Material isn not available at any other site'] , 201);
+                return response()->json(['message' => 'Material is not available at any other site'] , 201);
             }
         }catch (\Exception $e){
             $data = [
@@ -892,7 +892,8 @@ class PurchaseRequestController extends Controller
                 'quantity' => $request->quantity,
                 'unit_id' => $materialRequestComponent['unit_id'],
                 'user_id' => $user['id'],
-                'remark' => $request->remark
+                'remark' => $request->remark,
+                'show_p_r_detail' => true
             ];
             $materialRequestComponentVersion = MaterialRequestComponentVersion::create($materialRequestComponentVersionData);
             $status = 200;

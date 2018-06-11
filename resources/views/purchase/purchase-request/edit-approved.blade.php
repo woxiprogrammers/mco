@@ -129,8 +129,8 @@
                                                                     <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
                                                                     @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
                                                                         <td>
-                                                                            <div>
-                                                                                <select class="form-control input-lg select2-multiple" id="select-vendor-{{$materialRequestComponentDetails[$iterator]['id']}}" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden" data-placeholder="Select Vendor">
+                                                                            <div id="select-vendor-{{$materialRequestComponentDetails[$iterator]['id']}}">
+                                                                                <select class="form-control input-lg select2-multiple" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden" data-placeholder="Select Vendor">
                                                                                     @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
                                                                                         @if(array_key_exists('is_client',$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]) && $materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['is_client'] == true)
 
@@ -563,6 +563,11 @@
                             }
                             $("#componentQuantity-"+materialRequestComponentId).html(data.quantity);
                             alert(data.message);
+                            if(data.quantity <= 0){
+                                $("#select-vendor-"+materialRequestComponentId).hide();
+                            }else{
+                                $("#select-vendor-"+materialRequestComponentId).show();
+                            }
                             $('#editQuantityModal').modal('toggle');
 
                         },
