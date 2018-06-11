@@ -81,6 +81,28 @@
                                                             </table>
                                                         </div>
                                                     </div>
+                                                    <div class="form-group">
+                                                        <div class="row">
+                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                        </div>
+                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                Browse</a>
+                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                <i class="fa fa-share"></i> Upload Files </a>
+                                                        </div><br>
+                                                        <table class="table table-bordered table-hover col-md-offset-3" style="width: 700px">
+                                                            <thead>
+                                                            <tr role="row" class="heading">
+                                                                <th> Image </th>
+                                                                <th> Action </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="show-product-images">
+
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
