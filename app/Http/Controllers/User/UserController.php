@@ -381,7 +381,12 @@ class UserController extends Controller
             $subModuleIds = array_column($subModuleIds,'module_id');
             $moduleIds = Module::whereIn('id',$subModuleIds)->select('module_id')->distinct()->get()->toArray();
             $moduleIds = array_column($moduleIds,'module_id');
-            $data = ACLHelper::getPermissions($moduleIds);
+            if($userRole == 'superadmin'){
+                $isSuperadmin = true;
+            }else{
+                $isSuperadmin = false;
+            }
+            $data = ACLHelper::getPermissions($moduleIds, $isSuperadmin);
             $roleWebPermissions = RoleHasPermission::where('role_id',$roleId)->where('is_web', true)->pluck('permission_id')->toArray();
             $roleMobilePermissions = RoleHasPermission::where('role_id',$roleId)->where('is_mobile', true)->pluck('permission_id')->toArray();
             $webModuleResponse = $data['webModuleResponse'];

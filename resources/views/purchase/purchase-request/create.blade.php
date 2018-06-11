@@ -109,7 +109,7 @@
                                                                             <th> Action </th>
                                                                         </tr>
                                                                         </thead>
-                                                                        <tbody>
+                                                                        <tbody id="indentRows">
                                                                             @foreach($materialRequestList as $components)
                                                                                 <tr>
                                                                                     <td> <input type="checkbox"> <input type="hidden" name="material_request_component_ids[]" value="{{$components['material_request_component_id']}}"></td>
