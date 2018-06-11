@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Purchase;
 
 use App\BankInfo;
 use App\Client;
+use App\Helper\MaterialProductHelper;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
@@ -382,9 +383,9 @@ class PurchaseOrderBillingController extends Controller
                     $billTotals = $total - $paidAmount;
                     $billPaidAmount = PurchaseOrderPayment::whereIn('purchase_order_bill_id', $purchaseOrderBillData->pluck('id'))->sum('amount');;
                 }
-                $records['total'] = $total;
-                $records['billtotal'] = $billTotals;
-                $records['paidtotal'] = $billPaidAmount;
+                $records['total'] = MaterialProductHelper::customRound($total);
+                $records['billtotal'] = MaterialProductHelper::customRound($billTotals);
+                $records['paidtotal'] = MaterialProductHelper::customRound($billPaidAmount);
             } else {
                 $records = array();
                 $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
