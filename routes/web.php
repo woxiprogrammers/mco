@@ -281,6 +281,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
             Route::post('change-status-mti',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatustoMTI'));
             Route::get('get-material-request-component-details/{materialRequestComponent}',array('uses' => 'User\PurchaseController@getMaterialRequestComponentDetail'));
+            Route::post('validate-quantity', array('uses' => 'User\PurchaseController@validateQuantity'));
         });
 
         Route::group(['prefix' => 'purchase-request'], function(){
