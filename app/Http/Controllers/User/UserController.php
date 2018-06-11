@@ -301,7 +301,7 @@ class UserController extends Controller
                     </div>';
                 }
                 $records['data'][$iterator] = [
-                    $userData[$pagination]['first_name'].' '.$userData[$pagination]['last_name'] ,
+                    ucfirst($userData[$pagination]['first_name']).' '.ucfirst($userData[$pagination]['last_name']) ,
                     $userData[$pagination]['email'],
                     $userData[$pagination]['mobile'],
                     $userData[$pagination]['role_name'],
