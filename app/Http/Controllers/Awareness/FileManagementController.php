@@ -37,7 +37,7 @@ class FileManagementController extends Controller
     }
     public function getCategoryCreateView(Request $request){
         try{
-            $main_categories = AwarenessMainCategory::select('id','name')->get();
+            $main_categories = AwarenessMainCategory::where('is_active', true)->select('id','name')->get();
             return view('awareness.file-management.create')->with(compact('main_categories'));
         }catch(\Exception $e){
             $data = [
@@ -51,7 +51,7 @@ class FileManagementController extends Controller
     }
     public function getMainCategories(Request $request,$id){
         try{
-            $sub_categories = AwarenessSubCategory::where('awareness_main_category_id',$id)->select('id','name')->get()->toArray();
+            $sub_categories = AwarenessSubCategory::where('awareness_main_category_id',$id)->where('is_active', true)->select('id','name')->get()->toArray();
             $sub_category_dropdown = array();
             $iterator = 0;
             foreach($sub_categories as $sub_category){

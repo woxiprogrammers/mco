@@ -41,10 +41,14 @@ var  CreateMaterialRequest = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
-                $("button[type='submit']").prop('disabled', true);
-                success.show();
-                error.hide();
-                form.submit();
+                if($("#Materialrows tr").length > 0 || $("#Assetrows tr").length > 0 ){
+                    $("button[type='submit']").prop('disabled', true);
+                    success.show();
+                    error.hide();
+                    form.submit();
+                }else{
+                    alert('Please enter valid data');
+                }
             }
         });
     }
@@ -94,10 +98,14 @@ var  CreatePurchaseRequest = function () {
                     .closest('.form-group').addClass('has-success');
             },
             submitHandler: function (form) {
-                $("button[type='submit']").prop('disabled', true);
-                success.show();
-                error.hide();
-                form.submit();
+                if($("#Materialrows tr").length > 0 || $("#Assetrows tr").length > 0 || $("#indentRows tr").length > 0){
+                    $("button[type='submit']").prop('disabled', true);
+                    success.show();
+                    error.hide();
+                    form.submit();
+                }else{
+                    alert('Please enter valid data');
+                }
             }
         });
     }

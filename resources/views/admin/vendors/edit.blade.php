@@ -271,16 +271,20 @@
             }).on('typeahead:selected', function (obj, datum) {
                 if($("#cityList input:checkbox:checked").length > 0){
                     var POData = $.parseJSON(JSON.stringify(datum));
-                    var materialTrString = '<tr><td><input type="checkbox" class="material-city-row"></td><td>'+POData.name+'</td><td>';
-                    $("#cityList input:checkbox:checked").each(function(){
-                        var cityName = $(this).next().text();
-                        var cityId = $(this).val();
-                        materialTrString += '<input type="checkbox" name="material_city['+POData.id+'][]" value="'+cityId+'"><span>'+cityName+'</span><br>';
-                    });
-                    materialTrString += '</td></tr>';
-                    $("#materialCityTable").append(materialTrString);
-                    $("#materialCityTable").show();
-                    $("#removeMaterial").show();
+                    if($("input[name='material_city["+POData.id+"][]']").length <= 0){
+                        var materialTrString = '<tr><td><input type="checkbox" class="material-city-row"></td><td>'+POData.name+'</td><td>';
+                        $("#cityList input:checkbox:checked").each(function(){
+                            var cityName = $(this).next().text();
+                            var cityId = $(this).val();
+                            materialTrString += '<input type="checkbox" name="material_city['+POData.id+'][]" value="'+cityId+'"><span>'+cityName+'</span><br>';
+                        });
+                        materialTrString += '</td></tr>';
+                        $("#materialCityTable").append(materialTrString);
+                        $("#materialCityTable").show();
+                        $("#removeMaterial").show();
+                    }else{
+                        alert('You can not select same material more than once.');
+                    }
                 }else{
                     alert("Please select atleast one city first");
                 }
