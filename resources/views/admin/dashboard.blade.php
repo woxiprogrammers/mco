@@ -34,7 +34,7 @@
                 <!-- END PAGE BREADCRUMBS -->
                 <!-- BEGIN PAGE CONTENT INNER -->
                 <div class="page-content-inner">
-                    <div class="row">
+                    {{--<div class="row">
                         <fieldset>
                             <legend>
                                 <label style="margin-left: 1%">
@@ -88,7 +88,7 @@
                                 @endif
                             @endfor
                         </fieldset>
-                    </div>
+                    </div>--}}
                     @if(($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                         <div class="row" style="margin-top: 3%">
                         <div class="col-md-4">

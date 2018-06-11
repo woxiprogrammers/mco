@@ -328,6 +328,8 @@ trait BillTrait{
                     $listingData[$iterator]['tax'][$tax['tax_id']] = $taxAmount;
                     $listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
                 }
+                $listingData[$iterator]['paid_amount'] = BillTransaction::where('bill_id',$bill->id)->sum('total');
+                $listingData[$iterator]['balance_amount'] = $listingData[$iterator]['final_total'] - $listingData[$iterator]['paid_amount'];
                 $iterator++;
             }
             $iTotalRecords = count($listingData);
@@ -358,6 +360,8 @@ trait BillTrait{
                     array_push($records['data'][$iterator],MaterialProductHelper::customRound($taxAmount,3));
                 }
                 array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
+                array_push($records['data'][$iterator],$listingData[$iterator]['paid_amount']);
+                array_push($records['data'][$iterator],$listingData[$iterator]['balance_amount']);
                 array_push($records['data'][$iterator],$billStatus);
                 if($listingData[$iterator]['status'] == "approved"){
                     array_push($records['data'][$iterator],'<div class="btn-group">
