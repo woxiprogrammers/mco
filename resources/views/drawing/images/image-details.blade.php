@@ -129,7 +129,6 @@
                         success: function(data,textStatus,xhr){
                             var option = '';
                             $.each(data, function( index, value ) {
-                                console.log(value);
                                 option += '<a href="/drawing/images/get-details/'+value.id +'"><li class="list-group-item"> Version '+ (parseInt(index)+1) +'</li></a>';
                             });
                             $('#versinListingId').html(option);

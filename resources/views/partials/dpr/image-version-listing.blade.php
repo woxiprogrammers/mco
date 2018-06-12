@@ -1,0 +1,33 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ameya
+ * Date: 12/6/18
+ * Time: 6:03 PM
+ */
+?>
+
+@if(count($imageVersionData) > 0)<table class="table table-bordered table-hover">
+    <thead>
+    <tr role="row" class="heading">
+        <th style="width: 50% !important;"> Image </th>
+        <th> Title </th>
+    </tr>
+    </thead>
+    <tbody id="show-product-images">
+        @foreach($imageVersionData as $imageVersion)
+            <tr>
+                <td>
+                    <img src="{{$imageVersion['image_path']}}" style="width: 250px; height: 150px">
+                </td>
+                <td>
+                    <div class="form-group">
+                        <input class="form-control" value="{{$imageVersion['title']}}">
+                    </div>
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
+
+@endif

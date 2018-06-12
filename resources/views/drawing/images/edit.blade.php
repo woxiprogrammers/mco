@@ -12,32 +12,41 @@
                 <!-- BEGIN CONTAINER -->
                 <div class="page-container">
                     <!-- BEGIN CONTENT -->
-                    <div class="page-content-wrapper">
-                        <div class="page-head">
-                            <div class="container">
-                                <!-- BEGIN PAGE TITLE -->
-                                <div class="page-title">
-                                    <h1>Edit Image</h1>
+                    <form action="/drawing/images/edit" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="project_site_id" value="{{$site['id']}}">
+                        <input type="hidden" name="main_category_id" value="{{$main_category['id']}}">
+                        <input type="hidden" name="sub_category_id" value="{{$sub_category['id']}}">
+                        <div class="page-content-wrapper">
+                            <div class="page-head">
+                                <div class="container">
+                                    <!-- BEGIN PAGE TITLE -->
+                                    <div class="page-title">
+                                        <h1>Edit Image</h1>
+                                    </div>
+                                    <div class="col-md-6" style="margin-top: 12px;float: right">
+                                        <button type="submit" class="btn btn-set red pull-right">
+                                            <i class="fa fa-check"></i>
+                                            Submit
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="page-content">
-                            @include('partials.common.messages')
-                            <div class="container">
-                                <ul class="page-breadcrumb breadcrumb">
-                                    <li>
-                                        <a href="/drawing/images/manage">Manage Image</a>
-                                        <i class="fa fa-circle"></i>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);">Edit Image</a>
-                                        <i class="fa fa-circle"></i>
-                                    </li>
-                                </ul>
-                                <div class="col-md-12">
+                            <div class="page-content">
+                                @include('partials.common.messages')
+                                <div class="container">
+                                    <ul class="page-breadcrumb breadcrumb">
+                                        <li>
+                                            <a href="/drawing/images/manage">Manage Image</a>
+                                            <i class="fa fa-circle"></i>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);">Edit Image</a>
+                                            <i class="fa fa-circle"></i>
+                                        </li>
+                                    </ul>
+                                    <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
-
                                         <div class="portlet-body form">
                                             {!! csrf_field() !!}
                                             <div class="form-body">
@@ -85,15 +94,15 @@
                                                         @foreach($drawing_image_latest_version as $file)
                                                             <tr id="image-{{$file['id']}}">
                                                                 <td>
-                                                                    <a href="{{$file['encoded_name']}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                                                                    <a href="javascript:void(0);" onclick="showVersions({{$file['id']}})">
                                                                         <img class="img-responsive" src="{{$file['encoded_name']}}" alt="" style="width:100px; height:100px;"> </a>
 
-                                                                    <input type="hidden" class="product-image-name" name="work_order_images[{{$file['id']}}][image_name]" id="product-image-name-{{$file['id']}}" value="{{$file['encoded_name']}}"/>
-                                                                    <input type="text"  name="work_order_images[{{$file['id']}}][title]" value="{{$file['title']}}" required/>
+                                                                    <input type="hidden" class="product-image-name" name="work_order_images[{{$file['id']}}][image_name]" id="product-image-name-{{$file['id']}}" value="{{$file['encoded_name']}}"/><br>
+                                                                    <input type="text"  class="form-control" name="work_order_images[{{$file['id']}}][title]" value="{{$file['title']}}" />
                                                                 </td>
                                                                 <td>
-                                                                    <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$file['id']}}","{{$file['encoded_name']}}",0);'>
-                                                                        <i class="fa fa-times"></i> Remove </a>
+                                                                    {{--<a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$file['id']}}","{{$file['encoded_name']}}",0);'>
+                                                                        <i class="fa fa-times"></i> Remove </a>--}}
                                                                     <button  class="btn btn-default btn-sm myBtn"  value="{{$file['original_id']}}">
                                                                         <i class="fa fa-plus-square"></i> Add Version </button>
                                                                 </td>
@@ -103,57 +112,74 @@
                                                     </table>
                                                 </div>
                                             </div>
-                                            <input type="hidden" id="path" name="path" value="">
-                                            <input type="hidden" id="max_files_count" name="max_files_count" value="20">
-                                            <div class="modal fade" id="myModal" role="dialog">
-                                                <div class="modal-dialog">
-                                                    <!-- Modal content-->
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <div class="row">
-                                                                <div class="col-md-4"></div>
-                                                                <div class="col-md-4"> Material</div>
-                                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-body" style="padding:40px 50px;">
-                                                            <form action="/drawing/images/add-version" method="POST" enctype="multipart/form-data">
-                                                                {!! csrf_field() !!}
-                                                                <input type="hidden" id="drawing-images-id" name="drawing_images_id">
-                                                                <input type="hidden"  name="site_id" value="{{$site_id}}">
-                                                                <input type="hidden"  name="sub_category_id" value="{{$id}}">
-                                                                <div class="form-group row">
-                                                                    <div class="col-md-3" style="text-align: right">
-                                                                        <label for="name" class="control-label">Browse File</label>
-                                                                        <span>*</span>
-                                                                    </div>
-                                                                    <div class="col-md-6">
-                                                                        <input type="file" name="file" required>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group row">
-                                                                    <div class="col-md-3" style="text-align: right">
-                                                                        <label for="name" class="control-label">Title</label>
-                                                                        <span>*</span>
-                                                                    </div>
-                                                                    <div class="col-md-6">
-                                                                        <input type="text" name="title" required>
-                                                                    </div>
-                                                                </div>
-                                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-add-drawing')|| $user->customHasPermission('create-add-drawing'))
-                                                                    <input type="submit" class="btn red pull-right" >
-                                                                @endif
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                </div>
                             </div>
                         </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="path" name="path" value="">
+    <input type="hidden" id="max_files_count" name="max_files_count" value="20">
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4"> Material</div>
+                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
                     </div>
+                </div>
+                <div class="modal-body" style="padding:40px 50px;">
+                    <form action="/drawing/images/add-version" method="POST" enctype="multipart/form-data">
+                        {!! csrf_field() !!}
+                        <input type="hidden" id="drawing-images-id" name="drawing_images_id">
+                        <input type="hidden"  name="site_id" value="{{$site_id}}">
+                        <input type="hidden"  name="sub_category_id" value="{{$id}}">
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">Browse File</label>
+                                <span>*</span>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="file" name="file" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">Title</label>
+                                <span>*</span>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="title" required>
+                            </div>
+                        </div>
+                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-add-drawing')|| $user->customHasPermission('create-add-drawing'))
+                            <input type="submit" class="btn red pull-right" >
+                        @endif
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="versionModal" role="dialog">
+        <div class="modal-dialog" style="width: 70%">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4"> <h3><b>Drawing Image Versions</b></h3> </div>
+                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding:40px 50px;">
+
                 </div>
             </div>
         </div>
@@ -179,6 +205,23 @@
                 $("#myModal").modal();
             });
         });
+
+        function showVersions(drawingVersionId){
+            $("#versionModal").modal('show');
+            $.ajax({
+                url: '/drawing/images/get-version-images?_token='+$("input[name='_token']").val(),
+                type: "POST",
+                data:{
+                    image_version_id: drawingVersionId
+                },
+                success: function(data,textStatus,xhr){
+                    $("#versionModal .modal-body").html(data);
+                },
+                error: function(errorData){
+
+                }
+            })
+        }
     </script>
 
 @endsection
