@@ -300,7 +300,7 @@
                                                             <label class="control-label pull-right">Quantity</label>
                                                         </div>
                                                         <div class="col-md-10">
-                                                            <input type="text" id="quantity" name="quantity" class="form-control" placeholder="Enter Quantity">
+                                                            <input type="text" id="quantity" name="quantity" class="form-control user-quantity" placeholder="Enter Quantity" onchange="checkUserAllowedQuantity()">
                                                         </div>
                                                     </div>
                                                     <div class="row form-group">
@@ -309,7 +309,7 @@
                                                                 <label class="control-label pull-right">Unit</label>
                                                             </div>
                                                             <div class="col-md-10">
-                                                                <select class="form-control" id="unit" name="unit_id">
+                                                                <select class="form-control user-unit" id="unit" name="unit_id" onchange="checkUserAllowedQuantity()">
                                                                     <option value="{{$nosUnitId}}">Nos</option>
                                                                 </select>
                                                             </div>
@@ -1369,6 +1369,46 @@
         }();
     </script>
     <script>
+
+        function checkUserAllowedQuantity(){
+            console.log('inside quantity');
+            //$('.user-quantity').rules('remove');
+            //$('.user-quantity').closest('form-group').removeClass('has-error');
+            var quantity = $('.user-quantity').val();
+            console.log(quantity);
+            var unitId =  $('.user-unit').val();
+            console.log(unitId);
+            if(typeof quantity != 'undefined' && quantity != '' && !(isNaN(quantity)) && typeof unitId != 'undefined' && unitId != '' && !(isNaN(unitId))){
+                $.ajax({
+                    url: '/inventory/transfer/check-quantity',
+                    type: 'POST',
+                    async: true,
+                    data: {
+                        _token: $("input[name='_token']").val(),
+                        inventoryComponentId : $('#inventoryComponentId').val(),
+                        quantity: quantity,
+                        unitId: unitId
+                    },
+                    success: function(data,textStatus,xhr){
+                        if(data.show_validation == true){
+                            $('.user-quantity').rules('add',{
+                                max: data.available_quantity,
+                                messages: {
+                                    max  : "Available quantity is "+data.available_quantity
+                                }
+                            });
+                        }else{
+                            $('.user-quantity').rules('remove');
+                            $('.user-quantity').closest('form-group').removeClass('has-error');
+                        }
+                    },
+                    error: function(){
+
+                    }
+                });
+            }
+        }
+
         $('#transfer_type').change(function(){
             if($(this).val() == 'user'){
                 $("#dynamicForm").html($('#labour_form').clone().show(500));
