@@ -293,6 +293,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
             Route::post('change-status-mti',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatustoMTI'));
             Route::get('get-material-request-component-details/{materialRequestComponent}',array('uses' => 'User\PurchaseController@getMaterialRequestComponentDetail'));
+            Route::post('validate-quantity', array('uses' => 'User\PurchaseController@validateQuantity'));
         });
 
         Route::group(['prefix' => 'purchase-request'], function(){
@@ -772,6 +773,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage_dpr',array('uses' => 'Dpr\DprController@getDprManageView'));
         Route::post('category-listing',array('uses' => 'Dpr\DprController@categoryListing'));
         Route::post('dpr-listing',array('uses' => 'Dpr\DprController@dprListing'));
+        Route::post('temp-image-upload',array('uses' => 'Dpr\DprController@uploadTempImages'));
+        Route::post('display-temp-files',array('uses' => 'Dpr\DprController@displayTempImages'));
+        Route::post('delete-temp-image',array('uses' => 'Dpr\DprController@removeTempImage'));
+        Route::post('delete-image',array('uses' => 'Dpr\DprController@removeImage'));
         Route::get('change-status/{id}/{status}',array('uses'=> 'Dpr\DprController@changeStatus'));
         Route::group(['prefix' => 'subcontractor'], function(){
             Route::post('get-category',array('uses'=> 'Dpr\DprController@getSubcontractorsCategories'));

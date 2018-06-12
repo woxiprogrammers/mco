@@ -23,6 +23,10 @@ use App\BankInfo;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\Http\Controllers\CustomTraits\PeticashTrait;
+use App\InventoryComponent;
+use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
+use App\InventoryTransferTypes;
 use App\PaymentType;
 use App\Vendor;
 use Carbon\Carbon;
@@ -157,7 +161,36 @@ class AssetMaintenanceController extends Controller{
 
     public function autoSuggest(Request $request,$keyword){
         try{
-            $assetList = Asset::where('name','ilike','%'.$keyword.'%')->where('is_active',true)->select('id','name')->get();
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $assetIds = InventoryComponent::join('assets','assets.id','=','inventory_components.reference_id')
+                                        ->where('inventory_components.project_site_id', $projectSiteId)
+                                        ->where('assets.name','ilike','%'.$keyword.'%')
+                                        ->where('inventory_components.is_material', false)
+                                        ->where('assets.is_active',true)
+                                        ->pluck('inventory_components.id');
+            }else{
+                $assetIds = array();
+            }
+            $inTransferIds = InventoryTransferTypes::where('type','ilike','in')->pluck('id');
+            $outTransferIds = InventoryTransferTypes::where('type','ilike','out')->pluck('id');
+            $assetList = array();
+            foreach($assetIds as $inventoryComponentId){
+                $lastInTransferDate = InventoryComponentTransfers::where('inventory_component_id', $inventoryComponentId)
+                                            ->whereIn('transfer_type_id', $inTransferIds)
+                                            ->orderBy('created_at', 'desc')->pluck('created_at')->first();
+                $lastOutTransferDate = InventoryComponentTransfers::where('inventory_component_id', $inventoryComponentId)
+                    ->whereIn('transfer_type_id', $outTransferIds)
+                    ->where('created_at', '>=', $lastInTransferDate)
+                    ->orderBy('created_at', 'desc')->pluck('created_at')->first();
+                if($lastOutTransferDate == null){
+                    $inventoryComponent = InventoryComponent::findOrFail($inventoryComponentId);
+                    $assetList[] = [
+                        'id' => $inventoryComponent->reference_id,
+                        'name' => $inventoryComponent->name
+                    ];
+                }
+            }
         }catch(\Exception $e){
             $assetList = array();
             $data = [

@@ -62,24 +62,8 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-6 col-md-offset-3" style="text-align: right">
-                                                            <table class="table table-bordered" id="categoryTable" hidden>
-                                                                <thead>
-                                                                    <tr>
-                                                                       <th style="width: 50%">
-                                                                           Category
-                                                                       </th>
-                                                                        <th>
-                                                                            Number of labours
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
+                                                    <div id="categoryImageDiv">
 
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -89,11 +73,18 @@
                             </div>
                         </div>
                     </form>
+                    <input type="hidden" id="path" name="path" value="">
+                    <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                 </div>
             </div>
         </div>
     </div>
 @endsection
 @section('javascript')
+    <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/dpr/dpr.js" type="application/javascript"></script>
+    <script src="/assets/custom/dpr/file-datatable.js" type="application/javascript"></script>
+    <script src="/assets/custom/dpr/upload-file.js" type="application/javascript"></script>
 @endsection
