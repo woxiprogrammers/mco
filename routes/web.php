@@ -48,6 +48,18 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{client}',array('uses' => 'Client\ClientController@changeClientStatus'));
     });
 
+    Route::group(['prefix' => 'address'],function (){
+        Route::get('create',array('uses' => 'Admin\AddressController@getCreateView'));
+        Route::post('create',array('uses' => 'Admin\AddressController@createAddress'));
+        Route::get('edit/{address}',array('uses' => 'Admin\AddressController@getEditView'));
+        Route::post('edit/{address}',array('uses' => 'Admin\AddressController@editAddress'));
+        Route::get('manage',array('uses' => 'Admin\AddressController@getAddressManageView'));
+        Route::post('listing',array('uses' => 'Admin\AddressController@addressListing'));
+        Route::post('get-states',array('uses' => 'Admin\AddressController@getStates'));
+        Route::post('get-cities',array('uses' => 'Admin\AddressController@getCities'));
+        Route::get('change-status/{address}',array('uses' => 'Admin\AddressController@changeAddressStatus'));
+    });
+
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
