@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dpr;
 
 use App\Client;
 use App\DprDetail;
+use App\DprDetailImageRelation;
+use App\DprImage;
 use App\DprMainCategory;
 use App\ProjectSite;
 use App\Subcontractor;
@@ -11,6 +13,8 @@ use App\SubcontractorDPRCategoryRelation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
@@ -168,11 +172,13 @@ class DprController extends Controller
     public function createDpr(Request $request){
         try{
             $today = Carbon::now();
+            $user = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
                 $dprDetailData = [
                     'project_site_id' => $projectSiteId
                 ];
+                $dprDetailIds = array();
                 foreach ($request->number_of_users as $relationId => $numberOfUser){
                     $dprDetail = DprDetail::where('project_site_id', $projectSiteId)
                                         ->where('subcontractor_dpr_category_relation_id', $relationId)
@@ -181,11 +187,39 @@ class DprController extends Controller
                     if($dprDetail == null){
                         $dprDetailData['subcontractor_dpr_category_relation_id'] = $relationId;
                         $dprDetailData['number_of_users'] = $numberOfUser;
-                        DprDetail::create($dprDetailData);
+                        $dprDetail = DprDetail::create($dprDetailData);
                     }else{
                         $dprDetail->update(['number_of_users' => $numberOfUser]);
                     }
-
+                    $dprDetailIds[] = $dprDetail->id;
+                }
+                if($request->has('dpr_images')){
+                    $userDirectory = sha1($user->id);
+                    $projectSiteDirectory = sha1($projectSiteId);
+                    $tempImageUploadPath = public_path().env('DPR_TEMP_UPLOAD').DIRECTORY_SEPARATOR.$userDirectory;
+                    $imageUploadPath = public_path().env('DPR_UPLOAD').DIRECTORY_SEPARATOR.$projectSiteDirectory;
+                    foreach($request->dpr_images as $image){
+                        $imageName = basename($image);
+                        $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
+                        $dprImageData = [
+                            'name'=> $imageName
+                        ];
+                        if (!file_exists($imageUploadPath)) {
+                            File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                        }
+                        if(File::exists($newTempImageUploadPath)){
+                            $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
+                            File::move($newTempImageUploadPath,$imageUploadNewPath);
+                        }
+                        $dprImage = DprImage::create($dprImageData);
+                        foreach($dprDetailIds as $dprDetailId){
+                            $dprDetailImageRelationData = [
+                                'dpr_detail_id' => $dprDetailId,
+                                'dpr_image_id' => $dprImage->id
+                            ];
+                            $dprDetailImageRelation = DprDetailImageRelation::create($dprDetailImageRelationData);
+                        }
+                    }
                 }
                 $request->session()->flash('success','Data saved successfully !');
             }else{
@@ -294,8 +328,29 @@ class DprController extends Controller
                                             ->where('dpr_details.project_site_id', $projectSiteId)
                                             ->select('dpr_details.project_site_id','dpr_details.number_of_users as number_of_users','dpr_main_categories.name as category_name','dpr_details.id as dpr_detail_id')
                                             ->get();
+            $dprDetailId = $subcontractorDprDetailData[0]['dpr_detail_id'];
+            $dprImageData = DprDetailImageRelation::join('dpr_images','dpr_images.id','=','dpr_detail_image_relations.dpr_image_id')
+                ->where('dpr_detail_image_relations.dpr_detail_id', $dprDetailId)
+                ->select('dpr_images.name as image_name','dpr_detail_image_relations.id as dpr_detail_image_relation_id','dpr_images.id as dpr_image_id')
+                ->get();
+            $subcontractorCategoryImages = array();
+            if(count($dprImageData) > 0){
+                $projectSiteDirectory = sha1($projectSiteId);
+                $imageUploadPath = env('DPR_UPLOAD').DIRECTORY_SEPARATOR.$projectSiteDirectory;
+                foreach($dprImageData as $dprImageDatum){
+                    $imagePath = $imageUploadPath.DIRECTORY_SEPARATOR.$dprImageDatum['image_name'];
+                    if (file_exists(public_path().$imagePath)) {
+                        if(!array_key_exists($dprImageDatum['dpr_image_id'], $subcontractorCategoryImages))
+                        $subcontractorCategoryImages[$dprImageDatum['dpr_image_id']] = [
+                            'path' => $imagePath,
+                            'random' => sha1($dprImageDatum['dpr_detail_image_relation_id']),
+                            'dpr_image_id' => $dprImageDatum['dpr_image_id']
+                        ];
+                    }
+                }
+            }
             $subcontractorName = Subcontractor::where('id',$request->subcontractor_id)->pluck('company_name')->first();
-            return view('dpr.edit-dpr')->with(compact('subcontractorDprDetailData','subcontractorName'));
+            return view('dpr.edit-dpr')->with(compact('subcontractorDprDetailData','subcontractorName','subcontractorCategoryImages'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'DPR create',
@@ -324,8 +379,39 @@ class DprController extends Controller
 
     public function dprEdit(Request $request){
         try{
+            $user = Auth::user();
             foreach ($request->number_of_users as $dprDetailId => $numberOfUsers){
                 DprDetail::where('id',$dprDetailId)->update(['number_of_users' => $numberOfUsers]);
+
+            }
+            if($request->has('dpr_images')){
+                $projectSiteId = DprDetail::where('id', $dprDetailId)->pluck('project_site_id')->first();
+                $userDirectory = sha1($user->id);
+                $projectSiteDirectory = sha1($projectSiteId);
+                $tempImageUploadPath = public_path().env('DPR_TEMP_UPLOAD').DIRECTORY_SEPARATOR.$userDirectory;
+                $imageUploadPath = public_path().env('DPR_UPLOAD').DIRECTORY_SEPARATOR.$projectSiteDirectory;
+                foreach($request->dpr_images as $image){
+                    $imageName = basename($image);
+                    $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
+                    $dprImageData = [
+                        'name'=> $imageName
+                    ];
+                    if (!file_exists($imageUploadPath)) {
+                        File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                    }
+                    if(File::exists($newTempImageUploadPath)){
+                        $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
+                        File::move($newTempImageUploadPath,$imageUploadNewPath);
+                    }
+                    $dprImage = DprImage::create($dprImageData);
+                    foreach($request->number_of_users as $dprDetailId => $numberOfUsers){
+                        $dprDetailImageRelationData = [
+                            'dpr_detail_id' => $dprDetailId,
+                            'dpr_image_id' => $dprImage->id
+                        ];
+                        $dprDetailImageRelation = DprDetailImageRelation::create($dprDetailImageRelationData);
+                    }
+                }
             }
             $request->session()->flash('success', 'DPR edited successfully.');
             return redirect('dpr/manage_dpr');
@@ -369,16 +455,38 @@ class DprController extends Controller
                     ->where('dpr_details.project_site_id', $projectSiteId)
                     ->select('dpr_details.id as dpr_detail_id','subcontractor_dpr_category_relations.id as subcontractor_dpr_category_relation_id','dpr_details.number_of_users as number_of_users','dpr_main_categories.name as dpr_main_category_name')
                     ->get()->toArray();
+                $subcontractorCategoryImages = array();
                 if(count($subcontractorCategoryData) <= 0){
                     $subcontractorCategoryData = SubcontractorDPRCategoryRelation::join('dpr_main_categories','dpr_main_categories.id','=','subcontractor_dpr_category_relations.dpr_main_category_id')
                         ->where('subcontractor_dpr_category_relations.subcontractor_id', $request->subcontractor_id)
                         ->select('subcontractor_dpr_category_relations.id as subcontractor_dpr_category_relation_id','dpr_main_categories.name as dpr_main_category_name')
                         ->get()->toArray();
+                }else{
+                    $dprDetailId = $subcontractorCategoryData[0]['dpr_detail_id'];
+                    $dprImageData = DprDetailImageRelation::join('dpr_images','dpr_images.id','=','dpr_detail_image_relations.dpr_image_id')
+                                        ->where('dpr_detail_image_relations.dpr_detail_id', $dprDetailId)
+                                        ->select('dpr_images.name as image_name','dpr_detail_image_relations.id as dpr_detail_image_relation_id','dpr_images.id as dpr_image_id')
+                                        ->get();
+                    if(count($dprImageData) > 0){
+                        $projectSiteDirectory = sha1($projectSiteId);
+                        $imageUploadPath = env('DPR_UPLOAD').DIRECTORY_SEPARATOR.$projectSiteDirectory;
+                        foreach($dprImageData as $dprImageDatum){
+                            $imagePath = $imageUploadPath.DIRECTORY_SEPARATOR.$dprImageDatum['image_name'];
+                            if (file_exists(public_path().$imagePath)) {
+                                $subcontractorCategoryImages[] = [
+                                    'path' => $imagePath,
+                                    'random' => sha1($dprImageDatum['dpr_detail_image_relation_id']),
+                                    'dpr_image_id' => $dprImageDatum['dpr_image_id']
+                                ];
+                            }
+                        }
+                    }
                 }
             }else{
                 $subcontractorCategoryData = array();
+                $subcontractorCategoryImages = array();
             }
-            return view('partials.dpr.category-table')->with(compact('subcontractorCategoryData'));
+            return view('partials.dpr.category-table')->with(compact('subcontractorCategoryData','subcontractorCategoryImages'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor\'s DPR categories',
@@ -388,11 +496,12 @@ class DprController extends Controller
             return response()->json([], 500);
         }
     }
-    public function uploadTempImages(Request $request,$quotationId){
+    public function uploadTempImages(Request $request){
         try{
-            $quotationDirectoryName = sha1($quotationId);
-            $tempUploadPath = public_path().env('WORK_ORDER_TEMP_IMAGE_UPLOAD');
-            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$quotationDirectoryName;
+            $user = Auth::user();
+            $userDirectoryName = sha1($user->id);
+            $tempUploadPath = public_path().env('DPR_TEMP_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath.DIRECTORY_SEPARATOR.$userDirectoryName;
             /* Create Upload Directory If Not Exists */
             if (!file_exists($tempImageUploadPath)) {
                 File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
@@ -400,7 +509,7 @@ class DprController extends Controller
             $extension = $request->file('file')->getClientOriginalExtension();
             $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
             $request->file('file')->move($tempImageUploadPath,$filename);
-            $path = env('WORK_ORDER_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $path = env('DPR_TEMP_UPLOAD').DIRECTORY_SEPARATOR.$userDirectoryName.DIRECTORY_SEPARATOR.$filename;
             $response = [
                 'jsonrpc' => '2.0',
                 'result' => 'OK',
@@ -428,13 +537,25 @@ class DprController extends Controller
             $path = null;
             $count = null;
         }
-        return view('partials.quotation.work-order-images')->with(compact('path','count','random'));
+        return view('partials.dpr.image-listing')->with(compact('path','count','random'));
     }
 
     public function removeTempImage(Request $request){
         try{
             $sellerUploadPath = public_path().$request->path;
             File::delete($sellerUploadPath);
+            return response(200);
+        }catch(\Exception $e){
+            return response(500);
+        }
+    }
+
+    public function removeImage(Request $request){
+        try{
+            $sellerUploadPath = public_path().$request->path;
+            File::delete($sellerUploadPath);
+            DprDetailImageRelation::where('dpr_image_id', $request->dpr_image_id)->delete();
+            DprImage::where('id', $request->dpr_image_id)->delete();
             return response(200);
         }catch(\Exception $e){
             return response(500);

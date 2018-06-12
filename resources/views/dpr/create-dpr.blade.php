@@ -62,46 +62,8 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-6 col-md-offset-3" style="text-align: right">
-                                                            <table class="table table-bordered" id="categoryTable" hidden>
-                                                                <thead>
-                                                                    <tr>
-                                                                       <th style="width: 50%">
-                                                                           Category
-                                                                       </th>
-                                                                        <th>
-                                                                            Number of labours
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
+                                                    <div id="categoryImageDiv">
 
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="row">
-                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
-                                                        </div>
-                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
-                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
-                                                                Browse</a>
-                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
-                                                                <i class="fa fa-share"></i> Upload Files </a>
-                                                        </div><br>
-                                                        <table class="table table-bordered table-hover col-md-offset-3" style="width: 700px">
-                                                            <thead>
-                                                            <tr role="row" class="heading">
-                                                                <th> Image </th>
-                                                                <th> Action </th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody id="show-product-images">
-
-                                                            </tbody>
-                                                        </table>
                                                     </div>
                                                 </div>
                                             </div>
@@ -111,11 +73,18 @@
                             </div>
                         </div>
                     </form>
+                    <input type="hidden" id="path" name="path" value="">
+                    <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                 </div>
             </div>
         </div>
     </div>
 @endsection
 @section('javascript')
+    <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/dpr/dpr.js" type="application/javascript"></script>
+    <script src="/assets/custom/dpr/file-datatable.js" type="application/javascript"></script>
+    <script src="/assets/custom/dpr/upload-file.js" type="application/javascript"></script>
 @endsection

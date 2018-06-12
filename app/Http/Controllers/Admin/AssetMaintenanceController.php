@@ -191,7 +191,6 @@ class AssetMaintenanceController extends Controller{
                     ];
                 }
             }
-//            $assetList = Asset::where('name','ilike','%'.$keyword.'%')->where('is_active',true)->select('id','name')->get();
         }catch(\Exception $e){
             $assetList = array();
             $data = [
