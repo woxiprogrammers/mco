@@ -112,7 +112,7 @@
                                                             <th> ID </th>
                                                             <th> Name </th>
                                                             <th> Quantity </th>
-                                                            <th>Action</th>
+                                                            <th> Available Quantity</th>
                                                             <th> Unit </th>
                                                             @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
                                                                 <th width="50%"> Action </th>
@@ -129,7 +129,7 @@
                                                                     <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
                                                                     @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
                                                                         <td>
-                                                                            <div id="select-vendor-{{$materialRequestComponentDetails[$iterator]['id']}}">
+                                                                            <div id="select-vendor-{{$materialRequestComponentDetails[$iterator]['id']}}" class="select-vendor">
                                                                                 <select class="form-control input-lg select2-multiple" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden" data-placeholder="Select Vendor">
                                                                                     @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
                                                                                         @if(array_key_exists('is_client',$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]) && $materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['is_client'] == true)
@@ -402,13 +402,11 @@
                 $(".select2-selection--multiple .select2-selection__choice").each(function(){
                     var vendorName = $(this).attr('title');
                     var vendorId;
-                    $("#select2-multiple-input-lg option").each(function(){
+                    $(this).closest('.select-vendor').find('.select2-multiple option').each(function(){
                         if (vendorName == $(this).text()) {
                             vendorId = $(this).attr('value');
                         }
                     });
-
-
                     var materialId = $(this).closest('tr').find('td:nth-child(1)').text();
                     var materialName = $(this).closest('tr').find('td:nth-child(2)').text();
                     var materialQuantity = $(this).closest('tr').find('td:nth-child(3)').text();
