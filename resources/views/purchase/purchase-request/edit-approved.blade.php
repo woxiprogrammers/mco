@@ -410,7 +410,7 @@
                     var materialId = $(this).closest('tr').find('td:nth-child(1)').text();
                     var materialName = $(this).closest('tr').find('td:nth-child(2)').text();
                     var materialQuantity = $(this).closest('tr').find('td:nth-child(3)').text();
-                    var materialUnit = $(this).closest('tr').find('td:nth-child(4)').text();
+                    var materialUnit = $(this).closest('tr').find('td:nth-child(5)').text();
                     if(vendor.length > 0){
                         var found = false;
                         $.each(vendor,function(i,v){
