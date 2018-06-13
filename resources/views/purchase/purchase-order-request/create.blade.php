@@ -52,6 +52,20 @@
                                                         <input type="text" class="form-control typeahead" id="purchaseRequest" name="purchaseRequest">
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label pull-right">
+                                                            Delivery Address
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-control" id="delivery_address" name="delivery_address">
+                                                            @foreach($deliveryAddresses as $deliveryAddress)
+                                                                <option value="{{$deliveryAddress}}">{{$deliveryAddress}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
                                                 <div class="table-scrollable" style="overflow: scroll !important;">
                                                     <table class="table table-striped table-bordered table-hover" id="purchaseRequestComponentTable" style="overflow: scroll; table-layout: fixed">
                                                         <thead>
