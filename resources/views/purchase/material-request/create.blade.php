@@ -149,6 +149,7 @@
                                         </div>
                                     </div>
                                     <div class="modal-body" style="padding:40px 50px;">
+                                            <input type="hidden" id="materialModalComponentSlug">
                                             <div class="form-group">
                                                 <input type="text" class="form-control empty" id="searchbox"  placeholder="Enter material name" >
                                             </div>

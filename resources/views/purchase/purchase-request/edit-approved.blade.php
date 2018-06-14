@@ -112,6 +112,7 @@
                                                             <th> ID </th>
                                                             <th> Name </th>
                                                             <th> Quantity </th>
+                                                            <th> Available Quantity</th>
                                                             <th> Unit </th>
                                                             @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
                                                                 <th width="50%"> Action </th>
@@ -123,12 +124,13 @@
                                                                 <tr>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['id']}} </td>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['name']}} </td>
-                                                                    <td> {{$materialRequestComponentDetails[$iterator]['quantity']}} </td>
+                                                                    <td> <a href="javascript:void(0);" onclick="editQuantity({{$materialRequestComponentDetails[$iterator]['id']}})" id="componentQuantity-{{$materialRequestComponentDetails[$iterator]['id']}}">{{$materialRequestComponentDetails[$iterator]['quantity']}}</a> </td>
+                                                                    <td> <a href="javascript:void(0);"  onclick="checkQuantity({{$materialRequestComponentDetails[$iterator]['id']}})"> Check Quantity </a></td>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
                                                                     @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
                                                                         <td>
-                                                                            <div>
-                                                                                <select class="form-control input-lg select2-multiple" id="select2-multiple-input-lg" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden" data-placeholder="Select Vendor">
+                                                                            <div id="select-vendor-{{$materialRequestComponentDetails[$iterator]['id']}}" class="select-vendor">
+                                                                                <select class="form-control input-lg select2-multiple" name="material_vendors[{{$materialRequestComponentDetails[$iterator]['id']}}][]" multiple="multiple" style="overflow:hidden" data-placeholder="Select Vendor">
                                                                                     @for($iterator1 = 0 ; $iterator1 < count($materialRequestComponentDetails[$iterator]['vendors']); $iterator1++)
                                                                                         @if(array_key_exists('is_client',$materialRequestComponentDetails[$iterator]['vendors'][$iterator1]) && $materialRequestComponentDetails[$iterator]['vendors'][$iterator1]['is_client'] == true)
 
@@ -304,6 +306,64 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="modal fade" id="inventoryQuantityModal" role="dialog">
+                                <div class="modal-dialog" style="width: 60% !important;">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <div class="row">
+                                                <div class="col-md-4"></div>
+                                                <div class="col-md-4" style="font-size: 18px"> Inventory Quantities </div>
+                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-body" style="padding:40px 50px;">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="editQuantityModal" role="dialog">
+                                <div class="modal-dialog" style="width: 60% !important;">                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <div class="row">
+                                                <div class="col-md-4"></div>
+                                                <div class="col-md-4" style="font-size: 18px"> Edit Quantity </div>
+                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-body" style="padding:40px 50px;">
+                                            <input type="hidden" id="editQuantityMaterialId">
+                                            <div class="form-group row">
+                                                <div class="col-md-3">
+                                                    <label class="control-label pull-right">
+                                                        Quantity :
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="text" class="form-control" name="quantity" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <div class="col-md-3">
+                                                    <label class="control-label pull-right">
+                                                        Remark :
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <textarea class="form-control" name="remark" required></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <div class="col-md-6 col-md-offset-3">
+                                                    <a href="javascript:void(0);" class="btn red" onclick="submitEditQuantity()">Submit</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -342,17 +402,15 @@
                 $(".select2-selection--multiple .select2-selection__choice").each(function(){
                     var vendorName = $(this).attr('title');
                     var vendorId;
-                    $("#select2-multiple-input-lg option").each(function(){
+                    $(this).closest('.select-vendor').find('.select2-multiple option').each(function(){
                         if (vendorName == $(this).text()) {
                             vendorId = $(this).attr('value');
                         }
                     });
-
-
                     var materialId = $(this).closest('tr').find('td:nth-child(1)').text();
                     var materialName = $(this).closest('tr').find('td:nth-child(2)').text();
                     var materialQuantity = $(this).closest('tr').find('td:nth-child(3)').text();
-                    var materialUnit = $(this).closest('tr').find('td:nth-child(4)').text();
+                    var materialUnit = $(this).closest('tr').find('td:nth-child(5)').text();
                     if(vendor.length > 0){
                         var found = false;
                         $.each(vendor,function(i,v){
@@ -450,6 +508,76 @@
                 $(this).remove();
             });
             $("#vendorPreviewModal form").submit();
+        }
+
+        function checkQuantity(materialRequestComponentId){
+            $.ajax({
+                url: '/purchase/purchase-request/get-material-inventory-quantity',
+                type: 'POST',
+                data: {
+                    _token: $("input[name='_token']").val(),
+                    material_request_component_id: materialRequestComponentId
+                },
+                success: function(data,textStatus,xhr ){
+                    if(xhr.status == 201){
+                        alert(data.message);
+                    }else{
+                        $("#inventoryQuantityModal .modal-body").html(data);
+                        $("#inventoryQuantityModal").modal('show');
+                    }
+                },
+                error: function (errorData){
+                    alert('Something went wrong');
+                }
+            })
+        }
+
+        function editQuantity(materialRequestComponentId){
+            $("#editQuantityMaterialId").val(materialRequestComponentId);
+            $("#editQuantityModal").modal('show');
+        }
+
+        function submitEditQuantity(){
+            var quantity =($("#editQuantityModal input[name='quantity']").val());
+            var remark = $("#editQuantityModal textarea[name='remark']").val();
+            if(!(typeof quantity == 'undefined' || quantity < 0 || isNaN(quantity) || !($.isNumeric(quantity)))){
+                var a = confirm('Do you want to edit quantity ?');
+                if(a == true){
+                    var materialRequestComponentId = $("#editQuantityMaterialId").val();
+                    $.ajax({
+                        url: '/purchase/purchase-request/edit-quantity',
+                        type: 'POST',
+                        data:{
+                            _token: $("input[name='_token']").val(),
+                            quantity: quantity,
+                            remark: remark,
+                            material_request_component_id: materialRequestComponentId
+                        },
+                        success: function(data, textStatus, xhr){
+                            if(data.quantity <= 0){
+                                $("#select-vendor-"+materialRequestComponentId).hide();
+                            }else{
+                                $("#select-vendor-"+materialRequestComponentId).show();
+                            }
+                            $("#componentQuantity-"+materialRequestComponentId).html(data.quantity);
+                            alert(data.message);
+                            if(data.quantity <= 0){
+                                $("#select-vendor-"+materialRequestComponentId).hide();
+                            }else{
+                                $("#select-vendor-"+materialRequestComponentId).show();
+                            }
+                            $('#editQuantityModal').modal('toggle');
+
+                        },
+                        error: function(errorData){
+                            alert('Something went wrong');
+                        }
+
+                    });
+                }
+            }else{
+                $("#editQuantityModal input[name='quantity']").closest('.form-group').addClass('has-error');
+            }
         }
     </script>
 @endsection

@@ -55,9 +55,11 @@
                                                             <tr>
                                                                 <th> Sr No </th>
                                                                 <th> Main Category Name </th>
+                                                                <th> Status </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
+                                                                <th></th>
                                                                 <th></th>
                                                                 <th></th>
                                                                 <th>

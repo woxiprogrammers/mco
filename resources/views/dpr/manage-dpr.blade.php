@@ -3,6 +3,8 @@
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
+    <link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -41,13 +43,20 @@
                                                         <tr>
                                                             <th style="width: 10%"> No. </th>
                                                             <th> Subcontractor </th>
-                                                            <th> Date </th>
+                                                            <th style="width:30%;"> Date </th>
                                                             <th> Action </th>
                                                         </tr>
                                                         <tr class="filter">
                                                             <th style="width: 10%">  </th>
                                                             <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
-                                                            <th> <input type="text" class="form-control form-filter" name="search_main_category" readonly> </th>
+                                                            <th>
+                                                                <div class="date date-picker">
+                                                                    <input type="text"  class="form-filter" name="search_date" placeholder="Select Date" id="date" readonly/>
+                                                                    <button class="btn btn-sm default" type="button">
+                                                                        <i class="fa fa-calendar"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </th>
                                                             <th>
                                                                 <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                 <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -74,9 +83,11 @@
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/dpr/dpr-datatable.js" type="text/javascript"></script>
     <script>

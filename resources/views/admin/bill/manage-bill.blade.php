@@ -67,6 +67,8 @@
                                                         <th> {!! $taxes[$iterator]['name'] !!} </th>
                                                     @endfor
                                                     <th> Final Total </th>
+                                                    <th> Paid Amount </th>
+                                                    <th> Balance Amount </th>
                                                     <th>Status</th>
                                                     <th> Actions </th>
                                                 </tr>

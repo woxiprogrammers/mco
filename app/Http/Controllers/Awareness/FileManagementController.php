@@ -37,7 +37,7 @@ class FileManagementController extends Controller
     }
     public function getCategoryCreateView(Request $request){
         try{
-            $main_categories = AwarenessMainCategory::select('id','name')->get();
+            $main_categories = AwarenessMainCategory::where('is_active', true)->select('id','name')->get();
             return view('awareness.file-management.create')->with(compact('main_categories'));
         }catch(\Exception $e){
             $data = [
@@ -51,7 +51,7 @@ class FileManagementController extends Controller
     }
     public function getMainCategories(Request $request,$id){
         try{
-            $sub_categories = AwarenessSubCategory::where('awareness_main_category_id',$id)->select('id','name')->get()->toArray();
+            $sub_categories = AwarenessSubCategory::where('awareness_main_category_id',$id)->where('is_active', true)->select('id','name')->get()->toArray();
             $sub_category_dropdown = array();
             $iterator = 0;
             foreach($sub_categories as $sub_category){
@@ -118,26 +118,30 @@ class FileManagementController extends Controller
             $tempImageUploadPath = public_path().env('AWARENESS_TEMP_FILE_UPLOAD').DIRECTORY_SEPARATOR.sha1($user_id['id']);
             $imageUploadPath = public_path().env('AWARENESS_FILE_UPLOAD').DIRECTORY_SEPARATOR.$directoryName;
             $workOrderImagesData = array();
-            $files = $request->awareness_files;
-            foreach($files as $image){
-                $imageName = urldecode(basename($image['image_name']));
-                $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
-                $workOrderImagesData['file_name'] = $imageName;
-                $workOrderImagesData['awareness_main_category_id']=$request->main_category_id;
-                $workOrderImagesData['awareness_sub_category_id']=$request->sub_category_sub;
-                AwarenessFiles::create($workOrderImagesData);
-                if (!file_exists($imageUploadPath)) {
-                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+            if($request->has('awareness_files')){
+                $files = $request->awareness_files;
+                foreach($files as $image){
+                    $imageName = urldecode(basename($image['image_name']));
+                    $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
+                    $workOrderImagesData['file_name'] = $imageName;
+                    $workOrderImagesData['awareness_main_category_id']=$request->main_category_id;
+                    $workOrderImagesData['awareness_sub_category_id']=$request->sub_category_sub;
+                    AwarenessFiles::create($workOrderImagesData);
+                    if (!file_exists($imageUploadPath)) {
+                        File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                    }
+                    if(File::exists($newTempImageUploadPath)){
+                        $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
+                        File::move($newTempImageUploadPath,$imageUploadNewPath);
+                    }
                 }
-                if(File::exists($newTempImageUploadPath)){
-                    $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
-                    File::move($newTempImageUploadPath,$imageUploadNewPath);
+                if(count(scandir($tempImageUploadPath)) <= 2){
+                    rmdir($tempImageUploadPath);
                 }
+                $request->session()->flash('success','Data Saved successfully.');
+            }else{
+                $request->session()->flash('error','Please add atleast one file');
             }
-            if(count(scandir($tempImageUploadPath)) <= 2){
-                rmdir($tempImageUploadPath);
-            }
-            $request->session()->flash('success','Data Saved successfully.');
             return redirect('/awareness/file-management/create');
         }catch(\Exception $e){
             $data = [
