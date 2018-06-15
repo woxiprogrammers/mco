@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Purchase;
 
+use App\Address;
 use App\Asset;
 use App\AssetType;
 use App\Category;
@@ -15,6 +16,7 @@ use App\Material;
 use App\MaterialRequestComponentTypes;
 use App\MaterialVersion;
 use App\Module;
+use App\ProjectSite;
 use App\PurchaseOrder;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderComponentImage;
@@ -62,7 +64,20 @@ class PurchaseOrderRequestController extends Controller
 
     public function getCreateView(Request $request){
         try{
-            return view('purchase.purchase-order-request.create');
+            $projectSiteId = Session::get('global_project_site');
+            $projectSiteInfo = ProjectSite::where('id',$projectSiteId)->first();
+            if($projectSiteInfo->city_id == null){
+                $deliveryAddresses[0] = $projectSiteInfo->project->name.', '.$projectSiteInfo->name.', '.$projectSiteInfo->address;
+            }else{
+                $deliveryAddresses[0] = $projectSiteInfo->project->name.', '.$projectSiteInfo->name.', '.$projectSiteInfo->address.', '.$projectSiteInfo->city->name.', '.$projectSiteInfo->city->state->name;
+            }
+            $systemAddresses = Address::where('is_active',true)->get();
+            $iterator = 1;
+            foreach ($systemAddresses as $address){
+                $deliveryAddresses[$iterator] = $address->address.', '.$address->cities->name.', '.$address->cities->state->name;
+                $iterator++;
+            }
+            return view('purchase.purchase-order-request.create')->with(compact('deliveryAddresses'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get purchase order request create view',
@@ -78,7 +93,8 @@ class PurchaseOrderRequestController extends Controller
             $user = Auth::user();
             $purchaseOrderRequestData = [
                 'purchase_request_id' => $request->purchase_request_id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'delivery_address' => $request->delivery_address
             ];
             $projectSiteInfo = PurchaseRequest::join('project_sites','project_sites.id','=','purchase_requests.project_site_id')
                                         ->join('projects','projects.id','=','project_sites.project_id')
