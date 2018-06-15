@@ -93,7 +93,8 @@ class PurchaseOrderRequestController extends Controller
             $user = Auth::user();
             $purchaseOrderRequestData = [
                 'purchase_request_id' => $request->purchase_request_id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'delivery_address' => $request->delivery_address
             ];
             $projectSiteInfo = PurchaseRequest::join('project_sites','project_sites.id','=','purchase_requests.project_site_id')
                                         ->join('projects','projects.id','=','project_sites.project_id')

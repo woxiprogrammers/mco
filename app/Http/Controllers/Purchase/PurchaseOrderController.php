@@ -966,7 +966,22 @@ class PurchaseOrderController extends Controller
                 $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
                 $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate_per_unit'];
                 $iterator++;
-                if(count($projectSiteInfo) <= 0){
+                $projectSiteInfo['project_site_address'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->address;
+                if($purchaseOrder->purchaseOrderRequest->delivery_address != null){
+                    $projectSiteInfo['delivery_address'] = $purchaseOrder->purchaseOrderRequest->delivery_address;
+                }else{
+                    $projectSiteInfo['project_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->project->name;
+                    $projectSiteInfo['project_site_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->name;
+
+                    if($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->city_id == null){
+                        $projectSiteInfo['project_site_city'] = '';
+                    }else{
+                        $projectSiteInfo['project_site_city'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->city->name;
+                    }
+                    $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
+                }
+
+                /*if(count($projectSiteInfo) <= 0){
                     $projectSiteInfo['project_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->project->name;
                     $projectSiteInfo['project_site_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->name;
                     $projectSiteInfo['project_site_address'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->address;
@@ -975,7 +990,7 @@ class PurchaseOrderController extends Controller
                     }else{
                         $projectSiteInfo['project_site_city'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->city->name;
                     }
-                }
+                }*/
             }
             $pdf = App::make('dompdf.wrapper');
             $pdfFlag = "purchase-order-listing-download";

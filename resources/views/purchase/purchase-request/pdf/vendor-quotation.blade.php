@@ -104,16 +104,16 @@
                     <span><b>Terms of Delivery :</b></span>
                     <div style="margin-left: 2%;font-size: 12px;">
                         <div>
-                            {{$projectSiteInfo['project_name']}}
+                            {{$projectSiteInfo['delivery_address']}}
                         </div>
                         <div>
-                            {{$projectSiteInfo['project_site_name']}}
+
                         </div>
                         <div>
-                            {{$projectSiteInfo['project_site_address']}}
+
                         </div>
                         <div>
-                            {{$projectSiteInfo['project_site_city']}}
+
                         </div>
                     </div>
                 </td>
